@@ -23,841 +23,421 @@
       "id": "changed:AnimScriptProbe.HandlerMatrix",
       "symbol": "AnimScriptProbe.HandlerMatrix",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "script support",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/AnimScriptProbe/AnimScriptProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "525983a328c9c3913791c45b3084c6092d4644657e1ab0b19623f3a157d8604e"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Frame, AnimationGroup, and all nine Animation subtypes accept the documented handler matrix; HasScript and SetScript agree. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:AttributeDispatchProbe.ScalarRepeat",
       "symbol": "AttributeDispatchProbe.ScalarRepeat",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "attributes",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/AttributeDispatchProbe/AttributeDispatchProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "506f8fa370aa6fe8ea9b51d3a9bef1e3a17a7a5d03636026722e2f9c4efa5bc5"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Repeated scalar SetAttribute dispatches OnAttributeChanged; explicit false is preserved and delivered as false. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:AttributeDispatchProbe.PanelPulse",
       "symbol": "AttributeDispatchProbe.PanelPulse",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "panel lifecycle",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/AttributeDispatchProbe/AttributeDispatchProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "506f8fa370aa6fe8ea9b51d3a9bef1e3a17a7a5d03636026722e2f9c4efa5bc5"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Repeated ShowUIPanel pulse followed by CloseAllWindows preserves the expected panel-stack behavior. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:CoreBehaviorProbe.ForbiddenState",
       "symbol": "CoreBehaviorProbe.ForbiddenState",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "forbidden frames",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/CoreBehaviorProbe/CoreBehaviorProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "75fd8011b6dd4ef018a056a4702bea08b5535269410919424f65956ca83dc4e7"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Normal addon frames remain un-forbidden; SetForbidden does not create forbidden state. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:CoreBehaviorProbe.ForbiddenConstructor",
       "symbol": "CoreBehaviorProbe.ForbiddenConstructor",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "forbidden frames",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/CoreBehaviorProbe/CoreBehaviorProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "75fd8011b6dd4ef018a056a4702bea08b5535269410919424f65956ca83dc4e7"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "CreateForbiddenFrame availability and EnumerateFrames behavior are captured. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:CoreBehaviorProbe.UnitEventFilter",
       "symbol": "CoreBehaviorProbe.UnitEventFilter",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "events",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/CoreBehaviorProbe/CoreBehaviorProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "75fd8011b6dd4ef018a056a4702bea08b5535269410919424f65956ca83dc4e7"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Valid RegisterUnitEvent registration works; invalid unit filters are dropped while the event remains registered. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:CoreBehaviorProbe.AttributeWildcardFalse",
       "symbol": "CoreBehaviorProbe.AttributeWildcardFalse",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "attributes",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/CoreBehaviorProbe/CoreBehaviorProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "75fd8011b6dd4ef018a056a4702bea08b5535269410919424f65956ca83dc4e7"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Wildcard GetAttribute preserves explicit stored false. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:CoreBehaviorProbe.AttributeWildcardValues",
       "symbol": "CoreBehaviorProbe.AttributeWildcardValues",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "attributes",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/CoreBehaviorProbe/CoreBehaviorProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "75fd8011b6dd4ef018a056a4702bea08b5535269410919424f65956ca83dc4e7"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Wildcard true/string values and one-, two-, and three-argument lookup behavior are preserved. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:CoreBehaviorProbe.RaiseLowerLevel",
       "symbol": "CoreBehaviorProbe.RaiseLowerLevel",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "frame ordering",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/CoreBehaviorProbe/CoreBehaviorProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "75fd8011b6dd4ef018a056a4702bea08b5535269410919424f65956ca83dc4e7"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Raise/Lower affect same-level ties but cannot overtake a higher frame level. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:CoreBehaviorProbe.MouseFocusOrder",
       "symbol": "CoreBehaviorProbe.MouseFocusOrder",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "mouse focus",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/CoreBehaviorProbe/CoreBehaviorProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "75fd8011b6dd4ef018a056a4702bea08b5535269410919424f65956ca83dc4e7"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "GetMouseFoci/GetMouseFocus shape and hit ordering after Raise/Lower. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:DevToolsDumpProbe.FrameArrayDump",
       "symbol": "DevToolsDumpProbe.FrameArrayDump",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "frame identity",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/DevToolsDumpProbe/DevToolsDumpProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "9161b1d634a2f765f3e8906862465b4a52ce92ff56b6c145faab2dc08ff9c102"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "tinsert(frame, foo), frame slot contents, and DevTools_Dump output metadata. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:FrameIdentityProbe.IdentitySlot",
       "symbol": "FrameIdentityProbe.IdentitySlot",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "identity",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/FrameIdentityProbe/FrameIdentityProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "f0c28a2fd9f4bfbca34edcaacb0b9c12e90613be0a44e93deef2cdbd4723baca"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Frame slot [0] contains the identity userdata token. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:FrameIdentityProbe.SurrogateDispatch",
       "symbol": "FrameIdentityProbe.SurrogateDispatch",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "identity",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/FrameIdentityProbe/FrameIdentityProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "f0c28a2fd9f4bfbca34edcaacb0b9c12e90613be0a44e93deef2cdbd4723baca"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Replacing [0] redirects protection and method dispatch; [1] alone does not. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:FrameIdentityProbe.DuplicateFreshness",
       "symbol": "FrameIdentityProbe.DuplicateFreshness",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "identity",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/FrameIdentityProbe/FrameIdentityProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "f0c28a2fd9f4bfbca34edcaacb0b9c12e90613be0a44e93deef2cdbd4723baca"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Duplicate named frames receive fresh Lua objects, identity tokens, and custom-field state. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:HookScriptBindingProbe.IndexedHooks",
       "symbol": "HookScriptBindingProbe.IndexedHooks",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "scripts",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/HookScriptBindingProbe/HookScriptBindingProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "9adc29a88ed998f86bc63902775fcca1753e86cfe47b05d216319bb01d5ff8aa"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "HookScript accepts indices 0, 1, and 2; GetScript retrieves indexed hooks. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:IsProtectedProbe.LegacySetters",
       "symbol": "IsProtectedProbe.LegacySetters",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/IsProtectedProbe/IsProtectedProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "eeb6cce71c46858776d45fd98978c4b4d09d2ab3574aeee0045ea1be2e0f27ee"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Legacy Protect and SetProtected methods are absent and calls fail. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:IsProtectedProbe.SecureTemplate",
       "symbol": "IsProtectedProbe.SecureTemplate",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/IsProtectedProbe/IsProtectedProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "eeb6cce71c46858776d45fd98978c4b4d09d2ab3574aeee0045ea1be2e0f27ee"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Secure-template buttons report protected state while ordinary frames do not. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:IsProtectedProbe.DescendantAnchorPropagation",
       "symbol": "IsProtectedProbe.DescendantAnchorPropagation",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/IsProtectedProbe/IsProtectedProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "eeb6cce71c46858776d45fd98978c4b4d09d2ab3574aeee0045ea1be2e0f27ee"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Child, grandchild, and protected-anchor return values are captured. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:JustifyProbe.FrameFontStrings",
       "symbol": "JustifyProbe.FrameFontStrings",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/JustifyProbe/JustifyProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "b7e46fa43b24d3b5163ec5f7a26f5f4118b410bcbf1b6d290abdcc02201068e0"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Direct unanchored frame-layer FontStrings receive the observed default anchors and justification. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:JustifyProbe.ButtonText",
       "symbol": "JustifyProbe.ButtonText",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/JustifyProbe/JustifyProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "b7e46fa43b24d3b5163ec5f7a26f5f4118b410bcbf1b6d290abdcc02201068e0"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Implicit ButtonText FontString behavior matches the probe matrix. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:JustifyProbe.SizeVariants",
       "symbol": "JustifyProbe.SizeVariants",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/JustifyProbe/JustifyProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "b7e46fa43b24d3b5163ec5f7a26f5f4118b410bcbf1b6d290abdcc02201068e0"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "No-size, width-only, height-only, and width+height variants are captured. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:JustifyProbe.ExplicitAnchors",
       "symbol": "JustifyProbe.ExplicitAnchors",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/JustifyProbe/JustifyProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "b7e46fa43b24d3b5163ec5f7a26f5f4118b410bcbf1b6d290abdcc02201068e0"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "TOP/BOTTOM/LEFT/RIGHT/TOPLEFT controls distinguish missing from partial anchoring. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:JustifyProbe.EditBoxRegions",
       "symbol": "JustifyProbe.EditBoxRegions",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/JustifyProbe/JustifyProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "b7e46fa43b24d3b5163ec5f7a26f5f4118b410bcbf1b6d290abdcc02201068e0"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "EditBox FontStrings, including sized and inset variants, are captured. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:JustifyProbe.MessageRegions",
       "symbol": "JustifyProbe.MessageRegions",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/JustifyProbe/JustifyProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "b7e46fa43b24d3b5163ec5f7a26f5f4118b410bcbf1b6d290abdcc02201068e0"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "MessageFrame and ScrollingMessageFrame owner/region behavior and TextInsets effects. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:ProtectedRetailProbe.PlainFrame",
       "symbol": "ProtectedRetailProbe.PlainFrame",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/ProtectedRetailProbe/ProtectedRetailProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "df6f804a91f0bd5ce9437ba1228c0d006ab8a48212c2a09994bda777357e1720"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Plain frame protection/forbidden state and legacy setter behavior. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:ProtectedRetailProbe.XmlProtected",
       "symbol": "ProtectedRetailProbe.XmlProtected",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/ProtectedRetailProbe/ProtectedRetailProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "df6f804a91f0bd5ce9437ba1228c0d006ab8a48212c2a09994bda777357e1720"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "XML protected=true frame state and setters. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:ProtectedRetailProbe.SecureStore",
       "symbol": "ProtectedRetailProbe.SecureStore",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/ProtectedRetailProbe/ProtectedRetailProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "df6f804a91f0bd5ce9437ba1228c0d006ab8a48212c2a09994bda777357e1720"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Secure-template child state and Blizzard Store frame observations. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:ScaleEventProbe.OrderedEvents",
       "symbol": "ScaleEventProbe.OrderedEvents",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "scale events",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/ScaleEventProbe/ScaleEventProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "fe8effdb7bbe33682a4ffae3e5ff0ad2b2ce01e56d58c91010f341c7289c2a21"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "DISPLAY_SIZE_CHANGED, UI_SCALE_CHANGED, and relevant CVAR_UPDATE ordering. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:ScaleEventProbe.SameSizeDuplicatePair",
@@ -878,211 +458,106 @@
       "id": "changed:SetAtlasProbe.InvalidArguments",
       "symbol": "SetAtlasProbe.InvalidArguments",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "texture atlas",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/SetAtlasProbe/SetAtlasProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "20f38fd2891a5cfc45c5a242b7aa2a40894db4e162b56e50fc5c1bb16b22a2e2"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "nil, no-argument, boolean, numeric, empty, and unknown atlas inputs. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:TextureSetTextureProbe.PathFdid",
       "symbol": "TextureSetTextureProbe.PathFdid",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "texture",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/TextureSetTextureProbe/TextureSetTextureProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "ddcc43715b7615e65d9f7797047dd50bb8bc6e3a7a866cd79b79e725e67d9447"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "UI-Panel-Button-Up path assignment and retained FDID 130828. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:TextureSetTextureProbe.Clear",
       "symbol": "TextureSetTextureProbe.Clear",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "texture",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/TextureSetTextureProbe/TextureSetTextureProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "ddcc43715b7615e65d9f7797047dd50bb8bc6e3a7a866cd79b79e725e67d9447"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "SetTexture(nil) and no-argument clearing behavior. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:XmlFrameLevelProbe.BareAndFixed",
       "symbol": "XmlFrameLevelProbe.BareAndFixed",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "XML frame level",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/XmlFrameLevelProbe/XmlFrameLevelProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "d2b9339131f42427300c353be18d9f56ffe504286069b12cc3fb8e78836da2c3"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Bare frameLevel versus fixedFrameLevel=true semantics. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:XmlFrameLevelProbe.ParentReparent",
       "symbol": "XmlFrameLevelProbe.ParentReparent",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "XML frame level",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/XmlFrameLevelProbe/XmlFrameLevelProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "d2b9339131f42427300c353be18d9f56ffe504286069b12cc3fb8e78836da2c3"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "Parent-level changes, unfixed-child propagation, and Lua SetFrameLevel reparenting. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:XmlFrameLevelProbe.Flags",
       "symbol": "XmlFrameLevelProbe.Flags",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "XML frame level",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/XmlFrameLevelProbe/XmlFrameLevelProbe.lua",
-          "summary": "Checked-in probe source documents the captured 12.0.5 behavior; raw SavedVariables output was not retained.",
-          "source_hash": "d2b9339131f42427300c353be18d9f56ffe504286069b12cc3fb8e78836da2c3"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies all itemized probe rows retain a source directory and evidence note.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "367f35370",
+      "commit": null,
       "approval_id": null,
-      "notes": "HasFixedFrameLevel and IsUsingParentLevel observations. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:XmlFrameLevelProbe.RawCaptureProvenance",
       "symbol": "XmlFrameLevelProbe.RawCaptureProvenance",
       "change": "changed",
-      "status": "best-effort",
-      "resolution": "behavioral",
+      "status": null,
+      "resolution": "untriaged",
       "owner": "provenance",
       "load_addon": null,
-      "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/addons/XmlFrameLevelProbe/XmlFrameLevelProbe.lua",
-          "summary": "Checked-in XML frame-level probe source documents the finding; raw SavedVariables provenance is missing.",
-          "source_hash": "d2b9339131f42427300c353be18d9f56ffe504286069b12cc3fb8e78836da2c3"
-        },
-        {
-          "kind": "test",
-          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
-          "summary": "Focused register-integrity test verifies itemized probe evidence remains checked in.",
-          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
-        }
-      ],
-      "tests": [
-        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
-      ],
+      "evidence": [],
+      "tests": [],
       "assertions": [],
-      "commit": "88c51d261",
+      "commit": null,
       "approval_id": null,
-      "notes": "Raw SavedVariables capture was not retained; classify the documented provenance gap as best-effort rather than unresolved behavior."
+      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
     },
     {
       "id": "changed:StoreForbiddenProbe.DropdownPopulation",

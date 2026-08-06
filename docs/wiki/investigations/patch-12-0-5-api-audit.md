@@ -10,17 +10,17 @@ The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and t
 
 Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptProbe`, `AttributeDispatchProbe`, `CoreBehaviorProbe`, `DevToolsDumpProbe`, `FrameIdentityProbe`, `HookScriptBindingProbe`, `IsProtectedProbe`, `JustifyProbe`, `ProtectedRetailProbe`, `ScaleEventProbe`, `SetAtlasProbe`, `StoreForbiddenProbe`, and `TextureSetTextureProbe`. `XmlFrameLevelProbe` findings are documented, but its raw capture was not retained.
 
-The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current classification is **35 best-effort, 0 implemented, 0 exception-requested, and 3 untriaged**; the remaining unresolved rows stay open pending informed exception review or fresh captures.
+The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Prior documentation grouped them as 30 resolved, four best-effort, and four unresolved, while all 38 machine rows remain neutral/untriaged until item-specific evidence is attached.
 
 ### Itemized probe status
 
 **Implemented with focused regression coverage:** animation handler matrix/rejection (`AnimScriptProbe`); unchanged scalar attribute dispatch (`AttributeDispatchProbe`); retail forbidden-frame behavior, invalid unit-event filters, wildcard false attributes and arity, Raise/Lower ordering (`CoreBehaviorProbe`); frame iteration/dump identity, `[0]` surrogate dispatch, duplicate-frame freshness (`DevToolsDumpProbe` / `FrameIdentityProbe`); HookScript binding validation/chaining; absent legacy `Protect`/`SetProtected` methods plus normal-frame `SetForbidden` no-op; XML FontString justify/default anchors; no-arg/invalid `SetAtlas`; XML frame-level propagation; ordered display/scale event pairs.
 
-**Best-effort with retained probe evidence:** the 34 classified rows retain their checked-in probe source, itemized detail, and a focused register-integrity test. Because raw SavedVariables output was not retained, these are documented best-effort classifications rather than claims of fresh exact replay.
+**Best-effort with existing subsystem coverage:** `ShowUIPanel` pulse/`CloseAllWindows`; `GetMouseFoci`/`GetMouseFocus` live return shape; protected-template descendant/anchor observations; and secure-template/Store observations. These four subfindings retain explicit best-effort status because their subsystem coverage is not an exact focused replay of the retained probe contract.
 
 ### Open probe gaps and exception candidates
 
-The earlier broad approval language is superseded. Three rows remain untriaged pending the itemized status review required before any exception request; no exception approval is requested or recorded here.
+A broad approval recorded on 2026-07-14 is superseded pending re-triage and an itemized checklist presented in chat. No exception approval is requested or recorded here.
 
 1. **Store dropdown population:** `StoreDropdown_SetDropdown` was nil in the retained capture, so intended real/synthetic dropdown population never executed. This remains an unresolved probe gap; do not invent lifecycle behavior.
 2. **Store forbidden descendants:** the intended Store descendant scan did not produce valid lifecycle evidence. This remains an unresolved probe gap requiring a fresh capture where the Store surface exists.
@@ -69,7 +69,7 @@ The remaining generic defaults are intentionally outside this 12.0.5 audit unles
 
 ### Audit state
 
-This audit remains open because three occurrence rows are still untriaged. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
+This audit remains open: remaining fidelity gaps are pending exception requests above. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
 
 ## Sources
 

@@ -2,10 +2,6 @@
 
 Chronological record of wiki operations.
 
-## [2026-08-06] investigation | 12.0.5 probe re-triage
-
-Attached checked-in probe-source and register-integrity evidence to 35 of 38 12.0.5 subfindings as documented best-effort classifications. Three rows remain untriaged: same-size scale-event duplication, Store dropdown population, and Store forbidden descendants. The missing XmlFrameLevel raw provenance is documented best-effort rather than treated as unresolved behavior. No exception approval was requested.
-
 ## [2026-08-06] investigation | 12.0.7 occurrence-level re-triage
 
 Classified all 131 named 12.0.7 occurrences: 34 implemented and 97 best-effort, with no untriaged or exception-requested rows. Focused profile-gated tests cover safe globals, duration methods, CVar defaults, event registration, widget compatibility, and retained/removed compatibility surfaces. Exact service payload, secrecy, and load-order fidelity limits remain explicit best-effort notes; unnamed crawler claims remain metadata.

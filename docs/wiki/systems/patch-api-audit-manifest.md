@@ -9,7 +9,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - `data/patch-api/sources/12.1-framexml.json` preserves the legacy raw 320-added/112-removed direction-array snapshot.
 - `data/patch-api/sources/12.0.7-register.json` preserves 131 named occurrences as categorized `{direction, category, symbol, detail?}` objects without inventing the unnamed CVar additions/removals omitted by the crawler excerpt.
 - `data/patch-api/12.0.7.json`, `docs/generated/patch-12-0-7-checklist.md`, and [[patch-12-0-7-occurrence-inventory]] form the occurrence register; all 131 named rows are classified as 34 implemented and 97 best-effort, with no untriaged or exception-requested rows.
-- `data/patch-api/sources/12.0.5-probes.json`, `data/patch-api/12.0.5-probes.json`, `docs/generated/patch-12-0-5-probe-checklist.md`, and [[patch-12-0-5-probe-inventory]] preserve 38 probe subfindings. Current machine status is 35 best-effort and three untriaged unresolved rows; raw-capture limitations remain explicit.
+- `data/patch-api/sources/12.0.5-probes.json`, `data/patch-api/12.0.5-probes.json`, `docs/generated/patch-12-0-5-probe-checklist.md`, and [[patch-12-0-5-probe-inventory]] preserve 38 probe subfindings. Prior documentation grouped them as 30 resolved, four best-effort, and four unresolved; the machine manifest remains neutral until each probe has focused evidence.
 - `data/patch-api/12.1-framexml.json` stores all 432 rows keyed by `change:symbol`.
 - `docs/generated/patch-12-1-framexml-checklist.md` contains one generated line per row.
 - `src/bin/wow_cli/audit_api/patch_manifest.rs` owns generic added/changed/removed parsing, repository validation, completion validation, observation comparison, and rendering.
