@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Bound 12.0.0 C_ColorUtil slice
+
+Classified `added:C_ColorUtil.GenerateTextColorCode` and `added:C_ColorUtil.WrapTextInColorCode` as best-effort behavioral from the checked-in source register, current color defaults, exact `installs_color_defaults` test, and ancestor commit `1abe6088d`; claims remain limited to tested RGB-to-`ffRRGGBB` conversion and explicit color-code wrapping. Classified four conversion rows and `added:C_ColorUtil.WrapTextInColor` as evidence-required unsafe with empty tests and no approval path. The register now totals **40 best-effort, 58 evidence-required, and 3312 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 C_Timer signature slice
 
 Classified `changed:C_Timer.NewTimer` and `changed:C_Timer.NewTicker` as best-effort behavioral from checked-in signatures, current timer/proxy paths, ancestor commits `330e521be`/`3d767dbd2`, and the five named timer-container tests; claims remain limited to function/container acceptance, returned container identity/proxy equality, cancellation, and independent ticker counts. Classified `changed:C_Timer.After` as evidence-required unsafe because only an ignored focused-looking test exists; callback/lifecycle semantics require a correct modeled implementation and executable behavioral proof, with no approval path. The register now totals **38 best-effort, 53 evidence-required, and 3319 untriaged**.
