@@ -184,6 +184,36 @@ fn test_patch_12_1_player_choice_payload_and_mutator_intent() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_tiered_entrance_payloads() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local active = C_DelvesUI.GetActiveDelveTier()
+            if active.tier ~= 4 or active.suggestedILvl ~= 610 or active.unlocked ~= true then return "active-scalars" end
+            if active.tierDescription ~= "Tier 4" or active.modifierUIWidgetSetID ~= 4404 then return "active-display" end
+            if active.lockedReason ~= nil or type(active.rewards) ~= "table" then return "active-optional" end
+            local itemReward = active.rewards[1]
+            if itemReward.id ~= 228361 or itemReward.quantity ~= 1 then return "item-reward" end
+            if itemReward.rewardType ~= Enum.TieredEntranceRewardType.Item or itemReward.context ~= 0 then return "item-reward-type" end
+            local currencyReward = active.rewards[2]
+            if currencyReward.id ~= 2815 or currencyReward.quantity ~= 25 then return "currency-reward" end
+            if currencyReward.rewardType ~= Enum.TieredEntranceRewardType.Currency or currencyReward.context ~= 0 then return "currency-reward-type" end
+
+            local tiers = C_DelvesUI.GetDelveEntranceTiers()
+            if #tiers ~= 5 or tiers[1].tier ~= 1 or tiers[5].tier ~= 5 then return "tier-order" end
+            if tiers[5].unlocked ~= false or type(tiers[5].lockedReason) ~= "string" then return "locked-tier" end
+            if type(tiers[1].rewards) ~= "table" or #tiers[1].rewards ~= 2 then return "tier-rewards" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_spell_cooldown_payload() {
     let env = WowLuaEnv::new().unwrap();
     {
