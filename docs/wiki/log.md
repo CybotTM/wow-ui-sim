@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-06] system | Non-Lua exception evidence
+
+Allowed `unsafe` and `impossible` manifest rows to omit fabricated Lua-path assertions when their item-specific evidence concerns provenance or another non-Lua boundary. Completion still requires unique per-row informed approval.
+
 ## [2026-08-06] investigation | 12.0.7 occurrence-level re-triage
 
 Classified all 131 named 12.0.7 occurrences: 34 implemented and 97 best-effort, with no untriaged or exception-requested rows. Focused profile-gated tests cover safe globals, duration methods, CVar defaults, event registration, widget compatibility, and retained/removed compatibility surfaces. Exact service payload, secrecy, and load-order fidelity limits remain explicit best-effort notes; unnamed crawler claims remain metadata.

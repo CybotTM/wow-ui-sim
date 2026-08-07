@@ -531,6 +531,13 @@ fn validate_assertions(row: &PatchAuditRow) -> Result<(), String> {
             ))
         };
     }
+    if matches!(
+        row.resolution,
+        ResolutionKind::Unsafe | ResolutionKind::Impossible
+    ) && row.assertions.is_empty()
+    {
+        return Ok(());
+    }
     if row.assertions.is_empty() {
         return Err(format!("row {} requires an assertion", row.id));
     }
@@ -1602,6 +1609,17 @@ mod tests {
                 .unwrap_err()
                 .contains("incompatible")
         );
+    }
+
+    #[test]
+    fn exception_rows_without_lua_surface_accept_no_assertions() {
+        for resolution in ["unsafe", "impossible"] {
+            let row = resolved_row("exception-requested", resolution, "");
+            let manifest = fixture_manifest(&row);
+
+            validate_manifest(&manifest)
+                .expect("non-Lua exception evidence should not require a presence assertion");
+        }
     }
 
     fn assert_observation_mismatch(assertion_json: String, observation_json: &str) {

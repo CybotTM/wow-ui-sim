@@ -18,7 +18,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 `untriaged` is neutral draft state and has a null status. It is not an exception request. Final status vocabulary is fixed to `implemented`, `best-effort`, and `exception-requested`.
 
-Resolution explains the evidence outcome: vendor-present, simulator compatibility behavior, test-backed behavioral behavior, load-on-demand ownership, removal, cross-flavor contamination, stale/reversed snapshot data, unsafe behavior, or impossible behavior. `behavioral` is for non-global contracts such as event registration, widget methods, CVars, and probe outcomes: it requires hashed test evidence plus a focused named test, permits implemented/best-effort status, and forbids fabricated Lua-path assertions. Source owner and the addon passed to `LoadAddOn` are separate fields; LoD lifecycle assertions must match the declared addon. Only `unsafe` and `impossible` may use `exception-requested`.
+Resolution explains the evidence outcome: vendor-present, simulator compatibility behavior, test-backed behavioral behavior, load-on-demand ownership, removal, cross-flavor contamination, stale/reversed snapshot data, unsafe behavior, or impossible behavior. `behavioral` is for contracts that are not simple Lua-path presence checks, such as stateful globals, event registration, widget methods, CVars, and probe outcomes: it requires hashed test evidence plus a focused named test, permits implemented/best-effort status, and forbids fabricated Lua-path assertions. Source owner and the addon passed to `LoadAddOn` are separate fields; LoD lifecycle assertions must match the declared addon. Only `unsafe` and `impossible` may use `exception-requested`.
 
 Current 12.1 FrameXML totals are **1 implemented, 431 best-effort, 0 exception-requested, and 0 untriaged**. The objective remains open.
 
@@ -37,7 +37,7 @@ Unknown JSON fields, blank evidence, invalid lifecycle vocabulary, and incompati
 
 ### Runtime observations
 
-Completion additionally consumes an observation artifact bound to the exact manifest hash. Each Lua-path assertion requires exactly one observation matching row, flavor, phase, addon owner, presence, and Lua type. Behavioral rows intentionally carry no Lua-path assertions or observations; their focused test/evidence/commit references remain repository-validated. Missing, extra, duplicated, or mismatched observations fail.
+Completion additionally consumes an observation artifact bound to the exact manifest hash. Each Lua-path assertion requires exactly one observation matching row, flavor, phase, addon owner, presence, and Lua type. Behavioral rows intentionally carry no Lua-path assertions or observations; their focused test/evidence/commit references remain repository-validated. Unsafe/impossible rows may also omit assertions when the item-specific evidence concerns provenance or another non-Lua boundary. Missing, extra, duplicated, or mismatched observations fail.
 
 The production observation primitive reads actual global/table paths from `WowLuaEnv` and records the active compiled profile, presence, and Lua type. Lifecycle phase and addon are caller-supplied assertion labels, not independently inferred facts. Focused coverage exercises present, absent, and a real TOC addon whose directory/TOC identity matches the declared LoD addon. `--observe-initialization` writes assertions available immediately after environment construction and rejects a manifest built for another profile. Full manifest-driven post-core/post-load/LoD/reset orchestration and checked-in per-row artifact generation remain open. Post-reset coverage is currently a synthetic validator falsifier only; it does not claim a simulator reset operation.
 
@@ -50,7 +50,7 @@ The production observation primitive reads actual global/table paths from `WowLu
 Each exception must:
 
 1. resolve to `unsafe` or `impossible`;
-2. retain item-specific evidence and lifecycle assertions;
+2. retain item-specific evidence, plus lifecycle assertions when the exception concerns Lua-path presence;
 3. have a unique approval ID beginning `user-chat:<change:symbol>:`.
 
 One approval token cannot silently approve multiple rows.
