@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-08-07] investigation | Bound remaining 12.0.0 C_ActionBar runtime slice
+
+Classified four C_ActionBar rows as best-effort/behavioral and 22 as evidence-required/unsafe using only source-register, current action-bar implementation/registration, and the named direct/end-to-end tests; the 11 ActionBarChargeInfo/ActionBarCooldownInfo structure/field rows remain untriaged. Totals are now **77 best-effort, 116 evidence-required, and 3217 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 C_ActionBar page/state-query slice
 
 Classified exactly 13 `C_ActionBar` page/state-query rows as `best-effort`/`behavioral` from the source register, current action-bar implementation/registration, ancestor commits `dacb23419`, `bdf741cf4`, `0859e07be`, `06bf6616a`, `5b9497307`, `6425b3f0b`, `080358cdb`, `6d13156ae`, and `167e23297`, and only the named page/state/default/transition tests; claims remain limited to tested state/default/transition behavior, with exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics unproven. Classified exactly three rows as `evidence-required`/`unsafe` with source-register and current implementation evidence, empty tests, and null commit/approval/scope exception; authoritative semantics or a correct model/test are required, and no approval can close them. Totals are now **73 best-effort, 94 evidence-required, and 3243 untriaged**.

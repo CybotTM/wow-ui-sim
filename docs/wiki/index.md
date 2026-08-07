@@ -45,7 +45,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 
 | Page | Summary |
 |------|---------|
-| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 73 best-effort behavioral rows, 94 evidence-required unsafe rows, and 3243 untriaged occurrences. The bounded C_ActionBar page/state-query slice is limited to named page/state/default/transition tests; three constant/derived queries remain evidence-required with no approval path. Schema provenance only: no historical 12.0.0 FrameXML or live runtime behavior is claimed, and the audit remains open. |
+| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 77 best-effort behavioral rows, 116 evidence-required unsafe rows, and 3217 untriaged occurrences. The bounded C_ActionBar slice covers 17 behavioral rows and 25 unsafe rows; four new behavioral rows are limited to named profession-quality, main-bar slot, and outfit-lock tests, while 11 ActionBarChargeInfo/ActionBarCooldownInfo structure/field rows remain untriaged. Schema provenance only: no historical 12.0.0 FrameXML or live runtime behavior is claimed, and the audit remains open. |
 | [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 33 best-effort rows; 4 behavior gaps are evidence-required; 1 provenance-only exception-requested row is approved |
 | [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 33 best-effort, 4 evidence-required, 1 approved provenance-only exception-requested, 0 untriaged |
 | [[patch-12-0-7-api-audit]] | 12.0.7 occurrence audit: 131 named rows classified as 29 implemented, 101 best-effort, and one repository-scope-authorized impossible 3D-model exception; restricted unit-token, encounter, taint, payload, and widget secret/aspect limits are documented per row |

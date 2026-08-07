@@ -1090,17 +1090,36 @@
       "id": "added:C_ActionBar.GetActionAutocast",
       "symbol": "C_ActionBar.GetActionAutocast",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionAutocast as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"autocastAllowed\", \"type\": \"boolean\"}, {\"name\": \"autocastEnabled\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current action-bar implementation and registration do not publish this method (absent)."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration has no binding for GetActionAutocast; the method is absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current action-bar implementation and registration do not publish this method (absent). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetActionBarPage",
@@ -1149,161 +1168,359 @@
       "id": "added:C_ActionBar.GetActionChargeDuration",
       "symbol": "C_ActionBar.GetActionChargeDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionChargeDuration as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"duration\", \"type\": {\"luaobject\": \"LuaDurationObject\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns a fresh default LuaDurationObject without reading the action slot (default duration behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionChargeDuration to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns a fresh default LuaDurationObject without reading the action slot (default duration behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetActionCharges",
       "symbol": "C_ActionBar.GetActionCharges",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionCharges as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"chargeInfo\", \"type\": {\"structure\": \"C_ActionBar.ActionBarChargeInfo\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns a partial zero/default ActionBarChargeInfo-shaped table: current/max charges and cooldown fields are zero, with modRate 1. No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionCharges to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns a partial zero/default ActionBarChargeInfo-shaped table: current/max charges and cooldown fields are zero, with modRate 1. Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetActionCooldown",
       "symbol": "C_ActionBar.GetActionCooldown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionCooldown as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"cooldownInfo\", \"type\": {\"structure\": \"C_ActionBar.ActionBarCooldownInfo\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns a partial ActionBarCooldownInfo-shaped table: spell-slot cooldown start/duration are modeled, while isEnabled=true and modRate=1 are constant defaults. No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionCooldown to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns a partial ActionBarCooldownInfo-shaped table: spell-slot cooldown start/duration are modeled, while isEnabled=true and modRate=1 are constant defaults. Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetActionCooldownDuration",
       "symbol": "C_ActionBar.GetActionCooldownDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionCooldownDuration as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"duration\", \"type\": {\"luaobject\": \"LuaDurationObject\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns a fresh default LuaDurationObject without reading the action slot (default duration behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionCooldownDuration to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns a fresh default LuaDurationObject without reading the action slot (default duration behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetActionDisplayCount",
       "symbol": "C_ActionBar.GetActionDisplayCount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionDisplayCount as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}, {\"default\": 9999, \"name\": \"maxDisplayCount\", \"type\": \"number\"}, {\"default\": \"*\", \"name\": \"replacementString\", \"type\": \"string\"}], \"outputs\": [{\"name\": \"displayCount\", \"type\": \"string\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant nil for every input (no-op/absent-value behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionDisplayCount to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant nil for every input (no-op/absent-value behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetActionLossOfControlCooldown",
       "symbol": "C_ActionBar.GetActionLossOfControlCooldown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionLossOfControlCooldown as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"startTime\", \"type\": \"number\"}, {\"name\": \"duration\", \"type\": \"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant startTime=0 and duration=0 for every input (default/no-op behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionLossOfControlCooldown to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant startTime=0 and duration=0 for every input (default/no-op behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetActionLossOfControlCooldownDuration",
       "symbol": "C_ActionBar.GetActionLossOfControlCooldownDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionLossOfControlCooldownDuration as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"duration\", \"type\": {\"luaobject\": \"LuaDurationObject\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns a fresh default LuaDurationObject without reading the action slot (default duration behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionLossOfControlCooldownDuration to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns a fresh default LuaDurationObject without reading the action slot (default duration behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetActionText",
       "symbol": "C_ActionBar.GetActionText",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionText as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"mayreturnnothing\": true, \"outputs\": [{\"name\": \"text\", \"type\": \"string\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant nil for every input (no-op/absent-value behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionText to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant nil for every input (no-op/absent-value behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetActionTexture",
       "symbol": "C_ActionBar.GetActionTexture",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionTexture as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"textureFileID\", \"type\": \"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "GetActionTexture resolves a modeled action-bar spell slot through SPELL_DB and returns the mapped texture path when the slot has a known spell."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionTexture to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbar/behavior_main_bar_buttons.rs",
+          "source_hash": "b1498b90e53d20dcfbe0469855f2ceb0091e91d4c6dd1bf71e9f133ad1fc0e1e",
+          "summary": "Focused main-bar end-to-end test covers empty-to-seeded slot 1 refresh and a non-empty icon texture round-trip after ACTIONBAR_SLOT_CHANGED."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbar/behavior_main_bar_buttons.rs::main_bar_button_1_reflects_action_bars_slot_one_after_actionbar_slot_changed"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e1cbad52e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to modeled action-slot texture lookup for the tested seeded spell and empty transition. Broader source-type, file-ID, item/spell, gear-state, secure, and UI-lifecycle fidelity remain unproven."
     },
     {
       "id": "added:C_ActionBar.GetActionUseCount",
       "symbol": "C_ActionBar.GetActionUseCount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionUseCount as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"count\", \"type\": \"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant 0 for every input (default behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionUseCount to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant 0 for every input (default behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetBonusBarIndex",
@@ -1543,17 +1760,58 @@
       "id": "added:C_ActionBar.GetProfessionQualityInfo",
       "symbol": "C_ActionBar.GetProfessionQualityInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetProfessionQualityInfo as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"info\", \"nilable\": true, \"type\": {\"structure\": \"CraftingQualityInfo\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "GetProfessionQualityInfo reads the simulator action_profession_quality state and returns a table with inventoryQuality, iconInventory, and iconQualityContainer, or nil for missing/malformed input."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetProfessionQualityInfo to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_action_bar_slot_mutation.rs",
+          "source_hash": "beffbbb84768c15c8bf0473818a1b1812efe0af98b599e83ec89d9fd0a9dd602",
+          "summary": "Focused slot-mutation tests cover missing-slot nil, seeded state-table fields, and malformed-input nil behavior."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_action_bar_slot_mutation.rs",
+          "source_hash": "beffbbb84768c15c8bf0473818a1b1812efe0af98b599e83ec89d9fd0a9dd602",
+          "summary": "Focused slot-mutation tests cover missing-slot nil, seeded state-table fields, and malformed-input nil behavior."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_action_bar_slot_mutation.rs",
+          "source_hash": "beffbbb84768c15c8bf0473818a1b1812efe0af98b599e83ec89d9fd0a9dd602",
+          "summary": "Focused slot-mutation tests cover missing-slot nil, seeded state-table fields, and malformed-input nil behavior."
+        }
+      ],
+      "tests": [
+        "tests/c_action_bar_slot_mutation.rs::profession_quality_info_defaults_nil",
+        "tests/c_action_bar_slot_mutation.rs::profession_quality_info_returns_state_table",
+        "tests/c_action_bar_slot_mutation.rs::profession_quality_info_invalid_input_returns_nil"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "f831998ca",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded/empty/malformed profession-quality inputs: missing slot nil, the modeled state table fields, and malformed input nil. Broader CraftingQualityInfo source-type, file-ID, secure, and UI-lifecycle fidelity remain unproven."
     },
     {
       "id": "added:C_ActionBar.GetTempShapeshiftBarIndex",
@@ -1647,17 +1905,44 @@
       "id": "added:C_ActionBar.HasAction",
       "symbol": "C_ActionBar.HasAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.HasAction as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"hasAction\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "HasAction reports modeled action-slot presence from state.action_bars or state.action_outfits."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds HasAction to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbar/behavior_main_bar_buttons.rs",
+          "source_hash": "b1498b90e53d20dcfbe0469855f2ceb0091e91d4c6dd1bf71e9f133ad1fc0e1e",
+          "summary": "Focused main-bar end-to-end test covers empty slot 1, seeded spell slot 1, and event-driven button refresh."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbar/behavior_main_bar_buttons.rs::main_bar_button_1_reflects_action_bars_slot_one_after_actionbar_slot_changed"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e1cbad52e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to modeled action-slot presence for the tested empty and seeded spell paths. Broader source-type, item/spell, gear-state, secure, and UI-lifecycle fidelity remain unproven."
     },
     {
       "id": "added:C_ActionBar.HasBonusActionBar",
@@ -1792,17 +2077,36 @@
       "id": "added:C_ActionBar.HasRangeRequirements",
       "symbol": "C_ActionBar.HasRangeRequirements",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.HasRangeRequirements as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"hasRangeRequirements\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current action-bar implementation and registration do not publish this method (absent)."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration has no binding for HasRangeRequirements; the method is absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current action-bar implementation and registration do not publish this method (absent). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.HasTempShapeshiftActionBar",
@@ -1894,129 +2198,289 @@
       "id": "added:C_ActionBar.IsActionInRange",
       "symbol": "C_ActionBar.IsActionInRange",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsActionInRange as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}, {\"name\": \"target\", \"nilable\": true, \"type\": \"unit\"}], \"outputs\": [{\"name\": \"isInRange\", \"nilable\": true, \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current action-bar implementation and registration do not publish this method (absent)."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration has no binding for IsActionInRange; the method is absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current action-bar implementation and registration do not publish this method (absent). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.IsAttackAction",
       "symbol": "C_ActionBar.IsAttackAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsAttackAction as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"isAttackAction\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsAttackAction to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant false for every input (default predicate behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.IsAutoRepeatAction",
       "symbol": "C_ActionBar.IsAutoRepeatAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsAutoRepeatAction as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"isAutoRepeatAction\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsAutoRepeatAction to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant false for every input (default predicate behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.IsConsumableAction",
       "symbol": "C_ActionBar.IsConsumableAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsConsumableAction as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"isConsumableAction\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsConsumableAction to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant false for every input (default predicate behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.IsCurrentAction",
       "symbol": "C_ActionBar.IsCurrentAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsCurrentAction as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"isCurrentAction\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation provides a partial casting/action-slot model: it compares the active casting spell to the slot action and otherwise returns false. No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsCurrentAction to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation provides a partial casting/action-slot model: it compares the active casting spell to the slot action and otherwise returns false. Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.IsEquippedAction",
       "symbol": "C_ActionBar.IsEquippedAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsEquippedAction as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"isEquippedAction\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsEquippedAction to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant false for every input (default predicate behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.IsEquippedGearOutfitAction",
       "symbol": "C_ActionBar.IsEquippedGearOutfitAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsEquippedGearOutfitAction as an added api with published value metadata {\"inputs\": [{\"name\": \"slotID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"isEquippedGearOutfitAction\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "IsEquippedGearOutfitAction reads the modeled equipped_gear_outfit_action_slots set used by the action-button outfit-lock overlay path."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsEquippedGearOutfitAction to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbar/behavior_outfit_locked.rs",
+          "source_hash": "de064a3288971c22fda8f3874fad7579173aec1c00e6976829826638393c37fe",
+          "summary": "Focused Blizzard_ActionBar end-to-end test covers a seeded equipped-gear outfit slot and the locked/unlocked overlay transition."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbar/behavior_outfit_locked.rs::equipped_gear_outfit_lock_shows_autocast_overlay_until_unlocked"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7cbd694b7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to modeled equipped-gear outfit slot behavior as exercised by the locked/unlocked action-button overlay. Broader gear state, source-type, secure, and UI-lifecycle fidelity remain unproven."
     },
     {
       "id": "added:C_ActionBar.IsItemAction",
       "symbol": "C_ActionBar.IsItemAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsItemAction as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"isItemAction\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsItemAction to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant false for every input (default predicate behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.IsPossessBarVisible",
@@ -2065,49 +2529,106 @@
       "id": "added:C_ActionBar.IsStackableAction",
       "symbol": "C_ActionBar.IsStackableAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsStackableAction as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"isStackableAction\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsStackableAction to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns constant false for every input (default predicate behavior). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.IsUsableAction",
       "symbol": "C_ActionBar.IsUsableAction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsUsableAction as an added api with published value metadata {\"inputs\": [{\"name\": \"actionID\", \"type\": \"number\"}], \"outputs\": [{\"name\": \"isUsable\", \"type\": \"boolean\"}, {\"name\": \"isLackingResources\", \"type\": \"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation provides a partial action-slot presence model: it reports whether a spell/outfit slot exists and always returns isLackingResources=false. No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsUsableAction to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation provides a partial action-slot presence model: it reports whether a spell/outfit slot exists and always returns isLackingResources=false. Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.RegisterActionUIButton",
       "symbol": "C_ActionBar.RegisterActionUIButton",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.RegisterActionUIButton as an added api with published value metadata {\"inputs\": [{\"name\": \"checkboxFrame\", \"type\": {\"uiobject\": \"CheckButton\"}}, {\"name\": \"actionID\", \"type\": \"number\"}, {\"name\": \"cooldownFrame\", \"type\": {\"uiobject\": \"Cooldown\"}}], \"outputs\": null}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current implementation partially records button/action identity for simulator refresh dispatch but ignores the cooldown-frame argument; cooldown and lifecycle semantics are unproven. No focused direct test is present in this evidence slice."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds RegisterActionUIButton to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation partially records button/action identity for simulator refresh dispatch but ignores the cooldown-frame argument; cooldown and lifecycle semantics are unproven. Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.SetActionBarPage",
@@ -2156,17 +2677,36 @@
       "id": "added:C_ActionBar.UnregisterActionUIButton",
       "symbol": "C_ActionBar.UnregisterActionUIButton",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.UnregisterActionUIButton as an added api with published value metadata {\"inputs\": [{\"name\": \"checkboxFrame\", \"type\": {\"uiobject\": \"CheckButton\"}}], \"outputs\": null}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current action-bar implementation and registration do not publish this method (absent)."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration has no binding for UnregisterActionUIButton; the method is absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current action-bar implementation and registration do not publish this method (absent). Authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_AdventureMap.AdventureMapQuestPortraitInfo",
