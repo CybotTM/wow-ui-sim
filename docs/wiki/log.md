@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Document neutral 12.0.0 audit artifacts
+
+Added [[patch-12-0-0-api-audit]] for the reproducible wowless snapshot register: boundary 11.2.7 build `65299` → final explicit 12.0.0 build `65727`, six 12.0.0 snapshots, 8 transient lifecycle rows, 3410 total occurrences, and all rows untriaged. Recorded the explicit limit: wowless schema provenance only, with no historical 12.0.0 FrameXML or live runtime claim; the active retail cache manifest is validation metadata rather than historical provenance.
+
 ## [2026-08-07] decision | Separate evidence-required from exception-requested
 
 Migrated the 12.1 behavior register to **33 best-effort, 21 evidence-required, 0 exception-requested, 0 untriaged** and the 12.0.5 probe register to **33 best-effort, 4 evidence-required, 1 approved provenance-only exception-requested, 0 untriaged**. `evidence-required` marks triaged unresolved unsafe/impossible behavior requiring item-specific authoritative/live evidence; it requires no approval, commit, or focused test and cannot pass `--complete`. The 12.0.7 repository-authorized no-3D exception remains unchanged.
