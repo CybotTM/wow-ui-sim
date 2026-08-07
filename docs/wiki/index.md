@@ -45,7 +45,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 
 | Page | Summary |
 |------|---------|
-| [[patch-12-0-0-api-audit]] | Neutral 12.0.0 wowless snapshot audit: 3410 untriaged occurrences, 2554 added / 313 changed / 543 removed; no historical FrameXML or live-runtime claim |
+| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 3 best-effort AbbreviateConfig rows, 3407 untriaged occurrences, 2554 added / 313 changed / 543 removed; no historical FrameXML or live-runtime claim |
 | [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 33 best-effort rows; 4 behavior gaps are evidence-required; 1 provenance-only exception-requested row is approved |
 | [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 33 best-effort, 4 evidence-required, 1 approved provenance-only exception-requested, 0 untriaged |
 | [[patch-12-0-7-api-audit]] | 12.0.7 occurrence audit: 131 named rows classified as 29 implemented, 101 best-effort, and one repository-scope-authorized impossible 3D-model exception; restricted unit-token, encounter, taint, payload, and widget secret/aspect limits are documented per row |
