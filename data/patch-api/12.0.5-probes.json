@@ -587,16 +587,39 @@
       "id": "changed:SetAtlasProbe.InvalidArguments",
       "symbol": "SetAtlasProbe.InvalidArguments",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "texture atlas",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/set_atlas_arguments.rs::test_set_atlas_argument_validation_matches_retail",
+          "summary": "No-argument and boolean calls raise usage errors, nil clears successfully, and numeric atlas IDs are accepted.",
+          "source_hash": "7afbc0beb76a4b9f642d1d331d933d68628344067f95fd0d3406b64c8353208f"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/texture_atlas_regressions.rs::empty_set_atlas_clears_texture_instead_of_using_empty_atlas_db_entry",
+          "summary": "An empty atlas name clears the texture and atlas state.",
+          "source_hash": "496060b550ac7cf0e523cd38075d77a01a7e17231e7dd6e7f34ce7be4efd5033"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/methods_texture.rs::test_set_atlas_unknown",
+          "summary": "An unknown atlas name remains observable without fabricating a texture path.",
+          "source_hash": "419c30bfd97df89dbc9bb960de00690f769d6ab60e35354a3da9938a0e78361c"
+        }
+      ],
+      "tests": [
+        "tests/set_atlas_arguments.rs::test_set_atlas_argument_validation_matches_retail",
+        "tests/texture_atlas_regressions.rs::empty_set_atlas_clears_texture_instead_of_using_empty_atlas_db_entry",
+        "tests/methods_texture.rs::test_set_atlas_unknown"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1d5cfe346",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained nil, no-argument, boolean, numeric, empty-string, and unknown-atlas matrix is covered by focused behavioral tests."
     },
     {
       "id": "changed:TextureSetTextureProbe.PathFdid",

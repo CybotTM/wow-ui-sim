@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Invalid SetAtlas argument evidence
+
+Classified the retained nil, no-argument, boolean, numeric, empty-string, and unknown-atlas matrix from three focused behavioral tests. The 12.0.5 register now contains 20 best-effort and 18 untriaged rows.
+
 ## [2026-08-07] investigation | Identity and protection probe evidence
 
 Classified surrogate identity dispatch, absent legacy `Protect`/`SetProtected`, and secure-template protection from exact focused tests. The 12.0.5 register now contains 19 best-effort and 19 untriaged rows.

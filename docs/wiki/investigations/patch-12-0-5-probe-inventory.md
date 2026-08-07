@@ -5,7 +5,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `35da3c796e6976464394dc8486d7748eb0b0cdd790b13cb2e1d845377b2f14e2`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 19 best-effort, 0 exception-requested, 19 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 20 best-effort, 0 exception-requested, 18 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -38,7 +38,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `ProtectedRetailProbe.SecureStore` | untriaged | best-effort | protection | changed | Secure-template child state and Blizzard Store frame observations. |
 | `ScaleEventProbe.OrderedEvents` | untriaged | resolved | scale events | changed | DISPLAY_SIZE_CHANGED, UI_SCALE_CHANGED, and relevant CVAR_UPDATE ordering. |
 | `ScaleEventProbe.SameSizeDuplicatePair` | untriaged | unresolved | scale events | changed | Same-size maximize/restore duplicate display/scale event pair. |
-| `SetAtlasProbe.InvalidArguments` | untriaged | resolved | texture atlas | changed | nil, no-argument, boolean, numeric, empty, and unknown atlas inputs. |
+| `SetAtlasProbe.InvalidArguments` | best-effort | resolved | texture atlas | changed | nil, no-argument, boolean, numeric, empty, and unknown atlas inputs. |
 | `TextureSetTextureProbe.PathFdid` | best-effort | resolved | texture | changed | UI-Panel-Button-Up path assignment and retained FDID 130828. |
 | `TextureSetTextureProbe.Clear` | best-effort | resolved | texture | changed | SetTexture(nil) and no-argument clearing behavior. |
 | `XmlFrameLevelProbe.BareAndFixed` | best-effort | resolved | XML frame level | changed | Bare frameLevel versus fixedFrameLevel=true semantics. |
@@ -51,9 +51,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 19
+- best-effort: 20
 - exception-requested: 0
-- untriaged: 19
+- untriaged: 18
 
 ## Sources
 
