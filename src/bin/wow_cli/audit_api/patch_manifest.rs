@@ -51,6 +51,10 @@ struct PatchSourceOccurrence {
     category: String,
     symbol: String,
     detail: Option<String>,
+    #[serde(rename = "before")]
+    _before: Option<serde_json::Value>,
+    #[serde(rename = "after")]
+    _after: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -2057,6 +2061,60 @@ mod tests {
                 "changed:ChangedFixture",
                 "removed:RemovedFixture"
             ]
+        );
+    }
+
+    #[test]
+    fn categorized_occurrence_payloads_preserve_row_ids_and_reject_unknown_fields() {
+        let source = serde_json::json!({
+            "occurrences": [
+                {
+                    "direction":"removed",
+                    "category":"widget",
+                    "symbol":"RemovedFixture",
+                    "before":{"kind":"Frame","methods":["Hide"]}
+                },
+                {
+                    "direction":"added",
+                    "category":"global",
+                    "symbol":"AddedFixture",
+                    "after":{"kind":"function","signature":["string"]}
+                },
+                {
+                    "direction":"changed",
+                    "category":"event",
+                    "symbol":"ChangedFixture",
+                    "before":{"payload":{"old":true}},
+                    "after":["new",{"version":2}]
+                }
+            ]
+        });
+
+        let row_ids = source_row_ids(&source)
+            .expect("optional occurrence payloads should not affect row identity");
+
+        assert_eq!(
+            row_ids,
+            vec![
+                "added:AddedFixture",
+                "changed:ChangedFixture",
+                "removed:RemovedFixture"
+            ]
+        );
+
+        let invalid_source = serde_json::json!({
+            "occurrences": [{
+                "direction":"added",
+                "category":"global",
+                "symbol":"UnknownFieldFixture",
+                "unknown":true
+            }]
+        });
+        let error = source_row_ids(&invalid_source)
+            .expect_err("unknown occurrence fields must remain rejected");
+        assert!(
+            error.contains("unknown field") && error.contains("unknown"),
+            "unexpected error: {error}"
         );
     }
 

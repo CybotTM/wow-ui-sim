@@ -15,7 +15,7 @@ The generator compares the last explicit retail 11.2.7 snapshot at build `65299`
 - build `65699` — `03bb5214f7a951ca5b5a6d38dc7ca56af164b281`
 - build `65727` — `a6d2717d06f9255e507ab07f811c1bafaea64939`
 
-The source covers wowless `apis`, `cvars`, `docs`, `events`, `globals`, `luaobjects`, `structures`, and `uiobjects` snapshots. The generator performs a semantic endpoint diff and preserves transient symbols found only in intermediate snapshots; this produced 8 transient lifecycle rows.
+The source covers wowless `apis`, `cvars`, `docs`, `events`, `globals`, `luaobjects`, `structures`, and `uiobjects` snapshots. The generator performs a semantic endpoint diff, preserves transient symbols found only in intermediate snapshots, and now retains normalized value+metadata payloads for exact enum, constant, signature, and structure triage; this produced 8 transient lifecycle rows.
 
 ### Register state
 
@@ -24,7 +24,9 @@ The source covers wowless `apis`, `cvars`, `docs`, `events`, `globals`, `luaobje
 - **Changed:** 313
 - **Removed:** 543
 - **Status:** all 3410 rows are `untriaged` with null final status
-- **Source SHA-256:** `a7440a5084758ab3461f19cc9f743f45371b7114cb85921aa29ef47ded0d6f88`
+- **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
+
+Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the neutral status or counts.
 
 This is neutral inventory state, not a compatibility or completion claim. No rows have implementation, evidence-required, or exception status.
 

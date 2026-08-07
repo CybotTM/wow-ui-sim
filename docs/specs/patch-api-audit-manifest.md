@@ -5,6 +5,8 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 ## What it must do
 
 - [x] Preserve every patch-list occurrence using `change:symbol`, including `added`, `changed`, and `removed` directions and names present in multiple direction lists.
+- [x] Allow occurrence objects to carry optional typed `before`/`after` JSON payloads containing normalized category, value, and metadata; added rows carry `after`, removed rows `before`, changed rows both, and transient lifecycle rows the corresponding side.
+- [x] Keep row identity as `direction+symbol` independently of payload contents, and reject unknown occurrence fields.
 - [x] Represent pending work as neutral `untriaged` rows with a null status, not as evidence requests or exceptions.
 - [x] Represent triaged unresolved `unsafe`/`impossible` behavior as `evidence-required`; it requires item-specific evidence but no approval, commit, or focused test and cannot pass `--complete`.
 - [x] Keep `exception-requested` as a distinct exception-handling path with approval or allowlisted-scope requirements; it is not `evidence-required`.

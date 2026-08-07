@@ -311,13 +311,33 @@ def _signature(record: dict) -> str:
     )
 
 
-def _occurrence(direction: str, record: dict, detail: str) -> dict:
+def _payload(record: dict) -> dict:
     return {
+        "category": record["category"],
+        "value": record["value"],
+        "metadata": record["metadata"],
+    }
+
+
+def _occurrence(
+    direction: str,
+    record: dict,
+    detail: str,
+    *,
+    before: dict | None = None,
+    after: dict | None = None,
+) -> dict:
+    occurrence = {
         "direction": direction,
         "category": record["category"],
         "symbol": record["path"],
         "detail": detail,
     }
+    if before is not None:
+        occurrence["before"] = _payload(before)
+    if after is not None:
+        occurrence["after"] = _payload(after)
+    return occurrence
 
 
 def _diff_records(
@@ -330,16 +350,36 @@ def _diff_records(
     occurrences = []
     for path in sorted(after.keys() - before.keys()):
         record = after[path]
-        occurrences.append(_occurrence("added", record, f"{record['category']} added in 12.0.0."))
+        occurrences.append(
+            _occurrence(
+                "added",
+                record,
+                f"{record['category']} added in 12.0.0.",
+                after=record,
+            )
+        )
     for path in sorted(before.keys() & after.keys()):
         if _signature(before[path]) != _signature(after[path]):
             record = after[path]
             occurrences.append(
-                _occurrence("changed", record, f"{record['category']} changed in 12.0.0.")
+                _occurrence(
+                    "changed",
+                    record,
+                    f"{record['category']} changed in 12.0.0.",
+                    before=before[path],
+                    after=record,
+                )
             )
     for path in sorted(before.keys() - after.keys()):
         record = before[path]
-        occurrences.append(_occurrence("removed", record, f"{record['category']} removed in 12.0.0."))
+        occurrences.append(
+            _occurrence(
+                "removed",
+                record,
+                f"{record['category']} removed in 12.0.0.",
+                before=record,
+            )
+        )
     occurrences.extend(_transient_occurrences(before, after, intermediate_records))
     return sorted(occurrences, key=lambda item: (item["direction"], item["symbol"]))
 
@@ -361,8 +401,8 @@ def _transient_occurrences(
             f"Transient {record['category']} existed in an intermediate 12.0.0 snapshot "
             "but was absent at both patch endpoints."
         )
-        occurrences.append(_occurrence("added", record, detail))
-        occurrences.append(_occurrence("removed", record, detail))
+        occurrences.append(_occurrence("added", record, detail, after=record))
+        occurrences.append(_occurrence("removed", record, detail, before=record))
     return occurrences
 
 

@@ -6,7 +6,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 ### Files
 
-- `tools/gen_patch_12_0_0_register.py`, `data/patch-api/sources/12.0.0-register.json`, `data/patch-api/12.0.0.json`, `docs/generated/patch-12-0-0-checklist.md`, and [[patch-12-0-0-occurrence-inventory]] preserve the neutral 12.0.0 wowless snapshot audit: six 12.0.0 snapshots, 3410 untriaged occurrences, and 2554 added / 313 changed / 543 removed. The source covers wowless schema surfaces, not historical FrameXML or live runtime behavior; the active retail cache manifest is validation metadata only.
+- `tools/gen_patch_12_0_0_register.py`, `data/patch-api/sources/12.0.0-register.json`, `data/patch-api/12.0.0.json`, `docs/generated/patch-12-0-0-checklist.md`, and [[patch-12-0-0-occurrence-inventory]] preserve the neutral 12.0.0 wowless snapshot audit: six 12.0.0 snapshots, 3410 untriaged occurrences, and 2554 added / 313 changed / 543 removed. Each normalized occurrence may also preserve typed `before`/`after` payloads with category, value, and metadata for exact triage; this does not change row identity or status. The source covers wowless schema surfaces, not historical FrameXML or live runtime behavior; the active retail cache manifest is validation metadata only.
 - `data/patch-api/sources/12.1-framexml.json` preserves the legacy raw 320-added/112-removed direction-array snapshot.
 - `data/patch-api/sources/12.1-behaviors.json`, `data/patch-api/12.1-behaviors.json`, `docs/generated/patch-12-1-behavior-checklist.md`, and [[patch-12-1-behavior-inventory]] preserve 54 independently testable non-FrameXML behavior boundaries: 33 best-effort and 21 evidence-required; candidate disposition is 33 behavioral, 21 unsafe, and 0 impossible.
 - `data/patch-api/sources/12.0.7-register.json` preserves 131 named occurrences as categorized `{direction, category, symbol, detail?}` objects without inventing the unnamed CVar additions/removals omitted by the crawler excerpt.
@@ -20,6 +20,10 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 `untriaged` is neutral draft state and has a null status. `evidence-required` is triaged unresolved `unsafe`/`impossible` behavior requiring item-specific authoritative/live evidence; it needs no approval, commit, or focused test and cannot pass `--complete`. `exception-requested` is a distinct exception-handling path with approval or allowlisted-scope requirements. Final status vocabulary is `implemented`, `best-effort`, `evidence-required`, and `exception-requested`.
 
+### Occurrence payloads and identity
+
+Categorized source occurrence objects accept only their defined fields: `direction`, `category`, `symbol`, optional `detail`, and optional typed `before`/`after` JSON payloads. Payloads preserve normalized `category`, `value`, and `metadata` data for exact enum, constant, signature, and structure triage. Added occurrences carry `after`; removed occurrences carry `before`; changed occurrences carry both; transient add/remove rows carry the corresponding side. Row identity remains `direction+symbol`, so payload changes do not create new rows. Unknown fields remain validation errors.
+
 Resolution explains the evidence outcome: vendor-present, simulator compatibility behavior, test-backed behavioral behavior, load-on-demand ownership, removal, cross-flavor contamination, stale/reversed snapshot data, unsafe behavior, or impossible behavior. `behavioral` is for contracts that are not simple Lua-path presence checks, such as stateful globals, event registration, widget methods, CVars, and probe outcomes: it requires hashed test evidence plus a focused named test, permits implemented/best-effort status, and forbids fabricated Lua-path assertions. Source owner and the addon passed to `LoadAddOn` are separate fields; LoD lifecycle assertions must match the declared addon. Only `unsafe` and `impossible` may use `evidence-required` or `exception-requested`.
 
 Current 12.1 FrameXML totals are **1 implemented, 431 best-effort, 0 evidence-required, 0 exception-requested, and 0 untriaged**. The separate broader behavior register is **0 implemented, 33 best-effort, 21 evidence-required, 0 exception-requested, and 0 untriaged**. The 21 unsafe rows remain open for authoritative/live evidence; they are not approval candidates.
@@ -32,7 +36,7 @@ Normal manifest validation recomputes:
 - every resolved row's evidence-file SHA-256;
 - focused test file and exact named `#[test]` definition existence;
 - implementation commit existence and ancestry;
-- raw source row order/count for either direction arrays or categorized `occurrences`; object sources validate direction, nonblank category, optional nonblank change detail, symbol path, and deterministic added/changed/removed grouping; older manifests omit `changed_count` and default it to zero;
+- raw source row order/count for either direction arrays or categorized `occurrences`; object sources validate direction, nonblank category, optional nonblank change detail, symbol path, optional typed `before`/`after` payloads, and deterministic added/changed/removed grouping; older manifests omit `changed_count` and default it to zero;
 - generated checklist and human inventory status drift.
 
 Unknown JSON fields, blank evidence, invalid lifecycle vocabulary, and incompatible status/resolution combinations fail validation.

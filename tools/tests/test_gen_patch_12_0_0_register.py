@@ -228,6 +228,35 @@ class Patch1200RegisterTests(unittest.TestCase):
             ],
         )
 
+        by_change = {(record["direction"], record["symbol"]): record for record in first}
+        added = by_change[("added", "GetNewGlobal")]
+        self.assertEqual(set(added), {"direction", "category", "symbol", "detail", "after"})
+        self.assertEqual(
+            added["after"],
+            {"category": "global", "value": {}, "metadata": {}},
+        )
+
+        removed = by_change[("removed", "EVENT_REMOVED")]
+        self.assertEqual(set(removed), {"direction", "category", "symbol", "detail", "before"})
+        self.assertEqual(
+            removed["before"],
+            {"category": "event", "value": {}, "metadata": {}},
+        )
+
+        changed = by_change[("changed", "C_Test.GetValue")]
+        self.assertEqual(
+            set(changed),
+            {"direction", "category", "symbol", "detail", "before", "after"},
+        )
+        self.assertEqual(
+            changed["before"],
+            {"category": "api", "value": {"returns": ["number"]}, "metadata": {}},
+        )
+        self.assertEqual(
+            changed["after"],
+            {"category": "api", "value": {"returns": ["string"]}, "metadata": {}},
+        )
+
     def test_transient_symbol_emits_added_and_removed_with_lifecycle_detail(self) -> None:
         before = self.snapshot()
         after = self.snapshot()
@@ -248,6 +277,23 @@ class Patch1200RegisterTests(unittest.TestCase):
         self.assertEqual([record["direction"] for record in transient], ["added", "removed"])
         self.assertTrue(all("transient" in record["detail"].lower() for record in transient))
         self.assertTrue(all("intermediate" in record["detail"].lower() for record in transient))
+
+        transient_payload = {
+            "category": "api",
+            "value": {"returns": ["boolean"]},
+            "metadata": {},
+        }
+        transient_added, transient_removed = transient
+        self.assertEqual(
+            set(transient_added),
+            {"direction", "category", "symbol", "detail", "after"},
+        )
+        self.assertEqual(transient_added["after"], transient_payload)
+        self.assertEqual(
+            set(transient_removed),
+            {"direction", "category", "symbol", "detail", "before"},
+        )
+        self.assertEqual(transient_removed["before"], transient_payload)
 
     def test_register_paths_order_and_category_counts_match_occurrences(self) -> None:
         before = self.snapshot()

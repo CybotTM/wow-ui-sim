@@ -2,11 +2,13 @@
 Occurrence-level register derived from explicit wowless retail snapshots. All rows are neutral pending evidence-backed classification; the source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
-- **Source SHA-256:** `a7440a5084758ab3461f19cc9f743f45371b7114cb85921aa29ef47ded0d6f88`
+- **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
 - **Rows:** 3410 total — 0 implemented, 0 best-effort, 0 evidence-required, 0 exception-requested, 3410 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
+
+Source occurrence objects preserve optional typed `before`/`after` JSON payloads with normalized `category`, `value`, and `metadata` fields for exact enum, constant, signature, and structure triage. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side. Row identity remains `direction+symbol`; unknown occurrence fields are rejected. These payloads do not change the 3410-row neutral status or the 2554/313/543 direction counts.
 
 | Symbol | Status | Category | Direction | Note |
 |---|---|---|---|---|

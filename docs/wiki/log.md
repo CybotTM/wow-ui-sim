@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] architecture | Document 12.0.0 occurrence payloads
+
+Documented the current 12.0.0 generator/source-register change: categorized occurrence objects may preserve optional typed `before`/`after` payloads containing normalized value and metadata for exact enum, constant, signature, and structure triage. Added/removed/changed and transient lifecycle rows carry the corresponding sides; row identity remains `direction+symbol`, unknown fields remain rejected, and counts/statuses/source SHA are unchanged.
+
 ## [2026-08-07] investigation | Document neutral 12.0.0 audit artifacts
 
 Added [[patch-12-0-0-api-audit]] for the reproducible wowless snapshot register: boundary 11.2.7 build `65299` → final explicit 12.0.0 build `65727`, six 12.0.0 snapshots, 8 transient lifecycle rows, 3410 total occurrences, and all rows untriaged. Recorded the explicit limit: wowless schema provenance only, with no historical 12.0.0 FrameXML or live runtime claim; the active retail cache manifest is validation metadata rather than historical provenance.
