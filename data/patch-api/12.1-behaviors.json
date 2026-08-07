@@ -1053,7 +1053,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_spell_cooldown_payload",
           "summary": "Seeded and inactive spell cooldown queries return the modeled start, duration, enabled, active, and rate fields.",
-          "source_hash": "a3f137c8fa0ac5ea9843128240ad71adddd96313c76a31e799d2a5a9086ec800"
+          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
         }
       ],
       "tests": [
@@ -1077,7 +1077,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads",
           "summary": "Seeded and unknown species queries verify the modeled 12.1 pet information fields and nil boundary.",
-          "source_hash": "a3f137c8fa0ac5ea9843128240ad71adddd96313c76a31e799d2a5a9086ec800"
+          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
         }
       ],
       "tests": [
@@ -1101,7 +1101,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads",
           "summary": "Seeded and unknown search-result queries verify the modeled LFG identity, activity, size, GUID, and censored fields.",
-          "source_hash": "a3f137c8fa0ac5ea9843128240ad71adddd96313c76a31e799d2a5a9086ec800"
+          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
         }
       ],
       "tests": [
@@ -1125,7 +1125,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_player_choice_payload_and_mutator_intent",
           "summary": "Default and seeded PlayerChoice queries expose the generated nested payload shape while response, reroll, and close calls record local intent.",
-          "source_hash": "a3f137c8fa0ac5ea9843128240ad71adddd96313c76a31e799d2a5a9086ec800"
+          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
         }
       ],
       "tests": [

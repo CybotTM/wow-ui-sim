@@ -104,7 +104,7 @@
           "kind": "test",
           "reference": "tests/protected_frame_enforcement.rs::test_insecure_addon_created_normal_frame_set_forbidden_is_noop",
           "summary": "Normal addon-frame SetForbidden behavior is directly regression-tested.",
-          "source_hash": "b623d5ce3789ad14e96e2db469d791dfe31d6b66fb6c399d8b1a3092810424a0"
+          "source_hash": "eda8ab6d1fd1ac3105da7c810f9462239492268a6ec1b2d025aaa03ba3283c8e"
         }
       ],
       "tests": [
@@ -128,7 +128,7 @@
           "kind": "test",
           "reference": "tests/protected_frame_enforcement.rs::test_retail_create_forbidden_frame_is_absent",
           "summary": "Retail exposes no CreateForbiddenFrame constructor, so the probe's creation and enumeration branch is unreachable.",
-          "source_hash": "b623d5ce3789ad14e96e2db469d791dfe31d6b66fb6c399d8b1a3092810424a0"
+          "source_hash": "eda8ab6d1fd1ac3105da7c810f9462239492268a6ec1b2d025aaa03ba3283c8e"
         }
       ],
       "tests": [
@@ -611,7 +611,7 @@
           "kind": "test",
           "reference": "tests/protected_frame_enforcement.rs::test_retail_plain_frame_protection_probe",
           "summary": "A plain frame remains unprotected and unforbidden; legacy protection setters are absent, their calls fail, and protection state remains false.",
-          "source_hash": "b623d5ce3789ad14e96e2db469d791dfe31d6b66fb6c399d8b1a3092810424a0"
+          "source_hash": "eda8ab6d1fd1ac3105da7c810f9462239492268a6ec1b2d025aaa03ba3283c8e"
         }
       ],
       "tests": [
