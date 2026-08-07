@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-08-07] investigation | Bound 12.0.0 C_Spell triage
+
+Classified exactly 12 added `C_Spell` rows as `evidence-required`/`unsafe` using only the checked-in source register and clean current `src/c_api/c_spell.rs` evidence. Duration lifecycle, spell metadata, and boolean semantics remain unproven; `IsSelfBuff` has a same-name internal implementation, but no matching 12.0.0 publication/behavioral contract is proven. All tests/assertions are empty with null commit, approval, and scope exception; no approval can close these rows. Totals are now **40 best-effort, 70 evidence-required, and 3300 untriaged**.
+
 Chronological record of wiki operations.
 
 ## [2026-08-07] investigation | Bound 12.0.0 C_ColorUtil slice

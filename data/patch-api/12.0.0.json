@@ -8816,193 +8816,349 @@
       "id": "added:C_Spell.GetSpellChargeDuration",
       "symbol": "C_Spell.GetSpellChargeDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with string spellIdentifier input and an optional LuaDurationObject duration output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 duration method; duration-object lifecycle and semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 duration contract is not currently registered/implemented with focused proof; duration-object lifecycle and semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.GetSpellCooldownDuration",
       "symbol": "C_Spell.GetSpellCooldownDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with string spellIdentifier input and an optional LuaDurationObject duration output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 duration method; duration-object lifecycle and semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 duration contract is not currently registered/implemented with focused proof; duration-object lifecycle and semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.GetSpellDisplayCount",
       "symbol": "C_Spell.GetSpellDisplayCount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with string spellIdentifier, optional maxDisplayCount number (default 9999), and optional replacementString string (default \"*\") inputs, returning a displayCount string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 display-count method; spell metadata/display semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 display-count contract is not currently registered/implemented with focused proof; spell metadata/display semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.GetSpellLossOfControlCooldownDuration",
       "symbol": "C_Spell.GetSpellLossOfControlCooldownDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with string spellIdentifier input and an optional LuaDurationObject duration output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 duration method; duration-object lifecycle and semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 duration contract is not currently registered/implemented with focused proof; duration-object lifecycle and semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.GetSpellMaxCumulativeAuraApplications",
       "symbol": "C_Spell.GetSpellMaxCumulativeAuraApplications",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with spellID number input and cumulativeAura number output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 metadata method; spell metadata semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 spell-metadata contract is not currently registered/implemented with focused proof; spell metadata semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.GetVisibilityInfo",
       "symbol": "C_Spell.GetVisibilityInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with spellID number and SpellAuraVisibilityType inputs and optional hasCustom, alwaysShowMine, and showForMySpec boolean outputs.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 metadata method; spell metadata semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 spell-metadata contract is not currently registered/implemented with focused proof; spell metadata semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.IsConsumableSpell",
       "symbol": "C_Spell.IsConsumableSpell",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with string spellIdentifier input and consumable boolean output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 boolean contract is not currently registered/implemented with focused proof; boolean semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.IsExternalDefensive",
       "symbol": "C_Spell.IsExternalDefensive",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with spellID number input and isExternalDefensive boolean output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 boolean contract is not currently registered/implemented with focused proof; boolean semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.IsPriorityAura",
       "symbol": "C_Spell.IsPriorityAura",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with spellID number input and isHighPriority boolean output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 boolean contract is not currently registered/implemented with focused proof; boolean semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.IsSelfBuff",
       "symbol": "C_Spell.IsSelfBuff",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with spellID number input and hasSelfEffectsOnly boolean output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` contains a same-name `IsSelfBuff` registration/implementation based on `implicit_target`, but no matching 12.0.0 publication/behavioral contract is proven.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "A same-name internal IsSelfBuff implementation exists, but no matching 12.0.0 publication/behavioral contract is proven; boolean semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.IsSpellCrowdControl",
       "symbol": "C_Spell.IsSpellCrowdControl",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with string spellIdentifier input and isCrowdControl boolean output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 boolean contract is not currently registered/implemented with focused proof; boolean semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_Spell.IsSpellImportant",
       "symbol": "C_Spell.IsSpellImportant",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records this added api with string spellIdentifier input and isImportant boolean output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The 12.0.0 boolean contract is not currently registered/implemented with focused proof; boolean semantics require authoritative evidence or a correct model, and no approval can close the row."
     },
     {
       "id": "added:C_SpellBook.FindBaseSpellByID",
