@@ -4,7 +4,7 @@ Occurrence-level register derived from explicit wowless retail snapshots. Twenty
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 21 best-effort, 0 evidence-required, 0 exception-requested, 3389 untriaged
+- **Rows:** 3410 total — 0 implemented, 26 best-effort, 21 evidence-required, 0 exception-requested, 3363 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
