@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Protected descendant-anchor probe replay
+
+Classified `IsProtectedProbe.DescendantAnchorPropagation` as best-effort from focused behavioral evidence. The directly protected root returns true/true; child, grandchild, frames anchored to the root or child, and the root-keyed anchored frame remain false/false. The 12.0.5 register now has 33 best-effort and 5 untriaged rows.
+
 ## [2026-08-07] investigation | PlayerChoice and strict-load classification
 
 Classified the state-backed `C_PlayerChoice` payload and mutator-intent contract plus the pre-removal pinned-PTR load window as best-effort. Focused proof covers default and seeded nested choice payloads and confirms representative compatibility symbols remain callable after the complete all-LoD load. The broader register now has 23 best-effort and 31 untriaged rows.

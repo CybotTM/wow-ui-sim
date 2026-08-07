@@ -51,7 +51,7 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `docs/generated/patch-12-0-7-checklist.md` — generated occurrence checklist.
 - `docs/wiki/investigations/patch-12-0-7-occurrence-inventory.md` — human-readable occurrence inventory.
 - `data/patch-api/sources/12.0.5-probes.json` — categorized source for 38 retained probe subfindings, with prior documented states preserved separately from machine status.
-- `data/patch-api/12.0.5-probes.json` — 38-row probe manifest: 32 best-effort rows with direct evidence and 6 untriaged rows.
+- `data/patch-api/12.0.5-probes.json` — 38-row probe manifest: 33 best-effort rows with direct evidence and 5 untriaged rows.
 - `docs/generated/patch-12-0-5-probe-checklist.md` — generated probe checklist.
 - `docs/wiki/investigations/patch-12-0-5-probe-inventory.md` — human-readable probe inventory.
 - `data/patch-api/12.1-framexml.json` — complete 432-row FrameXML symbol audit register.

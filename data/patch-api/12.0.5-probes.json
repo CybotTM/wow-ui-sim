@@ -434,16 +434,25 @@
       "id": "changed:IsProtectedProbe.DescendantAnchorPropagation",
       "symbol": "IsProtectedProbe.DescendantAnchorPropagation",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/protected_frame_enforcement.rs::test_protected_state_does_not_propagate_to_descendants_or_anchors",
+          "summary": "Directly protected roots return true/true while child, grandchild, frames anchored to the root or child, and the root-keyed anchored frame remain false/false.",
+          "source_hash": "eda8ab6d1fd1ac3105da7c810f9462239492268a6ec1b2d025aaa03ba3283c8e"
+        }
+      ],
+      "tests": [
+        "tests/protected_frame_enforcement.rs::test_protected_state_does_not_propagate_to_descendants_or_anchors"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "5b4bb274d",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The directly protected root returns true/true; its child, grandchild, frames anchored to the root or child, and the root-keyed anchored frame remain false/false."
     },
     {
       "id": "changed:JustifyProbe.FrameFontStrings",

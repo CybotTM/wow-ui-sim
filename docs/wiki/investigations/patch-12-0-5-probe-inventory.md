@@ -5,7 +5,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 32 best-effort, 0 exception-requested, 6 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 33 best-effort, 0 exception-requested, 5 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -26,7 +26,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `HookScriptBindingProbe.IndexedHooks` | best-effort | resolved | scripts | changed | The normal binding slot succeeds and chains; explicit slots 0 and 2 return false and GetScript reports nil for those slots. |
 | `IsProtectedProbe.LegacySetters` | best-effort | resolved | protection | changed | Legacy Protect and SetProtected methods are absent and calls fail. |
 | `IsProtectedProbe.SecureTemplate` | best-effort | resolved | protection | changed | Secure-template buttons report protected state while ordinary frames do not. |
-| `IsProtectedProbe.DescendantAnchorPropagation` | untriaged | best-effort | protection | changed | Child, grandchild, and protected-anchor return values are captured. |
+| `IsProtectedProbe.DescendantAnchorPropagation` | best-effort | resolved | protection | changed | The directly protected root returns true/true; its child, grandchild, frames anchored to the root or child, and the root-keyed anchored frame remain false/false. |
 | `JustifyProbe.FrameFontStrings` | best-effort | resolved | FontString layout | changed | Direct unanchored frame-layer FontStrings receive the observed default anchors and justification. |
 | `JustifyProbe.ButtonText` | best-effort | resolved | FontString layout | changed | Implicit ButtonText FontString behavior matches the probe matrix. |
 | `JustifyProbe.SizeVariants` | best-effort | resolved | FontString layout | changed | No-size, width-only, height-only, and width+height variants are captured. |
@@ -51,9 +51,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 32
+- best-effort: 33
 - exception-requested: 0
-- untriaged: 6
+- untriaged: 5
 
 ## Sources
 

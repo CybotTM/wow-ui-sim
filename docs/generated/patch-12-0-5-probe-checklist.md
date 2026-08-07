@@ -15,7 +15,7 @@
 15. [best-effort] `changed:HookScriptBindingProbe.IndexedHooks` — behavioral
 16. [best-effort] `changed:IsProtectedProbe.LegacySetters` — behavioral
 17. [best-effort] `changed:IsProtectedProbe.SecureTemplate` — behavioral
-18. [untriaged] `changed:IsProtectedProbe.DescendantAnchorPropagation` — untriaged
+18. [best-effort] `changed:IsProtectedProbe.DescendantAnchorPropagation` — behavioral
 19. [best-effort] `changed:JustifyProbe.FrameFontStrings` — behavioral
 20. [best-effort] `changed:JustifyProbe.ButtonText` — behavioral
 21. [best-effort] `changed:JustifyProbe.SizeVariants` — behavioral
