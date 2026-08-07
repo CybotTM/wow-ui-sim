@@ -5,11 +5,11 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `ba32c953e6232d408eea328fc7bfb77a33a1fff803e310aefa6a76512178b344`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 15 best-effort, 0 exception-requested, 23 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 16 best-effort, 0 exception-requested, 22 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
-| `AnimScriptProbe.HandlerMatrix` | untriaged | resolved | script support | changed | Frame, AnimationGroup, and all nine Animation subtypes accept the documented handler matrix; HasScript and SetScript agree. |
+| `AnimScriptProbe.HandlerMatrix` | best-effort | resolved | script support | changed | Frame, AnimationGroup, and all nine Animation subtypes accept the documented handler matrix; HasScript and SetScript agree. |
 | `AttributeDispatchProbe.ScalarRepeat` | best-effort | resolved | attributes | changed | Repeated scalar SetAttribute dispatches OnAttributeChanged; explicit false is preserved and delivered as false. |
 | `AttributeDispatchProbe.PanelPulse` | untriaged | best-effort | panel lifecycle | changed | Repeated ShowUIPanel pulse followed by CloseAllWindows preserves the expected panel-stack behavior. |
 | `CoreBehaviorProbe.ForbiddenState` | best-effort | resolved | forbidden frames | changed | Normal addon frames remain un-forbidden; SetForbidden does not create forbidden state. |
@@ -51,9 +51,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 15
+- best-effort: 16
 - exception-requested: 0
-- untriaged: 23
+- untriaged: 22
 
 ## Sources
 

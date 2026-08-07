@@ -23,16 +23,25 @@
       "id": "changed:AnimScriptProbe.HandlerMatrix",
       "symbol": "AnimScriptProbe.HandlerMatrix",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "script support",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/runtime_subsystems.rs::test_animation_script_handler_matrix_matches_retail_probe",
+          "summary": "Frame, AnimationGroup, and all nine animation subtypes directly match the retained HasScript/SetScript handler matrix.",
+          "source_hash": "e725473130c206e1523dbf24280594be31fd4f021d2a8a115235e5d7d78ab552"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/runtime_subsystems.rs::test_animation_script_handler_matrix_matches_retail_probe"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "0a5040d7e1",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Frame, AnimationGroup, and all nine animation subtypes directly match the retained HasScript/SetScript handler matrix."
     },
     {
       "id": "changed:AttributeDispatchProbe.ScalarRepeat",

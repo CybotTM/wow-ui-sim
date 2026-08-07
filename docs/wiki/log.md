@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Animation script-handler probe replay
+
+Added a focused Frame/AnimationGroup/nine-animation-subtype handler-matrix regression. The initial RED exposed a test misunderstanding—unsupported `HasScript` returns false without error, while `SetScript` rejects—then the corrected test passed and classified `AnimScriptProbe.HandlerMatrix` as best-effort. Current 12.0.5 totals: 16 best-effort and 22 untriaged.
+
 ## [2026-08-07] investigation | First evidence-backed 12.0.5 probe classifications
 
 Classified 15 probe rows as best-effort only where focused behavioral tests directly exercise the recorded contract: scalar attributes, forbidden state, unit-event filters, wildcard attributes, frame ordering/identity, HookScript bindings, ButtonText anchors, texture path/clear behavior, and XML frame-level semantics. Twenty-three rows remain neutral; broad subsystem or register-shape tests are not accepted as probe evidence.

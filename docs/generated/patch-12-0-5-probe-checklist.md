@@ -1,4 +1,4 @@
-1. [untriaged] `changed:AnimScriptProbe.HandlerMatrix` — untriaged
+1. [best-effort] `changed:AnimScriptProbe.HandlerMatrix` — behavioral
 2. [best-effort] `changed:AttributeDispatchProbe.ScalarRepeat` — behavioral
 3. [untriaged] `changed:AttributeDispatchProbe.PanelPulse` — untriaged
 4. [best-effort] `changed:CoreBehaviorProbe.ForbiddenState` — behavioral
