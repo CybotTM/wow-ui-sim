@@ -4,7 +4,7 @@ Chronological record of wiki operations.
 
 ## [2026-08-06] system | Non-Lua exception evidence
 
-Allowed `unsafe` and `impossible` manifest rows to omit fabricated Lua-path assertions when their item-specific evidence concerns provenance or another non-Lua boundary. Completion still requires unique per-row informed approval.
+Allowed `unsafe` and `impossible` manifest rows to omit fabricated Lua-path assertions only when item-specific evidence concerns provenance or another non-Lua boundary. Item-specific evidence and unique per-row informed approval remain mandatory for completion.
 
 ## [2026-08-06] investigation | 12.0.7 occurrence-level re-triage
 

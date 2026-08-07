@@ -9,7 +9,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - [x] Restrict final statuses to `implemented`, `best-effort`, or `exception-requested`.
 - [x] Represent test-backed behavior contracts that are not simple Lua-path presence checks with `behavioral` resolution: implemented/best-effort only, at least one hashed test-evidence item plus a focused named test, and no fabricated Lua-path assertion or runtime observation.
 - [x] Restrict exception requests to `unsafe` or `impossible` resolutions.
-- [x] Allow unsafe/impossible exception rows with non-Lua evidence to omit fabricated presence assertions; item-specific approval remains mandatory for completion.
+- [x] Allow unsafe/impossible exception rows to omit fabricated presence assertions only when item-specific evidence concerns a non-Lua boundary; item-specific evidence and a unique per-row approval remain mandatory for completion.
 - [x] Record target flavor/build, source owner, distinct LoD addon identity, lifecycle assertions, evidence file hashes, tests, commit, and per-item approval provenance.
 - [x] Recompute patch-source, Blizzard manifest, and evidence hashes from repository files.
 - [x] Accept legacy direction arrays or a generic categorized `occurrences` array; validate each occurrence's direction, nonblank category, optional nonblank change detail, symbol path, and deterministic added/changed/removed ordering.
@@ -29,7 +29,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 ## Completion contract
 
-`--complete` requires an observation artifact for the exact manifest bytes. Behavioral rows are proven by their repository-validated test evidence and intentionally require no Lua-path observation. Unsafe/impossible rows may likewise omit observations when their evidence concerns provenance or another non-Lua boundary. It rejects:
+`--complete` requires an observation artifact for the exact manifest bytes. Behavioral rows are proven by their repository-validated test evidence and intentionally require no Lua-path observation. Unsafe/impossible rows may likewise omit observations only when item-specific evidence concerns provenance or another non-Lua boundary; item-specific evidence and a unique per-row approval remain mandatory. It rejects:
 
 - any `untriaged` row;
 - missing or mismatched repository evidence;
