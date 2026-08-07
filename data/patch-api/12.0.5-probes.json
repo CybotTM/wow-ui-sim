@@ -9,7 +9,7 @@
   },
   "source": {
     "path": "data/patch-api/sources/12.0.5-probes.json",
-    "hash": "35da3c796e6976464394dc8486d7748eb0b0cdd790b13cb2e1d845377b2f14e2",
+    "hash": "8b63e31aaf112305b6c9c1c70030262daea0d47ec4b785a83d3d0e415286fdf5",
     "added_count": 0,
     "changed_count": 38,
     "removed_count": 0
@@ -333,7 +333,7 @@
         {
           "kind": "test",
           "reference": "tests/hook_script.rs::test_hook_script_rejects_pre_and_post_binding_slots",
-          "summary": "Indexed HookScript binding rules and hook ordering are directly regression-tested.",
+          "summary": "The normal binding slot chains while explicit slots 0 and 2 return false and remain absent from GetScript.",
           "source_hash": "12fc97b39717a4823b363f5bd92965f85a7a7af216755236f583921d5a0e09f9"
         }
       ],
@@ -344,7 +344,7 @@
       "assertions": [],
       "commit": "0afd8e1bc",
       "approval_id": null,
-      "notes": "Indexed HookScript binding rules and hook ordering are directly regression-tested."
+      "notes": "The normal binding slot chains while explicit slots 0 and 2 return false and remain absent from GetScript; focused tests cover both binding rules and order."
     },
     {
       "id": "changed:IsProtectedProbe.LegacySetters",

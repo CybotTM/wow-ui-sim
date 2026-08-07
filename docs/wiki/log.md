@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] correction | HookScript binding probe contract
+
+Corrected the 12.0.5 source register to the retained retail behavior: the normal binding slot succeeds and chains, while explicit slots 0 and 2 return false and remain absent from `GetScript`. Existing focused tests directly prove that contract; classification totals are unchanged.
+
 ## [2026-08-07] investigation | Invalid SetAtlas argument evidence
 
 Classified the retained nil, no-argument, boolean, numeric, empty-string, and unknown-atlas matrix from three focused behavioral tests. The 12.0.5 register now contains 20 best-effort and 18 untriaged rows.

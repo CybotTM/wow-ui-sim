@@ -3,7 +3,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 
 ## Content
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
-- **Source SHA-256:** `35da3c796e6976464394dc8486d7748eb0b0cdd790b13cb2e1d845377b2f14e2`
+- **Source SHA-256:** `8b63e31aaf112305b6c9c1c70030262daea0d47ec4b785a83d3d0e415286fdf5`
 - **Target:** retail build `12.0.5`
 - **Rows:** 38 changed probe subfindings — 0 implemented, 20 best-effort, 0 exception-requested, 18 untriaged
 
@@ -23,7 +23,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `FrameIdentityProbe.IdentitySlot` | best-effort | resolved | identity | changed | Frame slot [0] contains the identity userdata token. |
 | `FrameIdentityProbe.SurrogateDispatch` | best-effort | resolved | identity | changed | Replacing [0] redirects protection and method dispatch; [1] alone does not. |
 | `FrameIdentityProbe.DuplicateFreshness` | best-effort | resolved | identity | changed | Duplicate named frames receive fresh Lua objects, identity tokens, and custom-field state. |
-| `HookScriptBindingProbe.IndexedHooks` | best-effort | resolved | scripts | changed | HookScript accepts indices 0, 1, and 2; GetScript retrieves indexed hooks. |
+| `HookScriptBindingProbe.IndexedHooks` | best-effort | resolved | scripts | changed | The normal binding slot succeeds and chains; explicit slots 0 and 2 return false and GetScript reports nil for those slots. |
 | `IsProtectedProbe.LegacySetters` | best-effort | resolved | protection | changed | Legacy Protect and SetProtected methods are absent and calls fail. |
 | `IsProtectedProbe.SecureTemplate` | best-effort | resolved | protection | changed | Secure-template buttons report protected state while ordinary frames do not. |
 | `IsProtectedProbe.DescendantAnchorPropagation` | untriaged | best-effort | protection | changed | Child, grandchild, and protected-anchor return values are captured. |
