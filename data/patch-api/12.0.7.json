@@ -32,7 +32,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -56,7 +56,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -80,7 +80,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -104,7 +104,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -128,7 +128,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -152,7 +152,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -176,7 +176,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -200,7 +200,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -224,7 +224,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -248,7 +248,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -272,7 +272,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -296,7 +296,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -320,7 +320,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -344,7 +344,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -368,7 +368,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -392,7 +392,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -416,7 +416,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -440,7 +440,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -464,7 +464,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -488,7 +488,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -512,7 +512,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -536,7 +536,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -560,7 +560,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -584,7 +584,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -608,7 +608,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -632,7 +632,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -656,7 +656,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -680,7 +680,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -704,7 +704,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -728,7 +728,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -752,7 +752,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -776,7 +776,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -800,7 +800,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -824,7 +824,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -848,7 +848,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_safe_global_bridges",
           "summary": "Focused 12.0.7 safe-global bridge test exercises this API contract.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -872,7 +872,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -896,7 +896,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -920,7 +920,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -944,7 +944,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -968,7 +968,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -992,7 +992,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1016,7 +1016,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1040,7 +1040,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1064,7 +1064,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1088,7 +1088,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1112,7 +1112,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1136,7 +1136,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1160,7 +1160,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1184,7 +1184,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1208,7 +1208,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1232,7 +1232,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1256,7 +1256,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1280,7 +1280,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1304,7 +1304,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1328,7 +1328,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1352,7 +1352,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1376,7 +1376,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1400,7 +1400,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1424,7 +1424,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1448,7 +1448,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1472,7 +1472,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1496,7 +1496,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1520,7 +1520,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1544,7 +1544,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1568,7 +1568,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1592,7 +1592,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1616,7 +1616,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1640,7 +1640,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1664,7 +1664,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1688,7 +1688,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1712,7 +1712,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
           "summary": "Focused 12.0.7 duration test exercises this exact modeled method or its unreachable stale-object family.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1736,7 +1736,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this event successfully.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1760,7 +1760,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this event successfully.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1928,7 +1928,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1952,7 +1952,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -1976,7 +1976,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2000,7 +2000,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2024,7 +2024,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2048,7 +2048,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2072,7 +2072,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2096,7 +2096,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2120,7 +2120,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2144,7 +2144,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2168,7 +2168,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2192,7 +2192,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2216,7 +2216,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2240,7 +2240,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies method availability.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2264,7 +2264,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2288,7 +2288,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2312,7 +2312,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2336,7 +2336,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2360,7 +2360,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2384,7 +2384,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2408,7 +2408,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2432,7 +2432,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2456,7 +2456,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2480,7 +2480,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2504,7 +2504,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2528,7 +2528,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2552,7 +2552,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2576,7 +2576,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2600,7 +2600,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 event-surface test registers this changed event.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2624,7 +2624,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2648,7 +2648,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the retained compatibility function.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2672,7 +2672,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the retained compatibility function.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2696,7 +2696,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the retained compatibility function.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2720,7 +2720,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2744,7 +2744,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2768,7 +2768,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2792,7 +2792,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2816,7 +2816,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2840,7 +2840,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2864,7 +2864,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2888,7 +2888,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2912,7 +2912,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the retained compatibility function.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2936,7 +2936,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2960,7 +2960,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the retained compatibility function.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -2984,7 +2984,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the retained compatibility function.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -3008,7 +3008,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_removal_and_event_surface",
           "summary": "Focused 12.0.7 removal-surface test records the symbol absent at initialization.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -3032,7 +3032,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies the retained Minimap method.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -3056,7 +3056,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies the retained Minimap method.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -3080,7 +3080,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies the retained Minimap method.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -3104,7 +3104,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies the retained Minimap method.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -3128,7 +3128,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies the retained Minimap method.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
@@ -3152,7 +3152,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_widget_compatibility_surface",
           "summary": "Focused 12.0.7 widget compatibility test verifies the retained Minimap method.",
-          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
         }
       ],
       "tests": [
