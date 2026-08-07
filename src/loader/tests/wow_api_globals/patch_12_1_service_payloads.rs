@@ -3,6 +3,13 @@
 use super::super::*;
 
 #[cfg(feature = "retail-12-1-0")]
+use crate::lua_api::state::{
+    PlayerChoiceInfo, PlayerChoiceOptionButtonInfo, PlayerChoiceOptionInfo,
+    PlayerChoiceOptionRewardInfo, PlayerChoiceRewardCurrencyInfo, PlayerChoiceRewardItemInfo,
+    PlayerChoiceRewardReputationInfo,
+};
+
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_pet_and_lfg_payloads() {
     let env = WowLuaEnv::new().unwrap();
@@ -32,6 +39,124 @@ fn test_patch_12_1_pet_and_lfg_payloads() {
         .unwrap();
 
     assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn test_patch_12_1_player_choice_payload_and_mutator_intent() {
+    let env = WowLuaEnv::new().unwrap();
+    let default_result: String = env
+        .eval(
+            r#"
+            if type(C_PlayerChoice) ~= "table" then return "namespace" end
+            if C_PlayerChoice.GetCurrentPlayerChoiceInfo() ~= nil then return "default-info" end
+            if C_PlayerChoice.GetNumRerolls() ~= 0 then return "default-rerolls" end
+            if C_PlayerChoice.GetRemainingTime() ~= nil then return "default-time" end
+            if C_PlayerChoice.IsWaitingForPlayerChoiceResponse() ~= false then return "default-waiting" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(default_result, "ok");
+
+    env.state().borrow_mut().player_choice.current = Some(PlayerChoiceInfo {
+        object_guid: "Creature-0-0000-0000-00000-12345-0000000000".into(),
+        choice_id: 42,
+        question_text: "Choose your path".into(),
+        pending_choice_text: "Waiting".into(),
+        ui_texture_kit: "playerchoice-test".into(),
+        hide_warboard_header: false,
+        keep_open_after_choice: true,
+        show_choices_as_list: true,
+        requires_selection: true,
+        show_choices_as_grid: false,
+        options: vec![PlayerChoiceOptionInfo {
+            id: 7,
+            description: "Take the reward".into(),
+            header: "Reward".into(),
+            choice_art_id: 99,
+            desaturated_art: false,
+            disabled_option: false,
+            has_rewards: true,
+            reward_info: PlayerChoiceOptionRewardInfo {
+                currency_rewards: vec![PlayerChoiceRewardCurrencyInfo {
+                    currency_id: 2003,
+                    name: "Dragon Isles Supplies".into(),
+                    currency_texture: 463446,
+                    quantity: 25,
+                    is_currency_container: false,
+                }],
+                item_rewards: vec![PlayerChoiceRewardItemInfo {
+                    item_id: 19019,
+                    name: "Thunderfury".into(),
+                    quantity: 1,
+                }],
+                reputation_rewards: vec![PlayerChoiceRewardReputationInfo {
+                    faction_id: 72,
+                    quantity: 100,
+                }],
+            },
+            ui_texture_kit: "playerchoice-option".into(),
+            max_stacks: 1,
+            buttons: vec![PlayerChoiceOptionButtonInfo {
+                id: 7,
+                text: "Select".into(),
+                disabled: false,
+                show_checkmark: true,
+                hide_button_show_text: false,
+                selected: true,
+                confirmation: Some("Confirm".into()),
+                tooltip: Some("Choose this reward".into()),
+                reward_quest_id: Some(70000),
+                sound_kit_id: Some(12867),
+                list_text: Some("Reward list entry".into()),
+            }],
+            widget_set_id: Some(55),
+            spell_id: Some(642),
+            rarity: Some(3),
+            type_art_id: Some(12),
+            header_icon_atlas_element: Some("playerchoice-icon".into()),
+            sub_header: Some("Epic".into()),
+            consolidate_widgets: true,
+        }],
+        sound_kit_id: Some(100),
+        close_ui_sound_kit_id: Some(101),
+    });
+    {
+        let mut state = env.state().borrow_mut();
+        state.player_choice.num_rerolls = 2;
+        state.player_choice.remaining_time = Some(30.5);
+        state.player_choice.waiting_for_response = true;
+    }
+
+    let result: String = env
+        .eval(
+            r#"
+            local info = C_PlayerChoice.GetCurrentPlayerChoiceInfo()
+            if type(info) ~= "table" or info.choiceID ~= 42 or info.objectGUID == nil then return "info" end
+            if info.questionText ~= "Choose your path" or info.keepOpenAfterChoice ~= true then return "info-fields" end
+            local option = info.options[1]
+            if option.id ~= 7 or option.choiceArtID ~= 99 or option.rarity ~= 3 then return "option" end
+            if option.buttons[1].text ~= "Select" or option.buttons[1].selected ~= true then return "button" end
+            if option.rewardInfo.currencyRewards[1].quantity ~= 25 then return "currency" end
+            if option.rewardInfo.itemRewards[1].itemId ~= 19019 then return "item" end
+            if option.rewardInfo.repRewards[1].factionId ~= 72 then return "reputation" end
+            if C_PlayerChoice.GetNumRerolls() ~= 2 then return "rerolls" end
+            if C_PlayerChoice.GetRemainingTime() ~= 30.5 then return "time" end
+            if C_PlayerChoice.IsWaitingForPlayerChoiceResponse() ~= true then return "waiting" end
+            C_PlayerChoice.SendPlayerChoiceResponse(7)
+            C_PlayerChoice.RequestRerollPlayerChoice()
+            C_PlayerChoice.OnUIClosed()
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+
+    let state = env.state().borrow();
+    assert_eq!(state.player_choice.last_response_id, Some(7));
+    assert!(state.player_choice.reroll_requested);
+    assert!(state.player_choice.ui_closed);
 }
 
 #[cfg(feature = "retail-12-1-0")]

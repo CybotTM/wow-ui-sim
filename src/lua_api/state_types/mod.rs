@@ -7,6 +7,7 @@ pub mod character_world;
 pub mod collections;
 pub mod crafting;
 pub mod mythic_plus_scenario;
+pub mod player_choice;
 pub mod pvp;
 pub mod runtime;
 pub mod social;
@@ -25,6 +26,7 @@ pub use mythic_plus_scenario::{
     DeathRecapEntry, KillingBlowInfo, MythicPlusAffix, MythicPlusRun, MythicPlusState,
     MythicPlusWeeklyBest, ScenarioState, ScenarioStep,
 };
+pub use player_choice::*;
 pub use pvp::*;
 pub use runtime::*;
 pub use social::*;

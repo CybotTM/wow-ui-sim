@@ -180,6 +180,7 @@ macro_rules! build_empty_sim_state {
             modifier_keys: ModifierKeys::default(),
             game_rules: GameRulesState::default(),
             discord: DiscordState::default(),
+            player_choice: PlayerChoiceState::default(),
             housing_service_enabled: true,
             housing: HousingState::default(),
             pet_battles: PetBattleState::default(),
@@ -364,10 +365,12 @@ pub use super::state_types::{
     LfgRoleSelection, LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect,
     MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,
     MythicPlusRatingSummary, MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess,
-    OwnedAuction, PendingTimer, PlayerState, PlayerXpState, PvpHonorState,
-    SEEDED_LOCAL_CHARACTER_GUID, SEEDED_LOCAL_CHARACTER_NAME, ScenarioState, ScenarioStep,
-    SecondaryPowerState, SocialFriend, SummonRequestState, TokenAuctionInfo, WorldState,
-    WowTokenState,
+    OwnedAuction, PendingTimer, PlayerChoiceInfo, PlayerChoiceOptionButtonInfo,
+    PlayerChoiceOptionInfo, PlayerChoiceOptionRewardInfo, PlayerChoiceRewardCurrencyInfo,
+    PlayerChoiceRewardItemInfo, PlayerChoiceRewardReputationInfo, PlayerChoiceState, PlayerState,
+    PlayerXpState, PvpHonorState, SEEDED_LOCAL_CHARACTER_GUID, SEEDED_LOCAL_CHARACTER_NAME,
+    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState,
+    TokenAuctionInfo, WorldState, WowTokenState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 

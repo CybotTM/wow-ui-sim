@@ -166,6 +166,7 @@ pub struct SimState {
     pub mouse_buttons: MouseButtons,
     pub game_rules: GameRulesState,
     pub discord: DiscordState,
+    pub player_choice: PlayerChoiceState,
     pub housing_service_enabled: bool,
     pub housing: HousingState,
     pub pet_battles: PetBattleState,
