@@ -38,16 +38,25 @@
       "id": "changed:AttributeDispatchProbe.ScalarRepeat",
       "symbol": "AttributeDispatchProbe.ScalarRepeat",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "attributes",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/protected_attribute_enforcement.rs::unchanged_scalar_attribute_refires_on_attribute_changed",
+          "summary": "Repeated scalar and explicit-false SetAttribute dispatch is directly regression-tested.",
+          "source_hash": "d8bd52c7fd19dfa52f87f9d145d3a42ba6c8bd17849b24f6f75acd091531e50b"
+        }
+      ],
+      "tests": [
+        "tests/protected_attribute_enforcement.rs::unchanged_scalar_attribute_refires_on_attribute_changed"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1de9cedea",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Repeated scalar and explicit-false SetAttribute dispatch is directly regression-tested."
     },
     {
       "id": "changed:AttributeDispatchProbe.PanelPulse",
@@ -68,16 +77,25 @@
       "id": "changed:CoreBehaviorProbe.ForbiddenState",
       "symbol": "CoreBehaviorProbe.ForbiddenState",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "forbidden frames",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/protected_frame_enforcement.rs::test_insecure_addon_created_normal_frame_set_forbidden_is_noop",
+          "summary": "Normal addon-frame SetForbidden behavior is directly regression-tested.",
+          "source_hash": "fcb2da408a6b70854570785bcde98f8f3a72691071d24d12bd5313013b5aad56"
+        }
+      ],
+      "tests": [
+        "tests/protected_frame_enforcement.rs::test_insecure_addon_created_normal_frame_set_forbidden_is_noop"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "0afd8e1bc",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Normal addon-frame SetForbidden behavior is directly regression-tested."
     },
     {
       "id": "changed:CoreBehaviorProbe.ForbiddenConstructor",
@@ -98,61 +116,98 @@
       "id": "changed:CoreBehaviorProbe.UnitEventFilter",
       "symbol": "CoreBehaviorProbe.UnitEventFilter",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "events",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/admin_event_api.rs::test_register_unit_event_reports_registered_unit",
+          "summary": "Valid and invalid RegisterUnitEvent filter behavior is directly regression-tested.",
+          "source_hash": "b55f1b3c908cbb1e3b84bfa0cb9a04ad6b083d3da85bb7520481476cc653a0e3"
+        }
+      ],
+      "tests": [
+        "tests/admin_event_api.rs::test_register_unit_event_reports_registered_unit"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "27771a531",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Valid and invalid RegisterUnitEvent filter behavior is directly regression-tested."
     },
     {
       "id": "changed:CoreBehaviorProbe.AttributeWildcardFalse",
       "symbol": "CoreBehaviorProbe.AttributeWildcardFalse",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "attributes",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/protected_attribute_enforcement.rs::get_attribute_wildcard_lookup_preserves_explicit_false",
+          "summary": "Wildcard attribute lookup preserving explicit false is directly regression-tested.",
+          "source_hash": "d8bd52c7fd19dfa52f87f9d145d3a42ba6c8bd17849b24f6f75acd091531e50b"
+        }
+      ],
+      "tests": [
+        "tests/protected_attribute_enforcement.rs::get_attribute_wildcard_lookup_preserves_explicit_false"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6a2c5bbb3",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Wildcard attribute lookup preserving explicit false is directly regression-tested."
     },
     {
       "id": "changed:CoreBehaviorProbe.AttributeWildcardValues",
       "symbol": "CoreBehaviorProbe.AttributeWildcardValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "attributes",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/protected_attribute_enforcement.rs::get_attribute_wildcard_lookup_preserves_explicit_false",
+          "summary": "Wildcard true/string values and lookup arity are directly regression-tested.",
+          "source_hash": "d8bd52c7fd19dfa52f87f9d145d3a42ba6c8bd17849b24f6f75acd091531e50b"
+        }
+      ],
+      "tests": [
+        "tests/protected_attribute_enforcement.rs::get_attribute_wildcard_lookup_preserves_explicit_false"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6a2c5bbb3",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Wildcard true/string values and lookup arity are directly regression-tested."
     },
     {
       "id": "changed:CoreBehaviorProbe.RaiseLowerLevel",
       "symbol": "CoreBehaviorProbe.RaiseLowerLevel",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "frame ordering",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/frame_level.rs::test_raise_lower_do_not_change_lua_visible_raised_frame_level",
+          "summary": "Raise/Lower tie ordering and raw frame-level boundaries are directly regression-tested.",
+          "source_hash": "9b014aa7a3b8e8c42d7518e438530e6db7f8ddfecc221348790a03d7e5de58e2"
+        }
+      ],
+      "tests": [
+        "tests/frame_level.rs::test_raise_lower_do_not_change_lua_visible_raised_frame_level",
+        "tests/frame_level.rs::test_raise_lower_do_not_cross_raw_frame_levels_for_hit_order"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "24ab86fcd",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Raise/Lower tie ordering and raw frame-level boundaries are directly regression-tested."
     },
     {
       "id": "changed:CoreBehaviorProbe.MouseFocusOrder",
@@ -188,16 +243,25 @@
       "id": "changed:FrameIdentityProbe.IdentitySlot",
       "symbol": "FrameIdentityProbe.IdentitySlot",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "identity",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/frame_table_iteration.rs::frame_pairs_enumerates_identity_and_array_slots",
+          "summary": "Frame slot zero identity userdata is directly regression-tested.",
+          "source_hash": "84de4c69b748525ff9a77686491b5dcf83e8d0fc4d922119b9f1c7e2605b5a8f"
+        }
+      ],
+      "tests": [
+        "tests/frame_table_iteration.rs::frame_pairs_enumerates_identity_and_array_slots"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b3f579f70",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Frame slot zero identity userdata is directly regression-tested."
     },
     {
       "id": "changed:FrameIdentityProbe.SurrogateDispatch",
@@ -218,31 +282,50 @@
       "id": "changed:FrameIdentityProbe.DuplicateFreshness",
       "symbol": "FrameIdentityProbe.DuplicateFreshness",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "identity",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/globals_legacy.rs::duplicate_named_frame_gets_fresh_identity_and_fields",
+          "summary": "Duplicate named-frame identity and custom-field freshness is directly regression-tested.",
+          "source_hash": "c37c15152c0ceb59bd0a24b4e980ccb982c6d6c6ac292ecab9a7f4f8579e75f6"
+        }
+      ],
+      "tests": [
+        "tests/globals_legacy.rs::duplicate_named_frame_gets_fresh_identity_and_fields"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "8f4f885c3",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Duplicate named-frame identity and custom-field freshness is directly regression-tested."
     },
     {
       "id": "changed:HookScriptBindingProbe.IndexedHooks",
       "symbol": "HookScriptBindingProbe.IndexedHooks",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "scripts",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/hook_script.rs::test_hook_script_rejects_pre_and_post_binding_slots",
+          "summary": "Indexed HookScript binding rules and hook ordering are directly regression-tested.",
+          "source_hash": "12fc97b39717a4823b363f5bd92965f85a7a7af216755236f583921d5a0e09f9"
+        }
+      ],
+      "tests": [
+        "tests/hook_script.rs::test_hook_script_rejects_pre_and_post_binding_slots",
+        "tests/hook_script.rs::test_multiple_hook_scripts_chain_in_order"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "0afd8e1bc",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Indexed HookScript binding rules and hook ordering are directly regression-tested."
     },
     {
       "id": "changed:IsProtectedProbe.LegacySetters",
@@ -308,16 +391,25 @@
       "id": "changed:JustifyProbe.ButtonText",
       "symbol": "JustifyProbe.ButtonText",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/xml_text_region_defaults.rs::button_text_without_anchors_uses_justify_h_default_point",
+          "summary": "Implicit ButtonText default points and justification are directly regression-tested.",
+          "source_hash": "29de2e31b1930ffae48b368852a4e0e6470b19b46e1389a8e43b699c1a47897d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/xml_text_region_defaults.rs::button_text_without_anchors_uses_justify_h_default_point"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "f612e3e3b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Implicit ButtonText default points and justification are directly regression-tested."
     },
     {
       "id": "changed:JustifyProbe.SizeVariants",
@@ -473,76 +565,127 @@
       "id": "changed:TextureSetTextureProbe.PathFdid",
       "symbol": "TextureSetTextureProbe.PathFdid",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "texture",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/methods_texture.rs::test_set_texture_known_path_returns_fdid_and_no_args_clear",
+          "summary": "Known texture path resolution to retained FDID 130828 is directly regression-tested.",
+          "source_hash": "419c30bfd97df89dbc9bb960de00690f769d6ab60e35354a3da9938a0e78361c"
+        }
+      ],
+      "tests": [
+        "tests/methods_texture.rs::test_set_texture_known_path_returns_fdid_and_no_args_clear"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "492041ac0",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Known texture path resolution to retained FDID 130828 is directly regression-tested."
     },
     {
       "id": "changed:TextureSetTextureProbe.Clear",
       "symbol": "TextureSetTextureProbe.Clear",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "texture",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/methods_texture.rs::test_set_texture_known_path_returns_fdid_and_no_args_clear",
+          "summary": "Nil and no-argument texture clearing are directly regression-tested.",
+          "source_hash": "419c30bfd97df89dbc9bb960de00690f769d6ab60e35354a3da9938a0e78361c"
+        }
+      ],
+      "tests": [
+        "tests/methods_texture.rs::test_set_texture_known_path_returns_fdid_and_no_args_clear",
+        "tests/methods_texture.rs::test_set_texture_nil_clears"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "492041ac0",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Nil and no-argument texture clearing are directly regression-tested."
     },
     {
       "id": "changed:XmlFrameLevelProbe.BareAndFixed",
       "symbol": "XmlFrameLevelProbe.BareAndFixed",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "XML frame level",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/xml_frame_strata.rs::test_xml_frame_level_uses_parent_relative_offset",
+          "summary": "Bare absolute and fixed XML frame-level behavior is directly regression-tested.",
+          "source_hash": "ca1c1384750ea6d2f73f61fa16ef199c789a5c0b89d4806862fc064afecc7133"
+        }
+      ],
+      "tests": [
+        "tests/xml_frame_strata.rs::test_xml_frame_level_uses_parent_relative_offset",
+        "tests/xml_frame_strata.rs::test_xml_fixed_frame_level_stops_parent_propagation_after_initial_offset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "11543bc5c",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Bare absolute and fixed XML frame-level behavior is directly regression-tested."
     },
     {
       "id": "changed:XmlFrameLevelProbe.ParentReparent",
       "symbol": "XmlFrameLevelProbe.ParentReparent",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "XML frame level",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/xml_frame_strata.rs::test_xml_frame_level_uses_parent_relative_offset",
+          "summary": "Parent-level propagation and fixed/non-fixed reparent behavior are directly regression-tested.",
+          "source_hash": "ca1c1384750ea6d2f73f61fa16ef199c789a5c0b89d4806862fc064afecc7133"
+        }
+      ],
+      "tests": [
+        "tests/xml_frame_strata.rs::test_xml_frame_level_uses_parent_relative_offset",
+        "tests/frame_level.rs::test_fixed_frame_level_preserved_on_reparent",
+        "tests/frame_level.rs::test_frame_level_recalc_after_nil_reparent"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "11543bc5c",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Parent-level propagation and fixed/non-fixed reparent behavior are directly regression-tested."
     },
     {
       "id": "changed:XmlFrameLevelProbe.Flags",
       "symbol": "XmlFrameLevelProbe.Flags",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "XML frame level",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/xml_frame_strata.rs::test_xml_frame_level_uses_parent_relative_offset",
+          "summary": "Fixed and use-parent-level query behavior is directly regression-tested.",
+          "source_hash": "ca1c1384750ea6d2f73f61fa16ef199c789a5c0b89d4806862fc064afecc7133"
+        }
+      ],
+      "tests": [
+        "tests/xml_frame_strata.rs::test_xml_frame_level_uses_parent_relative_offset",
+        "tests/xml_frame_strata.rs::test_xml_fixed_frame_level_stops_parent_propagation_after_initial_offset",
+        "tests/xml_frame_strata.rs::test_xml_use_parent_level_overrides_inherited_frame_level"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "11543bc5c",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Fixed and use-parent-level query behavior is directly regression-tested."
     },
     {
       "id": "changed:XmlFrameLevelProbe.RawCaptureProvenance",

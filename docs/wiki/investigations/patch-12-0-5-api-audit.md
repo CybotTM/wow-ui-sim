@@ -10,13 +10,13 @@ The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and t
 
 Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptProbe`, `AttributeDispatchProbe`, `CoreBehaviorProbe`, `DevToolsDumpProbe`, `FrameIdentityProbe`, `HookScriptBindingProbe`, `IsProtectedProbe`, `JustifyProbe`, `ProtectedRetailProbe`, `ScaleEventProbe`, `SetAtlasProbe`, `StoreForbiddenProbe`, and `TextureSetTextureProbe`. `XmlFrameLevelProbe` findings are documented, but its raw capture was not retained.
 
-The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Prior documentation grouped them as 30 resolved, four best-effort, and four unresolved, while all 38 machine rows remain neutral/untriaged until item-specific evidence is attached.
+The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current machine classification is **15 best-effort, 0 implemented, 0 exception-requested, and 23 untriaged**; prior documented states remain separate until exact row evidence exists.
 
 ### Itemized probe status
 
-**Implemented with focused regression coverage:** animation handler matrix/rejection (`AnimScriptProbe`); unchanged scalar attribute dispatch (`AttributeDispatchProbe`); retail forbidden-frame behavior, invalid unit-event filters, wildcard false attributes and arity, Raise/Lower ordering (`CoreBehaviorProbe`); frame iteration/dump identity, `[0]` surrogate dispatch, duplicate-frame freshness (`DevToolsDumpProbe` / `FrameIdentityProbe`); HookScript binding validation/chaining; absent legacy `Protect`/`SetProtected` methods plus normal-frame `SetForbidden` no-op; XML FontString justify/default anchors; no-arg/invalid `SetAtlas`; XML frame-level propagation; ordered display/scale event pairs.
+**Machine-classified with direct behavioral evidence:** repeated scalar/false attribute dispatch; normal-frame forbidden behavior; valid/invalid unit-event filters; wildcard false/true/string attributes; Raise/Lower level boundaries; frame identity slot and duplicate-frame freshness; indexed HookScript rules/order; implicit ButtonText anchors; texture path/FDID and clear behavior; and bare/fixed/parent/reparent XML frame-level semantics and flags.
 
-**Best-effort with existing subsystem coverage:** `ShowUIPanel` pulse/`CloseAllWindows`; `GetMouseFoci`/`GetMouseFocus` live return shape; protected-template descendant/anchor observations; and secure-template/Store observations. These four subfindings retain explicit best-effort status because their subsystem coverage is not an exact focused replay of the retained probe contract.
+**Still neutral pending exact focused proof:** animation handler matrix; panel pulse/close lifecycle; forbidden-constructor enumeration; mouse-focus order; DevTools dump metadata; surrogate `[1]` rejection; exact protected-template descendant/anchor states; generic FontString/EditBox/MessageFrame geometry; Store protection; complete display/CVAR ordering; same-size transitions; and full invalid-atlas argument coverage. Existing subsystem tests are not substituted for the missing probe behavior.
 
 ### Open probe gaps and exception candidates
 
@@ -69,7 +69,7 @@ The remaining generic defaults are intentionally outside this 12.0.5 audit unles
 
 ### Audit state
 
-This audit remains open: remaining fidelity gaps are pending exception requests above. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
+This audit remains open with 23 untriaged rows. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
 
 ## Sources
 

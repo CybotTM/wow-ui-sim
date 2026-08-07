@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | First evidence-backed 12.0.5 probe classifications
+
+Classified 15 probe rows as best-effort only where focused behavioral tests directly exercise the recorded contract: scalar attributes, forbidden state, unit-event filters, wildcard attributes, frame ordering/identity, HookScript bindings, ButtonText anchors, texture path/clear behavior, and XML frame-level semantics. Twenty-three rows remain neutral; broad subsystem or register-shape tests are not accepted as probe evidence.
+
 ## [2026-08-07] investigation | 12.0.7 duration proof and conservative status correction
 
 Extracted a focused duration clock/object/text-binding regression that directly exercises the modeled method families and verifies the stale formatting-options/raw-value factories remain unavailable. Corrected five overclaimed additive rows to best-effort, classified `ModelSceneActorBase.GetModelUnitGUID` as an unapproved impossible no-3D exception candidate, and pinned the register at 29 implemented, 101 best-effort, one exception-requested, and zero untriaged rows.
