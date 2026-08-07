@@ -45,7 +45,7 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `src/bin/wow_cli/audit_api/patch_manifest.rs` — generic added/changed/removed schema, repository validation, completion gates, actual Lua-state observation primitive, initialization generator, observation comparison, and rendering.
 - `src/bin/wow_cli/audit_api/patch_source_index.rs` — per-file direct-publication candidates, dynamic-publication ambiguity records, all-source tree indexing, and active-profile TOC/XML reachability indexing.
 - `data/patch-api/sources/12.1-framexml.json` — immutable raw 12.1 direction-array snapshot.
-- `data/patch-api/sources/12.1-behaviors.json` — 53 independently testable non-FrameXML behavior boundaries, grouped by the existing broader audit families; candidate disposition remains separate from machine status.
+- `data/patch-api/sources/12.1-behaviors.json` — 54 independently testable non-FrameXML behavior boundaries, grouped by the existing broader audit families; candidate disposition remains separate from machine status.
 - `data/patch-api/sources/12.0.7-register.json` — categorized raw register for the 131 named 12.0.7 occurrences; changed rows keep a normalized symbol plus exact detail, while unresolved unnamed CVar claims remain metadata rather than invented rows.
 - `data/patch-api/12.0.7.json` — 131-row occurrence manifest: 29 implemented, 101 best-effort, one unapproved impossible exception candidate, and no untriaged rows.
 - `docs/generated/patch-12-0-7-checklist.md` — generated occurrence checklist.
@@ -57,9 +57,9 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `data/patch-api/12.1-framexml.json` — complete 432-row FrameXML symbol audit register.
 - `docs/generated/patch-12-1-framexml-checklist.md` — generated FrameXML checklist.
 - `docs/wiki/investigations/patch-12-1-framexml-symbol-inventory.md` — FrameXML human inventory whose symbol/status columns are drift-checked.
-- `data/patch-api/12.1-behaviors.json` — 54-row broader behavior manifest: 30 direct-test-backed best-effort rows and 24 untriaged rows.
+- `data/patch-api/12.1-behaviors.json` — 54-row broader behavior manifest: 30 direct-test-backed best-effort rows and 24 item-specific exception requests.
 - `docs/generated/patch-12-1-behavior-checklist.md` — generated broader behavior checklist.
-- `docs/wiki/investigations/patch-12-1-behavior-inventory.md` — broader behavior inventory with 30 direct-test-backed best-effort rows, 24 untriaged rows, and candidate disposition of 30 safe best-effort, 21 unsafe, and 3 impossible.
+- `docs/wiki/investigations/patch-12-1-behavior-inventory.md` — broader behavior inventory with 30 direct-test-backed best-effort rows, 24 item-specific exception requests, and candidate disposition of 30 safe best-effort, 21 unsafe, and 3 impossible; no exception is approved.
 
 ## Tests asserting this spec
 

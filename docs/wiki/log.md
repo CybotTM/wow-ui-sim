@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Itemize remaining 12.1 exceptions
+
+Converted all 24 remaining 12.1 broader behavior rows to item-specific `exception-requested` entries: 21 unsafe and 3 impossible. Each row has current repository source evidence, empty tests/assertions, `commit: null`, and `approval_id: null`; no exception is approved. The broader register now has 30 best-effort, 24 exception-requested, and 0 untriaged rows.
+
 ## [2026-08-07] investigation | 12.0.5 pending exception register
 
 Converted the five remaining 12.0.5 probe rows to item-specific `exception-requested` entries: three unsafe Store/protection gaps and two impossible window/provenance gaps. Each row has hashed repository evidence, `approval_id: null`, empty tests/assertions, and awaits separate informed approval or new live evidence. The register now has 33 best-effort, 5 exception-requested, and 0 untriaged rows.
