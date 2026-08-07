@@ -440,16 +440,25 @@
       "id": "changed:JustifyProbe.FrameFontStrings",
       "symbol": "JustifyProbe.FrameFontStrings",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/xml_basics_extra.rs::layer_fontstring_without_anchors_uses_justify_h_default_point",
+          "summary": "Unanchored frame-layer FontStrings receive one LEFT, CENTER, or RIGHT parent-relative point selected by justifyH while justifyV does not alter it.",
+          "source_hash": "d83f8d0b8a9299f0efbda70735f0f9db4c741d854b8cddbf11bd2297320e5ad6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/xml_basics_extra.rs::layer_fontstring_without_anchors_uses_justify_h_default_point"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "426f428f5",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained unanchored frame-layer justifyH/justifyV matrix is directly regression-tested."
     },
     {
       "id": "changed:JustifyProbe.ButtonText",

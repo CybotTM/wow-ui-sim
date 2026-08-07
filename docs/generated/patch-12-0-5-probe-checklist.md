@@ -16,7 +16,7 @@
 16. [best-effort] `changed:IsProtectedProbe.LegacySetters` — behavioral
 17. [best-effort] `changed:IsProtectedProbe.SecureTemplate` — behavioral
 18. [untriaged] `changed:IsProtectedProbe.DescendantAnchorPropagation` — untriaged
-19. [untriaged] `changed:JustifyProbe.FrameFontStrings` — untriaged
+19. [best-effort] `changed:JustifyProbe.FrameFontStrings` — behavioral
 20. [best-effort] `changed:JustifyProbe.ButtonText` — behavioral
 21. [untriaged] `changed:JustifyProbe.SizeVariants` — untriaged
 22. [untriaged] `changed:JustifyProbe.ExplicitAnchors` — untriaged

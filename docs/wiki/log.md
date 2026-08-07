@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Frame-layer FontString anchor evidence
+
+Mapped the retained unanchored frame-layer `justifyH`/`justifyV` matrix to its exact regression test. The 12.0.5 register now contains 26 best-effort and 12 untriaged rows.
+
 ## [2026-08-07] investigation | Panel pulse and DevTools dump replays
 
 Added exact two-panel `ShowUIPanel`/`CloseAllWindows` lifecycle proof and a loaded-Blizzard-UI `DevTools_Dump` frame-array metadata replay. The 12.0.5 register now contains 25 best-effort and 13 untriaged rows.
