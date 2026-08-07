@@ -595,6 +595,45 @@ fn show_and_hide_ui_panel_toggle_registered_frame_visibility() {
 }
 
 #[test]
+fn repeated_show_ui_panel_pulse_closes_active_panel_stack() {
+    test_timeout! {
+        let env = setup_env();
+        let result: (bool, bool, bool, bool, bool, bool) = env.eval(r#"
+            local first = CreateFrame("Frame", "AttributeDispatchPanelPulseFirst", UIParent)
+            first:SetSize(300, 400)
+            first:Hide()
+            RegisterUIPanel(first, { area = "center", pushable = 0, whileDead = 1 })
+
+            local second = CreateFrame("Frame", "AttributeDispatchPanelPulseSecond", UIParent)
+            second:SetSize(300, 400)
+            second:Hide()
+            RegisterUIPanel(second, { area = "center", pushable = 0, whileDead = 1 })
+
+            ShowUIPanel(first)
+            local firstShownAfterFirst = first:IsShown()
+            local secondShownAfterFirst = second:IsShown()
+
+            ShowUIPanel(second)
+            local firstShownAfterSecond = first:IsShown()
+            local secondShownAfterSecond = second:IsShown()
+
+            CloseAllWindows()
+            local firstShownAfterCloseAll = first:IsShown()
+            local secondShownAfterCloseAll = second:IsShown()
+
+            return firstShownAfterFirst, secondShownAfterFirst,
+                firstShownAfterSecond, secondShownAfterSecond,
+                firstShownAfterCloseAll, secondShownAfterCloseAll
+        "#).unwrap();
+        assert_eq!(
+            result,
+            (true, false, false, true, false, false),
+            "repeated ShowUIPanel calls should replace the center panel and CloseAllWindows should hide both panels"
+        );
+    }
+}
+
+#[test]
 fn show_ui_panel_is_function() {
     test_timeout! {
         let env = setup_env();
