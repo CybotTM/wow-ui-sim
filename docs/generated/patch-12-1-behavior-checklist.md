@@ -42,9 +42,9 @@
 42. [best-effort] `changed:Patch12_1.Service.BattleNet.TitleFriendPayload` — behavioral
 43. [best-effort] `changed:Patch12_1.Service.BattleNet.TitleFriendUnitInvite` — behavioral
 44. [best-effort] `changed:Patch12_1.Service.EncounterJournal.DifficultyPayload` — behavioral
-45. [untriaged] `changed:Patch12_1.Service.Cooldown.Payloads` — untriaged
-46. [untriaged] `changed:Patch12_1.Service.Pet.Payloads` — untriaged
-47. [untriaged] `changed:Patch12_1.Service.LFG.Payloads` — untriaged
+45. [best-effort] `changed:Patch12_1.Service.Cooldown.Payloads` — behavioral
+46. [best-effort] `changed:Patch12_1.Service.Pet.Payloads` — behavioral
+47. [best-effort] `changed:Patch12_1.Service.LFG.Payloads` — behavioral
 48. [untriaged] `changed:Patch12_1.Service.PlayerChoice.Payloads` — untriaged
 49. [untriaged] `changed:Patch12_1.Service.TieredAura.Payloads` — untriaged
 50. [untriaged] `changed:Patch12_1.Service.PrivateAura.Payloads` — untriaged

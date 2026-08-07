@@ -21,7 +21,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 Resolution explains the evidence outcome: vendor-present, simulator compatibility behavior, test-backed behavioral behavior, load-on-demand ownership, removal, cross-flavor contamination, stale/reversed snapshot data, unsafe behavior, or impossible behavior. `behavioral` is for contracts that are not simple Lua-path presence checks, such as stateful globals, event registration, widget methods, CVars, and probe outcomes: it requires hashed test evidence plus a focused named test, permits implemented/best-effort status, and forbids fabricated Lua-path assertions. Source owner and the addon passed to `LoadAddOn` are separate fields; LoD lifecycle assertions must match the declared addon. Only `unsafe` and `impossible` may use `exception-requested`.
 
-Current 12.1 FrameXML totals are **1 implemented, 431 best-effort, 0 exception-requested, and 0 untriaged**. The separate broader behavior register is **0 implemented, 18 best-effort, 0 exception-requested, and 36 untriaged**. The full 12.1 objective remains open.
+Current 12.1 FrameXML totals are **1 implemented, 431 best-effort, 0 exception-requested, and 0 untriaged**. The separate broader behavior register is **0 implemented, 21 best-effort, 0 exception-requested, and 33 untriaged**. The full 12.1 objective remains open.
 
 ### Repository evidence
 

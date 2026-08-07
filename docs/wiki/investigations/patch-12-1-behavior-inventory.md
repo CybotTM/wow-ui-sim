@@ -5,7 +5,7 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 - **Source:** `data/patch-api/sources/12.1-behaviors.json`
 - **Source SHA-256:** `9f0b7de4bd72641eeff6b35e36fd594f6b67dc205df961a63b306c1c9585ea38`
 - **Target:** PTR build `12.1.0`
-- **Rows:** 54 changed behavioral boundaries — 0 implemented, 18 best-effort, 0 exception-requested, 36 untriaged
+- **Rows:** 54 changed behavioral boundaries — 0 implemented, 21 best-effort, 0 exception-requested, 33 untriaged
 - **Candidate split:** 30 safe best-effort, 21 unsafe, 3 impossible
 
 | Symbol | Machine Status | Candidate | Family | Direction | Contract |
@@ -54,9 +54,9 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 | `Patch12_1.Service.BattleNet.TitleFriendPayload` | best-effort | best-effort | Service payloads | changed | Battle.net title-friend custom names, tags, feature flags, and appear-offline state follow the local compatibility model. |
 | `Patch12_1.Service.BattleNet.TitleFriendUnitInvite` | best-effort | best-effort | Service payloads | changed | Battle.net title-friend unit invite eligibility uses a documented deterministic compatibility result. |
 | `Patch12_1.Service.EncounterJournal.DifficultyPayload` | best-effort | best-effort | Service payloads | changed | Encounter Journal base and valid difficulty IDs follow generated instance-data guesses. |
-| `Patch12_1.Service.Cooldown.Payloads` | untriaged | best-effort | Service payloads | changed | Cooldown query structures, secret fields, and update payloads follow a documented compatibility contract. |
-| `Patch12_1.Service.Pet.Payloads` | untriaged | best-effort | Service payloads | changed | Pet-related structures and state payloads follow a documented compatibility contract. |
-| `Patch12_1.Service.LFG.Payloads` | untriaged | best-effort | Service payloads | changed | LFG service-result structures follow a documented compatibility contract. |
+| `Patch12_1.Service.Cooldown.Payloads` | best-effort | best-effort | Service payloads | changed | Cooldown query structures, secret fields, and update payloads follow a documented compatibility contract. |
+| `Patch12_1.Service.Pet.Payloads` | best-effort | best-effort | Service payloads | changed | Pet-related structures and state payloads follow a documented compatibility contract. |
+| `Patch12_1.Service.LFG.Payloads` | best-effort | best-effort | Service payloads | changed | LFG service-result structures follow a documented compatibility contract. |
 | `Patch12_1.Service.PlayerChoice.Payloads` | untriaged | best-effort | Service payloads | changed | Player-choice structures, options, and state payloads follow a documented compatibility contract. |
 | `Patch12_1.Service.TieredAura.Payloads` | untriaged | best-effort | Service payloads | changed | Tiered-aura structures and tier fields follow a documented compatibility contract. |
 | `Patch12_1.Service.PrivateAura.Payloads` | untriaged | unsafe | Service payloads | changed | Private-aura payloads preserve inaccessible and secret structural boundaries. |
@@ -68,9 +68,9 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 18
+- best-effort: 21
 - exception-requested: 0
-- untriaged: 36
+- untriaged: 33
 
 ## Sources
 

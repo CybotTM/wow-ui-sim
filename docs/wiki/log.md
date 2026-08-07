@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Cooldown, pet, and LFG payload classification
+
+Added focused 12.1 payload tests for active/inactive spell cooldowns, seeded/unknown pet species, and seeded/unknown LFG search results. Classified all three local compatibility contracts as best-effort; secret fields and server-backed semantics remain unmodeled. The broader register now has 21 best-effort and 33 untriaged rows.
+
 ## [2026-08-07] investigation | Mouse-focus probe replay
 
 Added a GUI-path replay of the retained two-frame DIALOG scenario. `GetMouseFocus()` and `GetMouseFoci()[1]` both retain the higher raw-level frame before and after `Raise`/`Lower`, then clear when both frames hide. The 12.0.5 register now has 32 best-effort and 6 untriaged rows.

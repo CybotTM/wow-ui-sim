@@ -843,46 +843,73 @@
       "id": "changed:Patch12_1.Service.Cooldown.Payloads",
       "symbol": "Patch12_1.Service.Cooldown.Payloads",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_spell_cooldown_payload",
+          "summary": "Seeded and inactive spell cooldown queries return the modeled start, duration, enabled, active, and rate fields.",
+          "source_hash": "c769754629e0d68024fad28f3b2a672f9eac692bef6fee60b61b32b2a47280d9"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_spell_cooldown_payload"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "16fefe3b5",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "C_Spell.GetSpellCooldown returns a deterministic local cooldown table with startTime, duration, isEnabled, isActive, and modRate; secret-field semantics and update payloads remain unmodeled."
     },
     {
       "id": "changed:Patch12_1.Service.Pet.Payloads",
       "symbol": "Patch12_1.Service.Pet.Payloads",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads",
+          "summary": "Seeded and unknown species queries verify the modeled 12.1 pet information fields and nil boundary.",
+          "source_hash": "c769754629e0d68024fad28f3b2a672f9eac692bef6fee60b61b32b2a47280d9"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "856bd7c6d",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "C_PetJournal.GetPetInfoTableBySpeciesID returns modeled identity, battle, trade, obtainability, decor, and scale fields for seeded pets and nil for unknown species; complete retail ownership and validation semantics remain unmodeled."
     },
     {
       "id": "changed:Patch12_1.Service.LFG.Payloads",
       "symbol": "Patch12_1.Service.LFG.Payloads",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads",
+          "summary": "Seeded and unknown search-result queries verify the modeled LFG identity, activity, size, GUID, and censored fields.",
+          "source_hash": "c769754629e0d68024fad28f3b2a672f9eac692bef6fee60b61b32b2a47280d9"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "856bd7c6d",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "C_LFGList.GetSearchResultInfo returns modeled listing identity, activity IDs, member counts, party GUID, and censored=false for seeded results and nil for unknown IDs; server result and requirement semantics remain unmodeled."
     },
     {
       "id": "changed:Patch12_1.Service.PlayerChoice.Payloads",
