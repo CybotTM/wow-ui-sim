@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Bound 12.0.0 classifications
+
+Classified four `AbbreviateConfig` rows and twelve `UnitHealPrediction` rows as best-effort from bounded, evidence-backed tests. The 12.0.0 register now totals **16 best-effort and 3394 untriaged** (3410 occurrences); these limited-fidelity classifications do not complete the audit or satisfy `--complete`.
+
 ## [2026-08-07] architecture | Document 12.0.0 occurrence payloads
 
 Documented the current 12.0.0 generator/source-register change: categorized occurrence objects may preserve optional typed `before`/`after` payloads containing normalized value and metadata for exact enum, constant, signature, and structure triage. Added/removed/changed and transient lifecycle rows carry the corresponding sides; row identity remains `direction+symbol`, unknown fields remain rejected, and counts/statuses/source SHA are unchanged.
