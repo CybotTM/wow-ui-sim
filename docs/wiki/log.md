@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Duration binding identity split
+
+Split stable Lua-table identity from unknown Blizzard representation fidelity. Focused reference-retention/identity proof classifies lifetime and stable identity as best-effort; exact type/metatable/finalization fidelity remains a separate unsafe candidate. The broader register now has 54 rows: 15 best-effort and 39 untriaged.
+
 ## [2026-08-07] investigation | First 12.1 behavior classifications
 
 Classified 13 broader 12.1 rows only where exact existing tests directly prove the simulator contract: aura-frame creation, DurationTextBinding formatter/color/FontString behavior, Discord state, four housing models, Encounter Journal difficulty guesses, and post-startup strict removal. Forty rows remain untriaged.

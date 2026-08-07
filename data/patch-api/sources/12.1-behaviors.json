@@ -8,9 +8,9 @@
   },
   "candidate_status_totals": {
     "best-effort": 30,
-    "unsafe": 20,
+    "unsafe": 21,
     "impossible": 3,
-    "total": 53
+    "total": 54
   },
   "candidate_states": {
     "best_effort": [
@@ -22,7 +22,7 @@
       "Patch12_1.AuraContainer.ManagedButtonLifecycle",
       "Patch12_1.AuraContainer.TooltipBinding",
       "Patch12_1.DurationTextBinding.Lifetime",
-      "Patch12_1.DurationTextBinding.MetatableIdentity",
+      "Patch12_1.DurationTextBinding.StableIdentity",
       "Patch12_1.DurationTextBinding.Formatter",
       "Patch12_1.DurationTextBinding.ColorCurve",
       "Patch12_1.DurationTextBinding.FontStringUpdate",
@@ -65,7 +65,8 @@
       "Patch12_1.AuraContainer.SecretVisibility",
       "Patch12_1.Service.PrivateAura.Payloads",
       "Patch12_1.StrictRemoval.PreStartupVisibility",
-      "Patch12_1.StrictRemoval.WrapperTiming"
+      "Patch12_1.StrictRemoval.WrapperTiming",
+      "Patch12_1.DurationTextBinding.RepresentationFidelity"
     ],
     "impossible": [
       "Patch12_1.RadialProgress.Constructor",
@@ -241,13 +242,19 @@
       "direction": "changed",
       "category": "DurationTextBinding",
       "symbol": "Patch12_1.DurationTextBinding.Lifetime",
-      "detail": "DurationTextBinding lifetime and ownership follow Blizzard object semantics."
+      "detail": "A binding remains usable while retained by Lua references; exact Blizzard ownership and invalidation semantics remain unproven."
     },
     {
       "direction": "changed",
       "category": "DurationTextBinding",
-      "symbol": "Patch12_1.DurationTextBinding.MetatableIdentity",
-      "detail": "The returned binding has compatible table or userdata identity and method lookup behavior."
+      "symbol": "Patch12_1.DurationTextBinding.StableIdentity",
+      "detail": "Factory calls return distinct Lua tables with stable object identity and method lookup while referenced."
+    },
+    {
+      "direction": "changed",
+      "category": "DurationTextBinding",
+      "symbol": "Patch12_1.DurationTextBinding.RepresentationFidelity",
+      "detail": "The binding type, metatable, userdata representation, finalization, and ownership match Blizzard exactly."
     },
     {
       "direction": "changed",

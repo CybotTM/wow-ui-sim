@@ -3,10 +3,10 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 
 ## Content
 - **Source:** `data/patch-api/sources/12.1-behaviors.json`
-- **Source SHA-256:** `51ff0c88bd0064c9e8752be60a5d906f89c721acac143b905fdb0013574e6e93`
+- **Source SHA-256:** `9f0b7de4bd72641eeff6b35e36fd594f6b67dc205df961a63b306c1c9585ea38`
 - **Target:** PTR build `12.1.0`
-- **Rows:** 53 changed behavioral boundaries — 0 implemented, 13 best-effort, 0 exception-requested, 40 untriaged
-- **Candidate split:** 30 safe best-effort, 20 unsafe, 3 impossible
+- **Rows:** 54 changed behavioral boundaries — 0 implemented, 15 best-effort, 0 exception-requested, 39 untriaged
+- **Candidate split:** 30 safe best-effort, 21 unsafe, 3 impossible
 
 | Symbol | Machine Status | Candidate | Family | Direction | Contract |
 |---|---|---|---|---|---|
@@ -37,8 +37,9 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 | `Patch12_1.RadialProgress.Constructor` | untriaged | impossible | RadialProgress | changed | A standalone RadialProgress script object can be constructed through an audited retail API. |
 | `Patch12_1.RadialProgress.MethodDispatch` | untriaged | impossible | RadialProgress | changed | Standalone RadialProgress methods dispatch through the expected receiver and metatable. |
 | `Patch12_1.RadialProgress.StateBehavior` | untriaged | impossible | RadialProgress | changed | A standalone RadialProgress object stores and updates radial progress state. |
-| `Patch12_1.DurationTextBinding.Lifetime` | untriaged | best-effort | DurationTextBinding | changed | DurationTextBinding lifetime and ownership follow Blizzard object semantics. |
-| `Patch12_1.DurationTextBinding.MetatableIdentity` | untriaged | best-effort | DurationTextBinding | changed | The returned binding has compatible table or userdata identity and method lookup behavior. |
+| `Patch12_1.DurationTextBinding.Lifetime` | best-effort | best-effort | DurationTextBinding | changed | A binding remains usable while retained by Lua references; exact Blizzard ownership and invalidation semantics remain unproven. |
+| `Patch12_1.DurationTextBinding.StableIdentity` | best-effort | best-effort | DurationTextBinding | changed | Factory calls return distinct Lua tables with stable object identity and method lookup while referenced. |
+| `Patch12_1.DurationTextBinding.RepresentationFidelity` | untriaged | unsafe | DurationTextBinding | changed | The binding type, metatable, userdata representation, finalization, and ownership match Blizzard exactly. |
 | `Patch12_1.DurationTextBinding.Formatter` | best-effort | best-effort | DurationTextBinding | changed | Duration formatting and interpolation use the documented compatible contract. |
 | `Patch12_1.DurationTextBinding.ColorCurve` | best-effort | best-effort | DurationTextBinding | changed | Color-curve methods preserve compatible binding state. |
 | `Patch12_1.DurationTextBinding.FontStringUpdate` | best-effort | best-effort | DurationTextBinding | changed | The binding updates a FontString through a documented compatible lifetime and update contract. |
@@ -67,9 +68,9 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 13
+- best-effort: 15
 - exception-requested: 0
-- untriaged: 40
+- untriaged: 39
 
 ## Sources
 
