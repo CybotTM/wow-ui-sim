@@ -23,7 +23,7 @@
 23. [untriaged] `changed:JustifyProbe.EditBoxRegions` — untriaged
 24. [untriaged] `changed:JustifyProbe.MessageRegions` — untriaged
 25. [best-effort] `changed:ProtectedRetailProbe.PlainFrame` — behavioral
-26. [untriaged] `changed:ProtectedRetailProbe.XmlProtected` — untriaged
+26. [best-effort] `changed:ProtectedRetailProbe.XmlProtected` — behavioral
 27. [untriaged] `changed:ProtectedRetailProbe.SecureStore` — untriaged
 28. [untriaged] `changed:ScaleEventProbe.OrderedEvents` — untriaged
 29. [untriaged] `changed:ScaleEventProbe.SameSizeDuplicatePair` — untriaged

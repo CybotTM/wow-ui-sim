@@ -545,16 +545,25 @@
       "id": "changed:ProtectedRetailProbe.XmlProtected",
       "symbol": "ProtectedRetailProbe.XmlProtected",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/xml_frame_strata.rs::test_xml_protected_frame_retains_protection_and_lacks_legacy_setters",
+          "summary": "An XML frame with protected=true remains protected and unforbidden while legacy protection setters stay absent and fail when called.",
+          "source_hash": "4d296cb8c012be5d5d87b68c2b16047fcca63970bd580f00b122cc6994364216"
+        }
+      ],
+      "tests": [
+        "tests/xml_frame_strata.rs::test_xml_protected_frame_retains_protection_and_lacks_legacy_setters"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "c7637481b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained XML protected-attribute state and legacy-setter sequence is directly regression-tested."
     },
     {
       "id": "changed:ProtectedRetailProbe.SecureStore",

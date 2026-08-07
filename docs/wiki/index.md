@@ -45,8 +45,8 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 
 | Page | Summary |
 |------|---------|
-| [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 22 rows have direct behavioral evidence and 16 remain neutral pending exact replay, provenance, or live Store/window evidence |
-| [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 22 best-effort, 0 implemented, 0 exception-requested, 16 untriaged; prior documented states remain separate |
+| [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 23 rows have direct behavioral evidence and 15 remain neutral pending exact replay, provenance, or live Store/window evidence |
+| [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 23 best-effort, 0 implemented, 0 exception-requested, 15 untriaged; prior documented states remain separate |
 | [[patch-12-0-7-api-audit]] | 12.0.7 occurrence audit: 131 named rows classified as 29 implemented, 101 best-effort, and one unapproved impossible 3D-model exception candidate; restricted unit-token, encounter, taint, payload, and widget secret/aspect limits are documented per row |
 | [[patch-12-0-7-occurrence-inventory]] | 131-row 12.0.7 register: 29 implemented, 101 best-effort, 1 exception-requested, 0 untriaged; crawler-omitted CVar names remain explicit metadata |
 | [[patch-12-1-api-audit]] | 12.1 API audit status: 432-row FrameXML register complete; aura containers, DurationTextBinding, and service payloads retain explicit best-effort contracts, while UnitAura secrecy, private/forbidden enforcement, standalone RadialProgress construction, and strict-removal timing remain unapproved unsafe/impossible exception candidates |

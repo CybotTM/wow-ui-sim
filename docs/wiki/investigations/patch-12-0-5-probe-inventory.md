@@ -5,7 +5,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 22 best-effort, 0 exception-requested, 16 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 23 best-effort, 0 exception-requested, 15 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -34,7 +34,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `JustifyProbe.EditBoxRegions` | untriaged | resolved | FontString layout | changed | EditBox FontStrings, including sized and inset variants, are captured. |
 | `JustifyProbe.MessageRegions` | untriaged | resolved | FontString layout | changed | MessageFrame and ScrollingMessageFrame owner/region behavior and TextInsets effects. |
 | `ProtectedRetailProbe.PlainFrame` | best-effort | resolved | protection | changed | Plain frame protection/forbidden state and legacy setter behavior. |
-| `ProtectedRetailProbe.XmlProtected` | untriaged | resolved | protection | changed | XML protected=true frame state and setters. |
+| `ProtectedRetailProbe.XmlProtected` | best-effort | resolved | protection | changed | XML protected=true frame state and setters. |
 | `ProtectedRetailProbe.SecureStore` | untriaged | best-effort | protection | changed | Secure-template child state and Blizzard Store frame observations. |
 | `ScaleEventProbe.OrderedEvents` | untriaged | resolved | scale events | changed | DISPLAY_SIZE_CHANGED, UI_SCALE_CHANGED, and relevant CVAR_UPDATE ordering. |
 | `ScaleEventProbe.SameSizeDuplicatePair` | untriaged | unresolved | scale events | changed | Same-size maximize/restore duplicate display/scale event pair. |
@@ -51,9 +51,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 22
+- best-effort: 23
 - exception-requested: 0
-- untriaged: 16
+- untriaged: 15
 
 ## Sources
 

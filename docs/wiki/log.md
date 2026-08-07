@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | XML protected-frame replay
+
+Added an exact XML `protected="true"` frame replay covering protection, forbidden state, absent legacy setters, failing setter calls, and retained protection. The 12.0.5 register now contains 23 best-effort and 15 untriaged rows.
+
 ## [2026-08-07] investigation | Retail protection probe replays
 
 Added focused checks for absent retail `CreateForbiddenFrame` and the complete plain-frame protection/forbidden/legacy-setter sequence. Both probe rows are now best-effort, bringing the 12.0.5 register to 22 best-effort and 16 untriaged rows.
