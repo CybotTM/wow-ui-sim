@@ -121,6 +121,53 @@ fn blizzard_debug_tools_loads_via_load_addon_without_errors() {
 }
 
 #[test]
+fn devtools_dump_captures_frame_array_metadata() {
+    let env = load_full_game_ui();
+    let (
+        dump_type,
+        handler_type,
+        frame_type,
+        insert_ok,
+        insert_return_nil,
+        slot_one,
+        dump_ok,
+        dump_return_nil,
+        messages,
+    ): (String, String, String, bool, bool, String, bool, bool, Vec<String>) = env
+        .eval(
+            r#"
+            local messages = {}
+            DevTools_AddMessageHandler(function(message)
+                messages[#messages + 1] = tostring(message)
+            end)
+
+            local frame = CreateFrame("Frame")
+            local insertOk, insertResult = pcall(function()
+                return tinsert(frame, "foo")
+            end)
+            local dumpOk, dumpResult = pcall(function()
+                return DevTools_Dump(frame)
+            end)
+
+            return type(DevTools_Dump), type(DevTools_AddMessageHandler), type(frame),
+                insertOk, insertResult == nil, frame[1], dumpOk, dumpResult == nil, messages
+            "#,
+        )
+        .expect("DevTools frame dump probe should succeed");
+
+    assert_eq!(dump_type, "function");
+    assert_eq!(handler_type, "function");
+    assert_eq!(frame_type, "table");
+    assert!(insert_ok);
+    assert!(insert_return_nil);
+    assert_eq!(slot_one, "foo");
+    assert!(dump_ok);
+    assert!(dump_return_nil);
+    assert!(!messages.is_empty());
+    assert!(messages.join("\n").contains("foo"));
+}
+
+#[test]
 fn blizzard_debug_tools_frame_stack_tooltip_is_created() {
     let env = load_full_game_ui();
     load_addon(&env.loader_env(), &debug_tools_toc())
