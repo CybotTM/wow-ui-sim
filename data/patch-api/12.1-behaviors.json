@@ -9,7 +9,7 @@
   },
   "source": {
     "path": "data/patch-api/sources/12.1-behaviors.json",
-    "hash": "b26a9ae0939b770782c4a4fddf745b9692dc677205cbea9a58cb91d5c3e218eb",
+    "hash": "9e3ad69306c0e3d377e3aba6f5b928a21cd868ff98e5e9e43763385cdcecc83f",
     "added_count": 0,
     "changed_count": 54,
     "removed_count": 0
@@ -384,7 +384,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/frames_and_attributes.rs::test_patch_12_1_aura_frame_types_create",
           "summary": "AuraContainer, AuraButton, and ManagedAuraContainer creation returns the compatible frame object types.",
-          "source_hash": "37a69d719ff7f7cbbc88bd5a80e8a19c493fd766ff5c5d627beafdf0eec572bf"
+          "source_hash": "6112f574cf998f589793324a36d393df8fa9b914e5db05cc78c63f410fec8b09"
         }
       ],
       "tests": [
@@ -562,70 +562,76 @@
       "notes": "Public/private/EditMode mechanics are covered; secret exposure, taint, and error behavior are unknown."
     },
     {
-      "id": "changed:Patch12_1.RadialProgress.Constructor",
-      "symbol": "Patch12_1.RadialProgress.Constructor",
+      "id": "changed:Patch12_1.TextureRadialProgress.Surface",
+      "symbol": "Patch12_1.TextureRadialProgress.Surface",
       "change": "changed",
-      "status": "exception-requested",
-      "resolution": "impossible",
-      "owner": "RadialProgress",
+      "status": "best-effort",
+      "resolution": "behavioral",
+      "owner": "Texture radial progress",
       "load_addon": null,
       "evidence": [
         {
-          "kind": "source",
-          "reference": "src/lua_api/frame/methods/widgets/texture/mod.rs",
-          "summary": "Texture widget methods exist, but no standalone RadialProgress constructor, factory, or object path exists.",
-          "source_hash": "f21fb855f99e31b02b4b4662674c265c2c65feb8c894c85638d4b3528f7f6c41"
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/frames_and_attributes.rs::test_patch_12_1_texture_radial_progress_surface_and_state",
+          "summary": "A created Texture exposes the radial method family without claiming a standalone RadialProgress constructor or object.",
+          "source_hash": "6112f574cf998f589793324a36d393df8fa9b914e5db05cc78c63f410fec8b09"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/loader/tests/wow_api_globals/frames_and_attributes.rs::test_patch_12_1_texture_radial_progress_surface_and_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2ef0bd475",
       "approval_id": null,
-      "notes": "Texture widget methods exist, but no standalone RadialProgress constructor, factory, or object path exists."
+      "notes": "Texture method availability and value storage are tested; exact retail clamping and visual rendering remain best-effort."
     },
     {
-      "id": "changed:Patch12_1.RadialProgress.MethodDispatch",
-      "symbol": "Patch12_1.RadialProgress.MethodDispatch",
+      "id": "changed:Patch12_1.TextureRadialProgress.MethodDispatch",
+      "symbol": "Patch12_1.TextureRadialProgress.MethodDispatch",
       "change": "changed",
-      "status": "exception-requested",
-      "resolution": "impossible",
-      "owner": "RadialProgress",
+      "status": "best-effort",
+      "resolution": "behavioral",
+      "owner": "Texture radial progress",
       "load_addon": null,
       "evidence": [
         {
-          "kind": "source",
-          "reference": "src/lua_api/frame/methods/widgets/texture/radial.rs",
-          "summary": "RadialProgress methods and state are Texture-backed, not dispatched through a standalone receiver.",
-          "source_hash": "8eb78127a66318c012212525fe117415243e5ab333ae3a9ebc08a7689d030cb2"
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/frames_and_attributes.rs::test_patch_12_1_texture_radial_progress_surface_and_state",
+          "summary": "Radial progress methods dispatch on a Texture receiver.",
+          "source_hash": "6112f574cf998f589793324a36d393df8fa9b914e5db05cc78c63f410fec8b09"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/loader/tests/wow_api_globals/frames_and_attributes.rs::test_patch_12_1_texture_radial_progress_surface_and_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2ef0bd475",
       "approval_id": null,
-      "notes": "RadialProgress methods and state are Texture-backed, not dispatched through a standalone receiver."
+      "notes": "Texture method availability and value storage are tested; exact retail clamping and visual rendering remain best-effort."
     },
     {
-      "id": "changed:Patch12_1.RadialProgress.StateBehavior",
-      "symbol": "Patch12_1.RadialProgress.StateBehavior",
+      "id": "changed:Patch12_1.TextureRadialProgress.StateBehavior",
+      "symbol": "Patch12_1.TextureRadialProgress.StateBehavior",
       "change": "changed",
-      "status": "exception-requested",
-      "resolution": "impossible",
-      "owner": "RadialProgress",
+      "status": "best-effort",
+      "resolution": "behavioral",
+      "owner": "Texture radial progress",
       "load_addon": null,
       "evidence": [
         {
-          "kind": "source",
-          "reference": "src/lua_api/frame/methods/widgets/texture/radial.rs",
-          "summary": "RadialProgress methods and state are Texture-backed; no standalone backing model exists.",
-          "source_hash": "8eb78127a66318c012212525fe117415243e5ab333ae3a9ebc08a7689d030cb2"
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/frames_and_attributes.rs::test_patch_12_1_texture_radial_progress_surface_and_state",
+          "summary": "Texture-backed radial progress defaults, setters/getters, visual mode, and Clear reset are modeled.",
+          "source_hash": "6112f574cf998f589793324a36d393df8fa9b914e5db05cc78c63f410fec8b09"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/loader/tests/wow_api_globals/frames_and_attributes.rs::test_patch_12_1_texture_radial_progress_surface_and_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2ef0bd475",
       "approval_id": null,
-      "notes": "RadialProgress methods and state are Texture-backed; no standalone backing model exists."
+      "notes": "Texture method availability and value storage are tested; exact retail clamping and visual rendering remain best-effort."
     },
     {
       "id": "changed:Patch12_1.DurationTextBinding.Lifetime",
@@ -1053,7 +1059,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_spell_cooldown_payload",
           "summary": "Seeded and inactive spell cooldown queries return the modeled start, duration, enabled, active, and rate fields.",
-          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
+          "source_hash": "6e1194d6dafbe3c8f7c259a40ef4830229dace40ca9f59927517097cfb46ee2a"
         }
       ],
       "tests": [
@@ -1077,7 +1083,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads",
           "summary": "Seeded and unknown species queries verify the modeled 12.1 pet information fields and nil boundary.",
-          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
+          "source_hash": "6e1194d6dafbe3c8f7c259a40ef4830229dace40ca9f59927517097cfb46ee2a"
         }
       ],
       "tests": [
@@ -1101,7 +1107,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads",
           "summary": "Seeded and unknown search-result queries verify the modeled LFG identity, activity, size, GUID, and censored fields.",
-          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
+          "source_hash": "6e1194d6dafbe3c8f7c259a40ef4830229dace40ca9f59927517097cfb46ee2a"
         }
       ],
       "tests": [
@@ -1125,7 +1131,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_player_choice_payload_and_mutator_intent",
           "summary": "Default and seeded PlayerChoice queries expose the generated nested payload shape while response, reroll, and close calls record local intent.",
-          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
+          "source_hash": "6e1194d6dafbe3c8f7c259a40ef4830229dace40ca9f59927517097cfb46ee2a"
         }
       ],
       "tests": [
@@ -1149,7 +1155,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_tiered_entrance_payloads",
           "summary": "Seeded and default C_DelvesUI TieredEntrance queries expose the documented tier and nested reward fields.",
-          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
+          "source_hash": "6e1194d6dafbe3c8f7c259a40ef4830229dace40ca9f59927517097cfb46ee2a"
         }
       ],
       "tests": [

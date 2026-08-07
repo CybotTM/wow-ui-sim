@@ -7,9 +7,9 @@
     "normalization": "Each independently testable behavior is a changed occurrence grouped by the existing eight audit families."
   },
   "candidate_status_totals": {
-    "best-effort": 30,
+    "best-effort": 33,
     "unsafe": 21,
-    "impossible": 3,
+    "impossible": 0,
     "total": 54
   },
   "candidate_states": {
@@ -43,7 +43,10 @@
       "Patch12_1.Service.PlayerChoice.Payloads",
       "Patch12_1.Service.TieredEntrance.Payloads",
       "Patch12_1.StrictRemoval.BlizzardLoadCompatibility",
-      "Patch12_1.StrictRemoval.PostStartupHiding"
+      "Patch12_1.StrictRemoval.PostStartupHiding",
+      "Patch12_1.TextureRadialProgress.Surface",
+      "Patch12_1.TextureRadialProgress.MethodDispatch",
+      "Patch12_1.TextureRadialProgress.StateBehavior"
     ],
     "unsafe": [
       "Patch12_1.UnitAura.AddonSecretError",
@@ -68,11 +71,7 @@
       "Patch12_1.StrictRemoval.WrapperTiming",
       "Patch12_1.DurationTextBinding.RepresentationFidelity"
     ],
-    "impossible": [
-      "Patch12_1.RadialProgress.Constructor",
-      "Patch12_1.RadialProgress.MethodDispatch",
-      "Patch12_1.RadialProgress.StateBehavior"
-    ],
+    "impossible": [],
     "note": "Candidate states guide re-triage only. Machine status remains neutral until focused evidence or item-specific exception approval exists."
   },
   "occurrences": [
@@ -222,21 +221,21 @@
     },
     {
       "direction": "changed",
-      "category": "RadialProgress",
-      "symbol": "Patch12_1.RadialProgress.Constructor",
-      "detail": "A standalone RadialProgress script object can be constructed through an audited retail API."
+      "category": "Texture radial progress",
+      "symbol": "Patch12_1.TextureRadialProgress.Surface",
+      "detail": "A created Texture exposes the radial method family; no standalone constructor or object claim is made."
     },
     {
       "direction": "changed",
-      "category": "RadialProgress",
-      "symbol": "Patch12_1.RadialProgress.MethodDispatch",
-      "detail": "Standalone RadialProgress methods dispatch through the expected receiver and metatable."
+      "category": "Texture radial progress",
+      "symbol": "Patch12_1.TextureRadialProgress.MethodDispatch",
+      "detail": "Radial progress methods dispatch on a Texture receiver."
     },
     {
       "direction": "changed",
-      "category": "RadialProgress",
-      "symbol": "Patch12_1.RadialProgress.StateBehavior",
-      "detail": "A standalone RadialProgress object stores and updates radial progress state."
+      "category": "Texture radial progress",
+      "symbol": "Patch12_1.TextureRadialProgress.StateBehavior",
+      "detail": "Texture-backed radial progress defaults, setters/getters, visual mode, and Clear reset are modeled."
     },
     {
       "direction": "changed",

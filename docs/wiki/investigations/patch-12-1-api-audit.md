@@ -73,7 +73,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 
 ### Broader fidelity classification and exception candidates
 
-A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete. The broader fidelity boundaries are now itemized separately in [[patch-12-1-behavior-inventory]] as 54 rows: 30 direct-test-backed best-effort rows and 24 item-specific exception requests. Candidate disposition is fully resolved: 30 safe best-effort, 21 unsafe, and 3 impossible. Family names below are summaries only; approval remains per row. No exception is approved; each request remains item-specific and awaits informed approval.
+A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete. The broader fidelity boundaries are now itemized separately in [[patch-12-1-behavior-inventory]] as 54 rows: 33 direct-test-backed best-effort rows and 21 item-specific exception requests. Candidate disposition is fully resolved: 33 safe best-effort, 21 unsafe, and 0 impossible. Family names below are summaries only; approval remains per row. No exception is approved; each request remains item-specific and awaits informed approval.
 
 | Family | Current classification | Remaining fidelity boundary | Exception state |
 |---|---|---|---|
@@ -81,7 +81,7 @@ A broad approval recorded on 2026-07-14 is superseded: the itemized checklist wa
 | Private Script Objects / Forbidden Partition | **Best-effort:** compatible XML/private-table mechanics are modeled and tested. | Exact retail identity, public-key access, child traversal, hooks, script storage, and taint/delegate enforcement remain unknown. | **Exception requested: unsafe.** No approval recorded. |
 | Forbidden Aspects enforcement | **Best-effort:** inheritance plus query/add APIs are modeled and tested. | Runtime enforcement for `UntrustedScriptExecution`, `UntrustedLayoutScriptExecution`, `EventRegistrations`, `AlwaysPropagateInput`, `ScriptedInput`, and `QueryFocus` is unknown. | **Exception requested: unsafe.** No approval recorded. |
 | AuraContainer / AuraButton / ManagedAuraContainer | **Best-effort:** names, compatible creation, assignment/ownership, HELPFUL/HARMFUL/PLAYER filtering, configured comparator ordering, public/private/edit-mode partition selection, acquire-release-reacquire lifecycle, and tooltip filter/instance/leave-hide binding are covered by focused compatibility tests. | Secret exposure, taint, and error behavior remain unknown. | **Exception requested: unsafe.** No approval recorded. |
-| Standalone RadialProgress script object | Texture/statusbar radial-progress widget methods are bridged. | No standalone constructor/factory/object path exists; methods and state are Texture-backed. | **Exception requested: impossible.** No approval recorded. |
+| Texture radial progress | **Best-effort:** created Textures expose the radial method family; methods dispatch on Texture receivers; defaults, setters/getters, visual mode, and Clear reset are modeled as Texture-backed state. | Exact retail clamping and visual rendering remain unproven. | No exception requested. |
 | DurationTextBinding object fidelity | **Best-effort:** compatibility-table methods and 12.1 color-curve methods are implemented. | Exact Blizzard representation, metatable, GC/finalization, ownership, and invalidation remain unknown. | **Exception requested: unsafe.** No approval recorded. |
 | Changed structure payloads with real service data | **Best-effort:** local state backs Battle.net, invites, Encounter Journal, Discord, housing, PlayerChoice, and `C_DelvesUI` TieredEntrance rows/rewards. | Exact Discord/housing/cooldown/pet/LFG/player-choice payloads remain service-dependent; inaccessible and secret private-aura payload fidelity is unknown. | **Exception requested for PrivateAura.Payloads: unsafe.** No approval recorded. |
 | Deprecated wrappers vs strict-removal timing | **Best-effort:** strict removals are hidden from addons after startup while preserving current Blizzard load compatibility. | Exact pre-startup visibility and per-wrapper retirement timing remain unknown and unsafe to move. | **Exception requested: unsafe.** No approval recorded. |
@@ -89,7 +89,7 @@ A broad approval recorded on 2026-07-14 is superseded: the itemized checklist wa
 
 ### Practical next step
 
-Zero safe-best-effort rows remain. The 24 unsafe/impossible rows are now item-specific exception requests with repository evidence, empty tests/assertions, no approval IDs, and no approvals. Do not enforce security, taint, error-shape, private-data, or timing behavior without informed approval.
+The 21 unsafe rows are now item-specific exception requests with repository evidence, empty tests/assertions, no approval IDs, and no approvals. Do not enforce security, taint, error-shape, private-data, or timing behavior without informed approval.
 
 ## Sources
 

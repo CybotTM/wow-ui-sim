@@ -22,9 +22,9 @@
 22. [best-effort] `changed:Patch12_1.AuraContainer.ManagedButtonLifecycle` — behavioral
 23. [best-effort] `changed:Patch12_1.AuraContainer.TooltipBinding` — behavioral
 24. [exception-requested] `changed:Patch12_1.AuraContainer.SecretVisibility` — unsafe
-25. [exception-requested] `changed:Patch12_1.RadialProgress.Constructor` — impossible
-26. [exception-requested] `changed:Patch12_1.RadialProgress.MethodDispatch` — impossible
-27. [exception-requested] `changed:Patch12_1.RadialProgress.StateBehavior` — impossible
+25. [best-effort] `changed:Patch12_1.TextureRadialProgress.Surface` — behavioral
+26. [best-effort] `changed:Patch12_1.TextureRadialProgress.MethodDispatch` — behavioral
+27. [best-effort] `changed:Patch12_1.TextureRadialProgress.StateBehavior` — behavioral
 28. [best-effort] `changed:Patch12_1.DurationTextBinding.Lifetime` — behavioral
 29. [best-effort] `changed:Patch12_1.DurationTextBinding.StableIdentity` — behavioral
 30. [exception-requested] `changed:Patch12_1.DurationTextBinding.RepresentationFidelity` — unsafe

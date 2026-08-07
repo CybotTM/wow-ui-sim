@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Reclassify Texture radial progress rows
+
+Corrected the three 12.1 RadialProgress rows to Texture-backed behavioral best-effort contracts. Focused Texture surface/state proof covers method availability, receiver dispatch, defaults, setters/getters, visual mode, and Clear reset; exact retail clamping and visual rendering remain best-effort. The broader register now has 33 best-effort, 21 exception-requested, and 0 untriaged rows, with no impossible candidates.
+
 ## [2026-08-07] investigation | Itemize remaining 12.1 exceptions
 
 Converted all 24 remaining 12.1 broader behavior rows to item-specific `exception-requested` entries: 21 unsafe and 3 impossible. Each row has current repository source evidence, empty tests/assertions, `commit: null`, and `approval_id: null`; no exception is approved. The broader register now has 30 best-effort, 24 exception-requested, and 0 untriaged rows.
