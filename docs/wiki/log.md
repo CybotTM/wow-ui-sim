@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | 12.0.5 pending exception register
+
+Converted the five remaining 12.0.5 probe rows to item-specific `exception-requested` entries: three unsafe Store/protection gaps and two impossible window/provenance gaps. Each row has hashed repository evidence, `approval_id: null`, empty tests/assertions, and awaits separate informed approval or new live evidence. The register now has 33 best-effort, 5 exception-requested, and 0 untriaged rows.
+
 ## [2026-08-07] investigation | TieredEntrance payload classification
 
 Corrected the final 12.1 safe candidate from a tiered-aura label to `TieredEntrance` after confirming pinned PTR exposes `C_DelvesUI` `TieredEntranceTierInfo` / `TieredEntranceRewardInfo` and no corresponding aura API. Focused proof classifies deterministic tier/reward rows as best-effort; live reward IDs, quantities, unlock timing, eligibility, and economics remain outside the claim. The broader register now has 30 best-effort and 24 untriaged rows, with zero safe-best-effort rows remaining.

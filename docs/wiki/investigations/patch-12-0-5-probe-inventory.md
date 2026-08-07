@@ -1,11 +1,11 @@
 # Patch 12.0.5 Probe Inventory
-Probe-subfinding register for the retained 12.0.5 live-client audit. Machine status advances only with row-specific behavioral evidence; prior documented states remain visible separately.
+Probe-subfinding register for the retained 12.0.5 live-client audit. Machine status advances only with row-specific behavioral evidence or item-specific exception evidence; prior documented states remain visible separately.
 
 ## Content
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 33 best-effort, 0 exception-requested, 5 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 33 best-effort, 5 exception-requested, 0 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -35,25 +35,25 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `JustifyProbe.MessageRegions` | best-effort | resolved | FontString layout | changed | MessageFrame and ScrollingMessageFrame owner/region behavior and TextInsets effects. |
 | `ProtectedRetailProbe.PlainFrame` | best-effort | resolved | protection | changed | Plain frame protection/forbidden state and legacy setter behavior. |
 | `ProtectedRetailProbe.XmlProtected` | best-effort | resolved | protection | changed | XML protected=true frame state and setters. |
-| `ProtectedRetailProbe.SecureStore` | untriaged | best-effort | protection | changed | Secure-template child state and Blizzard Store frame observations. |
+| `ProtectedRetailProbe.SecureStore` | exception-requested | unsafe | protection | changed | Retained Store frames are forbidden, legacy setters are absent, and IsProtected errors; exact forbidden/secret-return enforcement is unsafe to guess. Await informed approval or new live evidence. |
 | `ScaleEventProbe.OrderedEvents` | best-effort | resolved | scale events | changed | DISPLAY_SIZE_CHANGED, UI_SCALE_CHANGED, and relevant CVAR_UPDATE ordering. |
-| `ScaleEventProbe.SameSizeDuplicatePair` | untriaged | unresolved | scale events | changed | Same-size maximize/restore duplicate display/scale event pair. |
+| `ScaleEventProbe.SameSizeDuplicatePair` | exception-requested | impossible | scale events | changed | Same-size maximize/restore duplicate event pairs are unobservable because the simulator receives no window-state transition signal. Await informed approval or new live evidence. |
 | `SetAtlasProbe.InvalidArguments` | best-effort | resolved | texture atlas | changed | nil, no-argument, boolean, numeric, empty, and unknown atlas inputs. |
 | `TextureSetTextureProbe.PathFdid` | best-effort | resolved | texture | changed | UI-Panel-Button-Up path assignment and retained FDID 130828. |
 | `TextureSetTextureProbe.Clear` | best-effort | resolved | texture | changed | SetTexture(nil) and no-argument clearing behavior. |
 | `XmlFrameLevelProbe.BareAndFixed` | best-effort | resolved | XML frame level | changed | Bare frameLevel versus fixedFrameLevel=true semantics. |
 | `XmlFrameLevelProbe.ParentReparent` | best-effort | resolved | XML frame level | changed | Parent-level changes, unfixed-child propagation, and Lua SetFrameLevel reparenting. |
 | `XmlFrameLevelProbe.Flags` | best-effort | resolved | XML frame level | changed | HasFixedFrameLevel and IsUsingParentLevel observations. |
-| `XmlFrameLevelProbe.RawCaptureProvenance` | untriaged | unresolved | provenance | changed | Raw SavedVariables capture was not retained; only documented behavior remains. |
-| `StoreForbiddenProbe.DropdownPopulation` | untriaged | unresolved | Store lifecycle | changed | Real and synthetic Store dropdown population plus button count/state. |
-| `StoreForbiddenProbe.ForbiddenDescendants` | untriaged | unresolved | Store lifecycle | changed | Store frame/descendant forbidden/protected scan via /sfp. |
+| `XmlFrameLevelProbe.RawCaptureProvenance` | exception-requested | impossible | provenance | changed | Behavior is tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally. Await informed approval or new live evidence. |
+| `StoreForbiddenProbe.DropdownPopulation` | exception-requested | unsafe | Store lifecycle | changed | Retained `StoreDropdown_SetDropdown == nil`; population, reuse, text/check, callback, and protection behavior were never observed. Await informed approval or new live evidence. |
+| `StoreForbiddenProbe.ForbiddenDescendants` | exception-requested | unsafe | Store lifecycle | changed | Retained file lacks the `/sfp` manual descendant scan, so Store descendant forbidden/protected state is unknown. Await informed approval or new live evidence. |
 
 ## Machine state totals
 
 - implemented: 0
 - best-effort: 33
-- exception-requested: 0
-- untriaged: 5
+- exception-requested: 5
+- untriaged: 0
 
 ## Sources
 
