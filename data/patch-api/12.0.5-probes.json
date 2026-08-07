@@ -707,14 +707,20 @@
           "kind": "manual",
           "reference": "docs/local/probe-savedvariables-backup/ScaleEventProbe.lua",
           "source_hash": "e250867b86166f8b182f57ce965deda05b1608ed311f99d22f05252802c7b2b3",
-          "summary": "Duplicate ordered DISPLAY_SIZE_CHANGED/UI_SCALE_CHANGED pairs occur on same-size maximize/restore window-state transitions, but the simulator receives no maximize/restore/fullscreen signal and cannot distinguish them from no transition. Approved as an impossible exception at the current input boundary."
+          "summary": "Duplicate ordered DISPLAY_SIZE_CHANGED/UI_SCALE_CHANGED pairs occur on same-size maximize/restore window-state transitions."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wiki/investigations/display-size-ui-scale-events.md",
+          "source_hash": "00598eea76793bc02fb96026adfb977e51e7cd622de5ba7d157d47532406836e",
+          "summary": "The simulator receives only iced canvas bounds; a same-size maximize/restore transition is indistinguishable from no transition, while emitting on equal-size polls would invent events."
         }
       ],
       "tests": [],
       "assertions": [],
       "commit": null,
-      "approval_id": "user-chat:changed:ScaleEventProbe.SameSizeDuplicatePair:2026-08-07-approved-unobservable-window-state",
-      "notes": "Approved as an impossible exception: same-size maximize/restore duplicate event pairs are unobservable because the simulator receives no window-state transition signal."
+      "approval_id": null,
+      "notes": "Same-size maximize/restore duplicate event pairs remain open: the simulator receives no window-state transition signal, so correct behavior is not modeled. Await separate informed approval or new live evidence."
     },
     {
       "id": "changed:SetAtlasProbe.InvalidArguments",
@@ -937,14 +943,14 @@
           "kind": "manual",
           "reference": "docs/local/probe-savedvariables-backup/StoreForbiddenProbe.lua",
           "source_hash": "adeb170d869d0bb1bd3727623d90abd48e702dd484042e315f5b52bd0f475682",
-          "summary": "The retained file lacks the /sfp manual descendant scan, so Store descendant forbidden/protected state is unknown. Approved unsafe exception: the missing descendant capture prevents safe inference; retain this gap until live evidence exists."
+          "summary": "The retained file lacks the /sfp manual descendant scan, so Store descendant forbidden/protected state is unknown. Await separate informed approval or new live evidence."
         }
       ],
       "tests": [],
       "assertions": [],
       "commit": null,
-      "approval_id": "user-chat:changed:StoreForbiddenProbe.ForbiddenDescendants:2026-08-07-approved-missing-descendant-capture",
-      "notes": "The retained file lacks the /sfp manual descendant scan, so Store descendant forbidden/protected state is unknown. Approved unsafe exception: the missing descendant capture prevents safe inference; retain this gap until live evidence exists."
+      "approval_id": null,
+      "notes": "Store descendant forbidden/protected state remains open: the retained file lacks the /sfp manual descendant scan, so correct behavior is not modeled. Await separate informed approval or new live evidence."
     }
   ]
 }

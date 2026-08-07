@@ -5,7 +5,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 33 best-effort, 5 exception-requested (2 approved impossible, 1 approved unsafe Store, 2 unapproved unsafe Store), 0 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 33 best-effort, 5 exception-requested (1 approved provenance-only, 4 open behavior exceptions: 1 impossible same-size boundary and 3 unsafe Store/security gaps), 0 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -37,22 +37,22 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `ProtectedRetailProbe.XmlProtected` | best-effort | resolved | protection | changed | XML protected=true frame state and setters. |
 | `ProtectedRetailProbe.SecureStore` | exception-requested | unsafe | protection | changed | Retained Store frames are forbidden, legacy setters are absent, and IsProtected errors; exact forbidden/secret-return enforcement is unsafe to guess. Await informed approval or new live evidence. |
 | `ScaleEventProbe.OrderedEvents` | best-effort | resolved | scale events | changed | DISPLAY_SIZE_CHANGED, UI_SCALE_CHANGED, and relevant CVAR_UPDATE ordering. |
-| `ScaleEventProbe.SameSizeDuplicatePair` | exception-requested | impossible | scale events | changed | Same-size maximize/restore duplicate event pairs are unobservable because the simulator receives no window-state transition signal. Approved as an impossible exception. |
+| `ScaleEventProbe.SameSizeDuplicatePair` | exception-requested | impossible | scale events | changed | Same-size maximize/restore duplicate event pairs remain open: the simulator receives no window-state transition signal, so correct behavior is not modeled. Await separate informed approval or new live evidence. |
 | `SetAtlasProbe.InvalidArguments` | best-effort | resolved | texture atlas | changed | nil, no-argument, boolean, numeric, empty, and unknown atlas inputs. |
 | `TextureSetTextureProbe.PathFdid` | best-effort | resolved | texture | changed | UI-Panel-Button-Up path assignment and retained FDID 130828. |
 | `TextureSetTextureProbe.Clear` | best-effort | resolved | texture | changed | SetTexture(nil) and no-argument clearing behavior. |
 | `XmlFrameLevelProbe.BareAndFixed` | best-effort | resolved | XML frame level | changed | Bare frameLevel versus fixedFrameLevel=true semantics. |
 | `XmlFrameLevelProbe.ParentReparent` | best-effort | resolved | XML frame level | changed | Parent-level changes, unfixed-child propagation, and Lua SetFrameLevel reparenting. |
 | `XmlFrameLevelProbe.Flags` | best-effort | resolved | XML frame level | changed | HasFixedFrameLevel and IsUsingParentLevel observations. |
-| `XmlFrameLevelProbe.RawCaptureProvenance` | exception-requested | impossible | provenance | changed | Behavior is tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally. Approved as an impossible provenance exception because the historical raw capture is unavailable. |
+| `XmlFrameLevelProbe.RawCaptureProvenance` | exception-requested | impossible | provenance | changed | Behavior is tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally. Approved provenance-only exception; behavior remains independently regression-tested. |
 | `StoreForbiddenProbe.DropdownPopulation` | exception-requested | unsafe | Store lifecycle | changed | Retained `StoreDropdown_SetDropdown == nil`; population, reuse, text/check, callback, and protection behavior were never observed. Await informed approval or new live evidence. |
-| `StoreForbiddenProbe.ForbiddenDescendants` | exception-requested | unsafe | Store lifecycle | changed | Retained file lacks the `/sfp` manual descendant scan, so Store descendant forbidden/protected state is unknown. Approved unsafe exception because the missing capture prevents safe inference. |
+| `StoreForbiddenProbe.ForbiddenDescendants` | exception-requested | unsafe | Store lifecycle | changed | Store descendant forbidden/protected state remains open: the retained file lacks the `/sfp` manual descendant scan, so correct behavior is not modeled. Await separate informed approval or new live evidence. |
 
 ## Machine state totals
 
 - implemented: 0
 - best-effort: 33
-- exception-requested: 5 (2 approved impossible; 1 approved unsafe Store; 2 unapproved unsafe Store)
+- exception-requested: 5 (1 approved provenance-only; 4 open behavior exceptions: 1 impossible same-size boundary and 3 unsafe Store/security gaps)
 - untriaged: 0
 
 ## Sources

@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] decision | Reopen unverified 12.0.5 behavior exceptions
+
+Applied the correct-behavior-only policy: reopened `ScaleEventProbe.SameSizeDuplicatePair` and `StoreForbiddenProbe.ForbiddenDescendants` by clearing their approvals. Kept `XmlFrameLevelProbe.RawCaptureProvenance` approved as provenance-only because its behavior is independently regression-tested. The 12.0.5 audit remains open at 33 best-effort, 5 exception-requested, 0 untriaged: 1 approved provenance-only exception and 4 open behavior exceptions (1 impossible same-size boundary and 3 unsafe Store/security gaps).
+
 ## [2026-08-07] investigation | Approve two 12.0.5 exceptions
 
 Recorded explicit approvals for `ScaleEventProbe.SameSizeDuplicatePair` and `XmlFrameLevelProbe.RawCaptureProvenance`. Both remain `exception-requested` with `impossible` resolution; the three unsafe Store exceptions remained unapproved at this point.

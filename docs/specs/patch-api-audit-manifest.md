@@ -49,11 +49,11 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `data/patch-api/sources/12.1-framexml.json` — immutable raw 12.1 direction-array snapshot.
 - `data/patch-api/sources/12.1-behaviors.json` — 54 independently testable non-FrameXML behavior boundaries, grouped by the existing broader audit families; candidate disposition remains separate from machine status.
 - `data/patch-api/sources/12.0.7-register.json` — categorized raw register for the 131 named 12.0.7 occurrences; changed rows keep a normalized symbol plus exact detail, while unresolved unnamed CVar claims remain metadata rather than invented rows.
-- `data/patch-api/12.0.7.json` — 131-row occurrence manifest: 29 implemented, 101 best-effort, one approved impossible exception-requested row, and no untriaged rows.
+- `data/patch-api/12.0.7.json` — 131-row occurrence manifest: 29 implemented, 101 best-effort, one repository-scope-authorized impossible exception-requested row, and no untriaged rows.
 - `docs/generated/patch-12-0-7-checklist.md` — generated occurrence checklist.
 - `docs/wiki/investigations/patch-12-0-7-occurrence-inventory.md` — human-readable occurrence inventory.
 - `data/patch-api/sources/12.0.5-probes.json` — categorized source for 38 retained probe subfindings, with prior documented states preserved separately from machine status.
-- `data/patch-api/12.0.5-probes.json` — 38-row probe manifest: 33 best-effort rows, 5 exception-requested rows (2 approved impossible, 1 approved unsafe Store, and 2 unapproved unsafe Store), and zero untriaged rows.
+- `data/patch-api/12.0.5-probes.json` — 38-row probe manifest: 33 best-effort rows, 5 exception-requested rows (1 approved provenance-only and 4 open behavior exceptions: 1 impossible same-size boundary and 3 unsafe Store/security gaps), and zero untriaged rows.
 - `docs/generated/patch-12-0-5-probe-checklist.md` — generated probe checklist.
 - `docs/wiki/investigations/patch-12-0-5-probe-inventory.md` — human-readable probe inventory.
 - `data/patch-api/12.1-framexml.json` — complete 432-row FrameXML symbol audit register.
