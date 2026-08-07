@@ -5,7 +5,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 31 best-effort, 0 exception-requested, 7 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 32 best-effort, 0 exception-requested, 6 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -18,7 +18,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `CoreBehaviorProbe.AttributeWildcardFalse` | best-effort | resolved | attributes | changed | Wildcard GetAttribute preserves explicit stored false. |
 | `CoreBehaviorProbe.AttributeWildcardValues` | best-effort | resolved | attributes | changed | Wildcard true/string values and one-, two-, and three-argument lookup behavior are preserved. |
 | `CoreBehaviorProbe.RaiseLowerLevel` | best-effort | resolved | frame ordering | changed | Raise/Lower affect same-level ties but cannot overtake a higher frame level. |
-| `CoreBehaviorProbe.MouseFocusOrder` | untriaged | best-effort | mouse focus | changed | GetMouseFoci/GetMouseFocus shape and hit ordering after Raise/Lower. |
+| `CoreBehaviorProbe.MouseFocusOrder` | best-effort | best-effort | mouse focus | changed | GetMouseFoci/GetMouseFocus shape and hit ordering after Raise/Lower. |
 | `DevToolsDumpProbe.FrameArrayDump` | best-effort | resolved | frame identity | changed | tinsert(frame, foo), frame slot contents, and DevTools_Dump output metadata. |
 | `FrameIdentityProbe.IdentitySlot` | best-effort | resolved | identity | changed | Frame slot [0] contains the identity userdata token. |
 | `FrameIdentityProbe.SurrogateDispatch` | best-effort | resolved | identity | changed | Replacing [0] redirects protection and method dispatch; [1] alone does not. |
@@ -51,9 +51,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 31
+- best-effort: 32
 - exception-requested: 0
-- untriaged: 7
+- untriaged: 6
 
 ## Sources
 

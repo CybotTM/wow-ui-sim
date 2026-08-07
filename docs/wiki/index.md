@@ -45,8 +45,8 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 
 | Page | Summary |
 |------|---------|
-| [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 31 rows have direct behavioral evidence and 7 remain neutral pending exact replay, provenance, or live Store/window evidence |
-| [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 31 best-effort, 0 implemented, 0 exception-requested, 7 untriaged; prior documented states remain separate |
+| [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 32 rows have direct behavioral evidence and 6 remain neutral pending exact replay, provenance, or live Store/window evidence |
+| [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 32 best-effort, 0 implemented, 0 exception-requested, 6 untriaged; prior documented states remain separate |
 | [[patch-12-0-7-api-audit]] | 12.0.7 occurrence audit: 131 named rows classified as 29 implemented, 101 best-effort, and one unapproved impossible 3D-model exception candidate; restricted unit-token, encounter, taint, payload, and widget secret/aspect limits are documented per row |
 | [[patch-12-0-7-occurrence-inventory]] | 131-row 12.0.7 register: 29 implemented, 101 best-effort, 1 exception-requested, 0 untriaged; crawler-omitted CVar names remain explicit metadata |
 | [[patch-12-1-api-audit]] | 12.1 audit split: 432-row FrameXML register complete; separate 54-row broader behavior register has 18 direct-test-backed best-effort rows and 36 untriaged |

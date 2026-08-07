@@ -10,13 +10,13 @@ The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and t
 
 Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptProbe`, `AttributeDispatchProbe`, `CoreBehaviorProbe`, `DevToolsDumpProbe`, `FrameIdentityProbe`, `HookScriptBindingProbe`, `IsProtectedProbe`, `JustifyProbe`, `ProtectedRetailProbe`, `ScaleEventProbe`, `SetAtlasProbe`, `StoreForbiddenProbe`, and `TextureSetTextureProbe`. `XmlFrameLevelProbe` findings are documented, but its raw capture was not retained.
 
-The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current machine classification is **31 best-effort, 0 implemented, 0 exception-requested, and 7 untriaged**; prior documented states remain separate until exact row evidence exists.
+The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current machine classification is **32 best-effort, 0 implemented, 0 exception-requested, and 6 untriaged**; prior documented states remain separate until exact row evidence exists.
 
 ### Itemized probe status
 
-**Machine-classified with direct behavioral evidence:** the full Frame/AnimationGroup/nine-subtype script-handler matrix; repeated scalar/false attribute dispatch and the two-panel ShowUIPanel pulse; normal-frame forbidden behavior and absent retail forbidden constructor; valid/invalid unit-event filters; wildcard false/true/string attributes; Raise/Lower level boundaries; frame identity slot, surrogate dispatch, duplicate-frame freshness, and DevTools frame-array dump metadata; normal HookScript chaining plus rejected explicit slots 0 and 2; absent legacy protection setters, the full plain-frame and XML-protected-frame sequences, and protected secure templates; frame-layer FontString default points, size variants, explicit anchors, implicit ButtonText anchors, EditBox backing regions/TextInsets, and MessageFrame/ScrollingMessageFrame owner-region behavior; complete observable display/UI-scale/CVAR ordering; the complete invalid-atlas argument matrix; texture path/FDID and clear behavior; and bare/fixed/parent/reparent XML frame-level semantics and flags.
+**Machine-classified with direct behavioral evidence:** the full Frame/AnimationGroup/nine-subtype script-handler matrix; repeated scalar/false attribute dispatch and the two-panel ShowUIPanel pulse; normal-frame forbidden behavior and absent retail forbidden constructor; valid/invalid unit-event filters; wildcard false/true/string attributes; Raise/Lower level boundaries and GUI mouse-focus ordering; frame identity slot, surrogate dispatch, duplicate-frame freshness, and DevTools frame-array dump metadata; normal HookScript chaining plus rejected explicit slots 0 and 2; absent legacy protection setters, the full plain-frame and XML-protected-frame sequences, and protected secure templates; frame-layer FontString default points, size variants, explicit anchors, implicit ButtonText anchors, EditBox backing regions/TextInsets, and MessageFrame/ScrollingMessageFrame owner-region behavior; complete observable display/UI-scale/CVAR ordering; the complete invalid-atlas argument matrix; texture path/FDID and clear behavior; and bare/fixed/parent/reparent XML frame-level semantics and flags.
 
-**Still neutral pending exact focused proof:** mouse-focus order; exact protected-template descendant/anchor states; Store protection; and same-size transitions. Existing subsystem tests are not substituted for the missing probe behavior.
+**Still neutral pending exact focused proof:** exact protected-template descendant/anchor states; Store protection; and same-size transitions. Existing subsystem tests are not substituted for the missing probe behavior.
 
 ### Open probe gaps and exception candidates
 
@@ -57,6 +57,7 @@ Regression coverage exists in:
 - `tests/protected_frame_enforcement.rs` — retail `SetForbidden` no-op behavior.
 - `tests/protected_attribute_enforcement.rs` — wildcard explicit-false lookup and repeated-false dispatch ordering.
 - `tests/frame_level.rs` — Raise/Lower and raised-frame-level ordering.
+- `src/iced_app/mouse_tests.rs` — GUI hover, `GetMouseFocus`/`GetMouseFoci`, and Raise/Lower focus ordering.
 - `tests/security_api.rs`, `tests/frame_table_iteration.rs`, `tests/globals_legacy.rs` — frame identity slot, surrogate dispatch, opaque identity userdata, duplicate named-frame freshness.
 - `tests/xml_frame_strata.rs` — XML `frameLevel` and `fixedFrameLevel` semantics.
 - `src/iced_app/resize_event_tests.rs` — display/scale ordered-pair behavior.
@@ -69,7 +70,7 @@ The remaining generic defaults are intentionally outside this 12.0.5 audit unles
 
 ### Audit state
 
-This audit remains open with 7 untriaged rows. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
+This audit remains open with 6 untriaged rows. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
 
 ## Sources
 

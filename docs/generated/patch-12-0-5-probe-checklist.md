@@ -7,7 +7,7 @@
 7. [best-effort] `changed:CoreBehaviorProbe.AttributeWildcardFalse` — behavioral
 8. [best-effort] `changed:CoreBehaviorProbe.AttributeWildcardValues` — behavioral
 9. [best-effort] `changed:CoreBehaviorProbe.RaiseLowerLevel` — behavioral
-10. [untriaged] `changed:CoreBehaviorProbe.MouseFocusOrder` — untriaged
+10. [best-effort] `changed:CoreBehaviorProbe.MouseFocusOrder` — behavioral
 11. [best-effort] `changed:DevToolsDumpProbe.FrameArrayDump` — behavioral
 12. [best-effort] `changed:FrameIdentityProbe.IdentitySlot` — behavioral
 13. [best-effort] `changed:FrameIdentityProbe.SurrogateDispatch` — behavioral

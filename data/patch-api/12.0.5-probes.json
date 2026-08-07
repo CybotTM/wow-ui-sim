@@ -240,16 +240,25 @@
       "id": "changed:CoreBehaviorProbe.MouseFocusOrder",
       "symbol": "CoreBehaviorProbe.MouseFocusOrder",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "mouse focus",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/iced_app/mouse_tests.rs::mouse_focus_order_tracks_gui_hover_after_raise_and_lower",
+          "summary": "GUI mouse-move hit testing keeps the higher raw-level frame as both GetMouseFocus and GetMouseFoci()[1] across Raise and Lower, then clears focus when hidden.",
+          "source_hash": "846046d4f1a9fae6389530eab92fed1a333b4296b80012e889b350581686ae2b"
+        }
+      ],
+      "tests": [
+        "src/iced_app/mouse_tests.rs::mouse_focus_order_tracks_gui_hover_after_raise_and_lower"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "253bb77f1",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained two-frame DIALOG scenario uses the GUI hover path: the level-10 frame remains both GetMouseFocus and GetMouseFoci()[1] before and after lower-frame Raise and higher-frame Lower; hiding both clears focus."
     },
     {
       "id": "changed:DevToolsDumpProbe.FrameArrayDump",
