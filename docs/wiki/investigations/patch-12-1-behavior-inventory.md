@@ -3,9 +3,9 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 
 ## Content
 - **Source:** `data/patch-api/sources/12.1-behaviors.json`
-- **Source SHA-256:** `9f0b7de4bd72641eeff6b35e36fd594f6b67dc205df961a63b306c1c9585ea38`
+- **Source SHA-256:** `b26a9ae0939b770782c4a4fddf745b9692dc677205cbea9a58cb91d5c3e218eb`
 - **Target:** PTR build `12.1.0`
-- **Rows:** 54 changed behavioral boundaries — 0 implemented, 29 best-effort, 0 exception-requested, 25 untriaged
+- **Rows:** 54 changed behavioral boundaries — 0 implemented, 30 best-effort, 0 exception-requested, 24 untriaged
 - **Candidate split:** 30 safe best-effort, 21 unsafe, 3 impossible
 
 | Symbol | Machine Status | Candidate | Family | Direction | Contract |
@@ -58,7 +58,7 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 | `Patch12_1.Service.Pet.Payloads` | best-effort | best-effort | Service payloads | changed | Pet-related structures and state payloads follow a documented compatibility contract. |
 | `Patch12_1.Service.LFG.Payloads` | best-effort | best-effort | Service payloads | changed | LFG service-result structures follow a documented compatibility contract. |
 | `Patch12_1.Service.PlayerChoice.Payloads` | best-effort | best-effort | Service payloads | changed | Player-choice structures, options, and state payloads follow a documented compatibility contract. |
-| `Patch12_1.Service.TieredAura.Payloads` | untriaged | best-effort | Service payloads | changed | Tiered-aura structures and tier fields follow a documented compatibility contract. |
+| `Patch12_1.Service.TieredEntrance.Payloads` | best-effort | best-effort | Service payloads | changed | C_DelvesUI TieredEntranceTierInfo rows expose tier, suggestedILvl, unlocked, tierDescription, modifierUIWidgetSetID, lockedReason, and rewards with id, quantity, rewardType, and context. Deterministic rows/rewards are modeled; live reward IDs, quantities, unlock timing, eligibility, and economics are not claimed. |
 | `Patch12_1.Service.PrivateAura.Payloads` | untriaged | unsafe | Service payloads | changed | Private-aura payloads preserve inaccessible and secret structural boundaries. |
 | `Patch12_1.StrictRemoval.PreStartupVisibility` | untriaged | unsafe | Strict removal timing | changed | Removed APIs are absent from addon-facing globals before Blizzard startup completes. |
 | `Patch12_1.StrictRemoval.BlizzardLoadCompatibility` | best-effort | best-effort | Strict removal timing | changed | Pinned Blizzard UI loads while required removed symbols remain temporarily available. |

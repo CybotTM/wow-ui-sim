@@ -46,7 +46,7 @@
 46. [best-effort] `changed:Patch12_1.Service.Pet.Payloads` — behavioral
 47. [best-effort] `changed:Patch12_1.Service.LFG.Payloads` — behavioral
 48. [best-effort] `changed:Patch12_1.Service.PlayerChoice.Payloads` — behavioral
-49. [untriaged] `changed:Patch12_1.Service.TieredAura.Payloads` — untriaged
+49. [best-effort] `changed:Patch12_1.Service.TieredEntrance.Payloads` — behavioral
 50. [untriaged] `changed:Patch12_1.Service.PrivateAura.Payloads` — untriaged
 51. [untriaged] `changed:Patch12_1.StrictRemoval.PreStartupVisibility` — untriaged
 52. [best-effort] `changed:Patch12_1.StrictRemoval.BlizzardLoadCompatibility` — behavioral

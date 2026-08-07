@@ -9,7 +9,7 @@
   },
   "source": {
     "path": "data/patch-api/sources/12.1-behaviors.json",
-    "hash": "9f0b7de4bd72641eeff6b35e36fd594f6b67dc205df961a63b306c1c9585ea38",
+    "hash": "b26a9ae0939b770782c4a4fddf745b9692dc677205cbea9a58cb91d5c3e218eb",
     "added_count": 0,
     "changed_count": 54,
     "removed_count": 0
@@ -990,19 +990,28 @@
       "notes": "C_PlayerChoice exposes deterministic no-choice defaults, seeded PlayerChoiceInfo/options/buttons/rewards, and local response/reroll/close intent. Retail timing, server validation, reroll economics, events, and live service values remain unmodeled."
     },
     {
-      "id": "changed:Patch12_1.Service.TieredAura.Payloads",
-      "symbol": "Patch12_1.Service.TieredAura.Payloads",
+      "id": "changed:Patch12_1.Service.TieredEntrance.Payloads",
+      "symbol": "Patch12_1.Service.TieredEntrance.Payloads",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_tiered_entrance_payloads",
+          "summary": "Seeded and default C_DelvesUI TieredEntrance queries expose the documented tier and nested reward fields.",
+          "source_hash": "372e988c2ed166638bcc0c7e289459c47aa44c2ccbead73ff901d906d3bf28d6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_tiered_entrance_payloads"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "efc164112",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Deterministic C_DelvesUI TieredEntrance rows and nested rewards are modeled; live reward IDs, quantities, unlock timing, eligibility, and economics are not claimed."
     },
     {
       "id": "changed:Patch12_1.Service.PrivateAura.Payloads",

@@ -41,7 +41,7 @@
       "Patch12_1.Service.Pet.Payloads",
       "Patch12_1.Service.LFG.Payloads",
       "Patch12_1.Service.PlayerChoice.Payloads",
-      "Patch12_1.Service.TieredAura.Payloads",
+      "Patch12_1.Service.TieredEntrance.Payloads",
       "Patch12_1.StrictRemoval.BlizzardLoadCompatibility",
       "Patch12_1.StrictRemoval.PostStartupHiding"
     ],
@@ -367,8 +367,8 @@
     {
       "direction": "changed",
       "category": "Service payloads",
-      "symbol": "Patch12_1.Service.TieredAura.Payloads",
-      "detail": "Tiered-aura structures and tier fields follow a documented compatibility contract."
+      "symbol": "Patch12_1.Service.TieredEntrance.Payloads",
+      "detail": "C_DelvesUI TieredEntranceTierInfo rows expose tier, suggestedILvl, unlocked, tierDescription, modifierUIWidgetSetID, lockedReason, and rewards containing id, quantity, rewardType, and context."
     },
     {
       "direction": "changed",

@@ -73,7 +73,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 
 ### Broader fidelity classification and exception candidates
 
-A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete. The broader fidelity boundaries are now itemized separately in [[patch-12-1-behavior-inventory]] as 54 rows: 29 direct-test-backed best-effort rows and 25 untriaged. Candidate disposition remains 30 safe best-effort, 21 unsafe, and 3 impossible. Family names below are summaries only; approval remains per row. No exception approval is requested or recorded by this section.
+A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete. The broader fidelity boundaries are now itemized separately in [[patch-12-1-behavior-inventory]] as 54 rows: 30 direct-test-backed best-effort rows and 24 untriaged. Candidate disposition is fully resolved: 30 safe best-effort, 21 unsafe, and 3 impossible. Family names below are summaries only; approval remains per row. No exception approval is requested or recorded by this section.
 
 | Family | Current classification | Remaining fidelity boundary | Exception state |
 |---|---|---|---|
@@ -83,13 +83,13 @@ A broad approval recorded on 2026-07-14 is superseded: the itemized checklist wa
 | AuraContainer / AuraButton / ManagedAuraContainer | **Best-effort:** names, compatible creation, assignment/ownership, HELPFUL/HARMFUL/PLAYER filtering, configured comparator ordering, public/private/edit-mode partition selection, acquire-release-reacquire lifecycle, and tooltip filter/instance/leave-hide binding are covered by focused compatibility tests. | Secret visibility remains untriaged; configured comparator ordering does not claim the retail default comparator. | No exception requested; retain the documented best-effort contract. |
 | Standalone RadialProgress script object | Texture/statusbar radial-progress widget methods are bridged. | The standalone `RadialProgress:*` object has no known constructor path in the audited API surface. | **Candidate: impossible to model faithfully without constructor evidence.** Pending informed approval; not approved. |
 | DurationTextBinding object fidelity | **Best-effort:** compatibility-table methods and 12.1 color-curve methods are implemented. | Blizzard lifetime, metatable identity, formatter semantics, and interpolation remain unproven. | No exception requested; retain the documented best-effort contract. |
-| Changed structure payloads with real service data | **Best-effort:** local state backs Battle.net, invites, Encounter Journal, Discord, and housing behavior. | Exact Discord/housing/cooldown/pet/LFG/player-choice/tiered/private-aura payloads require service models or captures. | No exception requested; retain the documented best-effort contract. |
+| Changed structure payloads with real service data | **Best-effort:** local state backs Battle.net, invites, Encounter Journal, Discord, housing, PlayerChoice, and `C_DelvesUI` TieredEntrance rows/rewards. | Exact Discord/housing/cooldown/pet/LFG/player-choice/private-aura payloads remain service-dependent; live TieredEntrance reward IDs, quantities, unlock timing, eligibility, and economics are not claimed. | No exception requested; retain the documented best-effort contract. |
 | Deprecated wrappers vs strict-removal timing | **Best-effort:** strict removals are hidden from addons after startup while preserving current Blizzard load compatibility. | Moving removal earlier can break the pinned Blizzard UI until current-source/load-order evidence proves otherwise. | **Candidate: unsafe to change timing.** Pending informed approval; not approved. |
 | FrameXML symbol snapshot | **Complete:** [[patch-12-1-framexml-symbol-inventory]] contains 1 implemented, 431 best-effort, 0 exception-requested, and 0 untriaged occurrences. | Some rows deliberately document vendor defects or conservative source/runtime absence rather than exact behavioral fidelity. | No blanket exception requested or approved. |
 
 ### Practical next step
 
-Resolve the remaining 1 safe-best-effort row with focused simulator-contract evidence first. Then present the remaining unsafe/impossible rows item by item in chat before requesting approval. For security, taint, error-shape, and private-data behavior, create probe evidence before enforcing restrictions.
+Zero safe-best-effort rows remain. Present the remaining unsafe/impossible rows item by item in chat before requesting approval. For security, taint, error-shape, and private-data behavior, create probe evidence before enforcing restrictions.
 
 ## Sources
 

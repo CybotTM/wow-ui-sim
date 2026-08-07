@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | TieredEntrance payload classification
+
+Corrected the final 12.1 safe candidate from a tiered-aura label to `TieredEntrance` after confirming pinned PTR exposes `C_DelvesUI` `TieredEntranceTierInfo` / `TieredEntranceRewardInfo` and no corresponding aura API. Focused proof classifies deterministic tier/reward rows as best-effort; live reward IDs, quantities, unlock timing, eligibility, and economics remain outside the claim. The broader register now has 30 best-effort and 24 untriaged rows, with zero safe-best-effort rows remaining.
+
 ## [2026-08-07] investigation | Protected descendant-anchor probe replay
 
 Classified `IsProtectedProbe.DescendantAnchorPropagation` as best-effort from focused behavioral evidence. The directly protected root returns true/true; child, grandchild, frames anchored to the root or child, and the root-keyed anchored frame remain false/false. The 12.0.5 register now has 33 best-effort and 5 untriaged rows.
