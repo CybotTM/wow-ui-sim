@@ -14,10 +14,15 @@ const DELVE_DESCRIPTION: &str = "The Fungal Folly winds deeper with every tier."
 const DELVE_ENTRANCE_MAP_ID: i32 = 2339;
 const LOCKED_TIER_REASON: &str = "Complete Tier 4 to unlock this delve tier.";
 const UNKNOWN_TIER_REASON: &str = "Unknown tier";
+#[cfg(feature = "retail-12-1-0")]
 const DELVE_ITEM_REWARD_ID: i32 = 228361;
+#[cfg(feature = "retail-12-1-0")]
 const DELVE_CURRENCY_REWARD_ID: i32 = 2815;
+#[cfg(feature = "retail-12-1-0")]
 const TIER_REWARD_ITEM: i32 = 0;
+#[cfg(feature = "retail-12-1-0")]
 const TIER_REWARD_CURRENCY: i32 = 1;
+#[cfg(feature = "retail-12-1-0")]
 const DEFAULT_ITEM_CREATION_CONTEXT: i32 = 0;
 
 const COMPANION_ID: f64 = 4401.0;
@@ -307,6 +312,7 @@ fn select_delve_entrance_tier(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+#[cfg(feature = "retail-12-1-0")]
 #[derive(Clone, Copy)]
 struct TierRewardRow {
     id: i32,
@@ -315,6 +321,7 @@ struct TierRewardRow {
     context: i32,
 }
 
+#[cfg(feature = "retail-12-1-0")]
 const TIER_REWARDS: [TierRewardRow; 2] = [
     TierRewardRow {
         id: DELVE_ITEM_REWARD_ID,
