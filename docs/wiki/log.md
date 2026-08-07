@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Add strict-removal timing evidence guidance
+
+Audited commit `12ed1355b`. Documented `StrictRemovalTimingProbe` as a collector for addon-visible lifecycle timing. Its presence does not resolve or close any 12.1 behavior row; strict-removal timing gaps remain open until raw retail/PTR SavedVariables captures are obtained and interpreted. The existing `ForbiddenAspectsProbe` remains the live evidence path for all six forbidden-aspect restrictions.
+
 ## [2026-08-07] investigation | Add private-object and forbidden-aspect probe guidance
 
 Documented `PrivateScriptObjectProbe` and `ForbiddenAspectsProbe` as addon-tainted live-evidence tools. Their corresponding 12.1 rows remain open until raw captures are retained and interpreted; neither proves secure-caller behavior or unsupported internal/input paths.

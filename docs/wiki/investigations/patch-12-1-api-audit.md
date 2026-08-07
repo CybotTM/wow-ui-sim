@@ -91,14 +91,15 @@ A broad approval recorded on 2026-07-14 is superseded: the itemized checklist wa
 
 The 21 unsafe rows are item-specific exception requests with repository evidence, empty tests/assertions, no approval IDs, and no approvals. They remain open pending live evidence. Do not guess security, taint, error-shape, private-data, or timing behavior, and do not treat approval as a substitute for correct behavior.
 
-Four live-client probes now provide the next evidence path:
+Five live-client probes now provide the next evidence path:
 
 - [UnitAuraSecretProbe](../../addons/UnitAuraSecretProbe/README.md) can constrain addon-tainted AuraData and `UNIT_AURA` behavior, but cannot establish Blizzard-secure caller access.
 - [DurationTextBindingProbe](../../addons/DurationTextBindingProbe/README.md) can constrain representation, identity, and lifetime observations, but cannot prove native finalization.
 - [PrivateScriptObjectProbe](../../addons/PrivateScriptObjectProbe/README.md) uses Blizzard's existing `CustomAuraContainerTemplate` to observe addon-visible public/private object behavior, but cannot prove secure-caller or private internals.
-- [ForbiddenAspectsProbe](../../addons/ForbiddenAspectsProbe/README.md) distinguishes mask storage, registration, invocation, and dispatch behavior, but cannot synthesize real input or secure-caller behavior.
+- [ForbiddenAspectsProbe](../../addons/ForbiddenAspectsProbe/README.md) distinguishes mask storage, registration, invocation, and dispatch behavior for all six forbidden-aspect restrictions, but cannot synthesize real input or secure-caller behavior.
+- [StrictRemovalTimingProbe](../../addons/StrictRemovalTimingProbe/README.md) collects addon-visible lifecycle timing for removed globals, enums, and CVar accessors across bootstrap, normal-file, addon-load, SavedVariables, login, world-entry, and manual phases.
 
-All corresponding 12.1 rows remain open until raw retail/PTR SavedVariables captures are retained and interpreted.
+The probes are evidence collectors only. Their presence does not resolve, reclassify, or close any corresponding 12.1 behavior row. No row may be closed before raw retail/PTR SavedVariables captures are obtained and interpreted.
 
 ## Sources
 
@@ -112,6 +113,8 @@ All corresponding 12.1 rows remain open until raw retail/PTR SavedVariables capt
 - [UnitAuraSecretProbe](../../addons/UnitAuraSecretProbe/README.md) — addon-tainted AuraData and `UNIT_AURA` capture procedure and limitations.
 - [DurationTextBindingProbe](../../addons/DurationTextBindingProbe/README.md) — DurationTextBinding representation, identity, and retained-lifetime capture procedure and limitations.
 - [PrivateScriptObjectProbe](../../addons/PrivateScriptObjectProbe/README.md) — addon-tainted public/private object observations and secure-caller limitations.
+- [StrictRemovalTimingProbe](../../addons/StrictRemovalTimingProbe/README.md) — addon-visible strict-removal lifecycle timing capture and limitations.
+- `12ed1355b` — added the strict-removal timing probe; probe code does not itself change audit status.
 - [ForbiddenAspectsProbe](../../addons/ForbiddenAspectsProbe/README.md) — addon-tainted forbidden-aspect storage, registration, invocation, and dispatch observations, with input and secure-caller limitations.
 - [[patch-12-1-framexml-symbol-inventory]] — exhaustive local FrameXML added/removed status inventory.
 - [[patch-12-1-behavior-inventory]] — separate non-FrameXML behavior inventory.
