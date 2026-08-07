@@ -35,7 +35,7 @@
     "note": "Statuses are preserved here and in the human inventory only; the machine manifest remains neutral until item-specific evidence is attached."
   },
   "occurrences": [
-    {"direction":"changed","category":"script support","symbol":"AnimScriptProbe.HandlerMatrix","detail":"Frame, AnimationGroup, and all nine Animation subtypes accept the documented handler matrix; HasScript and SetScript agree."},
+    {"direction":"changed","category":"script support","symbol":"AnimScriptProbe.HandlerMatrix","detail":"Frame, AnimationGroup, and all nine Animation subtypes match the documented matrix: unsupported HasScript calls succeed and return false, while SetScript rejects those handlers."},
     {"direction":"changed","category":"attributes","symbol":"AttributeDispatchProbe.ScalarRepeat","detail":"Repeated scalar SetAttribute dispatches OnAttributeChanged; explicit false is preserved and delivered as false."},
     {"direction":"changed","category":"panel lifecycle","symbol":"AttributeDispatchProbe.PanelPulse","detail":"Repeated ShowUIPanel pulse followed by CloseAllWindows preserves the expected panel-stack behavior."},
     {"direction":"changed","category":"forbidden frames","symbol":"CoreBehaviorProbe.ForbiddenState","detail":"Normal addon frames remain un-forbidden; SetForbidden does not create forbidden state."},
