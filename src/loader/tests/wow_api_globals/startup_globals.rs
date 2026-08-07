@@ -179,6 +179,33 @@ fn test_patch_12_0_7_duration_objects_and_text_binding() {
     assert_eq!(result, "ok");
 }
 
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn test_patch_12_1_duration_binding_reference_lifetime_and_identity() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local first = C_DurationUtil.CreateDurationTextBinding()
+            local second = C_DurationUtil.CreateDurationTextBinding()
+            if type(first) ~= "table" then return "type" end
+            if first == second then return "distinct" end
+            if type(first.SetDuration) ~= "function" then return "method" end
+
+            first:SetDuration(17)
+            local retained = { first }
+            first = nil
+            collectgarbage("collect")
+            if retained[1]:GetDuration() ~= 17 then return "retained" end
+            if retained[1] ~= retained[1] then return "identity" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
 #[cfg(feature = "retail-12-0-7")]
 #[test]
 fn test_patch_12_0_7_safe_global_bridges() {
