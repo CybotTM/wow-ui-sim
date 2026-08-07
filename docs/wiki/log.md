@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | First 12.1 behavior classifications
+
+Classified 13 broader 12.1 rows only where exact existing tests directly prove the simulator contract: aura-frame creation, DurationTextBinding formatter/color/FontString behavior, Discord state, four housing models, Encounter Journal difficulty guesses, and post-startup strict removal. Forty rows remain untriaged.
+
 ## [2026-08-07] investigation | 12.1 broader behavior register
 
 Created a separate 53-row machine register for non-FrameXML 12.1 fidelity boundaries. All rows remain neutral; candidate disposition is 30 safe best-effort, 20 unsafe, and 3 impossible, with family summaries no longer serving as approval units.

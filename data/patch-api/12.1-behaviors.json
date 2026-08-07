@@ -263,16 +263,25 @@
       "id": "changed:Patch12_1.AuraContainer.CreationTypes",
       "symbol": "Patch12_1.AuraContainer.CreationTypes",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "AuraContainer",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/frames_and_attributes.rs::test_patch_12_1_aura_frame_types_create",
+          "summary": "AuraContainer, AuraButton, and ManagedAuraContainer creation returns the compatible frame object types.",
+          "source_hash": "37a69d719ff7f7cbbc88bd5a80e8a19c493fd766ff5c5d627beafdf0eec572bf"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/frames_and_attributes.rs::test_patch_12_1_aura_frame_types_create"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "856bd7c6d",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "AuraContainer, AuraButton, and ManagedAuraContainer creation returns the compatible frame object types."
     },
     {
       "id": "changed:Patch12_1.AuraContainer.Assignment",
@@ -458,151 +467,241 @@
       "id": "changed:Patch12_1.DurationTextBinding.Formatter",
       "symbol": "Patch12_1.DurationTextBinding.Formatter",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "DurationTextBinding",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
+          "summary": "Duration binding formatting methods preserve the documented compatibility-table values.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "0198c5cb6",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Duration binding formatting methods preserve the documented compatibility-table values."
     },
     {
       "id": "changed:Patch12_1.DurationTextBinding.ColorCurve",
       "symbol": "Patch12_1.DurationTextBinding.ColorCurve",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "DurationTextBinding",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_safe_global_bridges",
+          "summary": "Duration binding color-curve methods exist and preserve compatible state.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_safe_global_bridges"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "85c2b11d3",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Duration binding color-curve methods exist and preserve compatible state."
     },
     {
       "id": "changed:Patch12_1.DurationTextBinding.FontStringUpdate",
       "symbol": "Patch12_1.DurationTextBinding.FontStringUpdate",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "DurationTextBinding",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding",
+          "summary": "Duration binding FontString assignment and update-facing methods preserve the documented compatibility contract.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_0_7_duration_objects_and_text_binding"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "0198c5cb6",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Duration binding FontString assignment and update-facing methods preserve the documented compatibility contract."
     },
     {
       "id": "changed:Patch12_1.Service.Discord.OAuthState",
       "symbol": "Patch12_1.Service.Discord.OAuthState",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_discord_state_surface",
+          "summary": "Discord authorization and refresh operations update and expose local compatibility state.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_discord_state_surface"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1701c1c4e",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Discord authorization and refresh operations update and expose local compatibility state."
     },
     {
       "id": "changed:Patch12_1.Service.Discord.GuildState",
       "symbol": "Patch12_1.Service.Discord.GuildState",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_discord_state_surface",
+          "summary": "Discord guild link, unlink, settings, and lobby operations update local compatibility state.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_discord_state_surface"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1701c1c4e",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Discord guild link, unlink, settings, and lobby operations update local compatibility state."
     },
     {
       "id": "changed:Patch12_1.Service.Discord.ServerChannelPayload",
       "symbol": "Patch12_1.Service.Discord.ServerChannelPayload",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_discord_state_surface",
+          "summary": "Discord server and channel getters return the seeded local compatibility payloads.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_discord_state_surface"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1701c1c4e",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Discord server and channel getters return the seeded local compatibility payloads."
     },
     {
       "id": "changed:Patch12_1.Service.Housing.OwnedHouseState",
       "symbol": "Patch12_1.Service.Housing.OwnedHouseState",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_housing_inside_owned_state_and_reset",
+          "summary": "Owned-house and plot queries plus ResetHouse follow the local housing state model.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_housing_inside_owned_state_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4728e37ab",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Owned-house and plot queries plus ResetHouse follow the local housing state model."
     },
     {
       "id": "changed:Patch12_1.Service.Housing.BlueprintPayload",
       "symbol": "Patch12_1.Service.Housing.BlueprintPayload",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_housing_blueprint_best_effort_state",
+          "summary": "Blueprint export, validation, import, rename, delete, and request calls follow the local housing blueprint model.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_housing_blueprint_best_effort_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "ec807facb",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Blueprint export, validation, import, rename, delete, and request calls follow the local housing blueprint model."
     },
     {
       "id": "changed:Patch12_1.Service.Housing.AvailabilityCodes",
       "symbol": "Patch12_1.Service.Housing.AvailabilityCodes",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_housing_blueprint_availability_state",
+          "summary": "Housing blueprint availability helpers return configurable local result codes.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_housing_blueprint_availability_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d91e8a342",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Housing blueprint availability helpers return configurable local result codes."
     },
     {
       "id": "changed:Patch12_1.Service.Housing.EditorDecorLayoutPayload",
       "symbol": "Patch12_1.Service.Housing.EditorDecorLayoutPayload",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_housing_editor_decor_layout_state",
+          "summary": "Housing editor, decor, room, budget, and layout calls read or update the local housing state model.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_housing_editor_decor_layout_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "96299bb1b",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Housing editor, decor, room, budget, and layout calls read or update the local housing state model."
     },
     {
       "id": "changed:Patch12_1.Service.BattleNet.FriendInvitePayload",
@@ -653,16 +752,25 @@
       "id": "changed:Patch12_1.Service.EncounterJournal.DifficultyPayload",
       "symbol": "Patch12_1.Service.EncounterJournal.DifficultyPayload",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_safe_global_bridges",
+          "summary": "Encounter Journal base and valid difficulty helpers return the generated-data compatibility guesses.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_safe_global_bridges"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1211024cef",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Encounter Journal base and valid difficulty helpers return the generated-data compatibility guesses."
     },
     {
       "id": "changed:Patch12_1.Service.Cooldown.Payloads",
@@ -788,16 +896,25 @@
       "id": "changed:Patch12_1.StrictRemoval.PostStartupHiding",
       "symbol": "Patch12_1.StrictRemoval.PostStartupHiding",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Strict removal timing",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_strict_removed_symbols_are_hidden",
+          "summary": "Strictly removed 12.1 symbols are absent from addon-facing globals after startup.",
+          "source_hash": "ff4011147537dbd57247e6ccb98713edf6a2e515cd326c215e63b48820310d3d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_strict_removed_symbols_are_hidden"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "390086d312",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Strictly removed 12.1 symbols are absent from addon-facing globals after startup."
     },
     {
       "id": "changed:Patch12_1.StrictRemoval.WrapperTiming",

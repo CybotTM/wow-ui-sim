@@ -57,7 +57,7 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `data/patch-api/12.1-framexml.json` — complete 432-row FrameXML symbol audit register.
 - `docs/generated/patch-12-1-framexml-checklist.md` — generated FrameXML checklist.
 - `docs/wiki/investigations/patch-12-1-framexml-symbol-inventory.md` — FrameXML human inventory whose symbol/status columns are drift-checked.
-- `data/patch-api/12.1-behaviors.json` — 53-row broader behavior manifest: all rows remain neutral pending focused evidence or item-specific exception approval.
+- `data/patch-api/12.1-behaviors.json` — 53-row broader behavior manifest: 13 direct-test-backed best-effort rows and 40 untriaged rows.
 - `docs/generated/patch-12-1-behavior-checklist.md` — generated broader behavior checklist.
 - `docs/wiki/investigations/patch-12-1-behavior-inventory.md` — broader behavior inventory with 30 safe-best-effort, 20 unsafe, and 3 impossible candidate dispositions.
 
