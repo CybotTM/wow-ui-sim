@@ -45,7 +45,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 
 | Page | Summary |
 |------|---------|
-| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 41 best-effort rows including the bounded C_Timer, C_ColorUtil, and C_TradeSkillUI behavioral slices; 81 evidence-required unsafe rows including unresolved curve contracts, unpublished C_StringUtil functions, C_ColorUtil conversion/wrapper rows, C_Timer.After, the C_Spell contracts, and the 11 C_TradeSkillUI quality/recraft/reagent-link rows; 3288 untriaged occurrences including 17 curve metadata rows |
+| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 60 best-effort rows including bounded C_Timer, C_ColorUtil, C_TradeSkillUI, and C_DamageMeter behavioral slices; 91 evidence-required unsafe rows; 3259 untriaged occurrences, including six C_DamageMeter metadata-only structure rows |
 | [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 33 best-effort rows; 4 behavior gaps are evidence-required; 1 provenance-only exception-requested row is approved |
 | [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 33 best-effort, 4 evidence-required, 1 approved provenance-only exception-requested, 0 untriaged |
 | [[patch-12-0-7-api-audit]] | 12.0.7 occurrence audit: 131 named rows classified as 29 implemented, 101 best-effort, and one repository-scope-authorized impossible 3D-model exception; restricted unit-token, encounter, taint, payload, and widget secret/aspect limits are documented per row |

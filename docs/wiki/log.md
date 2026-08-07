@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-08-07] investigation | Bound 12.0.0 C_DamageMeter triage
+
+Classified exactly 19 C_DamageMeter rows as `best-effort`/`behavioral` from the source register, clean temporary seeded-state implementation, ancestor commit `e005f99e`, and only the named seeded/empty/zero-ID/unit-detail tests; claims remain limited to exact seeded/empty lookup and shape/type assertions, with no complete retail aggregation/lifecycle/secret fidelity. Classified exactly 10 rows as `evidence-required`/`unsafe` with source-register and current implementation evidence, empty tests, and null commit/approval/scope exception; seeded-but-unasserted fields and the unimplemented reset lifecycle require authoritative semantics or a correct model/test, and no approval can close them. Six metadata-only structure rows remain untriaged. Totals are now **60 best-effort, 91 evidence-required, and 3259 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 C_TradeSkillUI slice
 
 Classified `added:C_TradeSkillUI.GetDependentReagents` as `best-effort`/`behavioral` from source-register, current professions implementation/registration, exact tests, and ancestor commit `36f425fb2`; the claim is limited to table return/iteration safety and nil/malformed/unknown-reagent behavior. Classified exactly 11 quality/recraft/reagent-link rows as `evidence-required`/`unsafe` with source-register and current professions implementation/registration evidence, empty tests, and null commit/approval/scope exception; current evidence distinguishes absent methods, placeholder empty-table/true behavior, and unproven removal behavior. Authoritative profession semantics or a correct model/test are required, and no approval can close them. Totals are now **41 best-effort, 81 evidence-required, and 3288 untriaged**.

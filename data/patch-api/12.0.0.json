@@ -3422,33 +3422,67 @@
       "id": "added:C_DamageMeter.DamageMeterAvailableCombatSession.name",
       "symbol": "C_DamageMeter.DamageMeterAvailableCombatSession.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterAvailableCombatSession.name as an added structure-field with published value metadata {\"type\":\"string\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the source register publishes a string name field, but the current seeded available-session fixture omits name and no focused test asserts it. Authoritative semantics or a correct model/test are required; no approval can close this row."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterAvailableCombatSession.sessionID",
       "symbol": "C_DamageMeter.DamageMeterAvailableCombatSession.sessionID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterAvailableCombatSession.sessionID as an added structure-field with published value metadata {\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named available-session assertion that the seeded sessionID is 1; no complete retail session lifecycle or secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSession",
@@ -3470,33 +3504,89 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSession.combatSources",
       "symbol": "C_DamageMeter.DamageMeterCombatSession.combatSources",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSession.combatSources as an added structure-field with published value metadata {\"type\":{\"arrayof\":{\"structure\":\"C_DamageMeter.DamageMeterCombatSource\"}}}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_current_session_returns_seeded_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_empty_sessions_for_unseeded_meter_types"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded/empty combatSources table shape and counts from the named session tests; no complete retail aggregation or lifecycle fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSession.maxAmount",
       "symbol": "C_DamageMeter.DamageMeterCombatSession.maxAmount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSession.maxAmount as an added structure-field with published value metadata {\"default\":0,\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_empty_sessions_for_unseeded_meter_types"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to maxAmount == 0 for empty known meter types; the seeded session maxAmount is not asserted. No complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSessionSource",
@@ -3518,33 +3608,89 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSessionSource.combatSpells",
       "symbol": "C_DamageMeter.DamageMeterCombatSessionSource.combatSpells",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSessionSource.combatSpells as an added structure-field with published value metadata {\"type\":{\"arrayof\":{\"structure\":\"C_DamageMeter.DamageMeterCombatSpell\"}}}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_current_session_returns_seeded_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_empty_sessions_for_unseeded_meter_types"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded/empty combatSpells table shape, counts, and spell lookup from the named tests; no complete retail aggregation or lifecycle fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSessionSource.maxAmount",
       "symbol": "C_DamageMeter.DamageMeterCombatSessionSource.maxAmount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSessionSource.maxAmount as an added structure-field with published value metadata {\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/startup_targeted_regressions/damage_meter.rs",
+          "source_hash": "e652a77fccbe8406779158362eaf5cb0672cf239ce4660e858bb4ce10bcf77c6",
+          "summary": "Focused spell-detail test checks seeded source/spell/detail table shape, numeric source maxAmount, string creatureName, and string unitName."
+        }
+      ],
+      "tests": [
+        "tests/startup_targeted_regressions/damage_meter.rs::damage_meter_seeded_spells_include_unit_details"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named seeded-source numeric maxAmount shape assertion; its value semantics are not established and no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource",
@@ -3566,113 +3712,250 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSource.amountPerSecond",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.amountPerSecond",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.amountPerSecond as an added structure-field with published value metadata {\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the current seeded fixture includes amountPerSecond, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.classFilename",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.classFilename",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.classFilename as an added structure-field with published value metadata {\"type\":\"string\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the current seeded fixture includes classFilename, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.isLocalPlayer",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.isLocalPlayer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.isLocalPlayer as an added structure-field with published value metadata {\"type\":\"boolean\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named seeded source assertion that Player is local; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.name",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.name as an added structure-field with published value metadata {\"type\":\"string\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named seeded source assertion that the top source is Player; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.sourceGUID",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.sourceGUID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.sourceGUID as an added structure-field with published value metadata {\"type\":\"string\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_current_session_returns_seeded_data"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded source identity and GUID-based lookup assertions from the named tests; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.specIconID",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.specIconID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.specIconID as an added structure-field with published value metadata {\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the current seeded fixture includes specIconID, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.totalAmount",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.totalAmount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.totalAmount as an added structure-field with published value metadata {\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_current_session_returns_seeded_data"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded source totals and source-lookup total matching from the named tests; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpell",
@@ -3694,81 +3977,170 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.amountPerSecond",
       "symbol": "C_DamageMeter.DamageMeterCombatSpell.amountPerSecond",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell.amountPerSecond as an added structure-field with published value metadata {\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the current seeded fixture includes spell amountPerSecond, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.combatSpellDetails",
       "symbol": "C_DamageMeter.DamageMeterCombatSpell.combatSpellDetails",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell.combatSpellDetails as an added structure-field with published value metadata {\"type\":{\"structure\":\"C_DamageMeter.DamageMeterCombatSpellUnitDetails\"}}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/startup_targeted_regressions/damage_meter.rs",
+          "source_hash": "e652a77fccbe8406779158362eaf5cb0672cf239ce4660e858bb4ce10bcf77c6",
+          "summary": "Focused spell-detail test checks seeded source/spell/detail table shape, numeric source maxAmount, string creatureName, and string unitName."
+        }
+      ],
+      "tests": [
+        "tests/startup_targeted_regressions/damage_meter.rs::damage_meter_seeded_spells_include_unit_details"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named seeded spell-detail table-shape assertion; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.creatureName",
       "symbol": "C_DamageMeter.DamageMeterCombatSpell.creatureName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell.creatureName as an added structure-field with published value metadata {\"type\":\"string\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/startup_targeted_regressions/damage_meter.rs",
+          "source_hash": "e652a77fccbe8406779158362eaf5cb0672cf239ce4660e858bb4ce10bcf77c6",
+          "summary": "Focused spell-detail test checks seeded source/spell/detail table shape, numeric source maxAmount, string creatureName, and string unitName."
+        }
+      ],
+      "tests": [
+        "tests/startup_targeted_regressions/damage_meter.rs::damage_meter_seeded_spells_include_unit_details"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named seeded spell string-shape assertion; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.spellID",
       "symbol": "C_DamageMeter.DamageMeterCombatSpell.spellID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell.spellID as an added structure-field with published value metadata {\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named seeded spell lookup assertion for spellID 19750; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.totalAmount",
       "symbol": "C_DamageMeter.DamageMeterCombatSpell.totalAmount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell.totalAmount as an added structure-field with published value metadata {\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the current seeded fixture includes spell totalAmount, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails",
@@ -3790,177 +4162,425 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.amount",
       "symbol": "C_DamageMeter.DamageMeterCombatSpellUnitDetails.amount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.amount as an added structure-field with published value metadata {\"type\":\"number\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the current seeded fixture includes unit-detail amount, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.classification",
       "symbol": "C_DamageMeter.DamageMeterCombatSpellUnitDetails.classification",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.classification as an added structure-field with published value metadata {\"type\":\"string\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the current seeded fixture includes unit-detail classification, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitClassFilename",
       "symbol": "C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitClassFilename",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitClassFilename as an added structure-field with published value metadata {\"type\":\"string\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the current seeded fixture includes unitClassFilename, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitName",
       "symbol": "C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitName as an added structure-field with published value metadata {\"type\":\"string\"}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/startup_targeted_regressions/damage_meter.rs",
+          "source_hash": "e652a77fccbe8406779158362eaf5cb0672cf239ce4660e858bb4ce10bcf77c6",
+          "summary": "Focused spell-detail test checks seeded source/spell/detail table shape, numeric source maxAmount, string creatureName, and string unitName."
+        }
+      ],
+      "tests": [
+        "tests/startup_targeted_regressions/damage_meter.rs::damage_meter_seeded_spells_include_unit_details"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named seeded unit-details string-shape assertion; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.GetAvailableCombatSessions",
       "symbol": "C_DamageMeter.GetAvailableCombatSessions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.GetAvailableCombatSessions as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"availableSessions\",\"type\":{\"arrayof\":{\"structure\":\"C_DamageMeter.DamageMeterAvailableCombatSession\"}}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to returning one seeded available-session table with sessionID 1 in the named test; no complete retail session lifecycle or secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.GetCombatSessionFromID",
       "symbol": "C_DamageMeter.GetCombatSessionFromID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.GetCombatSessionFromID as an added api with published value metadata {\"inputs\":[{\"name\":\"sessionID\",\"type\":\"number\"},{\"name\":\"type\",\"type\":{\"enum\":\"DamageMeterType\"}}],\"outputs\":[{\"name\":\"session\",\"type\":{\"structure\":\"C_DamageMeter.DamageMeterCombatSession\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/damage_meter_zero_id.rs",
+          "source_hash": "559b631203767cbe5897520c42648811e3f9e6c6b27fdaa12086c2ac21c10caa",
+          "summary": "Focused zero-ID test checks session ID 0 maps to the seeded session duration."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_empty_sessions_for_unseeded_meter_types",
+        "tests/damage_meter_zero_id.rs::damage_meter_zero_id_maps_to_seeded_session"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded ID/zero-ID lookup, missing-session nil, and empty known meter results from the named tests; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.GetCombatSessionFromType",
       "symbol": "C_DamageMeter.GetCombatSessionFromType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.GetCombatSessionFromType as an added api with published value metadata {\"inputs\":[{\"name\":\"sessionType\",\"type\":{\"enum\":\"DamageMeterSessionType\"}},{\"name\":\"type\",\"type\":{\"enum\":\"DamageMeterType\"}}],\"outputs\":[{\"name\":\"session\",\"type\":{\"structure\":\"C_DamageMeter.DamageMeterCombatSession\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_current_session_returns_seeded_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_empty_sessions_for_unseeded_meter_types"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded Overall/Current lookup and empty known meter results from the named tests; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.GetCombatSessionSourceFromID",
       "symbol": "C_DamageMeter.GetCombatSessionSourceFromID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.GetCombatSessionSourceFromID as an added api with published value metadata {\"inputs\":[{\"name\":\"sessionID\",\"type\":\"number\"},{\"name\":\"type\",\"type\":{\"enum\":\"DamageMeterType\"}},{\"name\":\"sourceGUID\",\"type\":\"string\"}],\"outputs\":[{\"name\":\"sessionSource\",\"type\":{\"structure\":\"C_DamageMeter.DamageMeterCombatSessionSource\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_empty_sessions_for_unseeded_meter_types"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded GUID lookup, optional creature-ID handling, missing-source nil, and empty known meter results from the named tests; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.GetCombatSessionSourceFromType",
       "symbol": "C_DamageMeter.GetCombatSessionSourceFromType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.GetCombatSessionSourceFromType as an added api with published value metadata {\"inputs\":[{\"name\":\"sessionType\",\"type\":{\"enum\":\"DamageMeterSessionType\"}},{\"name\":\"type\",\"type\":{\"enum\":\"DamageMeterType\"}},{\"name\":\"sourceGUID\",\"type\":\"string\"}],\"outputs\":[{\"name\":\"sessionSource\",\"type\":{\"structure\":\"C_DamageMeter.DamageMeterCombatSessionSource\"}}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_current_session_returns_seeded_data",
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_empty_sessions_for_unseeded_meter_types"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded Overall/Current source lookup, optional creature-ID handling, missing-source nil, and empty known meter results from the named tests; no complete retail aggregation/lifecycle/secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.IsDamageMeterAvailable",
       "symbol": "C_DamageMeter.IsDamageMeterAvailable",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.IsDamageMeterAvailable as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"isAvailable\",\"type\":\"boolean\"},{\"name\":\"failureReason\",\"type\":\"string\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/system_api_seeded.rs",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
+          "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
+        }
+      ],
+      "tests": [
+        "tests/system_api_seeded.rs::test_c_damage_meter_returns_seeded_session_and_source_data"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "e005f99e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named seeded availability assertion returning true with no failure reason; no complete retail availability lifecycle or secret fidelity is claimed."
     },
     {
       "id": "added:C_DamageMeter.ResetAllCombatSessions",
       "symbol": "C_DamageMeter.ResetAllCombatSessions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.ResetAllCombatSessions as an added api with published value metadata {\"inputs\":null,\"outputs\":null}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
+          "summary": "Current temporary damage-meter state installs seeded startup data and lookup helpers but does not define ResetAllCombatSessions; the reset lifecycle is unimplemented."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the source register adds ResetAllCombatSessions, but the current damage-meter implementation has no reset operation and the focused test set is empty. The reset lifecycle requires authoritative semantics or a correct model/test; no approval can close this row."
     },
     {
       "id": "added:C_DeathRecap.DeathRecapEventInfo",
