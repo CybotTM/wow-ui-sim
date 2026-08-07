@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Bound 12.0.0 C_Timer signature slice
+
+Classified `changed:C_Timer.NewTimer` and `changed:C_Timer.NewTicker` as best-effort behavioral from checked-in signatures, current timer/proxy paths, ancestor commits `330e521be`/`3d767dbd2`, and the five named timer-container tests; claims remain limited to function/container acceptance, returned container identity/proxy equality, cancellation, and independent ticker counts. Classified `changed:C_Timer.After` as evidence-required unsafe because only an ignored focused-looking test exists; callback/lifecycle semantics require a correct modeled implementation and executable behavioral proof, with no approval path. The register now totals **38 best-effort, 53 evidence-required, and 3319 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 C_StringUtil slice
 
 Classified `added:C_StringUtil.EscapeQuotedCodes` as best-effort behavioral from the checked-in source register, current `src/c_api/c_string_util.rs`, exact focused test, and ancestor commit `b3f579f70`; the claim is limited to quoted-code pipe escaping for tested plain/color-code cases. Classified eight unpublished `C_StringUtil` rows as evidence-required unsafe with no approval path. The register now totals **36 best-effort, 52 evidence-required, and 3322 untriaged**.

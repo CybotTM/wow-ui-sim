@@ -43044,49 +43044,131 @@
       "id": "changed:C_Timer.After",
       "symbol": "C_Timer.After",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Timer.After before/after: the callback changes from funtainer to LuaFunctionContainer while the seconds input and no-output shape remain.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/timer_layout.rs",
+          "summary": "Current raw C_Timer.After extracts a plain Lua function and enqueues a one-shot timer; it does not establish the changed LuaFunctionContainer callback contract.",
+          "source_hash": "ec88a341936e79588115e4c8adef316f2163ee57720baa3821c28bf7f4e2bb7c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "The temporary proxy path adds container coercion around C_Timer.After, but exact callback, scheduling, lifecycle, and edge semantics remain unproven.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/missing_apis.rs",
+          "summary": "The only focused-looking C_Timer.After test, test_c_timer_after, is ignored with `C_Timer not implemented`; no focused executable behavioral proof exists.",
+          "source_hash": "6f897d48301157d1f6bd3d1dd11c72a828bec0a39c83673e2d54de51497e1a5e"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No focused executable proof exists. Callback/lifecycle semantics require a correct modeled implementation and executable behavioral proof; exact scheduling, lifecycle, GC, and edge semantics remain unproven, and no approval can close this row."
     },
     {
       "id": "changed:C_Timer.NewTicker",
       "symbol": "C_Timer.NewTicker",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Timer.NewTicker before/after: callback and cbObject change from funtainer to LuaFunctionContainer; iterations remains a nilable number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/timer_layout.rs",
+          "summary": "Current timer_layout.rs validates NewTicker seconds, stores each registration's remaining count, returns a timer handle, and passes the registered callback argument on fire; the raw path accepts plain functions before the temporary container wrapper.",
+          "source_hash": "ec88a341936e79588115e4c8adef316f2163ee57720baa3821c28bf7f4e2bb7c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "The current temporary proxy factory accepts plain functions or userdata containers, returns the callback container from NewTicker, binds each timer handle, and cancels all handles backed by a container.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/timer_callback_container.rs",
+          "summary": "The four focused NewTicker tests cover container acceptance/identity, plain-function wrapping, independent counts for two registrations sharing a container, and cancellation.",
+          "source_hash": "4c96ac8d4487eeff1e0df3cc67a0e3810f1b43b50f291bf847053ba9e9faec46"
+        }
+      ],
+      "tests": [
+        "tests/timer_callback_container.rs::newticker_accepts_container_and_returns_it",
+        "tests/timer_callback_container.rs::newticker_wraps_plain_function_in_a_container",
+        "tests/timer_callback_container.rs::shared_container_two_tickers_keep_independent_counts",
+        "tests/timer_callback_container.rs::cancelling_container_stops_the_ticker"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "330e521be",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to function/container acceptance, returned container identity, cancellation, and independent per-registration ticker counts covered by the four named tests. Exact scheduling, lifecycle, GC, and edge semantics remain unproven."
     },
     {
       "id": "changed:C_Timer.NewTimer",
       "symbol": "C_Timer.NewTimer",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Timer.NewTimer before/after: callback and cbObject change from funtainer to LuaFunctionContainer.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/timer_layout.rs",
+          "summary": "Current timer_layout.rs validates NewTimer seconds, creates and returns a timer handle, and passes the registered callback argument on fire; the raw path accepts plain functions before the temporary container wrapper.",
+          "source_hash": "ec88a341936e79588115e4c8adef316f2163ee57720baa3821c28bf7f4e2bb7c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "The current temporary proxy factory coerces plain functions or userdata containers, binds NewTimer handles to the container, and passes a proxy sharing container state.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/timer_callback_container.rs",
+          "summary": "The focused NewTimer test verifies one callback argument, proxy equality with the returned handle, distinct raw-key identity, and shared handle fields.",
+          "source_hash": "4c96ac8d4487eeff1e0df3cc67a0e3810f1b43b50f291bf847053ba9e9faec46"
+        }
+      ],
+      "tests": [
+        "tests/timer_callback_container.rs::fired_callback_receives_proxy_equal_to_handle"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the shared function/container wrapper path and the named NewTimer proxy/handle test: the fired proxy receives one argument, compares equal to the returned handle, remains a distinct raw key, and shares its fields. Exact scheduling, lifecycle, GC, and edge semantics remain unproven."
     },
     {
       "id": "changed:C_TooltipInfo.GetRecipeResultItem",

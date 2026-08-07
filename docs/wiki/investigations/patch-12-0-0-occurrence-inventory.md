@@ -1,10 +1,10 @@
 # Patch 12.0.0 Occurrence Inventory
-Occurrence-level register derived from explicit wowless retail snapshots. Thirty-six rows carry evidence-backed best-effort behavioral classifications; fifty-two rows carry evidence-required unsafe classifications; the remaining 3322 rows are neutral pending evidence-backed classification, including 17 curve-family metadata rows. The nine curve-family best-effort rows are limited to tested factory/table shape, scalar interpolation/copy behavior, and color-object/copy shape; 23 unresolved curve contracts remain evidence-required and cannot be approved closed. The C_StringUtil slice contains one best-effort behavioral row limited to quoted-code pipe escaping for tested plain/color-code cases and eight evidence-required unsafe rows because the current model does not publish them; authoritative semantics or correct implementations are required and no approval can close them. The source covers wowless schema surfaces, not historical FrameXML.
+Occurrence-level register derived from explicit wowless retail snapshots. Thirty-eight rows carry evidence-backed best-effort behavioral classifications; fifty-three rows carry evidence-required unsafe classifications; the remaining 3319 rows are neutral pending evidence-backed classification, including 17 curve-family metadata rows. The nine curve-family best-effort rows are limited to tested factory/table shape, scalar interpolation/copy behavior, and color-object/copy shape; 23 unresolved curve contracts remain evidence-required and cannot be approved closed. The C_StringUtil slice contains one best-effort behavioral row limited to quoted-code pipe escaping for tested plain/color-code cases and eight evidence-required unsafe rows because the current model does not publish them; authoritative semantics or correct implementations are required and no approval can close them. The bounded C_Timer slice classifies NewTimer/NewTicker as best-effort behavioral, limited to function/container acceptance, returned container identity/proxy equality, cancellation, and independent ticker counts; exact scheduling, lifecycle, GC, and edge semantics remain unproven. C_Timer.After is evidence-required unsafe because its only focused-looking test is ignored; callback/lifecycle semantics require a correct modeled implementation and executable behavioral proof, and no approval can close it. The source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 36 best-effort, 52 evidence-required, 0 exception-requested, 3322 untriaged
+- **Rows:** 3410 total — 0 implemented, 38 best-effort, 53 evidence-required, 0 exception-requested, 3319 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -2596,9 +2596,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_Reputation.GetFactionParagonInfo` | untriaged | api | changed | api changed in 12.0.0. |
 | `C_Reputation.IsFactionParagon` | untriaged | api | changed | api changed in 12.0.0. |
 | `C_SpecializationInfo.GetSpecializationInfo` | untriaged | api | changed | api changed in 12.0.0. |
-| `C_Timer.After` | untriaged | api | changed | api changed in 12.0.0. |
-| `C_Timer.NewTicker` | untriaged | api | changed | api changed in 12.0.0. |
-| `C_Timer.NewTimer` | untriaged | api | changed | api changed in 12.0.0. |
+| `C_Timer.After` | evidence-required | api | changed | No focused executable proof exists; the only focused-looking test is ignored. Callback/lifecycle semantics require a correct modeled implementation and executable behavioral proof, and no approval can close this row. |
+| `C_Timer.NewTicker` | best-effort | api | changed | Best-effort behavioral evidence is limited to function/container acceptance, returned container identity, cancellation, and independent per-registration ticker counts covered by the four named tests; exact scheduling, lifecycle, GC, and edge semantics remain unproven. |
+| `C_Timer.NewTimer` | best-effort | api | changed | Best-effort behavioral evidence is limited to the named proxy/handle test: the fired proxy receives one argument, compares equal to the returned handle, remains a distinct raw key, and shares its fields; exact scheduling, lifecycle, GC, and edge semantics remain unproven. |
 | `C_TooltipInfo.GetRecipeResultItem` | untriaged | api | changed | api changed in 12.0.0. |
 | `C_TooltipInfo.GetRecipeResultItemForOrder` | untriaged | api | changed | api changed in 12.0.0. |
 | `C_TradeSkillUI.GetEnchantItems` | untriaged | api | changed | api changed in 12.0.0. |

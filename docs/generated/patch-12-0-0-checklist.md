@@ -2582,9 +2582,9 @@
 2582. [untriaged] `changed:C_Reputation.GetFactionParagonInfo` — untriaged
 2583. [untriaged] `changed:C_Reputation.IsFactionParagon` — untriaged
 2584. [untriaged] `changed:C_SpecializationInfo.GetSpecializationInfo` — untriaged
-2585. [untriaged] `changed:C_Timer.After` — untriaged
-2586. [untriaged] `changed:C_Timer.NewTicker` — untriaged
-2587. [untriaged] `changed:C_Timer.NewTimer` — untriaged
+2585. [evidence-required] `changed:C_Timer.After` — unsafe
+2586. [best-effort] `changed:C_Timer.NewTicker` — behavioral
+2587. [best-effort] `changed:C_Timer.NewTimer` — behavioral
 2588. [untriaged] `changed:C_TooltipInfo.GetRecipeResultItem` — untriaged
 2589. [untriaged] `changed:C_TooltipInfo.GetRecipeResultItemForOrder` — untriaged
 2590. [untriaged] `changed:C_TradeSkillUI.GetEnchantItems` — untriaged
