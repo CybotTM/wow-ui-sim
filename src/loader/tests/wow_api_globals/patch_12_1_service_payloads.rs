@@ -1,5 +1,6 @@
 //! Focused 12.1 service-payload compatibility contracts.
 
+#[cfg(feature = "retail-12-1-0")]
 use super::super::*;
 
 #[cfg(feature = "retail-12-1-0")]
