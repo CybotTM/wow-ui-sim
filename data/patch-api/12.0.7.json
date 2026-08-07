@@ -2128,8 +2128,8 @@
       ],
       "assertions": [],
       "commit": null,
-      "approval_id": null,
-      "notes": "Permanent 2D/no-3D scope leaves this model-unit GUID method absent; conditional-secret 3D model behavior is impossible to model faithfully without adding the excluded 3D subsystem."
+      "approval_id": "user-chat:changed:ModelSceneActorBase.GetModelUnitGUID:2026-08-07-no-3d-out-of-scope",
+      "notes": "Approved impossible exception: the permanent project 2D/no-3D scope leaves this model-unit GUID method absent; conditional-secret 3D model behavior is impossible to model faithfully without adding the excluded 3D subsystem."
     },
     {
       "id": "changed:ScrollFrame.GetHorizontalScroll",

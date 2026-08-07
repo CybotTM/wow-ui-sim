@@ -47,8 +47,8 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 |------|---------|
 | [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 33 rows have direct behavioral evidence and 5 are item-specific pending exceptions awaiting separate informed approval or new live evidence |
 | [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 33 best-effort, 0 implemented, 5 exception-requested, 0 untriaged; each exception awaits separate informed approval or new live evidence |
-| [[patch-12-0-7-api-audit]] | 12.0.7 occurrence audit: 131 named rows classified as 29 implemented, 101 best-effort, and one unapproved impossible 3D-model exception candidate; restricted unit-token, encounter, taint, payload, and widget secret/aspect limits are documented per row |
-| [[patch-12-0-7-occurrence-inventory]] | 131-row 12.0.7 register: 29 implemented, 101 best-effort, 1 exception-requested, 0 untriaged; crawler-omitted CVar names remain explicit metadata |
+| [[patch-12-0-7-api-audit]] | 12.0.7 occurrence audit: 131 named rows classified as 29 implemented, 101 best-effort, and one approved impossible 3D-model exception; restricted unit-token, encounter, taint, payload, and widget secret/aspect limits are documented per row |
+| [[patch-12-0-7-occurrence-inventory]] | 131-row 12.0.7 register: 29 implemented, 101 best-effort, 1 approved impossible exception-requested row, 0 untriaged; crawler-omitted CVar names remain explicit metadata |
 | [[patch-12-1-api-audit]] | 12.1 audit split: 432-row FrameXML register complete; separate 54-row broader behavior register has 30 direct-test-backed best-effort rows and 24 item-specific exception requests |
 | [[patch-12-1-framexml-symbol-inventory]] | Exhaustive 320-added/112-removed local FrameXML snapshot: 1 implemented, 431 best-effort, 0 exception-requested, 0 untriaged; includes explicit PTR source and LoD runtime proof for mismatches (430 distinct names; two duplicates) |
 | [[patch-12-1-behavior-inventory]] | 54 non-FrameXML behavior boundaries: 0 implemented, 30 best-effort, 24 exception-requested, 0 untriaged; candidate split is 30 safe best-effort, 21 unsafe, and 3 impossible; no exception is approved |
