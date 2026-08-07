@@ -21,7 +21,7 @@
 21. [best-effort] `changed:JustifyProbe.SizeVariants` — behavioral
 22. [best-effort] `changed:JustifyProbe.ExplicitAnchors` — behavioral
 23. [best-effort] `changed:JustifyProbe.EditBoxRegions` — behavioral
-24. [untriaged] `changed:JustifyProbe.MessageRegions` — untriaged
+24. [best-effort] `changed:JustifyProbe.MessageRegions` — behavioral
 25. [best-effort] `changed:ProtectedRetailProbe.PlainFrame` — behavioral
 26. [best-effort] `changed:ProtectedRetailProbe.XmlProtected` — behavioral
 27. [untriaged] `changed:ProtectedRetailProbe.SecureStore` — untriaged

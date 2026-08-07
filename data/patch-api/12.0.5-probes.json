@@ -560,16 +560,25 @@
       "id": "changed:JustifyProbe.MessageRegions",
       "symbol": "JustifyProbe.MessageRegions",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/xml_text_region_defaults.rs::justify_probe_message_regions_stay_absent_with_owner_insets",
+          "summary": "MessageFrame and ScrollingMessageFrame owners remain unanchored, expose no FontString regions, and retain explicit owner TextInsets.",
+          "source_hash": "a33cc6f29f0a70f218f8a5cda32e6b1f7419826163c13ec43b41d558307ead65"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/xml_text_region_defaults.rs::justify_probe_message_regions_stay_absent_with_owner_insets"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "ce7b2c3cd",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained MessageFrame and ScrollingMessageFrame owner/region/TextInsets observations are directly regression-tested."
     },
     {
       "id": "changed:ProtectedRetailProbe.PlainFrame",

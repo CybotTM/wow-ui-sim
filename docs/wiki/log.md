@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | MessageFrame region replay
+
+Added focused MessageFrame and ScrollingMessageFrame owner, region, anchor, and TextInsets proof. The 12.0.5 register now contains 30 best-effort and 8 untriaged rows.
+
 ## [2026-08-07] investigation | FontString size, anchor, and EditBox replays
 
 Added focused no-size/partial-size/full-size FontString checks, explicit TOP/BOTTOM/LEFT/RIGHT/TOPLEFT anchor controls, and no-size/sized/inset EditBox backing-region proof. The 12.0.5 register now contains 29 best-effort and 9 untriaged rows.
