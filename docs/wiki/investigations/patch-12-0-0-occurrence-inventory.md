@@ -1,10 +1,10 @@
 # Patch 12.0.0 Occurrence Inventory
-Occurrence-level register derived from explicit wowless retail snapshots. Thirty-five rows carry evidence-backed best-effort behavioral classifications; forty-four rows carry evidence-required unsafe classifications; the remaining 3331 rows are neutral pending evidence-backed classification, including 17 curve-family metadata rows. The nine curve-family best-effort rows are limited to tested factory/table shape, scalar interpolation/copy behavior, and color-object/copy shape; 23 unresolved curve contracts remain evidence-required and cannot be approved closed. The source covers wowless schema surfaces, not historical FrameXML.
+Occurrence-level register derived from explicit wowless retail snapshots. Thirty-six rows carry evidence-backed best-effort behavioral classifications; fifty-two rows carry evidence-required unsafe classifications; the remaining 3322 rows are neutral pending evidence-backed classification, including 17 curve-family metadata rows. The nine curve-family best-effort rows are limited to tested factory/table shape, scalar interpolation/copy behavior, and color-object/copy shape; 23 unresolved curve contracts remain evidence-required and cannot be approved closed. The C_StringUtil slice contains one best-effort behavioral row limited to quoted-code pipe escaping for tested plain/color-code cases and eight evidence-required unsafe rows because the current model does not publish them; authoritative semantics or correct implementations are required and no approval can close them. The source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 35 best-effort, 44 evidence-required, 0 exception-requested, 3331 untriaged
+- **Rows:** 3410 total — 0 implemented, 36 best-effort, 52 evidence-required, 0 exception-requested, 3322 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -576,15 +576,15 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_SpellDiminish.SpellDiminishTrackerInfo.showCountdown` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_SpellDiminish.SpellDiminishTrackerInfo.startTime` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_StableInfo.IsBonusPetSlotAvailable` | untriaged | api | added | api added in 12.0.0. |
-| `C_StringUtil.EscapeLuaFormatString` | untriaged | api | added | api added in 12.0.0. |
-| `C_StringUtil.EscapeLuaPatterns` | untriaged | api | added | api added in 12.0.0. |
-| `C_StringUtil.EscapeQuotedCodes` | untriaged | api | added | api added in 12.0.0. |
-| `C_StringUtil.FloorToNearestString` | untriaged | api | added | api added in 12.0.0. |
-| `C_StringUtil.RemoveContiguousSpaces` | untriaged | api | added | api added in 12.0.0. |
-| `C_StringUtil.RoundToNearestString` | untriaged | api | added | api added in 12.0.0. |
-| `C_StringUtil.StripHyperlinks` | untriaged | api | added | api added in 12.0.0. |
-| `C_StringUtil.TruncateWhenZero` | untriaged | api | added | api added in 12.0.0. |
-| `C_StringUtil.WrapString` | untriaged | api | added | api added in 12.0.0. |
+| `C_StringUtil.EscapeLuaFormatString` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
+| `C_StringUtil.EscapeLuaPatterns` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
+| `C_StringUtil.EscapeQuotedCodes` | best-effort | api | added | Best-effort behavioral evidence is limited to quoted-code pipe escaping for the tested plain/color-code cases; exact edge/secret/localization semantics remain unproven. |
+| `C_StringUtil.FloorToNearestString` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
+| `C_StringUtil.RemoveContiguousSpaces` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
+| `C_StringUtil.RoundToNearestString` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
+| `C_StringUtil.StripHyperlinks` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
+| `C_StringUtil.TruncateWhenZero` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
+| `C_StringUtil.WrapString` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
 | `C_TaskQuest.GetQuestUIWidgetSetByType` | untriaged | api | added | api added in 12.0.0. |
 | `C_TooltipComparison.CompareItem` | untriaged | api | added | api added in 12.0.0. |
 | `C_TooltipInfo.GetOutfit` | untriaged | api | added | api added in 12.0.0. |

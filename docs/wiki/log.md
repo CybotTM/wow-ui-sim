@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Bound 12.0.0 C_StringUtil slice
+
+Classified `added:C_StringUtil.EscapeQuotedCodes` as best-effort behavioral from the checked-in source register, current `src/c_api/c_string_util.rs`, exact focused test, and ancestor commit `b3f579f70`; the claim is limited to quoted-code pipe escaping for tested plain/color-code cases. Classified eight unpublished `C_StringUtil` rows as evidence-required unsafe with no approval path. The register now totals **36 best-effort, 52 evidence-required, and 3322 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 curve-family triage
 
 Classified nine curve factory/object rows as best-effort behavioral from the checked-in source register, temporary proxy factory, ancestor commit `22ab64e5e`, and only the relevant `userdata_proxy` tests; claims remain limited to tested factory/table shape, scalar interpolation/copy behavior, and color-object/copy shape. Classified 23 unresolved curve contracts as evidence-required unsafe with empty tests and no approval path because the generic proxy omits or does not faithfully establish their contracts; they cannot be approved closed. 17 curve-family metadata rows remain untriaged. The register now totals **35 best-effort, 44 evidence-required, and 3331 untriaged**.

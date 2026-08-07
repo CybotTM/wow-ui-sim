@@ -9237,145 +9237,270 @@
       "id": "added:C_StringUtil.EscapeLuaFormatString",
       "symbol": "C_StringUtil.EscapeLuaFormatString",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_StringUtil.EscapeLuaFormatString as an added api with a string input and string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_string_util.rs",
+          "summary": "Current C_StringUtil model exposes only EscapeQuotedCodes; it does not publish EscapeLuaFormatString.",
+          "source_hash": "edfcac2cb9881821d59e69c7103a1a97dcc564706a60487cb9be2b21909ac28b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row."
     },
     {
       "id": "added:C_StringUtil.EscapeLuaPatterns",
       "symbol": "C_StringUtil.EscapeLuaPatterns",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_StringUtil.EscapeLuaPatterns as an added api with a string input and string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_string_util.rs",
+          "summary": "Current C_StringUtil model exposes only EscapeQuotedCodes; it does not publish EscapeLuaPatterns.",
+          "source_hash": "edfcac2cb9881821d59e69c7103a1a97dcc564706a60487cb9be2b21909ac28b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row."
     },
     {
       "id": "added:C_StringUtil.EscapeQuotedCodes",
       "symbol": "C_StringUtil.EscapeQuotedCodes",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_StringUtil.EscapeQuotedCodes as an added api with a string input and string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_string_util.rs",
+          "summary": "Current C_StringUtil model publishes EscapeQuotedCodes and doubles pipe characters in the returned string.",
+          "source_hash": "edfcac2cb9881821d59e69c7103a1a97dcc564706a60487cb9be2b21909ac28b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/frame_table_iteration.rs",
+          "summary": "Focused test covers plain quoted text and color-code pipe escaping, including the displayable output.",
+          "source_hash": "84de4c69b748525ff9a77686491b5dcf83e8d0fc4d922119b9f1c7e2605b5a8f"
+        }
+      ],
+      "tests": [
+        "tests/frame_table_iteration.rs::c_string_util_escape_quoted_codes_returns_displayable_string"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b3f579f70",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to quoted-code pipe escaping for the tested plain/color-code cases; exact edge/secret/localization semantics remain unproven."
     },
     {
       "id": "added:C_StringUtil.FloorToNearestString",
       "symbol": "C_StringUtil.FloorToNearestString",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_StringUtil.FloorToNearestString as an added api with a number input and string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_string_util.rs",
+          "summary": "Current C_StringUtil model exposes only EscapeQuotedCodes; it does not publish FloorToNearestString.",
+          "source_hash": "edfcac2cb9881821d59e69c7103a1a97dcc564706a60487cb9be2b21909ac28b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row."
     },
     {
       "id": "added:C_StringUtil.RemoveContiguousSpaces",
       "symbol": "C_StringUtil.RemoveContiguousSpaces",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_StringUtil.RemoveContiguousSpaces as an added api with string and number inputs and a string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_string_util.rs",
+          "summary": "Current C_StringUtil model exposes only EscapeQuotedCodes; it does not publish RemoveContiguousSpaces.",
+          "source_hash": "edfcac2cb9881821d59e69c7103a1a97dcc564706a60487cb9be2b21909ac28b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row."
     },
     {
       "id": "added:C_StringUtil.RoundToNearestString",
       "symbol": "C_StringUtil.RoundToNearestString",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_StringUtil.RoundToNearestString as an added api with a number input and string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_string_util.rs",
+          "summary": "Current C_StringUtil model exposes only EscapeQuotedCodes; it does not publish RoundToNearestString.",
+          "source_hash": "edfcac2cb9881821d59e69c7103a1a97dcc564706a60487cb9be2b21909ac28b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row."
     },
     {
       "id": "added:C_StringUtil.StripHyperlinks",
       "symbol": "C_StringUtil.StripHyperlinks",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_StringUtil.StripHyperlinks as an added api with text input, four optional boolean inputs, and a string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_string_util.rs",
+          "summary": "Current C_StringUtil model exposes only EscapeQuotedCodes; it does not publish StripHyperlinks.",
+          "source_hash": "edfcac2cb9881821d59e69c7103a1a97dcc564706a60487cb9be2b21909ac28b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row."
     },
     {
       "id": "added:C_StringUtil.TruncateWhenZero",
       "symbol": "C_StringUtil.TruncateWhenZero",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_StringUtil.TruncateWhenZero as an added api with a number input and string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_string_util.rs",
+          "summary": "Current C_StringUtil model exposes only EscapeQuotedCodes; it does not publish TruncateWhenZero.",
+          "source_hash": "edfcac2cb9881821d59e69c7103a1a97dcc564706a60487cb9be2b21909ac28b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row."
     },
     {
       "id": "added:C_StringUtil.WrapString",
       "symbol": "C_StringUtil.WrapString",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_StringUtil.WrapString as an added api with a string input, two nilable string inputs, and a string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_string_util.rs",
+          "summary": "Current C_StringUtil model exposes only EscapeQuotedCodes; it does not publish WrapString.",
+          "source_hash": "edfcac2cb9881821d59e69c7103a1a97dcc564706a60487cb9be2b21909ac28b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row."
     },
     {
       "id": "added:C_TaskQuest.GetQuestUIWidgetSetByType",
