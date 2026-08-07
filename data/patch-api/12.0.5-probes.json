@@ -647,16 +647,27 @@
       "id": "changed:ScaleEventProbe.OrderedEvents",
       "symbol": "ScaleEventProbe.OrderedEvents",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "scale events",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/iced_app/resize_event_tests.rs::ui_scale_cvar_change_fires_pair_before_cvar_update",
+          "summary": "uiScale and useUiScale changes expose the new effective scale while the old CVar remains visible during DISPLAY_SIZE_CHANGED and UI_SCALE_CHANGED, then store the CVar and dispatch CVAR_UPDATE.",
+          "source_hash": "18656a3c64c518b2a44aa132f8a3ed06c7d6c7c51deb4fc705c9d334505a7fc7"
+        }
+      ],
+      "tests": [
+        "src/iced_app/resize_event_tests.rs::resizing_window_fires_display_size_changed_then_ui_scale_changed",
+        "src/iced_app/resize_event_tests.rs::startup_fires_display_scale_pair_before_player_login_not_after",
+        "src/iced_app/resize_event_tests.rs::ui_scale_cvar_change_fires_pair_before_cvar_update"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "198927536",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Observable resize, startup, and UI-scale CVar transitions now match the retained pair/CVAR_UPDATE ordering. Same-size OS transitions remain a separate unobservable row."
     },
     {
       "id": "changed:ScaleEventProbe.SameSizeDuplicatePair",

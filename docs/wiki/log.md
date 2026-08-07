@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | UI-scale CVar event ordering
+
+Modeled successful `SetCVar` event dispatch and the retail `uiScale`/`useUiScale` boundary: new effective scale first, then `DISPLAY_SIZE_CHANGED` and `UI_SCALE_CHANGED` while the old CVar remains visible, then storage and `CVAR_UPDATE`. The 12.0.5 register now contains 31 best-effort and 7 untriaged rows.
+
 ## [2026-08-07] investigation | MessageFrame region replay
 
 Added focused MessageFrame and ScrollingMessageFrame owner, region, anchor, and TextInsets proof. The 12.0.5 register now contains 30 best-effort and 8 untriaged rows.

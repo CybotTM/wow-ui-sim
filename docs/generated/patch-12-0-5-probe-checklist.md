@@ -25,7 +25,7 @@
 25. [best-effort] `changed:ProtectedRetailProbe.PlainFrame` — behavioral
 26. [best-effort] `changed:ProtectedRetailProbe.XmlProtected` — behavioral
 27. [untriaged] `changed:ProtectedRetailProbe.SecureStore` — untriaged
-28. [untriaged] `changed:ScaleEventProbe.OrderedEvents` — untriaged
+28. [best-effort] `changed:ScaleEventProbe.OrderedEvents` — behavioral
 29. [untriaged] `changed:ScaleEventProbe.SameSizeDuplicatePair` — untriaged
 30. [best-effort] `changed:SetAtlasProbe.InvalidArguments` — behavioral
 31. [best-effort] `changed:TextureSetTextureProbe.PathFdid` — behavioral
