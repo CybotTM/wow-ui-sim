@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Add private-object and forbidden-aspect probe guidance
+
+Documented `PrivateScriptObjectProbe` and `ForbiddenAspectsProbe` as addon-tainted live-evidence tools. Their corresponding 12.1 rows remain open until raw captures are retained and interpreted; neither proves secure-caller behavior or unsupported internal/input paths.
+
 ## [2026-08-07] investigation | Add 12.1 live-client probe guidance
 
 Documented [UnitAuraSecretProbe](../addons/UnitAuraSecretProbe/README.md) and [DurationTextBindingProbe](../addons/DurationTextBindingProbe/README.md) as evidence paths. UnitAura constrains addon-tainted AuraData and `UNIT_AURA` behavior but cannot establish Blizzard-secure caller access; DurationTextBinding constrains representation, identity, and lifetime observations but cannot prove native finalization. Corresponding 12.1 rows remain open until raw retail/PTR SavedVariables captures are retained and interpreted.
