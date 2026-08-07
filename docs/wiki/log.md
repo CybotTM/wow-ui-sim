@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Panel pulse and DevTools dump replays
+
+Added exact two-panel `ShowUIPanel`/`CloseAllWindows` lifecycle proof and a loaded-Blizzard-UI `DevTools_Dump` frame-array metadata replay. The 12.0.5 register now contains 25 best-effort and 13 untriaged rows.
+
 ## [2026-08-07] investigation | XML protected-frame replay
 
 Added an exact XML `protected="true"` frame replay covering protection, forbidden state, absent legacy setters, failing setter calls, and retained protection. The 12.0.5 register now contains 23 best-effort and 15 untriaged rows.

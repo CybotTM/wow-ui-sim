@@ -5,13 +5,13 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 23 best-effort, 0 exception-requested, 15 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 25 best-effort, 0 exception-requested, 13 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
 | `AnimScriptProbe.HandlerMatrix` | best-effort | resolved | script support | changed | Frame, AnimationGroup, and all nine Animation subtypes match the documented matrix: unsupported HasScript calls succeed and return false, while SetScript rejects those handlers. |
 | `AttributeDispatchProbe.ScalarRepeat` | best-effort | resolved | attributes | changed | Repeated scalar SetAttribute dispatches OnAttributeChanged; explicit false is preserved and delivered as false. |
-| `AttributeDispatchProbe.PanelPulse` | untriaged | best-effort | panel lifecycle | changed | Repeated ShowUIPanel pulse followed by CloseAllWindows preserves the expected panel-stack behavior. |
+| `AttributeDispatchProbe.PanelPulse` | best-effort | best-effort | panel lifecycle | changed | Repeated ShowUIPanel pulse followed by CloseAllWindows preserves the expected panel-stack behavior. |
 | `CoreBehaviorProbe.ForbiddenState` | best-effort | resolved | forbidden frames | changed | Normal addon frames remain un-forbidden; SetForbidden does not create forbidden state. |
 | `CoreBehaviorProbe.ForbiddenConstructor` | best-effort | resolved | forbidden frames | changed | CreateForbiddenFrame is nil on retail, so the probe does not enter its creation or EnumerateFrames branch. |
 | `CoreBehaviorProbe.UnitEventFilter` | best-effort | resolved | events | changed | Valid RegisterUnitEvent registration works; invalid unit filters are dropped while the event remains registered. |
@@ -19,7 +19,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `CoreBehaviorProbe.AttributeWildcardValues` | best-effort | resolved | attributes | changed | Wildcard true/string values and one-, two-, and three-argument lookup behavior are preserved. |
 | `CoreBehaviorProbe.RaiseLowerLevel` | best-effort | resolved | frame ordering | changed | Raise/Lower affect same-level ties but cannot overtake a higher frame level. |
 | `CoreBehaviorProbe.MouseFocusOrder` | untriaged | best-effort | mouse focus | changed | GetMouseFoci/GetMouseFocus shape and hit ordering after Raise/Lower. |
-| `DevToolsDumpProbe.FrameArrayDump` | untriaged | resolved | frame identity | changed | tinsert(frame, foo), frame slot contents, and DevTools_Dump output metadata. |
+| `DevToolsDumpProbe.FrameArrayDump` | best-effort | resolved | frame identity | changed | tinsert(frame, foo), frame slot contents, and DevTools_Dump output metadata. |
 | `FrameIdentityProbe.IdentitySlot` | best-effort | resolved | identity | changed | Frame slot [0] contains the identity userdata token. |
 | `FrameIdentityProbe.SurrogateDispatch` | best-effort | resolved | identity | changed | Replacing [0] redirects protection and method dispatch; [1] alone does not. |
 | `FrameIdentityProbe.DuplicateFreshness` | best-effort | resolved | identity | changed | Duplicate named frames receive fresh Lua objects, identity tokens, and custom-field state. |
@@ -51,9 +51,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 23
+- best-effort: 25
 - exception-requested: 0
-- untriaged: 15
+- untriaged: 13
 
 ## Sources
 

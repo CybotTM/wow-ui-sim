@@ -71,16 +71,25 @@
       "id": "changed:AttributeDispatchProbe.PanelPulse",
       "symbol": "AttributeDispatchProbe.PanelPulse",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "panel lifecycle",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/test_showuipanel.rs::repeated_show_ui_panel_pulse_closes_active_panel_stack",
+          "summary": "Sequential center-panel shows replace the first panel, and CloseAllWindows hides the active second panel.",
+          "source_hash": "99fcb367727c43396ec30de77d9fa2066e7ac633d6e81f4da4fc1917521e79b4"
+        }
+      ],
+      "tests": [
+        "tests/test_showuipanel.rs::repeated_show_ui_panel_pulse_closes_active_panel_stack"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cccddd5ad",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained two-panel ShowUIPanel pulse and CloseAllWindows stack behavior is directly regression-tested."
     },
     {
       "id": "changed:CoreBehaviorProbe.ForbiddenState",
@@ -246,16 +255,25 @@
       "id": "changed:DevToolsDumpProbe.FrameArrayDump",
       "symbol": "DevToolsDumpProbe.FrameArrayDump",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "frame identity",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_debug_tools_loads.rs::devtools_dump_captures_frame_array_metadata",
+          "summary": "Frame array insertion, slot retrieval, DevTools_Dump return shape, and emitted metadata are directly regression-tested.",
+          "source_hash": "9d44fb3ac9b37dc85b603f85d885fb3f911e4f92127778011e5a1fe690d6fbff"
+        }
+      ],
+      "tests": [
+        "tests/blizzard_debug_tools_loads.rs::devtools_dump_captures_frame_array_metadata"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "c121c451c",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained frame-array and DevTools dump metadata sequence is directly regression-tested against the loaded Blizzard UI surface."
     },
     {
       "id": "changed:FrameIdentityProbe.IdentitySlot",

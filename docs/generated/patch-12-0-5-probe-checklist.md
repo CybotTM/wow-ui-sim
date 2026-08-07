@@ -1,6 +1,6 @@
 1. [best-effort] `changed:AnimScriptProbe.HandlerMatrix` — behavioral
 2. [best-effort] `changed:AttributeDispatchProbe.ScalarRepeat` — behavioral
-3. [untriaged] `changed:AttributeDispatchProbe.PanelPulse` — untriaged
+3. [best-effort] `changed:AttributeDispatchProbe.PanelPulse` — behavioral
 4. [best-effort] `changed:CoreBehaviorProbe.ForbiddenState` — behavioral
 5. [best-effort] `changed:CoreBehaviorProbe.ForbiddenConstructor` — behavioral
 6. [best-effort] `changed:CoreBehaviorProbe.UnitEventFilter` — behavioral
@@ -8,7 +8,7 @@
 8. [best-effort] `changed:CoreBehaviorProbe.AttributeWildcardValues` — behavioral
 9. [best-effort] `changed:CoreBehaviorProbe.RaiseLowerLevel` — behavioral
 10. [untriaged] `changed:CoreBehaviorProbe.MouseFocusOrder` — untriaged
-11. [untriaged] `changed:DevToolsDumpProbe.FrameArrayDump` — untriaged
+11. [best-effort] `changed:DevToolsDumpProbe.FrameArrayDump` — behavioral
 12. [best-effort] `changed:FrameIdentityProbe.IdentitySlot` — behavioral
 13. [best-effort] `changed:FrameIdentityProbe.SurrogateDispatch` — behavioral
 14. [best-effort] `changed:FrameIdentityProbe.DuplicateFreshness` — behavioral
