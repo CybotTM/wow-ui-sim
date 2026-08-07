@@ -1,21 +1,21 @@
 # Patch 12.0.0 Occurrence Inventory
-Occurrence-level register derived from explicit wowless retail snapshots. All rows are neutral pending evidence-backed classification; the source covers wowless schema surfaces, not historical FrameXML.
+Occurrence-level register derived from explicit wowless retail snapshots. Three rows carry evidence-backed best-effort behavioral classifications; the remaining 3407 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 0 best-effort, 0 evidence-required, 0 exception-requested, 3410 untriaged
+- **Rows:** 3410 total — 0 implemented, 3 best-effort, 0 evidence-required, 0 exception-requested, 3407 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
-Source occurrence objects preserve optional typed `before`/`after` JSON payloads with normalized `category`, `value`, and `metadata` fields for exact enum, constant, signature, and structure triage. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side. Row identity remains `direction+symbol`; unknown occurrence fields are rejected. These payloads do not change the 3410-row neutral status or the 2554/313/543 direction counts.
+Source occurrence objects preserve optional typed `before`/`after` JSON payloads with normalized `category`, `value`, and `metadata` fields for exact enum, constant, signature, and structure triage. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side. Row identity remains `direction+symbol`; unknown occurrence fields are rejected. These payloads do not change the 3410-row register or the 2554/313/543 direction counts.
 
 | Symbol | Status | Category | Direction | Note |
 |---|---|---|---|---|
 | `ADDON_RESTRICTION_STATE_CHANGED` | untriaged | event | added | event added in 12.0.0. |
-| `AbbreviateConfig` | untriaged | luaobject | added | luaobject added in 12.0.0. |
-| `AbbreviateConfig.GetAbbreviateNumberData` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `AbbreviateConfig.SetAbbreviateNumberData` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
+| `AbbreviateConfig` | best-effort | luaobject | added | Best-effort behavioral evidence covers table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring; exact `arrayof NumberAbbrevData` structure fidelity is not established. |
+| `AbbreviateConfig.GetAbbreviateNumberData` | best-effort | luaobject-method | added | Best-effort behavioral evidence covers table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring; exact `arrayof NumberAbbrevData` structure fidelity is not established. |
+| `AbbreviateConfig.SetAbbreviateNumberData` | best-effort | luaobject-method | added | Best-effort behavioral evidence covers table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring; exact `arrayof NumberAbbrevData` structure fidelity is not established. |
 | `AbbreviateLargeNumbers` | untriaged | api | added | api added in 12.0.0. |
 | `AbbreviateNumbers` | untriaged | api | added | api added in 12.0.0. |
 | `AddSourceLocationExclude` | untriaged | api | added | api added in 12.0.0. |

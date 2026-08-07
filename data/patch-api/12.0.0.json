@@ -39,49 +39,124 @@
       "id": "added:AbbreviateConfig",
       "symbol": "AbbreviateConfig",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records AbbreviateConfig as an added luaobject.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Temporary proxy factory provides the AbbreviateConfig table proxy, method dispatch, per-instance fields, and tostring/read-only behavior.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy tests cover table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::abbreviate_config_is_table_with_methods",
+        "tests/userdata_proxy.rs::abbreviate_config_get_set_data_roundtrip",
+        "tests/userdata_proxy.rs::abbreviate_config_per_instance_fields",
+        "tests/userdata_proxy.rs::abbreviate_config_readonly_keys",
+        "tests/userdata_proxy.rs::abbreviate_config_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4d7dbe1da",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring; exact arrayof NumberAbbrevData structure fidelity is not established."
     },
     {
       "id": "added:AbbreviateConfig.GetAbbreviateNumberData",
       "symbol": "AbbreviateConfig.GetAbbreviateNumberData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records the GetAbbreviateNumberData method and its arrayof NumberAbbrevData signature.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Temporary proxy factory provides GetAbbreviateNumberData method dispatch and per-instance stored-data reads.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy tests cover table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::abbreviate_config_is_table_with_methods",
+        "tests/userdata_proxy.rs::abbreviate_config_get_set_data_roundtrip",
+        "tests/userdata_proxy.rs::abbreviate_config_per_instance_fields",
+        "tests/userdata_proxy.rs::abbreviate_config_readonly_keys",
+        "tests/userdata_proxy.rs::abbreviate_config_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4d7dbe1da",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring; exact arrayof NumberAbbrevData structure fidelity is not established."
     },
     {
       "id": "added:AbbreviateConfig.SetAbbreviateNumberData",
       "symbol": "AbbreviateConfig.SetAbbreviateNumberData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records the SetAbbreviateNumberData method and its arrayof NumberAbbrevData signature.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Temporary proxy factory provides SetAbbreviateNumberData method dispatch and per-instance stored-data writes.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy tests cover table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::abbreviate_config_is_table_with_methods",
+        "tests/userdata_proxy.rs::abbreviate_config_get_set_data_roundtrip",
+        "tests/userdata_proxy.rs::abbreviate_config_per_instance_fields",
+        "tests/userdata_proxy.rs::abbreviate_config_readonly_keys",
+        "tests/userdata_proxy.rs::abbreviate_config_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4d7dbe1da",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring; exact arrayof NumberAbbrevData structure fidelity is not established."
     },
     {
       "id": "added:AbbreviateLargeNumbers",

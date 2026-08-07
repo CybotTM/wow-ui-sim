@@ -1,6 +1,6 @@
 # Patch 12.0.0 API Audit
 
-Neutral 12.0.0 occurrence audit generated reproducibly from versioned wowless retail snapshots. It records schema-surface deltas only; it does not claim historical 12.0.0 FrameXML or live runtime behavior.
+12.0.0 occurrence audit generated reproducibly from versioned wowless retail snapshots. It records schema-surface deltas plus one bounded evidence-backed behavioral slice; it does not claim historical 12.0.0 FrameXML or live runtime behavior.
 
 ## Content
 
@@ -23,12 +23,12 @@ The source covers wowless `apis`, `cvars`, `docs`, `events`, `globals`, `luaobje
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** all 3410 rows are `untriaged` with null final status
+- **Status:** 3 rows are `best-effort`/`behavioral`; 3407 rows are `untriaged` with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
-Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the neutral status or counts.
+Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.
 
-This is neutral inventory state, not a compatibility or completion claim. No rows have implementation, evidence-required, or exception status.
+This remains a bounded evidence-backed slice, not a compatibility or completion claim. The three `AbbreviateConfig` rows are best-effort behavioral classifications; existing behavior proves table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring, but not exact `arrayof NumberAbbrevData` structure fidelity. The remaining 3407 rows are untriaged. No rows have `implemented`, `evidence-required`, or `exception-requested` status.
 
 ### Provenance and limits
 
@@ -45,7 +45,7 @@ The register does not claim:
 
 - [12.0.0 register generator](../../../tools/gen_patch_12_0_0_register.py) — reproducible wowless-history snapshot diff.
 - [12.0.0 source register](../../../data/patch-api/sources/12.0.0-register.json) — normalized source/provenance register.
-- [12.0.0 manifest](../../../data/patch-api/12.0.0.json) — neutral 3410-row audit manifest and validation metadata.
+- [12.0.0 manifest](../../../data/patch-api/12.0.0.json) — 3410-row audit manifest with the bounded classification slice and validation metadata.
 - [12.0.0 checklist](../../generated/patch-12-0-0-checklist.md) — generated one-line-per-occurrence checklist.
 - [12.0.0 occurrence inventory](patch-12-0-0-occurrence-inventory.md) — generated human-readable inventory.
 

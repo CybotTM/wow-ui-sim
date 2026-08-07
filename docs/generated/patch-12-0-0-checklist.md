@@ -1,7 +1,7 @@
 1. [untriaged] `added:ADDON_RESTRICTION_STATE_CHANGED` — untriaged
-2. [untriaged] `added:AbbreviateConfig` — untriaged
-3. [untriaged] `added:AbbreviateConfig.GetAbbreviateNumberData` — untriaged
-4. [untriaged] `added:AbbreviateConfig.SetAbbreviateNumberData` — untriaged
+2. [best-effort] `added:AbbreviateConfig` — behavioral
+3. [best-effort] `added:AbbreviateConfig.GetAbbreviateNumberData` — behavioral
+4. [best-effort] `added:AbbreviateConfig.SetAbbreviateNumberData` — behavioral
 5. [untriaged] `added:AbbreviateLargeNumbers` — untriaged
 6. [untriaged] `added:AbbreviateNumbers` — untriaged
 7. [untriaged] `added:AddSourceLocationExclude` — untriaged
