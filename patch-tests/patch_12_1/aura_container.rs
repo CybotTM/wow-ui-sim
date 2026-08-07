@@ -24,6 +24,46 @@ fn run_secure_probe(env: &WowLuaEnv, code: &str) -> String {
 }
 
 #[test]
+fn aura_container_selects_public_private_and_edit_mode_partitions() {
+    let env = load_aura_container_ui();
+    let result = run_secure_probe(
+        &env,
+        r#"
+            local container = CreateFromMixins(AuraContainerManagedMixin)
+            container.useEditModeSource = false
+            container.privateAurasEnabled = false
+
+            local publicOnly = container:GetAuraSources()
+            if publicOnly ~= AuraContainerAuraSourceLists.PublicOnly then return "public-list" end
+            if #publicOnly ~= 1 or publicOnly[1] ~= AuraContainerPublicAuraSource then
+                return "public-members"
+            end
+
+            container.privateAurasEnabled = true
+            local publicAndPrivate = container:GetAuraSources()
+            if publicAndPrivate ~= AuraContainerAuraSourceLists.PublicAndPrivate then
+                return "private-list"
+            end
+            if #publicAndPrivate ~= 2
+                or publicAndPrivate[1] ~= AuraContainerPublicAuraSource
+                or publicAndPrivate[2] ~= AuraContainerPrivateAuraSource then
+                return "private-members"
+            end
+
+            container.useEditModeSource = true
+            local editMode = container:GetAuraSources()
+            if editMode ~= AuraContainerAuraSourceLists.EditMode then return "edit-list" end
+            if #editMode ~= 1 or editMode[1] ~= AuraContainerEditModeAuraSource then
+                return "edit-members"
+            end
+            return "ok"
+            "#,
+    );
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn aura_container_group_assigns_and_releases_frames_by_aura_instance() {
     let env = load_aura_container_ui();
     let result = run_secure_probe(
