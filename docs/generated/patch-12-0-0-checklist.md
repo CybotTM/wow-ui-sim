@@ -876,7 +876,7 @@
 876. [untriaged] `added:CraftingVariableQuantities` — untriaged
 877. [untriaged] `added:CraftingVariableQuantities.quantity` — untriaged
 878. [untriaged] `added:CraftingVariableQuantities.reagent` — untriaged
-879. [untriaged] `added:CreateAbbreviateConfig` — untriaged
+879. [best-effort] `added:CreateAbbreviateConfig` — behavioral
 880. [untriaged] `added:CreateUnitHealPredictionCalculator` — untriaged
 881. [untriaged] `added:CriteriaRequiredValue` — untriaged
 882. [untriaged] `added:CriteriaRequiredValue.criteriaID` — untriaged

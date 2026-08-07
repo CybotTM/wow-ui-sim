@@ -1,10 +1,10 @@
 # Patch 12.0.0 Occurrence Inventory
-Occurrence-level register derived from explicit wowless retail snapshots. Three rows carry evidence-backed best-effort behavioral classifications; the remaining 3407 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
+Occurrence-level register derived from explicit wowless retail snapshots. Four rows carry evidence-backed best-effort behavioral classifications; the remaining 3406 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 3 best-effort, 0 evidence-required, 0 exception-requested, 3407 untriaged
+- **Rows:** 3410 total — 0 implemented, 4 best-effort, 0 evidence-required, 0 exception-requested, 3406 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -890,7 +890,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `CraftingVariableQuantities` | untriaged | structure | added | structure added in 12.0.0. |
 | `CraftingVariableQuantities.quantity` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `CraftingVariableQuantities.reagent` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `CreateAbbreviateConfig` | untriaged | api | added | api added in 12.0.0. |
+| `CreateAbbreviateConfig` | best-effort | api | added | Best-effort behavioral evidence covers factory/table proxy behavior, method dispatch, round-trip storage, per-instance isolation, read-only keys, and tostring; exact `arrayof NumberAbbrevData` structure fidelity is not established. |
 | `CreateUnitHealPredictionCalculator` | untriaged | api | added | api added in 12.0.0. |
 | `CriteriaRequiredValue` | untriaged | structure | added | structure added in 12.0.0. |
 | `CriteriaRequiredValue.criteriaID` | untriaged | structure-field | added | structure-field added in 12.0.0. |

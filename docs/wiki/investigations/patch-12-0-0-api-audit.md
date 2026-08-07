@@ -23,12 +23,12 @@ The source covers wowless `apis`, `cvars`, `docs`, `events`, `globals`, `luaobje
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 3 rows are `best-effort`/`behavioral`; 3407 rows are `untriaged` with null final status
+- **Status:** 4 rows are `best-effort`/`behavioral`; 3406 rows are `untriaged` with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.
 
-This remains a bounded evidence-backed slice, not a compatibility or completion claim. The three `AbbreviateConfig` rows are best-effort behavioral classifications; existing behavior proves table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring, but not exact `arrayof NumberAbbrevData` structure fidelity. The remaining 3407 rows are untriaged. No rows have `implemented`, `evidence-required`, or `exception-requested` status.
+This remains a bounded evidence-backed slice, not a compatibility or completion claim. The four `AbbreviateConfig` rows are best-effort behavioral classifications; existing behavior proves factory/table proxy behavior, method dispatch, round-trip storage, per-instance isolation, read-only keys, and tostring, but not exact `arrayof NumberAbbrevData` structure fidelity. The remaining 3406 rows are untriaged. No rows have `implemented`, `evidence-required`, or `exception-requested` status.
 
 ### Provenance and limits
 
