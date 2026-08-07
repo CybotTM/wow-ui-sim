@@ -4,7 +4,7 @@ Occurrence-level register derived from explicit wowless retail snapshots. Sixty 
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 60 best-effort, 91 evidence-required, 0 exception-requested, 3259 untriaged
+- **Rows:** 3410 total — 0 implemented, 73 best-effort, 94 evidence-required, 0 exception-requested, 3243 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -75,7 +75,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_ActionBar.ActionBarCooldownInfo.modRate` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_ActionBar.ActionBarCooldownInfo.startTime` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_ActionBar.GetActionAutocast` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.GetActionBarPage` | untriaged | api | added | api added in 12.0.0. |
+ | `C_ActionBar.GetActionBarPage` | best-effort | api | added | Best-effort behavioral evidence is limited to cold-start page 1, ActionBar_PageUp advancing to page 2, ACTIONBAR_PAGE_CHANGED dispatch, valid page 6, and wrap to page 1. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
 | `C_ActionBar.GetActionChargeDuration` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.GetActionCharges` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.GetActionCooldown` | untriaged | api | added | api added in 12.0.0. |
@@ -86,22 +86,22 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_ActionBar.GetActionText` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.GetActionTexture` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.GetActionUseCount` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.GetBonusBarIndex` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.GetBonusBarOffset` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.GetExtraBarIndex` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.GetMultiCastBarIndex` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.GetOverrideBarIndex` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.GetOverrideBarSkin` | untriaged | api | added | api added in 12.0.0. |
+ | `C_ActionBar.GetBonusBarIndex` | best-effort | api | added | Best-effort behavioral evidence is limited to the state-backed active bonus index value 5. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
+ | `C_ActionBar.GetBonusBarOffset` | evidence-required | api | added | Current GetBonusBarOffset behavior is derived compatibility behavior without focused direct proof; authoritative semantics or a correct model/test are required, and no approval can close the row. |
+ | `C_ActionBar.GetExtraBarIndex` | evidence-required | api | added | Current GetExtraBarIndex behavior is a constant compatibility value without focused direct proof; authoritative semantics or a correct model/test are required, and no approval can close the row. |
+ | `C_ActionBar.GetMultiCastBarIndex` | evidence-required | api | added | Current GetMultiCastBarIndex behavior is a constant compatibility value without focused direct proof; authoritative semantics or a correct model/test are required, and no approval can close the row. |
+ | `C_ActionBar.GetOverrideBarIndex` | best-effort | api | added | Best-effort behavioral evidence is limited to the inactive default override index 14. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
+ | `C_ActionBar.GetOverrideBarSkin` | best-effort | api | added | Best-effort behavioral evidence is limited to seeded override skin 1 during the skinned override transition. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
 | `C_ActionBar.GetProfessionQualityInfo` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.GetTempShapeshiftBarIndex` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.GetVehicleBarIndex` | untriaged | api | added | api added in 12.0.0. |
+ | `C_ActionBar.GetTempShapeshiftBarIndex` | best-effort | api | added | Best-effort behavioral evidence is limited to inactive default index 1 and the state-backed active index value 9. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
+ | `C_ActionBar.GetVehicleBarIndex` | best-effort | api | added | Best-effort behavioral evidence is limited to the state-backed vehicle index value 7 and inactive default index 12. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
 | `C_ActionBar.HasAction` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.HasBonusActionBar` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.HasExtraActionBar` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.HasOverrideActionBar` | untriaged | api | added | api added in 12.0.0. |
+ | `C_ActionBar.HasBonusActionBar` | best-effort | api | added | Best-effort behavioral evidence is limited to the seeded bonus-bar flag and state-backed index transition. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
+ | `C_ActionBar.HasExtraActionBar` | best-effort | api | added | Best-effort behavioral evidence is limited to the seeded extra-action flag driving bar visibility and icon round-trip through update events. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
+ | `C_ActionBar.HasOverrideActionBar` | best-effort | api | added | Best-effort behavioral evidence is limited to the seeded override-bar flag and skinned override transition. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
 | `C_ActionBar.HasRangeRequirements` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.HasTempShapeshiftActionBar` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.HasVehicleActionBar` | untriaged | api | added | api added in 12.0.0. |
+ | `C_ActionBar.HasTempShapeshiftActionBar` | best-effort | api | added | Best-effort behavioral evidence is limited to the seeded temp-shapeshift flag and state-backed index transition. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
+ | `C_ActionBar.HasVehicleActionBar` | best-effort | api | added | Best-effort behavioral evidence is limited to the seeded vehicle-bar flag and skinned vehicle transition/update-skin dispatch. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
 | `C_ActionBar.IsActionInRange` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.IsAttackAction` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.IsAutoRepeatAction` | untriaged | api | added | api added in 12.0.0. |
@@ -110,11 +110,11 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_ActionBar.IsEquippedAction` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.IsEquippedGearOutfitAction` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.IsItemAction` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.IsPossessBarVisible` | untriaged | api | added | api added in 12.0.0. |
+ | `C_ActionBar.IsPossessBarVisible` | best-effort | api | added | Best-effort behavioral evidence is limited to the seeded possess-bar flag driving show/hide round-trip through UPDATE_POSSESS_BAR. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
 | `C_ActionBar.IsStackableAction` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.IsUsableAction` | untriaged | api | added | api added in 12.0.0. |
 | `C_ActionBar.RegisterActionUIButton` | untriaged | api | added | api added in 12.0.0. |
-| `C_ActionBar.SetActionBarPage` | untriaged | api | added | api added in 12.0.0. |
+ | `C_ActionBar.SetActionBarPage` | best-effort | api | added | Best-effort behavioral evidence is limited to valid page 6 storage and the ACTIONBAR_PAGE_CHANGED transition exercised by the named page-change test. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven. |
 | `C_ActionBar.UnregisterActionUIButton` | untriaged | api | added | api added in 12.0.0. |
 | `C_AdventureMap.AdventureMapQuestPortraitInfo` | untriaged | structure | added | structure added in 12.0.0. |
 | `C_AdventureMap.AdventureMapQuestPortraitInfo.modelSceneID` | untriaged | structure-field | added | structure-field added in 12.0.0. |

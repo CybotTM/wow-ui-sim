@@ -1106,17 +1106,44 @@
       "id": "added:C_ActionBar.GetActionBarPage",
       "symbol": "C_ActionBar.GetActionBarPage",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetActionBarPage as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"currentPage\",\"type\":\"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "GetActionBarPage/SetActionBarPage store the current page in SimState; the page transition path fires ACTIONBAR_PAGE_CHANGED only for real changes."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetActionBarPage to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbar/behavior_page_change.rs",
+          "source_hash": "f56fed40198e62b99ab0a1d697b3eb02dcfc45effb59aa16b968919bf8e5b32f",
+          "summary": "Focused page-change behavior checks cold-start page 1, ActionBar_PageUp to page 2, ACTIONBAR_PAGE_CHANGED dispatch, valid SetActionBarPage(6), and wrap to page 1."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbar/behavior_page_change.rs::action_bar_page_up_advances_state_action_bar_page_and_fires_actionbar_page_changed"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "dacb23419",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to cold-start page 1, ActionBar_PageUp advancing to page 2, ACTIONBAR_PAGE_CHANGED dispatch, valid page 6, and wrap to page 1. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.GetActionChargeDuration",
@@ -1282,97 +1309,235 @@
       "id": "added:C_ActionBar.GetBonusBarIndex",
       "symbol": "C_ActionBar.GetBonusBarIndex",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetBonusBarIndex as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"bonusBarIndex\",\"type\":\"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "GetBonusBarIndex reads the simulator bonus-bar index state; the focused evidence covers the seeded state-backed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetBonusBarIndex to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_action_bar_state_globals.rs",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
+          "summary": "Focused state-global test checks the state-backed bonus-bar flag/index round-trip."
+        }
+      ],
+      "tests": [
+        "tests/c_action_bar_state_globals.rs::bonus_bar_index_reads_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "5b9497307",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the state-backed active bonus index value 5. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.GetBonusBarOffset",
       "symbol": "C_ActionBar.GetBonusBarOffset",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetBonusBarOffset as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"bonusBarOffset\",\"type\":\"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current C_ActionBar implementation publishes this query through action_bar_api.rs; the value is constant or derived compatibility behavior and is not covered by a focused direct test."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetBonusBarOffset to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current GetBonusBarOffset behavior is derived compatibility behavior without focused direct proof; authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetExtraBarIndex",
       "symbol": "C_ActionBar.GetExtraBarIndex",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetExtraBarIndex as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"extraBarIndex\",\"type\":\"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current C_ActionBar implementation publishes this query through action_bar_api.rs; the value is constant or derived compatibility behavior and is not covered by a focused direct test."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetExtraBarIndex to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current GetExtraBarIndex behavior is a constant compatibility value without focused direct proof; authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetMultiCastBarIndex",
       "symbol": "C_ActionBar.GetMultiCastBarIndex",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetMultiCastBarIndex as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"multiCastBarIndex\",\"type\":\"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "Current C_ActionBar implementation publishes this query through action_bar_api.rs; the value is constant or derived compatibility behavior and is not covered by a focused direct test."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetMultiCastBarIndex to its Rust implementation in the namespace method table."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current GetMultiCastBarIndex behavior is a constant compatibility value without focused direct proof; authoritative semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_ActionBar.GetOverrideBarIndex",
       "symbol": "C_ActionBar.GetOverrideBarIndex",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetOverrideBarIndex as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"overrideBarIndex\",\"type\":\"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "GetOverrideBarIndex exposes the simulator override-bar index; focused evidence covers only the inactive default number."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetOverrideBarIndex to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_action_bar_state_globals.rs",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
+          "summary": "Focused state-global test checks the default inactive override bar index alongside the other special-bar indexes."
+        }
+      ],
+      "tests": [
+        "tests/c_action_bar_state_globals.rs::special_bar_indexes_return_default_numbers_when_inactive"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "bdf741cf4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the inactive default override index 14. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.GetOverrideBarSkin",
       "symbol": "C_ActionBar.GetOverrideBarSkin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetOverrideBarSkin as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"textureFileID\",\"nilable\":true,\"type\":\"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "GetOverrideBarSkin reads the optional simulator override-bar skin used by the skinned override transition."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetOverrideBarSkin to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbarcontroller/behavior_update_override_skinned.rs",
+          "source_hash": "629d882cd652e1393ad748e576eb111bcb09066862db8b23cbe22054d71f1c44",
+          "summary": "Focused controller behavior test checks the override-bar flag/skin preconditions and skinned override transition."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbarcontroller/behavior_update_override_skinned.rs::update_override_actionbar_mounts_skinned_override_bar"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6425b3f0b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded override skin 1 during the skinned override transition. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.GetProfessionQualityInfo",
@@ -1394,33 +1559,89 @@
       "id": "added:C_ActionBar.GetTempShapeshiftBarIndex",
       "symbol": "C_ActionBar.GetTempShapeshiftBarIndex",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetTempShapeshiftBarIndex as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"tempShapeshiftBarIndex\",\"type\":\"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "GetTempShapeshiftBarIndex reads the simulator temp-shapeshift index state; the focused evidence covers state/default behavior only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetTempShapeshiftBarIndex to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_action_bar_state_globals.rs",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
+          "summary": "Focused state-global tests check the default inactive temp-shapeshift index and the state-backed active flag/index round-trip."
+        }
+      ],
+      "tests": [
+        "tests/c_action_bar_state_globals.rs::special_bar_indexes_return_default_numbers_when_inactive",
+        "tests/c_action_bar_state_globals.rs::temp_shapeshift_bar_index_reads_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "06bf6616a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to inactive default index 1 and the state-backed active index value 9. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.GetVehicleBarIndex",
       "symbol": "C_ActionBar.GetVehicleBarIndex",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.GetVehicleBarIndex as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"vehicleBarIndex\",\"type\":\"number\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "GetVehicleBarIndex reads the simulator vehicle-bar index state; the focused evidence covers state/default behavior only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds GetVehicleBarIndex to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_action_bar_state_globals.rs",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
+          "summary": "Focused state-global tests check vehicle bar-index round-trip from state and inactive default indexes for vehicle, override, and temp shapeshift bars."
+        }
+      ],
+      "tests": [
+        "tests/c_action_bar_state_globals.rs::vehicle_bar_index_reads_state",
+        "tests/c_action_bar_state_globals.rs::special_bar_indexes_return_default_numbers_when_inactive"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "0859e07be",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the state-backed vehicle index value 7 and inactive default index 12. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.HasAction",
@@ -1442,49 +1663,130 @@
       "id": "added:C_ActionBar.HasBonusActionBar",
       "symbol": "C_ActionBar.HasBonusActionBar",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.HasBonusActionBar as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"hasBonusActionBar\",\"type\":\"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "HasBonusActionBar reads the simulator bonus-bar state used by the state-backed bonus-bar transition."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds HasBonusActionBar to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_action_bar_state_globals.rs",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
+          "summary": "Focused state-global test checks HasBonusActionBar and the state-backed bonus-bar index."
+        }
+      ],
+      "tests": [
+        "tests/c_action_bar_state_globals.rs::bonus_bar_index_reads_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "5b9497307",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the seeded bonus-bar flag and state-backed index transition. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.HasExtraActionBar",
       "symbol": "C_ActionBar.HasExtraActionBar",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.HasExtraActionBar as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"hasExtraActionBar\",\"type\":\"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "HasExtraActionBar reads whether the simulator extra-action slot has a granted spell and drives the tested show/icon event path."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds HasExtraActionBar to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbar/behavior_extra_action_bar.rs",
+          "source_hash": "79284b4dece211d37110a97bcc31e838f00c74521aec61b0cf2b0b50fde97629",
+          "summary": "Focused extra-action behavior test checks HasExtraActionBar-driven show and action-icon round-trip through update events."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbar/behavior_extra_action_bar.rs::extra_action_button_show_and_icon_round_trip_through_update_events"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6d13156ae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the seeded extra-action flag driving bar visibility and icon round-trip through update events. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.HasOverrideActionBar",
       "symbol": "C_ActionBar.HasOverrideActionBar",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.HasOverrideActionBar as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"hasOverrideActionBar\",\"type\":\"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "HasOverrideActionBar reads the simulator override-bar state used by the skinned override transition."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds HasOverrideActionBar to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbarcontroller/behavior_update_override_skinned.rs",
+          "source_hash": "629d882cd652e1393ad748e576eb111bcb09066862db8b23cbe22054d71f1c44",
+          "summary": "Focused controller behavior test checks the override-bar flag/skin preconditions and skinned override transition."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbarcontroller/behavior_update_override_skinned.rs::update_override_actionbar_mounts_skinned_override_bar"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6425b3f0b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the seeded override-bar flag and skinned override transition. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.HasRangeRequirements",
@@ -1506,33 +1808,87 @@
       "id": "added:C_ActionBar.HasTempShapeshiftActionBar",
       "symbol": "C_ActionBar.HasTempShapeshiftActionBar",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.HasTempShapeshiftActionBar as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"hasTempShapeshiftActionBar\",\"type\":\"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "HasTempShapeshiftActionBar reads the simulator temp-shapeshift state used by the state-backed transition."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds HasTempShapeshiftActionBar to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_action_bar_state_globals.rs",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
+          "summary": "Focused state-global test checks HasTempShapeshiftActionBar and the state-backed temp-shapeshift index."
+        }
+      ],
+      "tests": [
+        "tests/c_action_bar_state_globals.rs::temp_shapeshift_bar_index_reads_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "06bf6616a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the seeded temp-shapeshift flag and state-backed index transition. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.HasVehicleActionBar",
       "symbol": "C_ActionBar.HasVehicleActionBar",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.HasVehicleActionBar as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"hasVehicleActionBar\",\"type\":\"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "HasVehicleActionBar reads the simulator vehicle-bar state used by the skinned vehicle transition."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds HasVehicleActionBar to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbarcontroller/behavior_update_vehicle_skinned.rs",
+          "source_hash": "963ceca3cdbb089e09df6b37552c97d52822ef553d095f65fb91f045bbb7778d",
+          "summary": "Focused controller behavior test checks the vehicle-bar flag and skinned vehicle transition/update-skin dispatch."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbarcontroller/behavior_update_vehicle_skinned.rs::update_vehicle_actionbar_mounts_skinned_override_bar"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "080358cdb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the seeded vehicle-bar flag and skinned vehicle transition/update-skin dispatch. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.IsActionInRange",
@@ -1666,17 +2022,44 @@
       "id": "added:C_ActionBar.IsPossessBarVisible",
       "symbol": "C_ActionBar.IsPossessBarVisible",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.IsPossessBarVisible as an added api with published value metadata {\"inputs\":null,\"outputs\":[{\"name\":\"isPossessBarVisible\",\"type\":\"boolean\"}]}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "IsPossessBarVisible reads the simulator possess-bar visibility state used by the tested UPDATE_POSSESS_BAR show/hide path."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds IsPossessBarVisible to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbar/behavior_possess_bar_show.rs",
+          "source_hash": "c586bde290dc7749ddbebcacd0de1ec3a6249cd07e0470ab05ee22ee03aca302",
+          "summary": "Focused possess-bar behavior test checks IsPossessBarVisible-driven show/hide round-trip through UPDATE_POSSESS_BAR."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbar/behavior_possess_bar_show.rs::possess_bar_show_hide_round_trips_through_update_possess_bar_event"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "167e23297",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the seeded possess-bar flag driving show/hide round-trip through UPDATE_POSSESS_BAR. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.IsStackableAction",
@@ -1730,17 +2113,44 @@
       "id": "added:C_ActionBar.SetActionBarPage",
       "symbol": "C_ActionBar.SetActionBarPage",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.SetActionBarPage as an added api with published value metadata {\"inputs\":[{\"name\":\"pageIndex\",\"type\":\"number\"}],\"outputs\":null}."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
+          "summary": "GetActionBarPage/SetActionBarPage store the current page in SimState; the page transition path fires ACTIONBAR_PAGE_CHANGED only for real changes."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api/registration.rs",
+          "source_hash": "618645c56b9250893728b3632d3aff30c7f913b8e711a9ac6519d69199347ce6",
+          "summary": "Current C_ActionBar registration binds SetActionBarPage to its Rust implementation in the namespace method table."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_actionbar/behavior_page_change.rs",
+          "source_hash": "f56fed40198e62b99ab0a1d697b3eb02dcfc45effb59aa16b968919bf8e5b32f",
+          "summary": "Focused page-change behavior checks cold-start page 1, ActionBar_PageUp to page 2, ACTIONBAR_PAGE_CHANGED dispatch, valid SetActionBarPage(6), and wrap to page 1."
+        }
+      ],
+      "tests": [
+        "tests/blizzard_ui/blizzard_actionbar/behavior_page_change.rs::action_bar_page_up_advances_state_action_bar_page_and_fires_actionbar_page_changed"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "dacb23419",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to valid page 6 storage and the ACTIONBAR_PAGE_CHANGED transition exercised by the named page-change test. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.UnregisterActionUIButton",
