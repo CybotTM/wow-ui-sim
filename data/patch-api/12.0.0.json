@@ -3874,33 +3874,67 @@
       "id": "added:C_DurationUtil.CreateDuration",
       "symbol": "C_DurationUtil.CreateDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_DurationUtil.CreateDuration as an added api occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust registration creates a table-backed LuaDurationObject with shared methods and an instance ID.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy coverage verifies the factory result is a table exposing duration methods.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::duration_object_is_table_with_methods"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "35e39a58f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers factory return shape and LuaDurationObject method exposure; full time, secret, and curve semantics are not established."
     },
     {
       "id": "added:C_DurationUtil.GetCurrentTime",
       "symbol": "C_DurationUtil.GetCurrentTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_DurationUtil.GetCurrentTime as an added api occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes C_DurationUtil.GetCurrentTime with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative time semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.AddEditModeEvents",
@@ -36112,353 +36146,658 @@
       "id": "added:LuaDurationObject",
       "symbol": "LuaDurationObject",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject as an added luaobject occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust implementation provides a table proxy with shared methods, per-instance fields, and tostring formatting.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy coverage verifies table/method shape, default-zero behavior, per-instance fields, and tostring.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::duration_object_is_table_with_methods",
+        "tests/userdata_proxy.rs::duration_object_is_zero_by_default",
+        "tests/userdata_proxy.rs::duration_object_per_instance_fields",
+        "tests/userdata_proxy.rs::duration_object_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "35e39a58f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers table-backed object shape, default-zero behavior, per-instance fields, and tostring; full time, secret, and curve semantics are not established."
     },
     {
       "id": "added:LuaDurationObject.Assign",
       "symbol": "LuaDurationObject.Assign",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.Assign as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.Assign with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.Copy",
       "symbol": "LuaDurationObject.Copy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.Copy as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.Copy with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is a fresh default object and is incomplete; authoritative copy semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.EvaluateElapsedDuration",
       "symbol": "LuaDurationObject.EvaluateElapsedDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.EvaluateElapsedDuration as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.EvaluateElapsedDuration with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.EvaluateElapsedPercent",
       "symbol": "LuaDurationObject.EvaluateElapsedPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.EvaluateElapsedPercent as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.EvaluateElapsedPercent with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.EvaluateRemainingDuration",
       "symbol": "LuaDurationObject.EvaluateRemainingDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.EvaluateRemainingDuration as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.EvaluateRemainingDuration with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.EvaluateRemainingPercent",
       "symbol": "LuaDurationObject.EvaluateRemainingPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.EvaluateRemainingPercent as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.EvaluateRemainingPercent with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.GetElapsedDuration",
       "symbol": "LuaDurationObject.GetElapsedDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.GetElapsedDuration as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.GetElapsedDuration with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.GetElapsedPercent",
       "symbol": "LuaDurationObject.GetElapsedPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.GetElapsedPercent as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.GetElapsedPercent with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.GetEndTime",
       "symbol": "LuaDurationObject.GetEndTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.GetEndTime as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.GetEndTime with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.GetModRate",
       "symbol": "LuaDurationObject.GetModRate",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.GetModRate as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.GetModRate with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 1); authoritative rate semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.GetRemainingDuration",
       "symbol": "LuaDurationObject.GetRemainingDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.GetRemainingDuration as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.GetRemainingDuration with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.GetRemainingPercent",
       "symbol": "LuaDurationObject.GetRemainingPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.GetRemainingPercent as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.GetRemainingPercent with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.GetStartTime",
       "symbol": "LuaDurationObject.GetStartTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.GetStartTime as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.GetStartTime with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.GetTotalDuration",
       "symbol": "LuaDurationObject.GetTotalDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.GetTotalDuration as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.GetTotalDuration with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.HasSecretValues",
       "symbol": "LuaDurationObject.HasSecretValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.HasSecretValues as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.HasSecretValues with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is constant (returns false); authoritative secret-value semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.IsZero",
       "symbol": "LuaDurationObject.IsZero",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.IsZero as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust implementation exposes IsZero as a default-zero constant.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy coverage verifies IsZero on a newly created duration object.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::duration_object_is_zero_by_default"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "35e39a58f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers default-zero IsZero behavior only; non-default duration, time, secret, and curve semantics are not established."
     },
     {
       "id": "added:LuaDurationObject.Reset",
       "symbol": "LuaDurationObject.Reset",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.Reset as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.Reset with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.SetTimeFromEnd",
       "symbol": "LuaDurationObject.SetTimeFromEnd",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.SetTimeFromEnd as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.SetTimeFromEnd with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.SetTimeFromStart",
       "symbol": "LuaDurationObject.SetTimeFromStart",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.SetTimeFromStart as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.SetTimeFromStart with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.SetTimeSpan",
       "symbol": "LuaDurationObject.SetTimeSpan",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.SetTimeSpan as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.SetTimeSpan with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaDurationObject.SetToDefaults",
       "symbol": "LuaDurationObject.SetToDefaults",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObject.SetToDefaults as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "summary": "Current Rust duration surface exposes LuaDurationObject.SetToDefaults with constant/no-op/incomplete behavior; it does not establish authoritative semantics.",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row."
     },
     {
       "id": "added:LuaFunctionContainer",
@@ -37364,17 +37703,38 @@
       "id": "added:StatusBar.GetTimerDuration",
       "symbol": "StatusBar.GetTimerDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records StatusBar.GetTimerDuration as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/statusbar.rs",
+          "summary": "Current Rust StatusBar methods store and retrieve the exact duration object identity.",
+          "source_hash": "f24c8850d33b949e610b3dc124253990c8083c91a745d36d0a073b24c17c9b5c"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/widget_methods_colorselect.rs",
+          "summary": "Focused StatusBar test verifies exact LuaDurationObject identity and per-instance field round-trip.",
+          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+        }
+      ],
+      "tests": [
+        "tests/widget_methods_colorselect.rs::test_statusbar_timer_duration_round_trips_duration_object"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "0a737bfbc",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers exact duration-object identity round-trip through StatusBar timer storage; full timer semantics are not established."
     },
     {
       "id": "added:StatusBar.IsInterpolating",
@@ -37396,17 +37756,38 @@
       "id": "added:StatusBar.SetTimerDuration",
       "symbol": "StatusBar.SetTimerDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records StatusBar.SetTimerDuration as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/statusbar.rs",
+          "summary": "Current Rust StatusBar methods store and retrieve the exact duration object identity.",
+          "source_hash": "f24c8850d33b949e610b3dc124253990c8083c91a745d36d0a073b24c17c9b5c"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/widget_methods_colorselect.rs",
+          "summary": "Focused StatusBar test verifies exact LuaDurationObject identity and per-instance field round-trip.",
+          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+        }
+      ],
+      "tests": [
+        "tests/widget_methods_colorselect.rs::test_statusbar_timer_duration_round_trips_duration_object"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "0a737bfbc",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers exact duration-object identity round-trip through StatusBar timer storage; full timer semantics are not established."
     },
     {
       "id": "added:StatusBar.SetToTargetValue",

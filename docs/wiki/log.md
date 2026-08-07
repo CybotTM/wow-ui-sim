@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Bound 12.0.0 duration-object audit slice
+
+Classified five duration/factory/StatusBar rows as best-effort behavioral from checked-in source, ancestor commits `35e39a58f`/`0a737bfbc`, and exact focused tests. Classified 21 duration-time/lifecycle/secret rows as evidence-required unsafe; current behavior is constant/no-op/incomplete and needs authoritative semantics or a correct modeled implementation, with no approval path. The register now totals **26 best-effort, 21 evidence-required, and 3363 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 FunctionContainer classification
 
 Classified `changed:C_FunctionContainers.CreateCallback` and four `LuaFunctionContainer` rows as best-effort behavioral from checked-in source-register/proxy evidence and the five named `userdata_proxy` tests. Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. The register now totals **21 best-effort and 3389 untriaged**.

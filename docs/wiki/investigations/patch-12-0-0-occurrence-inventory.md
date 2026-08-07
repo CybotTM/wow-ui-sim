@@ -1,5 +1,5 @@
 # Patch 12.0.0 Occurrence Inventory
-Occurrence-level register derived from explicit wowless retail snapshots. Twenty-one rows carry evidence-backed best-effort behavioral classifications; the remaining 3389 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
+Occurrence-level register derived from explicit wowless retail snapshots. Twenty-six rows carry evidence-backed best-effort behavioral classifications; twenty-one rows carry evidence-required unsafe classifications; the remaining 3363 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
@@ -248,8 +248,8 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_DeathRecap.HasRecapEvents` | untriaged | api | added | api added in 12.0.0. |
 | `C_DelvesUI.GetLockedTextForCompanion` | untriaged | api | added | api added in 12.0.0. |
 | `C_DelvesUI.IsTraitTreeForCompanion` | untriaged | api | added | api added in 12.0.0. |
-| `C_DurationUtil.CreateDuration` | untriaged | api | added | api added in 12.0.0. |
-| `C_DurationUtil.GetCurrentTime` | untriaged | api | added | api added in 12.0.0. |
+| `C_DurationUtil.CreateDuration` | best-effort | api | added | Best-effort behavioral evidence covers factory return shape and LuaDurationObject method exposure; full time, secret, and curve semantics are not established. |
+| `C_DurationUtil.GetCurrentTime` | evidence-required | api | added | Current behavior is constant (returns 0); authoritative time semantics or a correct modeled implementation is required, and no approval can close this row. |
 | `C_EncounterTimeline.AddEditModeEvents` | untriaged | api | added | api added in 12.0.0. |
 | `C_EncounterTimeline.AddScriptEvent` | untriaged | api | added | api added in 12.0.0. |
 | `C_EncounterTimeline.CancelAllScriptEvents` | untriaged | api | added | api added in 12.0.0. |
@@ -2259,28 +2259,28 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `LuaCurveObjectBase.GetType` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `LuaCurveObjectBase.HasSecretValues` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `LuaCurveObjectBase.SetType` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject` | untriaged | luaobject | added | luaobject added in 12.0.0. |
-| `LuaDurationObject.Assign` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.Copy` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.EvaluateElapsedDuration` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.EvaluateElapsedPercent` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.EvaluateRemainingDuration` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.EvaluateRemainingPercent` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.GetElapsedDuration` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.GetElapsedPercent` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.GetEndTime` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.GetModRate` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.GetRemainingDuration` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.GetRemainingPercent` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.GetStartTime` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.GetTotalDuration` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.HasSecretValues` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.IsZero` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.Reset` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.SetTimeFromEnd` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.SetTimeFromStart` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.SetTimeSpan` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaDurationObject.SetToDefaults` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
+| `LuaDurationObject` | best-effort | luaobject | added | Best-effort behavioral evidence covers table-backed object shape, default-zero behavior, per-instance fields, and tostring; full time, secret, and curve semantics are not established. |
+| `LuaDurationObject.Assign` | evidence-required | luaobject-method | added | Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.Copy` | evidence-required | luaobject-method | added | Current behavior is a fresh default object and is incomplete; authoritative copy semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.EvaluateElapsedDuration` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.EvaluateElapsedPercent` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.EvaluateRemainingDuration` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.EvaluateRemainingPercent` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.GetElapsedDuration` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.GetElapsedPercent` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.GetEndTime` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.GetModRate` | evidence-required | luaobject-method | added | Current behavior is constant (returns 1); authoritative rate semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.GetRemainingDuration` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.GetRemainingPercent` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.GetStartTime` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.GetTotalDuration` | evidence-required | luaobject-method | added | Current behavior is constant (returns 0); authoritative duration semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.HasSecretValues` | evidence-required | luaobject-method | added | Current behavior is constant (returns false); authoritative secret-value semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.IsZero` | best-effort | luaobject-method | added | Best-effort behavioral evidence covers default-zero IsZero behavior only; non-default duration, time, secret, and curve semantics are not established. |
+| `LuaDurationObject.Reset` | evidence-required | luaobject-method | added | Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.SetTimeFromEnd` | evidence-required | luaobject-method | added | Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.SetTimeFromStart` | evidence-required | luaobject-method | added | Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.SetTimeSpan` | evidence-required | luaobject-method | added | Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row. |
+| `LuaDurationObject.SetToDefaults` | evidence-required | luaobject-method | added | Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row. |
 | `LuaFunctionContainer` | best-effort | luaobject | added | Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. |
 | `LuaFunctionContainer.Cancel` | best-effort | luaobject-method | added | Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. |
 | `LuaFunctionContainer.Invoke` | best-effort | luaobject-method | added | Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. |
@@ -2331,9 +2331,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `SpellCooldownInfo.isOnGCD` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `SpellCooldownInfo.timeUntilEndOfStartRecovery` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `StatusBar.GetInterpolatedValue` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |
-| `StatusBar.GetTimerDuration` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |
+| `StatusBar.GetTimerDuration` | best-effort | uiobject-method | added | Best-effort behavioral evidence covers exact duration-object identity round-trip through StatusBar timer storage; full timer semantics are not established. |
 | `StatusBar.IsInterpolating` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |
-| `StatusBar.SetTimerDuration` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |
+| `StatusBar.SetTimerDuration` | best-effort | uiobject-method | added | Best-effort behavioral evidence covers exact duration-object identity round-trip through StatusBar timer storage; full timer semantics are not established. |
 | `StatusBar.SetToTargetValue` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |
 | `TOOLTIP_SHOW_ITEM_COMPARISON` | untriaged | event | added | event added in 12.0.0. |
 | `TRAINING_GROUNDS_ENABLED_STATUS_UPDATED` | untriaged | event | added | event added in 12.0.0. |
