@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | 12.1 broader behavior register
+
+Created a separate 53-row machine register for non-FrameXML 12.1 fidelity boundaries. All rows remain neutral; candidate disposition is 30 safe best-effort, 20 unsafe, and 3 impossible, with family summaries no longer serving as approval units.
+
 ## [2026-08-07] investigation | UI-scale CVar event ordering
 
 Modeled successful `SetCVar` event dispatch and the retail `uiScale`/`useUiScale` boundary: new effective scale first, then `DISPLAY_SIZE_CHANGED` and `UI_SCALE_CHANGED` while the old CVar remains visible, then storage and `CVAR_UPDATE`. The 12.0.5 register now contains 31 best-effort and 7 untriaged rows.

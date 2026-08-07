@@ -7,6 +7,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 ### Files
 
 - `data/patch-api/sources/12.1-framexml.json` preserves the legacy raw 320-added/112-removed direction-array snapshot.
+- `data/patch-api/sources/12.1-behaviors.json`, `data/patch-api/12.1-behaviors.json`, `docs/generated/patch-12-1-behavior-checklist.md`, and [[patch-12-1-behavior-inventory]] preserve 53 independently testable non-FrameXML behavior boundaries. All remain untriaged; candidate disposition is 30 safe best-effort, 20 unsafe, and 3 impossible.
 - `data/patch-api/sources/12.0.7-register.json` preserves 131 named occurrences as categorized `{direction, category, symbol, detail?}` objects without inventing the unnamed CVar additions/removals omitted by the crawler excerpt.
 - `data/patch-api/12.0.7.json`, `docs/generated/patch-12-0-7-checklist.md`, and [[patch-12-0-7-occurrence-inventory]] form the occurrence register; all 131 named rows are classified as 29 implemented, 101 best-effort, and one unapproved impossible 3D-model exception candidate, with no untriaged rows.
 - `data/patch-api/sources/12.0.5-probes.json`, `data/patch-api/12.0.5-probes.json`, `docs/generated/patch-12-0-5-probe-checklist.md`, and [[patch-12-0-5-probe-inventory]] preserve 38 probe subfindings. Thirty-one rows have direct best-effort behavioral evidence and 7 remain untriaged; prior documented states remain separate from machine status.
@@ -20,7 +21,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 Resolution explains the evidence outcome: vendor-present, simulator compatibility behavior, test-backed behavioral behavior, load-on-demand ownership, removal, cross-flavor contamination, stale/reversed snapshot data, unsafe behavior, or impossible behavior. `behavioral` is for contracts that are not simple Lua-path presence checks, such as stateful globals, event registration, widget methods, CVars, and probe outcomes: it requires hashed test evidence plus a focused named test, permits implemented/best-effort status, and forbids fabricated Lua-path assertions. Source owner and the addon passed to `LoadAddOn` are separate fields; LoD lifecycle assertions must match the declared addon. Only `unsafe` and `impossible` may use `exception-requested`.
 
-Current 12.1 FrameXML totals are **1 implemented, 431 best-effort, 0 exception-requested, and 0 untriaged**. The objective remains open.
+Current 12.1 FrameXML totals are **1 implemented, 431 best-effort, 0 exception-requested, and 0 untriaged**. The separate broader behavior register is **0 implemented, 0 best-effort, 0 exception-requested, and 53 untriaged**. The full 12.1 objective remains open.
 
 ### Repository evidence
 

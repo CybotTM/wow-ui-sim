@@ -4,7 +4,7 @@ Patch 12.1 API surface work in wow-ui-sim is split between compatible bridges th
 
 ## Content
 
-The per-item machine SSOT is `data/patch-api/12.1-framexml.json`; [[patch-api-audit-manifest]] documents validation and checklist generation. Draft `untriaged` resolutions remain completion blockers and are not approved exceptions.
+The per-item machine SSOTs are `data/patch-api/12.1-framexml.json` for the 432 FrameXML symbol occurrences and `data/patch-api/12.1-behaviors.json` for 53 independently testable non-FrameXML behavior boundaries. [[patch-api-audit-manifest]] documents validation and checklist generation. Draft `untriaged` resolutions remain completion blockers and are not approved exceptions.
 
 ### Completed compatible bridge work
 
@@ -73,7 +73,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 
 ### Broader fidelity classification and exception candidates
 
-A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete, but the broader fidelity families below sit outside that 432-row manifest and must be classified independently. No exception approval is requested or recorded by this section.
+A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete. The broader fidelity boundaries are now itemized separately in [[patch-12-1-behavior-inventory]] as 53 neutral rows: 30 safe-best-effort candidates, 20 unsafe candidates, and 3 impossible candidates. Family names below are summaries only; approval remains per row. No exception approval is requested or recorded by this section.
 
 | Family | Current classification | Remaining fidelity boundary | Exception state |
 |---|---|---|---|
@@ -89,16 +89,19 @@ A broad approval recorded on 2026-07-14 is superseded: the itemized checklist wa
 
 ### Practical next step
 
-Best-effort simulator behavior is acceptable before PTR probes when it is backed by plausible existing state and tests document the simulator contract. Mark those guesses explicitly here, then replace them with probe-backed semantics later. For security/taint/error-shape-sensitive behavior, create probe addons before enforcing restrictions.
+Resolve the 30 safe-best-effort rows with focused simulator-contract evidence first. Then present the remaining unsafe/impossible rows item by item in chat before requesting approval. For security, taint, error-shape, and private-data behavior, create probe evidence before enforcing restrictions.
 
 ## Sources
 
 - `/tmp/warcraft_patch_12_1_api_changes.txt` — source patch-note/API-change list used for the audit.
+- `data/patch-api/sources/12.1-behaviors.json` — normalized broader behavior boundaries and candidate disposition.
+- [[patch-12-1-behavior-inventory]] — itemized broader behavior machine state and candidate classification.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — regression coverage for safe bridges and strict removals.
 - `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` — now-empty version-gated hook; safe 12.1 social/housing bridges moved to Rust-backed simulator state.
 - `src/ptr/compat_bootstrap.lua` — 12.1 compatibility globals, including `LoadAddOnWithErrorHandling`.
 - `src/ptr/strict_removals.lua` — post-startup hiding of removed 12.1 symbols.
 - [[patch-12-1-framexml-symbol-inventory]] — exhaustive local FrameXML added/removed status inventory.
+- [[patch-12-1-behavior-inventory]] — separate non-FrameXML behavior inventory.
 - `src/lua_api/frame/methods/forbidden_aspects.rs` — compatible forbidden-aspect query/inheritance implementation.
 - `docs/wiki/systems/client-profiles.md` — retail epoch feature model.
 
