@@ -9,7 +9,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - `data/patch-api/sources/12.1-framexml.json` preserves the legacy raw 320-added/112-removed direction-array snapshot.
 - `data/patch-api/sources/12.1-behaviors.json`, `data/patch-api/12.1-behaviors.json`, `docs/generated/patch-12-1-behavior-checklist.md`, and [[patch-12-1-behavior-inventory]] preserve 54 independently testable non-FrameXML behavior boundaries. Thirty-three direct-test-backed rows are best-effort and 21 are item-specific exception requests; candidate disposition is 33 safe best-effort, 21 unsafe, and 0 impossible, with no exception approved.
 - `data/patch-api/sources/12.0.7-register.json` preserves 131 named occurrences as categorized `{direction, category, symbol, detail?}` objects without inventing the unnamed CVar additions/removals omitted by the crawler excerpt.
-- `data/patch-api/12.0.7.json`, `docs/generated/patch-12-0-7-checklist.md`, and [[patch-12-0-7-occurrence-inventory]] form the occurrence register; all 131 named rows are classified as 29 implemented, 101 best-effort, and one approved impossible 3D-model exception-requested row, with no untriaged rows.
+- `data/patch-api/12.0.7.json`, `docs/generated/patch-12-0-7-checklist.md`, and [[patch-12-0-7-occurrence-inventory]] form the occurrence register; all 131 named rows are classified as 29 implemented, 101 best-effort, and one impossible exception-requested row authorized by the repository's permanent no-3D project scope, with no untriaged rows.
 - `data/patch-api/sources/12.0.5-probes.json`, `data/patch-api/12.0.5-probes.json`, `docs/generated/patch-12-0-5-probe-checklist.md`, and [[patch-12-0-5-probe-inventory]] preserve 38 probe subfindings: 33 best-effort, 5 exception-requested, and 0 untriaged. Two impossible exceptions and one unsafe Store exception are approved; two unsafe Store exceptions remain unapproved pending live evidence.
 - `data/patch-api/12.1-framexml.json` stores all 432 rows keyed by `change:symbol`.
 - `docs/generated/patch-12-1-framexml-checklist.md` contains one generated line per row.
@@ -46,13 +46,16 @@ The production observation primitive reads actual global/table paths from `WowLu
 
 `--index-lua-source <file> --source-addon <addon>` emits direct global/table function and alias publication candidates for one file. `--index-lua-tree <AddOns>` emits the same records with deterministic relative paths and first-directory addon ownership across all Lua files. Add `--active-tocs` to restrict the tree to TOCs selected by the active compiled profile's `find_toc_file` resolver and recursively follow XML `<Script>`/`<Include>` paths through the loader's addon-root fallback and case-insensitive resolver. Missing Lua/XML references, including TOC-listed Lua/XML entries and XML `<Script>`/`<Include>` targets, are retained in the output's `missing` list. The lexer masks comments, quoted/long strings, and file-local namespaces; `_G.Name` is normalized to `Name`; source identities carry SHA-256 hashes; and multiple mixin/metatable/dynamic-`_G`/factory ambiguities on one line are retained. Active-TOC output identifies source candidates selected by active TOCs and per-file environment rules, but does not infer dependency order or startup versus load-on-demand timing. This is candidate evidence only: neither a text match nor absence changes a final manifest status.
 
-### Exception approval
+### Exception provenance
 
 Each exception must:
 
 1. resolve to `unsafe` or `impossible`;
 2. retain item-specific evidence, plus lifecycle assertions when the exception concerns Lua-path presence;
-3. have a unique approval ID beginning `user-chat:<change:symbol>:`.
+3. require a unique `user-chat:<change:symbol>:` approval for `unsafe` rows;
+4. require either that user approval or an allowlisted repository scope exception for `impossible` rows.
+
+`approval_id` and `scope_exception` are mutually exclusive. Scope exceptions are accepted only for impossible rows and are repository-validated against the allowlisted rule, `AGENTS.md#intentional-gaps`, and the required no-3D rule text. The repository rule is the authority for permanent project-scope gaps; it is not a newly granted user exception.
 
 One approval token cannot silently approve multiple rows.
 

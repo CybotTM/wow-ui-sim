@@ -9,7 +9,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - [x] Restrict final statuses to `implemented`, `best-effort`, or `exception-requested`.
 - [x] Represent test-backed behavior contracts that are not simple Lua-path presence checks with `behavioral` resolution: implemented/best-effort only, at least one hashed test-evidence item plus a focused named test, and no fabricated Lua-path assertion or runtime observation.
 - [x] Restrict exception requests to `unsafe` or `impossible` resolutions.
-- [x] Allow unsafe/impossible exception rows to omit fabricated presence assertions only when item-specific evidence concerns a non-Lua boundary; item-specific evidence and a unique per-row approval remain mandatory for completion.
+- [x] Allow unsafe/impossible exception rows to omit fabricated presence assertions only when item-specific evidence concerns a non-Lua boundary; unsafe rows require item-specific evidence and a unique per-row `user-chat:` approval, while impossible rows require either that approval or an allowlisted repository scope exception.
 - [x] Record target flavor/build, source owner, distinct LoD addon identity, lifecycle assertions, evidence file hashes, tests, commit, and per-item approval provenance.
 - [x] Recompute patch-source, Blizzard manifest, and evidence hashes from repository files.
 - [x] Accept legacy direction arrays or a generic categorized `occurrences` array; validate each occurrence's direction, nonblank category, optional nonblank change detail, symbol path, and deterministic added/changed/removed ordering.
@@ -29,13 +29,15 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 ## Completion contract
 
-`--complete` requires an observation artifact for the exact manifest bytes. Behavioral rows are proven by their repository-validated test evidence and intentionally require no Lua-path observation. Unsafe/impossible rows may likewise omit observations only when item-specific evidence concerns provenance or another non-Lua boundary; item-specific evidence and a unique per-row approval remain mandatory. It rejects:
+`--complete` requires an observation artifact for the exact manifest bytes. Behavioral rows are proven by their repository-validated test evidence and intentionally require no Lua-path observation. Unsafe/impossible rows may likewise omit observations only when item-specific evidence concerns provenance or another non-Lua boundary. Unsafe rows require a unique item-bound `user-chat:` approval; impossible rows require either that approval or an allowlisted repository scope exception. `approval_id` and `scope_exception` are mutually exclusive. Scope exceptions are repository-validated against the allowlisted rule, reference, and required `AGENTS.md` intentional-gaps/no-3D text. It rejects:
 
 - any `untriaged` row;
 - missing or mismatched repository evidence;
 - missing/fake named `#[test]` references or implementation commits;
 - any exception whose resolution is not `unsafe` or `impossible`;
-- any exception without a unique approval ID beginning `user-chat:<change:symbol>:`;
+- any unsafe exception without a unique approval ID beginning `user-chat:<change:symbol>:`;
+- any impossible exception without either that approval ID or a validated allowlisted scope exception;
+- any row that sets both `approval_id` and `scope_exception`;
 - missing, duplicated, extra, wrong-flavor, wrong-phase, wrong-addon, wrong-presence, or wrong-type observations.
 
 The validator does not infer semantic behavior from a symbol name. Runtime observation generation remains required before this audit can complete.

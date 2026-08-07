@@ -4,7 +4,7 @@ Occurrence-level register for the committed 12.0.7 API-change source. Every name
 - **Source:** `data/patch-api/sources/12.0.7-register.json`
 - **Source SHA-256:** `389e3b19174bf77c3646028f764cf186ccfe1b7dddaca2a3b3fcba75e3bdec60`
 - **Target:** retail build `12.0.7`
-- **Rows:** 131 total — 29 implemented, 101 best-effort, 1 approved impossible exception-requested, 0 untriaged
+- **Rows:** 131 total — 29 implemented, 101 best-effort, 1 repository-scope-authorized impossible exception-requested, 0 untriaged
 - **Directions:** 79 added, 29 changed, 23 removed
 
 | Symbol | Status | Category | Direction | Note |
@@ -96,7 +96,7 @@ Occurrence-level register for the committed 12.0.7 API-change source. Every name
 | `Font.SetFont` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
 | `FontString.SetFont` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
 | `MessageFrame.SetFont` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
-| `ModelSceneActorBase.GetModelUnitGUID` | exception-requested | widget-method | changed | Approved impossible exception: permanent project 2D/no-3D scope leaves this model-unit GUID method absent; conditional-secret 3D model behavior is impossible to model faithfully without adding the excluded 3D subsystem. |
+| `ModelSceneActorBase.GetModelUnitGUID` | exception-requested | widget-method | changed | Repository scope exception: `AGENTS.md#intentional-gaps` permanently excludes 3D model behavior, so this model-unit GUID method remains absent rather than guessed. |
 | `ScrollFrame.GetHorizontalScroll` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
 | `ScrollFrame.GetVerticalScroll` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
 | `ScrollFrame.SetHorizontalScroll` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |

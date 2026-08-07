@@ -8,6 +8,10 @@ use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 const PATCH_MANIFEST_SCHEMA: &str = "framexml-patch-audit/v2";
+const PERMANENT_PROJECT_SCOPE_RULE: &str = "permanent-project-scope";
+const INTENTIONAL_GAPS_REFERENCE: &str = "AGENTS.md#intentional-gaps";
+const INTENTIONAL_GAPS_HEADING: &str = "## Intentional Gaps";
+const NO_3D_RULE_MARKER: &str = "**No 3D rendering**";
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -71,7 +75,16 @@ pub struct PatchAuditRow {
     pub assertions: Vec<AuditAssertion>,
     pub commit: Option<String>,
     pub approval_id: Option<String>,
+    pub scope_exception: Option<ScopeException>,
     pub notes: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ScopeException {
+    pub rule: String,
+    pub reference: String,
+    pub summary: String,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
@@ -468,6 +481,7 @@ fn validate_untriaged_row(row: &PatchAuditRow) -> Result<(), String> {
         || !row.assertions.is_empty()
         || row.commit.is_some()
         || row.approval_id.is_some()
+        || row.scope_exception.is_some()
         || row.load_addon.is_some();
     if has_resolution_data {
         return Err(format!("row {} untriaged fields must remain empty", row.id));
@@ -569,6 +583,54 @@ fn validate_optional_metadata(row: &PatchAuditRow) -> Result<(), String> {
         if let Some(value) = value {
             require_text(&format!("{}.{}", row.id, field), value)?;
         }
+    }
+    if row.approval_id.is_some() && row.scope_exception.is_some() {
+        return Err(format!(
+            "row {} cannot set both approval_id and scope_exception",
+            row.id
+        ));
+    }
+    if let Some(scope_exception) = &row.scope_exception {
+        validate_scope_exception(row, scope_exception)?;
+    }
+    Ok(())
+}
+
+fn validate_scope_exception(
+    row: &PatchAuditRow,
+    scope_exception: &ScopeException,
+) -> Result<(), String> {
+    require_text(
+        &format!("{}.scope_exception.rule", row.id),
+        &scope_exception.rule,
+    )?;
+    require_text(
+        &format!("{}.scope_exception.reference", row.id),
+        &scope_exception.reference,
+    )?;
+    require_text(
+        &format!("{}.scope_exception.summary", row.id),
+        &scope_exception.summary,
+    )?;
+    if row.status != Some(AuditStatus::ExceptionRequested)
+        || row.resolution != ResolutionKind::Impossible
+    {
+        return Err(format!(
+            "row {} scope_exception requires exception-requested status with impossible resolution",
+            row.id
+        ));
+    }
+    if scope_exception.rule != PERMANENT_PROJECT_SCOPE_RULE {
+        return Err(format!(
+            "row {} scope_exception rule must be {PERMANENT_PROJECT_SCOPE_RULE}",
+            row.id
+        ));
+    }
+    if scope_exception.reference != INTENTIONAL_GAPS_REFERENCE {
+        return Err(format!(
+            "row {} scope_exception reference must be {INTENTIONAL_GAPS_REFERENCE}",
+            row.id
+        ));
     }
     Ok(())
 }
@@ -785,6 +847,38 @@ fn validate_resolved_row_artifacts(
         if let Some(commit) = &row.commit {
             validate_commit(root, commit)?;
         }
+        if let Some(scope_exception) = &row.scope_exception {
+            validate_scope_exception_reference(root, scope_exception)?;
+        }
+    }
+    Ok(())
+}
+
+fn validate_scope_exception_reference(
+    root: &Path,
+    scope_exception: &ScopeException,
+) -> Result<(), String> {
+    let path = scope_exception
+        .reference
+        .split_once('#')
+        .map_or(scope_exception.reference.as_str(), |(path, _)| path);
+    let full_path = root.join(path);
+    if !full_path.is_file() {
+        return Err(format!(
+            "scope exception reference does not exist: {}",
+            full_path.display()
+        ));
+    }
+    let contents = std::fs::read_to_string(&full_path).map_err(|error| {
+        format!(
+            "failed to read scope exception reference {}: {error}",
+            full_path.display()
+        )
+    })?;
+    if !contents.contains(INTENTIONAL_GAPS_HEADING) || !contents.contains(NO_3D_RULE_MARKER) {
+        return Err(format!(
+            "scope exception reference must contain {INTENTIONAL_GAPS_HEADING} and No 3D rendering"
+        ));
     }
     Ok(())
 }
@@ -1087,19 +1181,22 @@ fn validate_completion_row<'a>(
     }
     let status = row.status.expect("resolved row status validated");
     if status == AuditStatus::ExceptionRequested {
-        let approval = row
-            .approval_id
-            .as_deref()
-            .ok_or_else(|| format!("row {} requires an approval_id", row.id))?;
-        let prefix = format!("user-chat:{}:", row.id);
-        if !approval.starts_with(&prefix) || approval.len() == prefix.len() {
+        if let Some(approval) = row.approval_id.as_deref() {
+            let prefix = format!("user-chat:{}:", row.id);
+            if !approval.starts_with(&prefix) || approval.len() == prefix.len() {
+                return Err(format!(
+                    "row {} approval_id must start with {prefix}",
+                    row.id
+                ));
+            }
+            if !approvals.insert(approval) {
+                return Err(format!("duplicate approval_id: {approval}"));
+            }
+        } else if row.scope_exception.is_none() {
             return Err(format!(
-                "row {} approval_id must start with {prefix}",
+                "row {} requires an approval_id or scope_exception",
                 row.id
             ));
-        }
-        if !approvals.insert(approval) {
-            return Err(format!("duplicate approval_id: {approval}"));
         }
     } else if row.commit.is_none() {
         return Err(format!("row {} requires a commit", row.id));
@@ -1241,6 +1338,10 @@ mod tests {
     use wow_ui_sim::loader::load_addon;
 
     fn fixture_manifest(row: &str) -> PatchAuditManifest {
+        parse_fixture_manifest(row).expect("fixture should parse")
+    }
+
+    fn parse_fixture_manifest(row: &str) -> Result<PatchAuditManifest, String> {
         parse_manifest(&format!(
             r#"{{
               "schema":"framexml-patch-audit/v2",
@@ -1253,7 +1354,27 @@ mod tests {
             "a".repeat(64),
             "b".repeat(64)
         ))
-        .expect("fixture should parse")
+    }
+
+    fn scope_exception_row(
+        resolution: &str,
+        approval_id: Option<&str>,
+        rule: &str,
+        reference: &str,
+        summary: &str,
+    ) -> String {
+        let approval_id = serde_json::to_string(&approval_id).expect("approval ID should encode");
+        format!(
+            r#"{{
+              "id":"added:Fixture","symbol":"Fixture","change":"added",
+              "status":"exception-requested","resolution":"{resolution}","owner":"project-scope",
+              "evidence":[{{"kind":"source","reference":"fixture.lua","summary":"evidence","source_hash":"{}"}}],
+              "tests":[],"assertions":[],"commit":null,"approval_id":{approval_id},
+              "scope_exception":{{"rule":"{rule}","reference":"{reference}","summary":"{summary}"}},
+              "notes":"scope exception"
+            }}"#,
+            "c".repeat(64)
+        )
     }
 
     fn resolved_row(status: &str, resolution: &str, assertion: &str) -> String {
@@ -1620,6 +1741,133 @@ mod tests {
             validate_manifest(&manifest)
                 .expect("non-Lua exception evidence should not require a presence assertion");
         }
+    }
+
+    #[test]
+    fn impossible_scope_exception_with_repository_rule_provenance_is_valid() {
+        let row = scope_exception_row(
+            "impossible",
+            None,
+            "permanent-project-scope",
+            "AGENTS.md#intentional-gaps",
+            "The required subsystem is permanently outside project scope.",
+        );
+        let manifest = parse_fixture_manifest(&row).expect("scope exception should parse");
+
+        validate_manifest(&manifest).expect("valid scope exception should validate");
+    }
+
+    #[test]
+    fn scope_exception_and_user_chat_approval_are_mutually_exclusive() {
+        let row = scope_exception_row(
+            "impossible",
+            Some("user-chat:added:Fixture:approval-1"),
+            "permanent-project-scope",
+            "AGENTS.md#intentional-gaps",
+            "The required subsystem is permanently outside project scope.",
+        );
+        let manifest = parse_fixture_manifest(&row).expect("scope exception should parse");
+
+        let error = validate_manifest(&manifest)
+            .expect_err("scope exception and approval must be rejected together");
+        assert!(error.contains("approval_id"), "unexpected error: {error}");
+        assert!(
+            error.contains("scope_exception"),
+            "unexpected error: {error}"
+        );
+    }
+
+    #[test]
+    fn scope_exception_is_rejected_for_unsafe_resolution() {
+        let row = scope_exception_row(
+            "unsafe",
+            None,
+            "permanent-project-scope",
+            "AGENTS.md#intentional-gaps",
+            "The required subsystem is permanently outside project scope.",
+        );
+        let manifest = parse_fixture_manifest(&row).expect("scope exception should parse");
+
+        let error = validate_manifest(&manifest)
+            .expect_err("scope exception should require impossible resolution");
+        assert!(error.contains("impossible"), "unexpected error: {error}");
+    }
+
+    #[test]
+    fn scope_exception_rejects_wrong_repository_rule() {
+        let row = scope_exception_row(
+            "impossible",
+            None,
+            "temporary-gap",
+            "AGENTS.md#intentional-gaps",
+            "The required subsystem is permanently outside project scope.",
+        );
+        let manifest = parse_fixture_manifest(&row).expect("scope exception should parse");
+
+        let error = validate_manifest(&manifest)
+            .expect_err("scope exception should require the repository rule");
+        assert!(
+            error.contains("permanent-project-scope"),
+            "unexpected error: {error}"
+        );
+    }
+
+    #[test]
+    fn scope_exception_rejects_wrong_repository_rule_reference() {
+        let row = scope_exception_row(
+            "impossible",
+            None,
+            "permanent-project-scope",
+            "docs/wiki/unsupported.md",
+            "The required subsystem is permanently outside project scope.",
+        );
+        let manifest = parse_fixture_manifest(&row).expect("scope exception should parse");
+
+        let error = validate_manifest(&manifest)
+            .expect_err("scope exception should require the AGENTS rule reference");
+        assert!(
+            error.contains("AGENTS.md#intentional-gaps"),
+            "unexpected error: {error}"
+        );
+    }
+
+    #[test]
+    fn scope_exception_reference_requires_no_3d_rule_text() {
+        let directory = tempfile::tempdir().expect("temporary repository should create");
+        std::fs::write(
+            directory.path().join("AGENTS.md"),
+            "# Project rules\n\n## Intentional Gaps\n",
+        )
+        .expect("AGENTS fixture should write");
+        let scope_exception = ScopeException {
+            rule: PERMANENT_PROJECT_SCOPE_RULE.to_string(),
+            reference: INTENTIONAL_GAPS_REFERENCE.to_string(),
+            summary: "The required subsystem is permanently outside project scope.".to_string(),
+        };
+
+        let error = validate_scope_exception_reference(directory.path(), &scope_exception)
+            .expect_err("scope reference without the no-3D rule must fail");
+        assert!(
+            error.contains("No 3D rendering"),
+            "unexpected error: {error}"
+        );
+    }
+
+    #[test]
+    fn completion_accepts_repository_scope_exception_without_user_chat_approval() {
+        let row = scope_exception_row(
+            "impossible",
+            None,
+            PERMANENT_PROJECT_SCOPE_RULE,
+            INTENTIONAL_GAPS_REFERENCE,
+            "The required subsystem is permanently outside project scope.",
+        );
+        let manifest = fixture_manifest(&row);
+        let mut approvals = HashSet::new();
+
+        validate_completion_row(&manifest.rows[0], &mut approvals)
+            .expect("repository scope exception should complete without user approval");
+        assert!(approvals.is_empty());
     }
 
     fn assert_observation_mismatch(assertion_json: String, observation_json: &str) {
