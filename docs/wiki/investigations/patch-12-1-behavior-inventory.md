@@ -5,7 +5,7 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 - **Source:** `data/patch-api/sources/12.1-behaviors.json`
 - **Source SHA-256:** `9f0b7de4bd72641eeff6b35e36fd594f6b67dc205df961a63b306c1c9585ea38`
 - **Target:** PTR build `12.1.0`
-- **Rows:** 54 changed behavioral boundaries — 0 implemented, 23 best-effort, 0 exception-requested, 31 untriaged
+- **Rows:** 54 changed behavioral boundaries — 0 implemented, 29 best-effort, 0 exception-requested, 25 untriaged
 - **Candidate split:** 30 safe best-effort, 21 unsafe, 3 impossible
 
 | Symbol | Machine Status | Candidate | Family | Direction | Contract |
@@ -27,12 +27,12 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 | `Patch12_1.ForbiddenAspects.ScriptedInput` | untriaged | unsafe | Forbidden Aspects | changed | Scripted-input operations enforce the ScriptedInput aspect restriction. |
 | `Patch12_1.ForbiddenAspects.QueryFocus` | untriaged | unsafe | Forbidden Aspects | changed | Focus-query operations enforce the QueryFocus aspect restriction. |
 | `Patch12_1.AuraContainer.CreationTypes` | best-effort | best-effort | AuraContainer | changed | AuraContainer, AuraButton, and ManagedAuraContainer can be created with compatible object types. |
-| `Patch12_1.AuraContainer.Assignment` | untriaged | best-effort | AuraContainer | changed | Aura data can be assigned to container and button objects with compatible ownership. |
-| `Patch12_1.AuraContainer.Filtering` | untriaged | best-effort | AuraContainer | changed | Helpful, harmful, and player filters select a compatible aura subset. |
-| `Patch12_1.AuraContainer.Sorting` | untriaged | best-effort | AuraContainer | changed | Aura entries use a documented compatible ordering. |
-| `Patch12_1.AuraContainer.PartitionPlacement` | untriaged | best-effort | AuraContainer | changed | Public and private aura data lands in the compatible object partition. |
-| `Patch12_1.AuraContainer.ManagedButtonLifecycle` | untriaged | best-effort | AuraContainer | changed | Managed containers create, reuse, and release aura buttons compatibly. |
-| `Patch12_1.AuraContainer.TooltipBinding` | untriaged | best-effort | AuraContainer | changed | Aura buttons bind compatible aura tooltip data. |
+| `Patch12_1.AuraContainer.Assignment` | best-effort | best-effort | AuraContainer | changed | Aura groups assign aura data to frames by auraInstanceID with compatible ownership; retained frames remain owned while removed entries are released. |
+| `Patch12_1.AuraContainer.Filtering` | best-effort | best-effort | AuraContainer | changed | Aura groups apply HELPFUL/HARMFUL/PLAYER filtering to select compatible aura subsets. |
+| `Patch12_1.AuraContainer.Sorting` | best-effort | best-effort | AuraContainer | changed | Aura groups honor configured comparator ordering; this does not claim the retail default comparator. |
+| `Patch12_1.AuraContainer.PartitionPlacement` | best-effort | best-effort | AuraContainer | changed | Managed AuraContainer selects public-only, public-and-private, and edit-mode aura source partitions compatibly. |
+| `Patch12_1.AuraContainer.ManagedButtonLifecycle` | best-effort | best-effort | AuraContainer | changed | Aura groups implement an acquire-release-reacquire lifecycle for managed frames as auraInstanceID entries change. |
+| `Patch12_1.AuraContainer.TooltipBinding` | best-effort | best-effort | AuraContainer | changed | Aura buttons bind tooltip filter, aura-instance lookup, and leave-hide behavior. |
 | `Patch12_1.AuraContainer.SecretVisibility` | untriaged | unsafe | AuraContainer | changed | Secret aura values remain hidden while container and button structure stays usable. |
 | `Patch12_1.RadialProgress.Constructor` | untriaged | impossible | RadialProgress | changed | A standalone RadialProgress script object can be constructed through an audited retail API. |
 | `Patch12_1.RadialProgress.MethodDispatch` | untriaged | impossible | RadialProgress | changed | Standalone RadialProgress methods dispatch through the expected receiver and metatable. |
@@ -68,9 +68,9 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 23
+- best-effort: 28
 - exception-requested: 0
-- untriaged: 31
+- untriaged: 26
 
 ## Sources
 

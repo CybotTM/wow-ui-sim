@@ -287,91 +287,145 @@
       "id": "changed:Patch12_1.AuraContainer.Assignment",
       "symbol": "Patch12_1.AuraContainer.Assignment",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "AuraContainer",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/aura_container.rs::aura_container_group_assigns_and_releases_frames_by_aura_instance",
+          "summary": "Aura groups assign aura data to frames by auraInstanceID and preserve retained frame ownership while removed frames are released.",
+          "source_hash": "aafe392ecbc2aa63306d2978235eb0735849f3ba650dab23fbe5fbf67d41a989"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/aura_container.rs::aura_container_group_assigns_and_releases_frames_by_aura_instance"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1ef98b6c7",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Assignment/ownership: aura groups assign aura data to frames by auraInstanceID; retained frames remain owned while removed entries are released."
     },
     {
       "id": "changed:Patch12_1.AuraContainer.Filtering",
       "symbol": "Patch12_1.AuraContainer.Filtering",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "AuraContainer",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/aura_container.rs::aura_container_filters_helpful_harmful_and_player_auras",
+          "summary": "Aura groups select HELPFUL, HARMFUL, and PLAYER aura subsets through compatible filter combinations.",
+          "source_hash": "aafe392ecbc2aa63306d2978235eb0735849f3ba650dab23fbe5fbf67d41a989"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/aura_container.rs::aura_container_filters_helpful_harmful_and_player_auras"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1ef98b6c7",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "HELPFUL/HARMFUL/PLAYER filtering: aura groups select compatible aura subsets."
     },
     {
       "id": "changed:Patch12_1.AuraContainer.Sorting",
       "symbol": "Patch12_1.AuraContainer.Sorting",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "AuraContainer",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/aura_container.rs::aura_container_honors_configured_sort_order",
+          "summary": "Aura groups honor a configured comparator ordering; this does not claim the retail default comparator.",
+          "source_hash": "aafe392ecbc2aa63306d2978235eb0735849f3ba650dab23fbe5fbf67d41a989"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/aura_container.rs::aura_container_honors_configured_sort_order"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1ef98b6c7",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Configured comparator ordering, not retail default comparator."
     },
     {
       "id": "changed:Patch12_1.AuraContainer.PartitionPlacement",
       "symbol": "Patch12_1.AuraContainer.PartitionPlacement",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "AuraContainer",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/aura_container.rs::aura_container_selects_public_private_and_edit_mode_partitions",
+          "summary": "Aura containers select public-only, public-and-private, and edit-mode aura source partitions compatibly.",
+          "source_hash": "aafe392ecbc2aa63306d2978235eb0735849f3ba650dab23fbe5fbf67d41a989"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/aura_container.rs::aura_container_selects_public_private_and_edit_mode_partitions"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cda0bc3f9",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Partition placement: managed AuraContainer selects public-only, public-and-private, or edit-mode aura source lists from its local compatibility state."
     },
     {
       "id": "changed:Patch12_1.AuraContainer.ManagedButtonLifecycle",
       "symbol": "Patch12_1.AuraContainer.ManagedButtonLifecycle",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "AuraContainer",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/aura_container.rs::aura_container_group_assigns_and_releases_frames_by_aura_instance",
+          "summary": "Aura groups acquire, release, and reacquire frames as auraInstanceID entries are removed and re-added.",
+          "source_hash": "aafe392ecbc2aa63306d2978235eb0735849f3ba650dab23fbe5fbf67d41a989"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/aura_container.rs::aura_container_group_assigns_and_releases_frames_by_aura_instance"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1ef98b6c7",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Acquire-release-reacquire lifecycle for managed frames as auraInstanceID entries change."
     },
     {
       "id": "changed:Patch12_1.AuraContainer.TooltipBinding",
       "symbol": "Patch12_1.AuraContainer.TooltipBinding",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "AuraContainer",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/aura_tooltip.rs::aura_button_tooltip_binding_uses_filter_instance_id_and_leave_hide",
+          "summary": "Aura buttons bind HELPFUL/HARMFUL filters, aura-instance tooltip lookup, and leave-hide behavior.",
+          "source_hash": "ebc997d9e1e84fdf53547b819be1ee600f631e67213c224a563408c400831dad"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/aura_tooltip.rs::aura_button_tooltip_binding_uses_filter_instance_id_and_leave_hide"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b49f99a20",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Tooltip filter/instance/leave-hide binding: aura buttons bind HELPFUL/HARMFUL filters, aura-instance lookup, and leave-hide behavior."
     },
     {
       "id": "changed:Patch12_1.AuraContainer.SecretVisibility",

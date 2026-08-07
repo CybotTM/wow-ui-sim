@@ -4,7 +4,7 @@ Patch 12.1 API surface work in wow-ui-sim is split between compatible bridges th
 
 ## Content
 
-The per-item machine SSOTs are `data/patch-api/12.1-framexml.json` for the 432 FrameXML symbol occurrences and `data/patch-api/12.1-behaviors.json` for 53 independently testable non-FrameXML behavior boundaries. [[patch-api-audit-manifest]] documents validation and checklist generation. Draft `untriaged` resolutions remain completion blockers and are not approved exceptions.
+The per-item machine SSOTs are `data/patch-api/12.1-framexml.json` for the 432 FrameXML symbol occurrences and `data/patch-api/12.1-behaviors.json` for 54 independently testable non-FrameXML behavior boundaries. [[patch-api-audit-manifest]] documents validation and checklist generation. Draft `untriaged` resolutions remain completion blockers and are not approved exceptions.
 
 ### Completed compatible bridge work
 
@@ -73,14 +73,14 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 
 ### Broader fidelity classification and exception candidates
 
-A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete. The broader fidelity boundaries are now itemized separately in [[patch-12-1-behavior-inventory]] as 54 rows: 23 direct-test-backed best-effort rows and 31 untriaged. Candidate disposition remains 30 safe best-effort, 21 unsafe, and 3 impossible. Family names below are summaries only; approval remains per row. No exception approval is requested or recorded by this section.
+A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete. The broader fidelity boundaries are now itemized separately in [[patch-12-1-behavior-inventory]] as 54 rows: 29 direct-test-backed best-effort rows and 25 untriaged. Candidate disposition remains 30 safe best-effort, 21 unsafe, and 3 impossible. Family names below are summaries only; approval remains per row. No exception approval is requested or recorded by this section.
 
 | Family | Current classification | Remaining fidelity boundary | Exception state |
 |---|---|---|---|
 | UnitAura secrecy and errors | No enforcement is claimed for addon-vs-Blizzard secret aura errors, fully secret `AuraData`, or secret `UNIT_AURA` payloads. | Exact taint-sensitive call-site rules and error shapes require live evidence before enforcement. | **Candidate: unsafe to guess.** Pending informed approval; not approved. |
 | Private Script Objects / Forbidden Partition | **Best-effort:** compatible XML/private-table mechanics are modeled and tested. | Public/forbidden identity, inaccessible key paths, child visibility, hooks, script storage, and delegate enforcement remain unproven. | **Candidate for the security-enforcement remainder: unsafe to guess.** Pending informed approval; not approved. |
 | Forbidden Aspects enforcement | **Best-effort:** inheritance plus query/add APIs are modeled and tested. | Exact restrictions for `UntrustedScriptExecution`, `UntrustedLayoutScriptExecution`, `EventRegistrations`, `AlwaysPropagateInput`, `ScriptedInput`, and `QueryFocus` are unknown. | **Candidate: unsafe to guess.** Pending informed approval; not approved. |
-| AuraContainer / AuraButton / ManagedAuraContainer | **Best-effort:** names, compatible creation, and XML paths are bridged. | Assignment, filtering, sorting, partition placement, automatic button management, tooltips, and secret visibility are not exact fidelity claims. | No exception requested; retain the documented best-effort contract. |
+| AuraContainer / AuraButton / ManagedAuraContainer | **Best-effort:** names, compatible creation, assignment/ownership, HELPFUL/HARMFUL/PLAYER filtering, configured comparator ordering, public/private/edit-mode partition selection, acquire-release-reacquire lifecycle, and tooltip filter/instance/leave-hide binding are covered by focused compatibility tests. | Secret visibility remains untriaged; configured comparator ordering does not claim the retail default comparator. | No exception requested; retain the documented best-effort contract. |
 | Standalone RadialProgress script object | Texture/statusbar radial-progress widget methods are bridged. | The standalone `RadialProgress:*` object has no known constructor path in the audited API surface. | **Candidate: impossible to model faithfully without constructor evidence.** Pending informed approval; not approved. |
 | DurationTextBinding object fidelity | **Best-effort:** compatibility-table methods and 12.1 color-curve methods are implemented. | Blizzard lifetime, metatable identity, formatter semantics, and interpolation remain unproven. | No exception requested; retain the documented best-effort contract. |
 | Changed structure payloads with real service data | **Best-effort:** local state backs Battle.net, invites, Encounter Journal, Discord, and housing behavior. | Exact Discord/housing/cooldown/pet/LFG/player-choice/tiered/private-aura payloads require service models or captures. | No exception requested; retain the documented best-effort contract. |
@@ -89,7 +89,7 @@ A broad approval recorded on 2026-07-14 is superseded: the itemized checklist wa
 
 ### Practical next step
 
-Resolve the remaining 7 safe-best-effort rows with focused simulator-contract evidence first. Then present the remaining unsafe/impossible rows item by item in chat before requesting approval. For security, taint, error-shape, and private-data behavior, create probe evidence before enforcing restrictions.
+Resolve the remaining 1 safe-best-effort row with focused simulator-contract evidence first. Then present the remaining unsafe/impossible rows item by item in chat before requesting approval. For security, taint, error-shape, and private-data behavior, create probe evidence before enforcing restrictions.
 
 ## Sources
 
