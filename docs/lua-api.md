@@ -320,9 +320,9 @@ Enum.DrawLayer = { BACKGROUND=1, BORDER=2, ARTWORK=3, OVERLAY=4, HIGHLIGHT=5 }
 
 ## CVars
 
-**File:** `src/lua_api/globals/cvar_api.rs`
+**File:** `src/lua_api/globals/set_cvar_verb.rs`
 
-`GetCVar()`, `SetCVar()`, `GetCVarBool()`, `GetCVarNumber()` backed by `SimState.cvars: HashMap<String, String>`.
+`GetCVar()`, `SetCVar()`, `GetCVarBool()`, `GetCVarNumber()` are backed by `SimState.cvars` (`CVarStorage`). A successful `SetCVar()` stores the new value before dispatching `CVAR_UPDATE` with the CVar name and value. For `uiScale` and `useUiScale`, the simulator applies the modeled UIParent scale when available, dispatches `DISPLAY_SIZE_CHANGED` then `UI_SCALE_CHANGED` while `GetCVar()` still exposes the old value, and then stores the requested value and dispatches `CVAR_UPDATE`.
 
 ---
 

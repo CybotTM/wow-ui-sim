@@ -55,8 +55,9 @@ The `events` module defines constants for common WoW events:
 | `ADDON_LOADED` | An addon finished loading (arg: addon name) |
 | `VARIABLES_LOADED` | SavedVariables loaded |
 | `UPDATE_BINDINGS` | Key bindings changed |
-| `DISPLAY_SIZE_CHANGED` | Window resized |
-| `UI_SCALE_CHANGED` | UI scale changed |
+| `CVAR_UPDATE` | A CVar was successfully stored (args: CVar name, value) |
+| `DISPLAY_SIZE_CHANGED` | Display/UI dimensions changed |
+| `UI_SCALE_CHANGED` | Effective UI scale changed |
 | `PLAYER_TARGET_CHANGED` | Target changed |
 | `UNIT_HEALTH` | Unit health updated |
 | `UNIT_POWER_UPDATE` | Unit power (mana/energy) updated |
@@ -480,8 +481,8 @@ After all addons are loaded, the simulator fires startup events in this order:
 5. `TIME_PLAYED_MSG` -- via `RequestTimePlayed()` global
 6. `PLAYER_ENTERING_WORLD` with args `(true, false)` for initial login
 7. `UPDATE_BINDINGS` -- key bindings ready
-8. `DISPLAY_SIZE_CHANGED` -- screen dimensions set
-9. `UI_SCALE_CHANGED` -- UI scale applied
+
+Display/scale recalculation emits `DISPLAY_SIZE_CHANGED` then `UI_SCALE_CHANGED`; at those handlers, modeled `uiScale`/`useUiScale` changes expose the new effective scale while `GetCVar()` still returns the old value. The successful CVar write and `CVAR_UPDATE` follow afterward. Startup emits the display/scale pair before `PLAYER_LOGIN` as described in the scale-event investigation.
 
 Individual addons also receive per-addon `ADDON_LOADED` events during the loading phase, fired by `fire_addon_loaded()` in `src/lua_api/globals/addon_api.rs:550-558`.
 
