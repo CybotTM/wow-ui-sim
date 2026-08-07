@@ -3555,193 +3555,349 @@
       "id": "added:C_CombatAudioAlert.GetFormatSetting",
       "symbol": "C_CombatAudioAlert.GetFormatSetting",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.GetSpeakerSpeed",
       "symbol": "C_CombatAudioAlert.GetSpeakerSpeed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.GetSpeakerVolume",
       "symbol": "C_CombatAudioAlert.GetSpeakerVolume",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.GetSpecSetting",
       "symbol": "C_CombatAudioAlert.GetSpecSetting",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.GetThrottle",
       "symbol": "C_CombatAudioAlert.GetThrottle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.IsEnabled",
       "symbol": "C_CombatAudioAlert.IsEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.SetFormatSetting",
       "symbol": "C_CombatAudioAlert.SetFormatSetting",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.SetSpeakerSpeed",
       "symbol": "C_CombatAudioAlert.SetSpeakerSpeed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.SetSpeakerVolume",
       "symbol": "C_CombatAudioAlert.SetSpeakerVolume",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.SetSpecSetting",
       "symbol": "C_CombatAudioAlert.SetSpecSetting",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.SetThrottle",
       "symbol": "C_CombatAudioAlert.SetThrottle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatAudioAlert.SpeakText",
       "symbol": "C_CombatAudioAlert.SpeakText",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_CombatAudioAlert or this method; this is not an exhaustive lexical/runtime absence claim. Exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the row."
     },
     {
       "id": "added:C_CombatLog.ApplyFilterSettings",

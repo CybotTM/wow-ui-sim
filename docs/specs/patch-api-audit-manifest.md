@@ -51,7 +51,7 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `src/bin/wow_cli/audit_api/patch_manifest.rs` — generic added/changed/removed schema, repository validation, completion gates, actual Lua-state observation primitive, initialization generator, observation comparison, and rendering.
 - `src/bin/wow_cli/audit_api/patch_source_index.rs` — per-file direct-publication candidates, dynamic-publication ambiguity records, all-source tree indexing, and active-profile TOC/XML reachability indexing.
 - `tools/gen_patch_12_0_0_register.py` — reproducible wowless-history generator for the neutral 12.0.0 source register.
-- `data/patch-api/sources/12.0.0-register.json` — 3410-occurrence wowless snapshot register: 2554 added, 313 changed, 543 removed; the current manifest has 77 best-effort, 116 evidence-required, and 3217 untriaged rows, including 17 untriaged curve metadata rows, the 12-row C_Spell evidence-required slice, and the bounded C_TradeSkillUI slice.
+- `data/patch-api/sources/12.0.0-register.json` — 3410-occurrence wowless snapshot register: 2554 added, 313 changed, 543 removed; the current manifest has 77 best-effort, 128 evidence-required, and 3205 untriaged rows, including 17 untriaged curve metadata rows, the 12-row C_Spell evidence-required slice, the bounded C_TradeSkillUI slice, and the 12-row C_CombatAudioAlert evidence-required slice.
 - `data/patch-api/12.0.0.json` — neutral 12.0.0 manifest; its active retail cache manifest is validation metadata, not historical source provenance.
 - `docs/generated/patch-12-0-0-checklist.md` — generated 12.0.0 occurrence checklist.
 - `docs/wiki/investigations/patch-12-0-0-occurrence-inventory.md` — 12.0.0 human-readable occurrence inventory.

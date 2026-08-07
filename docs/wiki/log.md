@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-08-07] investigation | Bound 12.0.0 C_CombatAudioAlert slice
+
+Classified exactly 12 added `C_CombatAudioAlert` rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the examined current `src/lua_api/globals/register.rs` surface; tests remain empty with null commit, approval, and scope exception. exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the rows. Totals are now **77 best-effort, 128 evidence-required, and 3205 untriaged**.
+
 ## [2026-08-07] investigation | Bound remaining 12.0.0 C_ActionBar runtime slice
 
 Classified four C_ActionBar rows as best-effort/behavioral using only source-register, current action-bar implementation/registration, and the named direct/end-to-end tests; claims are limited to exact tested seeded/empty/malformed profession quality, modeled action-slot presence/texture, and modeled outfit-lock slot behavior. The remaining 22 action queries/registration rows are evidence-required/unsafe with no approval path; the 11 ActionBarChargeInfo/ActionBarCooldownInfo structure/field rows remain untriaged. Totals are now **77 best-effort, 116 evidence-required, and 3217 untriaged**.
