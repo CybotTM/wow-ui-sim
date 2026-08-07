@@ -3,9 +3,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 
 ## Content
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
-- **Source SHA-256:** `8b63e31aaf112305b6c9c1c70030262daea0d47ec4b785a83d3d0e415286fdf5`
+- **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 20 best-effort, 0 exception-requested, 18 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 22 best-effort, 0 exception-requested, 16 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -13,7 +13,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `AttributeDispatchProbe.ScalarRepeat` | best-effort | resolved | attributes | changed | Repeated scalar SetAttribute dispatches OnAttributeChanged; explicit false is preserved and delivered as false. |
 | `AttributeDispatchProbe.PanelPulse` | untriaged | best-effort | panel lifecycle | changed | Repeated ShowUIPanel pulse followed by CloseAllWindows preserves the expected panel-stack behavior. |
 | `CoreBehaviorProbe.ForbiddenState` | best-effort | resolved | forbidden frames | changed | Normal addon frames remain un-forbidden; SetForbidden does not create forbidden state. |
-| `CoreBehaviorProbe.ForbiddenConstructor` | untriaged | resolved | forbidden frames | changed | CreateForbiddenFrame availability and EnumerateFrames behavior are captured. |
+| `CoreBehaviorProbe.ForbiddenConstructor` | best-effort | resolved | forbidden frames | changed | CreateForbiddenFrame is nil on retail, so the probe does not enter its creation or EnumerateFrames branch. |
 | `CoreBehaviorProbe.UnitEventFilter` | best-effort | resolved | events | changed | Valid RegisterUnitEvent registration works; invalid unit filters are dropped while the event remains registered. |
 | `CoreBehaviorProbe.AttributeWildcardFalse` | best-effort | resolved | attributes | changed | Wildcard GetAttribute preserves explicit stored false. |
 | `CoreBehaviorProbe.AttributeWildcardValues` | best-effort | resolved | attributes | changed | Wildcard true/string values and one-, two-, and three-argument lookup behavior are preserved. |
@@ -33,7 +33,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `JustifyProbe.ExplicitAnchors` | untriaged | resolved | FontString layout | changed | TOP/BOTTOM/LEFT/RIGHT/TOPLEFT controls distinguish missing from partial anchoring. |
 | `JustifyProbe.EditBoxRegions` | untriaged | resolved | FontString layout | changed | EditBox FontStrings, including sized and inset variants, are captured. |
 | `JustifyProbe.MessageRegions` | untriaged | resolved | FontString layout | changed | MessageFrame and ScrollingMessageFrame owner/region behavior and TextInsets effects. |
-| `ProtectedRetailProbe.PlainFrame` | untriaged | resolved | protection | changed | Plain frame protection/forbidden state and legacy setter behavior. |
+| `ProtectedRetailProbe.PlainFrame` | best-effort | resolved | protection | changed | Plain frame protection/forbidden state and legacy setter behavior. |
 | `ProtectedRetailProbe.XmlProtected` | untriaged | resolved | protection | changed | XML protected=true frame state and setters. |
 | `ProtectedRetailProbe.SecureStore` | untriaged | best-effort | protection | changed | Secure-template child state and Blizzard Store frame observations. |
 | `ScaleEventProbe.OrderedEvents` | untriaged | resolved | scale events | changed | DISPLAY_SIZE_CHANGED, UI_SCALE_CHANGED, and relevant CVAR_UPDATE ordering. |
@@ -51,9 +51,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 20
+- best-effort: 22
 - exception-requested: 0
-- untriaged: 18
+- untriaged: 16
 
 ## Sources
 

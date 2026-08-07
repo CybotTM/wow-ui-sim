@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Retail protection probe replays
+
+Added focused checks for absent retail `CreateForbiddenFrame` and the complete plain-frame protection/forbidden/legacy-setter sequence. Both probe rows are now best-effort, bringing the 12.0.5 register to 22 best-effort and 16 untriaged rows.
+
 ## [2026-08-07] correction | HookScript binding probe contract
 
 Corrected the 12.0.5 source register to the retained retail behavior: the normal binding slot succeeds and chains, while explicit slots 0 and 2 return false and remain absent from `GetScript`. Existing focused tests directly prove that contract; classification totals are unchanged.

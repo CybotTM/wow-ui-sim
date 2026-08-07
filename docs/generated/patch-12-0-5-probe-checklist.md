@@ -2,7 +2,7 @@
 2. [best-effort] `changed:AttributeDispatchProbe.ScalarRepeat` — behavioral
 3. [untriaged] `changed:AttributeDispatchProbe.PanelPulse` — untriaged
 4. [best-effort] `changed:CoreBehaviorProbe.ForbiddenState` — behavioral
-5. [untriaged] `changed:CoreBehaviorProbe.ForbiddenConstructor` — untriaged
+5. [best-effort] `changed:CoreBehaviorProbe.ForbiddenConstructor` — behavioral
 6. [best-effort] `changed:CoreBehaviorProbe.UnitEventFilter` — behavioral
 7. [best-effort] `changed:CoreBehaviorProbe.AttributeWildcardFalse` — behavioral
 8. [best-effort] `changed:CoreBehaviorProbe.AttributeWildcardValues` — behavioral
@@ -22,7 +22,7 @@
 22. [untriaged] `changed:JustifyProbe.ExplicitAnchors` — untriaged
 23. [untriaged] `changed:JustifyProbe.EditBoxRegions` — untriaged
 24. [untriaged] `changed:JustifyProbe.MessageRegions` — untriaged
-25. [untriaged] `changed:ProtectedRetailProbe.PlainFrame` — untriaged
+25. [best-effort] `changed:ProtectedRetailProbe.PlainFrame` — behavioral
 26. [untriaged] `changed:ProtectedRetailProbe.XmlProtected` — untriaged
 27. [untriaged] `changed:ProtectedRetailProbe.SecureStore` — untriaged
 28. [untriaged] `changed:ScaleEventProbe.OrderedEvents` — untriaged

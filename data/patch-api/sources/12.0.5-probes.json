@@ -39,7 +39,7 @@
     {"direction":"changed","category":"attributes","symbol":"AttributeDispatchProbe.ScalarRepeat","detail":"Repeated scalar SetAttribute dispatches OnAttributeChanged; explicit false is preserved and delivered as false."},
     {"direction":"changed","category":"panel lifecycle","symbol":"AttributeDispatchProbe.PanelPulse","detail":"Repeated ShowUIPanel pulse followed by CloseAllWindows preserves the expected panel-stack behavior."},
     {"direction":"changed","category":"forbidden frames","symbol":"CoreBehaviorProbe.ForbiddenState","detail":"Normal addon frames remain un-forbidden; SetForbidden does not create forbidden state."},
-    {"direction":"changed","category":"forbidden frames","symbol":"CoreBehaviorProbe.ForbiddenConstructor","detail":"CreateForbiddenFrame availability and EnumerateFrames behavior are captured."},
+    {"direction":"changed","category":"forbidden frames","symbol":"CoreBehaviorProbe.ForbiddenConstructor","detail":"CreateForbiddenFrame is nil on retail, so the probe does not enter its creation or EnumerateFrames branch."},
     {"direction":"changed","category":"events","symbol":"CoreBehaviorProbe.UnitEventFilter","detail":"Valid RegisterUnitEvent registration works; invalid unit filters are dropped while the event remains registered."},
     {"direction":"changed","category":"attributes","symbol":"CoreBehaviorProbe.AttributeWildcardFalse","detail":"Wildcard GetAttribute preserves explicit stored false."},
     {"direction":"changed","category":"attributes","symbol":"CoreBehaviorProbe.AttributeWildcardValues","detail":"Wildcard true/string values and one-, two-, and three-argument lookup behavior are preserved."},

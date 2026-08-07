@@ -9,7 +9,7 @@
   },
   "source": {
     "path": "data/patch-api/sources/12.0.5-probes.json",
-    "hash": "8b63e31aaf112305b6c9c1c70030262daea0d47ec4b785a83d3d0e415286fdf5",
+    "hash": "2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca",
     "added_count": 0,
     "changed_count": 38,
     "removed_count": 0
@@ -110,16 +110,25 @@
       "id": "changed:CoreBehaviorProbe.ForbiddenConstructor",
       "symbol": "CoreBehaviorProbe.ForbiddenConstructor",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "forbidden frames",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/protected_frame_enforcement.rs::test_retail_create_forbidden_frame_is_absent",
+          "summary": "Retail exposes no CreateForbiddenFrame constructor, so the probe's creation and enumeration branch is unreachable.",
+          "source_hash": "b623d5ce3789ad14e96e2db469d791dfe31d6b66fb6c399d8b1a3092810424a0"
+        }
+      ],
+      "tests": [
+        "tests/protected_frame_enforcement.rs::test_retail_create_forbidden_frame_is_absent"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "8505fc5d0",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained retail constructor-absence result is directly regression-tested; no EnumerateFrames claim is made because the probe exits before that branch."
     },
     {
       "id": "changed:CoreBehaviorProbe.UnitEventFilter",
@@ -512,16 +521,25 @@
       "id": "changed:ProtectedRetailProbe.PlainFrame",
       "symbol": "ProtectedRetailProbe.PlainFrame",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/protected_frame_enforcement.rs::test_retail_plain_frame_protection_probe",
+          "summary": "A plain frame remains unprotected and unforbidden; legacy protection setters are absent, their calls fail, and protection state remains false.",
+          "source_hash": "b623d5ce3789ad14e96e2db469d791dfe31d6b66fb6c399d8b1a3092810424a0"
+        }
+      ],
+      "tests": [
+        "tests/protected_frame_enforcement.rs::test_retail_plain_frame_protection_probe"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "8505fc5d0",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained plain-frame protection, forbidden-state, and legacy-setter sequence is directly regression-tested."
     },
     {
       "id": "changed:ProtectedRetailProbe.XmlProtected",

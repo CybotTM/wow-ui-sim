@@ -10,13 +10,13 @@ The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and t
 
 Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptProbe`, `AttributeDispatchProbe`, `CoreBehaviorProbe`, `DevToolsDumpProbe`, `FrameIdentityProbe`, `HookScriptBindingProbe`, `IsProtectedProbe`, `JustifyProbe`, `ProtectedRetailProbe`, `ScaleEventProbe`, `SetAtlasProbe`, `StoreForbiddenProbe`, and `TextureSetTextureProbe`. `XmlFrameLevelProbe` findings are documented, but its raw capture was not retained.
 
-The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current machine classification is **20 best-effort, 0 implemented, 0 exception-requested, and 18 untriaged**; prior documented states remain separate until exact row evidence exists.
+The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current machine classification is **22 best-effort, 0 implemented, 0 exception-requested, and 16 untriaged**; prior documented states remain separate until exact row evidence exists.
 
 ### Itemized probe status
 
-**Machine-classified with direct behavioral evidence:** the full Frame/AnimationGroup/nine-subtype script-handler matrix; repeated scalar/false attribute dispatch; normal-frame forbidden behavior; valid/invalid unit-event filters; wildcard false/true/string attributes; Raise/Lower level boundaries; frame identity slot, surrogate dispatch, and duplicate-frame freshness; normal HookScript chaining plus rejected explicit slots 0 and 2; absent legacy protection setters and protected secure templates; implicit ButtonText anchors; the complete invalid-atlas argument matrix; texture path/FDID and clear behavior; and bare/fixed/parent/reparent XML frame-level semantics and flags.
+**Machine-classified with direct behavioral evidence:** the full Frame/AnimationGroup/nine-subtype script-handler matrix; repeated scalar/false attribute dispatch; normal-frame forbidden behavior and absent retail forbidden constructor; valid/invalid unit-event filters; wildcard false/true/string attributes; Raise/Lower level boundaries; frame identity slot, surrogate dispatch, and duplicate-frame freshness; normal HookScript chaining plus rejected explicit slots 0 and 2; absent legacy protection setters, the full plain-frame protection sequence, and protected secure templates; implicit ButtonText anchors; the complete invalid-atlas argument matrix; texture path/FDID and clear behavior; and bare/fixed/parent/reparent XML frame-level semantics and flags.
 
-**Still neutral pending exact focused proof:** panel pulse/close lifecycle; forbidden-constructor enumeration; mouse-focus order; DevTools dump metadata; exact protected-template descendant/anchor states; generic FontString/EditBox/MessageFrame geometry; Store protection; complete display/CVAR ordering; and same-size transitions. Existing subsystem tests are not substituted for the missing probe behavior.
+**Still neutral pending exact focused proof:** panel pulse/close lifecycle; mouse-focus order; DevTools dump metadata; exact protected-template descendant/anchor states; generic FontString/EditBox/MessageFrame geometry; XML-protected and Store protection; complete display/CVAR ordering; and same-size transitions. Existing subsystem tests are not substituted for the missing probe behavior.
 
 ### Open probe gaps and exception candidates
 
@@ -69,7 +69,7 @@ The remaining generic defaults are intentionally outside this 12.0.5 audit unles
 
 ### Audit state
 
-This audit remains open with 18 untriaged rows. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
+This audit remains open with 16 untriaged rows. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
 
 ## Sources
 
