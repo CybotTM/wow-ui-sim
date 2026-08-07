@@ -113,6 +113,13 @@ if type(FlagsUtil) ~= "table" then
   FlagsUtil = {}
 end
 
+if type(FlagsUtilConstants) ~= "table" then
+  FlagsUtilConstants = {}
+end
+if rawget(FlagsUtilConstants, "CombineShouldSet") == nil then
+  FlagsUtilConstants.CombineShouldSet = true
+end
+
 if FlagsUtil.IsSet == nil then
   function FlagsUtil.IsSet(flags, flag)
     if type(flags) ~= "number" or type(flag) ~= "number" then
