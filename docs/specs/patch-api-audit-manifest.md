@@ -55,7 +55,7 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `data/patch-api/12.0.0.json` — neutral 12.0.0 manifest; its active retail cache manifest is validation metadata, not historical source provenance.
 - `docs/generated/patch-12-0-0-checklist.md` — generated 12.0.0 occurrence checklist.
 - `docs/wiki/investigations/patch-12-0-0-occurrence-inventory.md` — 12.0.0 human-readable occurrence inventory.
-- The bounded 12.0.0 `C_DamageMeter` triage covers 19 best-effort behavioral rows limited to seeded/empty lookup and exact shape/type assertions, 10 evidence-required unsafe rows for seeded-but-unasserted fields and the unimplemented reset lifecycle, and six metadata-only structure rows left untriaged; no complete retail aggregation/lifecycle/secret fidelity is claimed.
+- The bounded 12.0.0 `C_DamageMeter` triage covers exactly 19 best-effort behavioral rows limited to exact seeded/empty/shape/type/lookup assertions; 10 seeded-but-unasserted/reset rows remain evidence-required unsafe with no approval path; six metadata-only structure rows remain untriaged; no complete retail aggregation/lifecycle/secret fidelity is claimed.
 - `data/patch-api/sources/12.1-framexml.json` — immutable raw 12.1 direction-array snapshot.
 - `data/patch-api/sources/12.1-behaviors.json` — 54 independently testable non-FrameXML behavior boundaries, grouped by the existing broader audit families; candidate disposition remains separate from machine status.
 - `data/patch-api/sources/12.0.7-register.json` — categorized raw register for the 131 named 12.0.7 occurrences; changed rows keep a normalized symbol plus exact detail, while unresolved unnamed CVar claims remain metadata rather than invented rows.
