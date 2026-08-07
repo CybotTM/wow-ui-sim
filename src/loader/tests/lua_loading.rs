@@ -459,6 +459,38 @@ Inbound.lua [LoadIntoEnvironment global]
 }
 
 #[test]
+fn secretunwrap_remains_callable_in_secure_environment_after_global_cleanup() {
+    let env = WowLuaEnv::new().unwrap();
+    let before_cleanup: (String, String, bool, bool) = env
+        .eval(
+            r#"
+            local value = {}
+            return type(_G.secretunwrap),
+                   type(__secureenv.secretunwrap),
+                   __secureenv.secretunwrap(value) == value,
+                   __secureenv.secretunwrap() == nil
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        before_cleanup,
+        ("function".into(), "function".into(), true, true)
+    );
+
+    env.exec("secretunwrap = nil").unwrap();
+    let after_cleanup: (String, String, f64) = env
+        .eval(
+            r#"
+            return type(_G.secretunwrap),
+                   type(__secureenv.secretunwrap),
+                   __secureenv.secretunwrap(42)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(after_cleanup, ("nil".into(), "function".into(), 42.0));
+}
+
+#[test]
 fn secure_xml_named_frames_bind_into_secure_environment() {
     let env = WowLuaEnv::new().unwrap();
     let temp_root = std::env::temp_dir().join("wow-sim-secure-xml-frame-test");
