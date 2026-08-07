@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Bound 12.0.0 FunctionContainer classification
+
+Classified `changed:C_FunctionContainers.CreateCallback` and four `LuaFunctionContainer` rows as best-effort behavioral from checked-in source-register/proxy evidence and the five named `userdata_proxy` tests. Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. The register now totals **21 best-effort and 3389 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 classifications
 
 Classified four `AbbreviateConfig` rows and twelve `UnitHealPrediction` rows as best-effort from bounded, evidence-backed tests. The 12.0.0 register now totals **16 best-effort and 3394 untriaged** (3410 occurrences); these limited-fidelity classifications do not complete the audit or satisfy `--complete`.

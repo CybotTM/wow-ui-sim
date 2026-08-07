@@ -36464,65 +36464,165 @@
       "id": "added:LuaFunctionContainer",
       "symbol": "LuaFunctionContainer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaFunctionContainer as an added luaobject with implementation funtainer.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
+        "tests/userdata_proxy.rs::function_container_per_instance_fields",
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "added:LuaFunctionContainer.Cancel",
       "symbol": "LuaFunctionContainer.Cancel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaFunctionContainer.Cancel as an added luaobject method.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
+        "tests/userdata_proxy.rs::function_container_per_instance_fields",
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "added:LuaFunctionContainer.Invoke",
       "symbol": "LuaFunctionContainer.Invoke",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaFunctionContainer.Invoke as an added luaobject method.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
+        "tests/userdata_proxy.rs::function_container_per_instance_fields",
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "added:LuaFunctionContainer.IsCancelled",
       "symbol": "LuaFunctionContainer.IsCancelled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaFunctionContainer.IsCancelled as an added luaobject method.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
+        "tests/userdata_proxy.rs::function_container_per_instance_fields",
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "added:Model.SetUseGBuffer",
@@ -41463,17 +41563,42 @@
       "id": "changed:C_FunctionContainers.CreateCallback",
       "symbol": "C_FunctionContainers.CreateCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records the C_FunctionContainers.CreateCallback before/after signature, changing the output from funtainer to LuaFunctionContainer.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
+        "tests/userdata_proxy.rs::function_container_per_instance_fields",
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "changed:C_Housing.RequestHouseFinderNeighborhoodData",

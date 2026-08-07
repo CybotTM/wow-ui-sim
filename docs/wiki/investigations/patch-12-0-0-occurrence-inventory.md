@@ -1,10 +1,10 @@
 # Patch 12.0.0 Occurrence Inventory
-Occurrence-level register derived from explicit wowless retail snapshots. Sixteen rows carry evidence-backed best-effort behavioral classifications; the remaining 3394 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
+Occurrence-level register derived from explicit wowless retail snapshots. Twenty-one rows carry evidence-backed best-effort behavioral classifications; the remaining 3389 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 16 best-effort, 0 evidence-required, 0 exception-requested, 3394 untriaged
+- **Rows:** 3410 total — 0 implemented, 21 best-effort, 0 evidence-required, 0 exception-requested, 3389 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -2281,10 +2281,10 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `LuaDurationObject.SetTimeFromStart` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `LuaDurationObject.SetTimeSpan` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `LuaDurationObject.SetToDefaults` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaFunctionContainer` | untriaged | luaobject | added | luaobject added in 12.0.0. |
-| `LuaFunctionContainer.Cancel` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaFunctionContainer.Invoke` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaFunctionContainer.IsCancelled` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
+| `LuaFunctionContainer` | best-effort | luaobject | added | Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. |
+| `LuaFunctionContainer.Cancel` | best-effort | luaobject-method | added | Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. |
+| `LuaFunctionContainer.Invoke` | best-effort | luaobject-method | added | Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. |
+| `LuaFunctionContainer.IsCancelled` | best-effort | luaobject-method | added | Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. |
 | `Model.SetUseGBuffer` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |
 | `NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED` | untriaged | event | added | event added in 12.0.0. |
 | `NEIGHBORHOOD_INITIATIVE_UPDATED` | untriaged | event | added | event added in 12.0.0. |
@@ -2568,7 +2568,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `typedef.UnitTokenVariant` | untriaged | typedef | added | typedef added in 12.0.0. |
 | `COMBAT_LOG_EVENT` | untriaged | event | changed | event changed in 12.0.0. |
 | `COMBAT_LOG_EVENT_UNFILTERED` | untriaged | event | changed | event changed in 12.0.0. |
-| `C_FunctionContainers.CreateCallback` | untriaged | api | changed | api changed in 12.0.0. |
+| `C_FunctionContainers.CreateCallback` | best-effort | api | changed | Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. |
 | `C_Housing.RequestHouseFinderNeighborhoodData` | untriaged | api | changed | api changed in 12.0.0. |
 | `C_Item.CanItemTransmogAppearance` | untriaged | api | changed | api changed in 12.0.0. |
 | `C_Item.GetItemInfo` | untriaged | api | changed | api changed in 12.0.0. |

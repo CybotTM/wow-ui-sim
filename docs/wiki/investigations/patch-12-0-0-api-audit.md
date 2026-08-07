@@ -23,12 +23,12 @@ The source covers wowless `apis`, `cvars`, `docs`, `events`, `globals`, `luaobje
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 16 rows are `best-effort`/`behavioral`; 3394 rows are `untriaged` with null final status
+- **Status:** 21 rows are `best-effort`/`behavioral`; 3389 rows are `untriaged` with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.
 
-This remains a bounded evidence-backed slice, not a compatibility or completion claim. The four `AbbreviateConfig` rows remain best-effort behavioral classifications; existing behavior proves factory/table proxy behavior, method dispatch, round-trip storage, per-instance isolation, read-only keys, and tostring, but not exact `arrayof NumberAbbrevData` structure fidelity. The twelve heal-prediction rows are best-effort behavioral classifications covering only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. The remaining 3394 rows are untriaged. No rows have `implemented`, `evidence-required`, or `exception-requested` status.
+This remains a bounded evidence-backed slice, not a compatibility or completion claim. The four `AbbreviateConfig` rows remain best-effort behavioral classifications; existing behavior proves factory/table proxy behavior, method dispatch, round-trip storage, per-instance isolation, read-only keys, and tostring, but not exact `arrayof NumberAbbrevData` structure fidelity. The twelve heal-prediction rows are best-effort behavioral classifications covering only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. The five `LuaFunctionContainer`/`C_FunctionContainers.CreateCallback` rows are best-effort behavioral classifications: the named `userdata_proxy` tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. The remaining 3389 rows are untriaged. No rows have `implemented`, `evidence-required`, or `exception-requested` status.
 
 ### Provenance and limits
 

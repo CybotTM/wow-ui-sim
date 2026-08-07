@@ -2267,10 +2267,10 @@
 2267. [untriaged] `added:LuaDurationObject.SetTimeFromStart` — untriaged
 2268. [untriaged] `added:LuaDurationObject.SetTimeSpan` — untriaged
 2269. [untriaged] `added:LuaDurationObject.SetToDefaults` — untriaged
-2270. [untriaged] `added:LuaFunctionContainer` — untriaged
-2271. [untriaged] `added:LuaFunctionContainer.Cancel` — untriaged
-2272. [untriaged] `added:LuaFunctionContainer.Invoke` — untriaged
-2273. [untriaged] `added:LuaFunctionContainer.IsCancelled` — untriaged
+2270. [best-effort] `added:LuaFunctionContainer` — behavioral
+2271. [best-effort] `added:LuaFunctionContainer.Cancel` — behavioral
+2272. [best-effort] `added:LuaFunctionContainer.Invoke` — behavioral
+2273. [best-effort] `added:LuaFunctionContainer.IsCancelled` — behavioral
 2274. [untriaged] `added:Model.SetUseGBuffer` — untriaged
 2275. [untriaged] `added:NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED` — untriaged
 2276. [untriaged] `added:NEIGHBORHOOD_INITIATIVE_UPDATED` — untriaged
@@ -2554,7 +2554,7 @@
 2554. [untriaged] `added:typedef.UnitTokenVariant` — untriaged
 2555. [untriaged] `changed:COMBAT_LOG_EVENT` — untriaged
 2556. [untriaged] `changed:COMBAT_LOG_EVENT_UNFILTERED` — untriaged
-2557. [untriaged] `changed:C_FunctionContainers.CreateCallback` — untriaged
+2557. [best-effort] `changed:C_FunctionContainers.CreateCallback` — behavioral
 2558. [untriaged] `changed:C_Housing.RequestHouseFinderNeighborhoodData` — untriaged
 2559. [untriaged] `changed:C_Item.CanItemTransmogAppearance` — untriaged
 2560. [untriaged] `changed:C_Item.GetItemInfo` — untriaged
