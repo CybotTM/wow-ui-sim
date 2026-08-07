@@ -77,6 +77,51 @@ fn test_retail_plain_frame_protection_probe() {
 }
 
 #[test]
+fn test_protected_state_does_not_propagate_to_descendants_or_anchors() {
+    let env = env();
+    let statuses: String = env
+        .eval(
+            r#"
+            local protected = CreateFrame("Button", "ProtectionPropagationRoot", UIParent)
+            A_Admin.SetFrameProtected("ProtectionPropagationRoot", true)
+
+            local child = CreateFrame("Frame", nil, protected)
+            local grandchild = CreateFrame("Frame", nil, child)
+
+            local anchoredToProtected = CreateFrame("Frame", nil, UIParent)
+            anchoredToProtected:SetPoint("CENTER", protected, "CENTER")
+
+            local anchoredToChild = CreateFrame("Frame", nil, UIParent)
+            anchoredToChild:SetPoint("CENTER", child, "CENTER")
+
+            local childAnchoredToProtected = CreateFrame("Frame", nil, UIParent)
+            childAnchoredToProtected:SetPoint("CENTER", protected, "CENTER")
+            protected.childAnchoredToProtected = childAnchoredToProtected
+
+            local function protectionStatus(frame)
+                local isProtected, isProtectedExplicitly = frame:IsProtected()
+                return tostring(isProtected) .. ":" .. tostring(isProtectedExplicitly)
+            end
+
+            return table.concat({
+                protectionStatus(protected),
+                protectionStatus(child),
+                protectionStatus(grandchild),
+                protectionStatus(anchoredToProtected),
+                protectionStatus(anchoredToChild),
+                protectionStatus(childAnchoredToProtected),
+            }, ",")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        statuses,
+        "true:true,false:false,false:false,false:false,false:false,false:false"
+    );
+}
+
+#[test]
 fn test_secure_set_forbidden_marks_frame_forbidden() {
     let env = env();
     let (before, after_true, after_false): (bool, bool, bool) = env
