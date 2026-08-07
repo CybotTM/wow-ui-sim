@@ -18,9 +18,9 @@
 18. [untriaged] `changed:IsProtectedProbe.DescendantAnchorPropagation` — untriaged
 19. [best-effort] `changed:JustifyProbe.FrameFontStrings` — behavioral
 20. [best-effort] `changed:JustifyProbe.ButtonText` — behavioral
-21. [untriaged] `changed:JustifyProbe.SizeVariants` — untriaged
-22. [untriaged] `changed:JustifyProbe.ExplicitAnchors` — untriaged
-23. [untriaged] `changed:JustifyProbe.EditBoxRegions` — untriaged
+21. [best-effort] `changed:JustifyProbe.SizeVariants` — behavioral
+22. [best-effort] `changed:JustifyProbe.ExplicitAnchors` — behavioral
+23. [best-effort] `changed:JustifyProbe.EditBoxRegions` — behavioral
 24. [untriaged] `changed:JustifyProbe.MessageRegions` — untriaged
 25. [best-effort] `changed:ProtectedRetailProbe.PlainFrame` — behavioral
 26. [best-effort] `changed:ProtectedRetailProbe.XmlProtected` — behavioral

@@ -488,46 +488,73 @@
       "id": "changed:JustifyProbe.SizeVariants",
       "symbol": "JustifyProbe.SizeVariants",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/xml_basics_extra.rs::layer_fontstring_size_variants_keep_justify_h_default_points",
+          "summary": "No-size, width-only, height-only, and width-plus-height FontStrings retain justifyH-selected default points while configured dimensions remain intact.",
+          "source_hash": "046291bb2f570ce7ca19ff66ea1fc77b88825ced3bc5f0486c969171df034482"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/xml_basics_extra.rs::layer_fontstring_size_variants_keep_justify_h_default_points"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "63dc7c62b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained frame-layer FontString size variants and default-anchor interaction are directly regression-tested."
     },
     {
       "id": "changed:JustifyProbe.ExplicitAnchors",
       "symbol": "JustifyProbe.ExplicitAnchors",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/xml_basics_extra.rs::layer_fontstring_explicit_anchors_remain_authoritative",
+          "summary": "TOP, BOTTOM, LEFT, RIGHT, and TOPLEFT explicit anchors remain the sole point regardless of justifyH.",
+          "source_hash": "046291bb2f570ce7ca19ff66ea1fc77b88825ced3bc5f0486c969171df034482"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/xml_basics_extra.rs::layer_fontstring_explicit_anchors_remain_authoritative"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "63dc7c62b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained explicit-anchor controls are directly regression-tested without adding an implicit justifyH point."
     },
     {
       "id": "changed:JustifyProbe.EditBoxRegions",
       "symbol": "JustifyProbe.EditBoxRegions",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "FontString layout",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/xml_text_region_defaults.rs::justify_probe_editbox_regions_cover_size_and_inset_variants",
+          "summary": "No-size, explicit-size, and inset EditBoxes expose unanchored backing FontStrings, retain owner TextInsets, and do not publish the XML FontString names.",
+          "source_hash": "899ffd0b59adf3aaba19154667f37385881f259690fb63a59fe13e52fc0144d7"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/xml_text_region_defaults.rs::justify_probe_editbox_regions_cover_size_and_inset_variants"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "63dc7c62b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "The retained EditBox backing-region, size-variant, and TextInsets behavior is directly regression-tested."
     },
     {
       "id": "changed:JustifyProbe.MessageRegions",

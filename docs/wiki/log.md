@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | FontString size, anchor, and EditBox replays
+
+Added focused no-size/partial-size/full-size FontString checks, explicit TOP/BOTTOM/LEFT/RIGHT/TOPLEFT anchor controls, and no-size/sized/inset EditBox backing-region proof. The 12.0.5 register now contains 29 best-effort and 9 untriaged rows.
+
 ## [2026-08-07] investigation | Frame-layer FontString anchor evidence
 
 Mapped the retained unanchored frame-layer `justifyH`/`justifyV` matrix to its exact regression test. The 12.0.5 register now contains 26 best-effort and 12 untriaged rows.

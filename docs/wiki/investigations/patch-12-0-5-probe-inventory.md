@@ -5,7 +5,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 26 best-effort, 0 exception-requested, 12 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 29 best-effort, 0 exception-requested, 9 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -29,9 +29,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `IsProtectedProbe.DescendantAnchorPropagation` | untriaged | best-effort | protection | changed | Child, grandchild, and protected-anchor return values are captured. |
 | `JustifyProbe.FrameFontStrings` | best-effort | resolved | FontString layout | changed | Direct unanchored frame-layer FontStrings receive the observed default anchors and justification. |
 | `JustifyProbe.ButtonText` | best-effort | resolved | FontString layout | changed | Implicit ButtonText FontString behavior matches the probe matrix. |
-| `JustifyProbe.SizeVariants` | untriaged | resolved | FontString layout | changed | No-size, width-only, height-only, and width+height variants are captured. |
-| `JustifyProbe.ExplicitAnchors` | untriaged | resolved | FontString layout | changed | TOP/BOTTOM/LEFT/RIGHT/TOPLEFT controls distinguish missing from partial anchoring. |
-| `JustifyProbe.EditBoxRegions` | untriaged | resolved | FontString layout | changed | EditBox FontStrings, including sized and inset variants, are captured. |
+| `JustifyProbe.SizeVariants` | best-effort | resolved | FontString layout | changed | No-size, width-only, height-only, and width+height variants are captured. |
+| `JustifyProbe.ExplicitAnchors` | best-effort | resolved | FontString layout | changed | TOP/BOTTOM/LEFT/RIGHT/TOPLEFT controls distinguish missing from partial anchoring. |
+| `JustifyProbe.EditBoxRegions` | best-effort | resolved | FontString layout | changed | EditBox FontStrings, including sized and inset variants, are captured. |
 | `JustifyProbe.MessageRegions` | untriaged | resolved | FontString layout | changed | MessageFrame and ScrollingMessageFrame owner/region behavior and TextInsets effects. |
 | `ProtectedRetailProbe.PlainFrame` | best-effort | resolved | protection | changed | Plain frame protection/forbidden state and legacy setter behavior. |
 | `ProtectedRetailProbe.XmlProtected` | best-effort | resolved | protection | changed | XML protected=true frame state and setters. |
@@ -51,9 +51,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 26
+- best-effort: 29
 - exception-requested: 0
-- untriaged: 12
+- untriaged: 9
 
 ## Sources
 
