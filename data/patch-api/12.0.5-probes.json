@@ -707,14 +707,14 @@
           "kind": "manual",
           "reference": "docs/local/probe-savedvariables-backup/ScaleEventProbe.lua",
           "source_hash": "e250867b86166f8b182f57ce965deda05b1608ed311f99d22f05252802c7b2b3",
-          "summary": "Duplicate ordered DISPLAY_SIZE_CHANGED/UI_SCALE_CHANGED pairs occur on same-size maximize/restore window-state transitions, but the simulator receives no maximize/restore/fullscreen signal and cannot distinguish them from no transition. Await separate informed approval or new live evidence."
+          "summary": "Duplicate ordered DISPLAY_SIZE_CHANGED/UI_SCALE_CHANGED pairs occur on same-size maximize/restore window-state transitions, but the simulator receives no maximize/restore/fullscreen signal and cannot distinguish them from no transition. Approved as an impossible exception at the current input boundary."
         }
       ],
       "tests": [],
       "assertions": [],
       "commit": null,
-      "approval_id": null,
-      "notes": "Duplicate ordered DISPLAY_SIZE_CHANGED/UI_SCALE_CHANGED pairs occur on same-size maximize/restore window-state transitions, but the simulator receives no maximize/restore/fullscreen signal and cannot distinguish them from no transition. Await separate informed approval or new live evidence."
+      "approval_id": "user-chat:changed:ScaleEventProbe.SameSizeDuplicatePair:2026-08-07-approved-unobservable-window-state",
+      "notes": "Approved as an impossible exception: same-size maximize/restore duplicate event pairs are unobservable because the simulator receives no window-state transition signal."
     },
     {
       "id": "changed:SetAtlasProbe.InvalidArguments",
@@ -893,14 +893,14 @@
           "kind": "source",
           "reference": "docs/addons/XmlFrameLevelProbe/README.md",
           "source_hash": "ae685be6c18d619b6adc9ff22c346fc24c92dd8059b27b98635de072a3d0e94c",
-          "summary": "Behavior is regression-tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally. Await separate informed approval or new live evidence."
+          "summary": "Behavior is regression-tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally. Approved as an impossible provenance exception."
         }
       ],
       "tests": [],
       "assertions": [],
       "commit": null,
-      "approval_id": null,
-      "notes": "Behavior is regression-tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally. Await separate informed approval or new live evidence."
+      "approval_id": "user-chat:changed:XmlFrameLevelProbe.RawCaptureProvenance:2026-08-07-approved-missing-raw-capture",
+      "notes": "Approved as an impossible provenance exception: the historical raw SavedVariables capture is unavailable and cannot be reconstructed locally."
     },
     {
       "id": "changed:StoreForbiddenProbe.DropdownPopulation",

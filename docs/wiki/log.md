@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Approve two 12.0.5 exceptions
+
+Recorded explicit approvals for `ScaleEventProbe.SameSizeDuplicatePair` and `XmlFrameLevelProbe.RawCaptureProvenance`. Both remain `exception-requested` with `impossible` resolution; three unsafe Store exceptions remain unapproved and pending live evidence.
+
 ## [2026-08-07] investigation | Reclassify Texture radial progress rows
 
 Corrected the three 12.1 RadialProgress rows to Texture-backed behavioral best-effort contracts. Focused Texture surface/state proof covers method availability, receiver dispatch, defaults, setters/getters, visual mode, and Clear reset; exact retail clamping and visual rendering remain best-effort. The broader register now has 33 best-effort, 21 exception-requested, and 0 untriaged rows, with no impossible candidates.
