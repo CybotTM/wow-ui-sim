@@ -5,7 +5,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `35da3c796e6976464394dc8486d7748eb0b0cdd790b13cb2e1d845377b2f14e2`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 16 best-effort, 0 exception-requested, 22 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 19 best-effort, 0 exception-requested, 19 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -21,11 +21,11 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `CoreBehaviorProbe.MouseFocusOrder` | untriaged | best-effort | mouse focus | changed | GetMouseFoci/GetMouseFocus shape and hit ordering after Raise/Lower. |
 | `DevToolsDumpProbe.FrameArrayDump` | untriaged | resolved | frame identity | changed | tinsert(frame, foo), frame slot contents, and DevTools_Dump output metadata. |
 | `FrameIdentityProbe.IdentitySlot` | best-effort | resolved | identity | changed | Frame slot [0] contains the identity userdata token. |
-| `FrameIdentityProbe.SurrogateDispatch` | untriaged | resolved | identity | changed | Replacing [0] redirects protection and method dispatch; [1] alone does not. |
+| `FrameIdentityProbe.SurrogateDispatch` | best-effort | resolved | identity | changed | Replacing [0] redirects protection and method dispatch; [1] alone does not. |
 | `FrameIdentityProbe.DuplicateFreshness` | best-effort | resolved | identity | changed | Duplicate named frames receive fresh Lua objects, identity tokens, and custom-field state. |
 | `HookScriptBindingProbe.IndexedHooks` | best-effort | resolved | scripts | changed | HookScript accepts indices 0, 1, and 2; GetScript retrieves indexed hooks. |
-| `IsProtectedProbe.LegacySetters` | untriaged | resolved | protection | changed | Legacy Protect and SetProtected methods are absent and calls fail. |
-| `IsProtectedProbe.SecureTemplate` | untriaged | resolved | protection | changed | Secure-template buttons report protected state while ordinary frames do not. |
+| `IsProtectedProbe.LegacySetters` | best-effort | resolved | protection | changed | Legacy Protect and SetProtected methods are absent and calls fail. |
+| `IsProtectedProbe.SecureTemplate` | best-effort | resolved | protection | changed | Secure-template buttons report protected state while ordinary frames do not. |
 | `IsProtectedProbe.DescendantAnchorPropagation` | untriaged | best-effort | protection | changed | Child, grandchild, and protected-anchor return values are captured. |
 | `JustifyProbe.FrameFontStrings` | untriaged | resolved | FontString layout | changed | Direct unanchored frame-layer FontStrings receive the observed default anchors and justification. |
 | `JustifyProbe.ButtonText` | best-effort | resolved | FontString layout | changed | Implicit ButtonText FontString behavior matches the probe matrix. |
@@ -51,9 +51,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 16
+- best-effort: 19
 - exception-requested: 0
-- untriaged: 22
+- untriaged: 19
 
 ## Sources
 

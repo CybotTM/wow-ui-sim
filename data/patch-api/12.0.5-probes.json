@@ -276,16 +276,26 @@
       "id": "changed:FrameIdentityProbe.SurrogateDispatch",
       "symbol": "FrameIdentityProbe.SurrogateDispatch",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "identity",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/security_api.rs::test_frame_identity_slots_dispatch_surrogate_methods",
+          "summary": "Frame slot zero redirects method/protection dispatch, while a slot-one-only surrogate is rejected.",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034"
+        }
+      ],
+      "tests": [
+        "tests/security_api.rs::test_frame_identity_slots_dispatch_surrogate_methods",
+        "tests/security_api.rs::test_frame_identity_slot_can_redirect_method_receiver"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a46933eab",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Frame slot zero redirects method/protection dispatch, while a slot-one-only surrogate is rejected."
     },
     {
       "id": "changed:FrameIdentityProbe.DuplicateFreshness",
@@ -340,31 +350,49 @@
       "id": "changed:IsProtectedProbe.LegacySetters",
       "symbol": "IsProtectedProbe.LegacySetters",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/security_api.rs::test_protect_methods_are_not_public_addon_surface",
+          "summary": "Legacy Protect and SetProtected methods are absent and calls fail.",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034"
+        }
+      ],
+      "tests": [
+        "tests/security_api.rs::test_protect_methods_are_not_public_addon_surface"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "35475582c",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Legacy Protect and SetProtected methods are absent and calls fail."
     },
     {
       "id": "changed:IsProtectedProbe.SecureTemplate",
       "symbol": "IsProtectedProbe.SecureTemplate",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "protection",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "tests/startup_warnings/late.rs::test_secure_action_button_template_is_protected_tuple_after_blizzard_framexml_load",
+          "summary": "SecureActionButtonTemplate instances report protected state after Blizzard FrameXML loads.",
+          "source_hash": "eadca6ddd3aa63fbf72ff4f73dbc8de4cdb249dc4b66158a308d305429422bbe"
+        }
+      ],
+      "tests": [
+        "tests/startup_warnings/late.rs::test_secure_action_button_template_is_protected_tuple_after_blizzard_framexml_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "c5176b6f8",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "SecureActionButtonTemplate instances report protected state after Blizzard FrameXML loads."
     },
     {
       "id": "changed:IsProtectedProbe.DescendantAnchorPropagation",

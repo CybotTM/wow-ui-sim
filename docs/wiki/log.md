@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Identity and protection probe evidence
+
+Classified surrogate identity dispatch, absent legacy `Protect`/`SetProtected`, and secure-template protection from exact focused tests. The 12.0.5 register now contains 19 best-effort and 19 untriaged rows.
+
 ## [2026-08-07] investigation | Animation script-handler probe replay
 
 Added a focused Frame/AnimationGroup/nine-animation-subtype handler-matrix regression. The initial RED exposed a test misunderstanding—unsupported `HasScript` returns false without error, while `SetScript` rejects—then the corrected test passed and classified `AnimScriptProbe.HandlerMatrix` as best-effort. Current 12.0.5 totals: 16 best-effort and 22 untriaged.

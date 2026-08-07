@@ -10,11 +10,11 @@
 10. [untriaged] `changed:CoreBehaviorProbe.MouseFocusOrder` — untriaged
 11. [untriaged] `changed:DevToolsDumpProbe.FrameArrayDump` — untriaged
 12. [best-effort] `changed:FrameIdentityProbe.IdentitySlot` — behavioral
-13. [untriaged] `changed:FrameIdentityProbe.SurrogateDispatch` — untriaged
+13. [best-effort] `changed:FrameIdentityProbe.SurrogateDispatch` — behavioral
 14. [best-effort] `changed:FrameIdentityProbe.DuplicateFreshness` — behavioral
 15. [best-effort] `changed:HookScriptBindingProbe.IndexedHooks` — behavioral
-16. [untriaged] `changed:IsProtectedProbe.LegacySetters` — untriaged
-17. [untriaged] `changed:IsProtectedProbe.SecureTemplate` — untriaged
+16. [best-effort] `changed:IsProtectedProbe.LegacySetters` — behavioral
+17. [best-effort] `changed:IsProtectedProbe.SecureTemplate` — behavioral
 18. [untriaged] `changed:IsProtectedProbe.DescendantAnchorPropagation` — untriaged
 19. [untriaged] `changed:JustifyProbe.FrameFontStrings` — untriaged
 20. [best-effort] `changed:JustifyProbe.ButtonText` — behavioral
