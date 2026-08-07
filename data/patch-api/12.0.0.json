@@ -9833,81 +9833,185 @@
       "id": "added:C_TradeSkillUI.GetDependentReagents",
       "symbol": "C_TradeSkillUI.GetDependentReagents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetDependentReagents as an added api with a CraftingReagent input and CraftingReagent[] output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation extracts a positive numeric itemID only from table input, looks up dependent reagent slots, and always returns a newly constructed table; nil, malformed, and unknown reagents produce an empty array.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current professions registration binds GetDependentReagents to the Rust implementation in the C_TradeSkillUI method table.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/test_crafting.rs",
+          "summary": "Focused tests verify that an unknown reagent returns a table safe to iterate with ipairs and that nil or malformed inputs return empty tables without errors.",
+          "source_hash": "4551c13cd977e8ab18e0b6af0624bc65c822bdc330b1a11a6dc122d17b2dd71c"
+        }
+      ],
+      "tests": [
+        "tests/test_crafting.rs::get_dependent_reagents_returns_empty_table_for_unknown_reagent",
+        "tests/test_crafting.rs::get_dependent_reagents_handles_nil_or_malformed_input"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "36f425fb2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to table return/iteration safety and nil/malformed/unknown-reagent behavior; exact retail dependency semantics remain unproven."
     },
     {
       "id": "added:C_TradeSkillUI.GetItemCraftedQualityInfo",
       "symbol": "C_TradeSkillUI.GetItemCraftedQualityInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetItemCraftedQualityInfo as an added api with a string input and nilable CraftingQualityInfo output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation has no named modeled implementation for C_TradeSkillUI.GetItemCraftedQualityInfo; this source check does not claim exact lexical/runtime absence.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration does not bind C_TradeSkillUI.GetItemCraftedQualityInfo; dynamic publication paths are not ruled out by this source check.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current professions implementation/registration surface does not publish this method; exact lexical/runtime absence is not claimed. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_TradeSkillUI.GetItemReagentQualityInfo",
       "symbol": "C_TradeSkillUI.GetItemReagentQualityInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetItemReagentQualityInfo as an added api with a string input and nilable CraftingQualityInfo output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation has no named modeled implementation for C_TradeSkillUI.GetItemReagentQualityInfo; this source check does not claim exact lexical/runtime absence.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration does not bind C_TradeSkillUI.GetItemReagentQualityInfo; dynamic publication paths are not ruled out by this source check.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current professions implementation/registration surface does not publish this method; exact lexical/runtime absence is not claimed. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_TradeSkillUI.GetRecipeItemQualityInfo",
       "symbol": "C_TradeSkillUI.GetRecipeItemQualityInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetRecipeItemQualityInfo as an added api with recipeID and quality number inputs and nilable CraftingQualityInfo output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation has no named modeled implementation for C_TradeSkillUI.GetRecipeItemQualityInfo; this source check does not claim exact lexical/runtime absence.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration does not bind C_TradeSkillUI.GetRecipeItemQualityInfo; dynamic publication paths are not ruled out by this source check.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current professions implementation/registration surface does not publish this method; exact lexical/runtime absence is not claimed. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_TradeSkillUI.GetRecipeQualityReagentLink",
       "symbol": "C_TradeSkillUI.GetRecipeQualityReagentLink",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetRecipeQualityReagentLink as an added api with recipeID, dataSlotIndex, and qualityIndex number inputs and a string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation has no named modeled implementation for C_TradeSkillUI.GetRecipeQualityReagentLink; this source check does not claim exact lexical/runtime absence.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration does not bind C_TradeSkillUI.GetRecipeQualityReagentLink; dynamic publication paths are not ruled out by this source check.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current professions implementation/registration surface does not publish this method; exact lexical/runtime absence is not claimed. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo",
@@ -43469,65 +43573,141 @@
       "id": "changed:C_TradeSkillUI.GetEnchantItems",
       "symbol": "C_TradeSkillUI.GetEnchantItems",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetEnchantItems as a changed api: the optional input changes from no second argument to nilable CraftingReagentInfo[], while the string[] output remains.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation has no named modeled implementation for C_TradeSkillUI.GetEnchantItems; this source check does not claim exact lexical/runtime absence.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration does not bind C_TradeSkillUI.GetEnchantItems; dynamic publication paths are not ruled out by this source check.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current professions implementation/registration surface does not publish this method; exact lexical/runtime absence is not claimed. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "changed:C_TradeSkillUI.GetRecraftRemovalWarnings",
       "symbol": "C_TradeSkillUI.GetRecraftRemovalWarnings",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetRecraftRemovalWarnings as a changed api: replacedItemIDs:number[] changes to replacedReagents:CraftingReagent[], while warnings:string[] remains.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation does not provide a modeled C_TradeSkillUI.GetRecraftRemovalWarnings contract; the registered behavior is a placeholder.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration binds C_TradeSkillUI.GetRecraftRemovalWarnings to stub_empty_table.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current registration binds this changed method to a placeholder empty-table return; exact replaced-reagent warning semantics are unproven. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "changed:C_TradeSkillUI.IsRecraftReagentValid",
       "symbol": "C_TradeSkillUI.IsRecraftReagentValid",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.IsRecraftReagentValid as a changed api: itemID:number changes to reagent:CraftingReagent, while the boolean output remains.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation has no named modeled implementation for C_TradeSkillUI.IsRecraftReagentValid; this source check does not claim exact lexical/runtime absence.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration does not bind C_TradeSkillUI.IsRecraftReagentValid; dynamic publication paths are not ruled out by this source check.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current professions implementation/registration surface does not publish this method; exact lexical/runtime absence is not claimed. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "changed:C_TradeSkillUI.RecraftLimitCategoryValid",
       "symbol": "C_TradeSkillUI.RecraftLimitCategoryValid",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.RecraftLimitCategoryValid as a changed api: reagentItemID:number changes to reagent:CraftingReagent, while the boolean output remains.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation does not provide a modeled C_TradeSkillUI.RecraftLimitCategoryValid contract; the registered behavior is a placeholder.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration binds C_TradeSkillUI.RecraftLimitCategoryValid to stub_true.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current registration binds this changed method to a placeholder true return; exact recraft-limit semantics are unproven. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "changed:C_Transmog.GetSlotVisualInfo",
@@ -48893,49 +49073,106 @@
       "id": "removed:C_TradeSkillUI.GetReagentRequirementItemIDs",
       "symbol": "C_TradeSkillUI.GetReagentRequirementItemIDs",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetReagentRequirementItemIDs as a removed api with an itemID:number input and number[] output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation provides no modeled replacement for C_TradeSkillUI.GetReagentRequirementItemIDs; exact removal behavior is not established by this source.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration does not bind C_TradeSkillUI.GetReagentRequirementItemIDs; this records the current surface only and does not prove the 12.0.0 retail removal.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current registration does not bind this removed method; 12.0.0 removal behavior is unproven and exact lexical/runtime absence is not claimed. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "removed:C_TradeSkillUI.GetRecipeFixedReagentItemLink",
       "symbol": "C_TradeSkillUI.GetRecipeFixedReagentItemLink",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetRecipeFixedReagentItemLink as a removed api with recipeID and dataSlotIndex number inputs and a string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation provides no modeled replacement for C_TradeSkillUI.GetRecipeFixedReagentItemLink; exact removal behavior is not established by this source.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration does not bind C_TradeSkillUI.GetRecipeFixedReagentItemLink; this records the current surface only and does not prove the 12.0.0 retail removal.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current registration does not bind this removed method; 12.0.0 removal behavior is unproven and exact lexical/runtime absence is not claimed. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "removed:C_TradeSkillUI.GetRecipeQualityReagentItemLink",
       "symbol": "C_TradeSkillUI.GetRecipeQualityReagentItemLink",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_TradeSkillUI.GetRecipeQualityReagentItemLink as a removed api with recipeID, dataSlotIndex, and qualityIndex number inputs and a string output.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "summary": "Current professions implementation provides no modeled replacement for C_TradeSkillUI.GetRecipeQualityReagentItemLink; exact removal behavior is not established by this source.",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions/professions_registration.rs",
+          "summary": "Current C_TradeSkillUI registration does not bind C_TradeSkillUI.GetRecipeQualityReagentItemLink; this records the current surface only and does not prove the 12.0.0 retail removal.",
+          "source_hash": "75861a9f681f88180f0de26055552460e80f4eef348655b4ac3c17dea4ce7cac"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current registration does not bind this removed method; 12.0.0 removal behavior is unproven and exact lexical/runtime absence is not claimed. Authoritative profession semantics or a correct model/test are required, and no approval can close the row."
     },
     {
       "id": "removed:C_Transmog.ApplyAllPending",

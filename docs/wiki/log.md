@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-08-07] investigation | Bound 12.0.0 C_TradeSkillUI slice
+
+Classified `added:C_TradeSkillUI.GetDependentReagents` as `best-effort`/`behavioral` from source-register, current professions implementation/registration, exact tests, and ancestor commit `36f425fb2`; the claim is limited to table return/iteration safety and nil/malformed/unknown-reagent behavior. Classified exactly 11 quality/recraft/reagent-link rows as `evidence-required`/`unsafe` with source-register and current professions implementation/registration evidence, empty tests, and null commit/approval/scope exception; current evidence distinguishes absent methods, placeholder empty-table/true behavior, and unproven removal behavior. Authoritative profession semantics or a correct model/test are required, and no approval can close them. Totals are now **41 best-effort, 81 evidence-required, and 3288 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 C_Spell triage
 
 Classified exactly 12 added `C_Spell` rows as `evidence-required`/`unsafe` using only the checked-in source register and clean current `src/c_api/c_spell.rs` evidence. Duration lifecycle, spell metadata, and boolean semantics remain unproven; `IsSelfBuff` has a same-name internal implementation, but no matching 12.0.0 publication/behavioral contract is proven. All tests/assertions are empty with null commit, approval, and scope exception; no approval can close these rows. Totals are now **40 best-effort, 70 evidence-required, and 3300 untriaged**.
