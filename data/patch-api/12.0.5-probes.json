@@ -104,7 +104,7 @@
           "kind": "test",
           "reference": "tests/protected_frame_enforcement.rs::test_insecure_addon_created_normal_frame_set_forbidden_is_noop",
           "summary": "Normal addon-frame SetForbidden behavior is directly regression-tested.",
-          "source_hash": "fcb2da408a6b70854570785bcde98f8f3a72691071d24d12bd5313013b5aad56"
+          "source_hash": "b623d5ce3789ad14e96e2db469d791dfe31d6b66fb6c399d8b1a3092810424a0"
         }
       ],
       "tests": [
@@ -449,7 +449,7 @@
           "kind": "test",
           "reference": "src/loader/tests/xml_basics_extra.rs::layer_fontstring_without_anchors_uses_justify_h_default_point",
           "summary": "Unanchored frame-layer FontStrings receive one LEFT, CENTER, or RIGHT parent-relative point selected by justifyH while justifyV does not alter it.",
-          "source_hash": "d83f8d0b8a9299f0efbda70735f0f9db4c741d854b8cddbf11bd2297320e5ad6"
+          "source_hash": "046291bb2f570ce7ca19ff66ea1fc77b88825ced3bc5f0486c969171df034482"
         }
       ],
       "tests": [
@@ -473,7 +473,7 @@
           "kind": "test",
           "reference": "src/loader/tests/xml_text_region_defaults.rs::button_text_without_anchors_uses_justify_h_default_point",
           "summary": "Implicit ButtonText default points and justification are directly regression-tested.",
-          "source_hash": "29de2e31b1930ffae48b368852a4e0e6470b19b46e1389a8e43b699c1a47897d"
+          "source_hash": "a33cc6f29f0a70f218f8a5cda32e6b1f7419826163c13ec43b41d558307ead65"
         }
       ],
       "tests": [
@@ -545,7 +545,7 @@
           "kind": "test",
           "reference": "src/loader/tests/xml_text_region_defaults.rs::justify_probe_editbox_regions_cover_size_and_inset_variants",
           "summary": "No-size, explicit-size, and inset EditBoxes expose unanchored backing FontStrings, retain owner TextInsets, and do not publish the XML FontString names.",
-          "source_hash": "899ffd0b59adf3aaba19154667f37385881f259690fb63a59fe13e52fc0144d7"
+          "source_hash": "a33cc6f29f0a70f218f8a5cda32e6b1f7419826163c13ec43b41d558307ead65"
         }
       ],
       "tests": [
@@ -784,7 +784,7 @@
           "kind": "test",
           "reference": "tests/xml_frame_strata.rs::test_xml_frame_level_uses_parent_relative_offset",
           "summary": "Bare absolute and fixed XML frame-level behavior is directly regression-tested.",
-          "source_hash": "ca1c1384750ea6d2f73f61fa16ef199c789a5c0b89d4806862fc064afecc7133"
+          "source_hash": "4d296cb8c012be5d5d87b68c2b16047fcca63970bd580f00b122cc6994364216"
         }
       ],
       "tests": [
@@ -809,7 +809,7 @@
           "kind": "test",
           "reference": "tests/xml_frame_strata.rs::test_xml_frame_level_uses_parent_relative_offset",
           "summary": "Parent-level propagation and fixed/non-fixed reparent behavior are directly regression-tested.",
-          "source_hash": "ca1c1384750ea6d2f73f61fa16ef199c789a5c0b89d4806862fc064afecc7133"
+          "source_hash": "4d296cb8c012be5d5d87b68c2b16047fcca63970bd580f00b122cc6994364216"
         }
       ],
       "tests": [
@@ -835,7 +835,7 @@
           "kind": "test",
           "reference": "tests/xml_frame_strata.rs::test_xml_frame_level_uses_parent_relative_offset",
           "summary": "Fixed and use-parent-level query behavior is directly regression-tested.",
-          "source_hash": "ca1c1384750ea6d2f73f61fa16ef199c789a5c0b89d4806862fc064afecc7133"
+          "source_hash": "4d296cb8c012be5d5d87b68c2b16047fcca63970bd580f00b122cc6994364216"
         }
       ],
       "tests": [
