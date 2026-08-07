@@ -1,10 +1,10 @@
 # Patch 12.0.0 Occurrence Inventory
-Occurrence-level register derived from explicit wowless retail snapshots. Four rows carry evidence-backed best-effort behavioral classifications; the remaining 3406 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
+Occurrence-level register derived from explicit wowless retail snapshots. Sixteen rows carry evidence-backed best-effort behavioral classifications; the remaining 3394 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 4 best-effort, 0 evidence-required, 0 exception-requested, 3406 untriaged
+- **Rows:** 3410 total — 0 implemented, 16 best-effort, 0 evidence-required, 0 exception-requested, 3394 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -891,7 +891,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `CraftingVariableQuantities.quantity` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `CraftingVariableQuantities.reagent` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `CreateAbbreviateConfig` | best-effort | api | added | Best-effort behavioral evidence covers factory/table proxy behavior, method dispatch, round-trip storage, per-instance isolation, read-only keys, and tostring; exact `arrayof NumberAbbrevData` structure fidelity is not established. |
-| `CreateUnitHealPredictionCalculator` | untriaged | api | added | api added in 12.0.0. |
+| `CreateUnitHealPredictionCalculator` | best-effort | api | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
 | `CriteriaRequiredValue` | untriaged | structure | added | structure added in 12.0.0. |
 | `CriteriaRequiredValue.criteriaID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `CriteriaRequiredValue.requiredValue` | untriaged | structure-field | added | structure-field added in 12.0.0. |
@@ -2358,8 +2358,8 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `UnitEmpoweredChannelDuration` | untriaged | api | added | api added in 12.0.0. |
 | `UnitEmpoweredStageDurations` | untriaged | api | added | api added in 12.0.0. |
 | `UnitEmpoweredStagePercentages` | untriaged | api | added | api added in 12.0.0. |
-| `UnitGetDetailedHealPrediction` | untriaged | api | added | api added in 12.0.0. |
-| `UnitHealPredictionCalculator` | untriaged | luaobject | added | luaobject added in 12.0.0. |
+| `UnitGetDetailedHealPrediction` | best-effort | api | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
+| `UnitHealPredictionCalculator` | best-effort | luaobject | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
 | `UnitHealPredictionCalculator.GetDamageAbsorbClampMode` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `UnitHealPredictionCalculator.GetDamageAbsorbs` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `UnitHealPredictionCalculator.GetHealAbsorbClampMode` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
@@ -2367,24 +2367,24 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `UnitHealPredictionCalculator.GetHealAbsorbs` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `UnitHealPredictionCalculator.GetIncomingHealClampMode` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `UnitHealPredictionCalculator.GetIncomingHealOverflowPercent` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `UnitHealPredictionCalculator.GetIncomingHeals` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `UnitHealPredictionCalculator.GetPredictedValues` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `UnitHealPredictionCalculator.HasSecretValues` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
+| `UnitHealPredictionCalculator.GetIncomingHeals` | best-effort | luaobject-method | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
+| `UnitHealPredictionCalculator.GetPredictedValues` | best-effort | luaobject-method | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
+| `UnitHealPredictionCalculator.HasSecretValues` | best-effort | luaobject-method | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
 | `UnitHealPredictionCalculator.Reset` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `UnitHealPredictionCalculator.SetDamageAbsorbClampMode` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
+| `UnitHealPredictionCalculator.SetDamageAbsorbClampMode` | best-effort | luaobject-method | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
 | `UnitHealPredictionCalculator.SetHealAbsorbClampMode` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `UnitHealPredictionCalculator.SetHealAbsorbMode` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `UnitHealPredictionCalculator.SetIncomingHealClampMode` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `UnitHealPredictionCalculator.SetIncomingHealOverflowPercent` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `UnitHealPredictionCalculator.SetPredictedValues` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
 | `UnitHealPredictionCalculator.SetToDefaults` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `UnitHealPredictionValues` | untriaged | structure | added | structure added in 12.0.0. |
-| `UnitHealPredictionValues.health` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `UnitHealPredictionValues.healthMax` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `UnitHealPredictionValues` | best-effort | structure | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
+| `UnitHealPredictionValues.health` | best-effort | structure-field | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
+| `UnitHealPredictionValues.healthMax` | best-effort | structure-field | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
 | `UnitHealPredictionValues.totalDamageAbsorbs` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `UnitHealPredictionValues.totalHealAbsorbs` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `UnitHealPredictionValues.totalIncomingHeals` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `UnitHealPredictionValues.totalIncomingHealsFromHealer` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `UnitHealPredictionValues.totalIncomingHeals` | best-effort | structure-field | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
+| `UnitHealPredictionValues.totalIncomingHealsFromHealer` | best-effort | structure-field | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
 | `UnitHealthMissing` | untriaged | api | added | api added in 12.0.0. |
 | `UnitHealthPercent` | untriaged | api | added | api added in 12.0.0. |
 | `UnitIsHumanPlayer` | untriaged | api | added | api added in 12.0.0. |
