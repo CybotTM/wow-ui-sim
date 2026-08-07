@@ -106,6 +106,67 @@ fn justify_probe_editbox_regions_cover_size_and_inset_variants() {
 }
 
 #[test]
+fn justify_probe_message_regions_stay_absent_with_owner_insets() {
+    let ctx = load_test_xml(
+        "justify-probe-message-regions",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="JustifyMessageOwnerParent" parent="UIParent" hidden="true"/>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_str(
+        r#"
+        return (function()
+            local function createMessageFrame(frameType, name, withInsets)
+                local frame = CreateFrame(frameType, name, JustifyMessageOwnerParent)
+                frame:SetSize(180, 32)
+                frame:SetFontObject(GameFontNormal)
+                frame:SetJustifyH("RIGHT")
+                frame:SetJustifyV("BOTTOM")
+                if withInsets then
+                    frame:SetTextInsets(7, 11, 13, 17)
+                end
+                frame:AddMessage(withInsets and "Inset" or "Text")
+                return frame
+            end
+
+            local function hasFontStringRegion(frame)
+                for _, region in ipairs({ frame:GetRegions() }) do
+                    if region:GetObjectType() == "FontString" then
+                        return true
+                    end
+                end
+                return false
+            end
+
+            local message = createMessageFrame("MessageFrame", "JustifyMessageFrame", false)
+            local messageInset = createMessageFrame("MessageFrame", "JustifyMessageFrameInset", true)
+            local scrolling = createMessageFrame("ScrollingMessageFrame", "JustifyScrollingMessageFrame", false)
+            local scrollingInset = createMessageFrame("ScrollingMessageFrame", "JustifyScrollingMessageFrameInset", true)
+            local ml, mr, mt, mb = messageInset:GetTextInsets()
+            local sl, sr, st, sb = scrollingInset:GetTextInsets()
+
+            return table.concat({
+                tostring(message:GetNumPoints() == 0),
+                tostring(messageInset:GetNumPoints() == 0),
+                tostring(scrolling:GetNumPoints() == 0),
+                tostring(scrollingInset:GetNumPoints() == 0),
+                tostring(not hasFontStringRegion(message)),
+                tostring(not hasFontStringRegion(messageInset)),
+                tostring(not hasFontStringRegion(scrolling)),
+                tostring(not hasFontStringRegion(scrollingInset)),
+                tostring(ml == 7 and mr == 11 and mt == 13 and mb == 17),
+                tostring(sl == 7 and sr == 11 and st == 13 and sb == 17),
+            }, "|")
+        end)()
+        "#,
+        "true|true|true|true|true|true|true|true|true|true",
+    );
+}
+
+#[test]
 fn editbox_xml_text_insets_do_not_anchor_backing_fontstring() {
     let ctx = load_test_xml(
         "editbox-text-insets-fontstring-anchor",
