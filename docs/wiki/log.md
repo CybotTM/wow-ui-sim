@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Bound 12.0.0 curve-family triage
+
+Classified nine curve factory/object rows as best-effort behavioral from the checked-in source register, temporary proxy factory, ancestor commit `22ab64e5e`, and only the relevant `userdata_proxy` tests. Classified 23 curve rows as evidence-required unsafe with empty tests and no approval path because the generic proxy omits or does not faithfully establish their contracts. The register now totals **35 best-effort, 44 evidence-required, and 3331 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 duration-object audit slice
 
 Classified five duration/factory/StatusBar rows as best-effort behavioral from checked-in source, ancestor commits `35e39a58f`/`0a737bfbc`, and exact focused tests. Classified 21 duration-time/lifecycle/secret rows as evidence-required unsafe; current behavior is constant/no-op/incomplete and needs authoritative semantics or a correct modeled implementation, with no approval path. The register now totals **26 best-effort, 21 evidence-required, and 3363 untriaged**.

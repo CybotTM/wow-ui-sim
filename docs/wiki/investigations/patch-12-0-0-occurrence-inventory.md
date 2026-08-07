@@ -1,10 +1,10 @@
 # Patch 12.0.0 Occurrence Inventory
-Occurrence-level register derived from explicit wowless retail snapshots. Twenty-six rows carry evidence-backed best-effort behavioral classifications; twenty-one rows carry evidence-required unsafe classifications; the remaining 3363 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
+Occurrence-level register derived from explicit wowless retail snapshots. Thirty-five rows carry evidence-backed best-effort behavioral classifications; forty-four rows carry evidence-required unsafe classifications; the remaining 3331 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 26 best-effort, 21 evidence-required, 0 exception-requested, 3363 untriaged
+ - **Rows:** 3410 total — 0 implemented, 35 best-effort, 44 evidence-required, 0 exception-requested, 3331 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -202,11 +202,11 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_CooldownViewer.CooldownViewerCooldown.cooldownID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_CooldownViewer.GetValidAlertTypes` | untriaged | api | added | api added in 12.0.0. |
 | `C_CreatureInfo.GetCreatureID` | untriaged | api | added | api added in 12.0.0. |
-| `C_CurveUtil.CreateColorCurve` | untriaged | api | added | api added in 12.0.0. |
-| `C_CurveUtil.CreateCurve` | untriaged | api | added | api added in 12.0.0. |
-| `C_CurveUtil.EvaluateColorFromBoolean` | untriaged | api | added | api added in 12.0.0. |
-| `C_CurveUtil.EvaluateColorValueFromBoolean` | untriaged | api | added | api added in 12.0.0. |
-| `C_CurveUtil.EvaluateGameCurve` | untriaged | api | added | api added in 12.0.0. |
+| `C_CurveUtil.CreateColorCurve` | best-effort | api | added | Best-effort behavioral evidence is limited to factory return/table shape; exact retail userdata identity and color evaluation remain unproven. |
+| `C_CurveUtil.CreateCurve` | best-effort | api | added | Best-effort behavioral evidence is limited to factory return/table shape; exact retail userdata identity and curve semantics remain unproven. |
+| `C_CurveUtil.EvaluateColorFromBoolean` | evidence-required | api | added | Current generic proxy omits or does not faithfully establish the boolean-to-color evaluation contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `C_CurveUtil.EvaluateColorValueFromBoolean` | evidence-required | api | added | Current generic proxy omits or does not faithfully establish the boolean-to-color-value evaluation contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `C_CurveUtil.EvaluateGameCurve` | evidence-required | api | added | Current generic proxy omits or does not faithfully establish the game-curve evaluation contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
 | `C_DamageMeter.DamageMeterAvailableCombatSession` | untriaged | structure | added | structure added in 12.0.0. |
 | `C_DamageMeter.DamageMeterAvailableCombatSession.name` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_DamageMeter.DamageMeterAvailableCombatSession.sessionID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
@@ -2229,36 +2229,36 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS` | untriaged | global | added | global added in 12.0.0. |
 | `LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS` | untriaged | global | added | global added in 12.0.0. |
 | `LayeredRegion.SetVertexColorFromBoolean` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |
-| `LuaColorCurveObject` | untriaged | luaobject | added | luaobject added in 12.0.0. |
-| `LuaColorCurveObject.AddPoint` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.ClearPoints` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.Copy` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.Evaluate` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.EvaluateUnpacked` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.GetPoint` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.GetPointCount` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.GetPoints` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.RemovePoint` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.SetPoints` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaColorCurveObject.SetToDefaults` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
+| `LuaColorCurveObject` | best-effort | luaobject | added | Best-effort evidence covers color-object table/method shape only; exact retail userdata identity, curve types, ordering/duplicates, color evaluation, secret propagation, and defaults remain unproven. |
+| `LuaColorCurveObject.AddPoint` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the color-point insertion contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaColorCurveObject.ClearPoints` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the color-point clearing contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaColorCurveObject.Copy` | best-effort | luaobject-method | added | Best-effort evidence covers color-object copy/table shape only; exact retail userdata identity, curve types, ordering/duplicates, color evaluation, secret propagation, and defaults remain unproven. |
+| `LuaColorCurveObject.Evaluate` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the color evaluation contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaColorCurveObject.EvaluateUnpacked` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the unpacked color evaluation contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaColorCurveObject.GetPoint` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the color-point retrieval contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaColorCurveObject.GetPointCount` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the color point-count contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaColorCurveObject.GetPoints` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the color point collection contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaColorCurveObject.RemovePoint` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the color-point removal contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaColorCurveObject.SetPoints` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the color-point replacement contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaColorCurveObject.SetToDefaults` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the color default-state contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
 | `LuaColorCurvePoint` | untriaged | structure | added | structure added in 12.0.0. |
 | `LuaColorCurvePoint.x` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `LuaColorCurvePoint.y` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `LuaCurveObject` | untriaged | luaobject | added | luaobject added in 12.0.0. |
-| `LuaCurveObject.AddPoint` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObject.ClearPoints` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObject.Copy` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObject.Evaluate` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObject.GetPoint` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObject.GetPointCount` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObject.GetPoints` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObject.RemovePoint` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObject.SetPoints` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObject.SetToDefaults` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObjectBase` | untriaged | luaobject | added | luaobject added in 12.0.0. |
-| `LuaCurveObjectBase.GetType` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObjectBase.HasSecretValues` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
-| `LuaCurveObjectBase.SetType` | untriaged | luaobject-method | added | luaobject-method added in 12.0.0. |
+| `LuaCurveObject` | best-effort | luaobject | added | Best-effort evidence covers table/method shape, per-instance fields, and tostring only; exact retail userdata identity, curve types, ordering/duplicates, secret propagation, and defaults remain unproven. |
+| `LuaCurveObject.AddPoint` | best-effort | luaobject-method | added | Best-effort behavioral evidence covers scalar point insertion only; exact retail userdata identity, curve types, ordering/duplicates, color evaluation, secret propagation, and defaults remain unproven. |
+| `LuaCurveObject.ClearPoints` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the retail ClearPoints contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaCurveObject.Copy` | best-effort | luaobject-method | added | Best-effort evidence covers scalar copy/table shape and copied point count only; exact retail userdata identity, curve types, ordering/duplicates, color evaluation, secret propagation, and defaults remain unproven. |
+| `LuaCurveObject.Evaluate` | best-effort | luaobject-method | added | Best-effort behavioral evidence covers scalar two-point linear interpolation only; exact retail userdata identity, curve types, ordering/duplicates, color evaluation, secret propagation, and defaults remain unproven. |
+| `LuaCurveObject.GetPoint` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the point retrieval contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaCurveObject.GetPointCount` | best-effort | luaobject-method | added | Best-effort evidence covers copied scalar point count only; exact retail userdata identity, curve types, ordering/duplicates, color evaluation, secret propagation, and defaults remain unproven. |
+| `LuaCurveObject.GetPoints` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the point collection contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaCurveObject.RemovePoint` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the point removal contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaCurveObject.SetPoints` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the point replacement contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaCurveObject.SetToDefaults` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the default-state contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaCurveObjectBase` | evidence-required | luaobject | added | Current generic proxy omits or does not faithfully establish the LuaCurveObjectBase contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaCurveObjectBase.GetType` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the curve type contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaCurveObjectBase.HasSecretValues` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the secret-value propagation contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
+| `LuaCurveObjectBase.SetType` | evidence-required | luaobject-method | added | Current generic proxy omits or does not faithfully establish the curve type mutation contract; authoritative semantics or a correct modeled implementation are required, and no approval can close this row. |
 | `LuaDurationObject` | best-effort | luaobject | added | Best-effort behavioral evidence covers table-backed object shape, default-zero behavior, per-instance fields, and tostring; full time, secret, and curve semantics are not established. |
 | `LuaDurationObject.Assign` | evidence-required | luaobject-method | added | Current behavior is a no-op and incomplete; authoritative mutation semantics or a correct modeled implementation is required, and no approval can close this row. |
 | `LuaDurationObject.Copy` | evidence-required | luaobject-method | added | Current behavior is a fresh default object and is incomplete; authoritative copy semantics or a correct modeled implementation is required, and no approval can close this row. |
