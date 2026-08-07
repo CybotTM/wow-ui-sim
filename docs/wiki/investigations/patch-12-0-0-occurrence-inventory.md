@@ -1,10 +1,10 @@
 # Patch 12.0.0 Occurrence Inventory
-Occurrence-level register derived from explicit wowless retail snapshots. Thirty-five rows carry evidence-backed best-effort behavioral classifications; forty-four rows carry evidence-required unsafe classifications; the remaining 3331 rows are neutral pending evidence-backed classification. The source covers wowless schema surfaces, not historical FrameXML.
+Occurrence-level register derived from explicit wowless retail snapshots. Thirty-five rows carry evidence-backed best-effort behavioral classifications; forty-four rows carry evidence-required unsafe classifications; the remaining 3331 rows are neutral pending evidence-backed classification, including 17 curve-family metadata rows. The nine curve-family best-effort rows are limited to tested factory/table shape, scalar interpolation/copy behavior, and color-object/copy shape; 23 unresolved curve contracts remain evidence-required and cannot be approved closed. The source covers wowless schema surfaces, not historical FrameXML.
 ## Content
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
- - **Rows:** 3410 total — 0 implemented, 35 best-effort, 44 evidence-required, 0 exception-requested, 3331 untriaged
+- **Rows:** 3410 total — 0 implemented, 35 best-effort, 44 evidence-required, 0 exception-requested, 3331 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
