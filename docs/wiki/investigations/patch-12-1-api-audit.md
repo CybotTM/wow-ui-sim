@@ -73,7 +73,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 
 ### Broader fidelity classification and exception candidates
 
-A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete. The broader fidelity boundaries are now itemized separately in [[patch-12-1-behavior-inventory]] as 54 rows: 21 direct-test-backed best-effort rows and 33 untriaged. Candidate disposition remains 30 safe best-effort, 21 unsafe, and 3 impossible. Family names below are summaries only; approval remains per row. No exception approval is requested or recorded by this section.
+A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and the 431 FrameXML rows had not yet been independently classified. The FrameXML register is now complete. The broader fidelity boundaries are now itemized separately in [[patch-12-1-behavior-inventory]] as 54 rows: 23 direct-test-backed best-effort rows and 31 untriaged. Candidate disposition remains 30 safe best-effort, 21 unsafe, and 3 impossible. Family names below are summaries only; approval remains per row. No exception approval is requested or recorded by this section.
 
 | Family | Current classification | Remaining fidelity boundary | Exception state |
 |---|---|---|---|
@@ -89,7 +89,7 @@ A broad approval recorded on 2026-07-14 is superseded: the itemized checklist wa
 
 ### Practical next step
 
-Resolve the remaining 9 safe-best-effort rows with focused simulator-contract evidence first. Then present the remaining unsafe/impossible rows item by item in chat before requesting approval. For security, taint, error-shape, and private-data behavior, create probe evidence before enforcing restrictions.
+Resolve the remaining 7 safe-best-effort rows with focused simulator-contract evidence first. Then present the remaining unsafe/impossible rows item by item in chat before requesting approval. For security, taint, error-shape, and private-data behavior, create probe evidence before enforcing restrictions.
 
 ## Sources
 

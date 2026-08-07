@@ -852,7 +852,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_spell_cooldown_payload",
           "summary": "Seeded and inactive spell cooldown queries return the modeled start, duration, enabled, active, and rate fields.",
-          "source_hash": "c769754629e0d68024fad28f3b2a672f9eac692bef6fee60b61b32b2a47280d9"
+          "source_hash": "a3f137c8fa0ac5ea9843128240ad71adddd96313c76a31e799d2a5a9086ec800"
         }
       ],
       "tests": [
@@ -876,7 +876,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads",
           "summary": "Seeded and unknown species queries verify the modeled 12.1 pet information fields and nil boundary.",
-          "source_hash": "c769754629e0d68024fad28f3b2a672f9eac692bef6fee60b61b32b2a47280d9"
+          "source_hash": "a3f137c8fa0ac5ea9843128240ad71adddd96313c76a31e799d2a5a9086ec800"
         }
       ],
       "tests": [
@@ -900,7 +900,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_pet_and_lfg_payloads",
           "summary": "Seeded and unknown search-result queries verify the modeled LFG identity, activity, size, GUID, and censored fields.",
-          "source_hash": "c769754629e0d68024fad28f3b2a672f9eac692bef6fee60b61b32b2a47280d9"
+          "source_hash": "a3f137c8fa0ac5ea9843128240ad71adddd96313c76a31e799d2a5a9086ec800"
         }
       ],
       "tests": [
@@ -915,16 +915,25 @@
       "id": "changed:Patch12_1.Service.PlayerChoice.Payloads",
       "symbol": "Patch12_1.Service.PlayerChoice.Payloads",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_player_choice_payload_and_mutator_intent",
+          "summary": "Default and seeded PlayerChoice queries expose the generated nested payload shape while response, reroll, and close calls record local intent.",
+          "source_hash": "a3f137c8fa0ac5ea9843128240ad71adddd96313c76a31e799d2a5a9086ec800"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_1_service_payloads.rs::test_patch_12_1_player_choice_payload_and_mutator_intent"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "75caab884",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "C_PlayerChoice exposes deterministic no-choice defaults, seeded PlayerChoiceInfo/options/buttons/rewards, and local response/reroll/close intent. Retail timing, server validation, reroll economics, events, and live service values remain unmodeled."
     },
     {
       "id": "changed:Patch12_1.Service.TieredAura.Payloads",
@@ -975,16 +984,25 @@
       "id": "changed:Patch12_1.StrictRemoval.BlizzardLoadCompatibility",
       "symbol": "Patch12_1.StrictRemoval.BlizzardLoadCompatibility",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Strict removal timing",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/remaining_observations.rs::remaining_symbols_match_observed_publications",
+          "summary": "The existing all-LoD PTR load leaves representative compatibility functions callable and enum fields available before strict-removal activation.",
+          "source_hash": "ea7558c745974bbcdf70b92fa3991f79eb2f98be0806cb522a8d53acf1de4091"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/remaining_observations.rs::remaining_symbols_match_observed_publications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "9fa01d4f1",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "The complete pinned PTR addon closure loads while representative removed compatibility functions and enum fields remain callable before the post-event strict-removal boundary."
     },
     {
       "id": "changed:Patch12_1.StrictRemoval.PostStartupHiding",

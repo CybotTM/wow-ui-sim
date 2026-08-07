@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | PlayerChoice and strict-load classification
+
+Classified the state-backed `C_PlayerChoice` payload and mutator-intent contract plus the pre-removal pinned-PTR load window as best-effort. Focused proof covers default and seeded nested choice payloads and confirms representative compatibility symbols remain callable after the complete all-LoD load. The broader register now has 23 best-effort and 31 untriaged rows.
+
+## [2026-08-07] architecture | PTR C_PlayerChoice local model
+
+Documented commit `c64472e6e`: patch 12.1 `C_PlayerChoice` uses `SimState.player_choice` for deterministic query payloads and mutator-intent markers, including nested choice options and currency/item/reputation rewards. Explicit boundary: no claim of retail timing, server validation, reroll economics, or live service values.
+
 ## [2026-08-07] investigation | Cooldown, pet, and LFG payload classification
 
 Added focused 12.1 payload tests for active/inactive spell cooldowns, seeded/unknown pet species, and seeded/unknown LFG search results. Classified all three local compatibility contracts as best-effort; secret fields and server-backed semantics remain unmodeled. The broader register now has 21 best-effort and 33 untriaged rows.

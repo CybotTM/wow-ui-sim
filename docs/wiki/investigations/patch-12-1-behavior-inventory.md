@@ -5,7 +5,7 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 - **Source:** `data/patch-api/sources/12.1-behaviors.json`
 - **Source SHA-256:** `9f0b7de4bd72641eeff6b35e36fd594f6b67dc205df961a63b306c1c9585ea38`
 - **Target:** PTR build `12.1.0`
-- **Rows:** 54 changed behavioral boundaries — 0 implemented, 21 best-effort, 0 exception-requested, 33 untriaged
+- **Rows:** 54 changed behavioral boundaries — 0 implemented, 23 best-effort, 0 exception-requested, 31 untriaged
 - **Candidate split:** 30 safe best-effort, 21 unsafe, 3 impossible
 
 | Symbol | Machine Status | Candidate | Family | Direction | Contract |
@@ -57,20 +57,20 @@ Non-FrameXML behavioral fidelity register. Family names group rows; status and e
 | `Patch12_1.Service.Cooldown.Payloads` | best-effort | best-effort | Service payloads | changed | Cooldown query structures, secret fields, and update payloads follow a documented compatibility contract. |
 | `Patch12_1.Service.Pet.Payloads` | best-effort | best-effort | Service payloads | changed | Pet-related structures and state payloads follow a documented compatibility contract. |
 | `Patch12_1.Service.LFG.Payloads` | best-effort | best-effort | Service payloads | changed | LFG service-result structures follow a documented compatibility contract. |
-| `Patch12_1.Service.PlayerChoice.Payloads` | untriaged | best-effort | Service payloads | changed | Player-choice structures, options, and state payloads follow a documented compatibility contract. |
+| `Patch12_1.Service.PlayerChoice.Payloads` | best-effort | best-effort | Service payloads | changed | Player-choice structures, options, and state payloads follow a documented compatibility contract. |
 | `Patch12_1.Service.TieredAura.Payloads` | untriaged | best-effort | Service payloads | changed | Tiered-aura structures and tier fields follow a documented compatibility contract. |
 | `Patch12_1.Service.PrivateAura.Payloads` | untriaged | unsafe | Service payloads | changed | Private-aura payloads preserve inaccessible and secret structural boundaries. |
 | `Patch12_1.StrictRemoval.PreStartupVisibility` | untriaged | unsafe | Strict removal timing | changed | Removed APIs are absent from addon-facing globals before Blizzard startup completes. |
-| `Patch12_1.StrictRemoval.BlizzardLoadCompatibility` | untriaged | best-effort | Strict removal timing | changed | Pinned Blizzard UI loads while required removed symbols remain temporarily available. |
+| `Patch12_1.StrictRemoval.BlizzardLoadCompatibility` | best-effort | best-effort | Strict removal timing | changed | Pinned Blizzard UI loads while required removed symbols remain temporarily available. |
 | `Patch12_1.StrictRemoval.PostStartupHiding` | best-effort | best-effort | Strict removal timing | changed | Removed symbols are hidden from addon-facing checks after startup. |
 | `Patch12_1.StrictRemoval.WrapperTiming` | untriaged | unsafe | Strict removal timing | changed | Deprecated wrappers remain available exactly until their required Blizzard callers finish. |
 
 ## Machine state totals
 
 - implemented: 0
-- best-effort: 21
+- best-effort: 23
 - exception-requested: 0
-- untriaged: 33
+- untriaged: 31
 
 ## Sources
 
