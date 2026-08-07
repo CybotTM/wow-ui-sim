@@ -5,6 +5,16 @@ fn env() -> WowLuaEnv {
 }
 
 #[test]
+fn test_retail_create_forbidden_frame_is_absent() {
+    let env = env();
+    let constructor_type: String = env
+        .eval("return type(CreateForbiddenFrame)")
+        .expect("CreateForbiddenFrame availability probe should succeed");
+
+    assert_eq!(constructor_type, "nil");
+}
+
+#[test]
 fn test_insecure_addon_created_normal_frame_set_forbidden_is_noop() {
     let env = env();
     let (before, after_true, after_false): (bool, bool, bool) = env
@@ -25,6 +35,45 @@ fn test_insecure_addon_created_normal_frame_set_forbidden_is_noop() {
     assert!(!before);
     assert!(!after_true);
     assert!(!after_false);
+}
+
+#[test]
+fn test_retail_plain_frame_protection_probe() {
+    let env = env();
+    let (
+        protected_before,
+        forbidden,
+        protect_missing,
+        set_protected_missing,
+        protect_ok,
+        set_true_ok,
+        set_false_ok,
+        protected_after,
+    ): (bool, bool, bool, bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", nil, UIParent)
+            local protectedBefore = frame:IsProtected()
+            local forbidden = frame:IsForbidden()
+            local protectMissing = type(frame.Protect) == "nil"
+            local setProtectedMissing = type(frame.SetProtected) == "nil"
+            local protectOk = pcall(function() frame:Protect() end)
+            local setTrueOk = pcall(function() frame:SetProtected(true) end)
+            local setFalseOk = pcall(function() frame:SetProtected(false) end)
+            return protectedBefore, forbidden, protectMissing, setProtectedMissing,
+                protectOk, setTrueOk, setFalseOk, frame:IsProtected()
+            "#,
+        )
+        .unwrap();
+
+    assert!(!protected_before);
+    assert!(!forbidden);
+    assert!(protect_missing);
+    assert!(set_protected_missing);
+    assert!(!protect_ok);
+    assert!(!set_true_ok);
+    assert!(!set_false_ok);
+    assert!(!protected_after);
 }
 
 #[test]
