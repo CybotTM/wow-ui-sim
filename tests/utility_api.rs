@@ -141,6 +141,35 @@ fn test_table_wipe_alias() {
     assert_eq!(count, 0);
 }
 
+#[test]
+fn test_table_create_returns_empty_mutable_tables_for_capacity_variants() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local tables = {
+                table.create(),
+                table.create(3),
+                table.create(0, 4),
+                table.create(3, 4),
+            }
+            for index, value in ipairs(tables) do
+                if type(value) ~= "table" or next(value) ~= nil then
+                    return "initial:" .. index
+                end
+                value[3] = "array"
+                value.key = "hash"
+                if value[3] ~= "array" or value.key ~= "hash" then
+                    return "mutation:" .. index
+                end
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
 // ============================================================================
 // tinsert / tremove
 // ============================================================================
