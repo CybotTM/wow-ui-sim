@@ -740,46 +740,80 @@
       "id": "changed:Patch12_1.Service.BattleNet.FriendInvitePayload",
       "symbol": "Patch12_1.Service.BattleNet.FriendInvitePayload",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_safe_global_bridges",
+          "summary": "Verified friend invites create one deduplicated local pending invite and expose modeled invite fields.",
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_safe_global_bridges"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "78f8053ec",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Verified friend invites create one deduplicated local pending invite and expose modeled ID, account, level, and timestamp fields; server validation and lifecycle semantics remain unmodeled."
     },
     {
       "id": "changed:Patch12_1.Service.BattleNet.TitleFriendPayload",
       "symbol": "Patch12_1.Service.BattleNet.TitleFriendPayload",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_safe_global_bridges",
+          "summary": "Title-friend custom names, tags, feature probes, and friend metadata use local compatibility state.",
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_battle_net_presence_state",
+          "summary": "Appear-offline intent is recorded in local Battle.net presence state.",
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_safe_global_bridges",
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_battle_net_presence_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdcdd4c62",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Title-friend custom names, tags, feature probes, friend metadata, and appear-offline intent use local compatibility state; exact service gating, persistence, events, and full payloads remain unmodeled."
     },
     {
       "id": "changed:Patch12_1.Service.BattleNet.TitleFriendUnitInvite",
       "symbol": "Patch12_1.Service.BattleNet.TitleFriendUnitInvite",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "Service payloads",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_battle_net_presence_state",
+          "summary": "Title-friend unit invite eligibility returns the documented deterministic unsupported-state result.",
+          "source_hash": "eb0b0446e6ceddfa2e926901c0a5c117b788512839dc31147d94b26536a5957c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_globals.rs::test_patch_12_1_battle_net_presence_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdcdd4c62",
       "approval_id": null,
-      "notes": "Safe best-effort candidate pending focused simulator-contract evidence."
+      "notes": "Title-friend unit invite eligibility deterministically returns false because service eligibility is not modeled; this is not a claim about retail eligibility results."
     },
     {
       "id": "changed:Patch12_1.Service.EncounterJournal.DifficultyPayload",

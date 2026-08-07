@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Battle.net service payload classification
+
+Classified three broader 12.1 Battle.net rows as best-effort from focused local-state tests: deduplicated verified friend invites and returned fields, title-friend names/tags/feature and presence state, and the explicitly unsupported deterministic unit-invite result. Exact service validation, persistence, events, and eligibility remain unmodeled. The broader register now has 18 best-effort and 36 untriaged rows.
+
 ## [2026-08-07] investigation | Duration binding identity split
 
 Split stable Lua-table identity from unknown Blizzard representation fidelity. Focused reference-retention/identity proof classifies lifetime and stable identity as best-effort; exact type/metatable/finalization fidelity remains a separate unsafe candidate. The broader register now has 54 rows: 15 best-effort and 39 untriaged.

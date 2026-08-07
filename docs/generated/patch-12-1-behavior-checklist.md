@@ -38,9 +38,9 @@
 38. [best-effort] `changed:Patch12_1.Service.Housing.BlueprintPayload` — behavioral
 39. [best-effort] `changed:Patch12_1.Service.Housing.AvailabilityCodes` — behavioral
 40. [best-effort] `changed:Patch12_1.Service.Housing.EditorDecorLayoutPayload` — behavioral
-41. [untriaged] `changed:Patch12_1.Service.BattleNet.FriendInvitePayload` — untriaged
-42. [untriaged] `changed:Patch12_1.Service.BattleNet.TitleFriendPayload` — untriaged
-43. [untriaged] `changed:Patch12_1.Service.BattleNet.TitleFriendUnitInvite` — untriaged
+41. [best-effort] `changed:Patch12_1.Service.BattleNet.FriendInvitePayload` — behavioral
+42. [best-effort] `changed:Patch12_1.Service.BattleNet.TitleFriendPayload` — behavioral
+43. [best-effort] `changed:Patch12_1.Service.BattleNet.TitleFriendUnitInvite` — behavioral
 44. [best-effort] `changed:Patch12_1.Service.EncounterJournal.DifficultyPayload` — behavioral
 45. [untriaged] `changed:Patch12_1.Service.Cooldown.Payloads` — untriaged
 46. [untriaged] `changed:Patch12_1.Service.Pet.Payloads` — untriaged
