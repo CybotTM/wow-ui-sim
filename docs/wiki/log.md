@@ -2,7 +2,7 @@
 
 ## [2026-08-07] investigation | Bound remaining 12.0.0 C_ActionBar runtime slice
 
-Classified four C_ActionBar rows as best-effort/behavioral and 22 as evidence-required/unsafe using only source-register, current action-bar implementation/registration, and the named direct/end-to-end tests; the 11 ActionBarChargeInfo/ActionBarCooldownInfo structure/field rows remain untriaged. Totals are now **77 best-effort, 116 evidence-required, and 3217 untriaged**.
+Classified four C_ActionBar rows as best-effort/behavioral using only source-register, current action-bar implementation/registration, and the named direct/end-to-end tests; claims are limited to exact tested seeded/empty/malformed profession quality, modeled action-slot presence/texture, and modeled outfit-lock slot behavior. The remaining 22 action queries/registration rows are evidence-required/unsafe with no approval path; the 11 ActionBarChargeInfo/ActionBarCooldownInfo structure/field rows remain untriaged. Totals are now **77 best-effort, 116 evidence-required, and 3217 untriaged**.
 
 ## [2026-08-07] investigation | Bound 12.0.0 C_ActionBar page/state-query slice
 
