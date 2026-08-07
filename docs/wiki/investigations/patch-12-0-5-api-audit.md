@@ -10,23 +10,23 @@ The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and t
 
 Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptProbe`, `AttributeDispatchProbe`, `CoreBehaviorProbe`, `DevToolsDumpProbe`, `FrameIdentityProbe`, `HookScriptBindingProbe`, `IsProtectedProbe`, `JustifyProbe`, `ProtectedRetailProbe`, `ScaleEventProbe`, `SetAtlasProbe`, `StoreForbiddenProbe`, and `TextureSetTextureProbe`. `XmlFrameLevelProbe` findings are documented, but its raw capture was not retained.
 
-The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current machine classification is **33 best-effort, 0 implemented, 5 exception-requested, and 0 untriaged**: two impossible exceptions are approved, while three unsafe Store exceptions remain unapproved and pending live evidence.
+The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current machine classification is **33 best-effort, 0 implemented, 5 exception-requested, and 0 untriaged**: two impossible exceptions and one unsafe Store exception are approved, while two unsafe Store exceptions remain unapproved and pending live evidence.
 
 ### Itemized probe status
 
 **Machine-classified with direct behavioral evidence:** the full Frame/AnimationGroup/nine-subtype script-handler matrix; repeated scalar/false attribute dispatch and the two-panel ShowUIPanel pulse; normal-frame forbidden behavior and absent retail forbidden constructor; valid/invalid unit-event filters; wildcard false/true/string attributes; Raise/Lower level boundaries and GUI mouse-focus ordering; frame identity slot, surrogate dispatch, duplicate-frame freshness, and DevTools frame-array dump metadata; normal HookScript chaining plus rejected explicit slots 0 and 2; absent legacy protection setters, the full plain-frame and XML-protected-frame sequences, and protected secure templates; frame-layer FontString default points, size variants, explicit anchors, implicit ButtonText anchors, EditBox backing regions/TextInsets, and MessageFrame/ScrollingMessageFrame owner-region behavior; complete observable display/UI-scale/CVAR ordering; the complete invalid-atlas argument matrix; texture path/FDID and clear behavior; and bare/fixed/parent/reparent XML frame-level semantics and flags.
 
-**Item-specific exceptions:** Same-size transitions and XML raw-capture provenance are approved impossible exceptions with hashed repository evidence. Store protection, Store dropdown population, and Store forbidden descendants remain unapproved unsafe exceptions pending live evidence; existing subsystem tests are not substituted for the missing probe behavior.
+**Item-specific exceptions:** Same-size transitions and XML raw-capture provenance are approved impossible exceptions with hashed repository evidence. Store forbidden descendants is an approved unsafe exception. Secure Store behavior and Store dropdown population remain unapproved unsafe exceptions pending live evidence; existing subsystem tests are not substituted for the missing probe behavior.
 
 ### Open probe gaps and exception candidates
 
-A broad approval recorded on 2026-07-14 is superseded. The five rows below are item-specific exceptions with hashed repository evidence and no tests/assertions. Two impossible rows have explicit approvals; the three unsafe Store rows retain `approval_id: null` and await separate informed approval or new live evidence.
+A broad approval recorded on 2026-07-14 is superseded. The five rows below are item-specific exceptions with hashed repository evidence and no tests/assertions. Two impossible rows and the Store descendant row have explicit approvals; SecureStore and Store dropdown population retain `approval_id: null` and await separate informed approval or new live evidence.
 
 1. **ProtectedRetailProbe.SecureStore — unsafe:** Retained Store frames are forbidden, legacy setters are absent, and `IsProtected` errors; the current simulator returns normally, so exact forbidden/secret-return enforcement is unsafe to guess.
 2. **ScaleEventProbe.SameSizeDuplicatePair — approved impossible:** Duplicate ordered display/scale event pairs occur on same-size maximize/restore transitions, but the simulator receives no maximize/restore/fullscreen signal and cannot distinguish them from no transition.
 3. **XmlFrameLevelProbe.RawCaptureProvenance — approved impossible:** Behavior is regression-tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally.
 4. **StoreForbiddenProbe.DropdownPopulation — unapproved unsafe:** The retained capture has `StoreDropdown_SetDropdown == nil`, so population, reuse, text/check, callback, and protection behavior was never observed.
-5. **StoreForbiddenProbe.ForbiddenDescendants — unapproved unsafe:** The retained file lacks the `/sfp` manual descendant scan, so Store descendant forbidden/protected state is unknown.
+5. **StoreForbiddenProbe.ForbiddenDescendants — approved unsafe:** The retained file lacks the `/sfp` manual descendant scan, so Store descendant forbidden/protected state is unknown; the missing capture prevents safe inference.
 
 The 38-row register is complete only for its explicit probe contract; generic fallbacks cannot be claimed as globally patch-complete without another concrete source.
 
@@ -72,7 +72,7 @@ The remaining generic defaults are intentionally outside this 12.0.5 audit unles
 
 ### Audit state
 
-This audit remains open with 5 exception-requested rows: 2 approved impossible exceptions and 3 unapproved unsafe Store exceptions pending live evidence. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
+This audit remains open with 5 exception-requested rows: 2 approved impossible exceptions, 1 approved unsafe Store exception, and 2 unapproved unsafe Store exceptions pending live evidence. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
 
 ## Sources
 

@@ -937,14 +937,14 @@
           "kind": "manual",
           "reference": "docs/local/probe-savedvariables-backup/StoreForbiddenProbe.lua",
           "source_hash": "adeb170d869d0bb1bd3727623d90abd48e702dd484042e315f5b52bd0f475682",
-          "summary": "The retained file lacks the /sfp manual descendant scan, so Store descendant forbidden/protected state is unknown. Await separate informed approval or new live evidence."
+          "summary": "The retained file lacks the /sfp manual descendant scan, so Store descendant forbidden/protected state is unknown. Approved unsafe exception: the missing descendant capture prevents safe inference; retain this gap until live evidence exists."
         }
       ],
       "tests": [],
       "assertions": [],
       "commit": null,
-      "approval_id": null,
-      "notes": "The retained file lacks the /sfp manual descendant scan, so Store descendant forbidden/protected state is unknown. Await separate informed approval or new live evidence."
+      "approval_id": "user-chat:changed:StoreForbiddenProbe.ForbiddenDescendants:2026-08-07-approved-missing-descendant-capture",
+      "notes": "The retained file lacks the /sfp manual descendant scan, so Store descendant forbidden/protected state is unknown. Approved unsafe exception: the missing descendant capture prevents safe inference; retain this gap until live evidence exists."
     }
   ]
 }

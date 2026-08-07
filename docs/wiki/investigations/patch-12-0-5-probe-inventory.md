@@ -5,7 +5,7 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 33 best-effort, 5 exception-requested (2 approved impossible, 3 unapproved unsafe Store), 0 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 33 best-effort, 5 exception-requested (2 approved impossible, 1 approved unsafe Store, 2 unapproved unsafe Store), 0 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -46,13 +46,13 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `XmlFrameLevelProbe.Flags` | best-effort | resolved | XML frame level | changed | HasFixedFrameLevel and IsUsingParentLevel observations. |
 | `XmlFrameLevelProbe.RawCaptureProvenance` | exception-requested | impossible | provenance | changed | Behavior is tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally. Approved as an impossible provenance exception because the historical raw capture is unavailable. |
 | `StoreForbiddenProbe.DropdownPopulation` | exception-requested | unsafe | Store lifecycle | changed | Retained `StoreDropdown_SetDropdown == nil`; population, reuse, text/check, callback, and protection behavior were never observed. Await informed approval or new live evidence. |
-| `StoreForbiddenProbe.ForbiddenDescendants` | exception-requested | unsafe | Store lifecycle | changed | Retained file lacks the `/sfp` manual descendant scan, so Store descendant forbidden/protected state is unknown. Await informed approval or new live evidence. |
+| `StoreForbiddenProbe.ForbiddenDescendants` | exception-requested | unsafe | Store lifecycle | changed | Retained file lacks the `/sfp` manual descendant scan, so Store descendant forbidden/protected state is unknown. Approved unsafe exception because the missing capture prevents safe inference. |
 
 ## Machine state totals
 
 - implemented: 0
 - best-effort: 33
-- exception-requested: 5 (2 approved impossible; 3 unapproved unsafe Store)
+- exception-requested: 5 (2 approved impossible; 1 approved unsafe Store; 2 unapproved unsafe Store)
 - untriaged: 0
 
 ## Sources

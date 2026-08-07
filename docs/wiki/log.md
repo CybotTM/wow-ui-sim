@@ -4,7 +4,11 @@ Chronological record of wiki operations.
 
 ## [2026-08-07] investigation | Approve two 12.0.5 exceptions
 
-Recorded explicit approvals for `ScaleEventProbe.SameSizeDuplicatePair` and `XmlFrameLevelProbe.RawCaptureProvenance`. Both remain `exception-requested` with `impossible` resolution; three unsafe Store exceptions remain unapproved and pending live evidence.
+Recorded explicit approvals for `ScaleEventProbe.SameSizeDuplicatePair` and `XmlFrameLevelProbe.RawCaptureProvenance`. Both remain `exception-requested` with `impossible` resolution; the three unsafe Store exceptions remained unapproved at this point.
+
+## [2026-08-07] decision | Approve Store descendant exception
+
+Recorded explicit approval for `StoreForbiddenProbe.ForbiddenDescendants` as an unsafe exception because the retained probe never captured the `/sfp` descendant matrix. Two unsafe Store exceptions remain unapproved; the 12.0.5 register remains 33 best-effort, 5 exception-requested, and 0 untriaged.
 
 ## [2026-08-07] investigation | Reclassify Texture radial progress rows
 
