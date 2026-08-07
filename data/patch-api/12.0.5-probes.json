@@ -650,7 +650,7 @@
       "id": "changed:ProtectedRetailProbe.SecureStore",
       "symbol": "ProtectedRetailProbe.SecureStore",
       "change": "changed",
-      "status": "exception-requested",
+      "status": "evidence-required",
       "resolution": "unsafe",
       "owner": "protection",
       "load_addon": null,
@@ -666,7 +666,7 @@
       "assertions": [],
       "commit": null,
       "approval_id": null,
-      "notes": "Retained Store frames are forbidden, legacy setters are absent, and IsProtected errors; the current simulator returns normally, so exact forbidden/secret-return enforcement is unsafe to guess. Await separate informed approval or new live evidence."
+      "notes": "Retained Store frames are forbidden, legacy setters are absent, and IsProtected errors; the current simulator returns normally, so exact forbidden/secret-return enforcement is unsafe to guess. Await authoritative live evidence or a correct modeled implementation."
     },
     {
       "id": "changed:ScaleEventProbe.OrderedEvents",
@@ -698,7 +698,7 @@
       "id": "changed:ScaleEventProbe.SameSizeDuplicatePair",
       "symbol": "ScaleEventProbe.SameSizeDuplicatePair",
       "change": "changed",
-      "status": "exception-requested",
+      "status": "evidence-required",
       "resolution": "impossible",
       "owner": "scale events",
       "load_addon": null,
@@ -720,7 +720,7 @@
       "assertions": [],
       "commit": null,
       "approval_id": null,
-      "notes": "Same-size maximize/restore duplicate event pairs remain open: the simulator receives no window-state transition signal, so correct behavior is not modeled. Await separate informed approval or new live evidence."
+      "notes": "Same-size maximize/restore duplicate event pairs remain open: the simulator receives no maximize/restore/fullscreen signal, so correct behavior is not modeled. Await an observable window-state input or other authoritative evidence."
     },
     {
       "id": "changed:SetAtlasProbe.InvalidArguments",
@@ -912,7 +912,7 @@
       "id": "changed:StoreForbiddenProbe.DropdownPopulation",
       "symbol": "StoreForbiddenProbe.DropdownPopulation",
       "change": "changed",
-      "status": "exception-requested",
+      "status": "evidence-required",
       "resolution": "unsafe",
       "owner": "Store lifecycle",
       "load_addon": null,
@@ -928,13 +928,13 @@
       "assertions": [],
       "commit": null,
       "approval_id": null,
-      "notes": "The retained capture has StoreDropdown_SetDropdown == nil, so dropdown population, button reuse, text/check state, callbacks, and protection behavior were never observed. Await separate informed approval or new live evidence."
+      "notes": "The retained capture has StoreDropdown_SetDropdown == nil, so dropdown population, button reuse, text/check state, callbacks, and protection behavior were never observed. Await authoritative live evidence or a correct modeled implementation."
     },
     {
       "id": "changed:StoreForbiddenProbe.ForbiddenDescendants",
       "symbol": "StoreForbiddenProbe.ForbiddenDescendants",
       "change": "changed",
-      "status": "exception-requested",
+      "status": "evidence-required",
       "resolution": "unsafe",
       "owner": "Store lifecycle",
       "load_addon": null,
@@ -950,7 +950,7 @@
       "assertions": [],
       "commit": null,
       "approval_id": null,
-      "notes": "Store descendant forbidden/protected state remains open: the retained file lacks the /sfp manual descendant scan, so correct behavior is not modeled. Await separate informed approval or new live evidence."
+      "notes": "Store descendant forbidden/protected state remains open: the retained file lacks the /sfp manual descendant scan, so correct behavior is not modeled. Await authoritative live evidence or a correct modeled implementation."
     }
   ]
 }

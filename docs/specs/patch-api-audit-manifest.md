@@ -1,15 +1,16 @@
 # Patch API audit manifest
 
-Patch API audits use a checked-in JSON register for every patch-list occurrence. Draft rows have no final status. A row receives `implemented`, `best-effort`, or `exception-requested` only after item-specific evidence exists.
+Patch API audits use a checked-in JSON register for every patch-list occurrence. Draft rows have no final status. A row receives `implemented`, `best-effort`, `evidence-required`, or `exception-requested` only after item-specific evidence exists.
 
 ## What it must do
 
 - [x] Preserve every patch-list occurrence using `change:symbol`, including `added`, `changed`, and `removed` directions and names present in multiple direction lists.
-- [x] Represent pending work as neutral `untriaged` rows with a null status, not as exception requests.
-- [x] Restrict final statuses to `implemented`, `best-effort`, or `exception-requested`.
+- [x] Represent pending work as neutral `untriaged` rows with a null status, not as evidence requests or exceptions.
+- [x] Represent triaged unresolved `unsafe`/`impossible` behavior as `evidence-required`; it requires item-specific evidence but no approval, commit, or focused test and cannot pass `--complete`.
+- [x] Keep `exception-requested` as a distinct exception-handling path with approval or allowlisted-scope requirements; it is not `evidence-required`.
 - [x] Represent test-backed behavior contracts that are not simple Lua-path presence checks with `behavioral` resolution: implemented/best-effort only, at least one hashed test-evidence item plus a focused named test, and no fabricated Lua-path assertion or runtime observation.
 - [x] Restrict exception requests to `unsafe` or `impossible` resolutions.
-- [x] Allow unsafe/impossible exception rows to omit fabricated presence assertions only when item-specific evidence concerns a non-Lua boundary; unsafe rows require item-specific evidence and a unique per-row `user-chat:` approval, while impossible rows require either that approval or an allowlisted repository scope exception.
+- [x] Allow unsafe/impossible evidence-required or exception-requested rows to omit fabricated presence assertions only when item-specific evidence concerns a non-Lua boundary; evidence-required rows require no approval, commit, or focused test, while exception-requested rows retain their approval or allowlisted scope requirements.
 - [x] Record target flavor/build, source owner, distinct LoD addon identity, lifecycle assertions, evidence file hashes, tests, commit, and per-item approval provenance.
 - [x] Recompute patch-source, Blizzard manifest, and evidence hashes from repository files.
 - [x] Accept legacy direction arrays or a generic categorized `occurrences` array; validate each occurrence's direction, nonblank category, optional nonblank change detail, symbol path, and deterministic added/changed/removed ordering.
@@ -29,14 +30,15 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 ## Completion contract
 
-`--complete` requires an observation artifact for the exact manifest bytes. Behavioral rows are proven by their repository-validated test evidence and intentionally require no Lua-path observation. Unsafe/impossible rows may likewise omit observations only when item-specific evidence concerns provenance or another non-Lua boundary. Unsafe rows require a unique item-bound `user-chat:` approval; impossible rows require either that approval or an allowlisted repository scope exception. `approval_id` and `scope_exception` are mutually exclusive. Scope exceptions are repository-validated against the allowlisted rule, reference, and required `AGENTS.md` intentional-gaps/no-3D text. It rejects:
+`--complete` requires an observation artifact for the exact manifest bytes. Behavioral rows are proven by their repository-validated test evidence and intentionally require no Lua-path observation. Evidence-required unsafe/impossible rows may likewise omit observations when item-specific evidence concerns provenance or another non-Lua boundary, but they always block completion. Exception-requested rows retain their approval or allowlisted scope requirements. `approval_id` and `scope_exception` are mutually exclusive. Scope exceptions are repository-validated against the allowlisted rule, reference, and required `AGENTS.md` intentional-gaps/no-3D text. It rejects:
 
 - any `untriaged` row;
+- any `evidence-required` row;
 - missing or mismatched repository evidence;
 - missing/fake named `#[test]` references or implementation commits;
-- any exception whose resolution is not `unsafe` or `impossible`;
-- any unsafe exception without a unique approval ID beginning `user-chat:<change:symbol>:`;
-- any impossible exception without either that approval ID or a validated allowlisted scope exception;
+- any `exception-requested` row whose resolution is not `unsafe` or `impossible`;
+- any unsafe `exception-requested` row without a unique approval ID beginning `user-chat:<change:symbol>:`;
+- any impossible `exception-requested` row without either that approval ID or a validated allowlisted scope exception;
 - any row that sets both `approval_id` and `scope_exception`;
 - missing, duplicated, extra, wrong-flavor, wrong-phase, wrong-addon, wrong-presence, or wrong-type observations.
 
@@ -53,15 +55,15 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `docs/generated/patch-12-0-7-checklist.md` — generated occurrence checklist.
 - `docs/wiki/investigations/patch-12-0-7-occurrence-inventory.md` — human-readable occurrence inventory.
 - `data/patch-api/sources/12.0.5-probes.json` — categorized source for 38 retained probe subfindings, with prior documented states preserved separately from machine status.
-- `data/patch-api/12.0.5-probes.json` — 38-row probe manifest: 33 best-effort rows, 5 exception-requested rows (1 approved provenance-only and 4 open behavior exceptions: 1 impossible same-size boundary and 3 unsafe Store/security gaps), and zero untriaged rows.
+- `data/patch-api/12.0.5-probes.json` — 38-row probe manifest: 33 best-effort, 4 evidence-required, 1 approved provenance-only exception-requested, and zero untriaged rows.
 - `docs/generated/patch-12-0-5-probe-checklist.md` — generated probe checklist.
 - `docs/wiki/investigations/patch-12-0-5-probe-inventory.md` — human-readable probe inventory.
 - `data/patch-api/12.1-framexml.json` — complete 432-row FrameXML symbol audit register.
 - `docs/generated/patch-12-1-framexml-checklist.md` — generated FrameXML checklist.
 - `docs/wiki/investigations/patch-12-1-framexml-symbol-inventory.md` — FrameXML human inventory whose symbol/status columns are drift-checked.
-- `data/patch-api/12.1-behaviors.json` — 54-row broader behavior manifest: 33 direct-test-backed best-effort rows and 21 item-specific exception requests.
+- `data/patch-api/12.1-behaviors.json` — 54-row broader behavior manifest: 33 best-effort and 21 evidence-required rows.
 - `docs/generated/patch-12-1-behavior-checklist.md` — generated broader behavior checklist.
-- `docs/wiki/investigations/patch-12-1-behavior-inventory.md` — broader behavior inventory with 33 direct-test-backed best-effort rows, 21 item-specific exception requests, and candidate disposition of 33 safe best-effort, 21 unsafe, and 0 impossible; no exception is approved.
+- `docs/wiki/investigations/patch-12-1-behavior-inventory.md` — broader behavior inventory with 33 best-effort and 21 evidence-required rows; candidate disposition is 33 behavioral, 21 unsafe, and 0 impossible.
 
 ## Tests asserting this spec
 

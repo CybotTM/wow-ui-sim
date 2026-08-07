@@ -110,6 +110,7 @@ impl ChangeDirection {
 pub enum AuditStatus {
     Implemented,
     BestEffort,
+    EvidenceRequired,
     ExceptionRequested,
 }
 
@@ -118,6 +119,7 @@ impl AuditStatus {
         match self {
             Self::Implemented => "implemented",
             Self::BestEffort => "best-effort",
+            Self::EvidenceRequired => "evidence-required",
             Self::ExceptionRequested => "exception-requested",
         }
     }
@@ -562,7 +564,10 @@ fn validate_assertions(row: &PatchAuditRow) -> Result<(), String> {
 }
 
 fn validate_focused_tests(row: &PatchAuditRow, status: AuditStatus) -> Result<(), String> {
-    if status == AuditStatus::ExceptionRequested {
+    if matches!(
+        status,
+        AuditStatus::EvidenceRequired | AuditStatus::ExceptionRequested
+    ) {
         return Ok(());
     }
     if row.tests.is_empty() {
@@ -641,9 +646,10 @@ fn validate_status_resolution(row: &PatchAuditRow, status: AuditStatus) -> Resul
         ResolutionKind::CrossFlavor
         | ResolutionKind::StaleSnapshot
         | ResolutionKind::ReversedSnapshot => status == AuditStatus::BestEffort,
-        ResolutionKind::Unsafe | ResolutionKind::Impossible => {
-            status == AuditStatus::ExceptionRequested
-        }
+        ResolutionKind::Unsafe | ResolutionKind::Impossible => matches!(
+            status,
+            AuditStatus::EvidenceRequired | AuditStatus::ExceptionRequested
+        ),
         ResolutionKind::VendorPresent
         | ResolutionKind::Compat
         | ResolutionKind::Behavioral
@@ -1179,27 +1185,39 @@ fn validate_completion_row<'a>(
     if row.resolution == ResolutionKind::Untriaged {
         return Err(format!("row {} remains untriaged", row.id));
     }
-    let status = row.status.expect("resolved row status validated");
-    if status == AuditStatus::ExceptionRequested {
-        if let Some(approval) = row.approval_id.as_deref() {
-            let prefix = format!("user-chat:{}:", row.id);
-            if !approval.starts_with(&prefix) || approval.len() == prefix.len() {
-                return Err(format!(
-                    "row {} approval_id must start with {prefix}",
-                    row.id
-                ));
-            }
-            if !approvals.insert(approval) {
-                return Err(format!("duplicate approval_id: {approval}"));
-            }
-        } else if row.scope_exception.is_none() {
-            return Err(format!(
+    match row.status.expect("resolved row status validated") {
+        AuditStatus::EvidenceRequired => Err(format!("row {} remains evidence-required", row.id)),
+        AuditStatus::ExceptionRequested => validate_exception_approval(row, approvals),
+        AuditStatus::Implemented | AuditStatus::BestEffort if row.commit.is_none() => {
+            Err(format!("row {} requires a commit", row.id))
+        }
+        AuditStatus::Implemented | AuditStatus::BestEffort => Ok(()),
+    }
+}
+
+fn validate_exception_approval<'a>(
+    row: &'a PatchAuditRow,
+    approvals: &mut HashSet<&'a str>,
+) -> Result<(), String> {
+    let Some(approval) = row.approval_id.as_deref() else {
+        return if row.scope_exception.is_some() {
+            Ok(())
+        } else {
+            Err(format!(
                 "row {} requires an approval_id or scope_exception",
                 row.id
-            ));
-        }
-    } else if row.commit.is_none() {
-        return Err(format!("row {} requires a commit", row.id));
+            ))
+        };
+    };
+    let prefix = format!("user-chat:{}:", row.id);
+    if !approval.starts_with(&prefix) || approval.len() == prefix.len() {
+        return Err(format!(
+            "row {} approval_id must start with {prefix}",
+            row.id
+        ));
+    }
+    if !approvals.insert(approval) {
+        return Err(format!("duplicate approval_id: {approval}"));
     }
     Ok(())
 }
@@ -1289,6 +1307,7 @@ pub fn render_summary(manifest: &PatchAuditManifest) -> String {
     let mut counts = BTreeMap::from([
         ("implemented", 0usize),
         ("best-effort", 0usize),
+        ("evidence-required", 0usize),
         ("exception-requested", 0usize),
         ("untriaged", 0usize),
     ]);
@@ -1297,13 +1316,14 @@ pub fn render_summary(manifest: &PatchAuditManifest) -> String {
         *counts.get_mut(status).expect("known status") += 1;
     }
     format!(
-        "Patch {} for {} {}: {} rows ({} implemented, {} best-effort, {} exception-requested, {} untriaged)\nSource: {}\nCache: {} ({})",
+        "Patch {} for {} {}: {} rows ({} implemented, {} best-effort, {} evidence-required, {} exception-requested, {} untriaged)\nSource: {}\nCache: {} ({})",
         manifest.patch,
         manifest.target.flavor.as_str(),
         manifest.target.build,
         manifest.rows.len(),
         counts["implemented"],
         counts["best-effort"],
+        counts["evidence-required"],
         counts["exception-requested"],
         counts["untriaged"],
         manifest.source.path,
@@ -1408,6 +1428,83 @@ mod tests {
             }}"#,
             "c".repeat(64)
         )
+    }
+
+    fn evidence_required_row(resolution: &str, evidence_kind: &str) -> String {
+        format!(
+            r#"{{
+              "id":"added:Fixture","symbol":"Fixture","change":"added",
+              "status":"evidence-required","resolution":"{resolution}","owner":"evidence-collector",
+              "evidence":[{{"kind":"{evidence_kind}","reference":"tests/fixture.rs::fixture_test","summary":"evidence pending implementation","source_hash":"{}"}}],
+              "tests":[],"assertions":[],"commit":null,"approval_id":null,"notes":"awaiting evidence"
+            }}"#,
+            "c".repeat(64)
+        )
+    }
+
+    #[test]
+    fn evidence_required_status_uses_kebab_case_for_deserialization_and_rendering() {
+        let status: AuditStatus =
+            serde_json::from_str(r#""evidence-required""#).expect("status should parse");
+
+        assert_eq!(status, AuditStatus::EvidenceRequired);
+        assert_eq!(status.as_str(), "evidence-required");
+    }
+
+    #[test]
+    fn evidence_required_unsafe_rows_validate_without_approval_or_commit() {
+        let manifest = fixture_manifest(&evidence_required_row("unsafe", "source"));
+
+        validate_manifest(&manifest).expect("evidence-required unsafe row should validate");
+        assert!(manifest.rows[0].approval_id.is_none());
+        assert!(manifest.rows[0].commit.is_none());
+    }
+
+    #[test]
+    fn evidence_required_impossible_rows_validate_without_approval_or_commit() {
+        let manifest = fixture_manifest(&evidence_required_row("impossible", "source"));
+
+        validate_manifest(&manifest).expect("evidence-required impossible row should validate");
+        assert!(manifest.rows[0].approval_id.is_none());
+        assert!(manifest.rows[0].commit.is_none());
+    }
+
+    #[test]
+    fn evidence_required_status_is_rejected_for_behavioral_resolution() {
+        let manifest = fixture_manifest(&evidence_required_row("behavioral", "test"));
+
+        let error = validate_manifest(&manifest)
+            .expect_err("evidence-required status must not resolve behavioral rows");
+
+        assert!(error.contains("behavioral"), "unexpected error: {error}");
+    }
+
+    #[test]
+    fn evidence_required_status_cannot_complete() {
+        let manifest = fixture_manifest(&evidence_required_row("unsafe", "source"));
+        let mut approvals = HashSet::new();
+
+        let error = validate_completion_row(&manifest.rows[0], &mut approvals)
+            .expect_err("evidence-required rows must not complete");
+
+        assert!(
+            error.contains("evidence-required"),
+            "unexpected error: {error}"
+        );
+    }
+
+    #[test]
+    fn evidence_required_status_appears_in_summary() {
+        let manifest = fixture_manifest(&evidence_required_row("unsafe", "source"));
+
+        assert!(render_summary(&manifest).contains("evidence-required"));
+    }
+
+    #[test]
+    fn evidence_required_status_appears_in_checklist() {
+        let manifest = fixture_manifest(&evidence_required_row("unsafe", "source"));
+
+        assert!(render_checklist(&manifest).contains("[evidence-required]"));
     }
 
     fn assertion(flavor: &str, phase: &str, expected: &str) -> String {

@@ -10,23 +10,23 @@ The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and t
 
 Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptProbe`, `AttributeDispatchProbe`, `CoreBehaviorProbe`, `DevToolsDumpProbe`, `FrameIdentityProbe`, `HookScriptBindingProbe`, `IsProtectedProbe`, `JustifyProbe`, `ProtectedRetailProbe`, `ScaleEventProbe`, `SetAtlasProbe`, `StoreForbiddenProbe`, and `TextureSetTextureProbe`. `XmlFrameLevelProbe` findings are documented, but its raw capture was not retained.
 
-The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current machine classification is **33 best-effort, 0 implemented, 5 exception-requested, and 0 untriaged**: one provenance-only exception is approved, while four behavior exceptions remain open—one impossible same-size input-boundary gap and three unsafe Store/security gaps.
+The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current machine classification is **33 best-effort, 0 implemented, 4 evidence-required, 1 exception-requested, and 0 untriaged**: the exception is approved provenance-only, while four behavior gaps remain evidence-required—one impossible same-size input-boundary gap and three unsafe Store/security gaps.
 
 ### Itemized probe status
 
 **Machine-classified with direct behavioral evidence:** the full Frame/AnimationGroup/nine-subtype script-handler matrix; repeated scalar/false attribute dispatch and the two-panel ShowUIPanel pulse; normal-frame forbidden behavior and absent retail forbidden constructor; valid/invalid unit-event filters; wildcard false/true/string attributes; Raise/Lower level boundaries and GUI mouse-focus ordering; frame identity slot, surrogate dispatch, duplicate-frame freshness, and DevTools frame-array dump metadata; normal HookScript chaining plus rejected explicit slots 0 and 2; absent legacy protection setters, the full plain-frame and XML-protected-frame sequences, and protected secure templates; frame-layer FontString default points, size variants, explicit anchors, implicit ButtonText anchors, EditBox backing regions/TextInsets, and MessageFrame/ScrollingMessageFrame owner-region behavior; complete observable display/UI-scale/CVAR ordering; the complete invalid-atlas argument matrix; texture path/FDID and clear behavior; and bare/fixed/parent/reparent XML frame-level semantics and flags.
 
-**Item-specific exceptions:** XML raw-capture provenance is the only approved exception because it concerns missing historical evidence while frame-level behavior is independently regression-tested. Same-size transitions remain an open impossible input-boundary gap. Secure Store behavior, Store dropdown population, and Store forbidden descendants remain open unsafe Store/security gaps; existing subsystem tests are not substituted for the missing probe behavior.
+**Evidence and exception state:** XML raw-capture provenance is the only approved exception because it concerns missing historical evidence while frame-level behavior is independently regression-tested. Same-size transitions remain an evidence-required impossible input-boundary gap. Secure Store behavior, Store dropdown population, and Store forbidden descendants remain evidence-required unsafe Store/security gaps; existing subsystem tests are not substituted for the missing probe behavior.
 
-### Open probe gaps and exception candidates
+### Open probe gaps and evidence-required rows
 
-A broad approval recorded on 2026-07-14 is superseded. The five rows below are item-specific exceptions with hashed repository evidence and no tests/assertions. Only XML raw-capture provenance is approved as a provenance-only exception; the four behavior rows retain `approval_id: null` and await correct behavior/evidence or separate informed approval.
+A broad approval recorded on 2026-07-14 is superseded. The five rows below distinguish four item-specific evidence-required behavior gaps from one approved provenance-only exception-requested row. Evidence-required rows carry hashed repository evidence but need no approval, commit, or focused test; they await authoritative/live evidence or correct implementation.
 
-1. **ProtectedRetailProbe.SecureStore — unsafe:** Retained Store frames are forbidden, legacy setters are absent, and `IsProtected` errors; the current simulator returns normally, so exact forbidden/secret-return enforcement is unsafe to guess.
-2. **ScaleEventProbe.SameSizeDuplicatePair — open impossible:** Duplicate ordered display/scale event pairs occur on same-size maximize/restore transitions, but the simulator receives no maximize/restore/fullscreen signal and cannot distinguish them from no transition; correct behavior remains unmodeled.
+1. **ProtectedRetailProbe.SecureStore — evidence-required unsafe:** Retained Store frames are forbidden, legacy setters are absent, and `IsProtected` errors; the current simulator returns normally, so exact forbidden/secret-return enforcement is unsafe to guess.
+2. **ScaleEventProbe.SameSizeDuplicatePair — evidence-required impossible:** Duplicate ordered display/scale event pairs occur on same-size maximize/restore transitions, but the simulator receives no maximize/restore/fullscreen signal and cannot distinguish them from no transition; correct behavior remains unmodeled.
 3. **XmlFrameLevelProbe.RawCaptureProvenance — approved impossible:** Behavior is regression-tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally.
-4. **StoreForbiddenProbe.DropdownPopulation — unapproved unsafe:** The retained capture has `StoreDropdown_SetDropdown == nil`, so population, reuse, text/check, callback, and protection behavior was never observed.
-5. **StoreForbiddenProbe.ForbiddenDescendants — open unsafe:** The retained file lacks the `/sfp` manual descendant scan, so Store descendant forbidden/protected state is unknown; correct behavior remains unmodeled pending live evidence.
+4. **StoreForbiddenProbe.DropdownPopulation — evidence-required unsafe:** The retained capture has `StoreDropdown_SetDropdown == nil`, so population, reuse, text/check, callback, and protection behavior was never observed.
+5. **StoreForbiddenProbe.ForbiddenDescendants — evidence-required unsafe:** The retained file lacks the `/sfp` manual descendant scan, so Store descendant forbidden/protected state is unknown; correct behavior remains unmodeled pending authoritative/live evidence.
 
 The 38-row register is complete only for its explicit probe contract; generic fallbacks cannot be claimed as globally patch-complete without another concrete source.
 
@@ -72,7 +72,7 @@ The remaining generic defaults are intentionally outside this 12.0.5 audit unles
 
 ### Audit state
 
-This audit remains open with 5 exception-requested rows: 1 approved provenance-only exception and 4 open behavior exceptions (1 impossible same-size input-boundary gap and 3 unsafe Store/security gaps). Correct behavior/evidence is still required before this audit can close. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
+This audit remains open with 4 evidence-required rows and 1 approved provenance-only exception-requested row. The four behavior gaps are one impossible same-size input-boundary gap and three unsafe Store/security gaps; they are not exception or approval candidates. Authoritative/live evidence or correct behavior is still required before this audit can close. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
 
 ## Sources
 

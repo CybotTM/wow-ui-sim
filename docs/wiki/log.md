@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] decision | Separate evidence-required from exception-requested
+
+Migrated the 12.1 behavior register to **33 best-effort, 21 evidence-required, 0 exception-requested, 0 untriaged** and the 12.0.5 probe register to **33 best-effort, 4 evidence-required, 1 approved provenance-only exception-requested, 0 untriaged**. `evidence-required` marks triaged unresolved unsafe/impossible behavior requiring item-specific authoritative/live evidence; it requires no approval, commit, or focused test and cannot pass `--complete`. The 12.0.7 repository-authorized no-3D exception remains unchanged.
+
 ## [2026-08-07] investigation | Add strict-removal timing evidence guidance
 
 Audited commit `12ed1355b`. Documented `StrictRemovalTimingProbe` as a collector for addon-visible lifecycle timing. Its presence does not resolve or close any 12.1 behavior row; strict-removal timing gaps remain open until raw retail/PTR SavedVariables captures are obtained and interpreted. The existing `ForbiddenAspectsProbe` remains the live evidence path for all six forbidden-aspect restrictions.

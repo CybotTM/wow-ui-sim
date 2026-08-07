@@ -7,21 +7,21 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 ### Files
 
 - `data/patch-api/sources/12.1-framexml.json` preserves the legacy raw 320-added/112-removed direction-array snapshot.
-- `data/patch-api/sources/12.1-behaviors.json`, `data/patch-api/12.1-behaviors.json`, `docs/generated/patch-12-1-behavior-checklist.md`, and [[patch-12-1-behavior-inventory]] preserve 54 independently testable non-FrameXML behavior boundaries. Thirty-three direct-test-backed rows are best-effort and 21 are item-specific exception requests; candidate disposition is 33 safe best-effort, 21 unsafe, and 0 impossible, with no exception approved.
+- `data/patch-api/sources/12.1-behaviors.json`, `data/patch-api/12.1-behaviors.json`, `docs/generated/patch-12-1-behavior-checklist.md`, and [[patch-12-1-behavior-inventory]] preserve 54 independently testable non-FrameXML behavior boundaries: 33 best-effort and 21 evidence-required; candidate disposition is 33 behavioral, 21 unsafe, and 0 impossible.
 - `data/patch-api/sources/12.0.7-register.json` preserves 131 named occurrences as categorized `{direction, category, symbol, detail?}` objects without inventing the unnamed CVar additions/removals omitted by the crawler excerpt.
 - `data/patch-api/12.0.7.json`, `docs/generated/patch-12-0-7-checklist.md`, and [[patch-12-0-7-occurrence-inventory]] form the occurrence register; all 131 named rows are classified as 29 implemented, 101 best-effort, and one impossible exception-requested row authorized by the repository's permanent no-3D project scope, with no untriaged rows.
-- `data/patch-api/sources/12.0.5-probes.json`, `data/patch-api/12.0.5-probes.json`, `docs/generated/patch-12-0-5-probe-checklist.md`, and [[patch-12-0-5-probe-inventory]] preserve 38 probe subfindings: 33 best-effort, 5 exception-requested, and 0 untriaged. One provenance-only exception is approved; four behavior exceptions remain open (one impossible same-size boundary and three unsafe Store/security gaps).
+- `data/patch-api/sources/12.0.5-probes.json`, `data/patch-api/12.0.5-probes.json`, `docs/generated/patch-12-0-5-probe-checklist.md`, and [[patch-12-0-5-probe-inventory]] preserve 38 probe subfindings: 33 best-effort, 4 evidence-required, 1 approved provenance-only exception-requested, and 0 untriaged.
 - `data/patch-api/12.1-framexml.json` stores all 432 rows keyed by `change:symbol`.
 - `docs/generated/patch-12-1-framexml-checklist.md` contains one generated line per row.
 - `src/bin/wow_cli/audit_api/patch_manifest.rs` owns generic added/changed/removed parsing, repository validation, completion validation, observation comparison, and rendering.
 
 ### Draft and final state
 
-`untriaged` is neutral draft state and has a null status. It is not an exception request. Final status vocabulary is fixed to `implemented`, `best-effort`, and `exception-requested`.
+`untriaged` is neutral draft state and has a null status. `evidence-required` is triaged unresolved `unsafe`/`impossible` behavior requiring item-specific authoritative/live evidence; it needs no approval, commit, or focused test and cannot pass `--complete`. `exception-requested` is a distinct exception-handling path with approval or allowlisted-scope requirements. Final status vocabulary is `implemented`, `best-effort`, `evidence-required`, and `exception-requested`.
 
-Resolution explains the evidence outcome: vendor-present, simulator compatibility behavior, test-backed behavioral behavior, load-on-demand ownership, removal, cross-flavor contamination, stale/reversed snapshot data, unsafe behavior, or impossible behavior. `behavioral` is for contracts that are not simple Lua-path presence checks, such as stateful globals, event registration, widget methods, CVars, and probe outcomes: it requires hashed test evidence plus a focused named test, permits implemented/best-effort status, and forbids fabricated Lua-path assertions. Source owner and the addon passed to `LoadAddOn` are separate fields; LoD lifecycle assertions must match the declared addon. Only `unsafe` and `impossible` may use `exception-requested`.
+Resolution explains the evidence outcome: vendor-present, simulator compatibility behavior, test-backed behavioral behavior, load-on-demand ownership, removal, cross-flavor contamination, stale/reversed snapshot data, unsafe behavior, or impossible behavior. `behavioral` is for contracts that are not simple Lua-path presence checks, such as stateful globals, event registration, widget methods, CVars, and probe outcomes: it requires hashed test evidence plus a focused named test, permits implemented/best-effort status, and forbids fabricated Lua-path assertions. Source owner and the addon passed to `LoadAddOn` are separate fields; LoD lifecycle assertions must match the declared addon. Only `unsafe` and `impossible` may use `evidence-required` or `exception-requested`.
 
-Current 12.1 FrameXML totals are **1 implemented, 431 best-effort, 0 exception-requested, and 0 untriaged**. The separate broader behavior register is **0 implemented, 33 best-effort, 21 exception-requested, and 0 untriaged**. The full 12.1 objective remains open only for the 21 unsafe approval decisions, none of which is approved.
+Current 12.1 FrameXML totals are **1 implemented, 431 best-effort, 0 evidence-required, 0 exception-requested, and 0 untriaged**. The separate broader behavior register is **0 implemented, 33 best-effort, 21 evidence-required, 0 exception-requested, and 0 untriaged**. The 21 unsafe rows remain open for authoritative/live evidence; they are not approval candidates.
 
 ### Repository evidence
 
@@ -38,7 +38,7 @@ Unknown JSON fields, blank evidence, invalid lifecycle vocabulary, and incompati
 
 ### Runtime observations
 
-Completion additionally consumes an observation artifact bound to the exact manifest hash. Each Lua-path assertion requires exactly one observation matching row, flavor, phase, addon owner, presence, and Lua type. Behavioral rows intentionally carry no Lua-path assertions or observations; their focused test/evidence/commit references remain repository-validated. Unsafe/impossible rows may also omit assertions only when item-specific evidence concerns provenance or another non-Lua boundary; item-specific evidence and a unique per-row approval remain mandatory. Missing, extra, duplicated, or mismatched observations fail.
+Completion additionally consumes an observation artifact bound to the exact manifest hash. Each Lua-path assertion requires exactly one observation matching row, flavor, phase, addon owner, presence, and Lua type. Behavioral rows intentionally carry no Lua-path assertions or observations; their focused test/evidence/commit references remain repository-validated. Evidence-required unsafe/impossible rows may also omit assertions when item-specific evidence concerns provenance or another non-Lua boundary; they require no approval, commit, or focused test and remain completion blockers. Exception-requested rows retain their approval or allowlisted scope requirements. Missing, extra, duplicated, or mismatched observations fail.
 
 The production observation primitive reads actual global/table paths from `WowLuaEnv` and records the active compiled profile, presence, and Lua type. Lifecycle phase and addon are caller-supplied assertion labels, not independently inferred facts. Focused coverage exercises present, absent, and a real TOC addon whose directory/TOC identity matches the declared LoD addon. `--observe-initialization` writes assertions available immediately after environment construction and rejects a manifest built for another profile. Full manifest-driven post-core/post-load/LoD/reset orchestration and checked-in per-row artifact generation remain open. Post-reset coverage is currently a synthetic validator falsifier only; it does not claim a simulator reset operation.
 
@@ -46,9 +46,15 @@ The production observation primitive reads actual global/table paths from `WowLu
 
 `--index-lua-source <file> --source-addon <addon>` emits direct global/table function and alias publication candidates for one file. `--index-lua-tree <AddOns>` emits the same records with deterministic relative paths and first-directory addon ownership across all Lua files. Add `--active-tocs` to restrict the tree to TOCs selected by the active compiled profile's `find_toc_file` resolver and recursively follow XML `<Script>`/`<Include>` paths through the loader's addon-root fallback and case-insensitive resolver. Missing Lua/XML references, including TOC-listed Lua/XML entries and XML `<Script>`/`<Include>` targets, are retained in the output's `missing` list. The lexer masks comments, quoted/long strings, and file-local namespaces; `_G.Name` is normalized to `Name`; source identities carry SHA-256 hashes; and multiple mixin/metatable/dynamic-`_G`/factory ambiguities on one line are retained. Active-TOC output identifies source candidates selected by active TOCs and per-file environment rules, but does not infer dependency order or startup versus load-on-demand timing. This is candidate evidence only: neither a text match nor absence changes a final manifest status.
 
-### Exception provenance
+### Evidence and exception provenance
 
-Each exception must:
+Evidence-required rows must:
+
+1. resolve to `unsafe` or `impossible`;
+2. retain item-specific evidence;
+3. omit approval, commit, and focused-test requirements until authoritative/live evidence resolves the row.
+
+Each `exception-requested` row must:
 
 1. resolve to `unsafe` or `impossible`;
 2. retain item-specific evidence, plus lifecycle assertions when the exception concerns Lua-path presence;
@@ -73,7 +79,7 @@ wow-cli audit-api --patch-manifest data/patch-api/12.1-framexml.json \
   --observations path/to/observations.json --complete
 ```
 
-`--complete` remains blocked while any row is untriaged or real observations are missing.
+`--complete` remains blocked while any row is untriaged, evidence-required, or real observations are missing.
 
 ## Sources
 

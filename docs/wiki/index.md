@@ -45,13 +45,13 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 
 | Page | Summary |
 |------|---------|
-| [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 33 rows have direct behavioral evidence; 1 provenance-only exception is approved and 4 behavior exceptions remain open |
-| [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 33 best-effort, 0 implemented, 5 exception-requested (1 approved provenance-only, 4 open behavior exceptions), 0 untriaged |
+| [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven audit: 33 best-effort rows; 4 behavior gaps are evidence-required; 1 provenance-only exception-requested row is approved |
+| [[patch-12-0-5-probe-inventory]] | 38-row 12.0.5 probe register: 33 best-effort, 4 evidence-required, 1 approved provenance-only exception-requested, 0 untriaged |
 | [[patch-12-0-7-api-audit]] | 12.0.7 occurrence audit: 131 named rows classified as 29 implemented, 101 best-effort, and one repository-scope-authorized impossible 3D-model exception; restricted unit-token, encounter, taint, payload, and widget secret/aspect limits are documented per row |
 | [[patch-12-0-7-occurrence-inventory]] | 131-row 12.0.7 register: 29 implemented, 101 best-effort, 1 repository-scope-authorized impossible exception-requested row, 0 untriaged; crawler-omitted CVar names remain explicit metadata |
-| [[patch-12-1-api-audit]] | 12.1 audit split: 432-row FrameXML register complete; separate 54-row broader behavior register has 33 direct-test-backed best-effort rows and 21 item-specific exception requests |
+| [[patch-12-1-api-audit]] | 12.1 audit split: 432-row FrameXML register complete; separate 54-row broader behavior register has 33 best-effort and 21 evidence-required rows |
 | [[patch-12-1-framexml-symbol-inventory]] | Exhaustive 320-added/112-removed local FrameXML snapshot: 1 implemented, 431 best-effort, 0 exception-requested, 0 untriaged; includes explicit PTR source and LoD runtime proof for mismatches (430 distinct names; two duplicates) |
-| [[patch-12-1-behavior-inventory]] | 54 non-FrameXML behavior boundaries: 0 implemented, 33 best-effort, 21 exception-requested, 0 untriaged; candidate split is 33 safe best-effort, 21 unsafe, and 0 impossible; no exception is approved |
+| [[patch-12-1-behavior-inventory]] | 54 non-FrameXML behavior boundaries: 0 implemented, 33 best-effort, 21 evidence-required, 0 exception-requested, 0 untriaged; candidate split is 33 behavioral, 21 unsafe, and 0 impossible |
 | [[retail-ptr-full-startup-lua-errors]] | Full GUI startup logs caught PVPUI, PTR cursor, and Store micro-button errors missed by `lua-errors`; fixes added backed PVP/cursor surfaces and guarded the Store inbound fallback |
 | [[lib-test-failure-sweep-2026-06]] | Nine accumulated lib-test failures: ScriptErrors missing from runtime foundations inverted the SharedXMLBase load order; `hooksecurefunc(C_AddOns, "LoadAddOn")` is silently refused so post-load repairs must use `apply_blizzard_post_load_patches`; two more pieces of code lost in the classic rebase; duplicated `== nil`-guarded Lua installers drifting; tests stale against deliberate semantic changes |
 | [[store-secure-pool-constructors]] | Retail Store blank/red cards came from `__secureenv.CreateFramePoolCollection` retaining the simulator fallback after `Blizzard_SharedXMLBase` replaced `_G` with Blizzard's proxy-backed constructor; secure replay of SharedXMLBase Lua now populates secureenv directly |

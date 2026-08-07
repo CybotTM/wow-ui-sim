@@ -1,11 +1,11 @@
 # Patch 12.0.5 Probe Inventory
-Probe-subfinding register for the retained 12.0.5 live-client audit. Machine status advances only with row-specific behavioral evidence or item-specific exception evidence; prior documented states remain visible separately.
+Probe-subfinding register for the retained 12.0.5 live-client audit. Machine status advances only with row-specific behavioral evidence or item-specific evidence for an explicit exception path; prior documented states remain visible separately.
 
 ## Content
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `2d7671b7702eed71c5d8a3ae4e92595771f6c04bb58fe98bd771647ac26cddca`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 changed probe subfindings — 0 implemented, 33 best-effort, 5 exception-requested (1 approved provenance-only, 4 open behavior exceptions: 1 impossible same-size boundary and 3 unsafe Store/security gaps), 0 untriaged
+- **Rows:** 38 changed probe subfindings — 0 implemented, 33 best-effort, 4 evidence-required, 1 approved provenance-only exception-requested, 0 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -35,9 +35,9 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `JustifyProbe.MessageRegions` | best-effort | resolved | FontString layout | changed | MessageFrame and ScrollingMessageFrame owner/region behavior and TextInsets effects. |
 | `ProtectedRetailProbe.PlainFrame` | best-effort | resolved | protection | changed | Plain frame protection/forbidden state and legacy setter behavior. |
 | `ProtectedRetailProbe.XmlProtected` | best-effort | resolved | protection | changed | XML protected=true frame state and setters. |
-| `ProtectedRetailProbe.SecureStore` | exception-requested | unsafe | protection | changed | Retained Store frames are forbidden, legacy setters are absent, and IsProtected errors; exact forbidden/secret-return enforcement is unsafe to guess. Await informed approval or new live evidence. |
+| `ProtectedRetailProbe.SecureStore` | evidence-required | unsafe | protection | changed | Retained Store frames are forbidden, legacy setters are absent, and IsProtected errors; exact forbidden/secret-return enforcement is unsafe to guess. Await authoritative live evidence or a correct modeled implementation. |
 | `ScaleEventProbe.OrderedEvents` | best-effort | resolved | scale events | changed | DISPLAY_SIZE_CHANGED, UI_SCALE_CHANGED, and relevant CVAR_UPDATE ordering. |
-| `ScaleEventProbe.SameSizeDuplicatePair` | exception-requested | impossible | scale events | changed | Same-size maximize/restore duplicate event pairs remain open: the simulator receives no window-state transition signal, so correct behavior is not modeled. Await separate informed approval or new live evidence. |
+| `ScaleEventProbe.SameSizeDuplicatePair` | evidence-required | impossible | scale events | changed | Same-size maximize/restore duplicate event pairs remain open: the simulator receives no window-state transition signal, so correct behavior is not modeled. Await an observable window-state input or other authoritative evidence. |
 | `SetAtlasProbe.InvalidArguments` | best-effort | resolved | texture atlas | changed | nil, no-argument, boolean, numeric, empty, and unknown atlas inputs. |
 | `TextureSetTextureProbe.PathFdid` | best-effort | resolved | texture | changed | UI-Panel-Button-Up path assignment and retained FDID 130828. |
 | `TextureSetTextureProbe.Clear` | best-effort | resolved | texture | changed | SetTexture(nil) and no-argument clearing behavior. |
@@ -45,14 +45,15 @@ Probe-subfinding register for the retained 12.0.5 live-client audit. Machine sta
 | `XmlFrameLevelProbe.ParentReparent` | best-effort | resolved | XML frame level | changed | Parent-level changes, unfixed-child propagation, and Lua SetFrameLevel reparenting. |
 | `XmlFrameLevelProbe.Flags` | best-effort | resolved | XML frame level | changed | HasFixedFrameLevel and IsUsingParentLevel observations. |
 | `XmlFrameLevelProbe.RawCaptureProvenance` | exception-requested | impossible | provenance | changed | Behavior is tested, but the raw SavedVariables capture does not exist and cannot be reconstructed locally. Approved provenance-only exception; behavior remains independently regression-tested. |
-| `StoreForbiddenProbe.DropdownPopulation` | exception-requested | unsafe | Store lifecycle | changed | Retained `StoreDropdown_SetDropdown == nil`; population, reuse, text/check, callback, and protection behavior were never observed. Await informed approval or new live evidence. |
-| `StoreForbiddenProbe.ForbiddenDescendants` | exception-requested | unsafe | Store lifecycle | changed | Store descendant forbidden/protected state remains open: the retained file lacks the `/sfp` manual descendant scan, so correct behavior is not modeled. Await separate informed approval or new live evidence. |
+| `StoreForbiddenProbe.DropdownPopulation` | evidence-required | unsafe | Store lifecycle | changed | Retained `StoreDropdown_SetDropdown == nil`; population, reuse, text/check, callback, and protection behavior were never observed. Await authoritative live evidence or a correct modeled implementation. |
+| `StoreForbiddenProbe.ForbiddenDescendants` | evidence-required | unsafe | Store lifecycle | changed | Store descendant forbidden/protected state remains open: the retained file lacks the `/sfp` manual descendant scan, so correct behavior is not modeled. Await authoritative live evidence or a correct modeled implementation. |
 
 ## Machine state totals
 
 - implemented: 0
 - best-effort: 33
-- exception-requested: 5 (1 approved provenance-only; 4 open behavior exceptions: 1 impossible same-size boundary and 3 unsafe Store/security gaps)
+- evidence-required: 4
+- exception-requested: 1 (approved provenance-only)
 - untriaged: 0
 
 ## Sources

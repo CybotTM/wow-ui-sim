@@ -24,9 +24,9 @@
 24. [best-effort] `changed:JustifyProbe.MessageRegions` — behavioral
 25. [best-effort] `changed:ProtectedRetailProbe.PlainFrame` — behavioral
 26. [best-effort] `changed:ProtectedRetailProbe.XmlProtected` — behavioral
-27. [exception-requested] `changed:ProtectedRetailProbe.SecureStore` — unsafe
+27. [evidence-required] `changed:ProtectedRetailProbe.SecureStore` — unsafe
 28. [best-effort] `changed:ScaleEventProbe.OrderedEvents` — behavioral
-29. [exception-requested] `changed:ScaleEventProbe.SameSizeDuplicatePair` — impossible
+29. [evidence-required] `changed:ScaleEventProbe.SameSizeDuplicatePair` — impossible
 30. [best-effort] `changed:SetAtlasProbe.InvalidArguments` — behavioral
 31. [best-effort] `changed:TextureSetTextureProbe.PathFdid` — behavioral
 32. [best-effort] `changed:TextureSetTextureProbe.Clear` — behavioral
@@ -34,5 +34,5 @@
 34. [best-effort] `changed:XmlFrameLevelProbe.ParentReparent` — behavioral
 35. [best-effort] `changed:XmlFrameLevelProbe.Flags` — behavioral
 36. [exception-requested] `changed:XmlFrameLevelProbe.RawCaptureProvenance` — impossible
-37. [exception-requested] `changed:StoreForbiddenProbe.DropdownPopulation` — unsafe
-38. [exception-requested] `changed:StoreForbiddenProbe.ForbiddenDescendants` — unsafe
+37. [evidence-required] `changed:StoreForbiddenProbe.DropdownPopulation` — unsafe
+38. [evidence-required] `changed:StoreForbiddenProbe.ForbiddenDescendants` — unsafe
