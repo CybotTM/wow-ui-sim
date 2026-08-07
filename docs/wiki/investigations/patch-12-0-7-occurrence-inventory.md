@@ -4,22 +4,22 @@ Occurrence-level register for the committed 12.0.7 API-change source. Every name
 - **Source:** `data/patch-api/sources/12.0.7-register.json`
 - **Source SHA-256:** `389e3b19174bf77c3646028f764cf186ccfe1b7dddaca2a3b3fcba75e3bdec60`
 - **Target:** retail build `12.0.7`
-- **Rows:** 131 total — 34 implemented, 97 best-effort, 0 exception-requested, 0 untriaged
+- **Rows:** 131 total — 29 implemented, 101 best-effort, 1 exception-requested, 0 untriaged
 - **Directions:** 79 added, 29 changed, 23 removed
 
 | Symbol | Status | Category | Direction | Note |
 |---|---|---|---|---|
 | `C_BattleNet.InviteFriend` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
-| `C_Container.CalculateTotalNumberOfFreeBagSlots` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
-| `C_DelvesUI.GetDelveEntranceTitleString` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
-| `C_DelvesUI.GetWorldTierDifficultyForActivePlayer` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
-| `C_DurationUtil.CreateDurationTextBinding` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
-| `C_DurationUtil.CreateManualClock` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
+| `C_Container.CalculateTotalNumberOfFreeBagSlots` | best-effort | global-api | added | Returns the simulator bag-model free-slot total; exact Blizzard container-family and hidden-bag semantics remain best-effort. |
+| `C_DelvesUI.GetDelveEntranceTitleString` | best-effort | global-api | added | Returns deterministic seeded Delves UI text; exact content-data localization and area selection remain best-effort. |
+| `C_DelvesUI.GetWorldTierDifficultyForActivePlayer` | best-effort | global-api | added | Returns the simulator Delves tier value; exact active-player world-tier service state remains best-effort. |
+| `C_DurationUtil.CreateDurationTextBinding` | best-effort | global-api | added | Compatibility binding state and methods are directly tested; native lifetime, identity, formatter, and secret semantics remain best-effort. |
+| `C_DurationUtil.CreateManualClock` | implemented | global-api | added | Manual clock construction and all documented clock mutations are directly state-tested. |
 | `C_EncounterTimeline.GetEventColor` | best-effort | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
 | `C_HousingCatalog.GetCatalogCategoryAndSubcategoryNames` | best-effort | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
 | `C_HousingCustomizeMode.RoomConnectionSupportsDoorType` | best-effort | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
 | `C_HousingLayout.CanSetViewedFloor` | best-effort | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
-| `C_MerchantFrame.GetMerchantCurrencies` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
+| `C_MerchantFrame.GetMerchantCurrencies` | best-effort | global-api | added | Returns a deterministic empty currency list until merchant-currency state is modeled; API shape is directly tested. |
 | `C_PartyInfo.ConfirmReadyCheck` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
 | `C_PartyInfo.DemoteAssistant` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
 | `C_PartyInfo.DoReadyCheck` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
@@ -44,42 +44,42 @@ Occurrence-level register for the committed 12.0.7 API-change source. Every name
 | `SetSecurePendingButtonCallback` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
 | `SetSecurePendingPingOffScreenCallback` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
 | `SetSecurePendingToggleRunCallback` | implemented | global-api | added | Behavior is covered by the profile-gated safe bridge test; exact Blizzard service/payload fidelity is best-effort where noted. |
-| `DurationClock.GetTime` | implemented | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationManualClock.AdvanceTime` | implemented | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationManualClock.ResetTime` | implemented | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationManualClock.RewindTime` | implemented | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationManualClock.SetTime` | implemented | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationObject.GetClock` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationObject.HasExpired` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationObject.HasStarted` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationObject.IsActive` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationObject.SetClock` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.CanFormatText` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.CanUpdateFontString` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.Disable` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.Enable` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.GetDuration` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.GetExpiredText` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.GetFontString` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.GetFormattedText` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.GetTimeModifier` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.GetUpdateInterval` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.GetZeroDurationText` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.IsEnabled` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.SetDuration` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.SetExpiredText` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.SetFontString` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.SetTimeModifier` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.SetUpdateInterval` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextBinding.SetZeroDurationText` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextFormattingOptions.GetAddRemainingText` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextFormattingOptions.GetDurationType` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextFormattingOptions.SetAddRemainingText` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextFormattingOptions.SetDurationType` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextRawValue.GetMilliseconds` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextRawValue.GetSeconds` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextRawValue.SetMilliseconds` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
-| `DurationTextRawValue.SetSeconds` | best-effort | script-object-method | added | Duration clock methods are directly state-tested; duration object/text binding methods are compatibility best-effort. |
+| `DurationClock.GetTime` | implemented | script-object-method | added | Manual clock construction and this documented mutation/query are directly state-tested. |
+| `DurationManualClock.AdvanceTime` | implemented | script-object-method | added | Manual clock construction and this documented mutation/query are directly state-tested. |
+| `DurationManualClock.ResetTime` | implemented | script-object-method | added | Manual clock construction and this documented mutation/query are directly state-tested. |
+| `DurationManualClock.RewindTime` | implemented | script-object-method | added | Manual clock construction and this documented mutation/query are directly state-tested. |
+| `DurationManualClock.SetTime` | implemented | script-object-method | added | Manual clock construction and this documented mutation/query are directly state-tested. |
+| `DurationObject.GetClock` | best-effort | script-object-method | added | Duration-object clock storage is directly tested; lifecycle queries retain explicit compatibility defaults. |
+| `DurationObject.HasExpired` | best-effort | script-object-method | added | Duration-object clock storage is directly tested; lifecycle queries retain explicit compatibility defaults. |
+| `DurationObject.HasStarted` | best-effort | script-object-method | added | Duration-object clock storage is directly tested; lifecycle queries retain explicit compatibility defaults. |
+| `DurationObject.IsActive` | best-effort | script-object-method | added | Duration-object clock storage is directly tested; lifecycle queries retain explicit compatibility defaults. |
+| `DurationObject.SetClock` | best-effort | script-object-method | added | Duration-object clock storage is directly tested; lifecycle queries retain explicit compatibility defaults. |
+| `DurationTextBinding.CanFormatText` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.CanUpdateFontString` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.Disable` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.Enable` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.GetDuration` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.GetExpiredText` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.GetFontString` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.GetFormattedText` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.GetTimeModifier` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.GetUpdateInterval` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.GetZeroDurationText` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.IsEnabled` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.SetDuration` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.SetExpiredText` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.SetFontString` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.SetTimeModifier` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.SetUpdateInterval` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextBinding.SetZeroDurationText` | best-effort | script-object-method | added | The compatibility binding method is directly exercised; native identity, formatter, interpolation, and secret semantics remain best-effort. |
+| `DurationTextFormattingOptions.GetAddRemainingText` | best-effort | script-object-method | added | The extracted object family has no constructor: the focused test verifies its factory remains nil, so these methods are unreachable stale-source entries. |
+| `DurationTextFormattingOptions.GetDurationType` | best-effort | script-object-method | added | The extracted object family has no constructor: the focused test verifies its factory remains nil, so these methods are unreachable stale-source entries. |
+| `DurationTextFormattingOptions.SetAddRemainingText` | best-effort | script-object-method | added | The extracted object family has no constructor: the focused test verifies its factory remains nil, so these methods are unreachable stale-source entries. |
+| `DurationTextFormattingOptions.SetDurationType` | best-effort | script-object-method | added | The extracted object family has no constructor: the focused test verifies its factory remains nil, so these methods are unreachable stale-source entries. |
+| `DurationTextRawValue.GetMilliseconds` | best-effort | script-object-method | added | The extracted object family has no constructor: the focused test verifies its factory remains nil, so these methods are unreachable stale-source entries. |
+| `DurationTextRawValue.GetSeconds` | best-effort | script-object-method | added | The extracted object family has no constructor: the focused test verifies its factory remains nil, so these methods are unreachable stale-source entries. |
+| `DurationTextRawValue.SetMilliseconds` | best-effort | script-object-method | added | The extracted object family has no constructor: the focused test verifies its factory remains nil, so these methods are unreachable stale-source entries. |
+| `DurationTextRawValue.SetSeconds` | best-effort | script-object-method | added | The extracted object family has no constructor: the focused test verifies its factory remains nil, so these methods are unreachable stale-source entries. |
 | `ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED` | best-effort | event | added | Registration is tested; live payload/firing semantics remain best-effort. |
 | `URL_TEXTURE_REQUEST_RESULT` | best-effort | event | added | Registration is tested; live payload/firing semantics remain best-effort. |
 | `assistedCombatReduceHighlights` | implemented | cvar | added | Implemented profile-gated default 1; crawler-omitted CVar claims remain outside occurrence rows. |
@@ -96,7 +96,7 @@ Occurrence-level register for the committed 12.0.7 API-change source. Every name
 | `Font.SetFont` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
 | `FontString.SetFont` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
 | `MessageFrame.SetFont` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
-| `ModelSceneActorBase.GetModelUnitGUID` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
+| `ModelSceneActorBase.GetModelUnitGUID` | exception-requested | widget-method | changed | Permanent 2D/no-3D scope leaves this model-unit GUID method absent; conditional-secret 3D model behavior is impossible to model faithfully without adding the excluded 3D subsystem. |
 | `ScrollFrame.GetHorizontalScroll` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
 | `ScrollFrame.GetVerticalScroll` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
 | `ScrollFrame.SetHorizontalScroll` | best-effort | widget-method | changed | Compatibility presence is tested; exact changed secret/aspect semantics remain best-effort. |
@@ -117,23 +117,23 @@ Occurrence-level register for the committed 12.0.7 API-change source. Every name
 | `CLUB_MEMBER_ROLE_UPDATED` | best-effort | event | changed | Registration is tested; changed payload and secret-lockdown semantics remain best-effort. |
 | `CLUB_MEMBER_UPDATED` | best-effort | event | changed | Registration is tested; changed payload and secret-lockdown semantics remain best-effort. |
 | `ENCOUNTER_END` | best-effort | event | changed | Registration is tested; changed payload and secret-lockdown semantics remain best-effort. |
-| `BNInviteFriend` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `C_ClickBindings.GetStringFromModifiers` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. |
-| `C_ClickBindings.MakeModifiers` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. |
-| `C_Spell.GetMawPowerBorderAtlasBySpellID` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. |
-| `ConfirmReadyCheck` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `DemoteAssistant` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `DoReadyCheck` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `GetMerchantCurrencies` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `IsGUIDInGroup` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `PromoteToAssistant` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `PromoteToLeader` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `SetEveryoneIsAssistant` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `UninviteUnit` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. |
-| `GetAutoCompletePresenceID` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
-| `GetAutoCompleteResults` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. |
-| `GetAutoCompleteRealms` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. |
-| `IsRecognizedName` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. |
+| `BNInviteFriend` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `C_ClickBindings.GetStringFromModifiers` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `C_ClickBindings.MakeModifiers` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `C_Spell.GetMawPowerBorderAtlasBySpellID` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `ConfirmReadyCheck` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `DemoteAssistant` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `DoReadyCheck` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `GetMerchantCurrencies` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `IsGUIDInGroup` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `PromoteToAssistant` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `PromoteToLeader` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `SetEveryoneIsAssistant` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `UninviteUnit` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `GetAutoCompletePresenceID` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `GetAutoCompleteResults` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `GetAutoCompleteRealms` | best-effort | global-api | removed | Patch list marks removal, but simulator retains a compatibility function to support loaded UI. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
+| `IsRecognizedName` | best-effort | global-api | removed | Startup removal behavior is tested; exact Blizzard load-order timing remains best-effort. Runtime availability/removal is captured by the startup compatibility test; post-reset timing is not claimed. |
 | `Minimap.SetBlipTexture` | best-effort | widget-method | removed | Patch list marks removal, but method remains as compatibility surface; exact vendor lifecycle semantics are best-effort. |
 | `Minimap.SetCorpsePOIArrowTexture` | best-effort | widget-method | removed | Patch list marks removal, but method remains as compatibility surface; exact vendor lifecycle semantics are best-effort. |
 | `Minimap.SetIconTexture` | best-effort | widget-method | removed | Patch list marks removal, but method remains as compatibility surface; exact vendor lifecycle semantics are best-effort. |

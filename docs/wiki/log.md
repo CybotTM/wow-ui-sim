@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | 12.0.7 duration proof and conservative status correction
+
+Extracted a focused duration clock/object/text-binding regression that directly exercises the modeled method families and verifies the stale formatting-options/raw-value factories remain unavailable. Corrected five overclaimed additive rows to best-effort, classified `ModelSceneActorBase.GetModelUnitGUID` as an unapproved impossible no-3D exception candidate, and pinned the register at 29 implemented, 101 best-effort, one exception-requested, and zero untriaged rows.
+
 ## [2026-08-06] system | Non-Lua exception evidence
 
 Allowed `unsafe` and `impossible` manifest rows to omit fabricated Lua-path assertions only when item-specific evidence concerns provenance or another non-Lua boundary. Item-specific evidence and unique per-row informed approval remain mandatory for completion.
