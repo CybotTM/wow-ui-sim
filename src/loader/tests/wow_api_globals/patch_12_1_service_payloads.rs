@@ -49,6 +49,7 @@ fn test_patch_12_1_player_choice_payload_and_mutator_intent() {
         .eval(
             r#"
             if type(C_PlayerChoice) ~= "table" then return "namespace" end
+            if select('#', C_PlayerChoice.GetCurrentPlayerChoiceInfo()) ~= 0 then return "default-info-count" end
             if C_PlayerChoice.GetCurrentPlayerChoiceInfo() ~= nil then return "default-info" end
             if C_PlayerChoice.GetNumRerolls() ~= 0 then return "default-rerolls" end
             if C_PlayerChoice.GetRemainingTime() ~= nil then return "default-time" end
@@ -133,14 +134,36 @@ fn test_patch_12_1_player_choice_payload_and_mutator_intent() {
         .eval(
             r#"
             local info = C_PlayerChoice.GetCurrentPlayerChoiceInfo()
-            if type(info) ~= "table" or info.choiceID ~= 42 or info.objectGUID == nil then return "info" end
-            if info.questionText ~= "Choose your path" or info.keepOpenAfterChoice ~= true then return "info-fields" end
+            if type(info) ~= "table" or info.choiceID ~= 42 then return "info" end
+            if info.objectGUID ~= "Creature-0-0000-0000-00000-12345-0000000000" then return "info-guid" end
+            if info.questionText ~= "Choose your path" or info.pendingChoiceText ~= "Waiting" then return "info-text" end
+            if info.uiTextureKit ~= "playerchoice-test" or info.hideWarboardHeader ~= false then return "info-display" end
+            if info.keepOpenAfterChoice ~= true or info.showChoicesAsList ~= true then return "info-list" end
+            if info.requiresSelection ~= true or info.showChoicesAsGrid ~= false then return "info-layout" end
+            if info.soundKitID ~= 100 or info.closeUISoundKitID ~= 101 then return "info-sounds" end
+
             local option = info.options[1]
-            if option.id ~= 7 or option.choiceArtID ~= 99 or option.rarity ~= 3 then return "option" end
-            if option.buttons[1].text ~= "Select" or option.buttons[1].selected ~= true then return "button" end
-            if option.rewardInfo.currencyRewards[1].quantity ~= 25 then return "currency" end
-            if option.rewardInfo.itemRewards[1].itemId ~= 19019 then return "item" end
-            if option.rewardInfo.repRewards[1].factionId ~= 72 then return "reputation" end
+            if option.id ~= 7 or option.description ~= "Take the reward" or option.header ~= "Reward" then return "option-identity" end
+            if option.choiceArtID ~= 99 or option.desaturatedArt ~= false or option.disabledOption ~= false then return "option-art" end
+            if option.hasRewards ~= true or option.uiTextureKit ~= "playerchoice-option" then return "option-display" end
+            if option.maxStacks ~= 1 or option.widgetSetID ~= 55 or option.spellID ~= 642 then return "option-ids" end
+            if option.rarity ~= 3 or option.typeArtID ~= 12 then return "option-types" end
+            if option.headerIconAtlasElement ~= "playerchoice-icon" or option.subHeader ~= "Epic" then return "option-header" end
+            if option.consolidateWidgets ~= true then return "option-widgets" end
+
+            local button = option.buttons[1]
+            if button.id ~= 7 or button.text ~= "Select" or button.disabled ~= false then return "button-identity" end
+            if button.showCheckmark ~= true or button.hideButtonShowText ~= false or button.selected ~= true then return "button-flags" end
+            if button.confirmation ~= "Confirm" or button.tooltip ~= "Choose this reward" then return "button-text" end
+            if button.rewardQuestID ~= 70000 or button.soundKitID ~= 12867 or button.listText ~= "Reward list entry" then return "button-optionals" end
+
+            local currency = option.rewardInfo.currencyRewards[1]
+            if currency.currencyId ~= 2003 or currency.name ~= "Dragon Isles Supplies" then return "currency-identity" end
+            if currency.currencyTexture ~= 463446 or currency.quantity ~= 25 or currency.isCurrencyContainer ~= false then return "currency-values" end
+            local item = option.rewardInfo.itemRewards[1]
+            if item.itemId ~= 19019 or item.name ~= "Thunderfury" or item.quantity ~= 1 then return "item" end
+            local reputation = option.rewardInfo.repRewards[1]
+            if reputation.factionId ~= 72 or reputation.quantity ~= 100 then return "reputation" end
             if C_PlayerChoice.GetNumRerolls() ~= 2 then return "rerolls" end
             if C_PlayerChoice.GetRemainingTime() ~= 30.5 then return "time" end
             if C_PlayerChoice.IsWaitingForPlayerChoiceResponse() ~= true then return "waiting" end

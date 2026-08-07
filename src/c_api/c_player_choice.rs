@@ -5,6 +5,7 @@
 //! table shape and mutators record local intent without claiming server timing
 //! or validation semantics.
 
+#[cfg(feature = "retail-12-1-0")]
 use crate::c_api::helpers::ensure_namespace;
 #[cfg(feature = "retail-12-1-0")]
 use crate::lua_api::methods::{
@@ -23,16 +24,9 @@ use rilua::LuaResult;
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
+#[cfg(feature = "retail-12-1-0")]
 pub(crate) fn register_c_player_choice_surface(state: &mut LuaState) -> LuaResult<()> {
     let player_choice = ensure_namespace(state, "C_PlayerChoice")?;
-    register_patch_12_1_surface(state, player_choice)
-}
-
-#[cfg(feature = "retail-12-1-0")]
-fn register_patch_12_1_surface(
-    state: &mut LuaState,
-    player_choice: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         player_choice,
@@ -63,10 +57,7 @@ fn register_patch_12_1_surface(
 }
 
 #[cfg(not(feature = "retail-12-1-0"))]
-fn register_patch_12_1_surface(
-    _state: &mut LuaState,
-    _player_choice: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-) -> LuaResult<()> {
+pub(crate) fn register_c_player_choice_surface(_state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
