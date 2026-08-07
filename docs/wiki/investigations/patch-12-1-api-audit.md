@@ -89,7 +89,14 @@ A broad approval recorded on 2026-07-14 is superseded: the itemized checklist wa
 
 ### Practical next step
 
-The 21 unsafe rows are now item-specific exception requests with repository evidence, empty tests/assertions, no approval IDs, and no approvals. Do not enforce security, taint, error-shape, private-data, or timing behavior without informed approval.
+The 21 unsafe rows are item-specific exception requests with repository evidence, empty tests/assertions, no approval IDs, and no approvals. They remain open pending live evidence. Do not guess security, taint, error-shape, private-data, or timing behavior, and do not treat approval as a substitute for correct behavior.
+
+Two new live-client probes now provide the next evidence path:
+
+- [UnitAuraSecretProbe](../../addons/UnitAuraSecretProbe/README.md) can constrain addon-tainted AuraData and `UNIT_AURA` behavior, but cannot establish Blizzard-secure caller access.
+- [DurationTextBindingProbe](../../addons/DurationTextBindingProbe/README.md) can constrain representation, identity, and lifetime observations, but cannot prove native finalization.
+
+All corresponding 12.1 rows remain open until raw retail/PTR SavedVariables captures are retained and interpreted.
 
 ## Sources
 
@@ -100,6 +107,8 @@ The 21 unsafe rows are now item-specific exception requests with repository evid
 - `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` — now-empty version-gated hook; safe 12.1 social/housing bridges moved to Rust-backed simulator state.
 - `src/ptr/compat_bootstrap.lua` — 12.1 compatibility globals, including `LoadAddOnWithErrorHandling`.
 - `src/ptr/strict_removals.lua` — post-startup hiding of removed 12.1 symbols.
+- [UnitAuraSecretProbe](../../addons/UnitAuraSecretProbe/README.md) — addon-tainted AuraData and `UNIT_AURA` capture procedure and limitations.
+- [DurationTextBindingProbe](../../addons/DurationTextBindingProbe/README.md) — DurationTextBinding representation, identity, and retained-lifetime capture procedure and limitations.
 - [[patch-12-1-framexml-symbol-inventory]] — exhaustive local FrameXML added/removed status inventory.
 - [[patch-12-1-behavior-inventory]] — separate non-FrameXML behavior inventory.
 - `src/lua_api/frame/methods/forbidden_aspects.rs` — compatible forbidden-aspect query/inheritance implementation.

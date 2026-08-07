@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-07] investigation | Add 12.1 live-client probe guidance
+
+Documented [UnitAuraSecretProbe](../addons/UnitAuraSecretProbe/README.md) and [DurationTextBindingProbe](../addons/DurationTextBindingProbe/README.md) as evidence paths. UnitAura constrains addon-tainted AuraData and `UNIT_AURA` behavior but cannot establish Blizzard-secure caller access; DurationTextBinding constrains representation, identity, and lifetime observations but cannot prove native finalization. Corresponding 12.1 rows remain open until raw retail/PTR SavedVariables captures are retained and interpreted.
+
 ## [2026-08-07] decision | Reopen unverified 12.0.5 behavior exceptions
 
 Applied the correct-behavior-only policy: reopened `ScaleEventProbe.SameSizeDuplicatePair` and `StoreForbiddenProbe.ForbiddenDescendants` by clearing their approvals. Kept `XmlFrameLevelProbe.RawCaptureProvenance` approved as provenance-only because its behavior is independently regression-tested. The 12.0.5 audit remains open at 33 best-effort, 5 exception-requested, 0 untriaged: 1 approved provenance-only exception and 4 open behavior exceptions (1 impossible same-size boundary and 3 unsafe Store/security gaps).
