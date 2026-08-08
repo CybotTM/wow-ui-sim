@@ -49498,17 +49498,38 @@
       "id": "added:Enum.VasTransactionPurchaseResult.DbHouseOwnerRestriction",
       "symbol": "Enum.VasTransactionPurchaseResult.DbHouseOwnerRestriction",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.VasTransactionPurchaseResult.DbHouseOwnerRestriction as an added enum occurrence with exact value 20096.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.VasTransactionPurchaseResult.DbHouseOwnerRestriction with exact numeric value 20096.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts VasTransactionPurchaseResult namespace publication, numeric Lua type, and the exact DbHouseOwnerRestriction value.",
+          "source_hash": "55f722901a4b548a7b7b3867e1610a6fbfd9f0557b2fdeb5db56a81790532759"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_vas_transaction_purchase_result_value"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact 12.0.0 value. VAS transaction behavior, validation, consumers, lifecycle, and historical load timing are not claimed."
     },
     {
       "id": "added:ExpansionDisplayInfo.glueAmbianceSoundKit",

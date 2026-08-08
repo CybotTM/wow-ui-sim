@@ -2142,7 +2142,7 @@
 2142. [best-effort] `added:Enum.UnitIncomingHealClampModeMeta.MaxValue` — behavioral
 2143. [best-effort] `added:Enum.UnitIncomingHealClampModeMeta.MinValue` — behavioral
 2144. [best-effort] `added:Enum.UnitIncomingHealClampModeMeta.NumValues` — behavioral
-2145. [untriaged] `added:Enum.VasTransactionPurchaseResult.DbHouseOwnerRestriction` — untriaged
+2145. [best-effort] `added:Enum.VasTransactionPurchaseResult.DbHouseOwnerRestriction` — behavioral
 2146. [untriaged] `added:ExpansionDisplayInfo.glueAmbianceSoundKit` — untriaged
 2147. [untriaged] `added:ExpansionDisplayInfo.glueCreditsSoundKit` — untriaged
 2148. [untriaged] `added:ExpansionDisplayInfo.glueMusicSoundKit` — untriaged

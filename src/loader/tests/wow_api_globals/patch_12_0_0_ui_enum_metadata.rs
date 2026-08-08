@@ -179,6 +179,33 @@ fn test_patch_12_0_0_unit_aura_sort_rule_enum_values() {
 }
 
 #[test]
+fn test_patch_12_0_0_vas_transaction_purchase_result_value() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local namespace = Enum.VasTransactionPurchaseResult
+                if type(namespace) ~= "table" then
+                    return "namespace=" .. type(namespace)
+                end
+                local value = namespace.DbHouseOwnerRestriction
+                if type(value) ~= "number" then
+                    return "type=" .. type(value)
+                end
+                if value ~= 20096 then
+                    return "value=" .. tostring(value)
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "retail 12.0.0 VasTransactionPurchaseResult value did not match the source register"
+    );
+}
+
+#[test]
 fn test_patch_12_0_0_cooldown_alert_event_type_omits_later_members() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
