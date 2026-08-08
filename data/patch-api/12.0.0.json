@@ -13395,353 +13395,771 @@
       "id": "added:C_TransmogCollection.DeleteCustomSet",
       "symbol": "C_TransmogCollection.DeleteCustomSet",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.GetCustomSetHyperlinkFromItemTransmogInfoList",
       "symbol": "C_TransmogCollection.GetCustomSetHyperlinkFromItemTransmogInfoList",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.GetCustomSetInfo",
       "symbol": "C_TransmogCollection.GetCustomSetInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.GetCustomSetItemTransmogInfoList",
       "symbol": "C_TransmogCollection.GetCustomSetItemTransmogInfoList",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.GetCustomSets",
       "symbol": "C_TransmogCollection.GetCustomSets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.GetItemTransmogInfoListFromCustomSetHyperlink",
       "symbol": "C_TransmogCollection.GetItemTransmogInfoListFromCustomSetHyperlink",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.GetNumMaxCustomSets",
       "symbol": "C_TransmogCollection.GetNumMaxCustomSets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.IsValidCustomSetName",
       "symbol": "C_TransmogCollection.IsValidCustomSetName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.IsValidTransmogSource",
       "symbol": "C_TransmogCollection.IsValidTransmogSource",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.ModifyCustomSet",
       "symbol": "C_TransmogCollection.ModifyCustomSet",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.NewCustomSet",
       "symbol": "C_TransmogCollection.NewCustomSet",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.RenameCustomSet",
       "symbol": "C_TransmogCollection.RenameCustomSet",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData.canHaveIllusion",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData.canHaveIllusion",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData.category",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData.category",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData.icon",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData.icon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData.isCollected",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData.isCollected",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData.itemAppearanceID",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData.itemAppearanceID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData.itemLink",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData.itemLink",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData.itemSubclass",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData.itemSubclass",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData.sourceType",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData.sourceType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.TransmogAppearanceSourceInfoData.transmoglink",
       "symbol": "C_TransmogCollection.TransmogAppearanceSourceInfoData.transmoglink",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.AddNewOutfit",
@@ -48650,17 +49068,36 @@
       "id": "changed:C_TransmogCollection.GetAppearanceSourceInfo",
       "symbol": "C_TransmogCollection.GetAppearanceSourceInfo",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this C_TransmogCollection occurrence and its names/signature/structure shape only; it does not establish custom-set persistence, hyperlink, validation, or exact appearance-source semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog_collection.rs",
+          "source_hash": "0969dd167c841d051e73db0f5d48e39e94bbc080f6a9d250c59af9614d0992ac",
+          "summary": "Current src/lua_api/globals/missing_surface/transmog_collection.rs provides a seeded appearance/filter/outfit surface, but no modeled custom-set lifecycle, hyperlink handling, or authoritative TransmogAppearanceSourceInfoData return shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf",
+          "summary": "Current src/lua_api/state_types/collections.rs contains seeded transmog appearance and collection state; related local tests cover seeded queries, not retail 12.0.0 custom-set or changed-structure semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_TransmogCollection is seeded/partial: custom-set lifecycle, hyperlinks, persistence, validation, and exact changed structure semantics are unproven. Local related tests do not establish authoritative retail 12.0.0 behavior; no approval can close the row."
     },
     {
       "id": "changed:C_UnitAuras.GetUnitAuras",
