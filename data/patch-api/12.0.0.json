@@ -34162,257 +34162,593 @@
       "id": "added:Enum.HousingResult.BoundsFailureChildren",
       "symbol": "Enum.HousingResult.BoundsFailureChildren",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.BoundsFailureChildren as a added enum occurrence with value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.BoundsFailurePlot",
       "symbol": "Enum.HousingResult.BoundsFailurePlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.BoundsFailurePlot as a added enum occurrence with value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.BoundsFailureRoom",
       "symbol": "Enum.HousingResult.BoundsFailureRoom",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.BoundsFailureRoom as a added enum occurrence with value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.HouseExteriorAlreadyThatSize",
       "symbol": "Enum.HousingResult.HouseExteriorAlreadyThatSize",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HouseExteriorAlreadyThatSize as a added enum occurrence with value 27."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.HouseExteriorAlreadyThatType",
       "symbol": "Enum.HousingResult.HouseExteriorAlreadyThatType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HouseExteriorAlreadyThatType as a added enum occurrence with value 28."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.HouseExteriorSizeNotAvailable",
       "symbol": "Enum.HousingResult.HouseExteriorSizeNotAvailable",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HouseExteriorSizeNotAvailable as a added enum occurrence with value 33."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.HouseExteriorTypeNeighborhoodMismatch",
       "symbol": "Enum.HousingResult.HouseExteriorTypeNeighborhoodMismatch",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HouseExteriorTypeNeighborhoodMismatch as a added enum occurrence with value 30."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.HouseExteriorTypeNotFound",
       "symbol": "Enum.HousingResult.HouseExteriorTypeNotFound",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HouseExteriorTypeNotFound as a added enum occurrence with value 31."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.HouseExteriorTypeSizeMismatch",
       "symbol": "Enum.HousingResult.HouseExteriorTypeSizeMismatch",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HouseExteriorTypeSizeMismatch as a added enum occurrence with value 32."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.MaxPreviewDecorReached",
       "symbol": "Enum.HousingResult.MaxPreviewDecorReached",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MaxPreviewDecorReached as a added enum occurrence with value 49."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.OwnerNotInGuild",
       "symbol": "Enum.HousingResult.OwnerNotInGuild",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.OwnerNotInGuild as a added enum occurrence with value 65."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.UncollectedExteriorFixture",
       "symbol": "Enum.HousingResult.UncollectedExteriorFixture",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.UncollectedExteriorFixture as a added enum occurrence with value 84."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.UncollectedHouseType",
       "symbol": "Enum.HousingResult.UncollectedHouseType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.UncollectedHouseType as a added enum occurrence with value 85."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.UncollectedRoom",
       "symbol": "Enum.HousingResult.UncollectedRoom",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.UncollectedRoom as a added enum occurrence with value 86."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.UncollectedRoomMaterial",
       "symbol": "Enum.HousingResult.UncollectedRoomMaterial",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.UncollectedRoomMaterial as a added enum occurrence with value 87."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingResult.UncollectedRoomTheme",
       "symbol": "Enum.HousingResult.UncollectedRoomTheme",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.UncollectedRoomTheme as a added enum occurrence with value 88."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "added:Enum.HousingRoomComponentFlags.HiddenInLayoutMode",
@@ -55214,1153 +55550,2665 @@
       "id": "changed:Enum.HousingResult.CannotAfford",
       "symbol": "Enum.HousingResult.CannotAfford",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.CannotAfford as a changed enum occurrence with value 5."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.CharterComplete",
       "symbol": "Enum.HousingResult.CharterComplete",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.CharterComplete as a changed enum occurrence with value 6."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.CollisionInvalid",
       "symbol": "Enum.HousingResult.CollisionInvalid",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.CollisionInvalid as a changed enum occurrence with value 7."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.DbError",
       "symbol": "Enum.HousingResult.DbError",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.DbError as a changed enum occurrence with value 8."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.DecorCannotBeRedeemed",
       "symbol": "Enum.HousingResult.DecorCannotBeRedeemed",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.DecorCannotBeRedeemed as a changed enum occurrence with value 9."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.DecorItemNotDestroyable",
       "symbol": "Enum.HousingResult.DecorItemNotDestroyable",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.DecorItemNotDestroyable as a changed enum occurrence with value 10."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.DecorNotFound",
       "symbol": "Enum.HousingResult.DecorNotFound",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.DecorNotFound as a changed enum occurrence with value 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.DecorNotFoundInStorage",
       "symbol": "Enum.HousingResult.DecorNotFoundInStorage",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.DecorNotFoundInStorage as a changed enum occurrence with value 12."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.DuplicateCharterSignature",
       "symbol": "Enum.HousingResult.DuplicateCharterSignature",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.DuplicateCharterSignature as a changed enum occurrence with value 13."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.FilterRejected",
       "symbol": "Enum.HousingResult.FilterRejected",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.FilterRejected as a changed enum occurrence with value 14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.FixtureCantDeleteDoor",
       "symbol": "Enum.HousingResult.FixtureCantDeleteDoor",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.FixtureCantDeleteDoor as a changed enum occurrence with value 15."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.FixtureHookEmpty",
       "symbol": "Enum.HousingResult.FixtureHookEmpty",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.FixtureHookEmpty as a changed enum occurrence with value 16."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.FixtureHookOccupied",
       "symbol": "Enum.HousingResult.FixtureHookOccupied",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.FixtureHookOccupied as a changed enum occurrence with value 17."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.FixtureHouseTypeMismatch",
       "symbol": "Enum.HousingResult.FixtureHouseTypeMismatch",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.FixtureHouseTypeMismatch as a changed enum occurrence with value 18."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.FixtureNotFound",
       "symbol": "Enum.HousingResult.FixtureNotFound",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.FixtureNotFound as a changed enum occurrence with value 19."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.FixtureSizeMismatch",
       "symbol": "Enum.HousingResult.FixtureSizeMismatch",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.FixtureSizeMismatch as a changed enum occurrence with value 20."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.FixtureTypeMismatch",
       "symbol": "Enum.HousingResult.FixtureTypeMismatch",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.FixtureTypeMismatch as a changed enum occurrence with value 21."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.GenericFailure",
       "symbol": "Enum.HousingResult.GenericFailure",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.GenericFailure as a changed enum occurrence with value 22."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.GuildMoreAccountsNeeded",
       "symbol": "Enum.HousingResult.GuildMoreAccountsNeeded",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.GuildMoreAccountsNeeded as a changed enum occurrence with value 23."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.GuildMoreActivePlayersNeeded",
       "symbol": "Enum.HousingResult.GuildMoreActivePlayersNeeded",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.GuildMoreActivePlayersNeeded as a changed enum occurrence with value 24."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.GuildNotLoaded",
       "symbol": "Enum.HousingResult.GuildNotLoaded",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.GuildNotLoaded as a changed enum occurrence with value 25."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.HookNotChildOfFixture",
       "symbol": "Enum.HousingResult.HookNotChildOfFixture",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HookNotChildOfFixture as a changed enum occurrence with value 34."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.HouseEditLockFailed",
       "symbol": "Enum.HousingResult.HouseEditLockFailed",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HouseEditLockFailed as a changed enum occurrence with value 26."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.HouseExteriorRootNotFound",
       "symbol": "Enum.HousingResult.HouseExteriorRootNotFound",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HouseExteriorRootNotFound as a changed enum occurrence with value 29."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.HouseNotFound",
       "symbol": "Enum.HousingResult.HouseNotFound",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.HouseNotFound as a changed enum occurrence with value 35."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.IncorrectFaction",
       "symbol": "Enum.HousingResult.IncorrectFaction",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.IncorrectFaction as a changed enum occurrence with value 36."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.InvalidDecorItem",
       "symbol": "Enum.HousingResult.InvalidDecorItem",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.InvalidDecorItem as a changed enum occurrence with value 37."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.InvalidDistance",
       "symbol": "Enum.HousingResult.InvalidDistance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.InvalidDistance as a changed enum occurrence with value 38."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.InvalidGuild",
       "symbol": "Enum.HousingResult.InvalidGuild",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.InvalidGuild as a changed enum occurrence with value 39."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.InvalidHouse",
       "symbol": "Enum.HousingResult.InvalidHouse",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.InvalidHouse as a changed enum occurrence with value 40."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.InvalidInstance",
       "symbol": "Enum.HousingResult.InvalidInstance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.InvalidInstance as a changed enum occurrence with value 41."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.InvalidInteraction",
       "symbol": "Enum.HousingResult.InvalidInteraction",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.InvalidInteraction as a changed enum occurrence with value 42."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.InvalidMap",
       "symbol": "Enum.HousingResult.InvalidMap",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.InvalidMap as a changed enum occurrence with value 43."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.InvalidNeighborhoodName",
       "symbol": "Enum.HousingResult.InvalidNeighborhoodName",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.InvalidNeighborhoodName as a changed enum occurrence with value 44."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.InvalidRoomLayout",
       "symbol": "Enum.HousingResult.InvalidRoomLayout",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.InvalidRoomLayout as a changed enum occurrence with value 45."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.LockOperationFailed",
       "symbol": "Enum.HousingResult.LockOperationFailed",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.LockOperationFailed as a changed enum occurrence with value 47."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.LockedByOtherPlayer",
       "symbol": "Enum.HousingResult.LockedByOtherPlayer",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.LockedByOtherPlayer as a changed enum occurrence with value 46."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.MaxDecorReached",
       "symbol": "Enum.HousingResult.MaxDecorReached",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MaxDecorReached as a changed enum occurrence with value 48."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.MissingCoreFixture",
       "symbol": "Enum.HousingResult.MissingCoreFixture",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MissingCoreFixture as a changed enum occurrence with value 50."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.MissingDye",
       "symbol": "Enum.HousingResult.MissingDye",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MissingDye as a changed enum occurrence with value 51."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.MissingExpansionAccess",
       "symbol": "Enum.HousingResult.MissingExpansionAccess",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MissingExpansionAccess as a changed enum occurrence with value 52."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.MissingFactionMap",
       "symbol": "Enum.HousingResult.MissingFactionMap",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MissingFactionMap as a changed enum occurrence with value 53."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.MissingPrivateNeighborhoodInvite",
       "symbol": "Enum.HousingResult.MissingPrivateNeighborhoodInvite",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MissingPrivateNeighborhoodInvite as a changed enum occurrence with value 54."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.MoreHouseSlotsNeeded",
       "symbol": "Enum.HousingResult.MoreHouseSlotsNeeded",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MoreHouseSlotsNeeded as a changed enum occurrence with value 55."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.MoreSignaturesNeeded",
       "symbol": "Enum.HousingResult.MoreSignaturesNeeded",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MoreSignaturesNeeded as a changed enum occurrence with value 56."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.NeighborhoodNotFound",
       "symbol": "Enum.HousingResult.NeighborhoodNotFound",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.NeighborhoodNotFound as a changed enum occurrence with value 57."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.NoNeighborhoodOwnershipRequests",
       "symbol": "Enum.HousingResult.NoNeighborhoodOwnershipRequests",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.NoNeighborhoodOwnershipRequests as a changed enum occurrence with value 58."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.NotInDecorEditMode",
       "symbol": "Enum.HousingResult.NotInDecorEditMode",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.NotInDecorEditMode as a changed enum occurrence with value 59."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.NotInFixtureEditMode",
       "symbol": "Enum.HousingResult.NotInFixtureEditMode",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.NotInFixtureEditMode as a changed enum occurrence with value 60."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.NotInLayoutEditMode",
       "symbol": "Enum.HousingResult.NotInLayoutEditMode",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.NotInLayoutEditMode as a changed enum occurrence with value 61."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.NotInsideHouse",
       "symbol": "Enum.HousingResult.NotInsideHouse",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.NotInsideHouse as a changed enum occurrence with value 62."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.NotOnOwnedPlot",
       "symbol": "Enum.HousingResult.NotOnOwnedPlot",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.NotOnOwnedPlot as a changed enum occurrence with value 63."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.OperationAborted",
       "symbol": "Enum.HousingResult.OperationAborted",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.OperationAborted as a changed enum occurrence with value 64."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.PermissionDenied",
       "symbol": "Enum.HousingResult.PermissionDenied",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.PermissionDenied as a changed enum occurrence with value 66."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.PlacementTargetInvalid",
       "symbol": "Enum.HousingResult.PlacementTargetInvalid",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.PlacementTargetInvalid as a changed enum occurrence with value 67."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.PlayerNotFound",
       "symbol": "Enum.HousingResult.PlayerNotFound",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.PlayerNotFound as a changed enum occurrence with value 68."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.PlayerNotInInstance",
       "symbol": "Enum.HousingResult.PlayerNotInInstance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.PlayerNotInInstance as a changed enum occurrence with value 69."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.PlotNotFound",
       "symbol": "Enum.HousingResult.PlotNotFound",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.PlotNotFound as a changed enum occurrence with value 70."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.PlotNotVacant",
       "symbol": "Enum.HousingResult.PlotNotVacant",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.PlotNotVacant as a changed enum occurrence with value 71."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.PlotReservationCooldown",
       "symbol": "Enum.HousingResult.PlotReservationCooldown",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.PlotReservationCooldown as a changed enum occurrence with value 72."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.PlotReserved",
       "symbol": "Enum.HousingResult.PlotReserved",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.PlotReserved as a changed enum occurrence with value 73."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.RoomNotFound",
       "symbol": "Enum.HousingResult.RoomNotFound",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.RoomNotFound as a changed enum occurrence with value 74."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.RoomUpdateFailed",
       "symbol": "Enum.HousingResult.RoomUpdateFailed",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.RoomUpdateFailed as a changed enum occurrence with value 75."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.RpcFailure",
       "symbol": "Enum.HousingResult.RpcFailure",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.RpcFailure as a changed enum occurrence with value 76."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.ServiceNotAvailable",
       "symbol": "Enum.HousingResult.ServiceNotAvailable",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.ServiceNotAvailable as a changed enum occurrence with value 77."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.StaticDataNotFound",
       "symbol": "Enum.HousingResult.StaticDataNotFound",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.StaticDataNotFound as a changed enum occurrence with value 78."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.TimeoutLimit",
       "symbol": "Enum.HousingResult.TimeoutLimit",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.TimeoutLimit as a changed enum occurrence with value 79."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.TimerunningNotAllowed",
       "symbol": "Enum.HousingResult.TimerunningNotAllowed",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.TimerunningNotAllowed as a changed enum occurrence with value 80."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.TokenRequired",
       "symbol": "Enum.HousingResult.TokenRequired",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.TokenRequired as a changed enum occurrence with value 81."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.TooManyRequests",
       "symbol": "Enum.HousingResult.TooManyRequests",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.TooManyRequests as a changed enum occurrence with value 82."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.TransactionFailure",
       "symbol": "Enum.HousingResult.TransactionFailure",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.TransactionFailure as a changed enum occurrence with value 83."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResult.UnlockOperationFailed",
       "symbol": "Enum.HousingResult.UnlockOperationFailed",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.UnlockOperationFailed as a changed enum occurrence with value 89."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current HousingResult enum table publishes the numeric entry."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values",
+          "source_hash": "c43e00edb4eeb446c11511556d3c687ac8ff43d02a2470fc8e70999f05011b6a",
+          "summary": "Focused retail 12.0.0 test asserts Enum.HousingResult namespace, numeric Lua type, and exact value for all added/changed entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_result.rs::test_patch_12_0_0_housing_result_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "fdfcb97f0387b892d4984934548aa6618113261a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup Enum.HousingResult publication, numeric Lua type, and exact value for this added/changed entry. Housing operations, result/error text mapping, consumers, persistence, mutation/protection, and lifecycle are not claimed. Implementation ancestor: 339424faf1111f33d12f12a197ffd4dbc6604dc8."
     },
     {
       "id": "changed:Enum.HousingResultMeta.MaxValue",
@@ -65901,33 +67749,59 @@
       "id": "removed:Enum.HousingResult.FixtureNotOwned",
       "symbol": "Enum.HousingResult.FixtureNotOwned",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.FixtureNotOwned as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current simulator bootstrap omits the removed HousingResult entry; this does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: current bootstrap omission does not prove full runtime or dynamic publication absence, historical removal timing, replacement semantics, or all-LoD absence for this removed HousingResult entry. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "removed:Enum.HousingResult.MissingTheme",
       "symbol": "Enum.HousingResult.MissingTheme",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingResult.MissingTheme as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current simulator bootstrap omits the removed HousingResult entry; this does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: current bootstrap omission does not prove full runtime or dynamic publication absence, historical removal timing, replacement semantics, or all-LoD absence for this removed HousingResult entry. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionExteriorFixture",
