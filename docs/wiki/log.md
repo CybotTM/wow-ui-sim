@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify 12.0.0 housing events
+
+Classified 12 added housing events as `evidence-required`/`unsafe`. The retail event registry accepts each name, but no modeled producer or focused proof establishes its source payload contract, timing, lifecycle, ordering, or duplicate behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **795 best-effort, 634 evidence-required, 2 exception-requested, and 1979 untriaged**.
+
 ## [2026-08-08] investigation | Classify 12.0.0 VAS result enum
 
 Classified `Enum.VasTransactionPurchaseResult.DbHouseOwnerRestriction=20096` as a bounded `best-effort`/`behavioral` startup claim. `test_patch_12_0_0_vas_transaction_purchase_result_value` proves namespace publication, numeric Lua type, and the exact source-register value; VAS transaction behavior, validation, consumers, lifecycle, and historical load timing remain unclaimed. Current totals are **795 best-effort, 622 evidence-required, 2 exception-requested, and 1991 untriaged**.

@@ -49910,193 +49910,421 @@
       "id": "added:HOUSE_EXTERIOR_TYPE_UNLOCKED",
       "symbol": "HOUSE_EXTERIOR_TYPE_UNLOCKED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSE_EXTERIOR_TYPE_UNLOCKED as an added event with payload contract: fixtureID: number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSE_EXTERIOR_TYPE_UNLOCKED; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSE_EXTERIOR_TYPE_UNLOCKED producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSE_EXTERIOR_TYPE_UNLOCKED, but no modeled producer or focused proof establishes the source payload contract (fixtureID: number), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_DECOR_ADD_TO_PREVIEW_LIST",
       "symbol": "HOUSING_DECOR_ADD_TO_PREVIEW_LIST",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_DECOR_ADD_TO_PREVIEW_LIST as an added event with payload contract: previewItemData: structure C_HousingCatalog.HousingPreviewItemData.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_DECOR_ADD_TO_PREVIEW_LIST; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_DECOR_ADD_TO_PREVIEW_LIST producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_DECOR_ADD_TO_PREVIEW_LIST, but no modeled producer or focused proof establishes the source payload contract (previewItemData: structure C_HousingCatalog.HousingPreviewItemData), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_DECOR_FREE_PLACE_STATUS_CHANGED",
       "symbol": "HOUSING_DECOR_FREE_PLACE_STATUS_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_DECOR_FREE_PLACE_STATUS_CHANGED as an added event with payload contract: isFreePlaceEnabled: boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_DECOR_FREE_PLACE_STATUS_CHANGED; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_DECOR_FREE_PLACE_STATUS_CHANGED producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_DECOR_FREE_PLACE_STATUS_CHANGED, but no modeled producer or focused proof establishes the source payload contract (isFreePlaceEnabled: boolean), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_DECOR_PREVIEW_LIST_REMOVE_FROM_WORLD",
       "symbol": "HOUSING_DECOR_PREVIEW_LIST_REMOVE_FROM_WORLD",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_DECOR_PREVIEW_LIST_REMOVE_FROM_WORLD as an added event with payload contract: decorGUID: string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_DECOR_PREVIEW_LIST_REMOVE_FROM_WORLD; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_DECOR_PREVIEW_LIST_REMOVE_FROM_WORLD producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_DECOR_PREVIEW_LIST_REMOVE_FROM_WORLD, but no modeled producer or focused proof establishes the source payload contract (decorGUID: string), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_DECOR_PREVIEW_LIST_UPDATED",
       "symbol": "HOUSING_DECOR_PREVIEW_LIST_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_DECOR_PREVIEW_LIST_UPDATED as an added event with payload contract: no arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_DECOR_PREVIEW_LIST_UPDATED; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_DECOR_PREVIEW_LIST_UPDATED producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_DECOR_PREVIEW_LIST_UPDATED, but no modeled producer or focused proof establishes the source payload contract (no arguments), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_DECOR_PREVIEW_STATE_CHANGED",
       "symbol": "HOUSING_DECOR_PREVIEW_STATE_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_DECOR_PREVIEW_STATE_CHANGED as an added event with payload contract: isPreviewState: boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_DECOR_PREVIEW_STATE_CHANGED; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_DECOR_PREVIEW_STATE_CHANGED producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_DECOR_PREVIEW_STATE_CHANGED, but no modeled producer or focused proof establishes the source payload contract (isPreviewState: boolean), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_EXPERT_MODE_PLACEMENT_FLAGS_UPDATED",
       "symbol": "HOUSING_EXPERT_MODE_PLACEMENT_FLAGS_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_EXPERT_MODE_PLACEMENT_FLAGS_UPDATED as an added event with payload contract: targetType: enum HousingExpertModeTargetType, activeFlags: enum HousingDecorPlacementRestriction.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_EXPERT_MODE_PLACEMENT_FLAGS_UPDATED; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_EXPERT_MODE_PLACEMENT_FLAGS_UPDATED producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_EXPERT_MODE_PLACEMENT_FLAGS_UPDATED, but no modeled producer or focused proof establishes the source payload contract (targetType: enum HousingExpertModeTargetType, activeFlags: enum HousingDecorPlacementRestriction), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_FIXTURE_UNLOCKED",
       "symbol": "HOUSING_FIXTURE_UNLOCKED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_FIXTURE_UNLOCKED as an added event with payload contract: fixtureID: number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_FIXTURE_UNLOCKED; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_FIXTURE_UNLOCKED producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_FIXTURE_UNLOCKED, but no modeled producer or focused proof establishes the source payload contract (fixtureID: number), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_REFUND_LIST_UPDATED",
       "symbol": "HOUSING_REFUND_LIST_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_REFUND_LIST_UPDATED as an added event with payload contract: no arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_REFUND_LIST_UPDATED; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_REFUND_LIST_UPDATED producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_REFUND_LIST_UPDATED, but no modeled producer or focused proof establishes the source payload contract (no arguments), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_SET_EXTERIOR_HOUSE_SIZE_RESPONSE",
       "symbol": "HOUSING_SET_EXTERIOR_HOUSE_SIZE_RESPONSE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_SET_EXTERIOR_HOUSE_SIZE_RESPONSE as an added event with payload contract: result: enum HousingResult.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_SET_EXTERIOR_HOUSE_SIZE_RESPONSE; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_SET_EXTERIOR_HOUSE_SIZE_RESPONSE producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_SET_EXTERIOR_HOUSE_SIZE_RESPONSE, but no modeled producer or focused proof establishes the source payload contract (result: enum HousingResult), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_SET_EXTERIOR_HOUSE_TYPE_RESPONSE",
       "symbol": "HOUSING_SET_EXTERIOR_HOUSE_TYPE_RESPONSE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_SET_EXTERIOR_HOUSE_TYPE_RESPONSE as an added event with payload contract: result: enum HousingResult.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_SET_EXTERIOR_HOUSE_TYPE_RESPONSE; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_SET_EXTERIOR_HOUSE_TYPE_RESPONSE producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_SET_EXTERIOR_HOUSE_TYPE_RESPONSE, but no modeled producer or focused proof establishes the source payload contract (result: enum HousingResult), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HOUSING_SET_FIXTURE_RESPONSE",
       "symbol": "HOUSING_SET_FIXTURE_RESPONSE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HOUSING_SET_FIXTURE_RESPONSE as an added event with payload contract: result: enum HousingResult.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts HOUSING_SET_FIXTURE_RESPONSE; registration alone does not establish production or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Examined temporary housing state does not provide authoritative HOUSING_SET_FIXTURE_RESPONSE producer, payload, timing, or lifecycle proof.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts HOUSING_SET_FIXTURE_RESPONSE, but no modeled producer or focused proof establishes the source payload contract (result: enum HousingResult), timing, lifecycle, ordering, or duplicate behavior. Registration alone cannot close this row."
     },
     {
       "id": "added:HouseExteriorSizeOption",
