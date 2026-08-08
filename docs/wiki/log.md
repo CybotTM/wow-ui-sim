@@ -4,6 +4,10 @@ Classified exactly 115 added `C_TransmogOutfitInfo` API, structure, and structur
 
 # Wiki Log
 
+## [2026-08-08] investigation | Bound 12.0.0 C_NamePlate additions
+
+Classified six added 2D `C_NamePlate`/`C_NamePlateManager` APIs as `evidence-required`/`unsafe` because the current permanent shim has no modeled nameplate-manager state and exact 12.0.0 semantics remain unproven. Classified `C_NamePlateManager.IsNamePlateUnitBehindCamera` as `exception-requested`/`impossible` under the already-decided permanent no-3D project scope; this is not a user approval request. The 19 removed C_NamePlate rows remain untriaged because removal direction alone does not establish replacement behavior. Tests remain empty with null commit, approval, and scope exception except for the allowlisted scope exception. Totals are now **77 best-effort, 361 evidence-required, 1 exception-requested, and 2971 untriaged**.
+
 ## [2026-08-08] investigation | Bound 12.0.0 C_EncounterTimeline slice
 
 Classified exactly 55 added `C_EncounterTimeline` API, structure, and structure-field rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the current `src/lua_api/workarounds/temporary/encounter_state.rs` partial seeded fixture; tests remain empty with null commit, approval, and scope exception. Nine APIs are present only as fixture-backed behavior and 46 rows are absent; exact encounter state, script-event lifecycle, timers, feature flags, payload values, and structure-field semantics require authoritative live evidence or a correct modeled subsystem with focused tests, and no approval can close these rows. Totals are now **77 best-effort, 240 evidence-required, and 3093 untriaged**.

@@ -9264,113 +9264,214 @@
       "id": "added:C_NamePlate.GetNamePlateSize",
       "symbol": "C_NamePlate.GetNamePlateSize",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_NamePlate/C_NamePlateManager API occurrence and its published signature metadata only; it does not establish runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1",
+          "summary": "Current permanent C_NamePlate shim has no modeled nameplate-manager state; it exposes only GetNamePlateForUnit, GetNamePlates, and a no-op SetNamePlateSize."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-register signature evidence establishes only the occurrence and return shape. Current nameplate behavior has no modeled 2D size/hit-test/state subsystem and exact 12.0.0 semantics remain unproven; no approval can close this row."
     },
     {
       "id": "added:C_NamePlate.SetNamePlateSize",
       "symbol": "C_NamePlate.SetNamePlateSize",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_NamePlate/C_NamePlateManager API occurrence and its published signature metadata only; it does not establish runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1",
+          "summary": "Current permanent C_NamePlate shim has no modeled nameplate-manager state; it exposes only GetNamePlateForUnit, GetNamePlates, and a no-op SetNamePlateSize."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-register signature evidence establishes only the occurrence and return shape. Current nameplate behavior has no modeled 2D size/hit-test/state subsystem and exact 12.0.0 semantics remain unproven; no approval can close this row."
     },
     {
       "id": "added:C_NamePlateManager.GetNamePlateHitTestInsets",
       "symbol": "C_NamePlateManager.GetNamePlateHitTestInsets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_NamePlate/C_NamePlateManager API occurrence and its published signature metadata only; it does not establish runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1",
+          "summary": "Current permanent C_NamePlate shim has no modeled nameplate-manager state; it exposes only GetNamePlateForUnit, GetNamePlates, and a no-op SetNamePlateSize."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-register signature evidence establishes only the occurrence and return shape. Current nameplate behavior has no modeled 2D size/hit-test/state subsystem and exact 12.0.0 semantics remain unproven; no approval can close this row."
     },
     {
       "id": "added:C_NamePlateManager.IsNamePlateUnitBehindCamera",
       "symbol": "C_NamePlateManager.IsNamePlateUnitBehindCamera",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "exception-requested",
+      "resolution": "impossible",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_NamePlate/C_NamePlateManager API occurrence and its published signature metadata only; it does not establish runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1",
+          "summary": "Current permanent C_NamePlate shim has no modeled nameplate-manager state; it exposes only GetNamePlateForUnit, GetNamePlates, and a no-op SetNamePlateSize."
+        },
+        {
+          "kind": "source",
+          "reference": "AGENTS.md",
+          "source_hash": "896a0b3a06d8bc1ae39c3525515d4978014cd43c10b8d866d4079274022e1bff",
+          "summary": "AGENTS.md defines the permanent no-3D project scope; direct 3D camera/projection behavior is intentionally excluded."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
-      "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "scope_exception": {
+        "rule": "permanent-project-scope",
+        "reference": "AGENTS.md#intentional-gaps",
+        "summary": "Permanent no-3D project scope excludes direct nameplate camera/projection behavior."
+      },
+      "notes": "Repository scope exception: this API directly reports whether a world nameplate unit is behind the 3D camera. The simulator intentionally has no 3D world/camera projection subsystem, so faithful implementation is impossible within the already-decided permanent no-3D project scope; this is not a user approval request."
     },
     {
       "id": "added:C_NamePlateManager.SetNamePlateHitTestFrame",
       "symbol": "C_NamePlateManager.SetNamePlateHitTestFrame",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_NamePlate/C_NamePlateManager API occurrence and its published signature metadata only; it does not establish runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1",
+          "summary": "Current permanent C_NamePlate shim has no modeled nameplate-manager state; it exposes only GetNamePlateForUnit, GetNamePlates, and a no-op SetNamePlateSize."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-register signature evidence establishes only the occurrence and return shape. Current nameplate behavior has no modeled 2D size/hit-test/state subsystem and exact 12.0.0 semantics remain unproven; no approval can close this row."
     },
     {
       "id": "added:C_NamePlateManager.SetNamePlateHitTestInsets",
       "symbol": "C_NamePlateManager.SetNamePlateHitTestInsets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_NamePlate/C_NamePlateManager API occurrence and its published signature metadata only; it does not establish runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1",
+          "summary": "Current permanent C_NamePlate shim has no modeled nameplate-manager state; it exposes only GetNamePlateForUnit, GetNamePlates, and a no-op SetNamePlateSize."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-register signature evidence establishes only the occurrence and return shape. Current nameplate behavior has no modeled 2D size/hit-test/state subsystem and exact 12.0.0 semantics remain unproven; no approval can close this row."
     },
     {
       "id": "added:C_NamePlateManager.SetNamePlateSimplified",
       "symbol": "C_NamePlateManager.SetNamePlateSimplified",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_NamePlate/C_NamePlateManager API occurrence and its published signature metadata only; it does not establish runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1",
+          "summary": "Current permanent C_NamePlate shim has no modeled nameplate-manager state; it exposes only GetNamePlateForUnit, GetNamePlates, and a no-op SetNamePlateSize."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-register signature evidence establishes only the occurrence and return shape. Current nameplate behavior has no modeled 2D size/hit-test/state subsystem and exact 12.0.0 semantics remain unproven; no approval can close this row."
     },
     {
       "id": "added:C_NeighborhoodInitiative.AddTrackedInitiativeTask",
