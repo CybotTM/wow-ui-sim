@@ -34962,225 +34962,519 @@
       "id": "added:Enum.ItemCollectionType.ExteriorFixture",
       "symbol": "Enum.ItemCollectionType.ExteriorFixture",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ExteriorFixture as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.ExteriorFixture with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.Heirloom",
       "symbol": "Enum.ItemCollectionType.Heirloom",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.Heirloom as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.Heirloom with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.HouseType",
       "symbol": "Enum.ItemCollectionType.HouseType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.HouseType as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.HouseType with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.None",
       "symbol": "Enum.ItemCollectionType.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.None as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.None with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.Room",
       "symbol": "Enum.ItemCollectionType.Room",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.Room as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.Room with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.RoomMaterial",
       "symbol": "Enum.ItemCollectionType.RoomMaterial",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.RoomMaterial as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.RoomMaterial with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.RoomTheme",
       "symbol": "Enum.ItemCollectionType.RoomTheme",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.RoomTheme as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.RoomTheme with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.RuneforgeLegendaryAbility",
       "symbol": "Enum.ItemCollectionType.RuneforgeLegendaryAbility",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.RuneforgeLegendaryAbility as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.RuneforgeLegendaryAbility with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.Toy",
       "symbol": "Enum.ItemCollectionType.Toy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.Toy as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.Toy with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.Transmog",
       "symbol": "Enum.ItemCollectionType.Transmog",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.Transmog as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.Transmog with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.TransmogIllusion",
       "symbol": "Enum.ItemCollectionType.TransmogIllusion",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.TransmogIllusion as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.TransmogIllusion with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.TransmogOutfit",
       "symbol": "Enum.ItemCollectionType.TransmogOutfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.TransmogOutfit as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.TransmogOutfit with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.TransmogSetFavorite",
       "symbol": "Enum.ItemCollectionType.TransmogSetFavorite",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.TransmogSetFavorite as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.TransmogSetFavorite with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCollectionType.WarbandScene",
       "symbol": "Enum.ItemCollectionType.WarbandScene",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.WarbandScene as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionType.WarbandScene with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.ItemCreationContext.TimewalkerLevelUp",
@@ -38658,385 +38952,889 @@
       "id": "added:Enum.SecretAspect.Alpha",
       "symbol": "Enum.SecretAspect.Alpha",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Alpha as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Alpha with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.BarValue",
       "symbol": "Enum.SecretAspect.BarValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.BarValue as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.BarValue with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Cooldown",
       "symbol": "Enum.SecretAspect.Cooldown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Cooldown as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Cooldown with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Cursor",
       "symbol": "Enum.SecretAspect.Cursor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Cursor as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Cursor with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Desaturation",
       "symbol": "Enum.SecretAspect.Desaturation",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Desaturation as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Desaturation with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.FrameLevel",
       "symbol": "Enum.SecretAspect.FrameLevel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.FrameLevel as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.FrameLevel with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Hierarchy",
       "symbol": "Enum.SecretAspect.Hierarchy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Hierarchy as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Hierarchy with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.ID",
       "symbol": "Enum.SecretAspect.ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.ID as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.ID with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.MinimumWidth",
       "symbol": "Enum.SecretAspect.MinimumWidth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.MinimumWidth as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.MinimumWidth with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.ObjectDebug",
       "symbol": "Enum.SecretAspect.ObjectDebug",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.ObjectDebug as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.ObjectDebug with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.ObjectName",
       "symbol": "Enum.SecretAspect.ObjectName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.ObjectName as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.ObjectName with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.ObjectSecrets",
       "symbol": "Enum.SecretAspect.ObjectSecrets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.ObjectSecrets as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.ObjectSecrets with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.ObjectSecurity",
       "symbol": "Enum.SecretAspect.ObjectSecurity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.ObjectSecurity as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.ObjectSecurity with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.ObjectType",
       "symbol": "Enum.SecretAspect.ObjectType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.ObjectType as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.ObjectType with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Padding",
       "symbol": "Enum.SecretAspect.Padding",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Padding as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Padding with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Rotation",
       "symbol": "Enum.SecretAspect.Rotation",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Rotation as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Rotation with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Scale",
       "symbol": "Enum.SecretAspect.Scale",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Scale as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Scale with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.ScrollRange",
       "symbol": "Enum.SecretAspect.ScrollRange",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.ScrollRange as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.ScrollRange with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.SecureText",
       "symbol": "Enum.SecretAspect.SecureText",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.SecureText as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.SecureText with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Shown",
       "symbol": "Enum.SecretAspect.Shown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Shown as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Shown with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.TexCoords",
       "symbol": "Enum.SecretAspect.TexCoords",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.TexCoords as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.TexCoords with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Text",
       "symbol": "Enum.SecretAspect.Text",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Text as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Text with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.Toplevel",
       "symbol": "Enum.SecretAspect.Toplevel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.Toplevel as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.Toplevel with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspect.VertexColor",
       "symbol": "Enum.SecretAspect.VertexColor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.SecretAspect.VertexColor as a added enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.SecretAspect.VertexColor with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "added:Enum.SecretAspectMeta.MaxValue",
@@ -58246,33 +59044,75 @@
       "id": "changed:Enum.ItemCollectionTypeMeta.MaxValue",
       "symbol": "Enum.ItemCollectionTypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionTypeMeta.MaxValue as a changed enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionTypeMeta.MaxValue with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "changed:Enum.ItemCollectionTypeMeta.NumValues",
       "symbol": "Enum.ItemCollectionTypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionTypeMeta.NumValues as a changed enum occurrence with its exact typed value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current runtime enum data publishes Enum.ItemCollectionTypeMeta.NumValues with the source-register numeric value."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values",
+          "source_hash": "b56705c0968387c1147be9e0b1bfa29e748106ff50f91c7d5f493d8685c8164a",
+          "summary": "Focused startup test verifies ItemCollectionType, ItemCollectionTypeMeta, and SecretAspect namespace publication, numeric Lua type, and exact values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, numeric Lua type, and exact source-register value. Item-collection behavior, consumers, persistence, mutation/protection, and lifecycle are not claimed; SecretAspect enforcement, aggregation, propagation, taint/security, and UIObject method semantics are not claimed."
     },
     {
       "id": "changed:Enum.MapIconUIWidgetSetTypeMeta.MaxValue",
@@ -67807,209 +68647,378 @@
       "id": "removed:Enum.ItemCollectionType.ItemCollectionExteriorFixture",
       "symbol": "Enum.ItemCollectionType.ItemCollectionExteriorFixture",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionExteriorFixture as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionExteriorFixture; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionHeirloom",
       "symbol": "Enum.ItemCollectionType.ItemCollectionHeirloom",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionHeirloom as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionHeirloom; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionNone",
       "symbol": "Enum.ItemCollectionType.ItemCollectionNone",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionNone as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionNone; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionRoom",
       "symbol": "Enum.ItemCollectionType.ItemCollectionRoom",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionRoom as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionRoom; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionRoomMaterial",
       "symbol": "Enum.ItemCollectionType.ItemCollectionRoomMaterial",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionRoomMaterial as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionRoomMaterial; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionRoomTheme",
       "symbol": "Enum.ItemCollectionType.ItemCollectionRoomTheme",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionRoomTheme as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionRoomTheme; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionRuneforgeLegendaryAbility",
       "symbol": "Enum.ItemCollectionType.ItemCollectionRuneforgeLegendaryAbility",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionRuneforgeLegendaryAbility as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionRuneforgeLegendaryAbility; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionToy",
       "symbol": "Enum.ItemCollectionType.ItemCollectionToy",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionToy as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionToy; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionTransmog",
       "symbol": "Enum.ItemCollectionType.ItemCollectionTransmog",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionTransmog as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionTransmog; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionTransmogIllusion",
       "symbol": "Enum.ItemCollectionType.ItemCollectionTransmogIllusion",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionTransmogIllusion as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionTransmogIllusion; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionTransmogSetFavorite",
       "symbol": "Enum.ItemCollectionType.ItemCollectionTransmogSetFavorite",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionTransmogSetFavorite as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionTransmogSetFavorite; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.ItemCollectionWarbandScene",
       "symbol": "Enum.ItemCollectionType.ItemCollectionWarbandScene",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.ItemCollectionWarbandScene as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.ItemCollectionWarbandScene; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCollectionType.NumItemCollectionTypes",
       "symbol": "Enum.ItemCollectionType.NumItemCollectionTypes",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemCollectionType.NumItemCollectionTypes as a removed enum occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data omits Enum.ItemCollectionType.NumItemCollectionTypes; this source evidence does not establish full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: bootstrap omission does not prove full runtime or dynamic publication absence, historical load-order timing, replacement semantics, or all-LoD 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and load_addon."
     },
     {
       "id": "removed:Enum.ItemCreationContext.Placeholder_12_0_0",
