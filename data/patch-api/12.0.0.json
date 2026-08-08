@@ -45640,113 +45640,212 @@
       "id": "added:UnitHealPredictionCalculator.GetDamageAbsorbClampMode",
       "symbol": "UnitHealPredictionCalculator.GetDamageAbsorbClampMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.GetDamageAbsorbClampMode as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Temporary UnitHealPredictionCalculator proxy stores and returns the local damage-absorb clamp mode.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "summary": "Focused heal_prediction_set_get_roundtrip test reads the initial mode, sets mode 3, and reads the stored mode back.",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::heal_prediction_set_get_roundtrip"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4d7dbe1da",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused setter/getter round-trip: the calculator is created, the local damage-absorb clamp mode is set to 3, and the getter returns 3 after the initial read. Exact retail mode mapping, defaults, validation, lifecycle, secret behavior, and edge semantics remain unproven."
     },
     {
       "id": "added:UnitHealPredictionCalculator.GetDamageAbsorbs",
       "symbol": "UnitHealPredictionCalculator.GetDamageAbsorbs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.GetDamageAbsorbs as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy returns the locally stored totalDamageAbsorbs field plus a false flag; this generic field/default behavior is not authoritative.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy returns the locally stored totalDamageAbsorbs field plus a false flag; this generic field/default behavior is not authoritative. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.GetHealAbsorbClampMode",
       "symbol": "UnitHealPredictionCalculator.GetHealAbsorbClampMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.GetHealAbsorbClampMode as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy returns the locally stored heal-absorb clamp mode or a generic default; exact retail mode mapping/default semantics are not established.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy returns the locally stored heal-absorb clamp mode or a generic default; exact retail mode mapping/default semantics are not established. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.GetHealAbsorbMode",
       "symbol": "UnitHealPredictionCalculator.GetHealAbsorbMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.GetHealAbsorbMode as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy returns the locally stored heal-absorb mode or a generic default; exact retail mode mapping/default semantics are not established.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy returns the locally stored heal-absorb mode or a generic default; exact retail mode mapping/default semantics are not established. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.GetHealAbsorbs",
       "symbol": "UnitHealPredictionCalculator.GetHealAbsorbs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.GetHealAbsorbs as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy returns the locally stored totalHealAbsorbs field plus a false flag; this generic field/default behavior is not authoritative.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy returns the locally stored totalHealAbsorbs field plus a false flag; this generic field/default behavior is not authoritative. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.GetIncomingHealClampMode",
       "symbol": "UnitHealPredictionCalculator.GetIncomingHealClampMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.GetIncomingHealClampMode as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy returns the locally stored incoming-heal clamp mode or a generic default; exact retail mode mapping/default semantics are not established.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy returns the locally stored incoming-heal clamp mode or a generic default; exact retail mode mapping/default semantics are not established. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.GetIncomingHealOverflowPercent",
       "symbol": "UnitHealPredictionCalculator.GetIncomingHealOverflowPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.GetIncomingHealOverflowPercent as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy returns the locally stored overflow percentage or a generic default; exact retail default/range/secret semantics are not established.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy returns the locally stored overflow percentage or a generic default; exact retail default/range/secret semantics are not established. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.GetIncomingHeals",
@@ -45911,17 +46010,30 @@
       "id": "added:UnitHealPredictionCalculator.Reset",
       "symbol": "UnitHealPredictionCalculator.Reset",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.Reset as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy resets local modes, overflow, predicted fields, maximum-health mode, and a secret flag; reset scope/order/defaults are not authoritative.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy resets local modes, overflow, predicted fields, maximum-health mode, and a secret flag; reset scope/order/defaults are not authoritative. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.SetDamageAbsorbClampMode",
@@ -45980,97 +46092,175 @@
       "id": "added:UnitHealPredictionCalculator.SetHealAbsorbClampMode",
       "symbol": "UnitHealPredictionCalculator.SetHealAbsorbClampMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.SetHealAbsorbClampMode as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy stores the supplied local heal-absorb clamp mode without establishing accepted modes, validation, or retail semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy stores the supplied local heal-absorb clamp mode without establishing accepted modes, validation, or retail semantics. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.SetHealAbsorbMode",
       "symbol": "UnitHealPredictionCalculator.SetHealAbsorbMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.SetHealAbsorbMode as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy stores the supplied local heal-absorb mode without establishing accepted modes, validation, or retail semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy stores the supplied local heal-absorb mode without establishing accepted modes, validation, or retail semantics. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.SetIncomingHealClampMode",
       "symbol": "UnitHealPredictionCalculator.SetIncomingHealClampMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.SetIncomingHealClampMode as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy stores the supplied local incoming-heal clamp mode without establishing accepted modes, validation, or retail semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy stores the supplied local incoming-heal clamp mode without establishing accepted modes, validation, or retail semantics. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.SetIncomingHealOverflowPercent",
       "symbol": "UnitHealPredictionCalculator.SetIncomingHealOverflowPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.SetIncomingHealOverflowPercent as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy stores the supplied local overflow percentage without establishing accepted range, validation, or secret semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy stores the supplied local overflow percentage without establishing accepted range, validation, or secret semantics. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.SetPredictedValues",
       "symbol": "UnitHealPredictionCalculator.SetPredictedValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.SetPredictedValues as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy copies a selected local predicted-value subset; exact payload fields, missing-field behavior, secret values, and prediction integration are not established.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy copies a selected local predicted-value subset; exact payload fields, missing-field behavior, secret values, and prediction integration are not established. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionCalculator.SetToDefaults",
       "symbol": "UnitHealPredictionCalculator.SetToDefaults",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "luaobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculator.SetToDefaults as an added luaobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current temporary proxy delegates to its local Reset implementation; exact default values, reset scope, and lifecycle semantics are not established.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: Current temporary proxy delegates to its local Reset implementation; exact default values, reset scope, and lifecycle semantics are not established. Exact retail contract, mode/default behavior, validation, secret/lifecycle semantics, and edge behavior require authoritative evidence or a correct modeled implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UnitHealPredictionValues",
