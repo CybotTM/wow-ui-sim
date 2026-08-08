@@ -20321,17 +20321,36 @@
       "id": "added:Cooldown.SetPaused",
       "symbol": "Cooldown.SetPaused",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Cooldown.SetPaused as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/cooldown.rs",
+          "source_hash": "527213c02fce0cda3bc7c6fd5f0874d3eea3d4e28dc59de2fb086cb32ac2e2b7",
+          "summary": "Current Cooldown methods expose Pause and Resume plus cooldown timing operations, but no SetPaused implementation; exact setter semantics are not established."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/mod.rs",
+          "source_hash": "3b7dda15a1b43199ec4dd68280301f8821d06c45d760747288830161bc71c234",
+          "summary": "Current widget registration delegates Cooldown methods to the Cooldown module; no separate SetPaused registration is present in the examined surface."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: current simulator evidence covers Pause/Resume, not SetPaused. Exact pause-state setter behavior, interaction with active cooldowns, lifecycle, events, rendering, validation, and invalid-input semantics require authoritative evidence or a correct model/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:CraftingItemSlotModification.reagent",
@@ -41071,49 +41090,108 @@
       "id": "added:FontString.GetScaleAnimationMode",
       "symbol": "FontString.GetScaleAnimationMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records FontString.GetScaleAnimationMode as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/mod.rs",
+          "source_hash": "7f67e023016d8bca65d1b90db69b353711712cfb3d3bec387a342f171647e829",
+          "summary": "The examined shared text/attribute/event registration surface has no FontString scale-animation-mode getter implementation."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/mod.rs",
+          "source_hash": "3b7dda15a1b43199ec4dd68280301f8821d06c45d760747288830161bc71c234",
+          "summary": "The examined widget registration surface has no FontString scale-animation-mode method registration."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: no matching simulator implementation or focused test was found. Exact return-value/default behavior, FontStringScaleAnimationMode mapping, validation, persistence, animation, layout, rendering, and edge semantics require authoritative evidence or a correct model/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:FontString.SetScaleAnimationMode",
       "symbol": "FontString.SetScaleAnimationMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records FontString.SetScaleAnimationMode as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/mod.rs",
+          "source_hash": "7f67e023016d8bca65d1b90db69b353711712cfb3d3bec387a342f171647e829",
+          "summary": "The examined shared text/attribute/event registration surface has no FontString scale-animation-mode setter implementation."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/mod.rs",
+          "source_hash": "3b7dda15a1b43199ec4dd68280301f8821d06c45d760747288830161bc71c234",
+          "summary": "The examined widget registration surface has no FontString scale-animation-mode method registration."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: no matching simulator implementation or focused test was found. Accepted modes, validation/errors, state persistence, animation behavior, layout/render effects, and edge semantics require authoritative evidence or a correct model/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:Frame.IsIgnoringChildrenForBounds",
       "symbol": "Frame.IsIgnoringChildrenForBounds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Frame.IsIgnoringChildrenForBounds as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/misc/highlight.rs",
+          "source_hash": "8c24c44cc019a7ecc55681a0af7f8b21a6e8542eadfd456df5ceda0b3a287935",
+          "summary": "Current Frame methods read the stored ignoring_children_for_bounds boolean."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/frame_state.rs",
+          "source_hash": "a8615ee76c68351107ab69ec5e9f31a647f3798b03d44be530dc845a9b5f5c49",
+          "summary": "Focused frame-state test verifies default false, true persistence, and false clearing for IsIgnoringChildrenForBounds."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/frame_state.rs::test_misc_visual_state_methods_persist_and_desaturate_hierarchy"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7a7a440402f4b03a89fe341956b6cb5e2051f465",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused false/true/false stored-state round-trip for IsIgnoringChildrenForBounds. Actual bounds exclusion, layout effects, rendering, invalid arguments, lifecycle, and other edge semantics remain unproven. Implementation ancestor is 7a7a440402; test-file ancestor is e7fb98b910."
     },
     {
       "id": "added:Frame.RegisterEventCallback",
@@ -41193,17 +41271,38 @@
       "id": "added:Frame.SetIgnoringChildrenForBounds",
       "symbol": "Frame.SetIgnoringChildrenForBounds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Frame.SetIgnoringChildrenForBounds as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/misc/highlight.rs",
+          "source_hash": "8c24c44cc019a7ecc55681a0af7f8b21a6e8542eadfd456df5ceda0b3a287935",
+          "summary": "Current Frame methods store the SetIgnoringChildrenForBounds boolean on the frame."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/frame_state.rs",
+          "source_hash": "a8615ee76c68351107ab69ec5e9f31a647f3798b03d44be530dc845a9b5f5c49",
+          "summary": "Focused frame-state test verifies false-to-true-to-false mutation through SetIgnoringChildrenForBounds and its getter."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/frame_state.rs::test_misc_visual_state_methods_persist_and_desaturate_hierarchy"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7a7a440402f4b03a89fe341956b6cb5e2051f465",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused false/true/false stored-state mutation for SetIgnoringChildrenForBounds. Actual bounds exclusion, layout effects, rendering, invalid arguments, lifecycle, and other edge semantics remain unproven. Implementation ancestor is 7a7a440402; test-file ancestor is e7fb98b910."
     },
     {
       "id": "added:GameTooltip.GetLeftLine",
@@ -42230,17 +42329,30 @@
       "id": "added:LayeredRegion.SetVertexColorFromBoolean",
       "symbol": "LayeredRegion.SetVertexColorFromBoolean",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records LayeredRegion.SetVertexColorFromBoolean as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/texture/mod.rs",
+          "source_hash": "f21fb855f99e31b02b4b4662674c265c2c65feb8c894c85638d4b3528f7f6c41",
+          "summary": "The examined texture/region registration surface exposes SetVertexColor but no boolean-branch setter implementation."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: no matching simulator implementation or focused test was found. Exact boolean branch, color/default arguments, vertex-color state interaction, propagation, rendering, validation, and edge semantics require authoritative evidence or a correct model/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:LuaColorCurveObject",
@@ -44272,17 +44384,45 @@
       "id": "added:Region.SetAlphaFromBoolean",
       "symbol": "Region.SetAlphaFromBoolean",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Region.SetAlphaFromBoolean as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/core_state/alpha.rs",
+          "source_hash": "ecabb6d766caf3ed05ddd7b7afac49fb2f1515947e1ddc74af7ced071a787f7b",
+          "summary": "Current SetAlphaFromBoolean selects the true/false alpha branch, clamps the result, propagates effective alpha, and returns without mutation when the value is unchanged."
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/frame/methods/core_state/alpha.rs",
+          "source_hash": "ecabb6d766caf3ed05ddd7b7afac49fb2f1515947e1ddc74af7ced071a787f7b",
+          "summary": "Focused alpha test verifies supplied true and false branch alpha values."
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/frame/methods/methods_core_state_tests.rs",
+          "source_hash": "444b592b9d3442b08b4c4952e50358e29759d194243ed4e4fa33a8a7da5a1da0",
+          "summary": "Focused no-op test verifies repeating the same SetAlphaFromBoolean value does not mark parent or child visually dirty."
+        }
+      ],
+      "tests": [
+        "src/lua_api/frame/methods/core_state/alpha.rs::set_alpha_from_boolean_uses_supplied_alpha_values",
+        "src/lua_api/frame/methods/methods_core_state_tests.rs::set_alpha_from_boolean_same_value_does_not_propagate"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b02c8fb4d68453e71a7ea521539475f2cb6eb4fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to tested true/false branch selection and same-value no-op dirty behavior. Full Region defaults, clamping edges, effective-alpha propagation beyond the fixture, rendering, invalid arguments, lifecycle, and other edge semantics remain unproven. Implementation ancestor is b02c8fb4d6; test ancestors are b02c8fb4d6 and 379de99713."
     },
     {
       "id": "added:Region.SetVertexColorFromBoolean",

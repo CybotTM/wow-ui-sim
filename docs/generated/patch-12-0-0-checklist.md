@@ -854,7 +854,7 @@
 854. [best-effort] `added:Cooldown.GetCountdownFontString` — behavioral
 855. [best-effort] `added:Cooldown.SetCooldownFromDurationObject` — behavioral
 856. [best-effort] `added:Cooldown.SetCooldownFromExpirationTime` — behavioral
-857. [untriaged] `added:Cooldown.SetPaused` — untriaged
+857. [evidence-required] `added:Cooldown.SetPaused` — unsafe
 858. [untriaged] `added:CraftingItemSlotModification.reagent` — untriaged
 859. [untriaged] `added:CraftingOrderReagentInfo.reagentInfo` — untriaged
 860. [untriaged] `added:CraftingQualityInfo` — untriaged
@@ -2147,12 +2147,12 @@
 2147. [untriaged] `added:ExpansionDisplayInfo.glueCreditsSoundKit` — untriaged
 2148. [untriaged] `added:ExpansionDisplayInfo.glueMusicSoundKit` — untriaged
 2149. [untriaged] `added:FACTION_STANDING_CHANGED` — untriaged
-2150. [untriaged] `added:FontString.GetScaleAnimationMode` — untriaged
-2151. [untriaged] `added:FontString.SetScaleAnimationMode` — untriaged
-2152. [untriaged] `added:Frame.IsIgnoringChildrenForBounds` — untriaged
+2150. [evidence-required] `added:FontString.GetScaleAnimationMode` — unsafe
+2151. [evidence-required] `added:FontString.SetScaleAnimationMode` — unsafe
+2152. [best-effort] `added:Frame.IsIgnoringChildrenForBounds` — behavioral
 2153. [best-effort] `added:Frame.RegisterEventCallback` — behavioral
 2154. [best-effort] `added:Frame.RegisterUnitEventCallback` — behavioral
-2155. [untriaged] `added:Frame.SetIgnoringChildrenForBounds` — untriaged
+2155. [best-effort] `added:Frame.SetIgnoringChildrenForBounds` — behavioral
 2156. [best-effort] `added:GameTooltip.GetLeftLine` — behavioral
 2157. [best-effort] `added:GameTooltip.GetRightLine` — behavioral
 2158. [untriaged] `added:GetCollapsingStarCost` — untriaged
@@ -2214,7 +2214,7 @@
 2214. [untriaged] `added:LE_GAME_ERR_SOLO_JOIN_TRAINING_GROUND` — untriaged
 2215. [untriaged] `added:LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS` — untriaged
 2216. [untriaged] `added:LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS` — untriaged
-2217. [untriaged] `added:LayeredRegion.SetVertexColorFromBoolean` — untriaged
+2217. [evidence-required] `added:LayeredRegion.SetVertexColorFromBoolean` — unsafe
 2218. [best-effort] `added:LuaColorCurveObject` — behavioral
 2219. [evidence-required] `added:LuaColorCurveObject.AddPoint` — unsafe
 2220. [evidence-required] `added:LuaColorCurveObject.ClearPoints` — unsafe
@@ -2290,7 +2290,7 @@
 2290. [untriaged] `added:PrivateAuraIconInfo.borderScale` — untriaged
 2291. [untriaged] `added:REMOVE_NEIGHBORHOOD_CHARTER_SIGNATURE` — untriaged
 2292. [untriaged] `added:Region.IsAnchoringSecret` — untriaged
-2293. [untriaged] `added:Region.SetAlphaFromBoolean` — untriaged
+2293. [best-effort] `added:Region.SetAlphaFromBoolean` — behavioral
 2294. [untriaged] `added:Region.SetVertexColorFromBoolean` — untriaged
 2295. [untriaged] `added:RegisterEventCallback` — untriaged
 2296. [untriaged] `added:RegisterUnitEventCallback` — untriaged
