@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Prove 12.0.0 vendor deprecated globals
+
+Classified exactly 56 removed legacy global API rows as `best-effort`/`vendor-present` using the committed full-LoD proof `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` at `a26692e00`. The 35 ActionBar, 3 BattleNet, 10 CombatLog, 2 CombatText, 3 DeathRecap, and 3 InstanceEncounter wrappers are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not complete legacy semantic fidelity. Fourteen other diagnosed published globals remain untriaged. Totals are now **203 best-effort, 453 evidence-required, 1 exception-requested, and 2753 untriaged**.
+
 ## [2026-08-08] investigation | Prove 12.0.0 legacy global removals
 
 Classified exactly four removed legacy global API rows (`IsConsumableSpell`, `SetRaidTargetProtected`, `SpellIsAlwaysShown`, and `StripHyperlinks`) as `best-effort`/`behavioral` using the committed full-LoD `rawget(_G, name)` probe `patch-tests/patch_12_1/strict_removals.rs::removed_legacy_global_apis_are_absent_after_full_lod_load` at `3471c5a4c`. The claim is limited to current publication absence; no source-scanner, replacement-behavior, or historical timing claim is made. The other 70 diagnosed published removed globals remain untriaged pending vendor/simulator provenance. Totals are now **147 best-effort, 453 evidence-required, 1 exception-requested, and 2809 untriaged**.

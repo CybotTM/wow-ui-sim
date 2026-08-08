@@ -54317,65 +54317,153 @@
       "id": "removed:ActionHasRange",
       "symbol": "ActionHasRange",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records ActionHasRange as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies ActionHasRange is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:BNSendGameData",
       "symbol": "BNSendGameData",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedBattleNet",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records BNSendGameData as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies BNSendGameData is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:BNSendWhisper",
       "symbol": "BNSendWhisper",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedBattleNet",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records BNSendWhisper as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies BNSendWhisper is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:BNSetCustomMessage",
       "symbol": "BNSetCustomMessage",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedBattleNet",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records BNSetCustomMessage as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies BNSetCustomMessage is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:C_CatalogShop.OpenCatalogShopInteraction",
@@ -54402,7 +54490,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54433,7 +54521,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54464,7 +54552,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54591,7 +54679,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54622,7 +54710,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54669,7 +54757,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54802,7 +54890,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54839,7 +54927,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54876,7 +54964,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54913,7 +55001,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54950,7 +55038,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -54987,7 +55075,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55024,7 +55112,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55061,7 +55149,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55098,7 +55186,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55135,7 +55223,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55172,7 +55260,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55209,7 +55297,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55246,7 +55334,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55283,7 +55371,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55320,7 +55408,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55357,7 +55445,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55394,7 +55482,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55431,7 +55519,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55468,7 +55556,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55601,7 +55689,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55638,7 +55726,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55675,7 +55763,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55712,7 +55800,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55749,7 +55837,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55780,7 +55868,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55811,7 +55899,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55842,7 +55930,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55879,7 +55967,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55910,7 +55998,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55941,7 +56029,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -55972,7 +56060,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56003,7 +56091,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56145,7 +56233,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56182,7 +56270,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56219,7 +56307,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56256,7 +56344,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56293,7 +56381,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56330,7 +56418,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56367,7 +56455,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56404,7 +56492,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56441,7 +56529,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56478,7 +56566,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56515,7 +56603,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56552,7 +56640,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56589,7 +56677,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56626,7 +56714,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56663,7 +56751,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56700,7 +56788,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56737,7 +56825,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56774,7 +56862,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1"
         }
       ],
       "tests": [
@@ -56858,7 +56946,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56895,7 +56983,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56932,7 +57020,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56969,7 +57057,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57006,7 +57094,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57043,7 +57131,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57080,7 +57168,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57117,7 +57205,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57154,7 +57242,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57191,7 +57279,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57224,33 +57312,77 @@
       "id": "removed:ChangeActionBarPage",
       "symbol": "ChangeActionBarPage",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records ChangeActionBarPage as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies ChangeActionBarPage is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLogAddFilter",
       "symbol": "CombatLogAddFilter",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogAddFilter as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLogAddFilter is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLogAdvanceEntry",
@@ -57272,97 +57404,229 @@
       "id": "removed:CombatLogClearEntries",
       "symbol": "CombatLogClearEntries",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogClearEntries as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLogClearEntries is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLogGetCurrentEntry",
       "symbol": "CombatLogGetCurrentEntry",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogGetCurrentEntry as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLogGetCurrentEntry is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLogGetCurrentEventInfo",
       "symbol": "CombatLogGetCurrentEventInfo",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogGetCurrentEventInfo as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLogGetCurrentEventInfo is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLogGetNumEntries",
       "symbol": "CombatLogGetNumEntries",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogGetNumEntries as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLogGetNumEntries is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLogGetRetentionTime",
       "symbol": "CombatLogGetRetentionTime",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogGetRetentionTime as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLogGetRetentionTime is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLogResetFilter",
       "symbol": "CombatLogResetFilter",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogResetFilter as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLogResetFilter is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLogSetCurrentEntry",
@@ -57384,65 +57648,153 @@
       "id": "removed:CombatLogSetRetentionTime",
       "symbol": "CombatLogSetRetentionTime",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogSetRetentionTime as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLogSetRetentionTime is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLogShowCurrentEntry",
       "symbol": "CombatLogShowCurrentEntry",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogShowCurrentEntry as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLogShowCurrentEntry is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatLog_Object_IsA",
       "symbol": "CombatLog_Object_IsA",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLog_Object_IsA as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatLog_Object_IsA is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:CombatTextSetActiveUnit",
       "symbol": "CombatTextSetActiveUnit",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatTextSetActiveUnit as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies CombatTextSetActiveUnit is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_CATEGORIES_EXPECTED",
@@ -57768,33 +58120,77 @@
       "id": "removed:DeathRecap_GetEvents",
       "symbol": "DeathRecap_GetEvents",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records DeathRecap_GetEvents as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies DeathRecap_GetEvents is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:DeathRecap_HasEvents",
       "symbol": "DeathRecap_HasEvents",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records DeathRecap_HasEvents as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies DeathRecap_HasEvents is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:DoEmote",
@@ -60584,129 +60980,305 @@
       "id": "removed:GetActionAutocast",
       "symbol": "GetActionAutocast",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetActionAutocast as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetActionAutocast is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetActionBarPage",
       "symbol": "GetActionBarPage",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetActionBarPage as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetActionBarPage is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetActionCharges",
       "symbol": "GetActionCharges",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetActionCharges as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetActionCharges is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetActionCooldown",
       "symbol": "GetActionCooldown",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetActionCooldown as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetActionCooldown is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetActionCount",
       "symbol": "GetActionCount",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetActionCount as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetActionCount is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetActionLossOfControlCooldown",
       "symbol": "GetActionLossOfControlCooldown",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetActionLossOfControlCooldown as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetActionLossOfControlCooldown is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetActionText",
       "symbol": "GetActionText",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetActionText as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetActionText is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetActionTexture",
       "symbol": "GetActionTexture",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetActionTexture as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetActionTexture is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetBattlegroundInfo",
@@ -60728,161 +61300,381 @@
       "id": "removed:GetBonusBarIndex",
       "symbol": "GetBonusBarIndex",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetBonusBarIndex as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetBonusBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetBonusBarOffset",
       "symbol": "GetBonusBarOffset",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetBonusBarOffset as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetBonusBarOffset is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetCurrentCombatTextEventInfo",
       "symbol": "GetCurrentCombatTextEventInfo",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetCurrentCombatTextEventInfo as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetCurrentCombatTextEventInfo is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetDeathRecapLink",
       "symbol": "GetDeathRecapLink",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedCombatLog",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetDeathRecapLink as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetDeathRecapLink is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetExtraBarIndex",
       "symbol": "GetExtraBarIndex",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetExtraBarIndex as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetExtraBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetMultiCastBarIndex",
       "symbol": "GetMultiCastBarIndex",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetMultiCastBarIndex as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetMultiCastBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetOverrideBarIndex",
       "symbol": "GetOverrideBarIndex",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetOverrideBarIndex as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetOverrideBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetOverrideBarSkin",
       "symbol": "GetOverrideBarSkin",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetOverrideBarSkin as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetOverrideBarSkin is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetTempShapeshiftBarIndex",
       "symbol": "GetTempShapeshiftBarIndex",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetTempShapeshiftBarIndex as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetTempShapeshiftBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:GetVehicleBarIndex",
       "symbol": "GetVehicleBarIndex",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GetVehicleBarIndex as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies GetVehicleBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:HOUSING_CATALOG_SEARCHER_RELEASED",
@@ -60920,161 +61712,381 @@
       "id": "removed:HasAction",
       "symbol": "HasAction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HasAction as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies HasAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:HasBonusActionBar",
       "symbol": "HasBonusActionBar",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HasBonusActionBar as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies HasBonusActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:HasExtraActionBar",
       "symbol": "HasExtraActionBar",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HasExtraActionBar as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies HasExtraActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:HasOverrideActionBar",
       "symbol": "HasOverrideActionBar",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HasOverrideActionBar as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies HasOverrideActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:HasTempShapeshiftActionBar",
       "symbol": "HasTempShapeshiftActionBar",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HasTempShapeshiftActionBar as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies HasTempShapeshiftActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:HasVehicleActionBar",
       "symbol": "HasVehicleActionBar",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HasVehicleActionBar as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies HasVehicleActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsActionInRange",
       "symbol": "IsActionInRange",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsActionInRange as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsActionInRange is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsAttackAction",
       "symbol": "IsAttackAction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsAttackAction as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsAttackAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsAutoRepeatAction",
       "symbol": "IsAutoRepeatAction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsAutoRepeatAction as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsAutoRepeatAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsConsumableAction",
       "symbol": "IsConsumableAction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsConsumableAction as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsConsumableAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsConsumableSpell",
@@ -61094,7 +62106,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
         }
       ],
@@ -61111,145 +62123,343 @@
       "id": "removed:IsCurrentAction",
       "symbol": "IsCurrentAction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsCurrentAction as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsCurrentAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsEncounterInProgress",
       "symbol": "IsEncounterInProgress",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedInstanceEncounter",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsEncounterInProgress as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsEncounterInProgress is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsEncounterLimitingResurrections",
       "symbol": "IsEncounterLimitingResurrections",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedInstanceEncounter",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsEncounterLimitingResurrections as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsEncounterLimitingResurrections is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsEncounterSuppressingRelease",
       "symbol": "IsEncounterSuppressingRelease",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedInstanceEncounter",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsEncounterSuppressingRelease as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsEncounterSuppressingRelease is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsEquippedAction",
       "symbol": "IsEquippedAction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsEquippedAction as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsEquippedAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsItemAction",
       "symbol": "IsItemAction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsItemAction as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsItemAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsPossessBarVisible",
       "symbol": "IsPossessBarVisible",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsPossessBarVisible as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsPossessBarVisible is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsStackableAction",
       "symbol": "IsStackableAction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsStackableAction as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsStackableAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:IsUsableAction",
       "symbol": "IsUsableAction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsUsableAction as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies IsUsableAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:LEARNED_SPELL_IN_TAB",
@@ -61575,17 +62785,39 @@
       "id": "removed:SetActionUIButton",
       "symbol": "SetActionUIButton",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedActionBar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records SetActionUIButton as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
+          "summary": "Full-LoD PTR proof verifies SetActionUIButton is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a26692e001c9aa9757b15ded220cbb133e184b02",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and representative forwarding/alias proof; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:SetPortraitToTexture",
@@ -61621,7 +62853,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
         }
       ],
@@ -61716,7 +62948,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
         }
       ],
@@ -61779,7 +63011,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "source_hash": "1b2ce1955ba62d1111512e0a1220d69f27b8a5b166d1343c55c4027652bef7b1",
           "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
         }
       ],

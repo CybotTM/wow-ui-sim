@@ -1,3 +1,4 @@
+- The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, 10 CombatLog, 2 CombatText, 3 DeathRecap, and 3 InstanceEncounter wrappers are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The other 14 diagnosed published globals remain untriaged.
 # Patch API audit manifest
 
 Patch API audits use a checked-in JSON register for every patch-list occurrence. Draft rows have no final status. A row receives `implemented`, `best-effort`, `evidence-required`, or `exception-requested` only after item-specific evidence exists.
