@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify 12.0.0 aura sort enums
+
+Classified nine `UnitAuraSortRule` member/metadata rows as bounded `best-effort`/`behavioral` startup claims. `test_patch_12_0_0_unit_aura_sort_rule_enum_values` proves namespace/metadata publication, numeric Lua types, and all exact source-register values; aura ordering, filtering, consumers, lifecycle, validation, and historical load timing remain unclaimed. Current totals are **794 best-effort, 622 evidence-required, 2 exception-requested, and 1992 untriaged**.
+
 ## [2026-08-08] investigation | Classify 12.0.0 heal-prediction enums
 
 Classified 21 `UnitDamageAbsorbClampMode`, `UnitHealAbsorbClampMode`, `UnitHealAbsorbMode`, and `UnitIncomingHealClampMode` member/metadata rows as bounded `best-effort`/`behavioral` startup claims. `test_patch_12_0_0_heal_prediction_enum_values` proves namespace/metadata publication, numeric Lua types, and all exact source-register values; heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and consumer semantics remain unclaimed. Current totals are **785 best-effort, 622 evidence-required, 2 exception-requested, and 2001 untriaged**.

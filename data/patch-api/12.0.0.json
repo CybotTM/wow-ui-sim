@@ -48388,145 +48388,334 @@
       "id": "added:Enum.UnitAuraSortRule.Default",
       "symbol": "Enum.UnitAuraSortRule.Default",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitAuraSortRule.Default as an added enum occurrence with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitAuraSortRule.Default with exact numeric value 1.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the UnitAuraSortRule member and metadata namespaces, numeric Lua types, and all nine exact source-register values.",
+          "source_hash": "cbc468e6d5011001c8d9a14b11a6db420931db95d14e4d9bbb40e2f77abe2f74"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_unit_aura_sort_rule_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Aura ordering, filtering, consumer behavior, lifecycle, validation, and historical load timing are not claimed."
     },
     {
       "id": "added:Enum.UnitAuraSortRule.Expiration",
       "symbol": "Enum.UnitAuraSortRule.Expiration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitAuraSortRule.Expiration as an added enum occurrence with exact value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitAuraSortRule.Expiration with exact numeric value 3.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the UnitAuraSortRule member and metadata namespaces, numeric Lua types, and all nine exact source-register values.",
+          "source_hash": "cbc468e6d5011001c8d9a14b11a6db420931db95d14e4d9bbb40e2f77abe2f74"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_unit_aura_sort_rule_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Aura ordering, filtering, consumer behavior, lifecycle, validation, and historical load timing are not claimed."
     },
     {
       "id": "added:Enum.UnitAuraSortRule.ExpirationOnly",
       "symbol": "Enum.UnitAuraSortRule.ExpirationOnly",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitAuraSortRule.ExpirationOnly as an added enum occurrence with exact value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitAuraSortRule.ExpirationOnly with exact numeric value 4.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the UnitAuraSortRule member and metadata namespaces, numeric Lua types, and all nine exact source-register values.",
+          "source_hash": "cbc468e6d5011001c8d9a14b11a6db420931db95d14e4d9bbb40e2f77abe2f74"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_unit_aura_sort_rule_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Aura ordering, filtering, consumer behavior, lifecycle, validation, and historical load timing are not claimed."
     },
     {
       "id": "added:Enum.UnitAuraSortRule.Name",
       "symbol": "Enum.UnitAuraSortRule.Name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitAuraSortRule.Name as an added enum occurrence with exact value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitAuraSortRule.Name with exact numeric value 5.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the UnitAuraSortRule member and metadata namespaces, numeric Lua types, and all nine exact source-register values.",
+          "source_hash": "cbc468e6d5011001c8d9a14b11a6db420931db95d14e4d9bbb40e2f77abe2f74"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_unit_aura_sort_rule_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Aura ordering, filtering, consumer behavior, lifecycle, validation, and historical load timing are not claimed."
     },
     {
       "id": "added:Enum.UnitAuraSortRule.NameOnly",
       "symbol": "Enum.UnitAuraSortRule.NameOnly",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitAuraSortRule.NameOnly as an added enum occurrence with exact value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitAuraSortRule.NameOnly with exact numeric value 6.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the UnitAuraSortRule member and metadata namespaces, numeric Lua types, and all nine exact source-register values.",
+          "source_hash": "cbc468e6d5011001c8d9a14b11a6db420931db95d14e4d9bbb40e2f77abe2f74"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_unit_aura_sort_rule_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Aura ordering, filtering, consumer behavior, lifecycle, validation, and historical load timing are not claimed."
     },
     {
       "id": "added:Enum.UnitAuraSortRule.Unsorted",
       "symbol": "Enum.UnitAuraSortRule.Unsorted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitAuraSortRule.Unsorted as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitAuraSortRule.Unsorted with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the UnitAuraSortRule member and metadata namespaces, numeric Lua types, and all nine exact source-register values.",
+          "source_hash": "cbc468e6d5011001c8d9a14b11a6db420931db95d14e4d9bbb40e2f77abe2f74"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_unit_aura_sort_rule_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Aura ordering, filtering, consumer behavior, lifecycle, validation, and historical load timing are not claimed."
     },
     {
       "id": "added:Enum.UnitAuraSortRuleMeta.MaxValue",
       "symbol": "Enum.UnitAuraSortRuleMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitAuraSortRuleMeta.MaxValue as an added enum occurrence with exact value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitAuraSortRuleMeta.MaxValue with exact numeric value 6.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the UnitAuraSortRule member and metadata namespaces, numeric Lua types, and all nine exact source-register values.",
+          "source_hash": "cbc468e6d5011001c8d9a14b11a6db420931db95d14e4d9bbb40e2f77abe2f74"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_unit_aura_sort_rule_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Aura ordering, filtering, consumer behavior, lifecycle, validation, and historical load timing are not claimed."
     },
     {
       "id": "added:Enum.UnitAuraSortRuleMeta.MinValue",
       "symbol": "Enum.UnitAuraSortRuleMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitAuraSortRuleMeta.MinValue as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitAuraSortRuleMeta.MinValue with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the UnitAuraSortRule member and metadata namespaces, numeric Lua types, and all nine exact source-register values.",
+          "source_hash": "cbc468e6d5011001c8d9a14b11a6db420931db95d14e4d9bbb40e2f77abe2f74"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_unit_aura_sort_rule_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Aura ordering, filtering, consumer behavior, lifecycle, validation, and historical load timing are not claimed."
     },
     {
       "id": "added:Enum.UnitAuraSortRuleMeta.NumValues",
       "symbol": "Enum.UnitAuraSortRuleMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitAuraSortRuleMeta.NumValues as an added enum occurrence with exact value 7.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitAuraSortRuleMeta.NumValues with exact numeric value 7.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the UnitAuraSortRule member and metadata namespaces, numeric Lua types, and all nine exact source-register values.",
+          "source_hash": "cbc468e6d5011001c8d9a14b11a6db420931db95d14e4d9bbb40e2f77abe2f74"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_unit_aura_sort_rule_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Aura ordering, filtering, consumer behavior, lifecycle, validation, and historical load timing are not claimed."
     },
     {
       "id": "added:Enum.UnitDamageAbsorbClampMode.MaximumHealth",
