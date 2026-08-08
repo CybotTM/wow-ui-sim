@@ -17,6 +17,13 @@ Enum.EncounterEventFlagsMeta = {
     MinValue = 1,
     NumValues = 1,
 }
+Enum.CooldownViewerAlertEventType.OnAuraApplied = nil
+Enum.CooldownViewerAlertEventType.OnAuraRemoved = nil
+Enum.CooldownViewerAlertEventTypeMeta = {
+    MaxValue = 4,
+    MinValue = 1,
+    NumValues = 4,
+}
 Enum.SecretAspect.Attributes = nil
 Enum.SecretAspect.CooldownStyle = nil
 Enum.SecretAspectMeta = {
