@@ -15,6 +15,7 @@ mod account_state_flags;
 mod caa_constants;
 mod frames_and_attributes;
 mod global_functions;
+mod housing_result;
 mod patch_12_1_service_payloads;
 mod runtime_subsystems;
 mod startup_globals;
