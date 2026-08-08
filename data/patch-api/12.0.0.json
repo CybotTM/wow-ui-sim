@@ -42986,17 +42986,36 @@
       "id": "added:LuaColorCurvePoint",
       "symbol": "LuaColorCurvePoint",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records LuaColorCurvePoint as an added structure declaration, but does not establish its exact typed field or payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd",
+          "summary": "Current temporary curve proxy creates related color-curve objects but does not establish the exact LuaColorCurvePoint structure contract."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/userdata_proxy.rs",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
+          "summary": "Related curve proxy tests cover table shape, point insertion, evaluation, and copy behavior, not exact LuaColorCurvePoint typed fields or payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: related curve proxy tests do not prove exact LuaColorCurvePoint typed structure, field, point-ordering, color-payload, lifecycle, validation, or edge semantics; authoritative evidence or a correct model/test is required. No approval can close this row."
     },
     {
       "id": "added:LuaColorCurvePoint.x",
@@ -44431,17 +44450,36 @@
       "id": "added:NumberAbbrevData",
       "symbol": "NumberAbbrevData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevData as an added structure declaration, but does not establish its exact typed field or payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd",
+          "summary": "Current temporary AbbreviateConfig proxy stores generic table data and does not establish the exact NumberAbbrevData structure contract."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/userdata_proxy.rs",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
+          "summary": "Related AbbreviateConfig proxy tests cover table shape and generic round-trip storage, not exact NumberAbbrevData typed fields or payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: related AbbreviateConfig proxy tests do not prove exact NumberAbbrevData typed structure, field, array, numeric, formatting, validation, or edge semantics; authoritative evidence or a correct model/test is required. No approval can close this row."
     },
     {
       "id": "added:NumberAbbrevData.abbreviation",
@@ -44527,17 +44565,36 @@
       "id": "added:NumberAbbrevOptions",
       "symbol": "NumberAbbrevOptions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevOptions as an added structure declaration, but does not establish its exact typed field or payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd",
+          "summary": "Current temporary AbbreviateConfig proxy stores generic options data and does not establish the exact NumberAbbrevOptions structure contract."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/userdata_proxy.rs",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
+          "summary": "Related AbbreviateConfig proxy tests cover generic table shape and storage, not exact NumberAbbrevOptions typed fields or payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: related AbbreviateConfig proxy tests do not prove exact NumberAbbrevOptions typed structure, field, nested-payload, validation, localization, or edge semantics; authoritative evidence or a correct model/test is required. No approval can close this row."
     },
     {
       "id": "added:NumberAbbrevOptions.breakpointData",
@@ -56077,17 +56134,36 @@
       "id": "removed:C_HousingBasicMode.InvalidPlacementInfo",
       "symbol": "C_HousingBasicMode.InvalidPlacementInfo",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records InvalidPlacementInfo and its fields as removed structure metadata, but does not prove runtime removal or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_housing.rs",
+          "source_hash": "211566972d653075b177290db9a91d8ee1ef6700320549c5e42b8cec620e80f2",
+          "summary": "Current C_Housing API registration models housing namespaces and methods but does not establish InvalidPlacementInfo structure removal or replacement semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.rs",
+          "source_hash": "e7bd273dc7dd200b76e9f0b4c035f3d9395e04b87f5bb6b622aa9135350b9b50",
+          "summary": "Current housing fixture state covers modeled catalog data, not runtime structure publication/removal identity for InvalidPlacementInfo."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source metadata and current housing method/model coverage do not prove InvalidPlacementInfo runtime removal, replacement structure, field lifecycle, or exact metadata identity; source-text or method absence alone cannot close this row. Authoritative evidence or a correct model/test is required. No approval can close this row."
     },
     {
       "id": "removed:C_HousingBasicMode.InvalidPlacementInfo.anyRestrictions",
@@ -56282,17 +56358,36 @@
       "id": "removed:C_HousingDecor.HousingLevelInfo",
       "symbol": "C_HousingDecor.HousingLevelInfo",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HousingLevelInfo and its fields as removed structure metadata, but does not prove runtime removal or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_housing.rs",
+          "source_hash": "211566972d653075b177290db9a91d8ee1ef6700320549c5e42b8cec620e80f2",
+          "summary": "Current C_Housing API registration models housing namespaces and methods but does not establish HousingLevelInfo removal or replacement semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.rs",
+          "source_hash": "e7bd273dc7dd200b76e9f0b4c035f3d9395e04b87f5bb6b622aa9135350b9b50",
+          "summary": "Current housing fixture state covers modeled catalog data, not runtime structure publication/removal identity for HousingLevelInfo."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source metadata and current housing method/model coverage do not prove HousingLevelInfo runtime removal, replacement by HouseLevelInfo, field lifecycle, or exact metadata identity; source-text or method absence alone cannot close this row. Authoritative evidence or a correct model/test is required. No approval can close this row."
     },
     {
       "id": "removed:C_HousingDecor.HousingLevelInfo.exteriorDecorPlacementBudget",
@@ -57081,17 +57176,36 @@
       "id": "removed:C_PerksActivities.PerksActivityCriteria",
       "symbol": "C_PerksActivities.PerksActivityCriteria",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records PerksActivityCriteria and its fields as removed structure metadata, but does not prove runtime removal or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_activities_state.rs",
+          "source_hash": "ad0b01a9de1add44930f74f97c97781cf3ad5ce8e4f258e64f807e7ecc5f4a52",
+          "summary": "Current temporary perks-activities state models fixture data and does not establish PerksActivityCriteria structure removal or replacement semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_program_defaults.rs",
+          "source_hash": "fe5355f10a09cc564ffba1ce50c20ca02b7a280b77e572f135923e763f226217",
+          "summary": "Current perks defaults provide compatibility values, not runtime structure publication/removal identity for PerksActivityCriteria."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source metadata and current perks fixture/default coverage do not prove PerksActivityCriteria runtime removal, replacement by a new criteria structure, field lifecycle, or exact metadata identity; source-text or method absence alone cannot close this row. Authoritative evidence or a correct model/test is required. No approval can close this row."
     },
     {
       "id": "removed:C_PerksActivities.PerksActivityCriteria.criteriaID",
@@ -57129,17 +57243,36 @@
       "id": "removed:C_PerksActivities.PerksActivityRequirement",
       "symbol": "C_PerksActivities.PerksActivityRequirement",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records PerksActivityRequirement and its fields as removed structure metadata, but does not prove runtime removal or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_activities_state.rs",
+          "source_hash": "ad0b01a9de1add44930f74f97c97781cf3ad5ce8e4f258e64f807e7ecc5f4a52",
+          "summary": "Current temporary perks-activities state models fixture data and does not establish PerksActivityRequirement structure removal or replacement semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_program_defaults.rs",
+          "source_hash": "fe5355f10a09cc564ffba1ce50c20ca02b7a280b77e572f135923e763f226217",
+          "summary": "Current perks defaults provide compatibility values, not runtime structure publication/removal identity for PerksActivityRequirement."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source metadata and current perks fixture/default coverage do not prove PerksActivityRequirement runtime removal, replacement by a new requirement structure, field lifecycle, or exact metadata identity; source-text or method absence alone cannot close this row. Authoritative evidence or a correct model/test is required. No approval can close this row."
     },
     {
       "id": "removed:C_PerksActivities.PerksActivityRequirement.completed",
@@ -58387,17 +58520,36 @@
       "id": "removed:C_Transmog.TransmogApplyWarningInfo",
       "symbol": "C_Transmog.TransmogApplyWarningInfo",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records TransmogApplyWarningInfo and its fields as removed structure metadata, but does not prove runtime removal or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
+          "summary": "Current strict-removal source lists TransmogApplyWarningInfo metadata for auxiliary token checks; that source-level check is not runtime structure-absence or replacement proof."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
+          "summary": "Current simulator transmog missing-surface coverage does not model TransmogApplyWarningInfo structure publication or replacement identity."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source metadata, auxiliary strict-removal token checks, and C_Transmog method absence do not prove TransmogApplyWarningInfo runtime structure removal, replacement identity, field lifecycle, or exact metadata semantics; source-text or method absence alone cannot close this row. Authoritative evidence or a correct model/test is required. No approval can close this row."
     },
     {
       "id": "removed:C_Transmog.TransmogApplyWarningInfo.itemLink",
@@ -64921,17 +65073,30 @@
       "id": "removed:TransmogPendingInfo",
       "symbol": "TransmogPendingInfo",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records TransmogPendingInfo and its TransmogPendingInfoMixin metadata as removed structure information, but does not prove runtime removal or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
+          "summary": "Current simulator transmog missing-surface coverage does not model TransmogPendingInfo publication, mixin identity, or replacement semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source metadata and current transmog method absence do not prove TransmogPendingInfo runtime removal, TransmogPendingInfoMixin identity, replacement behavior, lifecycle, or exact metadata semantics; source-text or method absence alone cannot close this row. Authoritative evidence or a correct model/test is required. No approval can close this row."
     },
     {
       "id": "removed:WorldTextCritScreenY",

@@ -2227,7 +2227,7 @@
 2227. [evidence-required] `added:LuaColorCurveObject.RemovePoint` — unsafe
 2228. [evidence-required] `added:LuaColorCurveObject.SetPoints` — unsafe
 2229. [evidence-required] `added:LuaColorCurveObject.SetToDefaults` — unsafe
-2230. [untriaged] `added:LuaColorCurvePoint` — untriaged
+2230. [evidence-required] `added:LuaColorCurvePoint` — unsafe
 2231. [untriaged] `added:LuaColorCurvePoint.x` — untriaged
 2232. [untriaged] `added:LuaColorCurvePoint.y` — untriaged
 2233. [best-effort] `added:LuaCurveObject` — behavioral
@@ -2275,13 +2275,13 @@
 2275. [untriaged] `added:NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED` — untriaged
 2276. [untriaged] `added:NEIGHBORHOOD_INITIATIVE_UPDATED` — untriaged
 2277. [untriaged] `added:NewCraftingOrderInfo.reagentInfos` — untriaged
-2278. [untriaged] `added:NumberAbbrevData` — untriaged
+2278. [evidence-required] `added:NumberAbbrevData` — unsafe
 2279. [untriaged] `added:NumberAbbrevData.abbreviation` — untriaged
 2280. [untriaged] `added:NumberAbbrevData.abbreviationIsGlobal` — untriaged
 2281. [untriaged] `added:NumberAbbrevData.breakpoint` — untriaged
 2282. [untriaged] `added:NumberAbbrevData.fractionDivisor` — untriaged
 2283. [untriaged] `added:NumberAbbrevData.significandDivisor` — untriaged
-2284. [untriaged] `added:NumberAbbrevOptions` — untriaged
+2284. [evidence-required] `added:NumberAbbrevOptions` — unsafe
 2285. [untriaged] `added:NumberAbbrevOptions.breakpointData` — untriaged
 2286. [untriaged] `added:NumberAbbrevOptions.config` — untriaged
 2287. [untriaged] `added:NumberAbbrevOptions.locale` — untriaged
@@ -2872,7 +2872,7 @@
 2872. [best-effort] `removed:C_CatalogShop.OpenCatalogShopInteraction` — behavioral
 2873. [best-effort] `removed:C_EventUtils.NotifySettingsLoaded` — behavioral
 2874. [best-effort] `removed:C_HouseExterior.GetCurrentHouseExteriorTypeName` — behavioral
-2875. [untriaged] `removed:C_HousingBasicMode.InvalidPlacementInfo` — untriaged
+2875. [evidence-required] `removed:C_HousingBasicMode.InvalidPlacementInfo` — unsafe
 2876. [untriaged] `removed:C_HousingBasicMode.InvalidPlacementInfo.anyRestrictions` — untriaged
 2877. [untriaged] `removed:C_HousingBasicMode.InvalidPlacementInfo.invalidCollision` — untriaged
 2878. [untriaged] `removed:C_HousingBasicMode.InvalidPlacementInfo.invalidTarget` — untriaged
@@ -2882,7 +2882,7 @@
 2882. [best-effort] `removed:C_HousingBasicMode.SetNudgeEnabled` — behavioral
 2883. [untriaged] `removed:C_HousingCatalog.HousingCatalogEntryInfo.numStored` — untriaged
 2884. [best-effort] `removed:C_HousingDecor.GetMaxDecorPlaced` — behavioral
-2885. [untriaged] `removed:C_HousingDecor.HousingLevelInfo` — untriaged
+2885. [evidence-required] `removed:C_HousingDecor.HousingLevelInfo` — unsafe
 2886. [untriaged] `removed:C_HousingDecor.HousingLevelInfo.exteriorDecorPlacementBudget` — untriaged
 2887. [untriaged] `removed:C_HousingDecor.HousingLevelInfo.exteriorFixtureBudget` — untriaged
 2888. [untriaged] `removed:C_HousingDecor.HousingLevelInfo.interiorDecorPlacementBudget` — untriaged
@@ -2907,10 +2907,10 @@
 2907. [best-effort] `removed:C_NamePlate.SetNamePlateSelfClickThrough` — behavioral
 2908. [best-effort] `removed:C_NamePlate.SetNamePlateSelfPreferredClickInsets` — behavioral
 2909. [best-effort] `removed:C_NamePlate.SetNamePlateSelfSize` — behavioral
-2910. [untriaged] `removed:C_PerksActivities.PerksActivityCriteria` — untriaged
+2910. [evidence-required] `removed:C_PerksActivities.PerksActivityCriteria` — unsafe
 2911. [untriaged] `removed:C_PerksActivities.PerksActivityCriteria.criteriaID` — untriaged
 2912. [untriaged] `removed:C_PerksActivities.PerksActivityCriteria.requiredValue` — untriaged
-2913. [untriaged] `removed:C_PerksActivities.PerksActivityRequirement` — untriaged
+2913. [evidence-required] `removed:C_PerksActivities.PerksActivityRequirement` — unsafe
 2914. [untriaged] `removed:C_PerksActivities.PerksActivityRequirement.completed` — untriaged
 2915. [untriaged] `removed:C_PerksActivities.PerksActivityRequirement.requirementText` — untriaged
 2916. [best-effort] `removed:C_PingSecure.GetCooldownInfo` — behavioral
@@ -2947,7 +2947,7 @@
 2947. [best-effort] `removed:C_Transmog.IsTransmogEnabled` — behavioral
 2948. [best-effort] `removed:C_Transmog.LoadOutfit` — behavioral
 2949. [best-effort] `removed:C_Transmog.SetPending` — behavioral
-2950. [untriaged] `removed:C_Transmog.TransmogApplyWarningInfo` — untriaged
+2950. [evidence-required] `removed:C_Transmog.TransmogApplyWarningInfo` — unsafe
 2951. [untriaged] `removed:C_Transmog.TransmogApplyWarningInfo.itemLink` — untriaged
 2952. [untriaged] `removed:C_Transmog.TransmogApplyWarningInfo.text` — untriaged
 2953. [best-effort] `removed:C_TransmogCollection.DeleteOutfit` — behavioral
@@ -3245,7 +3245,7 @@
 3245. [best-effort] `removed:StripHyperlinks` — behavioral
 3246. [untriaged] `removed:TerrainBlendBakeEnable` — untriaged
 3247. [untriaged] `removed:TerrainUnlitShaderEnable` — untriaged
-3248. [untriaged] `removed:TransmogPendingInfo` — untriaged
+3248. [evidence-required] `removed:TransmogPendingInfo` — unsafe
 3249. [untriaged] `removed:WorldTextCritScreenY` — untriaged
 3250. [untriaged] `removed:WorldTextGravity` — untriaged
 3251. [untriaged] `removed:WorldTextMinAlpha` — untriaged

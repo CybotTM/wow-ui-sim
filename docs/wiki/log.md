@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify remaining structure declarations
+
+Classified the nine remaining 12.0.0 structure declarations as `evidence-required`/`unsafe`: three added typed-structure rows (`LuaColorCurvePoint`, `NumberAbbrevData`, `NumberAbbrevOptions`) and six removed/removal-sensitive rows. Related proxy/curve tests do not prove exact added typed fields or payloads; source metadata, method absence, and auxiliary token checks do not prove removed structure/replacement/mixin identity. Tests/assertions remain empty with null commit, approval, and scope exception. Totals are now **298 best-effort, 492 evidence-required, 2 exception-requested, and 2618 untriaged**.
+
 ## [2026-08-08] investigation | Migrate remaining pure structure declarations
 
 Migrated exactly 23 added structure declarations to best-effort/provenance-only. Their field/API rows remain separate; no runtime behavior is claimed. Nine structure declarations remain untriaged because they are behavior-linked or removal-sensitive. Totals are now **298 best-effort, 483 evidence-required, 2 exception-requested, and 2627 untriaged**.
