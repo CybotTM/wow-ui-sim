@@ -13,6 +13,7 @@ fn vendor_deprecated_chat_spell_globals_are_published_and_forward() {
                 "DoEmote",
                 "SpellIsPriorityAura",
                 "SpellIsSelfBuff",
+                "SpellGetVisibilityInfo",
             }
             for _, name in ipairs(required) do
                 if type(rawget(_G, name)) ~= "function" then
@@ -80,6 +81,36 @@ fn vendor_deprecated_chat_spell_globals_are_published_and_forward() {
             C_Spell.IsSelfBuff = oldSelfBuff
             if not selfBuffOK or selfBuffID ~= 456 or selfBuffResult ~= "self-buff-sentinel" then
                 return "self-buff-wrapper"
+            end
+
+            local visibilityArgs
+            local oldVisibilityInfo = C_Spell.GetVisibilityInfo
+            C_Spell.GetVisibilityInfo = function(spellID, visibilityType)
+                visibilityArgs = {spellID, visibilityType}
+                return "visibility-sentinel", true, 17
+            end
+            local visibilityOK, visibilityResult, visibilityAlwaysShow, visibilityForSpec =
+                pcall(SpellGetVisibilityInfo, 789, "RAID_INCOMBAT")
+            C_Spell.GetVisibilityInfo = oldVisibilityInfo
+            if not visibilityOK
+                    or visibilityArgs[1] ~= 789
+                    or visibilityArgs[2] ~= Enum.SpellAuraVisibilityType.RaidInCombat
+                    or visibilityResult ~= "visibility-sentinel"
+                    or visibilityAlwaysShow ~= true
+                    or visibilityForSpec ~= 17 then
+                return "visibility-wrapper"
+            end
+
+            local unknownVisibilityType
+            oldVisibilityInfo = C_Spell.GetVisibilityInfo
+            C_Spell.GetVisibilityInfo = function(_, visibilityType)
+                unknownVisibilityType = visibilityType
+                return "unknown-visibility-sentinel"
+            end
+            local unknownOK, unknownResult = pcall(SpellGetVisibilityInfo, 789, "UNKNOWN")
+            C_Spell.GetVisibilityInfo = oldVisibilityInfo
+            if not unknownOK or unknownVisibilityType ~= nil or unknownResult ~= "unknown-visibility-sentinel" then
+                return "unknown-visibility-wrapper"
             end
 
             return "ok"
