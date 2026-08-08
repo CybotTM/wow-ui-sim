@@ -11,6 +11,7 @@
 //! - `runtime_subsystems` — text helpers, scroll scripts, C_Texture/atlas,
 //!   animation runtime, gamepad cursor, unit state, popup/tooltip frames.
 
+mod caa_constants;
 mod frames_and_attributes;
 mod global_functions;
 mod patch_12_1_service_payloads;

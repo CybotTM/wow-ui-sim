@@ -19058,513 +19058,1185 @@
       "id": "added:Constants.CAAConstants.CAAEnabledDefault",
       "symbol": "Constants.CAAConstants.CAAEnabledDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAEnabledDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAEnabledDefault with exact runtime value False."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAFrequencyDefault",
       "symbol": "Constants.CAAConstants.CAAFrequencyDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAFrequencyDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAFrequencyDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAFrequencyMax",
       "symbol": "Constants.CAAConstants.CAAFrequencyMax",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAFrequencyMax as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAFrequencyMax with exact runtime value 10."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAFrequencyMin",
       "symbol": "Constants.CAAConstants.CAAFrequencyMin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAFrequencyMin as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAFrequencyMin with exact runtime value -10."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAInterruptCastDefault",
       "symbol": "Constants.CAAConstants.CAAInterruptCastDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAInterruptCastDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAInterruptCastDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAInterruptCastSuccessDefault",
       "symbol": "Constants.CAAConstants.CAAInterruptCastSuccessDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAInterruptCastSuccessDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAInterruptCastSuccessDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAMinCastTimeDefault",
       "symbol": "Constants.CAAConstants.CAAMinCastTimeDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAMinCastTimeDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAMinCastTimeDefault with exact runtime value 1.5."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAMinCastTimeMax",
       "symbol": "Constants.CAAConstants.CAAMinCastTimeMax",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAMinCastTimeMax as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAMinCastTimeMax with exact runtime value 5."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAMinCastTimeMin",
       "symbol": "Constants.CAAConstants.CAAMinCastTimeMin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAMinCastTimeMin as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAMinCastTimeMin with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAMinCastTimeStep",
       "symbol": "Constants.CAAConstants.CAAMinCastTimeStep",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAMinCastTimeStep as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAMinCastTimeStep with exact runtime value 0.5."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAPartyHealthPercentDefault",
       "symbol": "Constants.CAAConstants.CAAPartyHealthPercentDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAPartyHealthPercentDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAPartyHealthPercentDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAPlayerCastFormatDefault",
       "symbol": "Constants.CAAConstants.CAAPlayerCastFormatDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAPlayerCastFormatDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAPlayerCastFormatDefault with exact runtime value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAPlayerCastModeDefault",
       "symbol": "Constants.CAAConstants.CAAPlayerCastModeDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAPlayerCastModeDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAPlayerCastModeDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAPlayerHealthFormatDefault",
       "symbol": "Constants.CAAConstants.CAAPlayerHealthFormatDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAPlayerHealthFormatDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAPlayerHealthFormatDefault with exact runtime value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAPlayerHealthPercentDefault",
       "symbol": "Constants.CAAConstants.CAAPlayerHealthPercentDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAPlayerHealthPercentDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAPlayerHealthPercentDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAPlayerResourceFormatDefault",
       "symbol": "Constants.CAAConstants.CAAPlayerResourceFormatDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAPlayerResourceFormatDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAPlayerResourceFormatDefault with exact runtime value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAPlayerResourcePercentDefault",
       "symbol": "Constants.CAAConstants.CAAPlayerResourcePercentDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAPlayerResourcePercentDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAPlayerResourcePercentDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAASampleTextThrottleTime",
       "symbol": "Constants.CAAConstants.CAASampleTextThrottleTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAASampleTextThrottleTime as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAASampleTextThrottleTime with exact runtime value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAASayCombatEndDefault",
       "symbol": "Constants.CAAConstants.CAASayCombatEndDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAASayCombatEndDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAASayCombatEndDefault with exact runtime value True."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAASayCombatStartDefault",
       "symbol": "Constants.CAAConstants.CAASayCombatStartDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAASayCombatStartDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAASayCombatStartDefault with exact runtime value True."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAASayIfTargetedDefault",
       "symbol": "Constants.CAAConstants.CAASayIfTargetedDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAASayIfTargetedDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAASayIfTargetedDefault with exact runtime value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAATargetCastFormatDefault",
       "symbol": "Constants.CAAConstants.CAATargetCastFormatDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAATargetCastFormatDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAATargetCastFormatDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAATargetCastModeDefault",
       "symbol": "Constants.CAAConstants.CAATargetCastModeDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAATargetCastModeDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAATargetCastModeDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAATargetDeathBehaviorDefault",
       "symbol": "Constants.CAAConstants.CAATargetDeathBehaviorDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAATargetDeathBehaviorDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAATargetDeathBehaviorDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAATargetHealthFormatDefault",
       "symbol": "Constants.CAAConstants.CAATargetHealthFormatDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAATargetHealthFormatDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAATargetHealthFormatDefault with exact runtime value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAATargetHealthPercentDefault",
       "symbol": "Constants.CAAConstants.CAATargetHealthPercentDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAATargetHealthPercentDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAATargetHealthPercentDefault with exact runtime value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAATargetNameDefault",
       "symbol": "Constants.CAAConstants.CAATargetNameDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAATargetNameDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAATargetNameDefault with exact runtime value True."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAThrottleDefault",
       "symbol": "Constants.CAAConstants.CAAThrottleDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAThrottleDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAThrottleDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAThrottleMax",
       "symbol": "Constants.CAAConstants.CAAThrottleMax",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAThrottleMax as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAThrottleMax with exact runtime value 5."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAThrottleMin",
       "symbol": "Constants.CAAConstants.CAAThrottleMin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAThrottleMin as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAThrottleMin with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAThrottleStep",
       "symbol": "Constants.CAAConstants.CAAThrottleStep",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAThrottleStep as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAThrottleStep with exact runtime value 0.5."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CAAConstants.CAAVoiceDefault",
       "symbol": "Constants.CAAConstants.CAAVoiceDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Constants.CAAConstants.CAAVoiceDefault as an added constant occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current startup constants publish Constants.CAAConstants.CAAVoiceDefault with exact runtime value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values",
+          "source_hash": "7565dec1cc2b64e2c350c25d24e3370cc72048caa116240d428ca8817576c103",
+          "summary": "Focused startup test asserts Constants.CAAConstants namespace publication and exact Lua type/value for all 32 CAAConstants rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "cf0908682a897f314da15dc3ae4f9c12c03cf6f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for this CAAConstants entry. CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics are not claimed. Implementation ancestor: cf0908682a897f314da15dc3ae4f9c12c03cf6f0."
     },
     {
       "id": "added:Constants.CatalogShopVirtualCurrencyConstants.HEARTHSTEEL_VC_CURRENCY_CODE",

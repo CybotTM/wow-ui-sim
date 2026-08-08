@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify 12.0.0 CAA constants
+
+Classified exactly 32 added `Constants.CAAConstants` rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values`. The focused startup test asserts namespace publication, exact Lua type, and exact value for all 32 rows. Source implementation ancestor is `cf0908682a897f314da15dc3ae4f9c12c03cf6f0`; current source/test hashes are recorded per row. Claims exclude CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics. Totals are now **330 best-effort, 492 evidence-required, 2 exception-requested, and 2586 untriaged**.
+
 ## [2026-08-08] investigation | Classify remaining structure declarations
 
 Classified the nine remaining 12.0.0 structure declarations as `evidence-required`/`unsafe`: three added typed-structure rows (`LuaColorCurvePoint`, `NumberAbbrevData`, `NumberAbbrevOptions`) and six removed/removal-sensitive rows. Related proxy/curve tests do not prove exact added typed fields or payloads; source metadata, method absence, and auxiliary token checks do not prove removed structure/replacement/mixin identity. Tests/assertions remain empty with null commit, approval, and scope exception. Totals are now **298 best-effort, 492 evidence-required, 2 exception-requested, and 2618 untriaged**.
