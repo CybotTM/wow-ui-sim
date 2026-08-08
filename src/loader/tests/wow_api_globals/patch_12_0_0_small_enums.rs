@@ -89,6 +89,46 @@ const ENUM_VALUES: &[(&str, &[(&str, i64)])] = &[
 ];
 
 #[test]
+fn test_patch_12_0_0_enum_current_keys_and_old_keys_absent() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local expected = {
+                    {"ItemRecraftFlags", "Invalid", 1, "ItemRecraftFlagInvalid"},
+                    {"PerksVendorCategoryType", "RefundUnused", 24, "UnusedPerksVendorCategoryRefundUnused"},
+                    {"PlayerInteractionType", "TieredEntrance", 79, "PlaceholderType79"},
+                    {"GossipNpcOption", "TieredEntrance", 66, "Placeholder_6"},
+                    {"QuestTagType", "Prey", 19, "Placeholder_1"},
+                }
+                for _, check in ipairs(expected) do
+                    local namespace_name = check[1]
+                    local namespace = Enum[namespace_name]
+                    if type(namespace) ~= "table" then
+                        return namespace_name .. ":namespace=" .. type(namespace)
+                    end
+                    local current_value = namespace[check[2]]
+                    if type(current_value) ~= "number" then
+                        return namespace_name .. "." .. check[2] .. ":type=" .. type(current_value)
+                    end
+                    if current_value ~= check[3] then
+                        return namespace_name .. "." .. check[2] .. ":value=" .. tostring(current_value)
+                    end
+                    if rawget(namespace, check[4]) ~= nil then
+                        return namespace_name .. "." .. check[4] .. ":present"
+                    end
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "12.0.0 enum publications did not match the expected current keys"
+    );
+}
+
+#[test]
 fn test_patch_12_0_0_small_enum_values() {
     let env = WowLuaEnv::new().unwrap();
     let expected_namespaces = ENUM_VALUES
