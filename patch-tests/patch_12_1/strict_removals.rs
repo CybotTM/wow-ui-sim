@@ -650,3 +650,4 @@ fn vendor_deprecated_globals_are_published_and_forward() {
 }
 
 include!("legacy_compat.rs");
+include!("vendor_deprecated_chat_spell.rs");
