@@ -1,3 +1,7 @@
+## [2026-08-08] Migrate 12.0.0 structure declaration provenance rows
+
+Migrated ten structure declarations to the machine-validated `best-effort`/`provenance-only` contract: the six `C_DamageMeter` declarations, `C_ActionBar.ActionBarChargeInfo`, `C_ActionBar.ActionBarCooldownInfo`, `C_CatalogShop.BulkPurchaseIndividualProductResult`, and `C_CatalogShop.RefundableDecorInfo`. Their field/API rows remain untriaged; no payload or runtime behavior is claimed. Totals are now **275 best-effort, 483 evidence-required, 2 exception-requested, and 2650 untriaged**.
+
 ## [2026-08-08] investigation | Migrate 12.0.0 typedef provenance rows
 
 Migrated all 21 untriaged `typedef.*` rows to the machine-validated `best-effort`/`provenance-only` contract. Each retains owner/category and source-register evidence only, sets `provenance_only: true`, has empty runtime proof fields, and uses exact notes `Provenance-only: no runtime behavior claimed.` This bookkeeping status claims no simulator-visible runtime behavior and is completion-eligible without a commit. Totals are now **265 best-effort, 483 evidence-required, 2 exception-requested, and 2660 untriaged**.

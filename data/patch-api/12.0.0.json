@@ -914,17 +914,25 @@
       "id": "added:C_ActionBar.ActionBarChargeInfo",
       "symbol": "C_ActionBar.ActionBarChargeInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.ActionBarChargeInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_ActionBar.ActionBarChargeInfo.chargeModRate",
@@ -1010,17 +1018,25 @@
       "id": "added:C_ActionBar.ActionBarCooldownInfo",
       "symbol": "C_ActionBar.ActionBarCooldownInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_ActionBar.ActionBarCooldownInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_ActionBar.ActionBarCooldownInfo.duration",
@@ -2872,17 +2888,25 @@
       "id": "added:C_CatalogShop.BulkPurchaseIndividualProductResult",
       "symbol": "C_CatalogShop.BulkPurchaseIndividualProductResult",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_CatalogShop.BulkPurchaseIndividualProductResult as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_CatalogShop.BulkPurchaseIndividualProductResult.entitlementId",
@@ -3192,17 +3216,25 @@
       "id": "added:C_CatalogShop.RefundableDecorInfo",
       "symbol": "C_CatalogShop.RefundableDecorInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_CatalogShop.RefundableDecorInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_CatalogShop.RefundableDecorInfo.decorGUID",
@@ -4772,17 +4804,25 @@
       "id": "added:C_DamageMeter.DamageMeterAvailableCombatSession",
       "symbol": "C_DamageMeter.DamageMeterAvailableCombatSession",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterAvailableCombatSession as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_DamageMeter.DamageMeterAvailableCombatSession.name",
@@ -4854,17 +4894,25 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSession",
       "symbol": "C_DamageMeter.DamageMeterCombatSession",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSession as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSession.combatSources",
@@ -4958,17 +5006,25 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSessionSource",
       "symbol": "C_DamageMeter.DamageMeterCombatSessionSource",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSessionSource as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSessionSource.combatSpells",
@@ -5062,17 +5118,25 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSource",
       "symbol": "C_DamageMeter.DamageMeterCombatSource",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.amountPerSecond",
@@ -5327,17 +5391,25 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSpell",
       "symbol": "C_DamageMeter.DamageMeterCombatSpell",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.amountPerSecond",
@@ -5512,17 +5584,25 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails",
       "symbol": "C_DamageMeter.DamageMeterCombatSpellUnitDetails",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.amount",
