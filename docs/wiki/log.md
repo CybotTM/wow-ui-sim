@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Prove 12.0.0 C_TransmogCollection removals
+
+Classified exactly 10 removed `C_TransmogCollection` outfit API rows as `best-effort`/`behavioral` using the committed full-LoD runtime probe `patch-tests/patch_12_1/source_absent.rs::removed_transmog_collection_outfit_methods_are_absent_after_full_lod_load` at `c3ae90c26`. The probe uses `rawget` to prove current publication absence while retained appearance methods remain callable; source scanning is auxiliary only. Removed the three obsolete simulator outfit placeholders and their tests. The 23 added/changed custom-set and appearance-source rows remain evidence-required; custom-set replacement APIs are not claimed implemented, and no clean replacement surface, historical load-order timing, or broad scanner completeness is claimed. Totals are now **106 best-effort, 453 evidence-required, 1 exception-requested, and 2850 untriaged**.
+
 ## [2026-08-08] investigation | Bound 12.0.0 C_CombatLog slice
 
 Classified all 11 added `C_CombatLog` API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the shared permissive/fixture-backed `src/lua_api/workarounds/temporary/combat_log_state.rs` model. Tests remain empty with null commit, approval, and scope exception. Filter schema/matching, restriction state, retention/message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven; no approval can close these rows. Totals are now **77 best-effort, 453 evidence-required, 1 exception-requested, and 2879 untriaged**.
