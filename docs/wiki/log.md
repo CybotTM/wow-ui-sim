@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Migrate remaining pure structure declarations
+
+Migrated exactly 23 added structure declarations to best-effort/provenance-only. Their field/API rows remain separate; no runtime behavior is claimed. Nine structure declarations remain untriaged because they are behavior-linked or removal-sensitive. Totals are now **298 best-effort, 483 evidence-required, 2 exception-requested, and 2627 untriaged**.
+
 ## [2026-08-08] Migrate 12.0.0 structure declaration provenance rows
 
 Migrated ten structure declarations to the machine-validated `best-effort`/`provenance-only` contract: the six `C_DamageMeter` declarations, `C_ActionBar.ActionBarChargeInfo`, `C_ActionBar.ActionBarCooldownInfo`, `C_CatalogShop.BulkPurchaseIndividualProductResult`, and `C_CatalogShop.RefundableDecorInfo`. Their field/API rows remain untriaged; no payload or runtime behavior is claimed. Totals are now **275 best-effort, 483 evidence-required, 2 exception-requested, and 2650 untriaged**.

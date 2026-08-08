@@ -2728,17 +2728,25 @@
       "id": "added:C_AdventureMap.AdventureMapQuestPortraitInfo",
       "symbol": "C_AdventureMap.AdventureMapQuestPortraitInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_AdventureMap.AdventureMapQuestPortraitInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_AdventureMap.AdventureMapQuestPortraitInfo.modelSceneID",
@@ -8456,17 +8464,25 @@
       "id": "added:C_EventScheduler.EventDisplayInfo",
       "symbol": "C_EventScheduler.EventDisplayInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_EventScheduler.EventDisplayInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_EventScheduler.EventDisplayInfo.hideDescription",
@@ -8984,17 +9000,25 @@
       "id": "added:C_HousingCatalog.HousingPreviewItemData",
       "symbol": "C_HousingCatalog.HousingPreviewItemData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_HousingCatalog.HousingPreviewItemData as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.bundleCatalogShopProductID",
@@ -9608,17 +9632,25 @@
       "id": "added:C_MajorFactions.RenownHighlightInfo",
       "symbol": "C_MajorFactions.RenownHighlightInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_MajorFactions.RenownHighlightInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_MajorFactions.RenownHighlightInfo.description",
@@ -10045,17 +10077,25 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeActivityLogEntry",
       "symbol": "C_NeighborhoodInitiative.InitiativeActivityLogEntry",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_NeighborhoodInitiative.InitiativeActivityLogEntry as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.amount",
@@ -10141,17 +10181,25 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeActivityLogInfo",
       "symbol": "C_NeighborhoodInitiative.InitiativeActivityLogInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_NeighborhoodInitiative.InitiativeActivityLogInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeActivityLogInfo.isLoaded",
@@ -10221,17 +10269,25 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneInfo",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_NeighborhoodInitiative.InitiativeMilestoneInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneInfo.milestoneOrderIndex",
@@ -10285,17 +10341,25 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.decorID",
@@ -10413,17 +10477,25 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_NeighborhoodInitiative.InitiativeTaskInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.ID",
@@ -10653,17 +10725,25 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeTasksTracked",
       "symbol": "C_NeighborhoodInitiative.InitiativeTasksTracked",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_NeighborhoodInitiative.InitiativeTasksTracked as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTasksTracked.trackedIDs",
@@ -10733,17 +10813,25 @@
       "id": "added:C_NeighborhoodInitiative.NeighborhoodInitiativeInfo",
       "symbol": "C_NeighborhoodInitiative.NeighborhoodInitiativeInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_NeighborhoodInitiative.NeighborhoodInitiativeInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_NeighborhoodInitiative.NeighborhoodInitiativeInfo.currentCycleID",
@@ -11085,17 +11173,25 @@
       "id": "added:C_PvP.BattlegroundInfo",
       "symbol": "C_PvP.BattlegroundInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_PvP.BattlegroundInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.battlegroundID",
@@ -18250,17 +18346,25 @@
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.frameTextureKit",
@@ -18882,17 +18986,25 @@
       "id": "added:C_WeeklyRewards.WeeklyRewardActivityTierProgress",
       "symbol": "C_WeeklyRewards.WeeklyRewardActivityTierProgress",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records C_WeeklyRewards.WeeklyRewardActivityTierProgress as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.activityTierID",
@@ -20468,17 +20580,25 @@
       "id": "added:CraftingQualityInfo",
       "symbol": "CraftingQualityInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CraftingQualityInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:CraftingQualityInfo.barBackground",
@@ -20724,17 +20844,25 @@
       "id": "added:CraftingVariableQuantities",
       "symbol": "CraftingVariableQuantities",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CraftingVariableQuantities as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:CraftingVariableQuantities.quantity",
@@ -20866,17 +20994,25 @@
       "id": "added:CriteriaRequiredValue",
       "symbol": "CriteriaRequiredValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CriteriaRequiredValue as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:CriteriaRequiredValue.criteriaID",
@@ -20914,17 +21050,25 @@
       "id": "added:CriteriaRequirement",
       "symbol": "CriteriaRequirement",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CriteriaRequirement as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:CriteriaRequirement.completed",
@@ -41673,17 +41817,25 @@
       "id": "added:HouseExteriorSizeOption",
       "symbol": "HouseExteriorSizeOption",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorSizeOption as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:HouseExteriorSizeOption.isLocked",
@@ -41737,17 +41889,25 @@
       "id": "added:HouseExteriorSizeOptionsInfo",
       "symbol": "HouseExteriorSizeOptionsInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorSizeOptionsInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:HouseExteriorSizeOptionsInfo.options",
@@ -41785,17 +41945,25 @@
       "id": "added:HouseExteriorTypeOption",
       "symbol": "HouseExteriorTypeOption",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorTypeOption as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:HouseExteriorTypeOption.houseExteriorTypeID",
@@ -41865,17 +42033,25 @@
       "id": "added:HouseExteriorTypeOptionsInfo",
       "symbol": "HouseExteriorTypeOptionsInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorTypeOptionsInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:HouseExteriorTypeOptionsInfo.options",
@@ -41913,17 +42089,25 @@
       "id": "added:HouseLevelInfo",
       "symbol": "HouseLevelInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records HouseLevelInfo as an added structure declaration; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:HouseLevelInfo.exteriorDecorPlacementBudget",
