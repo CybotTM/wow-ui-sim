@@ -54331,7 +54331,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies ActionHasRange is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -54369,7 +54369,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies BNSendGameData is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -54407,7 +54407,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies BNSendWhisper is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -54445,7 +54445,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies BNSetCustomMessage is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -54490,7 +54490,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -54521,7 +54521,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -54552,7 +54552,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -54679,7 +54679,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -54710,7 +54710,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -54757,7 +54757,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -54890,7 +54890,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -54927,7 +54927,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -54964,7 +54964,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55001,7 +55001,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55038,7 +55038,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55075,7 +55075,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55112,7 +55112,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55149,7 +55149,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55186,7 +55186,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55223,7 +55223,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55260,7 +55260,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55297,7 +55297,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55334,7 +55334,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55371,7 +55371,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55408,7 +55408,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55445,7 +55445,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55482,7 +55482,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55519,7 +55519,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55556,7 +55556,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55689,7 +55689,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55726,7 +55726,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55763,7 +55763,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55800,7 +55800,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55837,7 +55837,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55868,7 +55868,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55899,7 +55899,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55930,7 +55930,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55967,7 +55967,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -55998,7 +55998,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56029,7 +56029,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56060,7 +56060,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56091,7 +56091,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56233,7 +56233,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56270,7 +56270,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56307,7 +56307,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56344,7 +56344,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56381,7 +56381,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56418,7 +56418,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56455,7 +56455,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56492,7 +56492,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56529,7 +56529,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56566,7 +56566,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56603,7 +56603,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56640,7 +56640,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56677,7 +56677,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56714,7 +56714,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56751,7 +56751,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56788,7 +56788,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56825,7 +56825,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56862,7 +56862,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83"
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
         }
       ],
       "tests": [
@@ -56946,7 +56946,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56983,7 +56983,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57020,7 +57020,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57057,7 +57057,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57094,7 +57094,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57131,7 +57131,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57168,7 +57168,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57205,7 +57205,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57242,7 +57242,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57279,7 +57279,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57296,17 +57296,39 @@
       "id": "removed:CancelEmote",
       "symbol": "CancelEmote",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedChatInfo",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CancelEmote as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs",
+          "source_hash": "a4af85e8f6652fa9200d8fd338ecc44be6ceabbad01632343ebe0e0fe37295d0",
+          "summary": "Focused full-LoD PTR proof verifies CancelEmote is published as a function and forwards through the pinned deprecated chat/spell wrapper; DoEmote named and nil branches are exercised. This proves vendor publication and tested forwarding, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "02db1895a3a949a0dba45e30913ae0801e4acb05",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and the focused forwarding proof, including DoEmote named and nil branches; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:ChangeActionBarPage",
@@ -57326,7 +57348,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies ChangeActionBarPage is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57364,7 +57386,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLogAddFilter is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57418,7 +57440,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLogClearEntries is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57456,7 +57478,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLogGetCurrentEntry is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57494,7 +57516,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLogGetCurrentEventInfo is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57532,7 +57554,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLogGetNumEntries is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57570,7 +57592,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLogGetRetentionTime is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57608,7 +57630,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLogResetFilter is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57662,7 +57684,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLogSetRetentionTime is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57700,7 +57722,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLogShowCurrentEntry is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57738,7 +57760,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatLog_Object_IsA is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -57776,7 +57798,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies CombatTextSetActiveUnit is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -58134,7 +58156,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies DeathRecap_GetEvents is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -58172,7 +58194,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies DeathRecap_HasEvents is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -58196,17 +58218,39 @@
       "id": "removed:DoEmote",
       "symbol": "DoEmote",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedChatInfo",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records DoEmote as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs",
+          "source_hash": "a4af85e8f6652fa9200d8fd338ecc44be6ceabbad01632343ebe0e0fe37295d0",
+          "summary": "Focused full-LoD PTR proof verifies DoEmote is published as a function and forwards through the pinned deprecated chat/spell wrapper; DoEmote named and nil branches are exercised. This proves vendor publication and tested forwarding, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "02db1895a3a949a0dba45e30913ae0801e4acb05",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and the focused forwarding proof, including DoEmote named and nil branches; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:Enum.AccountDataUpdateStatus.AccountDataUpdateCorrupt",
@@ -61078,7 +61122,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetActionAutocast is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61116,7 +61160,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetActionBarPage is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61154,7 +61198,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetActionCharges is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61192,7 +61236,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetActionCooldown is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61230,7 +61274,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetActionCount is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61268,7 +61312,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetActionLossOfControlCooldown is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61306,7 +61350,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetActionText is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61344,7 +61388,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetActionTexture is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61426,7 +61470,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetBonusBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61464,7 +61508,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetBonusBarOffset is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61502,7 +61546,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetCurrentCombatTextEventInfo is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61540,7 +61584,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetDeathRecapLink is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61578,7 +61622,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetExtraBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61616,7 +61660,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetMultiCastBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61654,7 +61698,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetOverrideBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61692,7 +61736,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetOverrideBarSkin is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61730,7 +61774,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetTempShapeshiftBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61768,7 +61812,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies GetVehicleBarIndex is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61838,7 +61882,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies HasAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61876,7 +61920,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies HasBonusActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61914,7 +61958,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies HasExtraActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61952,7 +61996,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies HasOverrideActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -61990,7 +62034,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies HasTempShapeshiftActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62028,7 +62072,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies HasVehicleActionBar is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62066,7 +62110,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsActionInRange is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62104,7 +62148,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsAttackAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62142,7 +62186,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsAutoRepeatAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62180,7 +62224,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsConsumableAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62218,7 +62262,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
         }
       ],
@@ -62249,7 +62293,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsCurrentAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62287,7 +62331,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsEncounterInProgress is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62325,7 +62369,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsEncounterLimitingResurrections is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62363,7 +62407,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsEncounterSuppressingRelease is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62401,7 +62445,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsEquippedAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62439,7 +62483,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsItemAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62477,7 +62521,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsPossessBarVisible is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62515,7 +62559,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsStackableAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62553,7 +62597,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies IsUsableAction is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -62939,7 +62983,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD PTR proof verifies SetActionUIButton is published as a function under enabled loadDeprecationFallbacks; representative family forwarding/alias checks pass. This proves vendor publication, not full legacy API semantic fidelity."
         }
       ],
@@ -63021,7 +63065,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
         }
       ],
@@ -63116,7 +63160,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
         }
       ],
@@ -63133,33 +63177,77 @@
       "id": "removed:SpellIsPriorityAura",
       "symbol": "SpellIsPriorityAura",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedSpellScript",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records SpellIsPriorityAura as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs",
+          "source_hash": "a4af85e8f6652fa9200d8fd338ecc44be6ceabbad01632343ebe0e0fe37295d0",
+          "summary": "Focused full-LoD PTR proof verifies SpellIsPriorityAura is published as a function and forwards through the pinned deprecated chat/spell wrapper; DoEmote named and nil branches are exercised. This proves vendor publication and tested forwarding, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "02db1895a3a949a0dba45e30913ae0801e4acb05",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and the focused forwarding proof, including DoEmote named and nil branches; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:SpellIsSelfBuff",
       "symbol": "SpellIsSelfBuff",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedSpellScript",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records SpellIsSelfBuff as removed; the deprecated vendor wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs",
+          "source_hash": "a4af85e8f6652fa9200d8fd338ecc44be6ceabbad01632343ebe0e0fe37295d0",
+          "summary": "Focused full-LoD PTR proof verifies SpellIsSelfBuff is published as a function and forwards through the pinned deprecated chat/spell wrapper; DoEmote named and nil branches are exercised. This proves vendor publication and tested forwarding, not full legacy API semantic fidelity."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "02db1895a3a949a0dba45e30913ae0801e4acb05",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and the focused forwarding proof, including DoEmote named and nil branches; it does not claim complete legacy API semantic fidelity."
     },
     {
       "id": "removed:StripHyperlinks",
@@ -63179,7 +63267,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "b2ee90b8857d7d4ea385fb243890554e6de45d8b61d2419bef2bf5f07a131e83",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190",
           "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
         }
       ],

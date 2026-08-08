@@ -2960,7 +2960,7 @@
 2960. [best-effort] `removed:C_TransmogCollection.ModifyOutfit` — behavioral
 2961. [best-effort] `removed:C_TransmogCollection.NewOutfit` — behavioral
 2962. [best-effort] `removed:C_TransmogCollection.RenameOutfit` — behavioral
-2963. [untriaged] `removed:CancelEmote` — untriaged
+2963. [best-effort] `removed:CancelEmote` — vendor-present
 2964. [best-effort] `removed:ChangeActionBarPage` — vendor-present
 2965. [best-effort] `removed:CombatLogAddFilter` — vendor-present
 2966. [untriaged] `removed:CombatLogAdvanceEntry` — untriaged
@@ -2997,7 +2997,7 @@
 2997. [untriaged] `removed:CraftingResourceReturnInfo.itemID` — untriaged
 2998. [best-effort] `removed:DeathRecap_GetEvents` — vendor-present
 2999. [best-effort] `removed:DeathRecap_HasEvents` — vendor-present
-3000. [untriaged] `removed:DoEmote` — untriaged
+3000. [best-effort] `removed:DoEmote` — vendor-present
 3001. [untriaged] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateCorrupt` — untriaged
 3002. [untriaged] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateFailed` — untriaged
 3003. [untriaged] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateSuccess` — untriaged
@@ -3240,8 +3240,8 @@
 3240. [untriaged] `removed:ShowNamePlateLoseAggroFlash` — untriaged
 3241. [untriaged] `removed:SpellGetVisibilityInfo` — untriaged
 3242. [best-effort] `removed:SpellIsAlwaysShown` — behavioral
-3243. [untriaged] `removed:SpellIsPriorityAura` — untriaged
-3244. [untriaged] `removed:SpellIsSelfBuff` — untriaged
+3243. [best-effort] `removed:SpellIsPriorityAura` — vendor-present
+3244. [best-effort] `removed:SpellIsSelfBuff` — vendor-present
 3245. [best-effort] `removed:StripHyperlinks` — behavioral
 3246. [untriaged] `removed:TerrainBlendBakeEnable` — untriaged
 3247. [untriaged] `removed:TerrainUnlitShaderEnable` — untriaged

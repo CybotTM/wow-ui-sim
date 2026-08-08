@@ -26,7 +26,7 @@ The bounded 12.0.0 `C_CombatLog` slice classifies exactly 11 added API rows as e
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 210 best-effort rows (including 56 vendor-present deprecated-wrapper rows), 453 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2746 untriaged rows with null final status
+- **Status:** 214 best-effort rows (including 56 vendor-present deprecated-wrapper rows, four chat/spell vendor wrappers, and seven simulator compat rows), 453 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2742 untriaged rows with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.
