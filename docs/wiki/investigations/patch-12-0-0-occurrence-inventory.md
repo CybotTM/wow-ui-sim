@@ -4,7 +4,7 @@ Occurrence-level register derived from explicit wowless retail snapshots. Sevent
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 77 best-effort, 399 evidence-required, 1 exception-requested, 2933 untriaged
+- **Rows:** 3410 total — 0 implemented, 77 best-effort, 413 evidence-required, 1 exception-requested, 2919 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -561,20 +561,20 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_SpellBook.GetSpellBookItemChargeDuration` | untriaged | api | added | api added in 12.0.0. |
 | `C_SpellBook.GetSpellBookItemCooldownDuration` | untriaged | api | added | api added in 12.0.0. |
 | `C_SpellBook.GetSpellBookItemLossOfControlCooldownDuration` | untriaged | api | added | api added in 12.0.0. |
-| `C_SpellDiminish.GetAllSpellDiminishCategories` | untriaged | api | added | api added in 12.0.0. |
-| `C_SpellDiminish.GetSpellDiminishCategoryInfo` | untriaged | api | added | api added in 12.0.0. |
-| `C_SpellDiminish.IsSystemSupported` | untriaged | api | added | api added in 12.0.0. |
-| `C_SpellDiminish.ShouldTrackSpellDiminishCategory` | untriaged | api | added | api added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishCategoryInfo` | untriaged | structure | added | structure added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishCategoryInfo.category` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishCategoryInfo.icon` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishCategoryInfo.name` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishTrackerInfo` | untriaged | structure | added | structure added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishTrackerInfo.category` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishTrackerInfo.duration` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishTrackerInfo.isImmune` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishTrackerInfo.showCountdown` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_SpellDiminish.SpellDiminishTrackerInfo.startTime` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `C_SpellDiminish.GetAllSpellDiminishCategories` | evidence-required | api | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.GetSpellDiminishCategoryInfo` | evidence-required | api | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.IsSystemSupported` | evidence-required | api | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.ShouldTrackSpellDiminishCategory` | evidence-required | api | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishCategoryInfo` | evidence-required | structure | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishCategoryInfo.category` | evidence-required | structure-field | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishCategoryInfo.icon` | evidence-required | structure-field | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishCategoryInfo.name` | evidence-required | structure-field | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishTrackerInfo` | evidence-required | structure | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishTrackerInfo.category` | evidence-required | structure-field | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishTrackerInfo.duration` | evidence-required | structure-field | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishTrackerInfo.isImmune` | evidence-required | structure-field | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishTrackerInfo.showCountdown` | evidence-required | structure-field | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
+| `C_SpellDiminish.SpellDiminishTrackerInfo.startTime` | evidence-required | structure-field | added | Current static eight-category fixture does not prove authoritative 12.0.0 category, ruleset, or tracker semantics. |
 | `C_StableInfo.IsBonusPetSlotAvailable` | untriaged | api | added | api added in 12.0.0. |
 | `C_StringUtil.EscapeLuaFormatString` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
 | `C_StringUtil.EscapeLuaPatterns` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |

@@ -12448,225 +12448,407 @@
       "id": "added:C_SpellDiminish.GetAllSpellDiminishCategories",
       "symbol": "C_SpellDiminish.GetAllSpellDiminishCategories",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.GetSpellDiminishCategoryInfo",
       "symbol": "C_SpellDiminish.GetSpellDiminishCategoryInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.IsSystemSupported",
       "symbol": "C_SpellDiminish.IsSystemSupported",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.ShouldTrackSpellDiminishCategory",
       "symbol": "C_SpellDiminish.ShouldTrackSpellDiminishCategory",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishCategoryInfo",
       "symbol": "C_SpellDiminish.SpellDiminishCategoryInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishCategoryInfo.category",
       "symbol": "C_SpellDiminish.SpellDiminishCategoryInfo.category",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishCategoryInfo.icon",
       "symbol": "C_SpellDiminish.SpellDiminishCategoryInfo.icon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishCategoryInfo.name",
       "symbol": "C_SpellDiminish.SpellDiminishCategoryInfo.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishTrackerInfo",
       "symbol": "C_SpellDiminish.SpellDiminishTrackerInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishTrackerInfo.category",
       "symbol": "C_SpellDiminish.SpellDiminishTrackerInfo.category",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishTrackerInfo.duration",
       "symbol": "C_SpellDiminish.SpellDiminishTrackerInfo.duration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishTrackerInfo.isImmune",
       "symbol": "C_SpellDiminish.SpellDiminishTrackerInfo.isImmune",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishTrackerInfo.showCountdown",
       "symbol": "C_SpellDiminish.SpellDiminishTrackerInfo.showCountdown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_SpellDiminish.SpellDiminishTrackerInfo.startTime",
       "symbol": "C_SpellDiminish.SpellDiminishTrackerInfo.startTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this C_SpellDiminish API, structure, or field occurrence and its published signature/name metadata only."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell_diminish.rs",
+          "source_hash": "d17241960b8f14d21a3072efd5d213424c9c2d3b001707392b1648adef61a9e6",
+          "summary": "Current implementation uses a static eight-category fixture for the four APIs and does not establish authoritative 12.0.0 category, ruleset, or tracker-payload semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_SpellDiminish behavior is a static eight-category fixture with local implementation/tests, not authoritative 12.0.0 behavior. The source register establishes signatures and field names only; category contents, ruleset tracking semantics, and tracker payload fields remain unproven. No approval can close this row."
     },
     {
       "id": "added:C_StableInfo.IsBonusPetSlotAvailable",
