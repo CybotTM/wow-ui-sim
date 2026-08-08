@@ -2327,7 +2327,7 @@
 2327. [untriaged] `added:TRANSMOG_DISPLAYED_OUTFIT_CHANGED` — untriaged
 2328. [untriaged] `added:TUTORIAL_COMBAT_EVENT` — untriaged
 2329. [best-effort] `added:TextureBase.ResetTexCoord` — behavioral
-2330. [untriaged] `added:TextureBase.SetSpriteSheetCell` — untriaged
+2330. [evidence-required] `added:TextureBase.SetSpriteSheetCell` — unsafe
 2331. [evidence-required] `added:UIObject.HasAnySecretAspect` — unsafe
 2332. [evidence-required] `added:UIObject.HasSecretAspect` — unsafe
 2333. [evidence-required] `added:UIObject.HasSecretValues` — unsafe
@@ -2796,9 +2796,9 @@
 2796. [untriaged] `changed:RemoveRaidTargets` — untriaged
 2797. [untriaged] `changed:SetRaidTarget` — untriaged
 2798. [untriaged] `changed:StatusBar` — untriaged
-2799. [untriaged] `changed:StatusBar.GetFillStyle` — untriaged
-2800. [untriaged] `changed:StatusBar.SetFillStyle` — untriaged
-2801. [untriaged] `changed:StatusBar.SetMinMaxValues` — untriaged
+2799. [evidence-required] `changed:StatusBar.GetFillStyle` — unsafe
+2800. [evidence-required] `changed:StatusBar.SetFillStyle` — unsafe
+2801. [best-effort] `changed:StatusBar.SetMinMaxValues` — behavioral
 2802. [best-effort] `changed:StatusBar.SetValue` — behavioral
 2803. [untriaged] `changed:TRANSMOG_OUTFITS_CHANGED` — untriaged
 2804. [best-effort] `changed:TextureBase.GetTexCoord` — behavioral

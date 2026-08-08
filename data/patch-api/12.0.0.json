@@ -44891,7 +44891,7 @@
           "kind": "test",
           "reference": "tests/widget_methods_colorselect.rs",
           "summary": "Focused StatusBar interpolation test verifies target-facing GetValue, displayed GetInterpolatedValue, active interpolation, and snap completion.",
-          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+          "source_hash": "2d583549d6f0c49b3bfc9b1cce1f4fb35200ce46f8afb40bc320abfa4b2a1b7b"
         }
       ],
       "tests": [
@@ -44928,7 +44928,7 @@
           "kind": "test",
           "reference": "tests/widget_methods_colorselect.rs",
           "summary": "Focused StatusBar test verifies exact LuaDurationObject identity and per-instance field round-trip.",
-          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+          "source_hash": "2d583549d6f0c49b3bfc9b1cce1f4fb35200ce46f8afb40bc320abfa4b2a1b7b"
         }
       ],
       "tests": [
@@ -44971,7 +44971,7 @@
           "kind": "test",
           "reference": "tests/widget_methods_colorselect.rs",
           "summary": "Focused StatusBar interpolation test verifies target-facing GetValue, displayed GetInterpolatedValue, active interpolation, and snap completion.",
-          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+          "source_hash": "2d583549d6f0c49b3bfc9b1cce1f4fb35200ce46f8afb40bc320abfa4b2a1b7b"
         }
       ],
       "tests": [
@@ -45008,7 +45008,7 @@
           "kind": "test",
           "reference": "tests/widget_methods_colorselect.rs",
           "summary": "Focused StatusBar test verifies exact LuaDurationObject identity and per-instance field round-trip.",
-          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+          "source_hash": "2d583549d6f0c49b3bfc9b1cce1f4fb35200ce46f8afb40bc320abfa4b2a1b7b"
         }
       ],
       "tests": [
@@ -45051,7 +45051,7 @@
           "kind": "test",
           "reference": "tests/widget_methods_colorselect.rs",
           "summary": "Focused StatusBar interpolation test verifies target-facing GetValue, displayed GetInterpolatedValue, active interpolation, and snap completion.",
-          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+          "source_hash": "2d583549d6f0c49b3bfc9b1cce1f4fb35200ce46f8afb40bc320abfa4b2a1b7b"
         }
       ],
       "tests": [
@@ -45184,17 +45184,30 @@
       "id": "added:TextureBase.SetSpriteSheetCell",
       "symbol": "TextureBase.SetSpriteSheetCell",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records TextureBase.SetSpriteSheetCell as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/texture/rotation_mask.rs",
+          "source_hash": "194ab06da36cfec02bb0cdc9ad38fb0a12bfb7d26aa4c822fa512a78f23f847f",
+          "summary": "Current SetSpriteSheetCell is a no-op stub that only validates the frame receiver and changes no sprite-sheet or texture-coordinate state."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: current SetSpriteSheetCell is a no-op, and the existing callability-only test does not establish the documented cell contract. Exact cell indexing, row/column coordinate mapping, optional dimensions, validation, and rendering require authoritative evidence or a correct model/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UIObject.HasAnySecretAspect",
@@ -53811,49 +53824,96 @@
       "id": "changed:StatusBar.GetFillStyle",
       "symbol": "StatusBar.GetFillStyle",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records StatusBar.GetFillStyle as a changed uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/statusbar.rs",
+          "source_hash": "f24c8850d33b949e610b3dc124253990c8083c91a745d36d0a073b24c17c9b5c",
+          "summary": "Current GetFillStyle returns constant STANDARD instead of reading the stored fill-style state, so a nonstandard setter/getter round-trip is not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: current GetFillStyle returns constant STANDARD and does not establish the stored nonstandard style. Exact accepted styles, validation, state round-trip, rendering, and edge semantics require authoritative evidence or a correct implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "changed:StatusBar.SetFillStyle",
       "symbol": "StatusBar.SetFillStyle",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records StatusBar.SetFillStyle as a changed uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/statusbar.rs",
+          "source_hash": "f24c8850d33b949e610b3dc124253990c8083c91a745d36d0a073b24c17c9b5c",
+          "summary": "Current SetFillStyle stores the supplied style, but GetFillStyle returns constant STANDARD and no public nonstandard round-trip is established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: current SetFillStyle stores a value but its public round-trip is broken by GetFillStyle returning constant STANDARD. Exact accepted styles, validation, state, rendering, and edge semantics require authoritative evidence or a correct implementation/test; tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "changed:StatusBar.SetMinMaxValues",
       "symbol": "StatusBar.SetMinMaxValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records StatusBar.SetMinMaxValues as a changed uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/slider.rs",
+          "source_hash": "1fb5bc0a2d5eec503bfd087ed2e7c26c9d294d88e45d680957c050de6d46b87e",
+          "summary": "Current shared StatusBar SetMinMaxValues stores the new range and clamps the stored current and interpolated values to it."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/widget_methods_colorselect.rs",
+          "source_hash": "2d583549d6f0c49b3bfc9b1cce1f4fb35200ce46f8afb40bc320abfa4b2a1b7b",
+          "summary": "Focused test stores values before two range changes and verifies stored ranges plus upper and lower current-value clamping."
+        }
+      ],
+      "tests": [
+        "tests/widget_methods_colorselect.rs::test_statusbar_set_min_max_values_clamps_existing_value"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7a7a440402f4b03a89fe341956b6cb5e2051f465",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused SetMinMaxValues range round-trip and clamping of an already-stored current value: (10, 50) clamps 80 to 50, and (30, 40) clamps 20 to 30. Interpolation-target behavior, rendering, events, invalid/reversed ranges, and other edge semantics remain unproven."
     },
     {
       "id": "changed:StatusBar.SetValue",
@@ -53880,7 +53940,7 @@
           "kind": "test",
           "reference": "tests/widget_methods_colorselect.rs",
           "summary": "Focused StatusBar test verifies immediate value 0.25, Smooth target 0.75, target-facing GetValue, displayed GetInterpolatedValue, and snap completion.",
-          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+          "source_hash": "2d583549d6f0c49b3bfc9b1cce1f4fb35200ce46f8afb40bc320abfa4b2a1b7b"
         }
       ],
       "tests": [
