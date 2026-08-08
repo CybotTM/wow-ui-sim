@@ -57410,17 +57410,54 @@
       "id": "removed:CombatLogAdvanceEntry",
       "symbol": "CombatLogAdvanceEntry",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogAdvanceEntry as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "The simulator intentionally retains CombatLogAdvanceEntry as a temporary compatibility workaround: it mutates the shared cursor by a numeric step clamped at zero and unconditionally returns true. This is fixture-only behavior, not an authoritative legacy contract."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_DeprecatedCombatLog/Deprecated_CombatLog.lua",
+          "source_hash": "d13d4b67c78a4d907086be0840c3884e1e737ba14dcab3c2eee394bd16fe22eb",
+          "summary": "Pinned retail Blizzard_DeprecatedCombatLog publishes the other deprecated combat-log wrappers but does not publish CombatLogAdvanceEntry."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/ptr/AddOns/Blizzard_DeprecatedCombatLog/Deprecated_CombatLog.lua",
+          "source_hash": "d13d4b67c78a4d907086be0840c3884e1e737ba14dcab3c2eee394bd16fe22eb",
+          "summary": "Pinned PTR Blizzard_DeprecatedCombatLog publishes the other deprecated combat-log wrappers but does not publish CombatLogAdvanceEntry."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua",
+          "source_hash": "23d7a4696bd1956fa77491723033787a79df34cf871ec824fa6187ca2e49728d",
+          "summary": "Pinned Wrath Blizzard_CombatLog caller uses CombatLogAdvanceEntry while refiltering the legacy combat log."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/mists/AddOns/Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua",
+          "source_hash": "8522216fcba7f91b8cae4673b33fc646c2715fc9de3f0e884efc79c817d8b7f5",
+          "summary": "Pinned Mists Blizzard_CombatLog compatibility code uses CombatLogAdvanceEntry while refiltering the legacy combat log."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retain this simulator-only temporary compatibility publication because Wrath/Mists Blizzard_CombatLog callers still depend on it. No equivalent replacement API supplies the legacy cursor-navigation contract, and exact legacy semantics remain unproven; authoritative evidence or a correct model is required before removal or a compatibility classification."
     },
     {
       "id": "removed:CombatLogClearEntries",
@@ -57654,17 +57691,54 @@
       "id": "removed:CombatLogSetCurrentEntry",
       "symbol": "CombatLogSetCurrentEntry",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records CombatLogSetCurrentEntry as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "The simulator intentionally retains CombatLogSetCurrentEntry as a temporary compatibility workaround: it stores a numeric cursor clamped at zero and returns no value. This is fixture-only behavior, not an authoritative legacy contract."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_DeprecatedCombatLog/Deprecated_CombatLog.lua",
+          "source_hash": "d13d4b67c78a4d907086be0840c3884e1e737ba14dcab3c2eee394bd16fe22eb",
+          "summary": "Pinned retail Blizzard_DeprecatedCombatLog publishes the other deprecated combat-log wrappers but does not publish CombatLogSetCurrentEntry."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/ptr/AddOns/Blizzard_DeprecatedCombatLog/Deprecated_CombatLog.lua",
+          "source_hash": "d13d4b67c78a4d907086be0840c3884e1e737ba14dcab3c2eee394bd16fe22eb",
+          "summary": "Pinned PTR Blizzard_DeprecatedCombatLog publishes the other deprecated combat-log wrappers but does not publish CombatLogSetCurrentEntry."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua",
+          "source_hash": "23d7a4696bd1956fa77491723033787a79df34cf871ec824fa6187ca2e49728d",
+          "summary": "Pinned Wrath Blizzard_CombatLog caller uses CombatLogSetCurrentEntry when resetting the legacy combat-log cursor."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/mists/AddOns/Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua",
+          "source_hash": "8522216fcba7f91b8cae4673b33fc646c2715fc9de3f0e884efc79c817d8b7f5",
+          "summary": "Pinned Mists Blizzard_CombatLog compatibility code uses CombatLogSetCurrentEntry when resetting the legacy combat-log cursor."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retain this simulator-only temporary compatibility publication because Wrath/Mists Blizzard_CombatLog callers still depend on it. No equivalent replacement API supplies the legacy cursor-navigation contract, and exact legacy semantics remain unproven; authoritative evidence or a correct model is required before removal or a compatibility classification."
     },
     {
       "id": "removed:CombatLogSetRetentionTime",

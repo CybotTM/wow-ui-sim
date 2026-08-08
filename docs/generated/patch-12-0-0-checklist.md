@@ -2963,14 +2963,14 @@
 2963. [best-effort] `removed:CancelEmote` — vendor-present
 2964. [best-effort] `removed:ChangeActionBarPage` — vendor-present
 2965. [best-effort] `removed:CombatLogAddFilter` — vendor-present
-2966. [untriaged] `removed:CombatLogAdvanceEntry` — untriaged
+2966. [evidence-required] `removed:CombatLogAdvanceEntry` — unsafe
 2967. [best-effort] `removed:CombatLogClearEntries` — vendor-present
 2968. [best-effort] `removed:CombatLogGetCurrentEntry` — vendor-present
 2969. [best-effort] `removed:CombatLogGetCurrentEventInfo` — vendor-present
 2970. [best-effort] `removed:CombatLogGetNumEntries` — vendor-present
 2971. [best-effort] `removed:CombatLogGetRetentionTime` — vendor-present
 2972. [best-effort] `removed:CombatLogResetFilter` — vendor-present
-2973. [untriaged] `removed:CombatLogSetCurrentEntry` — untriaged
+2973. [evidence-required] `removed:CombatLogSetCurrentEntry` — unsafe
 2974. [best-effort] `removed:CombatLogSetRetentionTime` — vendor-present
 2975. [best-effort] `removed:CombatLogShowCurrentEntry` — vendor-present
 2976. [best-effort] `removed:CombatLog_Object_IsA` — vendor-present
