@@ -13516,1841 +13516,3336 @@
       "id": "added:C_TransmogOutfitInfo.AddNewOutfit",
       "symbol": "C_TransmogOutfitInfo.AddNewOutfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ChangeDisplayedOutfit",
       "symbol": "C_TransmogOutfitInfo.ChangeDisplayedOutfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ChangeViewedOutfit",
       "symbol": "C_TransmogOutfitInfo.ChangeViewedOutfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ClearAllPendingSituations",
       "symbol": "C_TransmogOutfitInfo.ClearAllPendingSituations",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ClearAllPendingTransmogs",
       "symbol": "C_TransmogOutfitInfo.ClearAllPendingTransmogs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ClearDisplayedOutfit",
       "symbol": "C_TransmogOutfitInfo.ClearDisplayedOutfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.CommitAndApplyAllPending",
       "symbol": "C_TransmogOutfitInfo.CommitAndApplyAllPending",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.CommitOutfitInfo",
       "symbol": "C_TransmogOutfitInfo.CommitOutfitInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.CommitPendingSituations",
       "symbol": "C_TransmogOutfitInfo.CommitPendingSituations",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetActiveOutfitID",
       "symbol": "C_TransmogOutfitInfo.GetActiveOutfitID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetAllSlotLocationInfo",
       "symbol": "C_TransmogOutfitInfo.GetAllSlotLocationInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetCollectionInfoForSlotAndOption",
       "symbol": "C_TransmogOutfitInfo.GetCollectionInfoForSlotAndOption",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID",
       "symbol": "C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetEquippedSlotOptionFromTransmogSlot",
       "symbol": "C_TransmogOutfitInfo.GetEquippedSlotOptionFromTransmogSlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetIllusionDefaultIMAIDForCollectionType",
       "symbol": "C_TransmogOutfitInfo.GetIllusionDefaultIMAIDForCollectionType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetItemModifiedAppearanceEffectiveCategory",
       "symbol": "C_TransmogOutfitInfo.GetItemModifiedAppearanceEffectiveCategory",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetLinkedSlotInfo",
       "symbol": "C_TransmogOutfitInfo.GetLinkedSlotInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetMaxNumberOfTotalOutfitsForSource",
       "symbol": "C_TransmogOutfitInfo.GetMaxNumberOfTotalOutfitsForSource",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetMaxNumberOfUsableOutfits",
       "symbol": "C_TransmogOutfitInfo.GetMaxNumberOfUsableOutfits",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetNextOutfitCost",
       "symbol": "C_TransmogOutfitInfo.GetNextOutfitCost",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetNumberOfOutfitsUnlockedForSource",
       "symbol": "C_TransmogOutfitInfo.GetNumberOfOutfitsUnlockedForSource",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetOutfitInfo",
       "symbol": "C_TransmogOutfitInfo.GetOutfitInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetOutfitSituation",
       "symbol": "C_TransmogOutfitInfo.GetOutfitSituation",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetOutfitSituationsEnabled",
       "symbol": "C_TransmogOutfitInfo.GetOutfitSituationsEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetOutfitsInfo",
       "symbol": "C_TransmogOutfitInfo.GetOutfitsInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetPendingTransmogCost",
       "symbol": "C_TransmogOutfitInfo.GetPendingTransmogCost",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetSecondarySlotState",
       "symbol": "C_TransmogOutfitInfo.GetSecondarySlotState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetSetSourcesForSlot",
       "symbol": "C_TransmogOutfitInfo.GetSetSourcesForSlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetSlotGroupInfo",
       "symbol": "C_TransmogOutfitInfo.GetSlotGroupInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetSourceIDsForSlot",
       "symbol": "C_TransmogOutfitInfo.GetSourceIDsForSlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetTransmogOutfitSlotForInventoryType",
       "symbol": "C_TransmogOutfitInfo.GetTransmogOutfitSlotForInventoryType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetTransmogOutfitSlotFromInventorySlot",
       "symbol": "C_TransmogOutfitInfo.GetTransmogOutfitSlotFromInventorySlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetUISituationCategoriesAndOptions",
       "symbol": "C_TransmogOutfitInfo.GetUISituationCategoriesAndOptions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetUnassignedAtlasForSlot",
       "symbol": "C_TransmogOutfitInfo.GetUnassignedAtlasForSlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetUnassignedDisplayAtlasForSlot",
       "symbol": "C_TransmogOutfitInfo.GetUnassignedDisplayAtlasForSlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetViewedOutfitSlotInfo",
       "symbol": "C_TransmogOutfitInfo.GetViewedOutfitSlotInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.GetWeaponOptionsForSlot",
       "symbol": "C_TransmogOutfitInfo.GetWeaponOptionsForSlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.HasPendingOutfitSituations",
       "symbol": "C_TransmogOutfitInfo.HasPendingOutfitSituations",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.HasPendingOutfitTransmogs",
       "symbol": "C_TransmogOutfitInfo.HasPendingOutfitTransmogs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.IsEquippedGearOutfitDisplayed",
       "symbol": "C_TransmogOutfitInfo.IsEquippedGearOutfitDisplayed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.IsEquippedGearOutfitLocked",
       "symbol": "C_TransmogOutfitInfo.IsEquippedGearOutfitLocked",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source models only local outfit-lock state for this query; that behavior does not establish authoritative retail 12.0.0 semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator models only local outfit-lock state for this query; local state-transition tests do not establish authoritative retail 12.0.0 semantics. The source contract provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.IsLockedOutfit",
       "symbol": "C_TransmogOutfitInfo.IsLockedOutfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source models only local outfit-lock state for this query; that behavior does not establish authoritative retail 12.0.0 semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator models only local outfit-lock state for this query; local state-transition tests do not establish authoritative retail 12.0.0 semantics. The source contract provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.IsSlotWeaponSlot",
       "symbol": "C_TransmogOutfitInfo.IsSlotWeaponSlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.IsUsableDiscountAvailable",
       "symbol": "C_TransmogOutfitInfo.IsUsableDiscountAvailable",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.IsValidTransmogOutfitName",
       "symbol": "C_TransmogOutfitInfo.IsValidTransmogOutfitName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.PickupOutfit",
       "symbol": "C_TransmogOutfitInfo.PickupOutfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ResetOutfitSituations",
       "symbol": "C_TransmogOutfitInfo.ResetOutfitSituations",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.RevertPendingTransmog",
       "symbol": "C_TransmogOutfitInfo.RevertPendingTransmog",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.SetOutfitSituationsEnabled",
       "symbol": "C_TransmogOutfitInfo.SetOutfitSituationsEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.SetOutfitToCustomSet",
       "symbol": "C_TransmogOutfitInfo.SetOutfitToCustomSet",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.SetOutfitToSet",
       "symbol": "C_TransmogOutfitInfo.SetOutfitToSet",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.SetPendingTransmog",
       "symbol": "C_TransmogOutfitInfo.SetPendingTransmog",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.SetSecondarySlotState",
       "symbol": "C_TransmogOutfitInfo.SetSecondarySlotState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.SetViewedWeaponOptionForSlot",
       "symbol": "C_TransmogOutfitInfo.SetViewedWeaponOptionForSlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.SlotHasSecondary",
       "symbol": "C_TransmogOutfitInfo.SlotHasSecondary",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitEntryInfo",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitEntryInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitEntryInfo.icon",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitEntryInfo.icon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitEntryInfo.isDisabled",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitEntryInfo.isDisabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitEntryInfo.isEventOutfit",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitEntryInfo.isEventOutfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitEntryInfo.name",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitEntryInfo.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitEntryInfo.outfitID",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitEntryInfo.outfitID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitEntryInfo.situationCategories",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitEntryInfo.situationCategories",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitLinkedSlotInfo",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitLinkedSlotInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitLinkedSlotInfo.primarySlotInfo",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitLinkedSlotInfo.primarySlotInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitLinkedSlotInfo.secondarySlotInfo",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitLinkedSlotInfo.secondarySlotInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotGroup",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotGroup",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotGroup.appearanceSlotInfo",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotGroup.appearanceSlotInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotGroup.illusionSlotInfo",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotGroup.illusionSlotInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotGroup.position",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotGroup.position",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotInfo",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotInfo.collectionType",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotInfo.collectionType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotInfo.isSecondary",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotInfo.isSecondary",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotInfo.slot",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotInfo.slot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotInfo.slotName",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotInfo.slotName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitSlotInfo.type",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitSlotInfo.type",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitWeaponCollectionInfo",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitWeaponCollectionInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitWeaponCollectionInfo.canHaveIllusions",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitWeaponCollectionInfo.canHaveIllusions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitWeaponCollectionInfo.isWeapon",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitWeaponCollectionInfo.isWeapon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitWeaponCollectionInfo.name",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitWeaponCollectionInfo.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitWeaponOptionInfo",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitWeaponOptionInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitWeaponOptionInfo.enabled",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitWeaponOptionInfo.enabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitWeaponOptionInfo.name",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitWeaponOptionInfo.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogOutfitWeaponOptionInfo.weaponOption",
       "symbol": "C_TransmogOutfitInfo.TransmogOutfitWeaponOptionInfo.weaponOption",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationCategory",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationCategory",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationCategory.description",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationCategory.description",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationCategory.groupData",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationCategory.groupData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationCategory.isRadioButton",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationCategory.isRadioButton",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationCategory.name",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationCategory.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationCategory.triggerID",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationCategory.triggerID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationGroup",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationGroup",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationGroup.groupID",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationGroup.groupID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationGroup.optionData",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationGroup.optionData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationGroup.secondaryID",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationGroup.secondaryID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationOption",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationOption",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationOption.equipmentSetID",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationOption.equipmentSetID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationOption.loadoutID",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationOption.loadoutID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationOption.situationID",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationOption.situationID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationOption.specID",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationOption.specID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationOptionData",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationOptionData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationOptionData.name",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationOptionData.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationOptionData.option",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationOptionData.option",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.TransmogSituationOptionData.value",
       "symbol": "C_TransmogOutfitInfo.TransmogSituationOptionData.value",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.UpdatePendingSituation",
       "symbol": "C_TransmogOutfitInfo.UpdatePendingSituation",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.canTransmogrify",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.canTransmogrify",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.displayType",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.displayType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.error",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.error",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.errorText",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.errorText",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.hasPending",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.hasPending",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.isPendingCollected",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.isPendingCollected",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.isTransmogrified",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.isTransmogrified",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.texture",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.texture",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.transmogID",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.transmogID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.warning",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.warning",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.warningText",
       "symbol": "C_TransmogOutfitInfo.ViewedTransmogOutfitSlotInfo.warningText",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this transmog-outfit API, structure, or field with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Current simulator source does not model this transmog-outfit API, structure, or field contract; authoritative runtime semantics are absent."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current simulator does not model this transmog-outfit API, structure, or field contract. The source register provides signature metadata only; authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close this row."
     },
     {
       "id": "added:C_TransmogSets.GetAvailableSets",

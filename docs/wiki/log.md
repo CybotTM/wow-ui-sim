@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Bound 12.0.0 C_TransmogOutfitInfo slice
+
+Classified exactly 115 added `C_TransmogOutfitInfo` API, structure, and structure-field rows as `evidence-required`/`unsafe` using checked-in source-register evidence and `src/lua_api/globals/transmog_outfit_info.rs`; tests remain empty with null commit, approval, and scope exception. The two present lock queries use only local state behavior, the other 113 rows are unmodeled, and local tests do not establish authoritative retail 12.0.0 semantics. Authoritative live evidence or a correct modeled transmog-outfit subsystem with focused tests is required, and no approval can close these rows. Totals are now **77 best-effort, 355 evidence-required, and 2978 untriaged**.
+
 # Wiki Log
 
 ## [2026-08-08] investigation | Bound 12.0.0 C_EncounterTimeline slice
