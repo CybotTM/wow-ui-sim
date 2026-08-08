@@ -1,6 +1,6 @@
 use super::{
-    assert_ptr_source_omits_qualified_methods, assert_ptr_source_omits_tokens,
-    load_full_game_ui_with_all_lod, ptr_source_files,
+    assert_ptr_source_omits_qualified_methods, assert_ptr_source_omits_qualified_symbols,
+    assert_ptr_source_omits_tokens, load_full_game_ui_with_all_lod, ptr_source_files,
 };
 
 const REMOVED_NAMEPLATE_METHODS: &[&str] = &[
@@ -36,6 +36,37 @@ const REMOVED_TRANSMOG_COLLECTION_OUTFIT_METHODS: &[&str] = &[
     "ModifyOutfit",
     "NewOutfit",
     "RenameOutfit",
+];
+
+// The register's 21 removed C_Transmog rows contain 18 Lua API keys plus
+// TransmogApplyWarningInfo and its two fields. Structure/field rows are
+// metadata, not additional C_Transmog namespace entries, so rawget covers
+// only the 18 API keys; the three metadata rows use auxiliary source checks.
+const REMOVED_TRANSMOG_METHODS: &[&str] = &[
+    "ApplyAllPending",
+    "CanTransmogItem",
+    "CanTransmogItemWithItem",
+    "ClearAllPending",
+    "ClearPending",
+    "Close",
+    "GetApplyCost",
+    "GetApplyWarnings",
+    "GetBaseCategory",
+    "GetCreatureDisplayIDForSource",
+    "GetPending",
+    "GetSlotEffectiveCategory",
+    "GetSlotInfo",
+    "GetSlotUseError",
+    "IsSlotBeingCollapsed",
+    "IsTransmogEnabled",
+    "LoadOutfit",
+    "SetPending",
+];
+
+const REMOVED_TRANSMOG_WARNING_METADATA: &[&str] = &[
+    "C_Transmog.TransmogApplyWarningInfo",
+    "C_Transmog.TransmogApplyWarningInfo.itemLink",
+    "C_Transmog.TransmogApplyWarningInfo.text",
 ];
 
 const SNAPSHOT_ONLY_SYMBOLS: &[&str] = &[
@@ -367,6 +398,72 @@ fn removed_transmog_collection_outfit_methods_are_absent_after_full_lod_load() {
     assert_eq!(
         retained_non_functions, "",
         "retained C_TransmogCollection appearance methods are not callable functions",
+    );
+}
+
+/// Proves removed C_Transmog APIs stay absent while metadata rows remain source-absent.
+#[test]
+fn removed_transmog_methods_are_absent_after_full_lod_load() {
+    // Source checks only falsify; the full-LoD runtime probe below is the proof.
+    assert_ptr_source_omits_qualified_methods("C_Transmog", REMOVED_TRANSMOG_METHODS);
+    assert_ptr_source_omits_qualified_symbols(REMOVED_TRANSMOG_WARNING_METADATA);
+
+    let env = load_full_game_ui_with_all_lod();
+    let (removed_published, retained_non_functions): (String, String) = env
+        .eval(
+            r#"
+            local removed = {
+                "ApplyAllPending",
+                "CanTransmogItem",
+                "CanTransmogItemWithItem",
+                "ClearAllPending",
+                "ClearPending",
+                "Close",
+                "GetApplyCost",
+                "GetApplyWarnings",
+                "GetBaseCategory",
+                "GetCreatureDisplayIDForSource",
+                "GetPending",
+                "GetSlotEffectiveCategory",
+                "GetSlotInfo",
+                "GetSlotUseError",
+                "IsSlotBeingCollapsed",
+                "IsTransmogEnabled",
+                "LoadOutfit",
+                "SetPending",
+            }
+            local retained = {
+                "GetAllSetAppearancesByID",
+                "GetAppliedAlteredAppearance",
+                "GetAppliedSourceID",
+                "IsAtTransmogNPC",
+                "PlayerHasTransmogByItemInfo",
+            }
+            local removedPublished = {}
+            for _, name in ipairs(removed) do
+                if rawget(C_Transmog, name) ~= nil then
+                    table.insert(removedPublished, name)
+                end
+            end
+            local retainedNonFunctions = {}
+            for _, name in ipairs(retained) do
+                if type(rawget(C_Transmog, name)) ~= "function" then
+                    table.insert(retainedNonFunctions, name)
+                end
+            end
+            return table.concat(removedPublished, ","),
+                table.concat(retainedNonFunctions, ",")
+            "#,
+        )
+        .expect("C_Transmog runtime probe succeeds");
+
+    assert_eq!(
+        removed_published, "",
+        "removed C_Transmog methods were published"
+    );
+    assert_eq!(
+        retained_non_functions, "",
+        "retained C_Transmog methods are not callable functions",
     );
 }
 

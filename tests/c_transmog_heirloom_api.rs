@@ -476,7 +476,7 @@ fn test_admin_set_transmog_for_slot() {
 }
 
 #[test]
-fn test_transmog_applied_altered_appearance_and_creature_display_lookup() {
+fn test_transmog_applied_altered_appearance() {
     let env = env();
     let result: String = env
         .eval(
@@ -485,9 +485,6 @@ fn test_transmog_applied_altered_appearance_and_creature_display_lookup() {
             A_Admin.SetTransmogForSlot(1, 42)
             local altered = C_Transmog.GetAppliedAlteredAppearance(1)
             if altered ~= 42 then return "altered=" .. tostring(altered) end
-            local displayID = C_Transmog.GetCreatureDisplayIDForSource(42)
-            if displayID ~= 42 then return "displayID=" .. tostring(displayID) end
-            if C_Transmog.GetCreatureDisplayIDForSource(999999) ~= nil then return "unknown source not nil" end
             return "ok"
             "#,
         )
@@ -506,24 +503,6 @@ fn test_transmog_player_has_transmog_by_item_info_and_is_at_npc() {
             if C_Transmog.PlayerHasTransmogByItemInfo("item:99989") then return "found uncollected item" end
             A_Admin.AddTransmog(77)
             if not C_Transmog.PlayerHasTransmogByItemInfo("item:77:0") then return "missing collected source id" end
-            return "ok"
-            "#,
-        )
-        .unwrap();
-    assert_eq!(result, "ok");
-}
-
-#[test]
-fn test_transmog_get_slot_info() {
-    let env = env();
-    let result: String = env
-        .eval(
-            r#"
-            local isTransmogrified, hasPending, isPendingCollected,
-                  canTransmogrify, cannotTransmogrifyReason, hasUndo = C_Transmog.GetSlotInfo(1)
-            if isTransmogrified then return "transmogrified" end
-            if hasPending then return "pending" end
-            if type(hasUndo) ~= "boolean" then return "hasUndo type=" .. type(hasUndo) end
             return "ok"
             "#,
         )
