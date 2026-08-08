@@ -60229,257 +60229,465 @@
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_CATEGORIES_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_CATEGORIES_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_ENTRY_TAGS_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_ENTRY_TAGS_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_FILTER_TAGS_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_FILTER_TAGS_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_NONE_TAG_ID",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_NONE_TAG_ID",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_NUM_FEATURED_BUNDLES_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_NUM_FEATURED_BUNDLES_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_NUM_FEATURED_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_NUM_FEATURED_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_NUM_FILTER_TAG_GROUPS",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_NUM_FILTER_TAG_GROUPS",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_OPTIONS_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_OPTIONS_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_OPTIONS_PER_CATEGORY_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_OPTIONS_PER_CATEGORY_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_OPTIONS_PER_SUBCATEGORY_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_OPTIONS_PER_SUBCATEGORY_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_ROOMS_CATEGORY_ID",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_ROOMS_CATEGORY_ID",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_ROOMS_SUBCATEGORY_ID",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_ROOMS_SUBCATEGORY_ID",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_SIZE_DATAGROUP_ID",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_SIZE_DATAGROUP_ID",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_SUBCATEGORIES_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_SUBCATEGORIES_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_SUBCATEGORIES_PER_CATEGORY_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_SUBCATEGORIES_PER_CATEGORY_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_TAG_GROUP_TAGS_EXPECTED",
       "symbol": "Constants.HousingCatalogConsts.HOUSING_CATALOG_TAG_GROUP_TAGS_EXPECTED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this Constants.HousingCatalogConsts constant as removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d",
+          "summary": "Current simulator bootstrap omits this removed key from Constants.HousingCatalogConsts while retaining the namespace; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source-register and current constants_values.lua evidence show the simulator bootstrap omits this key while retaining Constants.HousingCatalogConsts, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, load_addon, and provenance_only."
     },
     {
       "id": "removed:CraftingItemSlotModification.itemID",

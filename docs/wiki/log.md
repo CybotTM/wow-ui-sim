@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify 12.0.0 HousingCatalog constant removals
+
+Classified the 16 removed `Constants.HousingCatalogConsts.*` rows as `evidence-required`/`unsafe` using checked-in 12.0.0 source-register evidence plus current `src/lua_api/globals/enum_data/constants_values.lua` bootstrap evidence. The simulator bootstrap omits the keys while retaining the namespace, but source/bootstrap absence is insufficient to prove full runtime or dynamic publication, historical load-order timing, replacement semantics, or exact 12.0.0 removal. Tests/assertions remain empty with null commit, approval, scope exception, load_addon, and provenance_only. Totals are now **330 best-effort, 508 evidence-required, 2 exception-requested, and 2570 untriaged**.
+
 ## [2026-08-08] investigation | Classify 12.0.0 CAA constants
 
 Classified exactly 32 added `Constants.CAAConstants` rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/caa_constants.rs::test_patch_12_0_0_caa_constants_publish_exact_values`. The focused startup test asserts namespace publication, exact Lua type, and exact value for all 32 rows. Source implementation ancestor is `cf0908682a897f314da15dc3ae4f9c12c03cf6f0`; current source/test hashes are recorded per row. Claims exclude CVar linkage, UI behavior, localization, mutation/protection, and consumer semantics. Totals are now **330 best-effort, 492 evidence-required, 2 exception-requested, and 2586 untriaged**.
