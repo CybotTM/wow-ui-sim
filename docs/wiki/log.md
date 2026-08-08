@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Bound 12.0.0 C_CombatLogSecure slice
+
+Classified all nine added `C_CombatLogSecure` secure-only API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the permissive/fixture-backed `src/lua_api/workarounds/temporary/combat_log_state.rs` model. Tests remain empty with null commit, approval, and scope exception. Secure/taint enforcement, filtering rules, event/message payload shape, navigation semantics, and entry lifecycle remain unproven; no approval can close these rows.
+
 ## [2026-08-08] investigation | Bound 12.0.0 C_UnitAuras slice
 
 Classified exactly 10 added/changed `C_UnitAuras` API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the current `src/lua_api/globals/auras.rs` plus temporary `unit_auras_state.rs` seeded aura model. Tests remain empty with null commit, approval, and scope exception. Source signatures/defaults and adjacent seeded aura behavior do not establish defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, or GetUnitAuras sort semantics; no approval can close these rows. Totals are now **77 best-effort, 433 evidence-required, 1 exception-requested, and 2899 untriaged**.
