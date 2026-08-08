@@ -54402,7 +54402,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54433,7 +54433,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54464,7 +54464,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54591,7 +54591,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54622,7 +54622,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54669,7 +54669,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54802,7 +54802,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54839,7 +54839,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54876,7 +54876,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54913,7 +54913,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54950,7 +54950,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -54987,7 +54987,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55024,7 +55024,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55061,7 +55061,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55098,7 +55098,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55135,7 +55135,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55172,7 +55172,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55209,7 +55209,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55246,7 +55246,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55283,7 +55283,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55320,7 +55320,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55357,7 +55357,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55394,7 +55394,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55431,7 +55431,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55468,7 +55468,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55601,7 +55601,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55638,7 +55638,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55675,7 +55675,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55712,7 +55712,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55749,7 +55749,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55780,7 +55780,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55811,7 +55811,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55842,7 +55842,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55879,7 +55879,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55910,7 +55910,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55941,7 +55941,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -55972,7 +55972,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56003,7 +56003,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "One full-LoD runtime probe uses namespace-safe rawget to prove all 19 remaining removed runtime APIs are absent; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56145,7 +56145,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56182,7 +56182,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56219,7 +56219,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56256,7 +56256,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56293,7 +56293,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56330,7 +56330,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56367,7 +56367,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56404,7 +56404,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56441,7 +56441,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56478,7 +56478,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56515,7 +56515,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56552,7 +56552,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56589,7 +56589,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56626,7 +56626,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56663,7 +56663,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56700,7 +56700,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56737,7 +56737,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56774,7 +56774,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34"
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8"
         }
       ],
       "tests": [
@@ -56858,7 +56858,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56895,7 +56895,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56932,7 +56932,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56969,7 +56969,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57006,7 +57006,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57043,7 +57043,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57080,7 +57080,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57117,7 +57117,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57154,7 +57154,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -57191,7 +57191,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/strict_removals.rs",
-          "source_hash": "e580ae456520d7a8ed15af137f4277ff7fc3786bb510b3a3a2d29f08d4dfce34",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -61080,17 +61080,32 @@
       "id": "removed:IsConsumableSpell",
       "symbol": "IsConsumableSpell",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records IsConsumableSpell as removed."
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::removed_legacy_global_apis_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3471c5a4ca81d7a3ec75b2652a20623cef5a469b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD rawget absence for this removed global API; no source-scanner, replacement-behavior, or historical load-order claim is made."
     },
     {
       "id": "removed:IsCurrentAction",
@@ -61592,17 +61607,32 @@
       "id": "removed:SetRaidTargetProtected",
       "symbol": "SetRaidTargetProtected",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records SetRaidTargetProtected as removed."
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::removed_legacy_global_apis_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3471c5a4ca81d7a3ec75b2652a20623cef5a469b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD rawget absence for this removed global API; no source-scanner, replacement-behavior, or historical load-order claim is made."
     },
     {
       "id": "removed:ShowClassColorInFriendlyNameplate",
@@ -61672,17 +61702,32 @@
       "id": "removed:SpellIsAlwaysShown",
       "symbol": "SpellIsAlwaysShown",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records SpellIsAlwaysShown as removed."
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::removed_legacy_global_apis_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3471c5a4ca81d7a3ec75b2652a20623cef5a469b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD rawget absence for this removed global API; no source-scanner, replacement-behavior, or historical load-order claim is made."
     },
     {
       "id": "removed:SpellIsPriorityAura",
@@ -61720,17 +61765,32 @@
       "id": "removed:StripHyperlinks",
       "symbol": "StripHyperlinks",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records StripHyperlinks as removed."
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "source_hash": "0aa42697475df93c8845d9d6f268499d64613447a6298ee99c5c9b22bf78e3e8",
+          "summary": "Full-LoD runtime probe uses rawget(_G, name) to prove the selected removed legacy globals are absent; no source-scanner or replacement behavior is claimed."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/strict_removals.rs::removed_legacy_global_apis_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3471c5a4ca81d7a3ec75b2652a20623cef5a469b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD rawget absence for this removed global API; no source-scanner, replacement-behavior, or historical load-order claim is made."
     },
     {
       "id": "removed:TerrainBlendBakeEnable",

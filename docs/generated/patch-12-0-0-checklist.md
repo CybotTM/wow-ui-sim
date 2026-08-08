@@ -3202,7 +3202,7 @@
 3202. [untriaged] `removed:IsAttackAction` — untriaged
 3203. [untriaged] `removed:IsAutoRepeatAction` — untriaged
 3204. [untriaged] `removed:IsConsumableAction` — untriaged
-3205. [untriaged] `removed:IsConsumableSpell` — untriaged
+3205. [best-effort] `removed:IsConsumableSpell` — behavioral
 3206. [untriaged] `removed:IsCurrentAction` — untriaged
 3207. [untriaged] `removed:IsEncounterInProgress` — untriaged
 3208. [untriaged] `removed:IsEncounterLimitingResurrections` — untriaged
@@ -3234,15 +3234,15 @@
 3234. [untriaged] `removed:SHOW_DELVES_DISPLAY_UI` — untriaged
 3235. [untriaged] `removed:SetActionUIButton` — untriaged
 3236. [untriaged] `removed:SetPortraitToTexture` — untriaged
-3237. [untriaged] `removed:SetRaidTargetProtected` — untriaged
+3237. [best-effort] `removed:SetRaidTargetProtected` — behavioral
 3238. [untriaged] `removed:ShowClassColorInFriendlyNameplate` — untriaged
 3239. [untriaged] `removed:ShowClassColorInNameplate` — untriaged
 3240. [untriaged] `removed:ShowNamePlateLoseAggroFlash` — untriaged
 3241. [untriaged] `removed:SpellGetVisibilityInfo` — untriaged
-3242. [untriaged] `removed:SpellIsAlwaysShown` — untriaged
+3242. [best-effort] `removed:SpellIsAlwaysShown` — behavioral
 3243. [untriaged] `removed:SpellIsPriorityAura` — untriaged
 3244. [untriaged] `removed:SpellIsSelfBuff` — untriaged
-3245. [untriaged] `removed:StripHyperlinks` — untriaged
+3245. [best-effort] `removed:StripHyperlinks` — behavioral
 3246. [untriaged] `removed:TerrainBlendBakeEnable` — untriaged
 3247. [untriaged] `removed:TerrainUnlitShaderEnable` — untriaged
 3248. [untriaged] `removed:TransmogPendingInfo` — untriaged
