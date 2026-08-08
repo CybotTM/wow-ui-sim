@@ -26,7 +26,7 @@ The bounded 12.0.0 `C_CombatLog` slice classifies exactly 11 added API rows as e
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 203 best-effort rows (including 56 vendor-present deprecated-wrapper rows), 453 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2753 untriaged rows with null final status
+- **Status:** 210 best-effort rows (including 56 vendor-present deprecated-wrapper rows), 453 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2746 untriaged rows with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.
@@ -66,3 +66,4 @@ The register does not claim:
 - [[patch-12-0-5-api-audit]] — later probe-driven retail audit with separate evidence.
 
 The bounded remaining-removal slice classifies exactly 19 removed runtime API rows as best-effort/behavioral using one full-LoD namespace-safe rawget batch at `patch-tests/patch_12_1/strict_removals.rs::removed_remaining_runtime_apis_are_absent_after_full_lod_load`; three obsolete simulator publications were removed, 16 were already absent, source scanning is auxiliary, and no replacement behavior is inferred.
+- The bounded 12.0.0 simulator-compatibility slice classifies exactly seven removed globals `FindBaseSpellByID`, `FindFlyoutSlotBySpellID`, `FindSpellOverrideByID`, `GetBattlegroundInfo`, `PlaySound`, `SetPortraitToTexture`, and `strtrim` as best-effort/compat using the focused `patch-tests/patch_12_1/legacy_compat.rs::simulator_legacy_compat_globals_preserve_tested_behavior` proof at `abba2bd2a`; the claim is limited to tested wrapper forwarding, seeded battleground/unknown-ID behavior, numeric sound acceptance without audio fidelity, portrait masking, and default/custom trimming. SpellGetVisibilityInfo and the other unresolved simulator-published legacy globals remain open.

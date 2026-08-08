@@ -8,7 +8,7 @@ The bounded 12.0.0 `C_CombatLogSecure` slice classifies exactly nine added secur
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 203 best-effort, 453 evidence-required, 1 exception-requested, 2753 untriaged
+- **Rows:** 3410 total — 0 implemented, 210 best-effort, 453 evidence-required, 1 exception-requested, 2746 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -3185,9 +3185,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.WMOExteriorIDMeta.MaxValue` | untriaged | enum | removed | enum removed in 12.0.0. |
 | `Enum.WMOExteriorIDMeta.MinValue` | untriaged | enum | removed | enum removed in 12.0.0. |
 | `Enum.WMOExteriorIDMeta.NumValues` | untriaged | enum | removed | enum removed in 12.0.0. |
-| `FindBaseSpellByID` | untriaged | api | removed | api removed in 12.0.0. |
-| `FindFlyoutSlotBySpellID` | untriaged | api | removed | api removed in 12.0.0. |
-| `FindSpellOverrideByID` | untriaged | api | removed | api removed in 12.0.0. |
+| `FindBaseSpellByID` | best-effort | api | removed | Compatibility claim is limited to dynamic wrapper forwarding to C_SpellBook.FindBaseSpellByID; exact retail return semantics are not claimed. |
+| `FindFlyoutSlotBySpellID` | best-effort | api | removed | Compatibility claim is limited to dynamic wrapper forwarding to C_SpellBook.FindFlyoutSlotBySpellID; exact retail return semantics are not claimed. |
+| `FindSpellOverrideByID` | best-effort | api | removed | Compatibility claim is limited to dynamic wrapper forwarding to C_SpellBook.FindSpellOverrideByID; exact retail return semantics are not claimed. |
 | `ForceAllowAero` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `GetActionAutocast` | best-effort | api | removed | api removed in 12.0.0. |
 | `GetActionBarPage` | best-effort | api | removed | api removed in 12.0.0. |
@@ -3197,7 +3197,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `GetActionLossOfControlCooldown` | best-effort | api | removed | api removed in 12.0.0. |
 | `GetActionText` | best-effort | api | removed | api removed in 12.0.0. |
 | `GetActionTexture` | best-effort | api | removed | api removed in 12.0.0. |
-| `GetBattlegroundInfo` | untriaged | api | removed | api removed in 12.0.0. |
+| `GetBattlegroundInfo` | best-effort | api | removed | Compatibility claim is limited to the tested seeded Wintergrasp row and unknown-ID nil behavior; complete retail dataset/lifecycle fidelity is not claimed. |
 | `GetBonusBarIndex` | best-effort | api | removed | api removed in 12.0.0. |
 | `GetBonusBarOffset` | best-effort | api | removed | api removed in 12.0.0. |
 | `GetCurrentCombatTextEventInfo` | best-effort | api | removed | api removed in 12.0.0. |
@@ -3247,11 +3247,11 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `NameplatePersonalShowInCombat` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `NameplatePersonalShowWithTarget` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `NewCraftingOrderInfo.reagentItems` | untriaged | structure-field | removed | structure-field removed in 12.0.0. |
-| `PlaySound` | untriaged | api | removed | api removed in 12.0.0. |
+| `PlaySound` | best-effort | api | removed | Compatibility claim is limited to accepting a numeric sound ID without error; audio output fidelity is not claimed. |
 | `RegularReagentInfo.itemID` | untriaged | structure-field | removed | structure-field removed in 12.0.0. |
 | `SHOW_DELVES_DISPLAY_UI` | untriaged | event | removed | event removed in 12.0.0. |
 | `SetActionUIButton` | best-effort | api | removed | api removed in 12.0.0. |
-| `SetPortraitToTexture` | untriaged | api | removed | api removed in 12.0.0. |
+| `SetPortraitToTexture` | best-effort | api | removed | Compatibility claim is limited to the tested portrait circular mask and no duplicate mask on repeat; broader portrait semantics are not claimed. |
 | `SetRaidTargetProtected` | best-effort | api | removed | Current full-LoD rawget absence only; no source-scanner, replacement-behavior, or historical timing claim. |
 | `ShowClassColorInFriendlyNameplate` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `ShowClassColorInNameplate` | untriaged | cvar | removed | cvar removed in 12.0.0. |
@@ -3420,7 +3420,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `splashScreenBoost` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `splashScreenNormal` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `splashScreenSeason` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `strtrim` | untriaged | api | removed | api removed in 12.0.0. |
+| `strtrim` | best-effort | api | removed | Compatibility claim is limited to the tested default and custom-character trimming behavior; broader string semantics are not claimed. |
 | `trackQuestSorting` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `unlockedExpansionLandingPages` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `watchFrameBaseAlpha` | untriaged | cvar | removed | cvar removed in 12.0.0. |
@@ -3460,3 +3460,4 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 - [[patch-api-audit-manifest]] — register schema and completion contract.
 
 The bounded remaining-removal slice classifies exactly 19 removed runtime API rows as best-effort/behavioral using one full-LoD namespace-safe rawget batch at `patch-tests/patch_12_1/strict_removals.rs::removed_remaining_runtime_apis_are_absent_after_full_lod_load`; three obsolete simulator publications were removed, 16 were already absent, source scanning is auxiliary, and no replacement behavior is inferred.
+- The bounded 12.0.0 simulator-compatibility slice classifies exactly seven removed globals `FindBaseSpellByID`, `FindFlyoutSlotBySpellID`, `FindSpellOverrideByID`, `GetBattlegroundInfo`, `PlaySound`, `SetPortraitToTexture`, and `strtrim` as best-effort/compat using the focused `patch-tests/patch_12_1/legacy_compat.rs::simulator_legacy_compat_globals_preserve_tested_behavior` proof at `abba2bd2a`; the claim is limited to tested wrapper forwarding, seeded battleground/unknown-ID behavior, numeric sound acceptance without audio fidelity, portrait masking, and default/custom trimming. SpellGetVisibilityInfo and the other unresolved simulator-published legacy globals remain open.

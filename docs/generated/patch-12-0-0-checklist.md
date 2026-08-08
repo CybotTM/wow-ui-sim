@@ -3167,9 +3167,9 @@
 3167. [untriaged] `removed:Enum.WMOExteriorIDMeta.MaxValue` — untriaged
 3168. [untriaged] `removed:Enum.WMOExteriorIDMeta.MinValue` — untriaged
 3169. [untriaged] `removed:Enum.WMOExteriorIDMeta.NumValues` — untriaged
-3170. [untriaged] `removed:FindBaseSpellByID` — untriaged
-3171. [untriaged] `removed:FindFlyoutSlotBySpellID` — untriaged
-3172. [untriaged] `removed:FindSpellOverrideByID` — untriaged
+3170. [best-effort] `removed:FindBaseSpellByID` — compat
+3171. [best-effort] `removed:FindFlyoutSlotBySpellID` — compat
+3172. [best-effort] `removed:FindSpellOverrideByID` — compat
 3173. [untriaged] `removed:ForceAllowAero` — untriaged
 3174. [best-effort] `removed:GetActionAutocast` — vendor-present
 3175. [best-effort] `removed:GetActionBarPage` — vendor-present
@@ -3179,7 +3179,7 @@
 3179. [best-effort] `removed:GetActionLossOfControlCooldown` — vendor-present
 3180. [best-effort] `removed:GetActionText` — vendor-present
 3181. [best-effort] `removed:GetActionTexture` — vendor-present
-3182. [untriaged] `removed:GetBattlegroundInfo` — untriaged
+3182. [best-effort] `removed:GetBattlegroundInfo` — compat
 3183. [best-effort] `removed:GetBonusBarIndex` — vendor-present
 3184. [best-effort] `removed:GetBonusBarOffset` — vendor-present
 3185. [best-effort] `removed:GetCurrentCombatTextEventInfo` — vendor-present
@@ -3229,11 +3229,11 @@
 3229. [untriaged] `removed:NameplatePersonalShowInCombat` — untriaged
 3230. [untriaged] `removed:NameplatePersonalShowWithTarget` — untriaged
 3231. [untriaged] `removed:NewCraftingOrderInfo.reagentItems` — untriaged
-3232. [untriaged] `removed:PlaySound` — untriaged
+3232. [best-effort] `removed:PlaySound` — compat
 3233. [untriaged] `removed:RegularReagentInfo.itemID` — untriaged
 3234. [untriaged] `removed:SHOW_DELVES_DISPLAY_UI` — untriaged
 3235. [best-effort] `removed:SetActionUIButton` — vendor-present
-3236. [untriaged] `removed:SetPortraitToTexture` — untriaged
+3236. [best-effort] `removed:SetPortraitToTexture` — compat
 3237. [best-effort] `removed:SetRaidTargetProtected` — behavioral
 3238. [untriaged] `removed:ShowClassColorInFriendlyNameplate` — untriaged
 3239. [untriaged] `removed:ShowClassColorInNameplate` — untriaged
@@ -3402,7 +3402,7 @@
 3402. [untriaged] `removed:splashScreenBoost` — untriaged
 3403. [untriaged] `removed:splashScreenNormal` — untriaged
 3404. [untriaged] `removed:splashScreenSeason` — untriaged
-3405. [untriaged] `removed:strtrim` — untriaged
+3405. [best-effort] `removed:strtrim` — compat
 3406. [untriaged] `removed:trackQuestSorting` — untriaged
 3407. [untriaged] `removed:unlockedExpansionLandingPages` — untriaged
 3408. [untriaged] `removed:watchFrameBaseAlpha` — untriaged
