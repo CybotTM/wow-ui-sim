@@ -13105,161 +13105,291 @@
       "id": "added:C_Transmog.TransmogSlotVisualInfo",
       "symbol": "C_Transmog.TransmogSlotVisualInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo structure and names only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo.appliedSourceID",
       "symbol": "C_Transmog.TransmogSlotVisualInfo.appliedSourceID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo.appliedSourceID structure field name only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo.appliedVisualID",
       "symbol": "C_Transmog.TransmogSlotVisualInfo.appliedVisualID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo.appliedVisualID structure field name only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo.baseSourceID",
       "symbol": "C_Transmog.TransmogSlotVisualInfo.baseSourceID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo.baseSourceID structure field name only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo.baseVisualID",
       "symbol": "C_Transmog.TransmogSlotVisualInfo.baseVisualID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo.baseVisualID structure field name only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo.hasUndo",
       "symbol": "C_Transmog.TransmogSlotVisualInfo.hasUndo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo.hasUndo structure field name only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo.isHideVisual",
       "symbol": "C_Transmog.TransmogSlotVisualInfo.isHideVisual",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo.isHideVisual structure field name only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo.itemSubclass",
       "symbol": "C_Transmog.TransmogSlotVisualInfo.itemSubclass",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo.itemSubclass structure field name only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo.pendingSourceID",
       "symbol": "C_Transmog.TransmogSlotVisualInfo.pendingSourceID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo.pendingSourceID structure field name only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_Transmog.TransmogSlotVisualInfo.pendingVisualID",
       "symbol": "C_Transmog.TransmogSlotVisualInfo.pendingVisualID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this added C_Transmog.TransmogSlotVisualInfo.pendingVisualID structure field name only; it does not establish field values or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "added:C_TransmogCollection.DeleteCustomSet",
@@ -48491,17 +48621,30 @@
       "id": "changed:C_Transmog.GetSlotVisualInfo",
       "symbol": "C_Transmog.GetSlotVisualInfo",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence records this changed C_Transmog.GetSlotVisualInfo API and its before/after signature metadata, including the new C_Transmog.TransmogSlotVisualInfo return structure; it does not establish runtime slot, pending, or apply semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_Transmog has no modeled slot-visual/pending/apply state or direct behavioral proof for this row; the source contract and partial surface do not establish authoritative retail 12.0.0 semantics. No approval can close the row."
     },
     {
       "id": "changed:C_TransmogCollection.GetAppearanceSourceInfo",

@@ -4,6 +4,10 @@ Classified exactly 115 added `C_TransmogOutfitInfo` API, structure, and structur
 
 # Wiki Log
 
+## [2026-08-08] investigation | Bound 12.0.0 C_Transmog slice
+
+Classified exactly 11 non-removed `C_Transmog` structure/API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the current `src/lua_api/globals/missing_surface/transmog.rs` partial surface; tests remain empty with null commit, approval, and scope exception. The source records only names and the `GetSlotVisualInfo` signature transition, while no direct slot-visual/pending/apply state model or behavioral tests establish authoritative retail 12.0.0 semantics. The 21 removed C_Transmog rows remain untriaged because removal direction alone does not establish replacement behavior; no unrelated collection/outfit tests were used and no approval can close these rows. Totals are now **77 best-effort, 372 evidence-required, 1 exception-requested, and 2960 untriaged**.
+
 ## [2026-08-08] investigation | Bound 12.0.0 C_NamePlate additions
 
 Classified six added 2D `C_NamePlate`/`C_NamePlateManager` APIs as `evidence-required`/`unsafe` because the current permanent shim has no modeled nameplate-manager state and exact 12.0.0 semantics remain unproven. Classified `C_NamePlateManager.IsNamePlateUnitBehindCamera` as `exception-requested`/`impossible` under the already-decided permanent no-3D project scope; this is not a user approval request. The 19 removed C_NamePlate rows remain untriaged because removal direction alone does not establish replacement behavior. Tests remain empty with null commit, approval, and scope exception except for the allowlisted scope exception. Totals are now **77 best-effort, 361 evidence-required, 1 exception-requested, and 2971 untriaged**.
