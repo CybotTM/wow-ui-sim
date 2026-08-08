@@ -27883,65 +27883,149 @@
       "id": "added:Enum.CooldownViewerAddAlertStatus.DuplicateAlert",
       "symbol": "Enum.CooldownViewerAddAlertStatus.DuplicateAlert",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAddAlertStatus.DuplicateAlert as an added enum occurrence with exact 12.0.0 value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.CooldownViewerAddAlertStatus.DuplicateAlert with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.CooldownViewerAddAlertStatus namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact 12.0.0 member value. Alert creation, validation, duplicate handling, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAddAlertStatus.InvalidAlertType",
       "symbol": "Enum.CooldownViewerAddAlertStatus.InvalidAlertType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAddAlertStatus.InvalidAlertType as an added enum occurrence with exact 12.0.0 value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.CooldownViewerAddAlertStatus.InvalidAlertType with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.CooldownViewerAddAlertStatus namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact 12.0.0 member value. Alert creation, validation, duplicate handling, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAddAlertStatus.InvalidEventType",
       "symbol": "Enum.CooldownViewerAddAlertStatus.InvalidEventType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAddAlertStatus.InvalidEventType as an added enum occurrence with exact 12.0.0 value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.CooldownViewerAddAlertStatus.InvalidEventType with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.CooldownViewerAddAlertStatus namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact 12.0.0 member value. Alert creation, validation, duplicate handling, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAddAlertStatus.Success",
       "symbol": "Enum.CooldownViewerAddAlertStatus.Success",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAddAlertStatus.Success as an added enum occurrence with exact 12.0.0 value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.CooldownViewerAddAlertStatus.Success with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.CooldownViewerAddAlertStatus namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact 12.0.0 member value. Alert creation, validation, duplicate handling, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAddAlertStatusMeta.MaxValue",
@@ -27995,65 +28079,149 @@
       "id": "added:Enum.CooldownViewerAlertEventType.Available",
       "symbol": "Enum.CooldownViewerAlertEventType.Available",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAlertEventType.Available as an added enum occurrence with exact 12.0.0 value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.CooldownViewerAlertEventType.Available with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.CooldownViewerAlertEventType namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact value for the four 12.0.0 member rows. The current table also contains later members; exact historical table membership, event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventType.ChargeGained",
       "symbol": "Enum.CooldownViewerAlertEventType.ChargeGained",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAlertEventType.ChargeGained as an added enum occurrence with exact 12.0.0 value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.CooldownViewerAlertEventType.ChargeGained with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.CooldownViewerAlertEventType namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact value for the four 12.0.0 member rows. The current table also contains later members; exact historical table membership, event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventType.OnCooldown",
       "symbol": "Enum.CooldownViewerAlertEventType.OnCooldown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAlertEventType.OnCooldown as an added enum occurrence with exact 12.0.0 value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.CooldownViewerAlertEventType.OnCooldown with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.CooldownViewerAlertEventType namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact value for the four 12.0.0 member rows. The current table also contains later members; exact historical table membership, event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventType.PandemicTime",
       "symbol": "Enum.CooldownViewerAlertEventType.PandemicTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAlertEventType.PandemicTime as an added enum occurrence with exact 12.0.0 value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.CooldownViewerAlertEventType.PandemicTime with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.CooldownViewerAlertEventType namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact value for the four 12.0.0 member rows. The current table also contains later members; exact historical table membership, event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventTypeMeta.MaxValue",
@@ -30789,65 +30957,149 @@
       "id": "added:Enum.DamageMeterStyle.Bordered",
       "symbol": "Enum.DamageMeterStyle.Bordered",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.DamageMeterStyle.Bordered as an added enum occurrence with exact 12.0.0 value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "summary": "Current startup enum publication defines Enum.DamageMeterStyle.Bordered with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/edit_mode_api/enums.rs",
+          "source_hash": "0cf72258f30eb876df6cd40b77a968e4b04aafcc032b915a020146658fe10526",
+          "summary": "Focused enum test asserts the Enum.DamageMeterStyle namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "tests/edit_mode_api/enums.rs::edit_mode_profile_option_enums_match_blizzard_docs"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4a7d70f9d99145fd3496c4b2b3e1f8bf4be63c75",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication and exact 12.0.0 member values. Damage-meter rendering, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.DamageMeterStyle.Default",
       "symbol": "Enum.DamageMeterStyle.Default",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.DamageMeterStyle.Default as an added enum occurrence with exact 12.0.0 value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "summary": "Current startup enum publication defines Enum.DamageMeterStyle.Default with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/edit_mode_api/enums.rs",
+          "source_hash": "0cf72258f30eb876df6cd40b77a968e4b04aafcc032b915a020146658fe10526",
+          "summary": "Focused enum test asserts the Enum.DamageMeterStyle namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "tests/edit_mode_api/enums.rs::edit_mode_profile_option_enums_match_blizzard_docs"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4a7d70f9d99145fd3496c4b2b3e1f8bf4be63c75",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication and exact 12.0.0 member values. Damage-meter rendering, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.DamageMeterStyle.FullBackground",
       "symbol": "Enum.DamageMeterStyle.FullBackground",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.DamageMeterStyle.FullBackground as an added enum occurrence with exact 12.0.0 value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "summary": "Current startup enum publication defines Enum.DamageMeterStyle.FullBackground with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/edit_mode_api/enums.rs",
+          "source_hash": "0cf72258f30eb876df6cd40b77a968e4b04aafcc032b915a020146658fe10526",
+          "summary": "Focused enum test asserts the Enum.DamageMeterStyle namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "tests/edit_mode_api/enums.rs::edit_mode_profile_option_enums_match_blizzard_docs"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4a7d70f9d99145fd3496c4b2b3e1f8bf4be63c75",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication and exact 12.0.0 member values. Damage-meter rendering, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.DamageMeterStyle.Thin",
       "symbol": "Enum.DamageMeterStyle.Thin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.DamageMeterStyle.Thin as an added enum occurrence with exact 12.0.0 value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "summary": "Current startup enum publication defines Enum.DamageMeterStyle.Thin with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/edit_mode_api/enums.rs",
+          "source_hash": "0cf72258f30eb876df6cd40b77a968e4b04aafcc032b915a020146658fe10526",
+          "summary": "Focused enum test asserts the Enum.DamageMeterStyle namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "tests/edit_mode_api/enums.rs::edit_mode_profile_option_enums_match_blizzard_docs"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4a7d70f9d99145fd3496c4b2b3e1f8bf4be63c75",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication and exact 12.0.0 member values. Damage-meter rendering, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.DamageMeterStyleMeta.MaxValue",
@@ -32351,65 +32603,149 @@
       "id": "added:Enum.EditModeEncounterEventsSystemIndices.CriticalWarnings",
       "symbol": "Enum.EditModeEncounterEventsSystemIndices.CriticalWarnings",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeEncounterEventsSystemIndices.CriticalWarnings as an added enum occurrence with exact 12.0.0 value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "summary": "Current startup enum publication defines Enum.EditModeEncounterEventsSystemIndices.CriticalWarnings with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/edit_mode_api/enums.rs",
+          "source_hash": "0cf72258f30eb876df6cd40b77a968e4b04aafcc032b915a020146658fe10526",
+          "summary": "Focused enum test asserts the Enum.EditModeEncounterEventsSystemIndices namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "tests/edit_mode_api/enums.rs::edit_mode_profile_option_enums_match_blizzard_docs"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication and exact 12.0.0 member values. Edit Mode system selection, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EditModeEncounterEventsSystemIndices.MediumWarnings",
       "symbol": "Enum.EditModeEncounterEventsSystemIndices.MediumWarnings",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeEncounterEventsSystemIndices.MediumWarnings as an added enum occurrence with exact 12.0.0 value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "summary": "Current startup enum publication defines Enum.EditModeEncounterEventsSystemIndices.MediumWarnings with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/edit_mode_api/enums.rs",
+          "source_hash": "0cf72258f30eb876df6cd40b77a968e4b04aafcc032b915a020146658fe10526",
+          "summary": "Focused enum test asserts the Enum.EditModeEncounterEventsSystemIndices namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "tests/edit_mode_api/enums.rs::edit_mode_profile_option_enums_match_blizzard_docs"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication and exact 12.0.0 member values. Edit Mode system selection, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EditModeEncounterEventsSystemIndices.NormalWarnings",
       "symbol": "Enum.EditModeEncounterEventsSystemIndices.NormalWarnings",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeEncounterEventsSystemIndices.NormalWarnings as an added enum occurrence with exact 12.0.0 value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "summary": "Current startup enum publication defines Enum.EditModeEncounterEventsSystemIndices.NormalWarnings with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/edit_mode_api/enums.rs",
+          "source_hash": "0cf72258f30eb876df6cd40b77a968e4b04aafcc032b915a020146658fe10526",
+          "summary": "Focused enum test asserts the Enum.EditModeEncounterEventsSystemIndices namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "tests/edit_mode_api/enums.rs::edit_mode_profile_option_enums_match_blizzard_docs"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication and exact 12.0.0 member values. Edit Mode system selection, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EditModeEncounterEventsSystemIndices.Timeline",
       "symbol": "Enum.EditModeEncounterEventsSystemIndices.Timeline",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeEncounterEventsSystemIndices.Timeline as an added enum occurrence with exact 12.0.0 value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "summary": "Current startup enum publication defines Enum.EditModeEncounterEventsSystemIndices.Timeline with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/edit_mode_api/enums.rs",
+          "source_hash": "0cf72258f30eb876df6cd40b77a968e4b04aafcc032b915a020146658fe10526",
+          "summary": "Focused enum test asserts the Enum.EditModeEncounterEventsSystemIndices namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "tests/edit_mode_api/enums.rs::edit_mode_profile_option_enums_match_blizzard_docs"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "3f763a3449a31710b6ff0a4add6b83f99cb694d1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication and exact 12.0.0 member values. Edit Mode system selection, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EditModeEncounterEventsSystemIndicesMeta.MaxValue",
@@ -34710,65 +35046,149 @@
       "id": "added:Enum.HouseExteriorWMODataFlags.AllowedInAllianceNeighborhoods",
       "symbol": "Enum.HouseExteriorWMODataFlags.AllowedInAllianceNeighborhoods",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HouseExteriorWMODataFlags.AllowedInAllianceNeighborhoods as an added enum occurrence with exact 12.0.0 value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.HouseExteriorWMODataFlags.AllowedInAllianceNeighborhoods with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.HouseExteriorWMODataFlags namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact 12.0.0 bit-flag values. Bitwise composition, neighborhood availability, housing consumers, server state, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.HouseExteriorWMODataFlags.AllowedInHordeNeighborhoods",
       "symbol": "Enum.HouseExteriorWMODataFlags.AllowedInHordeNeighborhoods",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HouseExteriorWMODataFlags.AllowedInHordeNeighborhoods as an added enum occurrence with exact 12.0.0 value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.HouseExteriorWMODataFlags.AllowedInHordeNeighborhoods with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.HouseExteriorWMODataFlags namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact 12.0.0 bit-flag values. Bitwise composition, neighborhood availability, housing consumers, server state, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.HouseExteriorWMODataFlags.None",
       "symbol": "Enum.HouseExteriorWMODataFlags.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HouseExteriorWMODataFlags.None as an added enum occurrence with exact 12.0.0 value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.HouseExteriorWMODataFlags.None with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.HouseExteriorWMODataFlags namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact 12.0.0 bit-flag values. Bitwise composition, neighborhood availability, housing consumers, server state, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.HouseExteriorWMODataFlags.UnlockedByDefault",
       "symbol": "Enum.HouseExteriorWMODataFlags.UnlockedByDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HouseExteriorWMODataFlags.UnlockedByDefault as an added enum occurrence with exact 12.0.0 value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum publication defines Enum.HouseExteriorWMODataFlags.UnlockedByDefault with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
+          "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
+          "summary": "Focused enum test asserts the Enum.HouseExteriorWMODataFlags namespace and exact source-register member values used by this bounded classification."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact 12.0.0 bit-flag values. Bitwise composition, neighborhood availability, housing consumers, server state, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.HouseExteriorWMODataFlagsMeta.MaxValue",
