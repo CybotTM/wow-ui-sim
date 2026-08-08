@@ -10293,369 +10293,668 @@
       "id": "added:C_Secrets.GetPowerTypeSecrecy",
       "symbol": "C_Secrets.GetPowerTypeSecrecy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.GetSpellAuraSecrecy",
       "symbol": "C_Secrets.GetSpellAuraSecrecy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.GetSpellCastSecrecy",
       "symbol": "C_Secrets.GetSpellCastSecrecy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.GetSpellCooldownSecrecy",
       "symbol": "C_Secrets.GetSpellCooldownSecrecy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.HasSecretRestrictions",
       "symbol": "C_Secrets.HasSecretRestrictions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldActionCooldownBeSecret",
       "symbol": "C_Secrets.ShouldActionCooldownBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldAurasBeSecret",
       "symbol": "C_Secrets.ShouldAurasBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldCooldownsBeSecret",
       "symbol": "C_Secrets.ShouldCooldownsBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldSpellAuraBeSecret",
       "symbol": "C_Secrets.ShouldSpellAuraBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldSpellBookItemCooldownBeSecret",
       "symbol": "C_Secrets.ShouldSpellBookItemCooldownBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldSpellCooldownBeSecret",
       "symbol": "C_Secrets.ShouldSpellCooldownBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldTotemSlotBeSecret",
       "symbol": "C_Secrets.ShouldTotemSlotBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldTotemSpellBeSecret",
       "symbol": "C_Secrets.ShouldTotemSpellBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitAuraIndexBeSecret",
       "symbol": "C_Secrets.ShouldUnitAuraIndexBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitAuraInstanceBeSecret",
       "symbol": "C_Secrets.ShouldUnitAuraInstanceBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitAuraSlotBeSecret",
       "symbol": "C_Secrets.ShouldUnitAuraSlotBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitComparisonBeSecret",
       "symbol": "C_Secrets.ShouldUnitComparisonBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitHealthMaxBeSecret",
       "symbol": "C_Secrets.ShouldUnitHealthMaxBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitIdentityBeSecret",
       "symbol": "C_Secrets.ShouldUnitIdentityBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitPowerBeSecret",
       "symbol": "C_Secrets.ShouldUnitPowerBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitPowerMaxBeSecret",
       "symbol": "C_Secrets.ShouldUnitPowerMaxBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitSpellCastBeSecret",
       "symbol": "C_Secrets.ShouldUnitSpellCastBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_Secrets.ShouldUnitSpellCastingBeSecret",
       "symbol": "C_Secrets.ShouldUnitSpellCastingBeSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current registration surface does not register/model C_Secrets or this method; this is not an exhaustive lexical/runtime absence claim. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed."
     },
     {
       "id": "added:C_SecureTransfer.Cancel",

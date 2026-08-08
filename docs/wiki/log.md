@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-08-08] investigation | Bound 12.0.0 C_Secrets slice
+
+Classified exactly 23 added `C_Secrets` API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the examined current `src/lua_api/globals/register.rs` surface; tests remain empty with null commit, approval, and scope exception. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed. Totals are now **77 best-effort, 170 evidence-required, and 3163 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 C_EncounterWarnings slice
 
 Classified exactly 19 added `C_EncounterWarnings` structure/API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and clean current `encounter_warnings.rs`; tests remain empty with null commit, approval, and scope exception. `GetEditModeWarningInfo`/current structure fields are fabricated preview/static payload behavior, `PlaySound` is a no-op, and the other three methods lack examined registration; exact state, payload meanings, feature flags, severity sound mapping, and audio playback require authoritative evidence or a correct modeled subsystem/test. Totals are now **77 best-effort, 147 evidence-required, and 3186 untriaged**.
