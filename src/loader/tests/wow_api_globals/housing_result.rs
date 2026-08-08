@@ -121,6 +121,18 @@ fn test_patch_12_0_0_housing_result_values() {
                     return name .. ":value=" .. tostring(actual)
                 end
             end
+
+            local metadata = Enum.HousingResultMeta
+            local expected_metadata = {{
+                MaxValue = 89,
+                NumValues = 90,
+            }}
+            for name, value in pairs(expected_metadata) do
+                local actual = metadata[name]
+                if type(actual) ~= "number" or actual ~= value then
+                    return "metadata." .. name .. "=" .. tostring(actual)
+                end
+            end
             return "ok"
         "#,
         expected_lua = expected_lua,

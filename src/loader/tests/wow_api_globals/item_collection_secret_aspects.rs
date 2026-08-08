@@ -23,6 +23,10 @@ const ITEM_COLLECTION_TYPE_VALUES: &[(&str, i64)] = &[
 
 const ITEM_COLLECTION_TYPE_META_VALUES: &[(&str, i64)] = &[("MaxValue", 13), ("NumValues", 14)];
 
+#[cfg(not(feature = "retail-12-0-5"))]
+const SECRET_ASPECT_META_12_0_0_VALUES: &[(&str, i64)] =
+    &[("MaxValue", 262_144), ("MinValue", 1), ("NumValues", 24)];
+
 const SECRET_ASPECT_VALUES: &[(&str, i64)] = &[
     ("Alpha", 128),
     ("BarValue", 16384),
@@ -96,4 +100,61 @@ fn test_patch_12_0_0_item_collection_and_secret_aspect_values() {
         ITEM_COLLECTION_TYPE_META_VALUES,
     );
     assert_numeric_namespace(&env, "Enum.SecretAspect", SECRET_ASPECT_VALUES);
+}
+
+#[cfg(not(feature = "retail-12-0-5"))]
+#[test]
+fn test_patch_12_0_0_secret_aspect_epoch_values() {
+    let env = WowLuaEnv::new().unwrap();
+    assert_numeric_namespace(
+        &env,
+        "Enum.SecretAspectMeta",
+        SECRET_ASPECT_META_12_0_0_VALUES,
+    );
+    let result: String = env
+        .eval(
+            r#"
+                local count = 0
+                for _ in pairs(Enum.SecretAspect) do
+                    count = count + 1
+                end
+                if count ~= 24 then
+                    return "count=" .. tostring(count)
+                end
+                if rawget(Enum.SecretAspect, "Attributes") ~= nil then
+                    return "Attributes=" .. tostring(Enum.SecretAspect.Attributes)
+                end
+                if rawget(Enum.SecretAspect, "CooldownStyle") ~= nil then
+                    return "CooldownStyle=" .. tostring(Enum.SecretAspect.CooldownStyle)
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "SecretAspect did not match the 12.0.0 epoch");
+}
+
+#[cfg(feature = "retail-12-0-5")]
+#[test]
+fn test_later_retail_secret_aspect_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local aspects = Enum.SecretAspect
+                local metadata = Enum.SecretAspectMeta
+                if aspects.Attributes ~= 1 then
+                    return "Attributes=" .. tostring(aspects.Attributes)
+                end
+                if aspects.CooldownStyle ~= 524288 then
+                    return "CooldownStyle=" .. tostring(aspects.CooldownStyle)
+                end
+                if metadata.MaxValue ~= 524288 or metadata.MinValue ~= 1 or metadata.NumValues ~= 26 then
+                    return "metadata=" .. tostring(metadata.MaxValue) .. "/" .. tostring(metadata.MinValue) .. "/" .. tostring(metadata.NumValues)
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "later retail SecretAspect values changed");
 }

@@ -17,6 +17,13 @@ Enum.EncounterEventFlagsMeta = {
     MinValue = 1,
     NumValues = 1,
 }
+Enum.SecretAspect.Attributes = nil
+Enum.SecretAspect.CooldownStyle = nil
+Enum.SecretAspectMeta = {
+    MaxValue = 262144,
+    MinValue = 1,
+    NumValues = 24,
+}
 "#;
 const MISSING_CONSTANTS_LUA: &str = include_str!("../globals/enum_data/missing_constants.lua");
 const CONSTANTS_VALUES_LUA: &str = include_str!("../globals/enum_data/constants_values.lua");

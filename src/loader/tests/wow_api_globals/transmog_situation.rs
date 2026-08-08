@@ -55,6 +55,19 @@ fn test_patch_12_0_0_transmog_situation_enum_values() {
                     return name .. ":value=" .. tostring(actual)
                 end
             end
+
+            local metadata = Enum.TransmogSituationMeta
+            local expected_metadata = {{
+                MaxValue = 21,
+                MinValue = 0,
+                NumValues = 22,
+            }}
+            for name, value in pairs(expected_metadata) do
+                local actual = metadata[name]
+                if type(actual) ~= "number" or actual ~= value then
+                    return "metadata." .. name .. "=" .. tostring(actual)
+                end
+            end
             return "ok"
         "#,
         expected_lua = expected_lua,

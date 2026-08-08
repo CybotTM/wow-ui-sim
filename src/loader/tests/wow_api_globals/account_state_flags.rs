@@ -147,4 +147,32 @@ fn test_patch_12_0_0_account_state_enum_values() {
     let env = WowLuaEnv::new().unwrap();
     assert_enum_family(&env, "AccountStateLoadedFlags", ACCOUNT_STATE_LOADED_FLAGS);
     assert_enum_family(&env, "CreateAllAccountData", CREATE_ALL_ACCOUNT_DATA);
+
+    let metadata_result: String = env
+        .eval(
+            r#"
+                local expected = {
+                    AccountStateLoadedFlagsMeta = 48,
+                    CreateAllAccountDataMeta = 48,
+                }
+                for namespace_name, value in pairs(expected) do
+                    local namespace = Enum[namespace_name]
+                    if type(namespace) ~= "table" then
+                        return namespace_name .. ":namespace=" .. type(namespace)
+                    end
+                    if type(namespace.NumValues) ~= "number" then
+                        return namespace_name .. ".NumValues:type=" .. type(namespace.NumValues)
+                    end
+                    if namespace.NumValues ~= value then
+                        return namespace_name .. ".NumValues:value=" .. tostring(namespace.NumValues)
+                    end
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        metadata_result, "ok",
+        "account-state metadata did not match the 12.0.0 source register"
+    );
 }
