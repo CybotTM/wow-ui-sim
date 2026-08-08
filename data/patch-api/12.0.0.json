@@ -44080,17 +44080,40 @@
       "id": "added:Model.SetUseGBuffer",
       "symbol": "Model.SetUseGBuffer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "exception-requested",
+      "resolution": "impossible",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Model.SetUseGBuffer as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/model.rs",
+          "source_hash": "4b35ea7e8547c92672a68e4b7e585473bba59e8a49736dbceb385e63b4c26b4b",
+          "summary": "Current model widget surface is a stub-only 3D compatibility surface; no faithful G-buffer/model rendering behavior is implemented."
+        },
+        {
+          "kind": "source",
+          "reference": "AGENTS.md",
+          "source_hash": "896a0b3a06d8bc1ae39c3525515d4978014cd43c10b8d866d4079274022e1bff",
+          "summary": "AGENTS.md defines the permanent no-3D project scope; Model and related 3D widget behavior is intentionally out of scope."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
-      "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "scope_exception": {
+        "rule": "permanent-project-scope",
+        "reference": "AGENTS.md#intentional-gaps",
+        "summary": "Permanent no-3D project scope excludes direct Model G-buffer behavior."
+      },
+      "notes": "Repository scope exception: faithful Model.SetUseGBuffer behavior requires the excluded 3D/model rendering subsystem. This is an already-decided permanent no-3D scope exception, not a user approval request; no callability or stub behavior is claimed."
     },
     {
       "id": "added:NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED",
@@ -44368,17 +44391,30 @@
       "id": "added:Region.IsAnchoringSecret",
       "symbol": "Region.IsAnchoringSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Region.IsAnchoringSecret as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/misc/secret.rs",
+          "source_hash": "1446b48ea786a3f13384bc61d1ffec835c53e56d020858f048bdb10640896597",
+          "summary": "Current simulator derives anchoring-secret state from its local permissive secret/protection flags; authoritative retail anchoring-secret semantics are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: current local flag behavior does not establish the retail anchoring-secret relationship, secret propagation, authorization, lifecycle, or exact edge semantics; authoritative evidence or a correct security model/test is required. Tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:Region.SetAlphaFromBoolean",
@@ -45164,81 +45200,146 @@
       "id": "added:UIObject.HasAnySecretAspect",
       "symbol": "UIObject.HasAnySecretAspect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records UIObject.HasAnySecretAspect as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/misc/secret.rs",
+          "source_hash": "1446b48ea786a3f13384bc61d1ffec835c53e56d020858f048bdb10640896597",
+          "summary": "Current simulator aggregates only its local secret-value and anchoring-restriction flags; authoritative secret-aspect aggregation is not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: exact secret-aspect aggregation, aspect propagation, security/taint interaction, lifecycle, and edge semantics are unproven; current frame-state tests demonstrate simulator consistency only. Authoritative evidence or a correct security model/test is required. Tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UIObject.HasSecretAspect",
       "symbol": "UIObject.HasSecretAspect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records UIObject.HasSecretAspect as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/misc/secret.rs",
+          "source_hash": "1446b48ea786a3f13384bc61d1ffec835c53e56d020858f048bdb10640896597",
+          "summary": "Current simulator recognizes only a narrow local aspect mapping; authoritative Enum.SecretAspect values, combinations, and propagation are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: exact Enum.SecretAspect mapping, combinations, propagation, authorization, lifecycle, and edge semantics are unproven; current frame-state tests demonstrate simulator consistency only. Authoritative evidence or a correct security model/test is required. Tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UIObject.HasSecretValues",
       "symbol": "UIObject.HasSecretValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records UIObject.HasSecretValues as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/misc/secret.rs",
+          "source_hash": "1446b48ea786a3f13384bc61d1ffec835c53e56d020858f048bdb10640896597",
+          "summary": "Current simulator reports a local flag-derived secret-value state; authoritative secret-value propagation and taint semantics are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: exact secret-value propagation, source/consumer relationships, authorization, lifecycle, and edge semantics are unproven; current frame-state tests demonstrate simulator consistency only. Authoritative evidence or a correct security model/test is required. Tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UIObject.IsPreventingSecretValues",
       "symbol": "UIObject.IsPreventingSecretValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records UIObject.IsPreventingSecretValues as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/misc/secret.rs",
+          "source_hash": "1446b48ea786a3f13384bc61d1ffec835c53e56d020858f048bdb10640896597",
+          "summary": "Current simulator reads a local prevention flag; authoritative prevention authorization, propagation, and lifecycle semantics are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: exact prevention authorization, propagation, lifecycle, interaction with secret values/aspects, and edge semantics are unproven; current frame-state tests demonstrate simulator consistency only. Authoritative evidence or a correct security model/test is required. Tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UIObject.SetPreventSecretValues",
       "symbol": "UIObject.SetPreventSecretValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records UIObject.SetPreventSecretValues as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/misc/secret.rs",
+          "source_hash": "1446b48ea786a3f13384bc61d1ffec835c53e56d020858f048bdb10640896597",
+          "summary": "Current simulator mutates only a local prevention flag; authoritative secure authorization, propagation, and lifecycle semantics are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: exact secure authorization, propagation, lifecycle, interaction with secret values/aspects, and edge semantics are unproven; current frame-state tests demonstrate simulator consistency only. Authoritative evidence or a correct security model/test is required. Tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:UNIT_DIED",

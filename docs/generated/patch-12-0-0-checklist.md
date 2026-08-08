@@ -2271,7 +2271,7 @@
 2271. [best-effort] `added:LuaFunctionContainer.Cancel` — behavioral
 2272. [best-effort] `added:LuaFunctionContainer.Invoke` — behavioral
 2273. [best-effort] `added:LuaFunctionContainer.IsCancelled` — behavioral
-2274. [untriaged] `added:Model.SetUseGBuffer` — untriaged
+2274. [exception-requested] `added:Model.SetUseGBuffer` — impossible
 2275. [untriaged] `added:NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED` — untriaged
 2276. [untriaged] `added:NEIGHBORHOOD_INITIATIVE_UPDATED` — untriaged
 2277. [untriaged] `added:NewCraftingOrderInfo.reagentInfos` — untriaged
@@ -2289,7 +2289,7 @@
 2289. [untriaged] `added:PLAYER_TARGET_DIED` — untriaged
 2290. [untriaged] `added:PrivateAuraIconInfo.borderScale` — untriaged
 2291. [untriaged] `added:REMOVE_NEIGHBORHOOD_CHARTER_SIGNATURE` — untriaged
-2292. [untriaged] `added:Region.IsAnchoringSecret` — untriaged
+2292. [evidence-required] `added:Region.IsAnchoringSecret` — unsafe
 2293. [best-effort] `added:Region.SetAlphaFromBoolean` — behavioral
 2294. [untriaged] `added:Region.SetVertexColorFromBoolean` — untriaged
 2295. [untriaged] `added:RegisterEventCallback` — untriaged
@@ -2328,11 +2328,11 @@
 2328. [untriaged] `added:TUTORIAL_COMBAT_EVENT` — untriaged
 2329. [best-effort] `added:TextureBase.ResetTexCoord` — behavioral
 2330. [untriaged] `added:TextureBase.SetSpriteSheetCell` — untriaged
-2331. [untriaged] `added:UIObject.HasAnySecretAspect` — untriaged
-2332. [untriaged] `added:UIObject.HasSecretAspect` — untriaged
-2333. [untriaged] `added:UIObject.HasSecretValues` — untriaged
-2334. [untriaged] `added:UIObject.IsPreventingSecretValues` — untriaged
-2335. [untriaged] `added:UIObject.SetPreventSecretValues` — untriaged
+2331. [evidence-required] `added:UIObject.HasAnySecretAspect` — unsafe
+2332. [evidence-required] `added:UIObject.HasSecretAspect` — unsafe
+2333. [evidence-required] `added:UIObject.HasSecretValues` — unsafe
+2334. [evidence-required] `added:UIObject.IsPreventingSecretValues` — unsafe
+2335. [evidence-required] `added:UIObject.SetPreventSecretValues` — unsafe
 2336. [untriaged] `added:UNIT_DIED` — untriaged
 2337. [untriaged] `added:UNIT_LOOT` — untriaged
 2338. [untriaged] `added:UNIT_SPELL_DIMINISH_CATEGORY_STATE_UPDATED` — untriaged
