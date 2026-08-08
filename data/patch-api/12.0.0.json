@@ -34673,17 +34673,38 @@
       "id": "added:Enum.GossipNpcOption.TieredEntrance",
       "symbol": "Enum.GossipNpcOption.TieredEntrance",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.GossipNpcOption.TieredEntrance as an added enum occurrence with exact 12.0.0 value 66."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.GossipNpcOption.TieredEntrance with exact numeric value 66."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "3802a79f8f23a84d0c23f7f039ee75fecfffe617ccbad3eb0fb9db1f61e10ac6",
+          "summary": "Focused retail 12.0.0 startup test asserts five current replacement enum keys have numeric Lua values matching the source register and checks that the five old names are absent from current bootstrap publication."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_enum_current_keys_and_old_keys_absent"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, exact numeric Lua type, and exact 12.0.0 value. The paired old-key absence assertion is current-publication evidence only and does not prove historical removal timing, alias semantics, or full-LoD dynamic absence."
     },
     {
       "id": "added:Enum.HouseExteriorWMODataFlags.AllowedInAllianceNeighborhoods",
@@ -36545,17 +36566,38 @@
       "id": "added:Enum.ItemRecraftFlags.Invalid",
       "symbol": "Enum.ItemRecraftFlags.Invalid",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemRecraftFlags.Invalid as an added enum occurrence with exact 12.0.0 value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.ItemRecraftFlags.Invalid with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "3802a79f8f23a84d0c23f7f039ee75fecfffe617ccbad3eb0fb9db1f61e10ac6",
+          "summary": "Focused retail 12.0.0 startup test asserts five current replacement enum keys have numeric Lua values matching the source register and checks that the five old names are absent from current bootstrap publication."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_enum_current_keys_and_old_keys_absent"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, exact numeric Lua type, and exact 12.0.0 value. The paired old-key absence assertion is current-publication evidence only and does not prove historical removal timing, alias semantics, or full-LoD dynamic absence."
     },
     {
       "id": "added:Enum.LFGEntryGeneralPlaystyle.Expert",
@@ -38886,17 +38928,38 @@
       "id": "added:Enum.PerksVendorCategoryType.RefundUnused",
       "symbol": "Enum.PerksVendorCategoryType.RefundUnused",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.PerksVendorCategoryType.RefundUnused as an added enum occurrence with exact 12.0.0 value 24."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.PerksVendorCategoryType.RefundUnused with exact numeric value 24."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "3802a79f8f23a84d0c23f7f039ee75fecfffe617ccbad3eb0fb9db1f61e10ac6",
+          "summary": "Focused retail 12.0.0 startup test asserts five current replacement enum keys have numeric Lua values matching the source register and checks that the five old names are absent from current bootstrap publication."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_enum_current_keys_and_old_keys_absent"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, exact numeric Lua type, and exact 12.0.0 value. The paired old-key absence assertion is current-publication evidence only and does not prove historical removal timing, alias semantics, or full-LoD dynamic absence."
     },
     {
       "id": "added:Enum.PlayerCompanionInfoFlags.IgnoreSeasonInScenarios",
@@ -38966,17 +39029,38 @@
       "id": "added:Enum.PlayerInteractionType.TieredEntrance",
       "symbol": "Enum.PlayerInteractionType.TieredEntrance",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.PlayerInteractionType.TieredEntrance as an added enum occurrence with exact 12.0.0 value 79."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.PlayerInteractionType.TieredEntrance with exact numeric value 79."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "3802a79f8f23a84d0c23f7f039ee75fecfffe617ccbad3eb0fb9db1f61e10ac6",
+          "summary": "Focused retail 12.0.0 startup test asserts five current replacement enum keys have numeric Lua values matching the source register and checks that the five old names are absent from current bootstrap publication."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_enum_current_keys_and_old_keys_absent"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, exact numeric Lua type, and exact 12.0.0 value. The paired old-key absence assertion is current-publication evidence only and does not prove historical removal timing, alias semantics, or full-LoD dynamic absence."
     },
     {
       "id": "added:Enum.PreyHuntProgressState.Cold",
@@ -39270,17 +39354,38 @@
       "id": "added:Enum.QuestTagType.Prey",
       "symbol": "Enum.QuestTagType.Prey",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.QuestTagType.Prey as an added enum occurrence with exact 12.0.0 value 19."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.QuestTagType.Prey with exact numeric value 19."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "3802a79f8f23a84d0c23f7f039ee75fecfffe617ccbad3eb0fb9db1f61e10ac6",
+          "summary": "Focused retail 12.0.0 startup test asserts five current replacement enum keys have numeric Lua values matching the source register and checks that the five old names are absent from current bootstrap publication."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_enum_current_keys_and_old_keys_absent"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, exact numeric Lua type, and exact 12.0.0 value. The paired old-key absence assertion is current-publication evidence only and does not prove historical removal timing, alias semantics, or full-LoD dynamic absence."
     },
     {
       "id": "added:Enum.RaidAuraOrganizationType.BuffsRightDebuffsLeft",
@@ -72192,17 +72297,30 @@
       "id": "removed:Enum.GossipNpcOption.Placeholder_6",
       "symbol": "Enum.GossipNpcOption.Placeholder_6",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.GossipNpcOption.Placeholder_6 as a removed enum occurrence with previous value 66."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data does not publish the removed Enum.GossipNpcOption.Placeholder_6 entry; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: the source register pairs this removed name with a same-value added name, but current bootstrap omission is insufficient to prove full runtime or dynamic publication absence, historical removal timing, alias compatibility, or semantic replacement identity. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and provenance_only."
     },
     {
       "id": "removed:Enum.HousingCatalogEntrySubtype.MarketItem",
@@ -72707,17 +72825,30 @@
       "id": "removed:Enum.ItemRecraftFlags.ItemRecraftFlagInvalid",
       "symbol": "Enum.ItemRecraftFlags.ItemRecraftFlagInvalid",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.ItemRecraftFlags.ItemRecraftFlagInvalid as a removed enum occurrence with previous value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data does not publish the removed Enum.ItemRecraftFlags.ItemRecraftFlagInvalid entry; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: the source register pairs this removed name with a same-value added name, but current bootstrap omission is insufficient to prove full runtime or dynamic publication absence, historical removal timing, alias compatibility, or semantic replacement identity. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and provenance_only."
     },
     {
       "id": "removed:Enum.NeighbordhoodInitiativeCategory.Current",
@@ -72835,49 +72966,88 @@
       "id": "removed:Enum.PerksVendorCategoryType.UnusedPerksVendorCategoryRefundUnused",
       "symbol": "Enum.PerksVendorCategoryType.UnusedPerksVendorCategoryRefundUnused",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.PerksVendorCategoryType.UnusedPerksVendorCategoryRefundUnused as a removed enum occurrence with previous value 24."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data does not publish the removed Enum.PerksVendorCategoryType.UnusedPerksVendorCategoryRefundUnused entry; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: the source register pairs this removed name with a same-value added name, but current bootstrap omission is insufficient to prove full runtime or dynamic publication absence, historical removal timing, alias compatibility, or semantic replacement identity. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and provenance_only."
     },
     {
       "id": "removed:Enum.PlayerInteractionType.PlaceholderType79",
       "symbol": "Enum.PlayerInteractionType.PlaceholderType79",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.PlayerInteractionType.PlaceholderType79 as a removed enum occurrence with previous value 79."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data does not publish the removed Enum.PlayerInteractionType.PlaceholderType79 entry; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: the source register pairs this removed name with a same-value added name, but current bootstrap omission is insufficient to prove full runtime or dynamic publication absence, historical removal timing, alias compatibility, or semantic replacement identity. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and provenance_only."
     },
     {
       "id": "removed:Enum.QuestTagType.Placeholder_1",
       "symbol": "Enum.QuestTagType.Placeholder_1",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.QuestTagType.Placeholder_1 as a removed enum occurrence with previous value 19."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current bootstrap enum data does not publish the removed Enum.QuestTagType.Placeholder_1 entry; this source evidence does not prove full runtime or dynamic publication absence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: the source register pairs this removed name with a same-value added name, but current bootstrap omission is insufficient to prove full runtime or dynamic publication absence, historical removal timing, alias compatibility, or semantic replacement identity. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and provenance_only."
     },
     {
       "id": "removed:Enum.RcoCloseReason.RcoCloseCancel",

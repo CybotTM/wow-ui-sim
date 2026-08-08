@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify 12.0.0 replacement enum keys
+
+Added focused 12.0.0 startup coverage for five same-value enum replacements: `GossipNpcOption.TieredEntrance=66`, `ItemRecraftFlags.Invalid=1`, `PerksVendorCategoryType.RefundUnused=24`, `PlayerInteractionType.TieredEntrance=79`, and `QuestTagType.Prey=19`. Classified those five current names as bounded `best-effort`/`behavioral` publication/type/value claims. Their five paired old names remain `evidence-required`/`unsafe`; current bootstrap omission does not prove full-LoD dynamic absence, historical removal timing, alias compatibility, or semantic replacement identity. Current totals are **729 best-effort, 622 evidence-required, 2 exception-requested, and 2057 untriaged**.
+
 ## [2026-08-08] investigation | Extend 12.0.0 enum metadata coverage
 
 Classified 10 account-state, HousingResult, TransmogSituation, and SecretAspect metadata rows as bounded `best-effort`/`behavioral` claims. Epoch override `31172606b3f3b8b61bea63a81c457219546789fa` removes the two 12.0.1 SecretAspect members from 12.0.0 and restores exact metadata while retaining later values. Focused tests now cover 98 account-state rows, 90 HousingResult rows, 25 TransmogSituation rows, and 43 ItemCollectionType/SecretAspect rows. Normalized 33 provenance-only structure inventory rows to the declared five-column table. Current totals are **724 best-effort, 617 evidence-required, 2 exception-requested, and 2067 untriaged**.

@@ -1502,7 +1502,7 @@
 1502. [untriaged] `added:Enum.FrameTutorialAccount.TransmogWeaponOptions` — untriaged
 1503. [best-effort] `added:Enum.GameRule.EjJourneysDisabled` — behavioral
 1504. [best-effort] `added:Enum.GameRule.PvPInitialRatingOverride` — behavioral
-1505. [untriaged] `added:Enum.GossipNpcOption.TieredEntrance` — untriaged
+1505. [best-effort] `added:Enum.GossipNpcOption.TieredEntrance` — behavioral
 1506. [untriaged] `added:Enum.HouseExteriorWMODataFlags.AllowedInAllianceNeighborhoods` — untriaged
 1507. [untriaged] `added:Enum.HouseExteriorWMODataFlags.AllowedInHordeNeighborhoods` — untriaged
 1508. [untriaged] `added:Enum.HouseExteriorWMODataFlags.None` — untriaged
@@ -1577,7 +1577,7 @@
 1577. [best-effort] `added:Enum.ItemCollectionType.WarbandScene` — behavioral
 1578. [untriaged] `added:Enum.ItemCreationContext.TimewalkerLevelUp` — untriaged
 1579. [untriaged] `added:Enum.ItemCreationContext.TimewalkerMaxLevel` — untriaged
-1580. [untriaged] `added:Enum.ItemRecraftFlags.Invalid` — untriaged
+1580. [best-effort] `added:Enum.ItemRecraftFlags.Invalid` — behavioral
 1581. [untriaged] `added:Enum.LFGEntryGeneralPlaystyle.Expert` — untriaged
 1582. [untriaged] `added:Enum.LFGEntryGeneralPlaystyle.FunRelaxed` — untriaged
 1583. [untriaged] `added:Enum.LFGEntryGeneralPlaystyle.FunSerious` — untriaged
@@ -1722,12 +1722,12 @@
 1722. [untriaged] `added:Enum.NeighborhoodInitiativesCompletionStatesMeta.NumValues` — untriaged
 1723. [untriaged] `added:Enum.NpcCraftingOrderSetFlags.AllowDuplicate` — untriaged
 1724. [untriaged] `added:Enum.NpcCraftingOrderSetFlags.AllowMultiple` — untriaged
-1725. [untriaged] `added:Enum.PerksVendorCategoryType.RefundUnused` — untriaged
+1725. [best-effort] `added:Enum.PerksVendorCategoryType.RefundUnused` — behavioral
 1726. [untriaged] `added:Enum.PlayerCompanionInfoFlags.IgnoreSeasonInScenarios` — untriaged
 1727. [untriaged] `added:Enum.PlayerCompanionInfoFlagsMeta.MaxValue` — untriaged
 1728. [untriaged] `added:Enum.PlayerCompanionInfoFlagsMeta.MinValue` — untriaged
 1729. [untriaged] `added:Enum.PlayerCompanionInfoFlagsMeta.NumValues` — untriaged
-1730. [untriaged] `added:Enum.PlayerInteractionType.TieredEntrance` — untriaged
+1730. [best-effort] `added:Enum.PlayerInteractionType.TieredEntrance` — behavioral
 1731. [untriaged] `added:Enum.PreyHuntProgressState.Cold` — untriaged
 1732. [untriaged] `added:Enum.PreyHuntProgressState.Final` — untriaged
 1733. [untriaged] `added:Enum.PreyHuntProgressState.Hot` — untriaged
@@ -1746,7 +1746,7 @@
 1746. [untriaged] `added:Enum.ProceduralSpawnVolumeChunkFlagsMeta.MaxValue` — untriaged
 1747. [untriaged] `added:Enum.ProceduralSpawnVolumeChunkFlagsMeta.MinValue` — untriaged
 1748. [untriaged] `added:Enum.ProceduralSpawnVolumeChunkFlagsMeta.NumValues` — untriaged
-1749. [untriaged] `added:Enum.QuestTagType.Prey` — untriaged
+1749. [best-effort] `added:Enum.QuestTagType.Prey` — behavioral
 1750. [untriaged] `added:Enum.RaidAuraOrganizationType.BuffsRightDebuffsLeft` — untriaged
 1751. [untriaged] `added:Enum.RaidAuraOrganizationType.BuffsTopDebuffsBottom` — untriaged
 1752. [untriaged] `added:Enum.RaidAuraOrganizationType.Legacy` — untriaged
@@ -3107,7 +3107,7 @@
 3107. [untriaged] `removed:Enum.ExpansionLandingPageTypeMeta.MaxValue` — untriaged
 3108. [untriaged] `removed:Enum.ExpansionLandingPageTypeMeta.MinValue` — untriaged
 3109. [untriaged] `removed:Enum.ExpansionLandingPageTypeMeta.NumValues` — untriaged
-3110. [untriaged] `removed:Enum.GossipNpcOption.Placeholder_6` — untriaged
+3110. [evidence-required] `removed:Enum.GossipNpcOption.Placeholder_6` — unsafe
 3111. [untriaged] `removed:Enum.HousingCatalogEntrySubtype.MarketItem` — untriaged
 3112. [untriaged] `removed:Enum.HousingDecorPlacementRestriction.NotInsideRoom` — untriaged
 3113. [evidence-required] `removed:Enum.HousingResult.FixtureNotOwned` — unsafe
@@ -3127,7 +3127,7 @@
 3127. [evidence-required] `removed:Enum.ItemCollectionType.NumItemCollectionTypes` — unsafe
 3128. [untriaged] `removed:Enum.ItemCreationContext.Placeholder_12_0_0` — untriaged
 3129. [untriaged] `removed:Enum.ItemCreationContext.Timewalker` — untriaged
-3130. [untriaged] `removed:Enum.ItemRecraftFlags.ItemRecraftFlagInvalid` — untriaged
+3130. [evidence-required] `removed:Enum.ItemRecraftFlags.ItemRecraftFlagInvalid` — unsafe
 3131. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategory.Current` — untriaged
 3132. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategory.Legacy` — untriaged
 3133. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.MaxValue` — untriaged
@@ -3135,9 +3135,9 @@
 3135. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.NumValues` — untriaged
 3136. [untriaged] `removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowDuplicate` — untriaged
 3137. [untriaged] `removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowMultiple` — untriaged
-3138. [untriaged] `removed:Enum.PerksVendorCategoryType.UnusedPerksVendorCategoryRefundUnused` — untriaged
-3139. [untriaged] `removed:Enum.PlayerInteractionType.PlaceholderType79` — untriaged
-3140. [untriaged] `removed:Enum.QuestTagType.Placeholder_1` — untriaged
+3138. [evidence-required] `removed:Enum.PerksVendorCategoryType.UnusedPerksVendorCategoryRefundUnused` — unsafe
+3139. [evidence-required] `removed:Enum.PlayerInteractionType.PlaceholderType79` — unsafe
+3140. [evidence-required] `removed:Enum.QuestTagType.Placeholder_1` — unsafe
 3141. [untriaged] `removed:Enum.RcoCloseReason.RcoCloseCancel` — untriaged
 3142. [untriaged] `removed:Enum.RcoCloseReason.RcoCloseCrafterFulfill` — untriaged
 3143. [untriaged] `removed:Enum.RcoCloseReason.RcoCloseExpire` — untriaged
