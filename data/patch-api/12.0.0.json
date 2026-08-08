@@ -54685,305 +54685,704 @@
       "id": "removed:C_NamePlate.GetNamePlateEnemyClickThrough",
       "symbol": "C_NamePlate.GetNamePlateEnemyClickThrough",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNamePlateEnemyClickThrough as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.GetNamePlateEnemyPreferredClickInsets",
       "symbol": "C_NamePlate.GetNamePlateEnemyPreferredClickInsets",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNamePlateEnemyPreferredClickInsets as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.GetNamePlateEnemySize",
       "symbol": "C_NamePlate.GetNamePlateEnemySize",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNamePlateEnemySize as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.GetNamePlateFriendlyClickThrough",
       "symbol": "C_NamePlate.GetNamePlateFriendlyClickThrough",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNamePlateFriendlyClickThrough as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.GetNamePlateFriendlyPreferredClickInsets",
       "symbol": "C_NamePlate.GetNamePlateFriendlyPreferredClickInsets",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNamePlateFriendlyPreferredClickInsets as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.GetNamePlateFriendlySize",
       "symbol": "C_NamePlate.GetNamePlateFriendlySize",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNamePlateFriendlySize as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.GetNamePlateSelfClickThrough",
       "symbol": "C_NamePlate.GetNamePlateSelfClickThrough",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNamePlateSelfClickThrough as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.GetNamePlateSelfPreferredClickInsets",
       "symbol": "C_NamePlate.GetNamePlateSelfPreferredClickInsets",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNamePlateSelfPreferredClickInsets as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.GetNamePlateSelfSize",
       "symbol": "C_NamePlate.GetNamePlateSelfSize",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNamePlateSelfSize as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.GetNumNamePlateMotionTypes",
       "symbol": "C_NamePlate.GetNumNamePlateMotionTypes",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.GetNumNamePlateMotionTypes as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.SetNamePlateEnemyClickThrough",
       "symbol": "C_NamePlate.SetNamePlateEnemyClickThrough",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.SetNamePlateEnemyClickThrough as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.SetNamePlateEnemyPreferredClickInsets",
       "symbol": "C_NamePlate.SetNamePlateEnemyPreferredClickInsets",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.SetNamePlateEnemyPreferredClickInsets as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.SetNamePlateEnemySize",
       "symbol": "C_NamePlate.SetNamePlateEnemySize",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.SetNamePlateEnemySize as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.SetNamePlateFriendlyClickThrough",
       "symbol": "C_NamePlate.SetNamePlateFriendlyClickThrough",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.SetNamePlateFriendlyClickThrough as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.SetNamePlateFriendlyPreferredClickInsets",
       "symbol": "C_NamePlate.SetNamePlateFriendlyPreferredClickInsets",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.SetNamePlateFriendlyPreferredClickInsets as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.SetNamePlateFriendlySize",
       "symbol": "C_NamePlate.SetNamePlateFriendlySize",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.SetNamePlateFriendlySize as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.SetNamePlateSelfClickThrough",
       "symbol": "C_NamePlate.SetNamePlateSelfClickThrough",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.SetNamePlateSelfClickThrough as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.SetNamePlateSelfPreferredClickInsets",
       "symbol": "C_NamePlate.SetNamePlateSelfPreferredClickInsets",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.SetNamePlateSelfPreferredClickInsets as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_NamePlate.SetNamePlateSelfSize",
       "symbol": "C_NamePlate.SetNamePlateSelfSize",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_NamePlate.SetNamePlateSelfSize as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/permanent_shims/c_nameplate.rs",
+          "summary": "Current permanent C_NamePlate shim publishes only retained APIs and does not register removed methods.",
+          "source_hash": "e84ff2420042cf79e3420b2a958b1a46f5e3983efac42e309eccaa0fe65fb7f1"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "429cf043582f14555c053795052b570590530c4a7a2057d5192474fbcd9db75a"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_nameplate_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2c2c5ad1d4df63ac253dc9c3904af845f0c6258e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed API and retained-method callability; it does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_PerksActivities.PerksActivityCriteria",
