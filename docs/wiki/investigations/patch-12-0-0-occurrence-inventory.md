@@ -3459,4 +3459,4 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 
 - [[patch-api-audit-manifest]] — register schema and completion contract.
 
-The bounded remaining-removal slice classifies exactly 19 removed runtime API rows as best-effort/behavioral using one full-LoD namespace-safe rawget batch at `patch-tests/patch_12_1/source_absent.rs::removed_remaining_runtime_apis_are_absent_after_full_lod_load`; three obsolete simulator publications were removed, 16 were already absent, source scanning is auxiliary, and no replacement behavior is inferred.
+The bounded remaining-removal slice classifies exactly 19 removed runtime API rows as best-effort/behavioral using one full-LoD namespace-safe rawget batch at `patch-tests/patch_12_1/strict_removals.rs::removed_remaining_runtime_apis_are_absent_after_full_lod_load`; three obsolete simulator publications were removed, 16 were already absent, source scanning is auxiliary, and no replacement behavior is inferred.
