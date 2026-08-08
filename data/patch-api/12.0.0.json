@@ -3903,177 +3903,320 @@
       "id": "added:C_CombatLog.ApplyFilterSettings",
       "symbol": "C_CombatLog.ApplyFilterSettings",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.AreFilteredEventsEnabled",
       "symbol": "C_CombatLog.AreFilteredEventsEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.ClearEntries",
       "symbol": "C_CombatLog.ClearEntries",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.DoesObjectMatchFilter",
       "symbol": "C_CombatLog.DoesObjectMatchFilter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.GetEntryRetentionTime",
       "symbol": "C_CombatLog.GetEntryRetentionTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.GetMessageLimit",
       "symbol": "C_CombatLog.GetMessageLimit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.IsCombatLogRestricted",
       "symbol": "C_CombatLog.IsCombatLogRestricted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.RefilterEntries",
       "symbol": "C_CombatLog.RefilterEntries",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.SetEntryRetentionTime",
       "symbol": "C_CombatLog.SetEntryRetentionTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.SetFilteredEventsEnabled",
       "symbol": "C_CombatLog.SetFilteredEventsEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLog.SetMessageLimit",
       "symbol": "C_CombatLog.SetMessageLimit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_CombatLog APIs and signatures only; it does not establish filter schema, matching, restriction, retention, message-limit, refilter, or lifecycle semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
+          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_CombatLogSecure.AddEventFilter",
