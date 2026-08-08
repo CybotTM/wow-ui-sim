@@ -2767,10 +2767,10 @@
 2767. [untriaged] `changed:Enum.VasTransactionPurchaseResult.EndDbErrors` — untriaged
 2768. [untriaged] `changed:Enum.VasTransactionPurchaseResultMeta.MaxValue` — untriaged
 2769. [untriaged] `changed:Enum.VasTransactionPurchaseResultMeta.NumValues` — untriaged
-2770. [untriaged] `changed:GameTooltip.GetMinimumWidth` — untriaged
-2771. [untriaged] `changed:GameTooltip.GetPadding` — untriaged
-2772. [untriaged] `changed:GameTooltip.SetMinimumWidth` — untriaged
-2773. [untriaged] `changed:GameTooltip.SetPadding` — untriaged
+2770. [best-effort] `changed:GameTooltip.GetMinimumWidth` — behavioral
+2771. [best-effort] `changed:GameTooltip.GetPadding` — behavioral
+2772. [best-effort] `changed:GameTooltip.SetMinimumWidth` — behavioral
+2773. [best-effort] `changed:GameTooltip.SetPadding` — behavioral
 2774. [untriaged] `changed:GameTooltip.SetText` — untriaged
 2775. [untriaged] `changed:GetRaidTargetIndex` — untriaged
 2776. [untriaged] `changed:HOUSE_LEVEL_CHANGED` — untriaged

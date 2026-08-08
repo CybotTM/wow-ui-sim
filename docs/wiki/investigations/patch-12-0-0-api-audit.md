@@ -24,13 +24,15 @@ The bounded 12.0.0 StatusBar interpolation slice classifies exactly three added 
 
 The bounded 12.0.0 Cooldown slice classifies exactly three added methods (`GetCountdownFontString`, `SetCooldownFromDurationObject`, and `SetCooldownFromExpirationTime`) as best-effort/behavioral using `tests/cooldown_widget.rs::cooldown_widget_methods_persist_runtime_state`; implementation ancestors are `d7a3cf21b` for countdown-font/expiration behavior and `a1f638733` for duration-object behavior. The claim is limited to FontString creation/type, expiration-to-start/duration conversion, duration-object start/total-duration/mod-rate access, and zero-duration clearing; retail rendering, time progression, formatting, invalid arguments, and edge semantics remain unproven.
 
+The bounded 12.0.0 GameTooltip layout slice classifies exactly four changed methods (`GetMinimumWidth`, `SetMinimumWidth`, `GetPadding`, and `SetPadding`) as best-effort/behavioral using `tests/tooltip_basic.rs::test_setminimumwidth_and_getminimumwidth` and `tests/tooltip_basic.rs::test_setpadding_and_getpadding`; implementation ancestor `4a4621c2e` and test-file ancestor `fcc633ce2` are current ancestors. The claim is limited to the tested setter/getter state round-trips for 150 minimum width and 8 padding; tooltip rendering/layout effects, clamping, invalid arguments, and edge semantics remain unproven.
+
 ### Register state
 
 - **Occurrences:** 3410
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 221 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, seven simulator compat rows, three StatusBar interpolation rows, and three Cooldown widget rows), 455 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2733 untriaged rows with null final status
+- **Status:** 225 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, seven simulator compat rows, three StatusBar interpolation rows, three Cooldown widget rows, and four GameTooltip layout rows), 455 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2729 untriaged rows with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.

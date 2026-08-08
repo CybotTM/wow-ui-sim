@@ -52893,65 +52893,149 @@
       "id": "changed:GameTooltip.GetMinimumWidth",
       "symbol": "GameTooltip.GetMinimumWidth",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GameTooltip.GetMinimumWidth as a changed uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/tooltip/line_data.rs",
+          "source_hash": "469dd6b58b37b0a47bc800a5e6fe08eb3b0a27b438b0365c193100ce3e7d28b2",
+          "summary": "Current GameTooltip methods store minimum width in TooltipData and return the stored value through the getter."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/tooltip_basic.rs",
+          "source_hash": "a0ea03f766f01b53131a9eea7c18c2d55451faa60cf1c06b1ce8840598c001f9",
+          "summary": "Focused test test_setminimumwidth_and_getminimumwidth, carried into this file by test ancestor fcc633ce286002f95b758635427fa1ba7720838a, asserts SetMinimumWidth(150) then GetMinimumWidth() == 150."
+        }
+      ],
+      "tests": [
+        "tests/tooltip_basic.rs::test_setminimumwidth_and_getminimumwidth"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4a4621c2eb7ee2f95e628c5f8fe3625e43b4b4d4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused setter/getter state round-trip: SetMinimumWidth(150) persists and GetMinimumWidth() returns 150. Tooltip rendering/layout effects, clamping, invalid arguments, and edge semantics are not established."
     },
     {
       "id": "changed:GameTooltip.GetPadding",
       "symbol": "GameTooltip.GetPadding",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GameTooltip.GetPadding as a changed uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/tooltip/line_data.rs",
+          "source_hash": "469dd6b58b37b0a47bc800a5e6fe08eb3b0a27b438b0365c193100ce3e7d28b2",
+          "summary": "Current GameTooltip methods store padding in TooltipData and return the stored value through the getter."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/tooltip_basic.rs",
+          "source_hash": "a0ea03f766f01b53131a9eea7c18c2d55451faa60cf1c06b1ce8840598c001f9",
+          "summary": "Focused test test_setpadding_and_getpadding, carried into this file by test ancestor fcc633ce286002f95b758635427fa1ba7720838a, asserts SetPadding(8) then GetPadding() == 8."
+        }
+      ],
+      "tests": [
+        "tests/tooltip_basic.rs::test_setpadding_and_getpadding"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4a4621c2eb7ee2f95e628c5f8fe3625e43b4b4d4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused setter/getter state round-trip: SetPadding(8) persists and GetPadding() returns 8. Tooltip rendering/layout effects, clamping, invalid arguments, and edge semantics are not established."
     },
     {
       "id": "changed:GameTooltip.SetMinimumWidth",
       "symbol": "GameTooltip.SetMinimumWidth",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GameTooltip.SetMinimumWidth as a changed uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/tooltip/line_data.rs",
+          "source_hash": "469dd6b58b37b0a47bc800a5e6fe08eb3b0a27b438b0365c193100ce3e7d28b2",
+          "summary": "Current GameTooltip methods store the SetMinimumWidth value in TooltipData for subsequent queries."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/tooltip_basic.rs",
+          "source_hash": "a0ea03f766f01b53131a9eea7c18c2d55451faa60cf1c06b1ce8840598c001f9",
+          "summary": "Focused test test_setminimumwidth_and_getminimumwidth, carried into this file by test ancestor fcc633ce286002f95b758635427fa1ba7720838a, asserts SetMinimumWidth(150) persists to GetMinimumWidth()."
+        }
+      ],
+      "tests": [
+        "tests/tooltip_basic.rs::test_setminimumwidth_and_getminimumwidth"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4a4621c2eb7ee2f95e628c5f8fe3625e43b4b4d4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused setter/getter state round-trip: SetMinimumWidth(150) persists and GetMinimumWidth() returns 150. Tooltip rendering/layout effects, clamping, invalid arguments, and edge semantics are not established."
     },
     {
       "id": "changed:GameTooltip.SetPadding",
       "symbol": "GameTooltip.SetPadding",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records GameTooltip.SetPadding as a changed uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/tooltip/line_data.rs",
+          "source_hash": "469dd6b58b37b0a47bc800a5e6fe08eb3b0a27b438b0365c193100ce3e7d28b2",
+          "summary": "Current GameTooltip methods store the SetPadding value in TooltipData for subsequent queries."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/tooltip_basic.rs",
+          "source_hash": "a0ea03f766f01b53131a9eea7c18c2d55451faa60cf1c06b1ce8840598c001f9",
+          "summary": "Focused test test_setpadding_and_getpadding, carried into this file by test ancestor fcc633ce286002f95b758635427fa1ba7720838a, asserts SetPadding(8) persists to GetPadding()."
+        }
+      ],
+      "tests": [
+        "tests/tooltip_basic.rs::test_setpadding_and_getpadding"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4a4621c2eb7ee2f95e628c5f8fe3625e43b4b4d4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused setter/getter state round-trip: SetPadding(8) persists and GetPadding() returns 8. Tooltip rendering/layout effects, clamping, invalid arguments, and edge semantics are not established."
     },
     {
       "id": "changed:GameTooltip.SetText",
