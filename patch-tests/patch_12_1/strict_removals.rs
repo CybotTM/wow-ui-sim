@@ -429,3 +429,30 @@ fn removed_remaining_runtime_apis_are_absent_after_full_lod_load() {
         "retained runtime APIs are not callable functions",
     );
 }
+
+/// Proves removed legacy globals with no compatibility publication stay absent.
+#[test]
+fn removed_legacy_global_apis_are_absent_after_full_lod_load() {
+    let env = load_full_game_ui_with_all_lod();
+    let published: String = env
+        .eval(
+            r#"
+            local names = {
+                "IsConsumableSpell",
+                "SetRaidTargetProtected",
+                "SpellIsAlwaysShown",
+                "StripHyperlinks",
+            }
+            local published = {}
+            for _, name in ipairs(names) do
+                if rawget(_G, name) ~= nil then
+                    table.insert(published, name)
+                end
+            end
+            return table.concat(published, ",")
+            "#,
+        )
+        .expect("removed-global runtime probe succeeds");
+
+    assert_eq!(published, "", "removed legacy globals were published");
+}
