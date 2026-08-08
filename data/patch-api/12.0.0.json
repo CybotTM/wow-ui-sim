@@ -18326,17 +18326,30 @@
       "id": "added:C_UnitAurasPrivate.SetShowDispelTypeCallback",
       "symbol": "C_UnitAurasPrivate.SetShowDispelTypeCallback",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_WeeklyRewards.GetSortedProgressForActivity",
@@ -49401,145 +49414,262 @@
       "id": "changed:C_UnitAurasPrivate.AddPrivateAuraUpdateCallback",
       "symbol": "C_UnitAurasPrivate.AddPrivateAuraUpdateCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_UnitAurasPrivate.AnchorPrivateAura",
       "symbol": "C_UnitAurasPrivate.AnchorPrivateAura",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_UnitAurasPrivate.GetAllPrivateAuras",
       "symbol": "C_UnitAurasPrivate.GetAllPrivateAuras",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_UnitAurasPrivate.GetAuraDataByAuraInstanceIDPrivate",
       "symbol": "C_UnitAurasPrivate.GetAuraDataByAuraInstanceIDPrivate",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_UnitAurasPrivate.GetPrivateAuraAnchors",
       "symbol": "C_UnitAurasPrivate.GetPrivateAuraAnchors",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_UnitAurasPrivate.SetPrivateAuraAnchorAddedCallback",
       "symbol": "C_UnitAurasPrivate.SetPrivateAuraAnchorAddedCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_UnitAurasPrivate.SetPrivateAuraAnchorRemovedCallback",
       "symbol": "C_UnitAurasPrivate.SetPrivateAuraAnchorRemovedCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_UnitAurasPrivate.SetPrivateRaidBossMessageCallback",
       "symbol": "C_UnitAurasPrivate.SetPrivateRaidBossMessageCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_UnitAurasPrivate.SetPrivateWarningTextFrame",
       "symbol": "C_UnitAurasPrivate.SetPrivateWarningTextFrame",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAurasPrivate occurrences, secure-only changes, and two return shapes only; it does not establish secure/private-aura runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
+          "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current private-aura behavior is a permissive/partial temporary model, not authoritative 12.0.0 behavior. The source establishes secure-only and two return shapes only; secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven. Existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_VoiceChat.SpeakText",

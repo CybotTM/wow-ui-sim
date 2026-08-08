@@ -1,6 +1,10 @@
+## [2026-08-08] investigation | Bound 12.0.0 C_UnitAurasPrivate slice
+
+Classified all 10 added/changed `C_UnitAurasPrivate` secure-only API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the current `src/lua_api/workarounds/temporary/private_aura_state.rs` permissive/partial model. Tests remain empty with null commit, approval, and scope exception. Secure enforcement, private-aura visibility, callback/anchor lifecycle, callback payloads, and the two absent APIs remain unproven; existing tests prove simulator-only seeded state/callback behavior and are intentionally not attached, so no approval can close these rows. Totals are now **77 best-effort, 423 evidence-required, 1 exception-requested, and 2909 untriaged**.
+
 ## [2026-08-08] investigation | Bound 12.0.0 C_SpellDiminish slice
 
-Classified exactly 14 added `C_SpellDiminish` API, structure, and structure-field rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the current `src/c_api/c_spell_diminish.rs` static eight-category fixture. Tests remain empty with null commit, approval, and scope exception. The source register establishes signatures and field names only; the fixture and local tests do not establish authoritative 12.0.0 category contents, ruleset tracking semantics, or tracker payload fields, and no approval can close these rows. Totals are now **77 best-effort, 413 evidence-required, 1 exception-requested, and 2919 untriaged**.
+Classified exactly 14 added `C_SpellDiminish` API, structure, and structure-field rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the current `src/c_api/c_spell_diminish.rs` static eight-category fixture. Tests remain empty with null commit, approval, and scope exception. The source register establishes signatures and field names only; the fixture and local tests do not establish authoritative 12.0.0 category contents, ruleset tracking semantics, or tracker payload fields, and no approval can close these rows. Totals are now **77 best-effort, 423 evidence-required, 1 exception-requested, and 2909 untriaged**.
 
 ## [2026-08-08] investigation | Bound 12.0.0 C_DeathRecap slice
 
