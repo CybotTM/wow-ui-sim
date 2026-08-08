@@ -314,33 +314,6 @@ fn test_transmog_collection_get_illusions_empty() {
 }
 
 #[test]
-fn test_transmog_collection_get_outfits_empty() {
-    let env = env();
-    let count: i32 = env
-        .eval("return #C_TransmogCollection.GetOutfits()")
-        .unwrap();
-    assert_eq!(count, 0);
-}
-
-#[test]
-fn test_transmog_collection_get_num_max_outfits() {
-    let env = env();
-    let count: i32 = env
-        .eval("return C_TransmogCollection.GetNumMaxOutfits()")
-        .unwrap();
-    assert_eq!(count, 20);
-}
-
-#[test]
-fn test_transmog_collection_get_outfit_info_nil() {
-    let env = env();
-    let is_nil: bool = env
-        .eval("return C_TransmogCollection.GetOutfitInfo(1) == nil")
-        .unwrap();
-    assert!(is_nil);
-}
-
-#[test]
 fn test_transmog_collection_get_appearance_camera_id() {
     let env = env();
     let id: i32 = env

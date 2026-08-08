@@ -25,6 +25,19 @@ const REMOVED_NAMEPLATE_METHODS: &[&str] = &[
     "SetNamePlateSelfSize",
 ];
 
+const REMOVED_TRANSMOG_COLLECTION_OUTFIT_METHODS: &[&str] = &[
+    "DeleteOutfit",
+    "GetItemTransmogInfoListFromOutfitHyperlink",
+    "GetNumMaxOutfits",
+    "GetOutfitHyperlinkFromItemTransmogInfoList",
+    "GetOutfitInfo",
+    "GetOutfitItemTransmogInfoList",
+    "GetOutfits",
+    "ModifyOutfit",
+    "NewOutfit",
+    "RenameOutfit",
+];
+
 const SNAPSHOT_ONLY_SYMBOLS: &[&str] = &[
     "AddBehavioralMessagingTrayToStatusFrames",
     "AddFriendFrame_Show",
@@ -297,6 +310,63 @@ fn removed_nameplate_methods_are_absent_after_full_lod_load() {
     assert_eq!(
         retained_non_functions, "",
         "retained C_NamePlate methods are not callable functions",
+    );
+}
+
+/// Proves removed TransmogCollection outfit methods stay absent while appearance queries remain callable.
+#[test]
+fn removed_transmog_collection_outfit_methods_are_absent_after_full_lod_load() {
+    // Source checks only falsify; the full-LoD runtime probe below is the proof.
+    assert_ptr_source_omits_qualified_methods(
+        "C_TransmogCollection",
+        REMOVED_TRANSMOG_COLLECTION_OUTFIT_METHODS,
+    );
+
+    let env = load_full_game_ui_with_all_lod();
+    let (removed_published, retained_non_functions): (String, String) = env
+        .eval(
+            r#"
+            local removed = {
+                "DeleteOutfit",
+                "GetItemTransmogInfoListFromOutfitHyperlink",
+                "GetNumMaxOutfits",
+                "GetOutfitHyperlinkFromItemTransmogInfoList",
+                "GetOutfitInfo",
+                "GetOutfitItemTransmogInfoList",
+                "GetOutfits",
+                "ModifyOutfit",
+                "NewOutfit",
+                "RenameOutfit",
+            }
+            local retained = {
+                "GetAppearanceSources",
+                "GetAllAppearanceSources",
+            }
+            local removedPublished = {}
+            for _, name in ipairs(removed) do
+                if rawget(C_TransmogCollection, name) ~= nil then
+                    table.insert(removedPublished, name)
+                end
+            end
+            local retainedNonFunctions = {}
+            for _, name in ipairs(retained) do
+                if type(rawget(C_TransmogCollection, name)) ~= "function" then
+                    table.insert(retainedNonFunctions, name)
+                end
+            end
+            return table.concat(removedPublished, ","),
+                table.concat(retainedNonFunctions, ",")
+            "#,
+        )
+        .expect("C_TransmogCollection runtime probe succeeds");
+
+    assert_eq!(
+        removed_published, "",
+        "removed C_TransmogCollection outfit methods were published"
+    );
+    assert_eq!(
+        retained_non_functions, "",
+        "retained C_TransmogCollection appearance methods are not callable functions",
     );
 }
 
