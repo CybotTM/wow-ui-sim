@@ -23846,8 +23846,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -23883,8 +23883,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -30159,8 +30159,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -30196,8 +30196,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -31833,8 +31833,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -31870,8 +31870,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -32735,65 +32735,153 @@
       "id": "added:Enum.EncounterEventFlags.Disabled",
       "symbol": "Enum.EncounterEventFlags.Disabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EncounterEventFlags.Disabled as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "ab67d56601732102c440912ffe037846c8e874cc56dd57211d89979bfe50b3c5",
+          "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail tests assert the exact one-value 12.0.0 EncounterEventFlags epoch, absence of later IgnoreCastConsume, exact metadata, and preservation of the later two-value table from 12.0.5 onward."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_encounter_event_flags_values",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_later_retail_encounter_event_flags_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "9ca86a1723a3a51c84d05446e744ba4fc5d5bb50",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers exact 12.0.0 namespace publication, numeric values, metadata, absence of the later IgnoreCastConsume member, and preservation of later epoch values. Encounter-event flag operations, consumers, event lifecycle, mutation/protection, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EncounterEventFlagsMeta.MaxValue",
       "symbol": "Enum.EncounterEventFlagsMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EncounterEventFlagsMeta.MaxValue as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "ab67d56601732102c440912ffe037846c8e874cc56dd57211d89979bfe50b3c5",
+          "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail tests assert the exact one-value 12.0.0 EncounterEventFlags epoch, absence of later IgnoreCastConsume, exact metadata, and preservation of the later two-value table from 12.0.5 onward."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_encounter_event_flags_values",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_later_retail_encounter_event_flags_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "9ca86a1723a3a51c84d05446e744ba4fc5d5bb50",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers exact 12.0.0 namespace publication, numeric values, metadata, absence of the later IgnoreCastConsume member, and preservation of later epoch values. Encounter-event flag operations, consumers, event lifecycle, mutation/protection, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EncounterEventFlagsMeta.MinValue",
       "symbol": "Enum.EncounterEventFlagsMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EncounterEventFlagsMeta.MinValue as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "ab67d56601732102c440912ffe037846c8e874cc56dd57211d89979bfe50b3c5",
+          "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail tests assert the exact one-value 12.0.0 EncounterEventFlags epoch, absence of later IgnoreCastConsume, exact metadata, and preservation of the later two-value table from 12.0.5 onward."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_encounter_event_flags_values",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_later_retail_encounter_event_flags_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "9ca86a1723a3a51c84d05446e744ba4fc5d5bb50",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers exact 12.0.0 namespace publication, numeric values, metadata, absence of the later IgnoreCastConsume member, and preservation of later epoch values. Encounter-event flag operations, consumers, event lifecycle, mutation/protection, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EncounterEventFlagsMeta.NumValues",
       "symbol": "Enum.EncounterEventFlagsMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EncounterEventFlagsMeta.NumValues as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "ab67d56601732102c440912ffe037846c8e874cc56dd57211d89979bfe50b3c5",
+          "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail tests assert the exact one-value 12.0.0 EncounterEventFlags epoch, absence of later IgnoreCastConsume, exact metadata, and preservation of the later two-value table from 12.0.5 onward."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_encounter_event_flags_values",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_later_retail_encounter_event_flags_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "9ca86a1723a3a51c84d05446e744ba4fc5d5bb50",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers exact 12.0.0 namespace publication, numeric values, metadata, absence of the later IgnoreCastConsume member, and preservation of later epoch values. Encounter-event flag operations, consumers, event lifecycle, mutation/protection, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.BleedEffect",
@@ -34531,8 +34619,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -34568,8 +34656,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -34733,8 +34821,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -35090,8 +35178,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -36845,8 +36933,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -41802,8 +41890,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -41947,17 +42035,38 @@
       "id": "added:Enum.TooltipDataType.Outfit",
       "symbol": "Enum.TooltipDataType.Outfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TooltipDataType.Outfit as a added enum occurrence with exact 12.0.0 value 27."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TooltipDataType.Outfit with exact numeric value 27."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.TraitNodeEntryType.SpendCapstoneCircle",
@@ -41995,17 +42104,38 @@
       "id": "added:Enum.TraitNodeFlag.ShowTierTrack",
       "symbol": "Enum.TraitNodeFlag.ShowTierTrack",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TraitNodeFlag.ShowTierTrack as a added enum occurrence with exact 12.0.0 value 256."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TraitNodeFlag.ShowTierTrack with exact numeric value 256."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.TransmogOutfitDataFlags.IsCachedLocally",
@@ -47063,33 +47193,75 @@
       "id": "added:Enum.UICursorType.Outfit",
       "symbol": "Enum.UICursorType.Outfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.UICursorType.Outfit as a added enum occurrence with exact 12.0.0 value 21."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.UICursorType.Outfit with exact numeric value 21."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.UIWidgetVisualizationType.PreyHuntProgress",
       "symbol": "Enum.UIWidgetVisualizationType.PreyHuntProgress",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.UIWidgetVisualizationType.PreyHuntProgress as a added enum occurrence with exact 12.0.0 value 31."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.UIWidgetVisualizationType.PreyHuntProgress with exact numeric value 31."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitAuraSortDirection.Normal",
@@ -57991,8 +58163,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58028,8 +58200,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58433,8 +58605,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58470,8 +58642,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58507,8 +58679,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58560,8 +58732,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58597,8 +58769,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58634,8 +58806,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58671,8 +58843,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58772,8 +58944,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58809,8 +58981,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58846,8 +59018,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -58883,8 +59055,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -59032,8 +59204,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -59069,8 +59241,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -59170,8 +59342,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -59207,8 +59379,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -59308,8 +59480,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -59345,8 +59517,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -62152,8 +62324,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -62189,8 +62361,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -62258,8 +62430,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -62295,8 +62467,8 @@
         {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
-          "source_hash": "06fe3d45b5e2757951e32aa46269b991755579da687cc8374fc623b7304c794a",
-          "summary": "Focused retail 12.0.0 startup test asserts eleven bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 35 classified rows."
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
         }
       ],
       "tests": [
@@ -62344,33 +62516,75 @@
       "id": "changed:Enum.TooltipDataTypeMeta.MaxValue",
       "symbol": "Enum.TooltipDataTypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TooltipDataTypeMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 27."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TooltipDataTypeMeta.MaxValue with exact numeric value 27."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.TooltipDataTypeMeta.NumValues",
       "symbol": "Enum.TooltipDataTypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TooltipDataTypeMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 28."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TooltipDataTypeMeta.NumValues with exact numeric value 28."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.TraitNodeEntryTypeMeta.MaxValue",
@@ -62408,97 +62622,223 @@
       "id": "changed:Enum.TraitNodeFlagMeta.MaxValue",
       "symbol": "Enum.TraitNodeFlagMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TraitNodeFlagMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 256."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TraitNodeFlagMeta.MaxValue with exact numeric value 256."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.TraitNodeFlagMeta.NumValues",
       "symbol": "Enum.TraitNodeFlagMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TraitNodeFlagMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 9."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TraitNodeFlagMeta.NumValues with exact numeric value 9."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.UICursorTypeMeta.MaxValue",
       "symbol": "Enum.UICursorTypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.UICursorTypeMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 21."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.UICursorTypeMeta.MaxValue with exact numeric value 21."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.UICursorTypeMeta.NumValues",
       "symbol": "Enum.UICursorTypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.UICursorTypeMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 22."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.UICursorTypeMeta.NumValues with exact numeric value 22."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.UIWidgetVisualizationTypeMeta.MaxValue",
       "symbol": "Enum.UIWidgetVisualizationTypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.UIWidgetVisualizationTypeMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 31."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.UIWidgetVisualizationTypeMeta.MaxValue with exact numeric value 31."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.UIWidgetVisualizationTypeMeta.NumValues",
       "symbol": "Enum.UIWidgetVisualizationTypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.UIWidgetVisualizationTypeMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 32."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.UIWidgetVisualizationTypeMeta.NumValues with exact numeric value 32."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "8a9dd21974851a6e526e2c9934a701d4e02d0845ac620c400a5eaac88485a888",
+          "summary": "Focused retail 12.0.0 startup test asserts fifteen bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 47 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, tooltip/trait/cursor/widget state, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.VasTransactionPurchaseResult.EndDbErrors",

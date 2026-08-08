@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Fix EncounterEventFlags epoch drift
+
+Corrected the 12.0.0 runtime to publish the one-value `Enum.EncounterEventFlags` table while retaining the later two-value table from 12.0.5 onward. Focused tests prove `Disabled=1`, exact metadata, absence of later `IgnoreCastConsume` under 12.0.0, and preservation of later values. Classified those four rows plus 12 TooltipDataType, TraitNodeFlag, UICursorType, and UIWidgetVisualizationType rows as bounded `best-effort`/`behavioral` namespace/type/value claims. Current totals are **714 best-effort, 617 evidence-required, 2 exception-requested, and 2077 untriaged**.
+
 ## [2026-08-08] investigation | Extend small 12.0.0 enum coverage
 
 Classified 15 added/changed CraftingReagentItemFlag, EditModeAuraFrameSystemIndices, HousingItemToastType, MapIconUIWidgetSetType, and SurveyDeliveryMoment rows as `best-effort`/`behavioral` by extending `src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values`. The test now covers 35 rows across 11 families with exact namespace, numeric-type, and source-register-value assertions. Consumer, server/state, bitwise composition, mutation/protection, lifecycle, and edge semantics remain unclaimed. Current totals are **698 best-effort, 617 evidence-required, 2 exception-requested, and 2093 untriaged**.
