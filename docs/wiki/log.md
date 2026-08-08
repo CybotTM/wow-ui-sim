@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Migrate 12.0.0 typedef provenance rows
+
+Migrated all 21 untriaged `typedef.*` rows to the machine-validated `best-effort`/`provenance-only` contract. Each retains owner/category and source-register evidence only, sets `provenance_only: true`, has empty runtime proof fields, and uses exact notes `Provenance-only: no runtime behavior claimed.` This bookkeeping status claims no simulator-visible runtime behavior and is completion-eligible without a commit. Totals are now **265 best-effort, 483 evidence-required, 2 exception-requested, and 2660 untriaged**.
+
 ## [2026-08-08] investigation | Classify 12.0.0 UnitHealPredictionCalculator luaobject methods
 
 Classified `added:UnitHealPredictionCalculator.GetDamageAbsorbClampMode` as `best-effort`/`behavioral` using `tests/userdata_proxy.rs::heal_prediction_set_get_roundtrip` and implementation ancestor `4d7dbe1da`; the claim is limited to the tested local setter/getter round-trip. Classified the other 13 currently untriaged UnitHealPredictionCalculator luaobject-method rows as `evidence-required`/`unsafe` with empty tests/assertions and null commit/approval/scope exception because the generic proxy does not establish exact absorb/mode/default/reset/predicted-payload, secret, lifecycle, validation, or edge semantics. All 68 luaobject-method rows are now non-untriaged. Totals are now **244 best-effort, 483 evidence-required, 2 exception-requested, and 2681 untriaged**.

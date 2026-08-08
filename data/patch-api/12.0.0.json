@@ -49315,305 +49315,457 @@
       "id": "added:typedef.AbbreviateConfig",
       "symbol": "typedef.AbbreviateConfig",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.AbbreviateConfig as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.CooldownFrame",
       "symbol": "typedef.CooldownFrame",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.CooldownFrame as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.DurationSeconds",
       "symbol": "typedef.DurationSeconds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.DurationSeconds as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.EncounterTimelineEventID",
       "symbol": "typedef.EncounterTimelineEventID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.EncounterTimelineEventID as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.EventCallbackType",
       "symbol": "typedef.EventCallbackType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.EventCallbackType as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.FrameEventCallbackType",
       "symbol": "typedef.FrameEventCallbackType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.FrameEventCallbackType as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.FrameScriptObject",
       "symbol": "typedef.FrameScriptObject",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.FrameScriptObject as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.FrameTime",
       "symbol": "typedef.FrameTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.FrameTime as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.LuaColorCurveObject",
       "symbol": "typedef.LuaColorCurveObject",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.LuaColorCurveObject as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.LuaCurveEvaluatedResult",
       "symbol": "typedef.LuaCurveEvaluatedResult",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.LuaCurveEvaluatedResult as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.LuaCurveObject",
       "symbol": "typedef.LuaCurveObject",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.LuaCurveObject as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.LuaCurveObjectBase",
       "symbol": "typedef.LuaCurveObjectBase",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.LuaCurveObjectBase as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.LuaDurationObject",
       "symbol": "typedef.LuaDurationObject",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.LuaDurationObject as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.SimpleCheckbox",
       "symbol": "typedef.SimpleCheckbox",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.SimpleCheckbox as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.SoundHandle",
       "symbol": "typedef.SoundHandle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.SoundHandle as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.Tooltip",
       "symbol": "typedef.Tooltip",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.Tooltip as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.UISoundSubType",
       "symbol": "typedef.UISoundSubType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.UISoundSubType as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.UnitHealPredictionCalculator",
       "symbol": "typedef.UnitHealPredictionCalculator",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.UnitHealPredictionCalculator as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:typedef.UnitTokenVariant",
       "symbol": "typedef.UnitTokenVariant",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.UnitTokenVariant as a added typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "changed:COMBAT_LOG_EVENT",
@@ -55362,33 +55514,49 @@
       "id": "changed:typedef.TickerCallback",
       "symbol": "typedef.TickerCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.TickerCallback as a changed typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "changed:typedef.TimerCallback",
       "symbol": "typedef.TimerCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "typedef",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records typedef.TimerCallback as a changed typedef occurrence; this is provenance metadata only."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: no runtime behavior claimed.",
+      "provenance_only": true
     },
     {
       "id": "removed:ActionHasRange",

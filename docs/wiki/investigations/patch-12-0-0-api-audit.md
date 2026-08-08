@@ -42,13 +42,15 @@ The bounded 12.0.0 script-object slice classifies five added script-object API r
 
 The bounded 12.0.0 UnitHealPredictionCalculator luaobject-method slice classifies `added:UnitHealPredictionCalculator.GetDamageAbsorbClampMode` as best-effort/behavioral using `tests/userdata_proxy.rs::heal_prediction_set_get_roundtrip` and implementation ancestor `4d7dbe1da`; the claim is limited to the tested local setter/getter round-trip. The other 13 UnitHealPredictionCalculator luaobject-method rows are evidence-required/unsafe with empty tests/assertions and null commit/approval/scope exception because the generic proxy does not establish exact absorb/mode/default/reset/predicted-payload, secret, lifecycle, validation, or edge semantics. All 68 luaobject-method rows are now non-untriaged.
 
-### Register state
+The 21 `typedef.*` rows are provenance-only source metadata: `best-effort` is bookkeeping, not a runtime-behavior claim. The manifest requires the explicit provenance-only flag, source-register evidence only, empty runtime proof fields, and exact no-runtime-claim notes; completion does not require a commit for these rows.
+
+## Register state
 
 - **Occurrences:** 3410
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 244 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, seven simulator compat rows, three StatusBar interpolation rows, three Cooldown widget rows, four GameTooltip layout rows, one GameTooltip content row, two GameTooltip line rows, one TextureBase reset row, two TextureBase atlas rows, one StatusBar range-clamping row, one StatusBar value row, and two Frame event callback rows, five script-object proxy/state rows), 483 evidence-required/unsafe rows, 2 exception-requested/impossible rows, and 2681 untriaged rows with null final status
+- **Status:** 265 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, seven simulator compat rows, three StatusBar interpolation rows, three Cooldown widget rows, four GameTooltip layout rows, one GameTooltip content row, two GameTooltip line rows, one TextureBase reset row, two TextureBase atlas rows, one StatusBar range-clamping row, one StatusBar value row, two Frame event callback rows, five script-object proxy/state rows, and 21 provenance-only typedef rows), 483 evidence-required/unsafe rows, 2 exception-requested/impossible rows, and 2660 untriaged rows with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.
