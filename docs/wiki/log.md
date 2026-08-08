@@ -1910,3 +1910,7 @@ Added parser and loader support for TOC entries annotated with `[Bootstrap]`, mo
 ## [2026-07-01] correction | `[Bootstrap]` preserves TOC order
 
 Updated `systems/addon-loading.md` after live-client probes showed `[Bootstrap]` is not a separate pass and must not move files out of TOC order. `TocFile` now keeps annotated files in `files` and records a per-file bootstrap flag. Startup loads full TOCs for non-LoD addons and only annotated bootstrap files for LoD addons, preserving addon order; runtime `LoadAddOn` skips already-executed bootstrap files and a self `LoadAddOn(thisAddon)` call from bootstrap remains a benign reentrancy no-op.
+
+## [2026-08-08] investigation | Prove remaining 12.0.0 removed runtime APIs
+
+Classified exactly 19 removed runtime API rows as `best-effort`/`behavioral` using the committed full-LoD namespace-safe rawget batch `patch-tests/patch_12_1/source_absent.rs::removed_remaining_runtime_apis_are_absent_after_full_lod_load` at `ec9ffbc0b`. Three obsolete simulator publications were removed (`C_CatalogShop.OpenCatalogShopInteraction`, `C_PlayerInfo.IsExpansionLandingPageUnlockedForPlayer`, and `C_StorePublic.IsDisabledByParentalControls`); the other 16 rows were already absent. Source scanning is auxiliary, no replacement behavior is inferred, and the 143/453/1/2813 totals are current.

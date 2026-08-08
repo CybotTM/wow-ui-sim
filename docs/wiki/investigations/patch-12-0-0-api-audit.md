@@ -26,7 +26,7 @@ The bounded 12.0.0 `C_CombatLog` slice classifies exactly 11 added API rows as e
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 124 best-effort/behavioral rows, 453 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2832 untriaged rows with null final status
+- **Status:** 143 best-effort/behavioral rows, 453 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2813 untriaged rows with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.
@@ -64,3 +64,5 @@ The register does not claim:
 
 - [[patch-api-audit-manifest]] — register schema and completion contract.
 - [[patch-12-0-5-api-audit]] — later probe-driven retail audit with separate evidence.
+
+The bounded remaining-removal slice classifies exactly 19 removed runtime API rows as best-effort/behavioral using one full-LoD namespace-safe rawget batch at `patch-tests/patch_12_1/source_absent.rs::removed_remaining_runtime_apis_are_absent_after_full_lod_load`; three obsolete simulator publications were removed, 16 were already absent, source scanning is auxiliary, and no replacement behavior is inferred.
