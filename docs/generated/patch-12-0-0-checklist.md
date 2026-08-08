@@ -1816,9 +1816,9 @@
 1816. [best-effort] `added:Enum.SecretAspect.Text` — behavioral
 1817. [best-effort] `added:Enum.SecretAspect.Toplevel` — behavioral
 1818. [best-effort] `added:Enum.SecretAspect.VertexColor` — behavioral
-1819. [untriaged] `added:Enum.SecretAspectMeta.MaxValue` — untriaged
-1820. [untriaged] `added:Enum.SecretAspectMeta.MinValue` — untriaged
-1821. [untriaged] `added:Enum.SecretAspectMeta.NumValues` — untriaged
+1819. [best-effort] `added:Enum.SecretAspectMeta.MaxValue` — behavioral
+1820. [best-effort] `added:Enum.SecretAspectMeta.MinValue` — behavioral
+1821. [best-effort] `added:Enum.SecretAspectMeta.NumValues` — behavioral
 1822. [untriaged] `added:Enum.SendAddonMessageResult.AddOnMessageLockdown` — untriaged
 1823. [untriaged] `added:Enum.SendAddonMessageResult.TargetOffline` — untriaged
 1824. [untriaged] `added:Enum.SimpleOrderStatus.Creating` — untriaged
@@ -2069,9 +2069,9 @@
 2069. [untriaged] `added:Enum.TransmogSituationGroupFlagsMeta.MaxValue` — untriaged
 2070. [untriaged] `added:Enum.TransmogSituationGroupFlagsMeta.MinValue` — untriaged
 2071. [untriaged] `added:Enum.TransmogSituationGroupFlagsMeta.NumValues` — untriaged
-2072. [untriaged] `added:Enum.TransmogSituationMeta.MaxValue` — untriaged
-2073. [untriaged] `added:Enum.TransmogSituationMeta.MinValue` — untriaged
-2074. [untriaged] `added:Enum.TransmogSituationMeta.NumValues` — untriaged
+2072. [best-effort] `added:Enum.TransmogSituationMeta.MaxValue` — behavioral
+2073. [best-effort] `added:Enum.TransmogSituationMeta.MinValue` — behavioral
+2074. [best-effort] `added:Enum.TransmogSituationMeta.NumValues` — behavioral
 2075. [untriaged] `added:Enum.TransmogSituationTrigger.EquipmentSet` — untriaged
 2076. [untriaged] `added:Enum.TransmogSituationTrigger.EventOutfit` — untriaged
 2077. [untriaged] `added:Enum.TransmogSituationTrigger.Forms` — untriaged
@@ -2607,7 +2607,7 @@
 2607. [untriaged] `changed:CanBeRaidTarget` — untriaged
 2608. [untriaged] `changed:ClearRaidMarker` — untriaged
 2609. [untriaged] `changed:EmitterCombatRange` — untriaged
-2610. [untriaged] `changed:Enum.AccountStateLoadedFlagsMeta.NumValues` — untriaged
+2610. [best-effort] `changed:Enum.AccountStateLoadedFlagsMeta.NumValues` — behavioral
 2611. [best-effort] `changed:Enum.AccountTransTypeMeta.MaxValue` — behavioral
 2612. [best-effort] `changed:Enum.AccountTransTypeMeta.NumValues` — behavioral
 2613. [untriaged] `changed:Enum.CharCustomizationTypeMeta.MaxValue` — untriaged
@@ -2636,7 +2636,7 @@
 2636. [best-effort] `changed:Enum.CraftingReagentItemFlag.TooltipShowsAsStatModifications` — behavioral
 2637. [best-effort] `changed:Enum.CraftingReagentItemFlagMeta.MaxValue` — behavioral
 2638. [best-effort] `changed:Enum.CraftingReagentItemFlagMeta.MinValue` — behavioral
-2639. [untriaged] `changed:Enum.CreateAllAccountDataMeta.NumValues` — untriaged
+2639. [best-effort] `changed:Enum.CreateAllAccountDataMeta.NumValues` — behavioral
 2640. [best-effort] `changed:Enum.CurrencyDestroyReasonMeta.MaxValue` — behavioral
 2641. [best-effort] `changed:Enum.CurrencyDestroyReasonMeta.NumValues` — behavioral
 2642. [best-effort] `changed:Enum.CurrencySourceMeta.MaxValue` — behavioral
@@ -2742,8 +2742,8 @@
 2742. [best-effort] `changed:Enum.HousingResult.TooManyRequests` — behavioral
 2743. [best-effort] `changed:Enum.HousingResult.TransactionFailure` — behavioral
 2744. [best-effort] `changed:Enum.HousingResult.UnlockOperationFailed` — behavioral
-2745. [untriaged] `changed:Enum.HousingResultMeta.MaxValue` — untriaged
-2746. [untriaged] `changed:Enum.HousingResultMeta.NumValues` — untriaged
+2745. [best-effort] `changed:Enum.HousingResultMeta.MaxValue` — behavioral
+2746. [best-effort] `changed:Enum.HousingResultMeta.NumValues` — behavioral
 2747. [best-effort] `changed:Enum.ItemCollectionTypeMeta.MaxValue` — behavioral
 2748. [best-effort] `changed:Enum.ItemCollectionTypeMeta.NumValues` — behavioral
 2749. [best-effort] `changed:Enum.MapIconUIWidgetSetTypeMeta.MaxValue` — behavioral

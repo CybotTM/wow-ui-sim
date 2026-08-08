@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Extend 12.0.0 enum metadata coverage
+
+Classified 10 account-state, HousingResult, TransmogSituation, and SecretAspect metadata rows as bounded `best-effort`/`behavioral` claims. Epoch override `31172606b3f3b8b61bea63a81c457219546789fa` removes the two 12.0.1 SecretAspect members from 12.0.0 and restores exact metadata while retaining later values. Focused tests now cover 98 account-state rows, 90 HousingResult rows, 25 TransmogSituation rows, and 43 ItemCollectionType/SecretAspect rows. Normalized 33 provenance-only structure inventory rows to the declared five-column table. Current totals are **724 best-effort, 617 evidence-required, 2 exception-requested, and 2067 untriaged**.
+
 ## [2026-08-08] investigation | Fix EncounterEventFlags epoch drift
 
 Corrected the 12.0.0 runtime to publish the one-value `Enum.EncounterEventFlags` table while retaining the later two-value table from 12.0.5 onward. Focused tests prove `Disabled=1`, exact metadata, absence of later `IgnoreCastConsume` under 12.0.0, and preservation of later values. Classified those four rows plus 12 TooltipDataType, TraitNodeFlag, UICursorType, and UIWidgetVisualizationType rows as bounded `best-effort`/`behavioral` namespace/type/value claims. Current totals are **714 best-effort, 617 evidence-required, 2 exception-requested, and 2077 untriaged**.
