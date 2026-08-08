@@ -44538,17 +44538,44 @@
       "id": "added:StatusBar.GetInterpolatedValue",
       "symbol": "StatusBar.GetInterpolatedValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records StatusBar.GetInterpolatedValue as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/statusbar.rs",
+          "summary": "Current StatusBar methods return the stored displayed interpolation value, report target presence, and snap the displayed value to the target.",
+          "source_hash": "f24c8850d33b949e610b3dc124253990c8083c91a745d36d0a073b24c17c9b5c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/slider.rs",
+          "summary": "Current shared StatusBar SetValue handling stores Smooth-mode targets without replacing the displayed interpolation value.",
+          "source_hash": "1fb5bc0a2d5eec503bfd087ed2e7c26c9d294d88e45d680957c050de6d46b87e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/widget_methods_colorselect.rs",
+          "summary": "Focused StatusBar interpolation test verifies target-facing GetValue, displayed GetInterpolatedValue, active interpolation, and snap completion.",
+          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+        }
+      ],
+      "tests": [
+        "tests/widget_methods_colorselect.rs::test_statusbar_interpolation_methods_track_target_and_displayed_value"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "24e44f3f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested interpolation state machine: the displayed value stays old during Smooth target assignment, GetValue is target-facing, GetInterpolatedValue reports the displayed value, and SetToTargetValue snaps and clears interpolation. Timing/animation progression, repeated-target behavior, invalid modes, render, and event fidelity are not established."
     },
     {
       "id": "added:StatusBar.GetTimerDuration",
@@ -44591,17 +44618,44 @@
       "id": "added:StatusBar.IsInterpolating",
       "symbol": "StatusBar.IsInterpolating",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records StatusBar.IsInterpolating as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/statusbar.rs",
+          "summary": "Current StatusBar methods return the stored displayed interpolation value, report target presence, and snap the displayed value to the target.",
+          "source_hash": "f24c8850d33b949e610b3dc124253990c8083c91a745d36d0a073b24c17c9b5c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/slider.rs",
+          "summary": "Current shared StatusBar SetValue handling stores Smooth-mode targets without replacing the displayed interpolation value.",
+          "source_hash": "1fb5bc0a2d5eec503bfd087ed2e7c26c9d294d88e45d680957c050de6d46b87e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/widget_methods_colorselect.rs",
+          "summary": "Focused StatusBar interpolation test verifies target-facing GetValue, displayed GetInterpolatedValue, active interpolation, and snap completion.",
+          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+        }
+      ],
+      "tests": [
+        "tests/widget_methods_colorselect.rs::test_statusbar_interpolation_methods_track_target_and_displayed_value"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "24e44f3f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested interpolation state machine: the displayed value stays old during Smooth target assignment, GetValue is target-facing, GetInterpolatedValue reports the displayed value, and SetToTargetValue snaps and clears interpolation. Timing/animation progression, repeated-target behavior, invalid modes, render, and event fidelity are not established."
     },
     {
       "id": "added:StatusBar.SetTimerDuration",
@@ -44644,17 +44698,44 @@
       "id": "added:StatusBar.SetToTargetValue",
       "symbol": "StatusBar.SetToTargetValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records StatusBar.SetToTargetValue as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/statusbar.rs",
+          "summary": "Current StatusBar methods return the stored displayed interpolation value, report target presence, and snap the displayed value to the target.",
+          "source_hash": "f24c8850d33b949e610b3dc124253990c8083c91a745d36d0a073b24c17c9b5c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/slider.rs",
+          "summary": "Current shared StatusBar SetValue handling stores Smooth-mode targets without replacing the displayed interpolation value.",
+          "source_hash": "1fb5bc0a2d5eec503bfd087ed2e7c26c9d294d88e45d680957c050de6d46b87e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/widget_methods_colorselect.rs",
+          "summary": "Focused StatusBar interpolation test verifies target-facing GetValue, displayed GetInterpolatedValue, active interpolation, and snap completion.",
+          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+        }
+      ],
+      "tests": [
+        "tests/widget_methods_colorselect.rs::test_statusbar_interpolation_methods_track_target_and_displayed_value"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "24e44f3f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested interpolation state machine: the displayed value stays old during Smooth target assignment, GetValue is target-facing, GetInterpolatedValue reports the displayed value, and SetToTargetValue snaps and clears interpolation. Timing/animation progression, repeated-target behavior, invalid modes, render, and event fidelity are not established."
     },
     {
       "id": "added:TOOLTIP_SHOW_ITEM_COMPARISON",

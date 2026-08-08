@@ -2316,11 +2316,11 @@
 2316. [untriaged] `added:Sound_EncounterWarningsVolume` — untriaged
 2317. [untriaged] `added:SpellCooldownInfo.isOnGCD` — untriaged
 2318. [untriaged] `added:SpellCooldownInfo.timeUntilEndOfStartRecovery` — untriaged
-2319. [untriaged] `added:StatusBar.GetInterpolatedValue` — untriaged
+2319. [best-effort] `added:StatusBar.GetInterpolatedValue` — behavioral
 2320. [best-effort] `added:StatusBar.GetTimerDuration` — behavioral
-2321. [untriaged] `added:StatusBar.IsInterpolating` — untriaged
+2321. [best-effort] `added:StatusBar.IsInterpolating` — behavioral
 2322. [best-effort] `added:StatusBar.SetTimerDuration` — behavioral
-2323. [untriaged] `added:StatusBar.SetToTargetValue` — untriaged
+2323. [best-effort] `added:StatusBar.SetToTargetValue` — behavioral
 2324. [untriaged] `added:TOOLTIP_SHOW_ITEM_COMPARISON` — untriaged
 2325. [untriaged] `added:TRAINING_GROUNDS_ENABLED_STATUS_UPDATED` — untriaged
 2326. [untriaged] `added:TRANSMOG_CUSTOM_SETS_CHANGED` — untriaged

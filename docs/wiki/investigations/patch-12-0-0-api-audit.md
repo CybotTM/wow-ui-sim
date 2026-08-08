@@ -20,13 +20,15 @@ The bounded 12.0.0 `C_UnitAuras` slice classifies exactly 10 added/changed API r
 The bounded 12.0.0 `C_CombatLogSecure` slice classifies exactly nine added secure-only API rows as evidence-required/unsafe using checked-in source-register evidence and the permissive/fixture-backed `src/lua_api/workarounds/temporary/combat_log_state.rs` model; tests remain empty with null commit, approval, and scope exception. Secure/taint enforcement, filtering rules, event/message payload shape, navigation semantics, and entry lifecycle remain unproven, and no approval can close these rows. The audit remains open.
 The bounded 12.0.0 `C_CombatLog` slice classifies exactly 11 added API rows as evidence-required/unsafe using checked-in source-register evidence and the shared permissive/fixture-backed `src/lua_api/workarounds/temporary/combat_log_state.rs` model; tests remain empty with null commit, approval, and scope exception. Filter schema/matching, restriction state, retention/message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven, and no approval can close these rows. The audit remains open.
 
+The bounded 12.0.0 StatusBar interpolation slice classifies exactly three added methods (`GetInterpolatedValue`, `IsInterpolating`, and `SetToTargetValue`) as best-effort/behavioral using the existing focused interpolation test and ancestor implementation commit `24e44f3f0`. The claim is limited to the tested state machine: Smooth target assignment leaves the displayed value unchanged, `GetValue` is target-facing, `GetInterpolatedValue` returns the displayed value, `IsInterpolating` reports target presence, and `SetToTargetValue` snaps and clears interpolation. Timing/animation progression, repeated-target behavior, invalid modes, render, and event fidelity remain unproven.
+
 ### Register state
 
 - **Occurrences:** 3410
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 215 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, and seven simulator compat rows), 455 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2739 untriaged rows with null final status
+- **Status:** 218 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, seven simulator compat rows, and three StatusBar interpolation rows), 455 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2736 untriaged rows with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.
