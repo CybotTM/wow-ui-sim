@@ -1334,7 +1334,7 @@
 1334. [untriaged] `added:Enum.EditModeAuraFrameSetting.Opacity` — untriaged
 1335. [untriaged] `added:Enum.EditModeAuraFrameSetting.ShowDispelType` — untriaged
 1336. [untriaged] `added:Enum.EditModeAuraFrameSetting.VisibleSetting` — untriaged
-1337. [untriaged] `added:Enum.EditModeAuraFrameSystemIndices.ExternalDefensivesFrame` — untriaged
+1337. [best-effort] `added:Enum.EditModeAuraFrameSystemIndices.ExternalDefensivesFrame` — behavioral
 1338. [best-effort] `added:Enum.EditModeCooldownViewerSetting.BarWidthScale` — behavioral
 1339. [untriaged] `added:Enum.EditModeDamageMeterSetting.BackgroundTransparency` — untriaged
 1340. [untriaged] `added:Enum.EditModeDamageMeterSetting.BarHeight` — untriaged
@@ -1531,7 +1531,7 @@
 1531. [untriaged] `added:Enum.HousingFavorUpdateTypeMeta.MaxValue` — untriaged
 1532. [untriaged] `added:Enum.HousingFavorUpdateTypeMeta.MinValue` — untriaged
 1533. [untriaged] `added:Enum.HousingFavorUpdateTypeMeta.NumValues` — untriaged
-1534. [untriaged] `added:Enum.HousingItemToastType.House` — untriaged
+1534. [best-effort] `added:Enum.HousingItemToastType.House` — behavioral
 1535. [best-effort] `added:Enum.HousingResult.BoundsFailureChildren` — behavioral
 1536. [best-effort] `added:Enum.HousingResult.BoundsFailurePlot` — behavioral
 1537. [best-effort] `added:Enum.HousingResult.BoundsFailureRoom` — behavioral
@@ -1600,7 +1600,7 @@
 1600. [untriaged] `added:Enum.LuaCurveTypeMeta.MaxValue` — untriaged
 1601. [untriaged] `added:Enum.LuaCurveTypeMeta.MinValue` — untriaged
 1602. [untriaged] `added:Enum.LuaCurveTypeMeta.NumValues` — untriaged
-1603. [untriaged] `added:Enum.MapIconUIWidgetSetType.AdventureMapDetails` — untriaged
+1603. [best-effort] `added:Enum.MapIconUIWidgetSetType.AdventureMapDetails` — behavioral
 1604. [untriaged] `added:Enum.NamePlateCastBarDisplay.HighlightImportantCasts` — untriaged
 1605. [untriaged] `added:Enum.NamePlateCastBarDisplay.HighlightWhenCastTarget` — untriaged
 1606. [untriaged] `added:Enum.NamePlateCastBarDisplay.None` — untriaged
@@ -1877,7 +1877,7 @@
 1877. [untriaged] `added:Enum.StatusBarTimerDirectionMeta.MaxValue` — untriaged
 1878. [untriaged] `added:Enum.StatusBarTimerDirectionMeta.MinValue` — untriaged
 1879. [untriaged] `added:Enum.StatusBarTimerDirectionMeta.NumValues` — untriaged
-1880. [untriaged] `added:Enum.SurveyDeliveryMoment.MythicPlusCompleted` — untriaged
+1880. [best-effort] `added:Enum.SurveyDeliveryMoment.MythicPlusCompleted` — behavioral
 1881. [untriaged] `added:Enum.TableSecurityOption.DisallowSecretKeys` — untriaged
 1882. [untriaged] `added:Enum.TableSecurityOption.DisallowTaintedAccess` — untriaged
 1883. [untriaged] `added:Enum.TableSecurityOption.SecretWrapContents` — untriaged
@@ -2633,9 +2633,9 @@
 2633. [untriaged] `changed:Enum.CraftingOrderResult.WrongVersion` — untriaged
 2634. [untriaged] `changed:Enum.CraftingOrderResultMeta.MaxValue` — untriaged
 2635. [untriaged] `changed:Enum.CraftingOrderResultMeta.NumValues` — untriaged
-2636. [untriaged] `changed:Enum.CraftingReagentItemFlag.TooltipShowsAsStatModifications` — untriaged
-2637. [untriaged] `changed:Enum.CraftingReagentItemFlagMeta.MaxValue` — untriaged
-2638. [untriaged] `changed:Enum.CraftingReagentItemFlagMeta.MinValue` — untriaged
+2636. [best-effort] `changed:Enum.CraftingReagentItemFlag.TooltipShowsAsStatModifications` — behavioral
+2637. [best-effort] `changed:Enum.CraftingReagentItemFlagMeta.MaxValue` — behavioral
+2638. [best-effort] `changed:Enum.CraftingReagentItemFlagMeta.MinValue` — behavioral
 2639. [untriaged] `changed:Enum.CreateAllAccountDataMeta.NumValues` — untriaged
 2640. [best-effort] `changed:Enum.CurrencyDestroyReasonMeta.MaxValue` — behavioral
 2641. [best-effort] `changed:Enum.CurrencyDestroyReasonMeta.NumValues` — behavioral
@@ -2645,8 +2645,8 @@
 2645. [untriaged] `changed:Enum.EditModeAccountSettingMeta.NumValues` — untriaged
 2646. [untriaged] `changed:Enum.EditModeAuraFrameSettingMeta.MaxValue` — untriaged
 2647. [untriaged] `changed:Enum.EditModeAuraFrameSettingMeta.NumValues` — untriaged
-2648. [untriaged] `changed:Enum.EditModeAuraFrameSystemIndicesMeta.MaxValue` — untriaged
-2649. [untriaged] `changed:Enum.EditModeAuraFrameSystemIndicesMeta.NumValues` — untriaged
+2648. [best-effort] `changed:Enum.EditModeAuraFrameSystemIndicesMeta.MaxValue` — behavioral
+2649. [best-effort] `changed:Enum.EditModeAuraFrameSystemIndicesMeta.NumValues` — behavioral
 2650. [best-effort] `changed:Enum.EditModeCooldownViewerSettingMeta.MaxValue` — behavioral
 2651. [best-effort] `changed:Enum.EditModeCooldownViewerSettingMeta.NumValues` — behavioral
 2652. [untriaged] `changed:Enum.EditModeSystemMeta.MaxValue` — untriaged
@@ -2668,8 +2668,8 @@
 2668. [untriaged] `changed:Enum.HousingDecorPlacementRestriction.InvalidTarget` — untriaged
 2669. [untriaged] `changed:Enum.HousingDecorPlacementRestrictionMeta.MaxValue` — untriaged
 2670. [untriaged] `changed:Enum.HousingDecorPlacementRestrictionMeta.NumValues` — untriaged
-2671. [untriaged] `changed:Enum.HousingItemToastTypeMeta.MaxValue` — untriaged
-2672. [untriaged] `changed:Enum.HousingItemToastTypeMeta.NumValues` — untriaged
+2671. [best-effort] `changed:Enum.HousingItemToastTypeMeta.MaxValue` — behavioral
+2672. [best-effort] `changed:Enum.HousingItemToastTypeMeta.NumValues` — behavioral
 2673. [best-effort] `changed:Enum.HousingResult.CannotAfford` — behavioral
 2674. [best-effort] `changed:Enum.HousingResult.CharterComplete` — behavioral
 2675. [best-effort] `changed:Enum.HousingResult.CollisionInvalid` — behavioral
@@ -2746,12 +2746,12 @@
 2746. [untriaged] `changed:Enum.HousingResultMeta.NumValues` — untriaged
 2747. [best-effort] `changed:Enum.ItemCollectionTypeMeta.MaxValue` — behavioral
 2748. [best-effort] `changed:Enum.ItemCollectionTypeMeta.NumValues` — behavioral
-2749. [untriaged] `changed:Enum.MapIconUIWidgetSetTypeMeta.MaxValue` — untriaged
-2750. [untriaged] `changed:Enum.MapIconUIWidgetSetTypeMeta.NumValues` — untriaged
+2749. [best-effort] `changed:Enum.MapIconUIWidgetSetTypeMeta.MaxValue` — behavioral
+2750. [best-effort] `changed:Enum.MapIconUIWidgetSetTypeMeta.NumValues` — behavioral
 2751. [untriaged] `changed:Enum.SendAddonMessageResultMeta.MaxValue` — untriaged
 2752. [untriaged] `changed:Enum.SendAddonMessageResultMeta.NumValues` — untriaged
-2753. [untriaged] `changed:Enum.SurveyDeliveryMomentMeta.MaxValue` — untriaged
-2754. [untriaged] `changed:Enum.SurveyDeliveryMomentMeta.NumValues` — untriaged
+2753. [best-effort] `changed:Enum.SurveyDeliveryMomentMeta.MaxValue` — behavioral
+2754. [best-effort] `changed:Enum.SurveyDeliveryMomentMeta.NumValues` — behavioral
 2755. [untriaged] `changed:Enum.TooltipDataLineTypeMeta.MaxValue` — untriaged
 2756. [untriaged] `changed:Enum.TooltipDataLineTypeMeta.NumValues` — untriaged
 2757. [untriaged] `changed:Enum.TooltipDataTypeMeta.MaxValue` — untriaged

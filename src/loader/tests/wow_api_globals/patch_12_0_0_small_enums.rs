@@ -16,6 +16,14 @@ const ENUM_VALUES: &[(&str, &[(&str, i64)])] = &[
         "AccountTransTypeMeta",
         &[("MaxValue", 66), ("NumValues", 67)],
     ),
+    (
+        "CraftingReagentItemFlag",
+        &[("TooltipShowsAsStatModifications", 1)],
+    ),
+    (
+        "CraftingReagentItemFlagMeta",
+        &[("MaxValue", 1), ("MinValue", 1)],
+    ),
     ("CurrencyDestroyReason", &[("CraftingOrderReagent", 16)]),
     (
         "CurrencyDestroyReasonMeta",
@@ -23,6 +31,14 @@ const ENUM_VALUES: &[(&str, &[(&str, i64)])] = &[
     ),
     ("CurrencySource", &[("InitiativeReward", 67)]),
     ("CurrencySourceMeta", &[("MaxValue", 67), ("NumValues", 68)]),
+    (
+        "EditModeAuraFrameSystemIndices",
+        &[("ExternalDefensivesFrame", 3)],
+    ),
+    (
+        "EditModeAuraFrameSystemIndicesMeta",
+        &[("MaxValue", 3), ("NumValues", 3)],
+    ),
     ("EditModeCooldownViewerSetting", &[("BarWidthScale", 11)]),
     (
         "EditModeCooldownViewerSettingMeta",
@@ -40,6 +56,21 @@ const ENUM_VALUES: &[(&str, &[(&str, i64)])] = &[
     (
         "HousingDecorActionFlagsMeta",
         &[("MaxValue", 2_048), ("NumValues", 13)],
+    ),
+    ("HousingItemToastType", &[("House", 4)]),
+    (
+        "HousingItemToastTypeMeta",
+        &[("MaxValue", 4), ("NumValues", 5)],
+    ),
+    ("MapIconUIWidgetSetType", &[("AdventureMapDetails", 2)]),
+    (
+        "MapIconUIWidgetSetTypeMeta",
+        &[("MaxValue", 2), ("NumValues", 3)],
+    ),
+    ("SurveyDeliveryMoment", &[("MythicPlusCompleted", 4)]),
+    (
+        "SurveyDeliveryMomentMeta",
+        &[("MaxValue", 4), ("NumValues", 5)],
     ),
 ];
 

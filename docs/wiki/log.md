@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Extend small 12.0.0 enum coverage
+
+Classified 15 added/changed CraftingReagentItemFlag, EditModeAuraFrameSystemIndices, HousingItemToastType, MapIconUIWidgetSetType, and SurveyDeliveryMoment rows as `best-effort`/`behavioral` by extending `src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values`. The test now covers 35 rows across 11 families with exact namespace, numeric-type, and source-register-value assertions. Consumer, server/state, bitwise composition, mutation/protection, lifecycle, and edge semantics remain unclaimed. Current totals are **698 best-effort, 617 evidence-required, 2 exception-requested, and 2093 untriaged**.
+
 ## [2026-08-08] investigation | Classify six small 12.0.0 enum families
 
 Classified 20 added/changed AccountTransType, CurrencyDestroyReason, CurrencySource, EditModeCooldownViewerSetting, GameRule, and HousingDecorActionFlags rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values`. The focused retail 12.0.0 startup test asserts namespace publication, exact numeric Lua types, and exact source-register values. Claims exclude consumer, server/state, bitwise composition, mutation/protection, lifecycle, and edge semantics. Current totals are **683 best-effort, 617 evidence-required, 2 exception-requested, and 2108 untriaged**.
