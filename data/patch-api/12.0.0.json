@@ -28031,49 +28031,112 @@
       "id": "added:Enum.CooldownViewerAddAlertStatusMeta.MaxValue",
       "symbol": "Enum.CooldownViewerAddAlertStatusMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAddAlertStatusMeta.MaxValue as an added enum metadata occurrence with exact value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAddAlertStatusMeta.MaxValue with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. Alert creation, validation, duplicate handling, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAddAlertStatusMeta.MinValue",
       "symbol": "Enum.CooldownViewerAddAlertStatusMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAddAlertStatusMeta.MinValue as an added enum metadata occurrence with exact value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAddAlertStatusMeta.MinValue with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. Alert creation, validation, duplicate handling, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAddAlertStatusMeta.NumValues",
       "symbol": "Enum.CooldownViewerAddAlertStatusMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAddAlertStatusMeta.NumValues as an added enum metadata occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAddAlertStatusMeta.NumValues with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. Alert creation, validation, duplicate handling, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventType.Available",
@@ -28097,20 +28160,34 @@
           "summary": "Current startup enum publication defines Enum.CooldownViewerAlertEventType.Available with exact numeric value 1."
         },
         {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
+        },
+        {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
           "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
           "summary": "Focused enum test asserts the Enum.CooldownViewerAlertEventType namespace and exact source-register member values used by this bounded classification."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 tests prove later-member absence and exact four-member metadata after the epoch override."
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cooldown_alert_event_type_omits_later_members",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
       ],
       "assertions": [],
-      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
+      "commit": "890ae4afd2b2f5a6c368c8601e332044937135d5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact value for the four 12.0.0 member rows. The current table also contains later members; exact historical table membership, event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
+      "notes": "Best-effort behavioral evidence covers exact retail 12.0.0 startup table membership and the source-register member value: the epoch override removes the two later members and restores four-member metadata. Event dispatch, alert consumers, lifecycle, mutation/protection, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventType.ChargeGained",
@@ -28134,20 +28211,34 @@
           "summary": "Current startup enum publication defines Enum.CooldownViewerAlertEventType.ChargeGained with exact numeric value 4."
         },
         {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
+        },
+        {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
           "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
           "summary": "Focused enum test asserts the Enum.CooldownViewerAlertEventType namespace and exact source-register member values used by this bounded classification."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 tests prove later-member absence and exact four-member metadata after the epoch override."
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cooldown_alert_event_type_omits_later_members",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
       ],
       "assertions": [],
-      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
+      "commit": "890ae4afd2b2f5a6c368c8601e332044937135d5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact value for the four 12.0.0 member rows. The current table also contains later members; exact historical table membership, event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
+      "notes": "Best-effort behavioral evidence covers exact retail 12.0.0 startup table membership and the source-register member value: the epoch override removes the two later members and restores four-member metadata. Event dispatch, alert consumers, lifecycle, mutation/protection, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventType.OnCooldown",
@@ -28171,20 +28262,34 @@
           "summary": "Current startup enum publication defines Enum.CooldownViewerAlertEventType.OnCooldown with exact numeric value 3."
         },
         {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
+        },
+        {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
           "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
           "summary": "Focused enum test asserts the Enum.CooldownViewerAlertEventType namespace and exact source-register member values used by this bounded classification."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 tests prove later-member absence and exact four-member metadata after the epoch override."
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cooldown_alert_event_type_omits_later_members",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
       ],
       "assertions": [],
-      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
+      "commit": "890ae4afd2b2f5a6c368c8601e332044937135d5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact value for the four 12.0.0 member rows. The current table also contains later members; exact historical table membership, event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
+      "notes": "Best-effort behavioral evidence covers exact retail 12.0.0 startup table membership and the source-register member value: the epoch override removes the two later members and restores four-member metadata. Event dispatch, alert consumers, lifecycle, mutation/protection, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventType.PandemicTime",
@@ -28208,68 +28313,145 @@
           "summary": "Current startup enum publication defines Enum.CooldownViewerAlertEventType.PandemicTime with exact numeric value 2."
         },
         {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
+        },
+        {
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs",
           "source_hash": "8698f7b493db97f85dc99e01128759e3deb68e802f5aebe8924359c6313627e4",
           "summary": "Focused enum test asserts the Enum.CooldownViewerAlertEventType namespace and exact source-register member values used by this bounded classification."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 tests prove later-member absence and exact four-member metadata after the epoch override."
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_housing_enums.rs::test_patch_12_0_0_cooldown_viewer_and_house_exterior_enum_values",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cooldown_alert_event_type_omits_later_members",
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
       ],
       "assertions": [],
-      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
+      "commit": "890ae4afd2b2f5a6c368c8601e332044937135d5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to current startup namespace publication, numeric Lua type, and exact value for the four 12.0.0 member rows. The current table also contains later members; exact historical table membership, event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
+      "notes": "Best-effort behavioral evidence covers exact retail 12.0.0 startup table membership and the source-register member value: the epoch override removes the two later members and restores four-member metadata. Event dispatch, alert consumers, lifecycle, mutation/protection, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventTypeMeta.MaxValue",
       "symbol": "Enum.CooldownViewerAlertEventTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAlertEventTypeMeta.MaxValue as an added enum metadata occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MaxValue with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "890ae4afd2b2f5a6c368c8601e332044937135d5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers the exact 12.0.0 startup metadata restored by the epoch override. The override also removes the two later event-type members. Event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventTypeMeta.MinValue",
       "symbol": "Enum.CooldownViewerAlertEventTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAlertEventTypeMeta.MinValue as an added enum metadata occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MinValue with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "890ae4afd2b2f5a6c368c8601e332044937135d5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers the exact 12.0.0 startup metadata restored by the epoch override. The override also removes the two later event-type members. Event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertEventTypeMeta.NumValues",
       "symbol": "Enum.CooldownViewerAlertEventTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CooldownViewerAlertEventTypeMeta.NumValues as an added enum metadata occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.NumValues with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "890ae4afd2b2f5a6c368c8601e332044937135d5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers the exact 12.0.0 startup metadata restored by the epoch override. The override also removes the two later event-type members. Event dispatch, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAlertType.Sound",
@@ -31105,49 +31287,112 @@
       "id": "added:Enum.DamageMeterStyleMeta.MaxValue",
       "symbol": "Enum.DamageMeterStyleMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.DamageMeterStyleMeta.MaxValue as an added enum metadata occurrence with exact value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.DamageMeterStyleMeta.MaxValue with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. Damage-meter rendering, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.DamageMeterStyleMeta.MinValue",
       "symbol": "Enum.DamageMeterStyleMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.DamageMeterStyleMeta.MinValue as an added enum metadata occurrence with exact value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.DamageMeterStyleMeta.MinValue with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. Damage-meter rendering, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.DamageMeterStyleMeta.NumValues",
       "symbol": "Enum.DamageMeterStyleMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.DamageMeterStyleMeta.NumValues as an added enum metadata occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.DamageMeterStyleMeta.NumValues with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. Damage-meter rendering, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.DamageMeterType.Absorbs",
@@ -32751,49 +32996,112 @@
       "id": "added:Enum.EditModeEncounterEventsSystemIndicesMeta.MaxValue",
       "symbol": "Enum.EditModeEncounterEventsSystemIndicesMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeEncounterEventsSystemIndicesMeta.MaxValue as an added enum metadata occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.EditModeEncounterEventsSystemIndicesMeta.MaxValue with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. Edit Mode system selection, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EditModeEncounterEventsSystemIndicesMeta.MinValue",
       "symbol": "Enum.EditModeEncounterEventsSystemIndicesMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeEncounterEventsSystemIndicesMeta.MinValue as an added enum metadata occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.EditModeEncounterEventsSystemIndicesMeta.MinValue with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. Edit Mode system selection, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EditModeEncounterEventsSystemIndicesMeta.NumValues",
       "symbol": "Enum.EditModeEncounterEventsSystemIndicesMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeEncounterEventsSystemIndicesMeta.NumValues as an added enum metadata occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.EditModeEncounterEventsSystemIndicesMeta.NumValues with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. Edit Mode system selection, layout, persistence, consumer behavior, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.EditModePersonalResourceDisplaySetting.HideHealthAndPower",
@@ -35194,49 +35502,112 @@
       "id": "added:Enum.HouseExteriorWMODataFlagsMeta.MaxValue",
       "symbol": "Enum.HouseExteriorWMODataFlagsMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HouseExteriorWMODataFlagsMeta.MaxValue as an added enum metadata occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.HouseExteriorWMODataFlagsMeta.MaxValue with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. MaxValue is the highest declared flag, MinValue is the zero sentinel, and NumValues is the declared-entry count; bitwise composition, housing consumers, server state, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.HouseExteriorWMODataFlagsMeta.MinValue",
       "symbol": "Enum.HouseExteriorWMODataFlagsMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HouseExteriorWMODataFlagsMeta.MinValue as an added enum metadata occurrence with exact value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.HouseExteriorWMODataFlagsMeta.MinValue with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. MaxValue is the highest declared flag, MinValue is the zero sentinel, and NumValues is the declared-entry count; bitwise composition, housing consumers, server state, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.HouseExteriorWMODataFlagsMeta.NumValues",
       "symbol": "Enum.HouseExteriorWMODataFlagsMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HouseExteriorWMODataFlagsMeta.NumValues as an added enum metadata occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.HouseExteriorWMODataFlagsMeta.NumValues with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "source_hash": "7cb1c728d7d3d78421cd6efb8df014899131ab4c0f98c5c89e48a1410e0b6653",
+          "summary": "Focused retail 12.0.0 startup test asserts five metadata namespaces, numeric Lua types, and all 15 exact source-register values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_enum_metadata_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. MaxValue is the highest declared flag, MinValue is the zero sentinel, and NumValues is the declared-entry count; bitwise composition, housing consumers, server state, lifecycle, and other semantics are not claimed."
     },
     {
       "id": "added:Enum.HousingDecorActionFlags.PreviewDecor",
