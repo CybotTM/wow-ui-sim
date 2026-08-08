@@ -48581,113 +48581,273 @@
       "id": "added:script_object.AbbreviateConfigAPI",
       "symbol": "script_object.AbbreviateConfigAPI",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "script-object",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records AbbreviateConfigAPI as an added script-object occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd",
+          "summary": "Current temporary proxy factory creates AbbreviateConfig objects with tested getter/setter state, per-instance fields, read-only method keys, and tostring labels."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
+          "summary": "Focused userdata-proxy tests verify AbbreviateConfig table/method shape, data round-trip, per-instance fields, read-only keys, and tostring prefix."
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::abbreviate_config_is_table_with_methods",
+        "tests/userdata_proxy.rs::abbreviate_config_get_set_data_roundtrip",
+        "tests/userdata_proxy.rs::abbreviate_config_per_instance_fields",
+        "tests/userdata_proxy.rs::abbreviate_config_readonly_keys",
+        "tests/userdata_proxy.rs::abbreviate_config_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "22ab64e5eaa3a5c444cbb61cfb4dce8ee566ccca",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested AbbreviateConfig proxy table/method shape, getter/setter data round-trip, per-instance fields, read-only method keys, and tostring prefix. Retail abbreviation algorithms, formatting, lifecycle, validation, and edge semantics remain unproven."
     },
     {
       "id": "added:script_object.FrameAPITooltip",
       "symbol": "script_object.FrameAPITooltip",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "script-object",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records FrameAPITooltip as an added script-object occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd",
+          "summary": "The examined temporary proxy-object factory surface contains no FrameAPITooltip construction or method registration; this scoped inspection does not claim exhaustive source absence, and generated documentation presence is not runtime behavior."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: FrameAPITooltip has no examined simulator construction, registration, method surface, lifecycle, or focused behavioral test. Generated documentation presence is provenance only, not behavior; authoritative construction and contract evidence or a correct model/test is required. Tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:script_object.LuaColorCurveObjectAPI",
       "symbol": "script_object.LuaColorCurveObjectAPI",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "script-object",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records LuaColorCurveObjectAPI as an added script-object occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd",
+          "summary": "Current temporary proxy factory creates LuaColorCurveObject instances through the shared curve methods; tested behavior covers table/Evaluate shape and copy shape."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
+          "summary": "Focused userdata-proxy tests verify LuaColorCurveObject table/Evaluate shape and that copying a populated color curve returns a table."
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::color_curve_object_is_table",
+        "tests/userdata_proxy.rs::color_curve_copy_returns_table"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "22ab64e5eaa3a5c444cbb61cfb4dce8ee566ccca",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested LuaColorCurveObject proxy table/Evaluate shape and copy return shape. Color interpolation, point-value semantics, curve-type behavior, lifecycle, validation, secret behavior, and edge semantics remain unproven."
     },
     {
       "id": "added:script_object.LuaCurveObjectAPI",
       "symbol": "script_object.LuaCurveObjectAPI",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "script-object",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records LuaCurveObjectAPI as an added script-object occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd",
+          "summary": "Current temporary proxy factory creates LuaCurveObject instances with shared point insertion, scalar evaluation, copy, and per-instance proxy behavior."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
+          "summary": "Focused userdata-proxy tests verify LuaCurveObject table/method shape, scalar interpolation, copy shape/count, per-instance fields, and tostring prefix."
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::curve_object_is_table_with_methods",
+        "tests/userdata_proxy.rs::curve_object_add_and_evaluate",
+        "tests/userdata_proxy.rs::curve_object_copy_returns_table",
+        "tests/userdata_proxy.rs::curve_object_per_instance_fields",
+        "tests/userdata_proxy.rs::curve_object_tostring"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "22ab64e5eaa3a5c444cbb61cfb4dce8ee566ccca",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested LuaCurveObject proxy table/method shape, two-point scalar interpolation, copy shape/count, per-instance fields, and tostring prefix. Complete curve-type semantics, point ordering/duplicates, extrapolation, lifecycle, validation, and edge semantics remain unproven."
     },
     {
       "id": "added:script_object.LuaCurveObjectBaseAPI",
       "symbol": "script_object.LuaCurveObjectBaseAPI",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "script-object",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records LuaCurveObjectBaseAPI as an added script-object occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd",
+          "summary": "The examined proxy factory provides shared __wow_curve_methods for concrete LuaCurveObject and LuaColorCurveObject proxies, but no separately constructed LuaCurveObjectBase object or complete public base-contract surface."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: shared curve methods and indirect concrete-object tests do not establish the complete LuaCurveObjectBaseAPI method inventory, construction/identity contract, inheritance behavior, lifecycle, validation, or edge semantics. Authoritative evidence or a correct base model with focused tests is required. Tests and assertions remain empty, with null commit, approval, and scope exception."
     },
     {
       "id": "added:script_object.LuaDurationObjectAPI",
       "symbol": "script_object.LuaDurationObjectAPI",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "script-object",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records LuaDurationObjectAPI as an added script-object occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45",
+          "summary": "Current LuaDurationObject implementation exposes C_DurationUtil table proxies with the tested factory, zero-state, query, and lifecycle surface."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
+          "summary": "Focused userdata-proxy tests verify LuaDurationObject table/method shape, default-zero state, per-instance fields, and tostring prefix."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/widget_methods_colorselect.rs",
+          "source_hash": "2d583549d6f0c49b3bfc9b1cce1f4fb35200ce46f8afb40bc320abfa4b2a1b7b",
+          "summary": "Focused StatusBar test verifies the exact LuaDurationObject table identity and per-instance field round-trip through SetTimerDuration/GetTimerDuration."
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::duration_object_is_table_with_methods",
+        "tests/userdata_proxy.rs::duration_object_is_zero_by_default",
+        "tests/userdata_proxy.rs::duration_object_per_instance_fields",
+        "tests/userdata_proxy.rs::duration_object_tostring",
+        "tests/widget_methods_colorselect.rs::test_statusbar_timer_duration_round_trips_duration_object"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4d7dbe1dab8ab67c417931004ef3204c33bd903d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested LuaDurationObject proxy table/method shape, default-zero state, per-instance fields/tostring, and StatusBar duration-object identity round-trip. Exact timing/clock progression, duration calculations, secret behavior, lifecycle, validation, and edge semantics remain unproven."
     },
     {
       "id": "added:script_object.UnitHealPredictionCalculatorAPI",
       "symbol": "script_object.UnitHealPredictionCalculatorAPI",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "script-object",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionCalculatorAPI as an added script-object occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd",
+          "summary": "Current temporary proxy factory creates UnitHealPredictionCalculator objects with tested reset, clamp-mode, maximum-health, predicted-value, and tostring state."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/userdata_proxy.rs",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
+          "summary": "Focused userdata-proxy tests verify UnitHealPredictionCalculator table/method shape, damage-absorb clamp-mode round-trip, maximum-health calculation, and tostring prefix."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_health_power_api.rs",
+          "source_hash": "bea049c7eee4682c77d2993e02402d97f23fc7c630e18279c9b4dad11011e1b8",
+          "summary": "Focused detailed-heal-prediction test exercises the calculator through UnitGetDetailedHealPrediction and asserts populated predicted/current/maximum health state."
+        }
+      ],
+      "tests": [
+        "tests/userdata_proxy.rs::heal_prediction_is_table_with_methods",
+        "tests/userdata_proxy.rs::heal_prediction_set_get_roundtrip",
+        "tests/userdata_proxy.rs::heal_prediction_maximum_health_methods_read_predicted_health_max",
+        "tests/userdata_proxy.rs::heal_prediction_tostring",
+        "tests/admin_health_power_api.rs::unit_detailed_heal_prediction_populates_calculator"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "40df0a36603276ea1f29677d7fdaab386520cdf9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested UnitHealPredictionCalculator proxy table/method shape, damage-absorb clamp-mode round-trip, predicted/current/maximum health fixture behavior, and tostring prefix. Complete retail heal/absorb prediction, secret values, unit-state integration, lifecycle, validation, and edge semantics remain unproven."
     },
     {
       "id": "added:scrubsecretvalues",
