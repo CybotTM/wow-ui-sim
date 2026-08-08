@@ -28,13 +28,15 @@ The bounded 12.0.0 GameTooltip layout slice classifies exactly four changed meth
 
 The bounded 12.0.0 TextureBase atlas slice classifies exactly two changed methods (`GetTexCoord` and `SetAtlas`) as best-effort/behavioral using the focused tests in `tests/methods_texture.rs`; implementation ancestors are `50e028c9ef` for full-coordinate GetTexCoord behavior and `2591694d10` for the current atlas-method file, with tiling and render-preferred 2x behavior retained from `8bbadbf8c8` and `0c63d580ce`. The claim is limited to atlas remapping including partial UVs, known/unknown lookup, direct tile-slice selection, tiling flags and clearing, and render-preferred 2x path selection; complete atlas fidelity, CASC/texture loading beyond these assertions, filtering/wrap edge cases, invalid arguments, and rendering correctness remain unproven.
 
+The bounded 12.0.0 GameTooltip content slice classifies `changed:GameTooltip.SetText` as best-effort/behavioral using `tests/tooltip_basic.rs::test_settext_clears_and_sets_first_line` and implementation ancestor `fa8cd0e2fc` with test-file ancestor `fcc633ce28`; the claim is limited to clearing existing tooltip lines, inserting supplied text as the first line, and the focused `NumLines() == 1` assertion. Formatting, wrapping, colors, localization, rendering, invalid arguments, and edge semantics remain unproven.
+
 ### Register state
 
 - **Occurrences:** 3410
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 227 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, seven simulator compat rows, three StatusBar interpolation rows, three Cooldown widget rows, four GameTooltip layout rows, and two TextureBase atlas rows), 455 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2727 untriaged rows with null final status
+- **Status:** 228 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, seven simulator compat rows, three StatusBar interpolation rows, three Cooldown widget rows, four GameTooltip layout rows, one GameTooltip content row, and two TextureBase atlas rows), 455 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2726 untriaged rows with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.

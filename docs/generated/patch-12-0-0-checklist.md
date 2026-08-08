@@ -2771,7 +2771,7 @@
 2771. [best-effort] `changed:GameTooltip.GetPadding` — behavioral
 2772. [best-effort] `changed:GameTooltip.SetMinimumWidth` — behavioral
 2773. [best-effort] `changed:GameTooltip.SetPadding` — behavioral
-2774. [untriaged] `changed:GameTooltip.SetText` — untriaged
+2774. [best-effort] `changed:GameTooltip.SetText` — behavioral
 2775. [untriaged] `changed:GetRaidTargetIndex` — untriaged
 2776. [untriaged] `changed:HOUSE_LEVEL_CHANGED` — untriaged
 2777. [untriaged] `changed:HOUSING_BASIC_MODE_PLACEMENT_FLAGS_UPDATED` — untriaged
