@@ -45395,241 +45395,436 @@
       "id": "changed:C_PingSecure.ClearPendingPingInfo",
       "symbol": "C_PingSecure.ClearPendingPingInfo",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.CreateFrame",
       "symbol": "C_PingSecure.CreateFrame",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.DisplayError",
       "symbol": "C_PingSecure.DisplayError",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.GetTargetPingReceiver",
       "symbol": "C_PingSecure.GetTargetPingReceiver",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.GetTargetWorldPing",
       "symbol": "C_PingSecure.GetTargetWorldPing",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.GetTargetWorldPingAndSend",
       "symbol": "C_PingSecure.GetTargetWorldPingAndSend",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.SendPing",
       "symbol": "C_PingSecure.SendPing",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.SetPendingPingOffScreenCallback",
       "symbol": "C_PingSecure.SetPendingPingOffScreenCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.SetPingCooldownStartedCallback",
       "symbol": "C_PingSecure.SetPingCooldownStartedCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.SetPingPinFrameAddedCallback",
       "symbol": "C_PingSecure.SetPingPinFrameAddedCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.SetPingPinFrameRemovedCallback",
       "symbol": "C_PingSecure.SetPingPinFrameRemovedCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.SetPingPinFrameScreenClampStateUpdatedCallback",
       "symbol": "C_PingSecure.SetPingPinFrameScreenClampStateUpdatedCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.SetPingRadialWheelCreatedCallback",
       "symbol": "C_PingSecure.SetPingRadialWheelCreatedCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.SetSendMacroPingCallback",
       "symbol": "C_PingSecure.SetSendMacroPingCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_PingSecure.SetTogglePingListenerCallback",
       "symbol": "C_PingSecure.SetTogglePingListenerCallback",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this changed C_PingSecure API as secure-only and preserves its before/after signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_ping_secure.rs",
+          "source_hash": "6c1d7c6fe872b8e00bca5984d012acd1263d7cbbb9f66eab4be39a4fa7db0aee",
+          "summary": "Clean current C_PingSecure source is partial: CreateFrame is a no-op, callback setters retain inert compatibility state, and secure ping behavior is absent or unmodeled."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent. Exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and PingResult semantics require authoritative live evidence or a correct ping/security model and direct tests; no approval can close this row."
     },
     {
       "id": "changed:C_Reputation.GetFactionParagonInfo",

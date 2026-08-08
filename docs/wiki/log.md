@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-08-08] investigation | Bound 12.0.0 C_PingSecure slice
+
+Classified exactly 15 changed `C_PingSecure` API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and clean current `src/c_api/c_ping_secure.rs`; tests remain empty with null commit, approval, and scope exception. The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent; exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and `PingResult` semantics require authoritative live evidence or a correct ping/security model and direct tests, and no approval can close these rows. Totals are now **77 best-effort, 185 evidence-required, and 3148 untriaged**.
+
 ## [2026-08-08] investigation | Bound 12.0.0 C_Secrets slice
 
 Classified exactly 23 added `C_Secrets` API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the examined current `src/lua_api/globals/register.rs` surface; tests remain empty with null commit, approval, and scope exception. Exact secrecy levels and action/aura/cooldown/totem/unit health/identity/power/cast restriction semantics require authoritative live evidence or a correct taint/security model and tests; secret behavior must not be guessed or approved closed. Totals are now **77 best-effort, 170 evidence-required, and 3163 untriaged**.
