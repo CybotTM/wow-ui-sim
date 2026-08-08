@@ -20210,49 +20210,112 @@
       "id": "added:Cooldown.GetCountdownFontString",
       "symbol": "Cooldown.GetCountdownFontString",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Cooldown.GetCountdownFontString as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/cooldown.rs",
+          "source_hash": "527213c02fce0cda3bc7c6fd5f0874d3eea3d4e28dc59de2fb086cb32ac2e2b7",
+          "summary": "Current Cooldown methods create and retain a countdown child FontString and return its frame reference."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/cooldown_widget.rs",
+          "source_hash": "07a66162ff33fd6245879fc0d962ffa10cb9ca5026e8a9bf3fdcd651b4d19b8d",
+          "summary": "Focused cooldown widget test verifies GetCountdownFontString returns a non-nil FontString."
+        }
+      ],
+      "tests": [
+        "tests/cooldown_widget.rs::cooldown_widget_methods_persist_runtime_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d7a3cf21b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused test's countdown child creation and FontString type assertions. Retail countdown rendering, time progression, formatting, invalid arguments, and edge semantics are not established."
     },
     {
       "id": "added:Cooldown.SetCooldownFromDurationObject",
       "symbol": "Cooldown.SetCooldownFromDurationObject",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Cooldown.SetCooldownFromDurationObject as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/cooldown.rs",
+          "source_hash": "527213c02fce0cda3bc7c6fd5f0874d3eea3d4e28dc59de2fb086cb32ac2e2b7",
+          "summary": "Current Cooldown methods read duration-object start, total duration, mod rate, and zero state, then update or clear stored cooldown timing."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/cooldown_widget.rs",
+          "source_hash": "07a66162ff33fd6245879fc0d962ffa10cb9ca5026e8a9bf3fdcd651b4d19b8d",
+          "summary": "Focused cooldown widget test verifies duration-object start/duration and display-duration updates plus zero-duration clearing."
+        }
+      ],
+      "tests": [
+        "tests/cooldown_widget.rs::cooldown_widget_methods_persist_runtime_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a1f638733",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused test's duration-object update and zero-duration clearing, with the modeled start, total-duration, and mod-rate accessors. Retail timing/rendering, formatting, invalid arguments, and edge semantics are not established."
     },
     {
       "id": "added:Cooldown.SetCooldownFromExpirationTime",
       "symbol": "Cooldown.SetCooldownFromExpirationTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Cooldown.SetCooldownFromExpirationTime as an added uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/cooldown.rs",
+          "source_hash": "527213c02fce0cda3bc7c6fd5f0874d3eea3d4e28dc59de2fb086cb32ac2e2b7",
+          "summary": "Current Cooldown methods convert expiration time and duration to a stored start time and duration while retaining mod rate."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/cooldown_widget.rs",
+          "source_hash": "07a66162ff33fd6245879fc0d962ffa10cb9ca5026e8a9bf3fdcd651b4d19b8d",
+          "summary": "Focused cooldown widget test verifies expiration-time conversion to start/duration and millisecond display duration."
+        }
+      ],
+      "tests": [
+        "tests/cooldown_widget.rs::cooldown_widget_methods_persist_runtime_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d7a3cf21b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused test's expiration-time conversion and millisecond display-duration assertions. Retail timing/rendering, formatting, invalid arguments, and edge semantics are not established."
     },
     {
       "id": "added:Cooldown.SetPaused",

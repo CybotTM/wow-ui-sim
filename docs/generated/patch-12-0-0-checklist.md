@@ -851,9 +851,9 @@
 851. [untriaged] `added:Constants.UnitPowerSpellIDs.DARK_HEART_SPELL_ID` — untriaged
 852. [untriaged] `added:Constants.UnitPowerSpellIDs.SILENCE_THE_WHISPERS_SPELL_ID` — untriaged
 853. [untriaged] `added:Constants.UnitPowerSpellIDs.VOID_METAMORPHOSIS_SPELL_ID` — untriaged
-854. [untriaged] `added:Cooldown.GetCountdownFontString` — untriaged
-855. [untriaged] `added:Cooldown.SetCooldownFromDurationObject` — untriaged
-856. [untriaged] `added:Cooldown.SetCooldownFromExpirationTime` — untriaged
+854. [best-effort] `added:Cooldown.GetCountdownFontString` — behavioral
+855. [best-effort] `added:Cooldown.SetCooldownFromDurationObject` — behavioral
+856. [best-effort] `added:Cooldown.SetCooldownFromExpirationTime` — behavioral
 857. [untriaged] `added:Cooldown.SetPaused` — untriaged
 858. [untriaged] `added:CraftingItemSlotModification.reagent` — untriaged
 859. [untriaged] `added:CraftingOrderReagentInfo.reagentInfo` — untriaged

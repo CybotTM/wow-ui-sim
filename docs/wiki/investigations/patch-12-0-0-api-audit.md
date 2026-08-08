@@ -22,13 +22,15 @@ The bounded 12.0.0 `C_CombatLog` slice classifies exactly 11 added API rows as e
 
 The bounded 12.0.0 StatusBar interpolation slice classifies exactly three added methods (`GetInterpolatedValue`, `IsInterpolating`, and `SetToTargetValue`) as best-effort/behavioral using the existing focused interpolation test and ancestor implementation commit `24e44f3f0`. The claim is limited to the tested state machine: Smooth target assignment leaves the displayed value unchanged, `GetValue` is target-facing, `GetInterpolatedValue` returns the displayed value, `IsInterpolating` reports target presence, and `SetToTargetValue` snaps and clears interpolation. Timing/animation progression, repeated-target behavior, invalid modes, render, and event fidelity remain unproven.
 
+The bounded 12.0.0 Cooldown slice classifies exactly three added methods (`GetCountdownFontString`, `SetCooldownFromDurationObject`, and `SetCooldownFromExpirationTime`) as best-effort/behavioral using `tests/cooldown_widget.rs::cooldown_widget_methods_persist_runtime_state`; implementation ancestors are `d7a3cf21b` for countdown-font/expiration behavior and `a1f638733` for duration-object behavior. The claim is limited to FontString creation/type, expiration-to-start/duration conversion, duration-object start/total-duration/mod-rate access, and zero-duration clearing; retail rendering, time progression, formatting, invalid arguments, and edge semantics remain unproven.
+
 ### Register state
 
 - **Occurrences:** 3410
 - **Added:** 2554
 - **Changed:** 313
 - **Removed:** 543
-- **Status:** 218 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, seven simulator compat rows, and three StatusBar interpolation rows), 455 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2736 untriaged rows with null final status
+- **Status:** 221 best-effort rows (including 56 vendor-present deprecated-wrapper rows, five chat/spell vendor wrappers, seven simulator compat rows, three StatusBar interpolation rows, and three Cooldown widget rows), 455 evidence-required/unsafe rows, 1 exception-requested/impossible row, and 2733 untriaged rows with null final status
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 
 Each source occurrence may carry optional typed `before`/`after` JSON payloads. Added rows carry `after`, removed rows `before`, changed rows both, and transient add/remove rows the corresponding side; row identity remains `direction+symbol`, and unknown occurrence fields remain rejected. This payload metadata improves exact triage without changing the occurrence counts.
