@@ -2344,7 +2344,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `TRANSMOG_CUSTOM_SETS_CHANGED` | untriaged | event | added | event added in 12.0.0. |
 | `TRANSMOG_DISPLAYED_OUTFIT_CHANGED` | untriaged | event | added | event added in 12.0.0. |
 | `TUTORIAL_COMBAT_EVENT` | untriaged | event | added | event added in 12.0.0. |
-| `TextureBase.ResetTexCoord` | best-effort | uiobject-method | added | Best-effort behavioral evidence is limited to the focused SetTexCoord-then-ResetTexCoord default-coordinate reset. Atlas-specific reset, rendering, invalid arguments, and other edge semantics remain unproven. |
+| `TextureBase.ResetTexCoord` | best-effort | uiobject-method | added | Best-effort behavioral evidence is limited to the focused SetTexCoord-then-ResetTexCoord reset to default eight-corner coordinates; commit 090af1ec8 corrected the stale four-value GetTexCoord assertion. Atlas-specific reset, rendering, invalid arguments, and other edge semantics remain unproven. |
 | `TextureBase.SetSpriteSheetCell` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |
 | `UIObject.HasAnySecretAspect` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |
 | `UIObject.HasSecretAspect` | untriaged | uiobject-method | added | uiobject-method added in 12.0.0. |

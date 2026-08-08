@@ -44991,8 +44991,8 @@
         {
           "kind": "test",
           "reference": "tests/texture_methods_port.rs",
-          "summary": "Focused texture test verifies SetTexCoord followed by ResetTexCoord returns the default (0,1,0,1) coordinates.",
-          "source_hash": "1d2c10eef214e54ca889c8515668a329ffe437579295e8fd91e0639fbd762bbc"
+          "summary": "Focused texture test verifies SetTexCoord followed by ResetTexCoord returns the default eight-corner coordinates (0,0, 0,1, 1,0, 1,1); commit 090af1ec8 corrected the stale four-value assertion.",
+          "source_hash": "c5b2573efc194a93eb3a387eaea40657b37f5945fb22761885bfde47c82de5cf"
         }
       ],
       "tests": [
@@ -45002,7 +45002,7 @@
       "commit": "2591694d10dca666a09593cc5ffff121193171f9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to the focused SetTexCoord-then-ResetTexCoord default-coordinate reset. Atlas-specific reset, rendering, invalid arguments, and other edge semantics remain unproven."
+      "notes": "Best-effort behavioral evidence is limited to the focused SetTexCoord-then-ResetTexCoord reset to default eight-corner coordinates; commit 090af1ec8 corrected the stale four-value GetTexCoord assertion. Atlas-specific reset, rendering, invalid arguments, and other edge semantics remain unproven. Test-file ancestor is 090af1ec8."
     },
     {
       "id": "added:TextureBase.SetSpriteSheetCell",
