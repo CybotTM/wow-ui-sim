@@ -12,6 +12,7 @@ const PERMANENT_PROJECT_SCOPE_RULE: &str = "permanent-project-scope";
 const INTENTIONAL_GAPS_REFERENCE: &str = "AGENTS.md#intentional-gaps";
 const INTENTIONAL_GAPS_HEADING: &str = "## Intentional Gaps";
 const NO_3D_RULE_MARKER: &str = "**No 3D rendering**";
+const PROVENANCE_ONLY_NOTE: &str = "Provenance-only: no runtime behavior claimed.";
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -72,6 +73,8 @@ pub struct PatchAuditRow {
     pub change: ChangeDirection,
     pub status: Option<AuditStatus>,
     pub resolution: ResolutionKind,
+    #[serde(default)]
+    pub provenance_only: bool,
     pub owner: String,
     pub load_addon: Option<String>,
     pub evidence: Vec<AuditEvidence>,
@@ -136,6 +139,7 @@ pub enum ResolutionKind {
     VendorPresent,
     Compat,
     Behavioral,
+    ProvenanceOnly,
     LoadOnDemand,
     Removed,
     CrossFlavor,
@@ -152,6 +156,7 @@ impl ResolutionKind {
             Self::VendorPresent => "vendor-present",
             Self::Compat => "compat",
             Self::Behavioral => "behavioral",
+            Self::ProvenanceOnly => "provenance-only",
             Self::LoadOnDemand => "load-on-demand",
             Self::Removed => "removed",
             Self::CrossFlavor => "cross-flavor",
@@ -469,10 +474,22 @@ fn validate_direction_count(direction: &str, expected: usize, actual: usize) -> 
 }
 
 fn validate_row(row: &PatchAuditRow, target_flavor: AuditFlavor) -> Result<(), String> {
+    validate_provenance_only_flag(row)?;
     if row.resolution == ResolutionKind::Untriaged {
         return validate_untriaged_row(row);
     }
     validate_resolved_row(row, target_flavor)
+}
+
+fn validate_provenance_only_flag(row: &PatchAuditRow) -> Result<(), String> {
+    let uses_provenance_resolution = row.resolution == ResolutionKind::ProvenanceOnly;
+    if row.provenance_only == uses_provenance_resolution {
+        return Ok(());
+    }
+    Err(format!(
+        "row {} provenance_only flag and provenance-only resolution must match",
+        row.id
+    ))
 }
 
 fn validate_untriaged_row(row: &PatchAuditRow) -> Result<(), String> {
@@ -482,7 +499,8 @@ fn validate_untriaged_row(row: &PatchAuditRow) -> Result<(), String> {
     if let Some(notes) = &row.notes {
         require_text(&format!("{}.notes", row.id), notes)?;
     }
-    let has_resolution_data = !row.evidence.is_empty()
+    let has_resolution_data = row.provenance_only
+        || !row.evidence.is_empty()
         || !row.tests.is_empty()
         || !row.assertions.is_empty()
         || row.commit.is_some()
@@ -553,7 +571,7 @@ fn validate_assertions(row: &PatchAuditRow) -> Result<(), String> {
     }
     if matches!(
         row.resolution,
-        ResolutionKind::Unsafe | ResolutionKind::Impossible
+        ResolutionKind::Unsafe | ResolutionKind::Impossible | ResolutionKind::ProvenanceOnly
     ) && row.assertions.is_empty()
     {
         return Ok(());
@@ -568,6 +586,9 @@ fn validate_assertions(row: &PatchAuditRow) -> Result<(), String> {
 }
 
 fn validate_focused_tests(row: &PatchAuditRow, status: AuditStatus) -> Result<(), String> {
+    if row.resolution == ResolutionKind::ProvenanceOnly {
+        return Ok(());
+    }
     if matches!(
         status,
         AuditStatus::EvidenceRequired | AuditStatus::ExceptionRequested
@@ -649,7 +670,8 @@ fn validate_status_resolution(row: &PatchAuditRow, status: AuditStatus) -> Resul
         ResolutionKind::Untriaged => false,
         ResolutionKind::CrossFlavor
         | ResolutionKind::StaleSnapshot
-        | ResolutionKind::ReversedSnapshot => status == AuditStatus::BestEffort,
+        | ResolutionKind::ReversedSnapshot
+        | ResolutionKind::ProvenanceOnly => status == AuditStatus::BestEffort,
         ResolutionKind::Unsafe | ResolutionKind::Impossible => matches!(
             status,
             AuditStatus::EvidenceRequired | AuditStatus::ExceptionRequested
@@ -708,6 +730,7 @@ fn validate_resolution_contract(
         }
         ResolutionKind::VendorPresent | ResolutionKind::Compat => validate_presence_contract(row),
         ResolutionKind::Behavioral => validate_behavioral_contract(row),
+        ResolutionKind::ProvenanceOnly => validate_provenance_only_contract(row),
         ResolutionKind::Unsafe | ResolutionKind::Impossible | ResolutionKind::Untriaged => Ok(()),
     }
 }
@@ -756,6 +779,44 @@ fn validate_behavioral_contract(row: &PatchAuditRow) -> Result<(), String> {
         "row {} behavioral resolution requires test evidence",
         row.id
     ))
+}
+
+fn validate_provenance_only_contract(row: &PatchAuditRow) -> Result<(), String> {
+    if !row.provenance_only {
+        return Err(format!(
+            "row {} provenance-only resolution requires provenance_only=true",
+            row.id
+        ));
+    }
+    if row
+        .evidence
+        .iter()
+        .any(|evidence| evidence.kind != EvidenceKind::Source)
+    {
+        return Err(format!(
+            "row {} provenance-only resolution permits source evidence only",
+            row.id
+        ));
+    }
+    if !row.tests.is_empty() || !row.assertions.is_empty() {
+        return Err(format!(
+            "row {} provenance-only resolution must not carry runtime tests or assertions",
+            row.id
+        ));
+    }
+    if row.commit.is_some() || row.approval_id.is_some() || row.scope_exception.is_some() {
+        return Err(format!(
+            "row {} provenance-only resolution must not carry commit, approval, or scope metadata",
+            row.id
+        ));
+    }
+    if row.notes.as_deref() != Some(PROVENANCE_ONLY_NOTE) {
+        return Err(format!(
+            "row {} provenance-only notes must be exactly {PROVENANCE_ONLY_NOTE:?}",
+            row.id
+        ));
+    }
+    Ok(())
 }
 
 fn validate_presence_contract(row: &PatchAuditRow) -> Result<(), String> {
@@ -1189,6 +1250,9 @@ fn validate_completion_row<'a>(
     if row.resolution == ResolutionKind::Untriaged {
         return Err(format!("row {} remains untriaged", row.id));
     }
+    if row.resolution == ResolutionKind::ProvenanceOnly {
+        return Ok(());
+    }
     match row.status.expect("resolved row status validated") {
         AuditStatus::EvidenceRequired => Err(format!("row {} remains evidence-required", row.id)),
         AuditStatus::ExceptionRequested => validate_exception_approval(row, approvals),
@@ -1444,6 +1508,95 @@ mod tests {
             }}"#,
             "c".repeat(64)
         )
+    }
+
+    fn provenance_only_row(
+        status: &str,
+        resolution: &str,
+        provenance_only: Option<bool>,
+        evidence_kind: &str,
+        tests: &str,
+    ) -> String {
+        let provenance_only = provenance_only.map_or(String::new(), |value| {
+            format!(r#","provenance_only":{value}"#)
+        });
+        format!(
+            r#"{{
+              "id":"added:Fixture","symbol":"Fixture","change":"added",
+              "status":"{status}","resolution":"{resolution}","owner":"source-register",
+              "evidence":[{{"kind":"{evidence_kind}","reference":"data/patch-api/sources/fixture.json","summary":"typedef source metadata","source_hash":"{}"}}],
+              "tests":{tests},"assertions":[],"commit":null,"approval_id":null,"scope_exception":null,
+              "notes":"Provenance-only: no runtime behavior claimed."{provenance_only}
+            }}"#,
+            "c".repeat(64)
+        )
+    }
+
+    #[test]
+    fn provenance_only_source_row_validates_and_is_completion_eligible() {
+        let manifest = fixture_manifest(&provenance_only_row(
+            "best-effort",
+            "provenance-only",
+            Some(true),
+            "source",
+            "[]",
+        ));
+
+        validate_manifest(&manifest).expect("provenance-only source row should validate");
+        let mut approvals = HashSet::new();
+        validate_completion_row(&manifest.rows[0], &mut approvals)
+            .expect("provenance-only source row should be completion-eligible");
+    }
+
+    fn assert_provenance_only_rejected(row: &str) {
+        match parse_fixture_manifest(row) {
+            Err(error) => assert!(error.contains("provenance"), "unexpected error: {error}"),
+            Ok(manifest) => {
+                let error = validate_manifest(&manifest)
+                    .expect_err("invalid provenance-only row should be rejected");
+                assert!(error.contains("provenance"), "unexpected error: {error}");
+            }
+        }
+    }
+
+    #[test]
+    fn provenance_only_resolution_requires_explicit_flag() {
+        assert_provenance_only_rejected(&provenance_only_row(
+            "best-effort",
+            "provenance-only",
+            None,
+            "source",
+            "[]",
+        ));
+    }
+
+    #[test]
+    fn provenance_only_rows_reject_runtime_test_evidence() {
+        assert_provenance_only_rejected(&provenance_only_row(
+            "best-effort",
+            "provenance-only",
+            Some(true),
+            "test",
+            r#"["tests/fixture.rs::fixture_test"]"#,
+        ));
+    }
+
+    #[test]
+    fn provenance_only_requires_best_effort_status_and_resolution() {
+        assert_provenance_only_rejected(&provenance_only_row(
+            "evidence-required",
+            "provenance-only",
+            Some(true),
+            "source",
+            "[]",
+        ));
+        assert_provenance_only_rejected(&provenance_only_row(
+            "best-effort",
+            "behavioral",
+            Some(true),
+            "source",
+            "[]",
+        ));
     }
 
     #[test]
