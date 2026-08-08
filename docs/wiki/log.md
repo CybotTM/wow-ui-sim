@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Prove 12.0.0 SpellGetVisibilityInfo vendor wrapper
+
+Classified `SpellGetVisibilityInfo` as `best-effort`/`vendor-present` using `patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward` at `ed3ad9d87`. The focused full-LoD proof checks publication under enabled `loadDeprecationFallbacks`, string-to-Enum translation for `RAID_INCOMBAT`, sentinel forwarding, and unknown visibility-name nil forwarding; it does not claim complete `C_Spell` visibility semantics. `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` remain untriaged. Totals are now **215 best-effort, 453 evidence-required, 1 exception-requested, and 2741 untriaged**.
+
 ## [2026-08-08] investigation | Prove 12.0.0 deprecated chat/spell globals
 
 Classified `CancelEmote`, `DoEmote`, `SpellIsPriorityAura`, and `SpellIsSelfBuff` as `best-effort`/`vendor-present` using `patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward` at `02db1895a`. The focused full-LoD proof checks publication under enabled `loadDeprecationFallbacks`, CancelEmote forwarding, DoEmote named and nil branches, and spell-wrapper forwarding; it does not claim complete legacy semantic fidelity. `CombatLogAdvanceEntry`, `CombatLogSetCurrentEntry`, and `SpellGetVisibilityInfo` remain untriaged. Totals are now **214 best-effort, 453 evidence-required, 1 exception-requested, and 2742 untriaged**.

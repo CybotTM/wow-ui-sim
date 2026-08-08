@@ -57310,7 +57310,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs",
-          "source_hash": "a4af85e8f6652fa9200d8fd338ecc44be6ceabbad01632343ebe0e0fe37295d0",
+          "source_hash": "dadac28a68d179899c11c6cb64d66e086309fe4ac01b11ebe9dfd3b43cfcded3",
           "summary": "Focused full-LoD PTR proof verifies CancelEmote is published as a function and forwards through the pinned deprecated chat/spell wrapper; DoEmote named and nil branches are exercised. This proves vendor publication and tested forwarding, not full legacy API semantic fidelity."
         }
       ],
@@ -58232,7 +58232,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs",
-          "source_hash": "a4af85e8f6652fa9200d8fd338ecc44be6ceabbad01632343ebe0e0fe37295d0",
+          "source_hash": "dadac28a68d179899c11c6cb64d66e086309fe4ac01b11ebe9dfd3b43cfcded3",
           "summary": "Focused full-LoD PTR proof verifies DoEmote is published as a function and forwards through the pinned deprecated chat/spell wrapper; DoEmote named and nil branches are exercised. This proves vendor publication and tested forwarding, not full legacy API semantic fidelity."
         }
       ],
@@ -63130,17 +63130,39 @@
       "id": "removed:SpellGetVisibilityInfo",
       "symbol": "SpellGetVisibilityInfo",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "api",
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_DeprecatedSpellScript",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records SpellGetVisibilityInfo as removed; the deprecated Blizzard spell-script wrapper is published separately when loadDeprecationFallbacks is enabled."
+        },
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs",
+          "source_hash": "dadac28a68d179899c11c6cb64d66e086309fe4ac01b11ebe9dfd3b43cfcded3",
+          "summary": "Focused full-LoD PTR proof verifies SpellGetVisibilityInfo is published as a function, translates RAID_INCOMBAT to Enum.SpellAuraVisibilityType.RaidInCombat, forwards sentinel and unknown-name nil values to C_Spell.GetVisibilityInfo, and restores the destination. This proves vendor publication and wrapper forwarding, not full C_Spell visibility semantics."
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "ed3ad9d870e12f2f210e3222533479613452c7c9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Vendor-present best-effort classification is limited to deprecated-wrapper publication under enabled loadDeprecationFallbacks and focused translation/forwarding proof for RAID_INCOMBAT and unknown visibility names; it does not claim complete C_Spell visibility semantics."
     },
     {
       "id": "removed:SpellIsAlwaysShown",
@@ -63191,7 +63213,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs",
-          "source_hash": "a4af85e8f6652fa9200d8fd338ecc44be6ceabbad01632343ebe0e0fe37295d0",
+          "source_hash": "dadac28a68d179899c11c6cb64d66e086309fe4ac01b11ebe9dfd3b43cfcded3",
           "summary": "Focused full-LoD PTR proof verifies SpellIsPriorityAura is published as a function and forwards through the pinned deprecated chat/spell wrapper; DoEmote named and nil branches are exercised. This proves vendor publication and tested forwarding, not full legacy API semantic fidelity."
         }
       ],
@@ -63229,7 +63251,7 @@
         {
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs",
-          "source_hash": "a4af85e8f6652fa9200d8fd338ecc44be6ceabbad01632343ebe0e0fe37295d0",
+          "source_hash": "dadac28a68d179899c11c6cb64d66e086309fe4ac01b11ebe9dfd3b43cfcded3",
           "summary": "Focused full-LoD PTR proof verifies SpellIsSelfBuff is published as a function and forwards through the pinned deprecated chat/spell wrapper; DoEmote named and nil branches are exercised. This proves vendor publication and tested forwarding, not full legacy API semantic fidelity."
         }
       ],

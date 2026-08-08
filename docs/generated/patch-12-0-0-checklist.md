@@ -3238,7 +3238,7 @@
 3238. [untriaged] `removed:ShowClassColorInFriendlyNameplate` — untriaged
 3239. [untriaged] `removed:ShowClassColorInNameplate` — untriaged
 3240. [untriaged] `removed:ShowNamePlateLoseAggroFlash` — untriaged
-3241. [untriaged] `removed:SpellGetVisibilityInfo` — untriaged
+3241. [best-effort] `removed:SpellGetVisibilityInfo` — vendor-present
 3242. [best-effort] `removed:SpellIsAlwaysShown` — behavioral
 3243. [best-effort] `removed:SpellIsPriorityAura` — vendor-present
 3244. [best-effort] `removed:SpellIsSelfBuff` — vendor-present
