@@ -2801,8 +2801,8 @@
 2801. [untriaged] `changed:StatusBar.SetMinMaxValues` — untriaged
 2802. [untriaged] `changed:StatusBar.SetValue` — untriaged
 2803. [untriaged] `changed:TRANSMOG_OUTFITS_CHANGED` — untriaged
-2804. [untriaged] `changed:TextureBase.GetTexCoord` — untriaged
-2805. [untriaged] `changed:TextureBase.SetAtlas` — untriaged
+2804. [best-effort] `changed:TextureBase.GetTexCoord` — behavioral
+2805. [best-effort] `changed:TextureBase.SetAtlas` — behavioral
 2806. [untriaged] `changed:UNIT_SPELLCAST_CHANNEL_START` — untriaged
 2807. [untriaged] `changed:UNIT_SPELLCAST_CHANNEL_STOP` — untriaged
 2808. [untriaged] `changed:UNIT_SPELLCAST_CHANNEL_UPDATE` — untriaged

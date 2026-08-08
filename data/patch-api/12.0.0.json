@@ -53521,33 +53521,81 @@
       "id": "changed:TextureBase.GetTexCoord",
       "symbol": "TextureBase.GetTexCoord",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records TextureBase.GetTexCoord as a changed uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/texture/coords.rs",
+          "source_hash": "0aa45b65e0f427602ec88569039d3b5cc44ee5a4636f010aa51cdbc3c63f4d95",
+          "summary": "Current TextureBase GetTexCoord returns full corner coordinates, while SetTexCoord remaps rectangular coordinates through an active atlas sub-region."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/methods_texture.rs",
+          "source_hash": "419c30bfd97df89dbc9bb960de00690f769d6ab60e35354a3da9938a0e78361c",
+          "summary": "Focused texture tests verify atlas remapping for a nontrivial atlas rectangle and a partial UV rectangle."
+        }
+      ],
+      "tests": [
+        "tests/methods_texture.rs::test_set_tex_coord_with_atlas_remaps",
+        "tests/methods_texture.rs::test_set_tex_coord_with_atlas_partial"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "50e028c9ef0e6a503f21c85395086aa9e84a81ae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested atlas remapping, including partial UV mapping; complete atlas fidelity, CASC/texture loading beyond these assertions, filtering/wrap edge cases, invalid arguments, and rendering correctness remain unproven. Implementation ancestor is 50e028c9ef; test-file ancestor is 257f13c34e."
     },
     {
       "id": "changed:TextureBase.SetAtlas",
       "symbol": "TextureBase.SetAtlas",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records TextureBase.SetAtlas as a changed uiobject-method occurrence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/texture/atlas.rs",
+          "source_hash": "ec7681bfe7e11c4692a1e5290423fd1c2332874555147964910bff488742a625",
+          "summary": "Current TextureBase SetAtlas handles known and unknown atlas names, direct atlas slices, atlas tiling flags, flag clearing, and render-preferred texture paths."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/methods_texture.rs",
+          "source_hash": "419c30bfd97df89dbc9bb960de00690f769d6ab60e35354a3da9938a0e78361c",
+          "summary": "Focused texture tests verify known/unknown lookup, direct tile-slice selection, tiling flags and clearing, and the render-preferred 2x texture path."
+        }
+      ],
+      "tests": [
+        "tests/methods_texture.rs::test_set_atlas_known",
+        "tests/methods_texture.rs::test_set_atlas_tile_slice_uses_direct_atlas_entry",
+        "tests/methods_texture.rs::test_set_atlas_applies_atlas_tiling_flags",
+        "tests/methods_texture.rs::test_set_atlas_clears_previous_atlas_tiling_flags",
+        "tests/methods_texture.rs::test_set_atlas_uses_render_preferred_2x_texture_path",
+        "tests/methods_texture.rs::test_set_atlas_unknown"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2591694d10dca666a09593cc5ffff121193171f9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the tested known/unknown lookup, direct atlas slice, tiling-flag state, and render-preferred 2x path selection; complete atlas fidelity, CASC/texture loading beyond these assertions, filtering/wrap edge cases, invalid arguments, and rendering correctness remain unproven. Implementation file ancestor is 2591694d10; tiling and 2x path behavior are retained from 8bbadbf8c8 and 0c63d580ce; test-file ancestor is 257f13c34e."
     },
     {
       "id": "changed:UNIT_SPELLCAST_CHANNEL_START",
