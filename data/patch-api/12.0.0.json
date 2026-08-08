@@ -48532,337 +48532,778 @@
       "id": "added:Enum.UnitDamageAbsorbClampMode.MaximumHealth",
       "symbol": "Enum.UnitDamageAbsorbClampMode.MaximumHealth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitDamageAbsorbClampMode.MaximumHealth as an added enum occurrence with exact value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitDamageAbsorbClampMode.MaximumHealth with exact numeric value 2.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitDamageAbsorbClampMode.MissingHealth",
       "symbol": "Enum.UnitDamageAbsorbClampMode.MissingHealth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitDamageAbsorbClampMode.MissingHealth as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitDamageAbsorbClampMode.MissingHealth with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitDamageAbsorbClampMode.MissingHealthWithoutIncomingHeals",
       "symbol": "Enum.UnitDamageAbsorbClampMode.MissingHealthWithoutIncomingHeals",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitDamageAbsorbClampMode.MissingHealthWithoutIncomingHeals as an added enum occurrence with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitDamageAbsorbClampMode.MissingHealthWithoutIncomingHeals with exact numeric value 1.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitDamageAbsorbClampModeMeta.MaxValue",
       "symbol": "Enum.UnitDamageAbsorbClampModeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitDamageAbsorbClampModeMeta.MaxValue as an added enum occurrence with exact value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitDamageAbsorbClampModeMeta.MaxValue with exact numeric value 2.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitDamageAbsorbClampModeMeta.MinValue",
       "symbol": "Enum.UnitDamageAbsorbClampModeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitDamageAbsorbClampModeMeta.MinValue as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitDamageAbsorbClampModeMeta.MinValue with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitDamageAbsorbClampModeMeta.NumValues",
       "symbol": "Enum.UnitDamageAbsorbClampModeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitDamageAbsorbClampModeMeta.NumValues as an added enum occurrence with exact value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitDamageAbsorbClampModeMeta.NumValues with exact numeric value 3.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbClampMode.CurrentHealth",
       "symbol": "Enum.UnitHealAbsorbClampMode.CurrentHealth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbClampMode.CurrentHealth as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbClampMode.CurrentHealth with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbClampMode.MaximumHealth",
       "symbol": "Enum.UnitHealAbsorbClampMode.MaximumHealth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbClampMode.MaximumHealth as an added enum occurrence with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbClampMode.MaximumHealth with exact numeric value 1.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbClampModeMeta.MaxValue",
       "symbol": "Enum.UnitHealAbsorbClampModeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbClampModeMeta.MaxValue as an added enum occurrence with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbClampModeMeta.MaxValue with exact numeric value 1.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbClampModeMeta.MinValue",
       "symbol": "Enum.UnitHealAbsorbClampModeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbClampModeMeta.MinValue as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbClampModeMeta.MinValue with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbClampModeMeta.NumValues",
       "symbol": "Enum.UnitHealAbsorbClampModeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbClampModeMeta.NumValues as an added enum occurrence with exact value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbClampModeMeta.NumValues with exact numeric value 2.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbMode.ReducedByIncomingHeals",
       "symbol": "Enum.UnitHealAbsorbMode.ReducedByIncomingHeals",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbMode.ReducedByIncomingHeals as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbMode.ReducedByIncomingHeals with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbMode.Total",
       "symbol": "Enum.UnitHealAbsorbMode.Total",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbMode.Total as an added enum occurrence with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbMode.Total with exact numeric value 1.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbModeMeta.MaxValue",
       "symbol": "Enum.UnitHealAbsorbModeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbModeMeta.MaxValue as an added enum occurrence with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbModeMeta.MaxValue with exact numeric value 1.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbModeMeta.MinValue",
       "symbol": "Enum.UnitHealAbsorbModeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbModeMeta.MinValue as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbModeMeta.MinValue with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitHealAbsorbModeMeta.NumValues",
       "symbol": "Enum.UnitHealAbsorbModeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitHealAbsorbModeMeta.NumValues as an added enum occurrence with exact value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitHealAbsorbModeMeta.NumValues with exact numeric value 2.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitIncomingHealClampMode.MaximumHealth",
       "symbol": "Enum.UnitIncomingHealClampMode.MaximumHealth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitIncomingHealClampMode.MaximumHealth as an added enum occurrence with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitIncomingHealClampMode.MaximumHealth with exact numeric value 1.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitIncomingHealClampMode.MissingHealth",
       "symbol": "Enum.UnitIncomingHealClampMode.MissingHealth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitIncomingHealClampMode.MissingHealth as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitIncomingHealClampMode.MissingHealth with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitIncomingHealClampModeMeta.MaxValue",
       "symbol": "Enum.UnitIncomingHealClampModeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitIncomingHealClampModeMeta.MaxValue as an added enum occurrence with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitIncomingHealClampModeMeta.MaxValue with exact numeric value 1.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitIncomingHealClampModeMeta.MinValue",
       "symbol": "Enum.UnitIncomingHealClampModeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitIncomingHealClampModeMeta.MinValue as an added enum occurrence with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitIncomingHealClampModeMeta.MinValue with exact numeric value 0.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.UnitIncomingHealClampModeMeta.NumValues",
       "symbol": "Enum.UnitIncomingHealClampModeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.UnitIncomingHealClampModeMeta.NumValues as an added enum occurrence with exact value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes Enum.UnitIncomingHealClampModeMeta.NumValues with exact numeric value 2.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts four heal/absorb enum namespaces and four metadata namespaces, numeric Lua types, and all 21 exact source-register values.",
+          "source_hash": "0ee55ca0d06b248bc7842e540fd29e48cafac1c423a97721db6df45a678476c2"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_heal_prediction_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "a3268282ffd9a50877cdb2a14859266aeff019ef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup enum namespace/metadata publication, numeric Lua type, and exact 12.0.0 value. Heal prediction, absorb/clamp calculations, incoming-heal state, UI behavior, lifecycle, and other consumer semantics are not claimed."
     },
     {
       "id": "added:Enum.VasTransactionPurchaseResult.DbHouseOwnerRestriction",
