@@ -13661,7 +13661,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -13690,7 +13690,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -13719,7 +13719,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -13748,7 +13748,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -13777,7 +13777,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -13806,7 +13806,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -13835,7 +13835,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -13864,7 +13864,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -13893,7 +13893,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -13922,7 +13922,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -49779,7 +49779,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/transmog.rs",
-          "source_hash": "fe699dec89bb4421629fbf19b33fa24d55665b7fecc241de2e33f44320b556c8",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771",
           "summary": "Current C_Transmog registration in src/lua_api/globals/missing_surface/transmog.rs has no GetSlotVisualInfo or TransmogSlotVisualInfo state; GetSlotInfo exposes only a partial fixed boolean/placeholder tuple, so slot visual/pending/apply semantics are not modeled."
         }
       ],
@@ -54706,7 +54706,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -54743,7 +54743,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -54780,7 +54780,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -54817,7 +54817,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -54854,7 +54854,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -54891,7 +54891,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -54928,7 +54928,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -54965,7 +54965,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55002,7 +55002,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55039,7 +55039,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55076,7 +55076,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55113,7 +55113,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55150,7 +55150,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55187,7 +55187,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55224,7 +55224,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55261,7 +55261,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55298,7 +55298,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55335,7 +55335,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55372,7 +55372,7 @@
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
           "summary": "Full-LoD runtime probe uses rawget to prove all 19 removed C_NamePlate methods are absent while retained APIs remain callable; source scanning is auxiliary only.",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab"
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
         }
       ],
       "tests": [
@@ -55797,289 +55797,667 @@
       "id": "removed:C_Transmog.ApplyAllPending",
       "symbol": "C_Transmog.ApplyAllPending",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.ApplyAllPending as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.CanTransmogItem",
       "symbol": "C_Transmog.CanTransmogItem",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.CanTransmogItem as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.CanTransmogItemWithItem",
       "symbol": "C_Transmog.CanTransmogItemWithItem",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.CanTransmogItemWithItem as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.ClearAllPending",
       "symbol": "C_Transmog.ClearAllPending",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.ClearAllPending as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.ClearPending",
       "symbol": "C_Transmog.ClearPending",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.ClearPending as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.Close",
       "symbol": "C_Transmog.Close",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.Close as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.GetApplyCost",
       "symbol": "C_Transmog.GetApplyCost",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.GetApplyCost as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.GetApplyWarnings",
       "symbol": "C_Transmog.GetApplyWarnings",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.GetApplyWarnings as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.GetBaseCategory",
       "symbol": "C_Transmog.GetBaseCategory",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.GetBaseCategory as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.GetCreatureDisplayIDForSource",
       "symbol": "C_Transmog.GetCreatureDisplayIDForSource",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.GetCreatureDisplayIDForSource as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.GetPending",
       "symbol": "C_Transmog.GetPending",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.GetPending as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.GetSlotEffectiveCategory",
       "symbol": "C_Transmog.GetSlotEffectiveCategory",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.GetSlotEffectiveCategory as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.GetSlotInfo",
       "symbol": "C_Transmog.GetSlotInfo",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.GetSlotInfo as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.GetSlotUseError",
       "symbol": "C_Transmog.GetSlotUseError",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.GetSlotUseError as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.IsSlotBeingCollapsed",
       "symbol": "C_Transmog.IsSlotBeingCollapsed",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.IsSlotBeingCollapsed as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.IsTransmogEnabled",
       "symbol": "C_Transmog.IsTransmogEnabled",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.IsTransmogEnabled as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.LoadOutfit",
       "symbol": "C_Transmog.LoadOutfit",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.LoadOutfit as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.SetPending",
       "symbol": "C_Transmog.SetPending",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records C_Transmog.SetPending as removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current C_Transmog registration no longer publishes the removed API; the two obsolete simulator registrations were removed while retained C_Transmog APIs remain registered.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/source_absent.rs",
+          "summary": "Full-LoD runtime probe uses rawget to prove all 18 removed C_Transmog API keys are absent while five retained APIs remain callable; source scanning is auxiliary only.",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/source_absent.rs::removed_transmog_methods_are_absent_after_full_lod_load"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2975b0ad62af66817833d46be23792bbfa0edd00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Behavioral proof is limited to current full-LoD publication absence for this removed C_Transmog API and retained-method callability; the three removed TransmogApplyWarningInfo structure/field rows remain untriaged because runtime rawget does not prove metadata removal. It does not claim historical load-order timing or broad source-scanner completeness."
     },
     {
       "id": "removed:C_Transmog.TransmogApplyWarningInfo",
@@ -56153,7 +56531,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56190,7 +56568,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56227,7 +56605,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56264,7 +56642,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56301,7 +56679,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56338,7 +56716,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56375,7 +56753,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56412,7 +56790,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56449,7 +56827,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
@@ -56486,7 +56864,7 @@
         {
           "kind": "test",
           "reference": "patch-tests/patch_12_1/source_absent.rs",
-          "source_hash": "6416b9788331013d4e50faee54bf2e2b6cab83d6d4f3d9960ab958919369ebab",
+          "source_hash": "b2bd5cd849342b59c8cffd8e00cd508335c9f67e36348297e82159ef6228b1bc",
           "summary": "Full-LoD runtime probe uses rawget to prove all 10 removed C_TransmogCollection outfit methods are absent while retained appearance APIs remain callable; source scanning is auxiliary only."
         }
       ],
