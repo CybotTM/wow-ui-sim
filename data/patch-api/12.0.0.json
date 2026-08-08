@@ -6734,305 +6734,552 @@
       "id": "added:C_EncounterWarnings.EncounterWarningInfo",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure with published metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.casterGUID",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.casterGUID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.casterName",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.casterName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.duration",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.duration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.iconFileID",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.iconFileID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.isDeadly",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.isDeadly",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.severity",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.severity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.shouldPlaySound",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.shouldPlaySound",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.shouldShowChatMessage",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.shouldShowChatMessage",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.shouldShowWarning",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.shouldShowWarning",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.targetGUID",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.targetGUID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.targetName",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.targetName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.text",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.text",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo.tooltipSpellID",
       "symbol": "C_EncounterWarnings.EncounterWarningInfo.tooltipSpellID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure field with published type metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` supplies only fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current structure-field evidence is limited to fabricated Edit Mode preview/static payload behavior in `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.GetEditModeWarningInfo",
       "symbol": "C_EncounterWarnings.GetEditModeWarningInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` implements this method as fabricated Edit Mode preview/static payload behavior; exact encounter state and payload field meanings are not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation returns a fabricated Edit Mode preview/static payload from `src/lua_api/globals/missing_surface/encounter_warnings.rs`; exact encounter state and payload field meanings require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.GetSoundKitForSeverity",
       "symbol": "C_EncounterWarnings.GetSoundKitForSeverity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` has no examined registration for this method; this is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current `src/lua_api/globals/missing_surface/encounter_warnings.rs` has no registration for this method; this is not an exhaustive lexical/runtime absence claim. Exact severity-to-sound mapping requires authoritative evidence or a correct modeled audio subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.IsFeatureAvailable",
       "symbol": "C_EncounterWarnings.IsFeatureAvailable",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` has no examined registration for this method; this is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current `src/lua_api/globals/missing_surface/encounter_warnings.rs` has no registration for this method; this is not an exhaustive lexical/runtime absence claim. Exact feature-availability semantics require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.IsFeatureEnabled",
       "symbol": "C_EncounterWarnings.IsFeatureEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` has no examined registration for this method; this is not an exhaustive lexical/runtime absence claim."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The examined current `src/lua_api/globals/missing_surface/encounter_warnings.rs` has no registration for this method; this is not an exhaustive lexical/runtime absence claim. Exact feature-enabling semantics require authoritative evidence or a correct modeled encounter subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EncounterWarnings.PlaySound",
       "symbol": "C_EncounterWarnings.PlaySound",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/encounter_warnings.rs",
+          "source_hash": "65206df7e05d77be6ed781751d85f9bb2d7f40e130ce6e2af37888724d3e18ad",
+          "summary": "Clean current `src/lua_api/globals/missing_surface/encounter_warnings.rs` implements this method as a no-op; exact audio playback behavior is not established."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current implementation in `src/lua_api/globals/missing_surface/encounter_warnings.rs` is a no-op. Exact audio playback semantics require authoritative evidence or a correct modeled audio subsystem/test, and no approval can close the row."
     },
     {
       "id": "added:C_EventScheduler.CanShowEvents",

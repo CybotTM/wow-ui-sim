@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-08-07] investigation | Bound 12.0.0 C_EncounterWarnings slice
+
+Classified exactly 19 added `C_EncounterWarnings` structure/API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and clean current `encounter_warnings.rs`; tests remain empty with null commit, approval, and scope exception. `GetEditModeWarningInfo`/current structure fields are fabricated preview/static payload behavior, `PlaySound` is a no-op, and the other three methods lack examined registration; exact state, payload meanings, feature flags, severity sound mapping, and audio playback require authoritative evidence or a correct modeled subsystem/test. Totals are now **77 best-effort, 147 evidence-required, and 3186 untriaged**.
+
 ## [2026-08-07] investigation | Bound 12.0.0 C_CombatAudioAlert slice
 
 Classified exactly 12 added `C_CombatAudioAlert` rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the examined current `src/lua_api/globals/register.rs` surface; tests remain empty with null commit, approval, and scope exception. exact combat-audio settings, speech scheduling/audio output, and enable/throttle semantics require authoritative evidence or a correct modeled subsystem, and no approval can close the rows. Totals are now **77 best-effort, 128 evidence-required, and 3205 untriaged**.
