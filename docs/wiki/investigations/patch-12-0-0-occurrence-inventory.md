@@ -8,7 +8,7 @@ The bounded 12.0.0 `C_CombatLogSecure` slice classifies exactly nine added secur
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 77 best-effort, 423 evidence-required, 1 exception-requested, 2909 untriaged
+- **Rows:** 3410 total — 0 implemented, 96 best-effort, 453 evidence-required, 1 exception-requested, 2860 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
