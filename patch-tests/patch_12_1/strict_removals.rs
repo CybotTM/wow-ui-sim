@@ -456,3 +456,195 @@ fn removed_legacy_global_apis_are_absent_after_full_lod_load() {
 
     assert_eq!(published, "", "removed legacy globals were published");
 }
+
+/// Proves pinned deprecated-global wrappers remain published and forward.
+#[test]
+fn vendor_deprecated_globals_are_published_and_forward() {
+    // Pinned PTR Deprecated_* addons intentionally publish these wrappers when
+    // loadDeprecationFallbacks is enabled.
+    let env = load_full_game_ui_with_all_lod();
+    let (
+        fallbacks_enabled,
+        missing,
+        action_forwarded,
+        battlenet_forwarded,
+        encounter_forwarded,
+        combat_log_alias,
+        combat_text_alias,
+        death_recap_alias,
+    ): (bool, String, bool, bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local action_bar = {
+                "GetActionAutocast",
+                "GetActionText",
+                "GetActionTexture",
+                "GetActionCount",
+                "GetActionCooldown",
+                "GetActionCharges",
+                "GetActionLossOfControlCooldown",
+                "HasAction",
+                "IsAttackAction",
+                "IsCurrentAction",
+                "IsAutoRepeatAction",
+                "IsUsableAction",
+                "IsConsumableAction",
+                "IsStackableAction",
+                "IsItemAction",
+                "IsEquippedAction",
+                "ActionHasRange",
+                "IsActionInRange",
+                "SetActionUIButton",
+                "GetBonusBarIndex",
+                "GetBonusBarOffset",
+                "GetExtraBarIndex",
+                "GetMultiCastBarIndex",
+                "GetOverrideBarIndex",
+                "GetOverrideBarSkin",
+                "GetTempShapeshiftBarIndex",
+                "GetVehicleBarIndex",
+                "HasBonusActionBar",
+                "HasExtraActionBar",
+                "HasOverrideActionBar",
+                "HasTempShapeshiftActionBar",
+                "HasVehicleActionBar",
+                "IsPossessBarVisible",
+                "ChangeActionBarPage",
+                "GetActionBarPage",
+            }
+            local battlenet = {
+                "BNSendGameData",
+                "BNSendWhisper",
+                "BNSetCustomMessage",
+            }
+            local combat_log = {
+                "CombatLog_Object_IsA",
+                "CombatLogAddFilter",
+                "CombatLogClearEntries",
+                "CombatLogGetCurrentEntry",
+                "CombatLogGetCurrentEventInfo",
+                "CombatLogGetNumEntries",
+                "CombatLogGetRetentionTime",
+                "CombatLogResetFilter",
+                "CombatLogSetRetentionTime",
+                "CombatLogShowCurrentEntry",
+            }
+            local combat_text = {
+                "CombatTextSetActiveUnit",
+                "GetCurrentCombatTextEventInfo",
+            }
+            local death_recap = {
+                "DeathRecap_GetEvents",
+                "DeathRecap_HasEvents",
+                "GetDeathRecapLink",
+            }
+            local encounter = {
+                "IsEncounterInProgress",
+                "IsEncounterLimitingResurrections",
+                "IsEncounterSuppressingRelease",
+            }
+            local groups = {
+                {"ActionBar", action_bar, 35},
+                {"BattleNet", battlenet, 3},
+                {"CombatLog", combat_log, 10},
+                {"CombatText", combat_text, 2},
+                {"DeathRecap", death_recap, 3},
+                {"InstanceEncounter", encounter, 3},
+            }
+            local missing = {}
+            for _, group in ipairs(groups) do
+                local label, names, expected = group[1], group[2], group[3]
+                if #names ~= expected then
+                    table.insert(missing, label .. ":count=" .. #names)
+                end
+                for _, name in ipairs(names) do
+                    if type(rawget(_G, name)) ~= "function" then
+                        table.insert(missing, name)
+                    end
+                end
+            end
+
+            local oldActionText = C_ActionBar.GetActionText
+            local actionID
+            C_ActionBar.GetActionText = function(value)
+                actionID = value
+                return "sentinel"
+            end
+            local actionOK, actionResult = pcall(GetActionText, 37)
+            C_ActionBar.GetActionText = oldActionText
+            local actionForwarded = actionOK and actionID == 37 and actionResult == "sentinel"
+
+            local oldCustomMessage = C_BattleNet.SetCustomMessage
+            local customMessage
+            C_BattleNet.SetCustomMessage = function(value)
+                customMessage = value
+            end
+            local battlenetOK = pcall(BNSetCustomMessage, "sentinel")
+            C_BattleNet.SetCustomMessage = oldCustomMessage
+            local battlenetForwarded = battlenetOK and customMessage == "sentinel"
+
+            local oldEncounter = C_InstanceEncounter.IsEncounterInProgress
+            C_InstanceEncounter.IsEncounterInProgress = function()
+                return "sentinel"
+            end
+            local encounterOK, encounterResult = pcall(IsEncounterInProgress)
+            C_InstanceEncounter.IsEncounterInProgress = oldEncounter
+            local encounterForwarded = encounterOK and encounterResult == "sentinel"
+
+            local combatLogAlias = rawequal(
+                CombatLog_Object_IsA,
+                C_CombatLog.DoesObjectMatchFilter
+            )
+            local combatTextAlias = rawequal(
+                CombatTextSetActiveUnit,
+                C_CombatText.SetActiveUnit
+            )
+            local deathRecapAlias = rawequal(
+                DeathRecap_HasEvents,
+                C_DeathRecap.HasRecapEvents
+            )
+            return GetCVarBool("loadDeprecationFallbacks"),
+                table.concat(missing, ","),
+                actionForwarded,
+                battlenetForwarded,
+                encounterForwarded,
+                combatLogAlias,
+                combatTextAlias,
+                deathRecapAlias
+            "#,
+        )
+        .expect("deprecated global runtime probe succeeds");
+
+    assert!(
+        fallbacks_enabled,
+        "loadDeprecationFallbacks should be enabled"
+    );
+    assert_eq!(
+        missing, "",
+        "deprecated globals were not published as functions"
+    );
+    assert!(
+        action_forwarded,
+        "GetActionText did not forward to C_ActionBar"
+    );
+    assert!(
+        battlenet_forwarded,
+        "BNSetCustomMessage did not forward to C_BattleNet"
+    );
+    assert!(
+        encounter_forwarded,
+        "IsEncounterInProgress did not forward to C_InstanceEncounter"
+    );
+    assert!(
+        combat_log_alias,
+        "CombatLog_Object_IsA is not the vendor alias"
+    );
+    assert!(
+        combat_text_alias,
+        "CombatTextSetActiveUnit is not the vendor alias"
+    );
+    assert!(
+        death_recap_alias,
+        "DeathRecap_HasEvents is not the vendor alias"
+    );
+}
