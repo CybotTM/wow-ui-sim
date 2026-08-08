@@ -44456,353 +44456,837 @@
       "id": "added:Enum.TransmogSituation.AllEquipmentSets",
       "symbol": "Enum.TransmogSituation.AllEquipmentSets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.AllEquipmentSets as an added enum occurrence with exact value 17."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.AllEquipmentSets with exact numeric value 17."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.AllLocations",
       "symbol": "Enum.TransmogSituation.AllLocations",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.AllLocations as an added enum occurrence with exact value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.AllLocations with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.AllMovement",
       "symbol": "Enum.TransmogSituation.AllMovement",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.AllMovement as an added enum occurrence with exact value 12."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.AllMovement with exact numeric value 12."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.AllRacialForms",
       "symbol": "Enum.TransmogSituation.AllRacialForms",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.AllRacialForms as an added enum occurrence with exact value 19."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.AllRacialForms with exact numeric value 19."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.AllSpecs",
       "symbol": "Enum.TransmogSituation.AllSpecs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.AllSpecs as an added enum occurrence with exact value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.AllSpecs with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.EquipmentSets",
       "symbol": "Enum.TransmogSituation.EquipmentSets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.EquipmentSets as an added enum occurrence with exact value 18."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.EquipmentSets with exact numeric value 18."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.FormNative",
       "symbol": "Enum.TransmogSituation.FormNative",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.FormNative as an added enum occurrence with exact value 20."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.FormNative with exact numeric value 20."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.FormNonNative",
       "symbol": "Enum.TransmogSituation.FormNonNative",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.FormNonNative as an added enum occurrence with exact value 21."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.FormNonNative with exact numeric value 21."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.LocationArenas",
       "symbol": "Enum.TransmogSituation.LocationArenas",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.LocationArenas as an added enum occurrence with exact value 10."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.LocationArenas with exact numeric value 10."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.LocationBattlegrounds",
       "symbol": "Enum.TransmogSituation.LocationBattlegrounds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.LocationBattlegrounds as an added enum occurrence with exact value 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.LocationBattlegrounds with exact numeric value 11."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.LocationCharacterSelect",
       "symbol": "Enum.TransmogSituation.LocationCharacterSelect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.LocationCharacterSelect as an added enum occurrence with exact value 5."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.LocationCharacterSelect with exact numeric value 5."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.LocationDelves",
       "symbol": "Enum.TransmogSituation.LocationDelves",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.LocationDelves as an added enum occurrence with exact value 7."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.LocationDelves with exact numeric value 7."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.LocationDungeons",
       "symbol": "Enum.TransmogSituation.LocationDungeons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.LocationDungeons as an added enum occurrence with exact value 8."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.LocationDungeons with exact numeric value 8."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.LocationHouse",
       "symbol": "Enum.TransmogSituation.LocationHouse",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.LocationHouse as an added enum occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.LocationHouse with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.LocationRaids",
       "symbol": "Enum.TransmogSituation.LocationRaids",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.LocationRaids as an added enum occurrence with exact value 9."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.LocationRaids with exact numeric value 9."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.LocationRested",
       "symbol": "Enum.TransmogSituation.LocationRested",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.LocationRested as an added enum occurrence with exact value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.LocationRested with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.LocationWorld",
       "symbol": "Enum.TransmogSituation.LocationWorld",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.LocationWorld as an added enum occurrence with exact value 6."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.LocationWorld with exact numeric value 6."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.MovementFlyingMount",
       "symbol": "Enum.TransmogSituation.MovementFlyingMount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.MovementFlyingMount as an added enum occurrence with exact value 16."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.MovementFlyingMount with exact numeric value 16."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.MovementGroundMount",
       "symbol": "Enum.TransmogSituation.MovementGroundMount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.MovementGroundMount as an added enum occurrence with exact value 15."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.MovementGroundMount with exact numeric value 15."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.MovementSwimming",
       "symbol": "Enum.TransmogSituation.MovementSwimming",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.MovementSwimming as an added enum occurrence with exact value 14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.MovementSwimming with exact numeric value 14."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.MovementUnmounted",
       "symbol": "Enum.TransmogSituation.MovementUnmounted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.MovementUnmounted as an added enum occurrence with exact value 13."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.MovementUnmounted with exact numeric value 13."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituation.Spec",
       "symbol": "Enum.TransmogSituation.Spec",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogSituation.Spec as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogSituation.Spec with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_situation.rs",
+          "source_hash": "7c431600713b9633359b90338383b60e4dd79d05f9986d67bec5eb138dd35086",
+          "summary": "Focused retail 12.0.0 startup test asserts Enum.TransmogSituation publication, numeric types, and exact values for all 22 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this TransmogSituation enum entry. Transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogSituationFlags.AllSituation",

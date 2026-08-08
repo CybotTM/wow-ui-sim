@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify 12.0.0 TransmogSituation enum
+
+Classified all 22 added `Enum.TransmogSituation.*` rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values`. The focused retail 12.0.0 startup test asserts namespace publication, exact numeric Lua type, and exact source-register value for every entry; transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, and lifecycle remain unclaimed. Implementation ancestor is `339424faf1`; current source/test hashes are recorded per row. Totals are now **628 best-effort, 617 evidence-required, 2 exception-requested, and 2163 untriaged**.
+
 ## [2026-08-08] investigation | Classify 12.0.0 transmog outfit enums
 
 Classified 52 added `Enum.TransmogOutfitSlot`, `Enum.TransmogOutfitSlotError`, `Enum.TransmogOutfitSlotOption`, and `Enum.TransmogOutfitTransactionFlags` rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values`. The focused retail 12.0.0 test asserts startup namespace publication, exact numeric Lua type, and exact source-register value for all 52 entries. Claims exclude transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and edge semantics. Totals are now **606 best-effort, 617 evidence-required, 2 exception-requested, and 2185 untriaged**.
