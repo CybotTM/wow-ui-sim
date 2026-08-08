@@ -18182,145 +18182,316 @@
       "id": "added:C_UnitAuras.AuraIsBigDefensive",
       "symbol": "C_UnitAuras.AuraIsBigDefensive",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_UnitAuras.DoesAuraHaveExpirationTime",
       "symbol": "C_UnitAuras.DoesAuraHaveExpirationTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_UnitAuras.GetAuraApplicationDisplayCount",
       "symbol": "C_UnitAuras.GetAuraApplicationDisplayCount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_UnitAuras.GetAuraBaseDuration",
       "symbol": "C_UnitAuras.GetAuraBaseDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_UnitAuras.GetAuraDispelTypeColor",
       "symbol": "C_UnitAuras.GetAuraDispelTypeColor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_UnitAuras.GetAuraDuration",
       "symbol": "C_UnitAuras.GetAuraDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_UnitAuras.GetRefreshExtendedDuration",
       "symbol": "C_UnitAuras.GetRefreshExtendedDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_UnitAuras.GetUnitAuraInstanceIDs",
       "symbol": "C_UnitAuras.GetUnitAuraInstanceIDs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_UnitAuras.TriggerPrivateAuraShowDispelType",
       "symbol": "C_UnitAuras.TriggerPrivateAuraShowDispelType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "added:C_UnitAurasPrivate.SetShowDispelTypeCallback",
@@ -49398,17 +49569,36 @@
       "id": "changed:C_UnitAuras.GetUnitAuras",
       "symbol": "C_UnitAuras.GetUnitAuras",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source-register evidence establishes these C_UnitAuras signatures and defaults only; it does not establish defensive classification, expiration, display-count formatting, duration-object, refresh, color-curve, sorting, private-callback, or GetUnitAuras sort-rule semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/auras.rs",
+          "source_hash": "58480b33a2186d5ca847a12711c81639d2c4c31c29af51f4029ce4e2dfe9a5a6",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/unit_auras_state.rs",
+          "source_hash": "5d36930bebc5f4d159d9cfe3f6ffd2748e2e3ac66697f18121f7e03ef2bb2b74",
+          "summary": "Current src/lua_api/globals/auras.rs and src/lua_api/workarounds/temporary/unit_auras_state.rs provide existing seeded aura lookup/state behavior but do not model or prove these added 12.0.0 contracts."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current C_UnitAuras behavior covers adjacent seeded aura lookup/table behavior, not authoritative 12.0.0 behavior for these rows. Defensive classification, expiration/display formatting, duration objects, refresh calculations, color curves, sorted instance IDs, private callback dispatch, and GetUnitAuras sort semantics remain unproven. Existing tests are intentionally not attached; no approval can close this row."
     },
     {
       "id": "changed:C_UnitAurasPrivate.AddPrivateAuraUpdateCallback",
