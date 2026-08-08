@@ -72,6 +72,20 @@ const ENUM_VALUES: &[(&str, &[(&str, i64)])] = &[
         "SurveyDeliveryMomentMeta",
         &[("MaxValue", 4), ("NumValues", 5)],
     ),
+    ("TooltipDataType", &[("Outfit", 27)]),
+    (
+        "TooltipDataTypeMeta",
+        &[("MaxValue", 27), ("NumValues", 28)],
+    ),
+    ("TraitNodeFlag", &[("ShowTierTrack", 256)]),
+    ("TraitNodeFlagMeta", &[("MaxValue", 256), ("NumValues", 9)]),
+    ("UICursorType", &[("Outfit", 21)]),
+    ("UICursorTypeMeta", &[("MaxValue", 21), ("NumValues", 22)]),
+    ("UIWidgetVisualizationType", &[("PreyHuntProgress", 31)]),
+    (
+        "UIWidgetVisualizationTypeMeta",
+        &[("MaxValue", 31), ("NumValues", 32)],
+    ),
 ];
 
 #[test]
@@ -119,5 +133,76 @@ fn test_patch_12_0_0_small_enum_values() {
     assert_eq!(
         result, "ok",
         "small 12.0.0 enum namespaces did not match the source register"
+    );
+}
+
+#[cfg(not(feature = "retail-12-0-5"))]
+#[test]
+fn test_patch_12_0_0_encounter_event_flags_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local flags = Enum.EncounterEventFlags
+                if type(flags) ~= "table" then
+                    return "flags:namespace=" .. type(flags)
+                end
+                if type(flags.Disabled) ~= "number" or flags.Disabled ~= 1 then
+                    return "flags.Disabled=" .. tostring(flags.Disabled)
+                end
+                if rawget(flags, "IgnoreCastConsume") ~= nil then
+                    return "flags.IgnoreCastConsume=" .. tostring(flags.IgnoreCastConsume)
+                end
+
+                local metadata = Enum.EncounterEventFlagsMeta
+                if type(metadata) ~= "table" then
+                    return "metadata:namespace=" .. type(metadata)
+                end
+                local expected = {
+                    MaxValue = 1,
+                    MinValue = 1,
+                    NumValues = 1,
+                }
+                for name, value in pairs(expected) do
+                    local actual = metadata[name]
+                    if type(actual) ~= "number" or actual ~= value then
+                        return "metadata." .. name .. "=" .. tostring(actual)
+                    end
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "EncounterEventFlags did not match the retail 12.0.0 epoch"
+    );
+}
+
+#[cfg(feature = "retail-12-0-5")]
+#[test]
+fn test_later_retail_encounter_event_flags_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local flags = Enum.EncounterEventFlags
+                local metadata = Enum.EncounterEventFlagsMeta
+                if type(flags.IgnoreCastConsume) ~= "number" or flags.IgnoreCastConsume ~= 2 then
+                    return "flags.IgnoreCastConsume=" .. tostring(flags.IgnoreCastConsume)
+                end
+                if type(metadata.MaxValue) ~= "number" or metadata.MaxValue ~= 2 then
+                    return "metadata.MaxValue=" .. tostring(metadata.MaxValue)
+                end
+                if type(metadata.NumValues) ~= "number" or metadata.NumValues ~= 2 then
+                    return "metadata.NumValues=" .. tostring(metadata.NumValues)
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "later retail EncounterEventFlags values were changed by the 12.0.0 override"
     );
 }
