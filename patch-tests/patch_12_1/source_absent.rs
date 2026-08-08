@@ -1,4 +1,29 @@
-use super::{assert_ptr_source_omits_tokens, load_full_game_ui_with_all_lod};
+use super::{
+    assert_ptr_source_omits_qualified_methods, assert_ptr_source_omits_tokens,
+    load_full_game_ui_with_all_lod, ptr_source_files,
+};
+
+const REMOVED_NAMEPLATE_METHODS: &[&str] = &[
+    "GetNamePlateEnemyClickThrough",
+    "GetNamePlateEnemyPreferredClickInsets",
+    "GetNamePlateEnemySize",
+    "GetNamePlateFriendlyClickThrough",
+    "GetNamePlateFriendlyPreferredClickInsets",
+    "GetNamePlateFriendlySize",
+    "GetNamePlateSelfClickThrough",
+    "GetNamePlateSelfPreferredClickInsets",
+    "GetNamePlateSelfSize",
+    "GetNumNamePlateMotionTypes",
+    "SetNamePlateEnemyClickThrough",
+    "SetNamePlateEnemyPreferredClickInsets",
+    "SetNamePlateEnemySize",
+    "SetNamePlateFriendlyClickThrough",
+    "SetNamePlateFriendlyPreferredClickInsets",
+    "SetNamePlateFriendlySize",
+    "SetNamePlateSelfClickThrough",
+    "SetNamePlateSelfPreferredClickInsets",
+    "SetNamePlateSelfSize",
+];
 
 const SNAPSHOT_ONLY_SYMBOLS: &[&str] = &[
     "AddBehavioralMessagingTrayToStatusFrames",
@@ -177,6 +202,103 @@ const SNAPSHOT_ONLY_SYMBOLS: &[&str] = &[
     "WarfrontsPartyPoseFrame_TryShow",
     "WowSurveyStatusFrame_OnSurveyDelivered",
 ];
+
+fn assert_nameplate_source_omits_table_and_dynamic_publications() {
+    for (path, source) in ptr_source_files() {
+        for method in REMOVED_NAMEPLATE_METHODS {
+            let table_literal_patterns = [
+                format!("{method} ="),
+                format!("[\"{method}\"] ="),
+                format!("['{method}'] ="),
+            ];
+            let dynamic_name_patterns = [format!("\"{method}\""), format!("'{method}'")];
+
+            for pattern in table_literal_patterns
+                .iter()
+                .chain(dynamic_name_patterns.iter())
+            {
+                assert!(
+                    !source.contains(pattern),
+                    "removed NamePlate method {method} appears in table/dynamic source pattern {pattern} in {}",
+                    path.display(),
+                );
+            }
+        }
+
+        assert!(
+            !source
+                .lines()
+                .any(|line| { line.contains("C_NamePlate[") && line.contains("] =") }),
+            "dynamic C_NamePlate publication appears in {}",
+            path.display(),
+        );
+    }
+}
+
+/// Proves removed NamePlate methods stay absent while retained APIs remain callable.
+#[test]
+fn removed_nameplate_methods_are_absent_after_full_lod_load() {
+    // Source checks only falsify; the full-LoD runtime probe below is the proof.
+    assert_ptr_source_omits_qualified_methods("C_NamePlate", REMOVED_NAMEPLATE_METHODS);
+    assert_nameplate_source_omits_table_and_dynamic_publications();
+
+    let env = load_full_game_ui_with_all_lod();
+    let (removed_published, retained_non_functions): (String, String) = env
+        .eval(
+            r#"
+            local removed = {
+                "GetNamePlateEnemyClickThrough",
+                "GetNamePlateEnemyPreferredClickInsets",
+                "GetNamePlateEnemySize",
+                "GetNamePlateFriendlyClickThrough",
+                "GetNamePlateFriendlyPreferredClickInsets",
+                "GetNamePlateFriendlySize",
+                "GetNamePlateSelfClickThrough",
+                "GetNamePlateSelfPreferredClickInsets",
+                "GetNamePlateSelfSize",
+                "GetNumNamePlateMotionTypes",
+                "SetNamePlateEnemyClickThrough",
+                "SetNamePlateEnemyPreferredClickInsets",
+                "SetNamePlateEnemySize",
+                "SetNamePlateFriendlyClickThrough",
+                "SetNamePlateFriendlyPreferredClickInsets",
+                "SetNamePlateFriendlySize",
+                "SetNamePlateSelfClickThrough",
+                "SetNamePlateSelfPreferredClickInsets",
+                "SetNamePlateSelfSize",
+            }
+            local retained = {
+                "GetNamePlateForUnit",
+                "GetNamePlates",
+                "SetNamePlateSize",
+            }
+            local removedPublished = {}
+            for _, name in ipairs(removed) do
+                if rawget(C_NamePlate, name) ~= nil then
+                    table.insert(removedPublished, name)
+                end
+            end
+            local retainedNonFunctions = {}
+            for _, name in ipairs(retained) do
+                if type(rawget(C_NamePlate, name)) ~= "function" then
+                    table.insert(retainedNonFunctions, name)
+                end
+            end
+            return table.concat(removedPublished, ","),
+                table.concat(retainedNonFunctions, ",")
+            "#,
+        )
+        .expect("C_NamePlate runtime probe succeeds");
+
+    assert_eq!(
+        removed_published, "",
+        "removed C_NamePlate methods were published"
+    );
+    assert_eq!(
+        retained_non_functions, "",
+        "retained C_NamePlate methods are not callable functions",
+    );
+}
 
 /// Proves conservative source-absent additions remain absent after PTR startup.
 #[test]
