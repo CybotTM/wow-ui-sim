@@ -2150,11 +2150,11 @@
 2150. [untriaged] `added:FontString.GetScaleAnimationMode` — untriaged
 2151. [untriaged] `added:FontString.SetScaleAnimationMode` — untriaged
 2152. [untriaged] `added:Frame.IsIgnoringChildrenForBounds` — untriaged
-2153. [untriaged] `added:Frame.RegisterEventCallback` — untriaged
-2154. [untriaged] `added:Frame.RegisterUnitEventCallback` — untriaged
+2153. [best-effort] `added:Frame.RegisterEventCallback` — behavioral
+2154. [best-effort] `added:Frame.RegisterUnitEventCallback` — behavioral
 2155. [untriaged] `added:Frame.SetIgnoringChildrenForBounds` — untriaged
-2156. [untriaged] `added:GameTooltip.GetLeftLine` — untriaged
-2157. [untriaged] `added:GameTooltip.GetRightLine` — untriaged
+2156. [best-effort] `added:GameTooltip.GetLeftLine` — behavioral
+2157. [best-effort] `added:GameTooltip.GetRightLine` — behavioral
 2158. [untriaged] `added:GetCollapsingStarCost` — untriaged
 2159. [untriaged] `added:HOUSE_EXTERIOR_TYPE_UNLOCKED` — untriaged
 2160. [untriaged] `added:HOUSING_DECOR_ADD_TO_PREVIEW_LIST` — untriaged
@@ -2326,7 +2326,7 @@
 2326. [untriaged] `added:TRANSMOG_CUSTOM_SETS_CHANGED` — untriaged
 2327. [untriaged] `added:TRANSMOG_DISPLAYED_OUTFIT_CHANGED` — untriaged
 2328. [untriaged] `added:TUTORIAL_COMBAT_EVENT` — untriaged
-2329. [untriaged] `added:TextureBase.ResetTexCoord` — untriaged
+2329. [best-effort] `added:TextureBase.ResetTexCoord` — behavioral
 2330. [untriaged] `added:TextureBase.SetSpriteSheetCell` — untriaged
 2331. [untriaged] `added:UIObject.HasAnySecretAspect` — untriaged
 2332. [untriaged] `added:UIObject.HasSecretAspect` — untriaged
@@ -2799,7 +2799,7 @@
 2799. [untriaged] `changed:StatusBar.GetFillStyle` — untriaged
 2800. [untriaged] `changed:StatusBar.SetFillStyle` — untriaged
 2801. [untriaged] `changed:StatusBar.SetMinMaxValues` — untriaged
-2802. [untriaged] `changed:StatusBar.SetValue` — untriaged
+2802. [best-effort] `changed:StatusBar.SetValue` — behavioral
 2803. [untriaged] `changed:TRANSMOG_OUTFITS_CHANGED` — untriaged
 2804. [best-effort] `changed:TextureBase.GetTexCoord` — behavioral
 2805. [best-effort] `changed:TextureBase.SetAtlas` — behavioral

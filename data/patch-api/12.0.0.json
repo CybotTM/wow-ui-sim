@@ -41119,33 +41119,75 @@
       "id": "added:Frame.RegisterEventCallback",
       "symbol": "Frame.RegisterEventCallback",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Frame.RegisterEventCallback as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/events.rs",
+          "summary": "Current Frame RegisterEventCallback registers a callback-capable event in the widget and rilua dispatch indexes.",
+          "source_hash": "096a106c441cb9c299248c427187a828edb0e46cb48749f435fe7a64fff5071b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_event_api.rs",
+          "summary": "Focused event test verifies RegisterEventCallback(\"MINIMAP_PING\") feeds the registered frame through FireEvent and its OnEvent handler.",
+          "source_hash": "b55f1b3c908cbb1e3b84bfa0cb9a04ad6b083d3da85bb7520481476cc653a0e3"
+        }
+      ],
+      "tests": [
+        "tests/admin_event_api.rs::test_register_event_callback_uses_event_dispatch_index"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7a7a440402f4b03a89fe341956b6cb5e2051f465",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to registering MINIMAP_PING and receiving it through the focused FireEvent/OnEvent dispatch path. Complete callback-event allowlists, return values, restricted-event behavior, lifecycle, validation, taint/security, and other edge semantics remain unproven."
     },
     {
       "id": "added:Frame.RegisterUnitEventCallback",
       "symbol": "Frame.RegisterUnitEventCallback",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Frame.RegisterUnitEventCallback as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/events.rs",
+          "summary": "Current Frame RegisterUnitEventCallback stores a frame-owned callback with an optional unit filter and dispatches through the event listener index.",
+          "source_hash": "096a106c441cb9c299248c427187a828edb0e46cb48749f435fe7a64fff5071b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_event_api.rs",
+          "summary": "Focused unit-event test verifies successful player-filter registration, callback owner identity, matching-unit dispatch, and suppression for a nonmatching unit.",
+          "source_hash": "b55f1b3c908cbb1e3b84bfa0cb9a04ad6b083d3da85bb7520481476cc653a0e3"
+        }
+      ],
+      "tests": [
+        "tests/admin_event_api.rs::test_fire_event_runs_matching_unit_event_callback"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7a7a440402f4b03a89fe341956b6cb5e2051f465",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to a frame-owned UNIT_HEALTH callback filtered to player: registration succeeds, owner identity is preserved, player dispatch fires, and target dispatch is suppressed. Complete unit validation, lifecycle, return values, restricted events, taint/security, and other edge semantics remain unproven."
     },
     {
       "id": "added:Frame.SetIgnoringChildrenForBounds",
@@ -41167,33 +41209,78 @@
       "id": "added:GameTooltip.GetLeftLine",
       "symbol": "GameTooltip.GetLeftLine",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records GameTooltip.GetLeftLine as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/tooltip/line_frames.rs",
+          "summary": "Current GameTooltip line access returns the indexed left FontString, or nil when the requested line is outside the stored tooltip lines.",
+          "source_hash": "5aad00aae34a34ecefba6414397a419b0a197da384c4b5cf311d300fb7e6aa48"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/tooltip_text.rs",
+          "summary": "Focused tooltip tests verify left-line FontString type, first/second line text, and nil for out-of-range or zero indexes.",
+          "source_hash": "67de0e9d5245ea5462dd241d9ad8349add0667db9286f4dcf7a4ec04093601c8"
+        }
+      ],
+      "tests": [
+        "tests/tooltip_text.rs::test_get_left_line_returns_fontstring",
+        "tests/tooltip_text.rs::test_get_left_line_has_correct_text",
+        "tests/tooltip_text.rs::test_get_left_line_out_of_range_returns_nil"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4ef55ce2cf0737da018279923edd49f075eda820",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to indexed left-line FontString lookup, first/second line text, and nil for the focused out-of-range/zero-index cases. Tooltip layout/rendering, line lifecycle, invalid arguments, localization, and other edge semantics remain unproven."
     },
     {
       "id": "added:GameTooltip.GetRightLine",
       "symbol": "GameTooltip.GetRightLine",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records GameTooltip.GetRightLine as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/tooltip/line_frames.rs",
+          "summary": "Current GameTooltip line access returns the indexed right FontString, including an empty/nil-text FontString when a line has no right text.",
+          "source_hash": "5aad00aae34a34ecefba6414397a419b0a197da384c4b5cf311d300fb7e6aa48"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/tooltip_text.rs",
+          "summary": "Focused tooltip tests verify right-line text for a double line and nil/empty text for a left-only line.",
+          "source_hash": "67de0e9d5245ea5462dd241d9ad8349add0667db9286f4dcf7a4ec04093601c8"
+        }
+      ],
+      "tests": [
+        "tests/tooltip_text.rs::test_get_right_line_has_correct_text",
+        "tests/tooltip_text.rs::test_get_right_line_no_right_text_returns_nil_text"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4ef55ce2cf0737da018279923edd49f075eda820",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to indexed right-line text for a double line and the focused left-only-line nil/empty-text case. Tooltip layout/rendering, line lifecycle, invalid arguments, localization, and other edge semantics remain unproven."
     },
     {
       "id": "added:GetCollapsingStarCost",
@@ -44884,17 +44971,38 @@
       "id": "added:TextureBase.ResetTexCoord",
       "symbol": "TextureBase.ResetTexCoord",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records TextureBase.ResetTexCoord as an added uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/texture/coords.rs",
+          "summary": "Current TextureBase ResetTexCoord restores the texture coordinates to the active default or atlas coordinates and clears custom quad coordinates.",
+          "source_hash": "0aa45b65e0f427602ec88569039d3b5cc44ee5a4636f010aa51cdbc3c63f4d95"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/texture_methods_port.rs",
+          "summary": "Focused texture test verifies SetTexCoord followed by ResetTexCoord returns the default (0,1,0,1) coordinates.",
+          "source_hash": "1d2c10eef214e54ca889c8515668a329ffe437579295e8fd91e0639fbd762bbc"
+        }
+      ],
+      "tests": [
+        "tests/texture_methods_port.rs::test_reset_tex_coord_restores_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2591694d10dca666a09593cc5ffff121193171f9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused SetTexCoord-then-ResetTexCoord default-coordinate reset. Atlas-specific reset, rendering, invalid arguments, and other edge semantics remain unproven."
     },
     {
       "id": "added:TextureBase.SetSpriteSheetCell",
@@ -53510,17 +53618,38 @@
       "id": "changed:StatusBar.SetValue",
       "symbol": "StatusBar.SetValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "uiobject-method",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records StatusBar.SetValue as a changed uiobject-method occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/slider.rs",
+          "summary": "Current shared StatusBar SetValue handling stores an immediate value or a Smooth-mode target while preserving the displayed value until snap completion.",
+          "source_hash": "1fb5bc0a2d5eec503bfd087ed2e7c26c9d294d88e45d680957c050de6d46b87e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/widget_methods_colorselect.rs",
+          "summary": "Focused StatusBar test verifies immediate value 0.25, Smooth target 0.75, target-facing GetValue, displayed GetInterpolatedValue, and snap completion.",
+          "source_hash": "9c7c891bb0c465f8354c6cd1302b984d6221db889ec4b7ffc10fd8deb3ba7a90"
+        }
+      ],
+      "tests": [
+        "tests/widget_methods_colorselect.rs::test_statusbar_interpolation_methods_track_target_and_displayed_value"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7a7a440402f4b03a89fe341956b6cb5e2051f465",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the focused StatusBar immediate/Smooth SetValue state machine: 0.25 displayed value, 0.75 target-facing value, preserved displayed value, and snap completion. Range clamping beyond the fixture, timing/animation progression, invalid modes, render, events, and edge semantics remain unproven."
     },
     {
       "id": "changed:TRANSMOG_OUTFITS_CHANGED",
