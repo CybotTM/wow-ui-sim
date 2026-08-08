@@ -228,10 +228,10 @@
 228. [best-effort] `added:C_DamageMeter.GetCombatSessionSourceFromType` — behavioral
 229. [best-effort] `added:C_DamageMeter.IsDamageMeterAvailable` — behavioral
 230. [evidence-required] `added:C_DamageMeter.ResetAllCombatSessions` — unsafe
-231. [untriaged] `added:C_DeathRecap.DeathRecapEventInfo` — untriaged
-232. [untriaged] `added:C_DeathRecap.GetRecapEvents` — untriaged
-233. [untriaged] `added:C_DeathRecap.GetRecapLink` — untriaged
-234. [untriaged] `added:C_DeathRecap.HasRecapEvents` — untriaged
+231. [evidence-required] `added:C_DeathRecap.DeathRecapEventInfo` — unsafe
+232. [evidence-required] `added:C_DeathRecap.GetRecapEvents` — unsafe
+233. [evidence-required] `added:C_DeathRecap.GetRecapLink` — unsafe
+234. [evidence-required] `added:C_DeathRecap.HasRecapEvents` — unsafe
 235. [untriaged] `added:C_DelvesUI.GetLockedTextForCompanion` — untriaged
 236. [untriaged] `added:C_DelvesUI.IsTraitTreeForCompanion` — untriaged
 237. [best-effort] `added:C_DurationUtil.CreateDuration` — behavioral

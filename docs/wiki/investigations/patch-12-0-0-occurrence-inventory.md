@@ -4,7 +4,7 @@ Occurrence-level register derived from explicit wowless retail snapshots. Sevent
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 77 best-effort, 395 evidence-required, 1 exception-requested, 2937 untriaged
+- **Rows:** 3410 total — 0 implemented, 77 best-effort, 399 evidence-required, 1 exception-requested, 2933 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -242,10 +242,10 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_DamageMeter.GetCombatSessionSourceFromType` | best-effort | api | added | Best-effort behavioral evidence is limited to seeded Overall/Current source lookup, optional creature-ID handling, missing-source nil, and empty known meter results from the named tests; no complete retail aggregation/lifecycle/secret fidelity is claimed. |
 | `C_DamageMeter.IsDamageMeterAvailable` | best-effort | api | added | Best-effort behavioral evidence is limited to the named seeded availability assertion returning true with no failure reason; no complete retail availability lifecycle or secret fidelity is claimed. |
 | `C_DamageMeter.ResetAllCombatSessions` | evidence-required | api | added | Evidence-required unsafe: the source register adds ResetAllCombatSessions, but the current damage-meter implementation has no reset operation and the focused test set is empty. The reset lifecycle requires authoritative semantics or a correct model/test; no approval can close this row. |
-| `C_DeathRecap.DeathRecapEventInfo` | untriaged | structure | added | structure added in 12.0.0. |
-| `C_DeathRecap.GetRecapEvents` | untriaged | api | added | api added in 12.0.0. |
-| `C_DeathRecap.GetRecapLink` | untriaged | api | added | api added in 12.0.0. |
-| `C_DeathRecap.HasRecapEvents` | untriaged | api | added | api added in 12.0.0. |
+| `C_DeathRecap.DeathRecapEventInfo` | evidence-required | structure | added | Pinned retail/PTR API documentation and Wowless schema expose no fields; vendor consumers reveal only partial amount/timestamp/sourceGUID usage, while current simulator state models killing blows only. Exact event-field semantics require authoritative evidence or a correct event model; no approval can close this row. |
+| `C_DeathRecap.GetRecapEvents` | evidence-required | api | added | Signatures establish only an optional recap ID and table return. Event fields, ordering, default/no-argument selection, and unknown-ID behavior remain unproven; current simulator has no event-record model. |
+| `C_DeathRecap.GetRecapLink` | evidence-required | api | added | Signatures and vendor display use establish only an optional recap ID and displayable string; link format and missing/unknown recap behavior remain unproven, with no current link model. |
+| `C_DeathRecap.HasRecapEvents` | evidence-required | api | added | Do not infer a best-effort non-empty check from killing-blow state. Default/no-argument selection, unknown-ID handling, and the event-presence predicate remain unproven. |
 | `C_DelvesUI.GetLockedTextForCompanion` | untriaged | api | added | api added in 12.0.0. |
 | `C_DelvesUI.IsTraitTreeForCompanion` | untriaged | api | added | api added in 12.0.0. |
 | `C_DurationUtil.CreateDuration` | best-effort | api | added | Best-effort behavioral evidence covers factory return shape and LuaDurationObject method exposure; full time, secret, and curve semantics are not established. |
