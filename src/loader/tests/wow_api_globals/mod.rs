@@ -21,3 +21,4 @@ mod patch_12_1_service_payloads;
 mod runtime_subsystems;
 mod startup_globals;
 mod startup_namespaces;
+mod transmog_outfit_enums;

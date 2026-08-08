@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify 12.0.0 transmog outfit enums
+
+Classified 52 added `Enum.TransmogOutfitSlot`, `Enum.TransmogOutfitSlotError`, `Enum.TransmogOutfitSlotOption`, and `Enum.TransmogOutfitTransactionFlags` rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values`. The focused retail 12.0.0 test asserts startup namespace publication, exact numeric Lua type, and exact source-register value for all 52 entries. Claims exclude transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and edge semantics. Totals are now **606 best-effort, 617 evidence-required, 2 exception-requested, and 2185 untriaged**.
+
 ## [2026-08-08] investigation | Classify ItemCollectionType and SecretAspect enums
 
 Classified 40 added/changed `Enum.ItemCollectionType`, `Enum.ItemCollectionTypeMeta`, and `Enum.SecretAspect` rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/item_collection_secret_aspects.rs::test_patch_12_0_0_item_collection_and_secret_aspect_values`; claims are limited to startup namespace publication, numeric type, and exact value. Classified 13 removed ItemCollectionType aliases/meta rows as `evidence-required`/`unsafe`; bootstrap omission does not prove full runtime/dynamic publication absence, historical timing, replacement semantics, or all-LoD removal. Totals are now **554 best-effort, 617 evidence-required, 2 exception-requested, and 2237 untriaged**.

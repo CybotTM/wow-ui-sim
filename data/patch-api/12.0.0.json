@@ -41664,481 +41664,1141 @@
       "id": "added:Enum.TransmogOutfitSlot.Back",
       "symbol": "Enum.TransmogOutfitSlot.Back",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Back as an added enum occurrence with exact value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Back with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.Body",
       "symbol": "Enum.TransmogOutfitSlot.Body",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Body as an added enum occurrence with exact value 6."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Body with exact numeric value 6."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.Chest",
       "symbol": "Enum.TransmogOutfitSlot.Chest",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Chest as an added enum occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Chest with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.Feet",
       "symbol": "Enum.TransmogOutfitSlot.Feet",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Feet as an added enum occurrence with exact value 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Feet with exact numeric value 11."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.Hand",
       "symbol": "Enum.TransmogOutfitSlot.Hand",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Hand as an added enum occurrence with exact value 8."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Hand with exact numeric value 8."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.Head",
       "symbol": "Enum.TransmogOutfitSlot.Head",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Head as an added enum occurrence with exact value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Head with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.Legs",
       "symbol": "Enum.TransmogOutfitSlot.Legs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Legs as an added enum occurrence with exact value 10."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Legs with exact numeric value 10."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.ShoulderLeft",
       "symbol": "Enum.TransmogOutfitSlot.ShoulderLeft",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.ShoulderLeft as an added enum occurrence with exact value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.ShoulderLeft with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.ShoulderRight",
       "symbol": "Enum.TransmogOutfitSlot.ShoulderRight",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.ShoulderRight as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.ShoulderRight with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.Tabard",
       "symbol": "Enum.TransmogOutfitSlot.Tabard",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Tabard as an added enum occurrence with exact value 5."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Tabard with exact numeric value 5."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.Waist",
       "symbol": "Enum.TransmogOutfitSlot.Waist",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Waist as an added enum occurrence with exact value 9."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Waist with exact numeric value 9."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.WeaponMainHand",
       "symbol": "Enum.TransmogOutfitSlot.WeaponMainHand",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.WeaponMainHand as an added enum occurrence with exact value 12."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.WeaponMainHand with exact numeric value 12."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.WeaponOffHand",
       "symbol": "Enum.TransmogOutfitSlot.WeaponOffHand",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.WeaponOffHand as an added enum occurrence with exact value 13."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.WeaponOffHand with exact numeric value 13."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.WeaponRanged",
       "symbol": "Enum.TransmogOutfitSlot.WeaponRanged",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.WeaponRanged as an added enum occurrence with exact value 14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.WeaponRanged with exact numeric value 14."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlot.Wrist",
       "symbol": "Enum.TransmogOutfitSlot.Wrist",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlot.Wrist as an added enum occurrence with exact value 7."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlot.Wrist with exact numeric value 7."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.CannotUseItem",
       "symbol": "Enum.TransmogOutfitSlotError.CannotUseItem",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.CannotUseItem as an added enum occurrence with exact value 10."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.CannotUseItem with exact numeric value 10."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.IncompatibleWithMainHand",
       "symbol": "Enum.TransmogOutfitSlotError.IncompatibleWithMainHand",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.IncompatibleWithMainHand as an added enum occurrence with exact value 14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.IncompatibleWithMainHand with exact numeric value 14."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.InvalidDestination",
       "symbol": "Enum.TransmogOutfitSlotError.InvalidDestination",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.InvalidDestination as an added enum occurrence with exact value 5."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.InvalidDestination with exact numeric value 5."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.InvalidItemType",
       "symbol": "Enum.TransmogOutfitSlotError.InvalidItemType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.InvalidItemType as an added enum occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.InvalidItemType with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.InvalidSlotForForm",
       "symbol": "Enum.TransmogOutfitSlotError.InvalidSlotForForm",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.InvalidSlotForForm as an added enum occurrence with exact value 13."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.InvalidSlotForForm with exact numeric value 13."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.InvalidSlotForRace",
       "symbol": "Enum.TransmogOutfitSlotError.InvalidSlotForRace",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.InvalidSlotForRace as an added enum occurrence with exact value 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.InvalidSlotForRace with exact numeric value 11."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.InvalidSource",
       "symbol": "Enum.TransmogOutfitSlotError.InvalidSource",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.InvalidSource as an added enum occurrence with exact value 8."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.InvalidSource with exact numeric value 8."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.InvalidSourceQuality",
       "symbol": "Enum.TransmogOutfitSlotError.InvalidSourceQuality",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.InvalidSourceQuality as an added enum occurrence with exact value 9."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.InvalidSourceQuality with exact numeric value 9."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.Legendary",
       "symbol": "Enum.TransmogOutfitSlotError.Legendary",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.Legendary as an added enum occurrence with exact value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.Legendary with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.Mismatch",
       "symbol": "Enum.TransmogOutfitSlotError.Mismatch",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.Mismatch as an added enum occurrence with exact value 6."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.Mismatch with exact numeric value 6."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.NoIllusion",
       "symbol": "Enum.TransmogOutfitSlotError.NoIllusion",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.NoIllusion as an added enum occurrence with exact value 12."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.NoIllusion with exact numeric value 12."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.NoItem",
       "symbol": "Enum.TransmogOutfitSlotError.NoItem",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.NoItem as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.NoItem with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.NotSoulbound",
       "symbol": "Enum.TransmogOutfitSlotError.NotSoulbound",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.NotSoulbound as an added enum occurrence with exact value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.NotSoulbound with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.Ok",
       "symbol": "Enum.TransmogOutfitSlotError.Ok",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.Ok as an added enum occurrence with exact value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.Ok with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotError.SameItem",
       "symbol": "Enum.TransmogOutfitSlotError.SameItem",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotError.SameItem as an added enum occurrence with exact value 7."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotError.SameItem with exact numeric value 7."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotErrorMeta.MaxValue",
@@ -42336,193 +42996,457 @@
       "id": "added:Enum.TransmogOutfitSlotOption.ArtifactSpecFour",
       "symbol": "Enum.TransmogOutfitSlotOption.ArtifactSpecFour",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.ArtifactSpecFour as an added enum occurrence with exact value 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.ArtifactSpecFour with exact numeric value 11."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.ArtifactSpecOne",
       "symbol": "Enum.TransmogOutfitSlotOption.ArtifactSpecOne",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.ArtifactSpecOne as an added enum occurrence with exact value 8."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.ArtifactSpecOne with exact numeric value 8."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.ArtifactSpecThree",
       "symbol": "Enum.TransmogOutfitSlotOption.ArtifactSpecThree",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.ArtifactSpecThree as an added enum occurrence with exact value 10."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.ArtifactSpecThree with exact numeric value 10."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.ArtifactSpecTwo",
       "symbol": "Enum.TransmogOutfitSlotOption.ArtifactSpecTwo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.ArtifactSpecTwo as an added enum occurrence with exact value 9."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.ArtifactSpecTwo with exact numeric value 9."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.DeprecatedReuseMe",
       "symbol": "Enum.TransmogOutfitSlotOption.DeprecatedReuseMe",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.DeprecatedReuseMe as an added enum occurrence with exact value 6."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.DeprecatedReuseMe with exact numeric value 6."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.FuryTwoHandedWeapon",
       "symbol": "Enum.TransmogOutfitSlotOption.FuryTwoHandedWeapon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.FuryTwoHandedWeapon as an added enum occurrence with exact value 7."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.FuryTwoHandedWeapon with exact numeric value 7."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.None",
       "symbol": "Enum.TransmogOutfitSlotOption.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.None as an added enum occurrence with exact value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.None with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.OffHand",
       "symbol": "Enum.TransmogOutfitSlotOption.OffHand",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.OffHand as an added enum occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.OffHand with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.OneHandedWeapon",
       "symbol": "Enum.TransmogOutfitSlotOption.OneHandedWeapon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.OneHandedWeapon as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.OneHandedWeapon with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.RangedWeapon",
       "symbol": "Enum.TransmogOutfitSlotOption.RangedWeapon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.RangedWeapon as an added enum occurrence with exact value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.RangedWeapon with exact numeric value 3."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.Shield",
       "symbol": "Enum.TransmogOutfitSlotOption.Shield",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.Shield as an added enum occurrence with exact value 5."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.Shield with exact numeric value 5."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOption.TwoHandedWeapon",
       "symbol": "Enum.TransmogOutfitSlotOption.TwoHandedWeapon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitSlotOption.TwoHandedWeapon as an added enum occurrence with exact value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitSlotOption.TwoHandedWeapon with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOptionFlags.DisablesOffhandSlot",
@@ -42976,161 +43900,381 @@
       "id": "added:Enum.TransmogOutfitTransactionFlags.AddNewOutfitMask",
       "symbol": "Enum.TransmogOutfitTransactionFlags.AddNewOutfitMask",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.AddNewOutfitMask as an added enum occurrence with exact value 20."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.AddNewOutfitMask with exact numeric value 20."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlags.AddOutfitAndUpdateSlots",
       "symbol": "Enum.TransmogOutfitTransactionFlags.AddOutfitAndUpdateSlots",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.AddOutfitAndUpdateSlots as an added enum occurrence with exact value 28."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.AddOutfitAndUpdateSlots with exact numeric value 28."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlags.CreateAndUpdateOutfitInfoMask",
       "symbol": "Enum.TransmogOutfitTransactionFlags.CreateAndUpdateOutfitInfoMask",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.CreateAndUpdateOutfitInfoMask as an added enum occurrence with exact value 6."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.CreateAndUpdateOutfitInfoMask with exact numeric value 6."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlags.CreateOutfitInfo",
       "symbol": "Enum.TransmogOutfitTransactionFlags.CreateOutfitInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.CreateOutfitInfo as an added enum occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.CreateOutfitInfo with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlags.FullOutfitUpdateMask",
       "symbol": "Enum.TransmogOutfitTransactionFlags.FullOutfitUpdateMask",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.FullOutfitUpdateMask as an added enum occurrence with exact value 27."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.FullOutfitUpdateMask with exact numeric value 27."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlags.UpdateMetadata",
       "symbol": "Enum.TransmogOutfitTransactionFlags.UpdateMetadata",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.UpdateMetadata as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.UpdateMetadata with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlags.UpdateOutfitInfo",
       "symbol": "Enum.TransmogOutfitTransactionFlags.UpdateOutfitInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.UpdateOutfitInfo as an added enum occurrence with exact value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.UpdateOutfitInfo with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlags.UpdateSituations",
       "symbol": "Enum.TransmogOutfitTransactionFlags.UpdateSituations",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.UpdateSituations as an added enum occurrence with exact value 16."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.UpdateSituations with exact numeric value 16."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlags.UpdateSituationsMask",
       "symbol": "Enum.TransmogOutfitTransactionFlags.UpdateSituationsMask",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.UpdateSituationsMask as an added enum occurrence with exact value 18."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.UpdateSituationsMask with exact numeric value 18."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlags.UpdateSlots",
       "symbol": "Enum.TransmogOutfitTransactionFlags.UpdateSlots",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitTransactionFlags.UpdateSlots as an added enum occurrence with exact value 8."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.TransmogOutfitTransactionFlags.UpdateSlots with exact numeric value 8."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values",
+          "source_hash": "7231867798380b6ad5b5ab4ee506656a70ee8490ef6d2b27b12e0be0c3a4368f",
+          "summary": "Focused retail 12.0.0 startup test asserts all four transmog outfit enum namespaces, numeric types, and exact values for all 52 added entries."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/transmog_outfit_enums.rs::test_patch_12_0_0_transmog_outfit_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "339424faf1111f33d12f12a197ffd4dbc6604dc8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this transmog outfit enum entry. Transmog operations, validation, slot compatibility, transaction semantics, persistence, mutation/protection, lifecycle, and other edge semantics are not claimed.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitTransactionFlagsMeta.MaxValue",
