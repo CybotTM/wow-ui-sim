@@ -5854,881 +5854,1596 @@
       "id": "added:C_EncounterTimeline.AddEditModeEvents",
       "symbol": "C_EncounterTimeline.AddEditModeEvents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.AddScriptEvent",
       "symbol": "C_EncounterTimeline.AddScriptEvent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.CancelAllScriptEvents",
       "symbol": "C_EncounterTimeline.CancelAllScriptEvents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.CancelEditModeEvents",
       "symbol": "C_EncounterTimeline.CancelEditModeEvents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.CancelScriptEvent",
       "symbol": "C_EncounterTimeline.CancelScriptEvent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure; its value metadata is empty and does not establish runtime object shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.duration",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.duration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.iconFileID",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.iconFileID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.icons",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.icons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.id",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.id",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.isApproximate",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.isApproximate",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.maxQueueDuration",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.maxQueueDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.severity",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.severity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.source",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.source",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.spellID",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.spellID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineEventInfo.spellName",
       "symbol": "C_EncounterTimeline.EncounterTimelineEventInfo.spellName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineScriptEventRequest",
       "symbol": "C_EncounterTimeline.EncounterTimelineScriptEventRequest",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure; its value metadata is empty and does not establish runtime object shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineScriptEventRequest.duration",
       "symbol": "C_EncounterTimeline.EncounterTimelineScriptEventRequest.duration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineScriptEventRequest.iconFileID",
       "symbol": "C_EncounterTimeline.EncounterTimelineScriptEventRequest.iconFileID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineScriptEventRequest.icons",
       "symbol": "C_EncounterTimeline.EncounterTimelineScriptEventRequest.icons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineScriptEventRequest.maxQueueDuration",
       "symbol": "C_EncounterTimeline.EncounterTimelineScriptEventRequest.maxQueueDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineScriptEventRequest.overrideName",
       "symbol": "C_EncounterTimeline.EncounterTimelineScriptEventRequest.overrideName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineScriptEventRequest.paused",
       "symbol": "C_EncounterTimeline.EncounterTimelineScriptEventRequest.paused",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineScriptEventRequest.severity",
       "symbol": "C_EncounterTimeline.EncounterTimelineScriptEventRequest.severity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineScriptEventRequest.spellID",
       "symbol": "C_EncounterTimeline.EncounterTimelineScriptEventRequest.spellID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineTrackInfo",
       "symbol": "C_EncounterTimeline.EncounterTimelineTrackInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure; its value metadata is empty and does not establish runtime object shape."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineTrackInfo.id",
       "symbol": "C_EncounterTimeline.EncounterTimelineTrackInfo.id",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineTrackInfo.maximumDuration",
       "symbol": "C_EncounterTimeline.EncounterTimelineTrackInfo.maximumDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineTrackInfo.maximumEventCount",
       "symbol": "C_EncounterTimeline.EncounterTimelineTrackInfo.maximumEventCount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineTrackInfo.minimumDuration",
       "symbol": "C_EncounterTimeline.EncounterTimelineTrackInfo.minimumDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineTrackInfo.minimumEventGapDuration",
       "symbol": "C_EncounterTimeline.EncounterTimelineTrackInfo.minimumEventGapDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineTrackInfo.minimumEventIntroDuration",
       "symbol": "C_EncounterTimeline.EncounterTimelineTrackInfo.minimumEventIntroDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineTrackInfo.sortDirection",
       "symbol": "C_EncounterTimeline.EncounterTimelineTrackInfo.sortDirection",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.EncounterTimelineTrackInfo.type",
       "symbol": "C_EncounterTimeline.EncounterTimelineTrackInfo.type",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added structure-field; source metadata does not establish field type, value, or runtime semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.FinishScriptEvent",
       "symbol": "C_EncounterTimeline.FinishScriptEvent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetCurrentTime",
       "symbol": "C_EncounterTimeline.GetCurrentTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetEventCountBySource",
       "symbol": "C_EncounterTimeline.GetEventCountBySource",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetEventInfo",
       "symbol": "C_EncounterTimeline.GetEventInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetEventList",
       "symbol": "C_EncounterTimeline.GetEventList",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetEventState",
       "symbol": "C_EncounterTimeline.GetEventState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetEventTimeElapsed",
       "symbol": "C_EncounterTimeline.GetEventTimeElapsed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetEventTimeRemaining",
       "symbol": "C_EncounterTimeline.GetEventTimeRemaining",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetEventTrack",
       "symbol": "C_EncounterTimeline.GetEventTrack",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetTrackInfo",
       "symbol": "C_EncounterTimeline.GetTrackInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.GetTrackList",
       "symbol": "C_EncounterTimeline.GetTrackList",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.HasActiveEvents",
       "symbol": "C_EncounterTimeline.HasActiveEvents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.HasAnyEvents",
       "symbol": "C_EncounterTimeline.HasAnyEvents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.HasPausedEvents",
       "symbol": "C_EncounterTimeline.HasPausedEvents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.HasVisibleEvents",
       "symbol": "C_EncounterTimeline.HasVisibleEvents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.IsEventBlocked",
       "symbol": "C_EncounterTimeline.IsEventBlocked",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.IsFeatureAvailable",
       "symbol": "C_EncounterTimeline.IsFeatureAvailable",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.IsFeatureEnabled",
       "symbol": "C_EncounterTimeline.IsFeatureEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.PauseScriptEvent",
       "symbol": "C_EncounterTimeline.PauseScriptEvent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.ResumeScriptEvent",
       "symbol": "C_EncounterTimeline.ResumeScriptEvent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterTimeline.SetEventIconTextures",
       "symbol": "C_EncounterTimeline.SetEventIconTextures",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records this added api with published signature metadata, but does not establish runtime state semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/encounter_state.rs",
+          "source_hash": "c0500b849a356995b79c438f05f77bbaf6461c91f108b0a6f15c7339228327f0",
+          "summary": "Current simulator encounter-timeline source is a partial fixed seeded fixture: nine APIs are present, 46 register rows are absent, and the present behavior does not establish authoritative retail semantics."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The current temporary model is a partial hard-coded seeded fixture: only nine APIs are present, 46 of these 55 rows are absent, and present behavior is not authoritative retail semantics. Authoritative live evidence or a correct modeled encounter-timeline subsystem with focused tests is required; no approval can close this row."
     },
     {
       "id": "added:C_EncounterWarnings.EncounterWarningInfo",

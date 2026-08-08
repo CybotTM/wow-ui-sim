@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-08-08] investigation | Bound 12.0.0 C_EncounterTimeline slice
+
+Classified exactly 55 added `C_EncounterTimeline` API, structure, and structure-field rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the current `src/lua_api/workarounds/temporary/encounter_state.rs` partial seeded fixture; tests remain empty with null commit, approval, and scope exception. Nine APIs are present only as fixture-backed behavior and 46 rows are absent; exact encounter state, script-event lifecycle, timers, feature flags, payload values, and structure-field semantics require authoritative live evidence or a correct modeled subsystem with focused tests, and no approval can close these rows. Totals are now **77 best-effort, 240 evidence-required, and 3093 untriaged**.
+
 ## [2026-08-08] investigation | Bound 12.0.0 C_PingSecure slice
 
 Classified exactly 15 changed `C_PingSecure` API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and clean current `src/c_api/c_ping_secure.rs`; tests remain empty with null commit, approval, and scope exception. The source contract is secure-only while current behavior is no-op/inert callback storage/partial or absent; exact secure-call enforcement, targeting, frame/error/audio/UI dispatch, callback invocation, and `PingResult` semantics require authoritative live evidence or a correct ping/security model and direct tests, and no approval can close these rows. Totals are now **77 best-effort, 185 evidence-required, and 3148 untriaged**.
