@@ -23826,33 +23826,75 @@
       "id": "added:Enum.AccountTransType.HouseInitiativeFavor",
       "symbol": "Enum.AccountTransType.HouseInitiativeFavor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.AccountTransType.HouseInitiativeFavor as a added enum occurrence with exact 12.0.0 value 66."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.AccountTransType.HouseInitiativeFavor with exact numeric value 66."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.AccountTransType.TransmogOutfitCollection",
       "symbol": "Enum.AccountTransType.TransmogOutfitCollection",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.AccountTransType.TransmogOutfitCollection as a added enum occurrence with exact 12.0.0 value 65."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.AccountTransType.TransmogOutfitCollection with exact numeric value 65."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.AddOnRestrictionState.Activating",
@@ -26546,561 +26588,1296 @@
       "id": "added:Enum.CombatLogObject.AffiliationMine",
       "symbol": "Enum.CombatLogObject.AffiliationMine",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.AffiliationMine as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.AffiliationMine with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.AffiliationOutsider",
       "symbol": "Enum.CombatLogObject.AffiliationOutsider",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.AffiliationOutsider as an added enum occurrence with exact value 8."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.AffiliationOutsider with exact numeric value 8."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.AffiliationParty",
       "symbol": "Enum.CombatLogObject.AffiliationParty",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.AffiliationParty as an added enum occurrence with exact value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.AffiliationParty with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.AffiliationRaid",
       "symbol": "Enum.CombatLogObject.AffiliationRaid",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.AffiliationRaid as an added enum occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.AffiliationRaid with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.ControlNpc",
       "symbol": "Enum.CombatLogObject.ControlNpc",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.ControlNpc as an added enum occurrence with exact value 512."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.ControlNpc with exact numeric value 512."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.ControlPlayer",
       "symbol": "Enum.CombatLogObject.ControlPlayer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.ControlPlayer as an added enum occurrence with exact value 256."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.ControlPlayer with exact numeric value 256."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.Empty",
       "symbol": "Enum.CombatLogObject.Empty",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.Empty as an added enum occurrence with exact value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.Empty with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.Focus",
       "symbol": "Enum.CombatLogObject.Focus",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.Focus as an added enum occurrence with exact value 131072."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.Focus with exact numeric value 131072."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.Mainassist",
       "symbol": "Enum.CombatLogObject.Mainassist",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.Mainassist as an added enum occurrence with exact value 524288."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.Mainassist with exact numeric value 524288."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.Maintank",
       "symbol": "Enum.CombatLogObject.Maintank",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.Maintank as an added enum occurrence with exact value 262144."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.Maintank with exact numeric value 262144."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.None",
       "symbol": "Enum.CombatLogObject.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.None as an added enum occurrence with exact value 2147483648."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.None with exact numeric value 2147483648."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.ReactionFriendly",
       "symbol": "Enum.CombatLogObject.ReactionFriendly",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.ReactionFriendly as an added enum occurrence with exact value 16."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.ReactionFriendly with exact numeric value 16."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.ReactionHostile",
       "symbol": "Enum.CombatLogObject.ReactionHostile",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.ReactionHostile as an added enum occurrence with exact value 64."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.ReactionHostile with exact numeric value 64."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.ReactionNeutral",
       "symbol": "Enum.CombatLogObject.ReactionNeutral",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.ReactionNeutral as an added enum occurrence with exact value 32."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.ReactionNeutral with exact numeric value 32."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.Target",
       "symbol": "Enum.CombatLogObject.Target",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.Target as an added enum occurrence with exact value 65536."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.Target with exact numeric value 65536."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.TypeGuardian",
       "symbol": "Enum.CombatLogObject.TypeGuardian",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.TypeGuardian as an added enum occurrence with exact value 8192."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.TypeGuardian with exact numeric value 8192."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.TypeNpc",
       "symbol": "Enum.CombatLogObject.TypeNpc",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.TypeNpc as an added enum occurrence with exact value 2048."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.TypeNpc with exact numeric value 2048."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.TypeObject",
       "symbol": "Enum.CombatLogObject.TypeObject",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.TypeObject as an added enum occurrence with exact value 16384."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.TypeObject with exact numeric value 16384."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.TypePet",
       "symbol": "Enum.CombatLogObject.TypePet",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.TypePet as an added enum occurrence with exact value 4096."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.TypePet with exact numeric value 4096."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObject.TypePlayer",
       "symbol": "Enum.CombatLogObject.TypePlayer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObject.TypePlayer as an added enum occurrence with exact value 1024."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObject.TypePlayer with exact numeric value 1024."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectMeta.MaxValue",
       "symbol": "Enum.CombatLogObjectMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectMeta.MaxValue as an added enum occurrence with exact value -2147483648."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectMeta.MaxValue with exact numeric value -2147483648."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectMeta.MinValue",
       "symbol": "Enum.CombatLogObjectMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectMeta.MinValue as an added enum occurrence with exact value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectMeta.MinValue with exact numeric value 0."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectMeta.NumValues",
       "symbol": "Enum.CombatLogObjectMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectMeta.NumValues as an added enum occurrence with exact value 20."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectMeta.NumValues with exact numeric value 20."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTarget.RaidNone",
       "symbol": "Enum.CombatLogObjectTarget.RaidNone",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTarget.RaidNone as an added enum occurrence with exact value 2147483648."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTarget.RaidNone with exact numeric value 2147483648."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTarget.Raidtarget1",
       "symbol": "Enum.CombatLogObjectTarget.Raidtarget1",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTarget.Raidtarget1 as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTarget.Raidtarget1 with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTarget.Raidtarget2",
       "symbol": "Enum.CombatLogObjectTarget.Raidtarget2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTarget.Raidtarget2 as an added enum occurrence with exact value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTarget.Raidtarget2 with exact numeric value 2."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTarget.Raidtarget3",
       "symbol": "Enum.CombatLogObjectTarget.Raidtarget3",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTarget.Raidtarget3 as an added enum occurrence with exact value 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTarget.Raidtarget3 with exact numeric value 4."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTarget.Raidtarget4",
       "symbol": "Enum.CombatLogObjectTarget.Raidtarget4",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTarget.Raidtarget4 as an added enum occurrence with exact value 8."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTarget.Raidtarget4 with exact numeric value 8."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTarget.Raidtarget5",
       "symbol": "Enum.CombatLogObjectTarget.Raidtarget5",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTarget.Raidtarget5 as an added enum occurrence with exact value 16."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTarget.Raidtarget5 with exact numeric value 16."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTarget.Raidtarget6",
       "symbol": "Enum.CombatLogObjectTarget.Raidtarget6",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTarget.Raidtarget6 as an added enum occurrence with exact value 32."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTarget.Raidtarget6 with exact numeric value 32."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTarget.Raidtarget7",
       "symbol": "Enum.CombatLogObjectTarget.Raidtarget7",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTarget.Raidtarget7 as an added enum occurrence with exact value 64."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTarget.Raidtarget7 with exact numeric value 64."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTarget.Raidtarget8",
       "symbol": "Enum.CombatLogObjectTarget.Raidtarget8",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTarget.Raidtarget8 as an added enum occurrence with exact value 128."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTarget.Raidtarget8 with exact numeric value 128."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTargetMeta.MaxValue",
       "symbol": "Enum.CombatLogObjectTargetMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTargetMeta.MaxValue as an added enum occurrence with exact value -2147483648."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTargetMeta.MaxValue with exact numeric value -2147483648."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTargetMeta.MinValue",
       "symbol": "Enum.CombatLogObjectTargetMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTargetMeta.MinValue as an added enum occurrence with exact value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTargetMeta.MinValue with exact numeric value 1."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CombatLogObjectTargetMeta.NumValues",
       "symbol": "Enum.CombatLogObjectTargetMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CombatLogObjectTargetMeta.NumValues as an added enum occurrence with exact value 9."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CombatLogObjectTargetMeta.NumValues with exact numeric value 9."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/combat_log_object.rs",
+          "source_hash": "c2867255c9745df8a8d9faca77e3c1a8290acf70a204942818b9df32fa7b9de1",
+          "summary": "Focused retail 12.0.0 startup test asserts all four CombatLogObject enum namespaces, numeric types, and exact values for all 35 added entries, including positive high-bit None and RaidNone values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this CombatLogObject enum entry. Combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CooldownViewerAddAlertStatus.DuplicateAlert",
@@ -29362,33 +30139,75 @@
       "id": "added:Enum.CurrencyDestroyReason.CraftingOrderReagent",
       "symbol": "Enum.CurrencyDestroyReason.CraftingOrderReagent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CurrencyDestroyReason.CraftingOrderReagent as a added enum occurrence with exact 12.0.0 value 16."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CurrencyDestroyReason.CraftingOrderReagent with exact numeric value 16."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.CurrencySource.InitiativeReward",
       "symbol": "Enum.CurrencySource.InitiativeReward",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CurrencySource.InitiativeReward as a added enum occurrence with exact 12.0.0 value 67."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CurrencySource.InitiativeReward with exact numeric value 67."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.DamageMeterNumbers.Compact",
@@ -31010,17 +31829,38 @@
       "id": "added:Enum.EditModeCooldownViewerSetting.BarWidthScale",
       "symbol": "Enum.EditModeCooldownViewerSetting.BarWidthScale",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeCooldownViewerSetting.BarWidthScale as a added enum occurrence with exact 12.0.0 value 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "summary": "Current startup enum data publishes Enum.EditModeCooldownViewerSetting.BarWidthScale with exact numeric value 11."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "4a7d70f9d99145fd3496c4b2b3e1f8bf4be63c75",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.BackgroundTransparency",
@@ -33650,33 +34490,75 @@
       "id": "added:Enum.GameRule.EjJourneysDisabled",
       "symbol": "Enum.GameRule.EjJourneysDisabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.GameRule.EjJourneysDisabled as a added enum occurrence with exact 12.0.0 value 156."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.GameRule.EjJourneysDisabled with exact numeric value 156."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.GameRule.PvPInitialRatingOverride",
       "symbol": "Enum.GameRule.PvPInitialRatingOverride",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.GameRule.PvPInitialRatingOverride as a added enum occurrence with exact 12.0.0 value 190."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.GameRule.PvPInitialRatingOverride with exact numeric value 190."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.GossipNpcOption.TieredEntrance",
@@ -33810,17 +34692,38 @@
       "id": "added:Enum.HousingDecorActionFlags.PreviewDecor",
       "symbol": "Enum.HousingDecorActionFlags.PreviewDecor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingDecorActionFlags.PreviewDecor as a added enum occurrence with exact 12.0.0 value 2048."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.HousingDecorActionFlags.PreviewDecor with exact numeric value 2048."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854ba2652724a902804fc78d443ff79332",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "added:Enum.HousingDecorPlacementRestriction.ChildOutsideBounds",
@@ -56984,33 +57887,75 @@
       "id": "changed:Enum.AccountTransTypeMeta.MaxValue",
       "symbol": "Enum.AccountTransTypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.AccountTransTypeMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 66."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.AccountTransTypeMeta.MaxValue with exact numeric value 66."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.AccountTransTypeMeta.NumValues",
       "symbol": "Enum.AccountTransTypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.AccountTransTypeMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 67."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.AccountTransTypeMeta.NumValues with exact numeric value 67."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.CharCustomizationTypeMeta.MaxValue",
@@ -57448,65 +58393,149 @@
       "id": "changed:Enum.CurrencyDestroyReasonMeta.MaxValue",
       "symbol": "Enum.CurrencyDestroyReasonMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CurrencyDestroyReasonMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 16."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CurrencyDestroyReasonMeta.MaxValue with exact numeric value 16."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.CurrencyDestroyReasonMeta.NumValues",
       "symbol": "Enum.CurrencyDestroyReasonMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CurrencyDestroyReasonMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 17."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CurrencyDestroyReasonMeta.NumValues with exact numeric value 17."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.CurrencySourceMeta.MaxValue",
       "symbol": "Enum.CurrencySourceMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CurrencySourceMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 67."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CurrencySourceMeta.MaxValue with exact numeric value 67."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.CurrencySourceMeta.NumValues",
       "symbol": "Enum.CurrencySourceMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.CurrencySourceMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 68."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.CurrencySourceMeta.NumValues with exact numeric value 68."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.EditModeAccountSettingMeta.MaxValue",
@@ -57608,33 +58637,75 @@
       "id": "changed:Enum.EditModeCooldownViewerSettingMeta.MaxValue",
       "symbol": "Enum.EditModeCooldownViewerSettingMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeCooldownViewerSettingMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.EditModeCooldownViewerSettingMeta.MaxValue with exact numeric value 11."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.EditModeCooldownViewerSettingMeta.NumValues",
       "symbol": "Enum.EditModeCooldownViewerSettingMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.EditModeCooldownViewerSettingMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 12."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.EditModeCooldownViewerSettingMeta.NumValues with exact numeric value 12."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.EditModeSystemMeta.MaxValue",
@@ -57752,33 +58823,75 @@
       "id": "changed:Enum.GameRuleMeta.MaxValue",
       "symbol": "Enum.GameRuleMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.GameRuleMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 190."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.GameRuleMeta.MaxValue with exact numeric value 190."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.GameRuleMeta.NumValues",
       "symbol": "Enum.GameRuleMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.GameRuleMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 140."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.GameRuleMeta.NumValues with exact numeric value 140."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.HousingCatalogEntrySubtype.OwnedModifiedStack",
@@ -57848,33 +58961,75 @@
       "id": "changed:Enum.HousingDecorActionFlagsMeta.MaxValue",
       "symbol": "Enum.HousingDecorActionFlagsMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingDecorActionFlagsMeta.MaxValue as a changed enum occurrence with exact 12.0.0 value 2048."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.HousingDecorActionFlagsMeta.MaxValue with exact numeric value 2048."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.HousingDecorActionFlagsMeta.NumValues",
       "symbol": "Enum.HousingDecorActionFlagsMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in 12.0.0 source register records Enum.HousingDecorActionFlagsMeta.NumValues as a changed enum occurrence with exact 12.0.0 value 13."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070",
+          "summary": "Current startup enum data publishes Enum.HousingDecorActionFlagsMeta.NumValues with exact numeric value 13."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs",
+          "source_hash": "1e0688d4d881677d358a9b5c7739c6b5dafc357a256e6dab9fae2b0fe41b0542",
+          "summary": "Focused retail 12.0.0 startup test asserts six bounded enum families and their metadata namespaces, numeric Lua types, and exact source-register values for all 20 classified rows."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "26df911318643d23516c5f720f40ea9b14886f6e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup namespace publication, exact numeric Lua type, and exact value for this enum entry. Enum consumers, server/state semantics, bitwise composition where applicable, mutation/protection, lifecycle, and other edge semantics are not claimed."
     },
     {
       "id": "changed:Enum.HousingDecorPlacementRestriction.InvalidCollision",

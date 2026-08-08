@@ -1,3 +1,11 @@
+## [2026-08-08] investigation | Classify six small 12.0.0 enum families
+
+Classified 20 added/changed AccountTransType, CurrencyDestroyReason, CurrencySource, EditModeCooldownViewerSetting, GameRule, and HousingDecorActionFlags rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/patch_12_0_0_small_enums.rs::test_patch_12_0_0_small_enum_values`. The focused retail 12.0.0 startup test asserts namespace publication, exact numeric Lua types, and exact source-register values. Claims exclude consumer, server/state, bitwise composition, mutation/protection, lifecycle, and edge semantics. Current totals are **683 best-effort, 617 evidence-required, 2 exception-requested, and 2108 untriaged**.
+
+## [2026-08-08] investigation | Classify 12.0.0 CombatLogObject enums
+
+Classified 35 added `Enum.CombatLogObject`, `Enum.CombatLogObjectMeta`, `Enum.CombatLogObjectTarget`, and `Enum.CombatLogObjectTargetMeta` rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/combat_log_object.rs::test_patch_12_0_0_combat_log_object_enum_values`. The focused retail 12.0.0 startup test asserts all four namespace tables, exact numeric Lua types, and exact source-register values, including positive high-bit `None` and `RaidNone`. Claims exclude combat-log bitmask operations, filter matching, consumers, signed host representations, mutation/protection, lifecycle, and edge semantics. Implementation ancestor is `b14f2a854ba`; current source/test hashes are recorded per row. Totals are now **663 best-effort, 617 evidence-required, 2 exception-requested, and 2128 untriaged**.
+
 ## [2026-08-08] investigation | Classify 12.0.0 TransmogSituation enum
 
 Classified all 22 added `Enum.TransmogSituation.*` rows as `best-effort`/`behavioral` using `src/loader/tests/wow_api_globals/transmog_situation.rs::test_patch_12_0_0_transmog_situation_enum_values`. The focused retail 12.0.0 startup test asserts namespace publication, exact numeric Lua type, and exact source-register value for every entry; transmog behavior, flags/combinations, consumers, validation, persistence, mutation/protection, and lifecycle remain unclaimed. Implementation ancestor is `339424faf1`; current source/test hashes are recorded per row. Totals are now **628 best-effort, 617 evidence-required, 2 exception-requested, and 2163 untriaged**.

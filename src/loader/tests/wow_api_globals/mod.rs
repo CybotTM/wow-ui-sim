@@ -13,10 +13,12 @@
 
 mod account_state_flags;
 mod caa_constants;
+mod combat_log_object;
 mod frames_and_attributes;
 mod global_functions;
 mod housing_result;
 mod item_collection_secret_aspects;
+mod patch_12_0_0_small_enums;
 mod patch_12_1_service_payloads;
 mod runtime_subsystems;
 mod startup_globals;
