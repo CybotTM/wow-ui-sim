@@ -648,3 +648,5 @@ fn vendor_deprecated_globals_are_published_and_forward() {
         "DeathRecap_HasEvents is not the vendor alias"
     );
 }
+
+include!("legacy_compat.rs");
