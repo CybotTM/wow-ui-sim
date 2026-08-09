@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **891 best-effort, 796 evidence-required, 2 exception-requested, and 1721 untriaged rows** (3410 total).
+Current manifest totals are **891 best-effort, 797 evidence-required, 2 exception-requested, and 1720 untriaged rows** (3410 total). `C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` is evidence-required/unsafe: the source requires a nullable number, but no `MajorFactionRenownRewardInfo` model or producer exists and `C_MajorFactions.GetRenownRewardsForLevel` returns an empty table. Present/nil values, numeric meanings, per-level rewards, ordering, unknown behavior, refresh, and lifecycle remain unproven.
 
 `C_MajorFactions.MajorFactionData.description` is evidence-required/unsafe: the source requires a string field, but the current state model lacks description and `GetMajorFactionData` omits it. Exact strings/defaults/per-faction values/unknown behavior/mutation/refresh/lifecycle remain unproven; `name` and `unlockDescription` are separate fields.
 

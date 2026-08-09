@@ -12602,17 +12602,42 @@
       "id": "added:C_MajorFactions.MajorFactionRenownRewardInfo.rewardType",
       "symbol": "C_MajorFactions.MajorFactionRenownRewardInfo.rewardType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines MajorFactionRenownRewardInfo.rewardType as a nullable number field with no explicit default.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current major-faction state types contain no MajorFactionRenownRewardInfo payload model or nullable reward type field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_major_factions.rs",
+          "summary": "Current state-backed C_MajorFactions implementation does not produce renown reward payloads.",
+          "source_hash": "9ee7329717a4f07ae594b770dba1e2df8aaed6c3417d5a4ecccb9b79c31d7972"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/major_faction_display_defaults.rs",
+          "summary": "Temporary C_MajorFactions.GetRenownRewardsForLevel fallback always returns an empty table, so no rewardType value can be observed.",
+          "source_hash": "3f4334265d2eab6e33fc00f41a00839105cd905d17eaeccc7aaae48f4ff0a60c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no MajorFactionRenownRewardInfo model or producer exists, and the major-faction reward query returns an empty table. Present/nil rewardType behavior, numeric meanings, per-level rewards, ordering, unknown behavior, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_MajorFactions.RenownHighlightInfo",

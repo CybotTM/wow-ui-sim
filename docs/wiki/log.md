@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_MajorFactions.MajorFactionRenownRewardInfo.rewardType
+
+Classified `C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` as evidence-required/unsafe: the source requires a nullable number, but no `MajorFactionRenownRewardInfo` model or producer exists and `C_MajorFactions.GetRenownRewardsForLevel` returns an empty table. Present/nil values, numeric meanings, per-level rewards, ordering, unknown behavior, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 797 evidence-required, 2 exception-requested, and 1720 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_MajorFactions.MajorFactionData.playerCompanionID
 
 Classified `C_MajorFactions.MajorFactionData.playerCompanionID` as evidence-required/unsafe: the source requires a nullable number, but current `MajorFactionData` has no companion association and `GetMajorFactionData` omits the field. Present/nil behavior, authoritative IDs, per-faction values, unknown behavior, mutation, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 796 evidence-required, 2 exception-requested, and 1721 untriaged** (3410 rows).
