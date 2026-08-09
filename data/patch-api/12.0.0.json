@@ -17213,81 +17213,176 @@
       "id": "added:C_SecureTransfer.Cancel",
       "symbol": "C_SecureTransfer.Cancel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines Cancel as a no-argument transaction action with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/secure_transfer_state.rs",
+          "summary": "Current temporary surface increments a counter and records lastAction only; it has no transaction cancellation, rollback, callback, or authorization behavior.",
+          "source_hash": "544ddbb480f608f51d16d3ca9ff793ad5949d8d0959e0533c7f5692b08d75bc0"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/secure_transfer.rs",
+          "summary": "Focused tests prove only the counter and lastAction mutation, not cancellation semantics.",
+          "source_hash": "d47dacb770cc0e03d67df7c23fb9f6c261a47934dc73adb49a63a1f1781df309"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no pending secure-transfer transaction, cancellation, rollback, callback, or authorization model exists. Missing/repeated cancellation, state restoration, events, errors, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SecureTransfer.CompleteHousingPurchase",
       "symbol": "C_SecureTransfer.CompleteHousingPurchase",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines CompleteHousingPurchase as a no-argument transaction action with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/secure_transfer_state.rs",
+          "summary": "Current temporary surface increments a counter and records lastAction only; it does not validate, debit, grant housing, or complete a secure purchase.",
+          "source_hash": "544ddbb480f608f51d16d3ca9ff793ad5949d8d0959e0533c7f5692b08d75bc0"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/secure_transfer.rs",
+          "summary": "Focused tests prove only the counter and lastAction mutation, not housing purchase completion.",
+          "source_hash": "d47dacb770cc0e03d67df7c23fb9f6c261a47934dc73adb49a63a1f1781df309"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no pending housing purchase, cost debit, entitlement grant, validation, secure callback, rollback, or event model exists. Valid/invalid/repeated completion, errors, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SecureTransfer.CompleteHousingVCPurchase",
       "symbol": "C_SecureTransfer.CompleteHousingVCPurchase",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines CompleteHousingVCPurchase as a no-argument transaction action with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/secure_transfer_state.rs",
+          "summary": "Current temporary surface increments a counter and records lastAction only; it does not validate a VC product or complete a purchase.",
+          "source_hash": "544ddbb480f608f51d16d3ca9ff793ad5949d8d0959e0533c7f5692b08d75bc0"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/secure_transfer.rs",
+          "summary": "Focused tests prove only the counter and lastAction mutation, not VC purchase completion.",
+          "source_hash": "d47dacb770cc0e03d67df7c23fb9f6c261a47934dc73adb49a63a1f1781df309"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no pending housing VC purchase, product validation, entitlement grant, secure callback, rollback, or event model exists. Valid/invalid/repeated completion, errors, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SecureTransfer.GetHousingPurchaseCost",
       "symbol": "C_SecureTransfer.GetHousingPurchaseCost",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetHousingPurchaseCost as a no-argument query returning a required numeric totalCost.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/secure_transfer_state.rs",
+          "summary": "Current temporary surface returns a manually injected numeric value defaulting to zero, without a purchase quote or price producer.",
+          "source_hash": "544ddbb480f608f51d16d3ca9ff793ad5949d8d0959e0533c7f5692b08d75bc0"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/secure_transfer.rs",
+          "summary": "Focused tests prove manual state read/coercion only, not authoritative housing purchase pricing.",
+          "source_hash": "d47dacb770cc0e03d67df7c23fb9f6c261a47934dc73adb49a63a1f1781df309"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no housing purchase quote or pricing model exists. Missing/available purchases, exact costs, currency changes, validation, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SecureTransfer.GetHousingVCPurchaseProductID",
       "symbol": "C_SecureTransfer.GetHousingVCPurchaseProductID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetHousingVCPurchaseProductID as a no-argument query returning a required numeric productID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/secure_transfer_state.rs",
+          "summary": "Current temporary surface returns a manually injected numeric value defaulting to zero, without VC product selection state.",
+          "source_hash": "544ddbb480f608f51d16d3ca9ff793ad5949d8d0959e0533c7f5692b08d75bc0"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/secure_transfer.rs",
+          "summary": "Focused tests prove manual state read/coercion only, not authoritative VC product selection.",
+          "source_hash": "d47dacb770cc0e03d67df7c23fb9f6c261a47934dc73adb49a63a1f1781df309"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no housing VC product-selection or catalog model exists. Missing/available products, exact IDs, catalog changes, validation, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SettingsUtil.NotifySettingsLoaded",

@@ -521,11 +521,11 @@
 521. [evidence-required] `added:C_Secrets.ShouldUnitPowerMaxBeSecret` — unsafe
 522. [evidence-required] `added:C_Secrets.ShouldUnitSpellCastBeSecret` — unsafe
 523. [evidence-required] `added:C_Secrets.ShouldUnitSpellCastingBeSecret` — unsafe
-524. [untriaged] `added:C_SecureTransfer.Cancel` — untriaged
-525. [untriaged] `added:C_SecureTransfer.CompleteHousingPurchase` — untriaged
-526. [untriaged] `added:C_SecureTransfer.CompleteHousingVCPurchase` — untriaged
-527. [untriaged] `added:C_SecureTransfer.GetHousingPurchaseCost` — untriaged
-528. [untriaged] `added:C_SecureTransfer.GetHousingVCPurchaseProductID` — untriaged
+524. [evidence-required] `added:C_SecureTransfer.Cancel` — unsafe
+525. [evidence-required] `added:C_SecureTransfer.CompleteHousingPurchase` — unsafe
+526. [evidence-required] `added:C_SecureTransfer.CompleteHousingVCPurchase` — unsafe
+527. [evidence-required] `added:C_SecureTransfer.GetHousingPurchaseCost` — unsafe
+528. [evidence-required] `added:C_SecureTransfer.GetHousingVCPurchaseProductID` — unsafe
 529. [untriaged] `added:C_SettingsUtil.NotifySettingsLoaded` — untriaged
 530. [untriaged] `added:C_SettingsUtil.OpenSettingsPanel` — untriaged
 531. [untriaged] `added:C_Sound.PlaySound` — untriaged

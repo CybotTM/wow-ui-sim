@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify secure transfer APIs
+
+Classified `C_SecureTransfer.Cancel`, `C_SecureTransfer.CompleteHousingPurchase`, `C_SecureTransfer.CompleteHousingVCPurchase`, `C_SecureTransfer.GetHousingPurchaseCost`, and `C_SecureTransfer.GetHousingVCPurchaseProductID` as evidence-required/unsafe: current temporary state exposes counters/lastAction and manually injected numeric query values only; no secure transaction, pricing/product producer, validation, authorization, purchase mutation, cancellation/rollback, callbacks/events exists. Exact costs/products and valid/invalid/repeated transaction lifecycle remain unproven. Current totals are **892 best-effort, 900 evidence-required, 2 exception-requested, and 1616 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify restricted-action policy APIs
 
 Classified `C_RestrictedActions.CheckAllowProtectedFunctions`, `C_RestrictedActions.GetAddOnRestrictionState`, and `C_RestrictedActions.IsAddOnRestrictionActive` as evidence-required/unsafe: constant-true and constant-Inactive defaults are compatibility scaffolding, the active query is absent, and no per-object protected-function policy or per-type restriction state machine exists. Object and silent semantics, enum types, transitions, taint/restriction enforcement, refresh, events, persistence, and lifecycle remain unproven. Current totals are **892 best-effort, 895 evidence-required, 2 exception-requested, and 1621 untriaged** (3410 rows).
