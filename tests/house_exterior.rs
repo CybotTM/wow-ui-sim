@@ -1,5 +1,16 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+const HOUSE_EXTERIOR_TYPE_SCRIPT: &str = r#"
+    local getCurrentHouseExteriorType = C_HouseExterior.GetCurrentHouseExteriorType
+    if type(getCurrentHouseExteriorType) ~= "function" then
+        return "not_callable", 0, 0, ""
+    end
+
+    local returnCount = select('#', getCurrentHouseExteriorType())
+    local exteriorType, exteriorTypeName = getCurrentHouseExteriorType()
+    return type(exteriorType), returnCount, exteriorType, exteriorTypeName
+"#;
+
 const HOUSE_EXTERIOR_SCRIPT: &str = r#"
     if C_HouseExterior.IsExteriorDecorHidden() ~= false then
         return "wrong_initial_hidden_state"
@@ -44,6 +55,19 @@ const HOUSE_EXTERIOR_SCRIPT: &str = r#"
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+#[test]
+fn current_house_exterior_type_returns_seeded_type_and_name() {
+    let env = env();
+    let (value_type, return_count, exterior_type, exterior_type_name): (String, i64, i64, String) =
+        env.eval(HOUSE_EXTERIOR_TYPE_SCRIPT)
+            .expect("seeded C_HouseExterior type method should be queryable");
+
+    assert_eq!(value_type, "number");
+    assert_eq!(return_count, 2);
+    assert_eq!(exterior_type, 1);
+    assert_eq!(exterior_type_name, "Sunspire Cottage");
 }
 
 #[test]
