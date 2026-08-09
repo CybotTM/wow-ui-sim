@@ -238,6 +238,7 @@ fn register_map_and_encounter_surfaces(state: &mut LuaState) -> LuaResult<()> {
     creature_info::register_creature_info_surface(state)?;
     delves_ui::register_delves_ui_surface(state)?;
     encounter_journal::register_encounter_journal_surface(state)?;
+    c_api::c_instance_encounter::register_c_instance_encounter_surface(state)?;
     c_api::c_quest_hub::register_c_quest_hub_surface(state)?;
     c_api::register_map_environment_tables(state)?;
     gossip_info::register_gossip_info_surface(state)?;

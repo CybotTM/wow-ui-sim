@@ -24,6 +24,7 @@ pub mod c_death_recap;
 pub mod c_discord;
 pub mod c_glue;
 pub mod c_housing;
+pub mod c_instance_encounter;
 pub mod c_lfg_info;
 pub mod c_login;
 pub mod c_major_factions;
