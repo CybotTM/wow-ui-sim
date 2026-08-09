@@ -560,8 +560,8 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_PvP.HasRandomTrainingGroundWinToday` | evidence-required | api | added | Evidence required: no daily Training Grounds win state or reset model exists. Before/after-win behavior, account/day rollover, refresh, events, persistence, and lifecycle remain unproven. |
 | `C_PvP.JoinRandomTrainingGround` | evidence-required | api | added | Evidence required: no random Training Grounds queue/join producer exists. Eligibility and rejection paths, duplicate joins, queue transitions, events, persistence, and lifecycle remain unproven. |
 | `C_PvP.JoinTrainingGround` | evidence-required | api | added | Evidence required: no Training Grounds ID catalog or queue/join producer exists. Valid/unknown IDs, eligibility failures, duplicate joins, queue transitions, events, persistence, and lifecycle remain unproven. |
-| `C_QuestInfoSystem.GetQuestLogRewardFavor` | untriaged | api | added | api added in 12.0.0. |
-| `C_QuestLog.GetActivePreyQuest` | untriaged | api | added | api added in 12.0.0. |
+| `C_QuestInfoSystem.GetQuestLogRewardFavor` | evidence-required | api | added | Evidence required: no quest-specific favor reward or initiative cycle-cap model exists. Unknown quests, zero/nonzero rewards, unclamped/clamped amounts, cap transitions, refresh, persistence, and lifecycle remain unproven. |
+| `C_QuestLog.GetActivePreyQuest` | evidence-required | api | added | Evidence required: no active-prey quest state or explicit API implementation exists. Inactive nil behavior, active numeric IDs, invalid/unavailable quests, quest-log consistency, transitions, refresh, events, and lifecycle remain unproven. |
 | `C_Reputation.IsFactionParagonForCurrentPlayer` | untriaged | api | added | api added in 12.0.0. |
 | `C_RestrictedActions.CheckAllowProtectedFunctions` | untriaged | api | added | api added in 12.0.0. |
 | `C_RestrictedActions.GetAddOnRestrictionState` | untriaged | api | added | api added in 12.0.0. |

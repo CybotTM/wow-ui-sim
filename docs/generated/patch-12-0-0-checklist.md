@@ -492,8 +492,8 @@
 492. [evidence-required] `added:C_PvP.HasRandomTrainingGroundWinToday` — unsafe
 493. [evidence-required] `added:C_PvP.JoinRandomTrainingGround` — unsafe
 494. [evidence-required] `added:C_PvP.JoinTrainingGround` — unsafe
-495. [untriaged] `added:C_QuestInfoSystem.GetQuestLogRewardFavor` — untriaged
-496. [untriaged] `added:C_QuestLog.GetActivePreyQuest` — untriaged
+495. [evidence-required] `added:C_QuestInfoSystem.GetQuestLogRewardFavor` — unsafe
+496. [evidence-required] `added:C_QuestLog.GetActivePreyQuest` — unsafe
 497. [untriaged] `added:C_Reputation.IsFactionParagonForCurrentPlayer` — untriaged
 498. [untriaged] `added:C_RestrictedActions.CheckAllowProtectedFunctions` — untriaged
 499. [untriaged] `added:C_RestrictedActions.GetAddOnRestrictionState` — untriaged

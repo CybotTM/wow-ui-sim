@@ -16327,33 +16327,71 @@
       "id": "added:C_QuestInfoSystem.GetQuestLogRewardFavor",
       "symbol": "C_QuestInfoSystem.GetQuestLogRewardFavor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetQuestLogRewardFavor with required numeric questID, optional clampFavorToCycleCap boolean, and required numeric amount return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/quest_surface/register.rs",
+          "summary": "Current C_QuestInfoSystem registration exposes quest classification only and has no favor-reward handler or backing state.",
+          "source_hash": "3ffbdb9ff3a168f074cec30a3c69f67def6c2d88078a4887fc9a58b8b9b6061c"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/c_quest_log_rewards.rs",
+          "summary": "Focused quest reward coverage exercises legacy item reward APIs and does not establish favor amounts or cycle-cap clamping.",
+          "source_hash": "bfb82cbbad0e077c7c32a303ac66b6989795b8e5740febebf5f6f4f0b9cdf5a0"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no quest-specific favor reward or initiative cycle-cap model exists. Unknown quests, zero/nonzero rewards, unclamped/clamped amounts, cap transitions, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_QuestLog.GetActivePreyQuest",
       "symbol": "C_QuestLog.GetActivePreyQuest",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetActivePreyQuest as a no-argument API that may return nothing or a numeric questID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/quest_log.rs",
+          "summary": "Current C_QuestLog surface does not register GetActivePreyQuest or publish active-prey state.",
+          "source_hash": "02c1f454bf9996402a1fb8d8366c1468c9b1fd065c517e8ff8d333c76bf6a47a"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/sim_substates/quest_log.rs",
+          "summary": "Quest-log state models entries, completion, rewards, waypoints, and tags, but no active-prey quest identifier or transitions.",
+          "source_hash": "ae91f706313ebcf6c1fc20626ed19d7b231fbe8d1de358dcafba737ce346171f"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no active-prey quest state or explicit API implementation exists. Inactive nil behavior, active numeric IDs, invalid/unavailable quests, quest-log consistency, transitions, refresh, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_Reputation.IsFactionParagonForCurrentPlayer",

@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify quest favor and active prey APIs
+
+Classified `C_QuestInfoSystem.GetQuestLogRewardFavor` and `C_QuestLog.GetActivePreyQuest` as evidence-required/unsafe: no quest-specific favor or cycle-cap model and no active-prey quest state exist; current quest surfaces cover other classification, log, and reward behavior only. Quest IDs, favor amounts and clamping, inactive nil and active prey IDs, transitions, refresh, events, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 892 evidence-required, 2 exception-requested, and 1625 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_PvP BattlegroundInfo and Training Grounds APIs
 
 Classified all 23 added C_PvP rows as evidence-required/unsafe: the simulator only has legacy positional battleground probes/state, not C_PvP.BattlegroundInfo or Training Grounds availability/catalog/rewards/queue/match/daily-win models. Required/nilable fields, structure-return contract, eligibility/reasons, lists/rewards, match/win transitions, join validation/events/persistence/lifecycle remain unproven. Current totals are **891 best-effort, 890 evidence-required, 2 exception-requested, and 1627 untriaged** (3410 rows).
