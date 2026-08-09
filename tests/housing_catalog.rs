@@ -80,6 +80,15 @@ const HOUSING_CATALOG_SCRIPT: &str = r#"
         return "clear_cart_not_reflected"
     end
 
+    local entryInfo = C_HousingCatalog.GetCatalogEntryInfo(1001)
+    if type(entryInfo.itemID) ~= "number" or entryInfo.itemID ~= 1001 then
+        return "wrong_catalog_entry_item_id"
+    end
+
+    if type(entryInfo.isUniqueTrophy) ~= "boolean" or entryInfo.isUniqueTrophy ~= false then
+        return "wrong_catalog_entry_unique_trophy"
+    end
+
     local bundle = C_HousingCatalog.GetBundleInfo(5001)
     if not bundle or bundle.wasViewed ~= false or #bundle.entryIDs ~= 2 then
         return "wrong_initial_bundle_info"
