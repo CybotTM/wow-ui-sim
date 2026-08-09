@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify three housing placement/cart gaps
+
+Classified `C_HousingBasicMode.SetFreePlaceEnabled`, `C_HousingBasicMode.StartPlacingPreviewDecor`, and `C_HousingCatalog.DeletePreviewCartDecor` as evidence-required/unsafe. All are published no-ops without mutable free-placement state, preview placement/decor/bundle state, or observable cart deletion; validation, repeated/unknown calls, requests/events, persistence, reset/isolation, and lifecycle remain unmodeled. Current totals are **873 best-effort, 768 evidence-required, 2 exception-requested, and 1767 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify three C_HouseExterior mutation/debug gaps
 
 Classified `C_HouseExterior.GetSelectedFixtureDebugInfo`, `SetHouseExteriorSize`, and `SetHouseExteriorType` as evidence-required/unsafe. The debug API retains only a name without signature/returns and lacks selected-fixture debug state; both setters are published no-ops that do not update getter-visible selected state, validate values, resolve names, persist, refresh, reset/isolate, or model lifecycle. Current totals are **873 best-effort, 765 evidence-required, 2 exception-requested, and 1770 untriaged** (3410 rows).

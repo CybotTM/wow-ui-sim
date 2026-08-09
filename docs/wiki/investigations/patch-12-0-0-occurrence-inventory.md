@@ -17,6 +17,8 @@ The bounded two-row exterior-type/debug slice classifies `C_HouseExterior.GetHou
 
 The bounded three-row exterior mutation/debug gap classifies `C_HouseExterior.GetSelectedFixtureDebugInfo`, `C_HouseExterior.SetHouseExteriorSize`, and `C_HouseExterior.SetHouseExteriorType` as evidence-required/unsafe. The selected-debug API is absent with no retained signature or payload model; both setters are no-ops that do not update getter-visible state, validate values, resolve names, persist, refresh, reset, or model lifecycle behavior.
 
+The bounded three-row housing placement/cart gap classifies `C_HousingBasicMode.SetFreePlaceEnabled`, `C_HousingBasicMode.StartPlacingPreviewDecor`, and `C_HousingCatalog.DeletePreviewCartDecor` as evidence-required/unsafe. All three are no-ops without mutable free-placement state, preview-placement/decor/bundle state, or observable cart deletion; validation, repeated calls, requests/events, persistence, reset/isolation, and lifecycle remain unmodeled.
+
 The bounded 33-row 12.0.0 CAA CVar-default slice classifies the existing 27 CAA CVars plus six additional target-health, voice, and volume CAA CVars as best-effort/behavioral using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed.
 
 The bounded six-row `C_AdventureMap.GetQuestPortraitInfo` slice classifies the API plus five portrait fields as best-effort/behavioral from focused `tests/c_adventure_map/quests.rs` proof. Claims cover injected-state lookup, typed five-field publication, unknown/nonnumeric zero-value returns, nullable `modelSceneID`, and tested display-ID gating. Retail data population, localization, full validation/edge behavior, assets/rendering, and lifecycle remain unclaimed. `modelSceneID` is treated strictly as data under the existing permanent no-3D scope; no 3D implementation or new exception is requested.
@@ -44,7 +46,7 @@ The bounded 12.0.0 `C_CombatLogSecure` slice classifies exactly nine added secur
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 873 best-effort, 765 evidence-required, 2 exception-requested, 1770 untriaged
+- **Rows:** 3410 total — 0 implemented, 873 best-effort, 768 evidence-required, 2 exception-requested, 1767 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -386,9 +388,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_Housing.IsHousingMarketShopEnabled` | evidence-required | api | added | Evidence required: no explicit method or dedicated market-shop availability state exists, and generic fallback behavior does not establish the required boolean result. |
 | `C_Housing.OnHouseFinderClickPlot` | evidence-required | api | added | Evidence required: no explicit callback or selected-plot request/event/state model exists, so numeric argument validation, click side effects, repeated clicks, and unknown plot behavior are unproven. |
 | `C_HousingBasicMode.IsFreePlaceEnabled` | evidence-required | api | added | Evidence required: hardcoded true and a no-op setter do not establish default, setter/getter state transitions, reset/isolation, persistence, or exact free-placement semantics. |
-| `C_HousingBasicMode.SetFreePlaceEnabled` | untriaged | api | added | api added in 12.0.0. |
-| `C_HousingBasicMode.StartPlacingPreviewDecor` | untriaged | api | added | api added in 12.0.0. |
-| `C_HousingCatalog.DeletePreviewCartDecor` | untriaged | api | added | api added in 12.0.0. |
+| `C_HousingBasicMode.SetFreePlaceEnabled` | evidence-required | api | added | Evidence required: the no-op setter cannot establish initial state, true/false transitions, getter round-trip, reset/isolation, persistence, or exact free-placement semantics. |
+| `C_HousingBasicMode.StartPlacingPreviewDecor` | evidence-required | api | added | Evidence required: the no-op does not model decor/bundle selection, placement-mode transition, invalid IDs, repeated calls, requests/events, or lifecycle behavior. |
+| `C_HousingCatalog.DeletePreviewCartDecor` | evidence-required | api | added | Evidence required: callable no-op behavior does not establish GUID validation, observable deletion, unknown/repeated deletion, cart-state updates, events, or lifecycle semantics. |
 | `C_HousingCatalog.GetBundleInfo` | untriaged | api | added | api added in 12.0.0. |
 | `C_HousingCatalog.GetCartSizeLimit` | untriaged | api | added | api added in 12.0.0. |
 | `C_HousingCatalog.GetCatalogEntryRefundTimeStampByRecordID` | untriaged | api | added | api added in 12.0.0. |

@@ -10911,49 +10911,88 @@
       "id": "added:C_HousingBasicMode.SetFreePlaceEnabled",
       "symbol": "C_HousingBasicMode.SetFreePlaceEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines SetFreePlaceEnabled(freePlaceEnabled: boolean) with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary setter is a no-op while the paired getter is hardcoded true, so no mutable free-placement state exists.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the no-op setter cannot establish initial state, true/false transitions, getter round-trip, reset/isolation, persistence, or exact free-placement semantics."
     },
     {
       "id": "added:C_HousingBasicMode.StartPlacingPreviewDecor",
       "symbol": "C_HousingBasicMode.StartPlacingPreviewDecor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines StartPlacingPreviewDecor(decorRecordID: number, bundleCatalogShopProductID: number?) with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary method is a no-op with no preview-placement, decor-record, bundle-product, validation, request, or event state.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the no-op does not model decor/bundle selection, placement-mode transition, invalid IDs, repeated calls, requests/events, or lifecycle behavior."
     },
     {
       "id": "added:C_HousingCatalog.DeletePreviewCartDecor",
       "symbol": "C_HousingCatalog.DeletePreviewCartDecor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines DeletePreviewCartDecor(decorGUID: string) with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary method is a no-op and does not remove or update preview-cart decor state.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: callable no-op behavior does not establish GUID validation, observable deletion, unknown/repeated deletion, cart-state updates, events, or lifecycle semantics."
     },
     {
       "id": "added:C_HousingCatalog.GetBundleInfo",

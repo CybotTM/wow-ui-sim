@@ -332,9 +332,9 @@
 332. [evidence-required] `added:C_Housing.IsHousingMarketShopEnabled` — unsafe
 333. [evidence-required] `added:C_Housing.OnHouseFinderClickPlot` — unsafe
 334. [evidence-required] `added:C_HousingBasicMode.IsFreePlaceEnabled` — unsafe
-335. [untriaged] `added:C_HousingBasicMode.SetFreePlaceEnabled` — untriaged
-336. [untriaged] `added:C_HousingBasicMode.StartPlacingPreviewDecor` — untriaged
-337. [untriaged] `added:C_HousingCatalog.DeletePreviewCartDecor` — untriaged
+335. [evidence-required] `added:C_HousingBasicMode.SetFreePlaceEnabled` — unsafe
+336. [evidence-required] `added:C_HousingBasicMode.StartPlacingPreviewDecor` — unsafe
+337. [evidence-required] `added:C_HousingCatalog.DeletePreviewCartDecor` — unsafe
 338. [untriaged] `added:C_HousingCatalog.GetBundleInfo` — untriaged
 339. [untriaged] `added:C_HousingCatalog.GetCartSizeLimit` — untriaged
 340. [untriaged] `added:C_HousingCatalog.GetCatalogEntryRefundTimeStampByRecordID` — untriaged
