@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeActivityLogInfo.taskActivity
+
+Classified `C_NeighborhoodInitiative.InitiativeActivityLogInfo.taskActivity` as evidence-required/unsafe: the source defines a required array of InitiativeActivityLogEntry structures, but no activity-log info/entry model or producer exists; generic fallback produces no payload. Absent/present behavior, array shape/order, entry fields, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 819 evidence-required, 2 exception-requested, and 1698 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeActivityLogInfo.neighborhoodGUID
 
 Classified `C_NeighborhoodInitiative.InitiativeActivityLogInfo.neighborhoodGUID` as evidence-required/unsafe: the source defines a required string neighborhoodGUID field, but no InitiativeActivityLogInfo runtime model or producer exists; generic fallback produces no payload. GUID presence and values, absent/present logs, refresh/update transitions, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 817 evidence-required, 2 exception-requested, and 1700 untriaged** (3410 rows).

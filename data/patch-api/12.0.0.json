@@ -13663,17 +13663,36 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeActivityLogInfo.taskActivity",
       "symbol": "C_NeighborhoodInitiative.InitiativeActivityLogInfo.taskActivity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeActivityLogInfo.taskActivity as a required array of InitiativeActivityLogEntry structures.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no activity-log info or entry model and no payload producer that could publish taskActivity.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback leaves GetInitiativeActivityLogInfo nil-returning, so no runtime taskActivity array or entry payloads are produced.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no activity-log info or entry model exists. Absent/present behavior, array shape and ordering, entry fields, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneInfo",
