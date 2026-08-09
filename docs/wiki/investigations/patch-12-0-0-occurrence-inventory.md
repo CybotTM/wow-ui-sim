@@ -3,6 +3,8 @@ Occurrence-level register derived from explicit wowless retail snapshots. 867 ro
 The bounded 12.0.0 miscellaneous payload-field slice classifies eight ExpansionDisplayInfo, LuaColorCurvePoint, PrivateAuraIconInfo, and SpellCooldownInfo fields as evidence-required/unsafe. Current behavior is absent, nil-only, generic, or placeholder-backed and does not establish exact contracts, state/security, or consumer semantics.
 The bounded 12.0.0 unit/heal-prediction slice classifies four added rows as best-effort/behavioral from focused tests; full retail semantics remain unclaimed.
 The bounded 23-row 12.0.0 CVar-default slice classifies the added encounter-warning, WorldText, chat-restriction, rune-icon, auction-sort, chat-bubble, combat-warning, damage-meter, and suggested-level-filter CVars as best-effort/behavioral using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; mutation, events, persistence, secure/read-only flags, consumers, and later-epoch behavior remain unclaimed.
+The bounded three-row `C_CooldownViewer` gap classifies `CooldownViewerCooldown.category`, `CooldownViewerCooldown.cooldownID`, and `GetValidAlertTypes` as evidence-required/unsafe because the current temporary surface returns nil/empty defaults and has no typed cooldown producer, category/ID records, ordered alert-type arrays, validation, routing, Settings UI behavior, or lifecycle.
+
 The bounded 33-row 12.0.0 CAA CVar-default slice classifies the existing 27 CAA CVars plus six additional target-health, voice, and volume CAA CVars as best-effort/behavioral using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed.
 
 The bounded six-row `C_AdventureMap.GetQuestPortraitInfo` slice classifies the API plus five portrait fields as best-effort/behavioral from focused `tests/c_adventure_map/quests.rs` proof. Claims cover injected-state lookup, typed five-field publication, unknown/nonnumeric zero-value returns, nullable `modelSceneID`, and tested display-ID gating. Retail data population, localization, full validation/edge behavior, assets/rendering, and lifecycle remain unclaimed. `modelSceneID` is treated strictly as data under the existing permanent no-3D scope; no 3D implementation or new exception is requested.
@@ -30,7 +32,7 @@ The bounded 12.0.0 `C_CombatLogSecure` slice classifies exactly nine added secur
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 868 best-effort, 743 evidence-required, 2 exception-requested, 1797 untriaged
+- **Rows:** 3410 total — 0 implemented, 868 best-effort, 746 evidence-required, 2 exception-requested, 1794 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -224,9 +226,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_CombatText.GetCurrentEventInfo` | evidence-required | api | added | Evidence required: source metadata lacks result semantics and no modeled combat-text event state establishes no-event behavior, result arity/values, active-unit interaction, advancement, clearing, or lifecycle. |
 | `C_CombatText.SetActiveUnit` | evidence-required | api | added | Evidence required: no modeled active-unit state or focused proof establishes valid/invalid unit handling, declassified-unit restrictions, GetActiveUnit round-trip, or CombatText event routing. |
 | `C_Commentator.GetCombatEventInfo` | evidence-required | api | added | Evidence required: source metadata lacks an authoritative result contract and no modeled commentator combat-event state establishes publication, return values, event ordering, empty/repeated behavior, or lifecycle. |
-| `C_CooldownViewer.CooldownViewerCooldown.category` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_CooldownViewer.CooldownViewerCooldown.cooldownID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_CooldownViewer.GetValidAlertTypes` | untriaged | api | added | api added in 12.0.0. |
+| `C_CooldownViewer.CooldownViewerCooldown.category` | evidence-required | structure-field | added | Evidence required: no CooldownViewerCooldown producer establishes required Enum.CooldownViewerCategory publication, exact values, cooldown relationships, routing, invalid IDs, or lifecycle semantics. |
+| `C_CooldownViewer.CooldownViewerCooldown.cooldownID` | evidence-required | structure-field | added | Evidence required: no CooldownViewerCooldown producer establishes required numeric cooldownID publication, exact values, record relationships, invalid IDs, or lifecycle semantics. |
+| `C_CooldownViewer.GetValidAlertTypes` | evidence-required | api | added | Evidence required: API is absent and no cooldown-viewer state establishes non-null ordered alert-type arrays, known/unknown cooldown behavior, exact enum values, empty behavior, or Settings UI consumption. |
 | `C_CreatureInfo.GetCreatureID` | untriaged | api | added | api added in 12.0.0. |
 | `C_CurveUtil.CreateColorCurve` | best-effort | api | added | Best-effort behavioral evidence is limited to factory return/table shape; exact retail userdata identity and color evaluation remain unproven. |
 | `C_CurveUtil.CreateCurve` | best-effort | api | added | Best-effort behavioral evidence is limited to factory return/table shape; exact retail userdata identity and curve semantics remain unproven. |

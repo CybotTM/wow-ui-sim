@@ -6277,49 +6277,88 @@
       "id": "added:C_CooldownViewer.CooldownViewerCooldown.category",
       "symbol": "C_CooldownViewer.CooldownViewerCooldown.category",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CooldownViewer.CooldownViewerCooldown.category occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/cooldown_viewer_defaults.rs",
+          "summary": "Current temporary CooldownViewer compatibility surface returns nil/empty defaults and does not model C_CooldownViewer.CooldownViewerCooldown.category producer semantics.",
+          "source_hash": "d70bf6417fe91af65887a689ea838ba43ef5adde0580d5c60d6fc6e8cd3318f5"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no CooldownViewerCooldown producer establishes required Enum.CooldownViewerCategory publication, exact values, cooldown relationships, routing, invalid IDs, or lifecycle semantics."
     },
     {
       "id": "added:C_CooldownViewer.CooldownViewerCooldown.cooldownID",
       "symbol": "C_CooldownViewer.CooldownViewerCooldown.cooldownID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CooldownViewer.CooldownViewerCooldown.cooldownID occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/cooldown_viewer_defaults.rs",
+          "summary": "Current temporary CooldownViewer compatibility surface returns nil/empty defaults and does not model C_CooldownViewer.CooldownViewerCooldown.cooldownID producer semantics.",
+          "source_hash": "d70bf6417fe91af65887a689ea838ba43ef5adde0580d5c60d6fc6e8cd3318f5"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no CooldownViewerCooldown producer establishes required numeric cooldownID publication, exact values, record relationships, invalid IDs, or lifecycle semantics."
     },
     {
       "id": "added:C_CooldownViewer.GetValidAlertTypes",
       "symbol": "C_CooldownViewer.GetValidAlertTypes",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CooldownViewer.GetValidAlertTypes occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/cooldown_viewer_defaults.rs",
+          "summary": "Current temporary CooldownViewer compatibility surface returns nil/empty defaults and does not model C_CooldownViewer.GetValidAlertTypes producer semantics.",
+          "source_hash": "d70bf6417fe91af65887a689ea838ba43ef5adde0580d5c60d6fc6e8cd3318f5"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: API is absent and no cooldown-viewer state establishes non-null ordered alert-type arrays, known/unknown cooldown behavior, exact enum values, empty behavior, or Settings UI consumption."
     },
     {
       "id": "added:C_CreatureInfo.GetCreatureID",

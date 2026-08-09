@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify three C_CooldownViewer gaps
+
+Classified `C_CooldownViewer.CooldownViewerCooldown.category`, `C_CooldownViewer.CooldownViewerCooldown.cooldownID`, and `C_CooldownViewer.GetValidAlertTypes` as `evidence-required`/`unsafe`. The current temporary surface returns nil/empty defaults and has no typed cooldown producer, category/ID records, ordered alert-type arrays, validation, routing, Settings UI behavior, or lifecycle. Current totals are **868 best-effort, 746 evidence-required, 2 exception-requested, and 1794 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify seven C_ChatInfo, C_CombatText, and C_Commentator API gaps
 
 Classified the seven-row `C_ChatInfo`/`C_CombatText`/`C_Commentator` API-gap slice as `evidence-required`/`unsafe`. Current fallbacks are absent, no-op, constant-false, or adjacent-state only and do not model lockdown, emote, active-unit, combat-text, or commentator event state, restrictions, result contracts, transitions, events, ordering, or lifecycle. Current totals are **868 best-effort, 743 evidence-required, 2 exception-requested, and 1797 untriaged** (3410 rows).

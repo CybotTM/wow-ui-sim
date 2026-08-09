@@ -184,9 +184,9 @@
 184. [evidence-required] `added:C_CombatText.GetCurrentEventInfo` — unsafe
 185. [evidence-required] `added:C_CombatText.SetActiveUnit` — unsafe
 186. [evidence-required] `added:C_Commentator.GetCombatEventInfo` — unsafe
-187. [untriaged] `added:C_CooldownViewer.CooldownViewerCooldown.category` — untriaged
-188. [untriaged] `added:C_CooldownViewer.CooldownViewerCooldown.cooldownID` — untriaged
-189. [untriaged] `added:C_CooldownViewer.GetValidAlertTypes` — untriaged
+187. [evidence-required] `added:C_CooldownViewer.CooldownViewerCooldown.category` — unsafe
+188. [evidence-required] `added:C_CooldownViewer.CooldownViewerCooldown.cooldownID` — unsafe
+189. [evidence-required] `added:C_CooldownViewer.GetValidAlertTypes` — unsafe
 190. [untriaged] `added:C_CreatureInfo.GetCreatureID` — untriaged
 191. [best-effort] `added:C_CurveUtil.CreateColorCurve` — behavioral
 192. [best-effort] `added:C_CurveUtil.CreateCurve` — behavioral
