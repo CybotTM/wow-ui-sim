@@ -416,7 +416,7 @@
 416. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeActivityLogInfo.nextUpdateTime` — unsafe
 417. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeActivityLogInfo.taskActivity` — unsafe
 418. [best-effort] `added:C_NeighborhoodInitiative.InitiativeMilestoneInfo` — provenance-only
-419. [untriaged] `added:C_NeighborhoodInitiative.InitiativeMilestoneInfo.milestoneOrderIndex` — untriaged
+419. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeMilestoneInfo.milestoneOrderIndex` — unsafe
 420. [untriaged] `added:C_NeighborhoodInitiative.InitiativeMilestoneInfo.requiredContributionAmount` — untriaged
 421. [untriaged] `added:C_NeighborhoodInitiative.InitiativeMilestoneInfo.rewards` — untriaged
 422. [best-effort] `added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo` — provenance-only
