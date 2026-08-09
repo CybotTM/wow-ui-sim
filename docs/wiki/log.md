@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify two C_HouseExterior rows
+
+The bounded two-row `C_HouseExterior` slice classifies `GetHouseExteriorTypeOptions` as best-effort/behavioral only for focused callable publication, one returned table, `selectedExteriorType` 1, and tested `Cottage`/1 plus `Manor`/2 options; metadata, mutation, persistence, refresh, validation, and lifecycle semantics remain unclaimed. `GetHoveredFixtureDebugInfo` is evidence-required/unsafe because only its API name is retained, its signature and returns are unknown, and the nil fallback has no hovered-fixture debug state. Current totals are **873 best-effort, 762 evidence-required, 2 exception-requested, and 1773 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify three Delves/housing rows
 
 The bounded three-row 12.0.0 Delves/housing slice classifies `C_HouseExterior.GetHouseExteriorSizeOptions` as best-effort/behavioral only for focused proof of callable publication, one table return, `selectedSize` 3, and exactly Medium/3 plus Large/4 options; exact metadata, enum fidelity, mutation, persistence, refresh, validation, and lifecycle remain unclaimed. `C_DelvesUI.IsTraitTreeForCompanion` is evidence-required/unsafe because it is absent without trait-tree ownership/classification state. `C_Housing.OnHouseFinderClickPlot` is evidence-required/unsafe because it is absent without selected-plot request/event/state side effects or validation.
