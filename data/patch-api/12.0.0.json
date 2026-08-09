@@ -15218,113 +15218,246 @@
       "id": "added:C_NeighborhoodInitiative.PlayerHasInitiativeAccess",
       "symbol": "C_NeighborhoodInitiative.PlayerHasInitiativeAccess",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines PlayerHasInitiativeAccess as a no-argument API returning a required boolean success value.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current defaults do not implement initiative access eligibility or backing state.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback returns nil instead of a modeled access boolean.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no initiative-access eligibility model exists. Allowed/denied states, player and neighborhood context, transitions, refresh, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.PlayerMeetsRequiredLevel",
       "symbol": "C_NeighborhoodInitiative.PlayerMeetsRequiredLevel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines PlayerMeetsRequiredLevel as a no-argument API returning a required boolean success value.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current defaults do not implement required-level eligibility or player-level state.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback returns nil instead of a modeled required-level boolean.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no initiative required-level or player-level model exists. Below/at/above threshold behavior, level transitions, refresh, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.RemoveTrackedInitiativeTask",
       "symbol": "C_NeighborhoodInitiative.RemoveTrackedInitiativeTask",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines RemoveTrackedInitiativeTask as a one numeric initiativeTaskID input and no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current temporary fallback is a no-op and does not mutate tracked-task state.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/c_tracking_defaults_probes.rs",
+          "summary": "Focused coverage proves only a nil return from the no-op and does not establish task removal behavior.",
+          "source_hash": "df72a7b7ff97aa354d78a8087c2476b9d8c6feccb9aba9559ea3b34eefd1af47"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no tracked-task state or removal behavior exists. Valid/invalid IDs, duplicate removal, list mutation, ordering, task updates, refresh, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.RequestInitiativeActivityLog",
       "symbol": "C_NeighborhoodInitiative.RequestInitiativeActivityLog",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines RequestInitiativeActivityLog as a no-argument request API with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current defaults provide no activity-log request state or producer.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback is a no-op without request timing, completion, or payload publication.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no initiative activity-log request state or producer exists. Request timing, empty/populated logs, completion events, failure behavior, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.RequestNeighborhoodInitiativeInfo",
       "symbol": "C_NeighborhoodInitiative.RequestNeighborhoodInitiativeInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines RequestNeighborhoodInitiativeInfo as a no-argument request API with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current defaults provide no initiative-info request state or populated payload producer.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback is a no-op without request timing, completion, or initiative-info publication.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no initiative-info request state or populated producer exists. Request timing, empty/populated results, completion events, failure behavior, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.SetActiveNeighborhood",
       "symbol": "C_NeighborhoodInitiative.SetActiveNeighborhood",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines SetActiveNeighborhood as a one string neighborhoodGUID input and no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current defaults contain no active-neighborhood state or GUID validation.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback is a no-op and does not change active-neighborhood context.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no active-neighborhood state model exists. GUID validation, valid/invalid and unavailable neighborhoods, state transitions, refresh, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.SetViewingNeighborhood",
       "symbol": "C_NeighborhoodInitiative.SetViewingNeighborhood",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines SetViewingNeighborhood as a one string neighborhoodGUID input and no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current defaults contain no viewing-neighborhood state or GUID validation.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback is a no-op and does not change viewing-neighborhood context.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no viewing-neighborhood state model exists. GUID validation, valid/invalid and unavailable neighborhoods, view transitions, refresh, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_Ping.IsPingSystemEnabled",

@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **891 best-effort, 859 evidence-required, 2 exception-requested, and 1658 untriaged rows** (3410 total).
+Current manifest totals are **891 best-effort, 866 evidence-required, 2 exception-requested, and 1651 untriaged rows** (3410 total).
+
+`C_NeighborhoodInitiative.PlayerHasInitiativeAccess`, `C_NeighborhoodInitiative.PlayerMeetsRequiredLevel`, `C_NeighborhoodInitiative.RemoveTrackedInitiativeTask`, `C_NeighborhoodInitiative.RequestInitiativeActivityLog`, `C_NeighborhoodInitiative.RequestNeighborhoodInitiativeInfo`, `C_NeighborhoodInitiative.SetActiveNeighborhood`, and `C_NeighborhoodInitiative.SetViewingNeighborhood` are evidence-required/unsafe: access/level queries lack eligibility state and fallback nil; tracked-task removal is a no-op; request and active/viewing setters lack request/producers/context state. Boolean eligibility, valid/invalid IDs/GUIDs, mutations, request timing/results/events, transitions, refresh, persistence, and lifecycle remain unproven.
 
 `C_NeighborhoodInitiative.NeighborhoodInitiativeInfo` fields `currentCycleID`, `currentProgress`, `description`, `duration`, `initiativeID`, `isLoaded`, `milestones`, `neighborhoodGUID`, `playerTotalContribution`, `progressRequired`, `tasks`, and `title` are evidence-required/unsafe: the source requires 12 scalar/nested initiative payload fields, but no NeighborhoodInitiativeInfo model or populated producer exists; generic GetNeighborhoodInitiativeInfo fallback returns nil. Loaded/nil states, scalar values, ordered milestone/task arrays, progress/cycle/contribution transitions, refresh, persistence, and lifecycle remain unproven.
 
