@@ -368,8 +368,8 @@
 368. [best-effort] `added:C_HousingDecor.IsPreviewState` — behavioral
 369. [best-effort] `added:C_InstanceEncounter.IsEncounterInProgress` — behavioral
 370. [evidence-required] `added:C_InstanceEncounter.IsEncounterLimitingResurrections` — unsafe
-371. [untriaged] `added:C_InstanceEncounter.IsEncounterSuppressingRelease` — untriaged
-372. [untriaged] `added:C_InstanceEncounter.ShouldShowTimelineForEncounter` — untriaged
+371. [evidence-required] `added:C_InstanceEncounter.IsEncounterSuppressingRelease` — unsafe
+372. [evidence-required] `added:C_InstanceEncounter.ShouldShowTimelineForEncounter` — unsafe
 373. [untriaged] `added:C_Item.IsItemBindToAccount` — untriaged
 374. [untriaged] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle1` — untriaged
 375. [untriaged] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle2` — untriaged

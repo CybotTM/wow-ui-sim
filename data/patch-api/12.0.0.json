@@ -12060,33 +12060,71 @@
       "id": "added:C_InstanceEncounter.IsEncounterSuppressingRelease",
       "symbol": "C_InstanceEncounter.IsEncounterSuppressingRelease",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsEncounterSuppressingRelease() with no arguments and one required boolean isSuppressingRelease result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_instance_encounter.rs",
+          "summary": "Current explicit C_InstanceEncounter model registers only IsEncounterInProgress; no release-suppression state or method is modeled.",
+          "source_hash": "de3b7b794262b62d4f5aae8958d22b1033925bef951f67cf3ad5381141596d86"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic namespace fallback synthesizes missing methods that return nil, which does not satisfy the required boolean contract or establish encounter release-suppression semantics.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled encounter release-suppression state, explicit API method, producer, transition behavior, or focused boolean proof exists; generic nil fallback and deprecated-wrapper publication are insufficient."
     },
     {
       "id": "added:C_InstanceEncounter.ShouldShowTimelineForEncounter",
       "symbol": "C_InstanceEncounter.ShouldShowTimelineForEncounter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines ShouldShowTimelineForEncounter() with no arguments and one required boolean shouldShow result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_instance_encounter.rs",
+          "summary": "Current explicit C_InstanceEncounter model registers only IsEncounterInProgress; no encounter timeline-visibility state or method is modeled.",
+          "source_hash": "de3b7b794262b62d4f5aae8958d22b1033925bef951f67cf3ad5381141596d86"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic namespace fallback synthesizes missing methods that return nil, which does not satisfy the required boolean contract or establish encounter timeline-visibility semantics.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled encounter timeline-visibility state, explicit API method, producer, transition behavior, or focused boolean proof exists; generic nil fallback and consumer usage are insufficient."
     },
     {
       "id": "added:C_Item.IsItemBindToAccount",
