@@ -572,7 +572,7 @@
 572. [evidence-required] `added:C_StringUtil.TruncateWhenZero` — unsafe
 573. [evidence-required] `added:C_StringUtil.WrapString` — unsafe
 574. [evidence-required] `added:C_TaskQuest.GetQuestUIWidgetSetByType` — unsafe
-575. [untriaged] `added:C_TooltipComparison.CompareItem` — untriaged
+575. [evidence-required] `added:C_TooltipComparison.CompareItem` — unsafe
 576. [evidence-required] `added:C_TooltipInfo.GetOutfit` — unsafe
 577. [evidence-required] `added:C_TooltipInfo.GetUnitAuraByAuraInstanceID` — unsafe
 578. [best-effort] `added:C_TradeSkillUI.GetDependentReagents` — behavioral

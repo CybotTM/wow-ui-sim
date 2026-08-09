@@ -18808,17 +18808,36 @@
       "id": "added:C_TooltipComparison.CompareItem",
       "symbol": "C_TooltipComparison.CompareItem",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds protected CompareItem with TooltipComparisonItem, Tooltip, and optional anchor-frame inputs and no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_shared_xml_game_loads.rs",
+          "summary": "Existing coverage proves Blizzard TooltipComparisonManager loads, not that the native C_TooltipComparison namespace or comparison workflow works.",
+          "source_hash": "ec708e61276937aeca961dff5ff4318a3250ee9400ce1347aa72aeb2e4def162"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/tooltip_hover.rs",
+          "summary": "Existing tooltip hover coverage proves GUID-backed item tooltip resolution only, not CompareItem rendering, anchoring, protected-call behavior, or deltas.",
+          "source_hash": "422a3f8b17236f29bcd55425eb52b3bd4668d1c94789910299ef6d6d719406fb"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_TooltipComparison implementation or comparison-data model exists. Protected-call/secret behavior, equipped-item selection, primary/secondary tooltip rendering, anchors, stat deltas, repeated comparisons, cleanup, and lifecycle remain unproven."
     },
     {
       "id": "added:C_TooltipInfo.GetOutfit",
