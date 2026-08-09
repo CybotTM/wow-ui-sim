@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **891 best-effort, 792 evidence-required, 2 exception-requested, and 1725 untriaged rows** (3410 total).
+Current manifest totals are **891 best-effort, 793 evidence-required, 2 exception-requested, and 1724 untriaged rows** (3410 total).
+
+`C_LimitedInput.LimitedInputAllowed` is evidence-required/unsafe: the source requires an `Enum.LimitedInputType` input and boolean result, but no allowance, budget, or policy state or namespace method exists; generic fallback returns nil. Authorization/taint rules, budget exhaustion, validation, boolean results, transitions, and lifecycle remain unproven.
 
 `C_LFGList.AdvancedFilterOptions.generalPlaystyle1` is best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean `generalPlaystyle1` with exact default false from modeled `LfgAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves the default. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed.
 

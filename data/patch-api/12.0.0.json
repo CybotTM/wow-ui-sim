@@ -12462,17 +12462,36 @@
       "id": "added:C_LimitedInput.LimitedInputAllowed",
       "symbol": "C_LimitedInput.LimitedInputAllowed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines LimitedInputAllowed(type: Enum.LimitedInputType) returning one required boolean allowed result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current enum compatibility data publishes the four LimitedInputType values, but provides no allowance state, budget, per-type policy, or API implementation.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic namespace fallback synthesizes the missing method as a nil-returning placeholder, which does not satisfy the required boolean or security-sensitive input contract.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: C_LimitedInput is unmodeled; per-input allowance state, authorization/taint rules, budget exhaustion, argument validation, required boolean results, transitions, and lifecycle remain unproven. Enum publication and nil fallback are insufficient."
     },
     {
       "id": "added:C_MajorFactions.MajorFactionData.description",

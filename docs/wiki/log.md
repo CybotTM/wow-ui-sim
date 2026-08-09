@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_LimitedInput.LimitedInputAllowed
+
+Classified `C_LimitedInput.LimitedInputAllowed` as evidence-required/unsafe: the source requires an `Enum.LimitedInputType` input and boolean result, but no allowance, budget, or policy state or namespace method exists; generic fallback returns nil. Authorization/taint rules, budget exhaustion, validation, boolean results, transitions, and lifecycle remain unproven. Current totals are **891 best-effort, 793 evidence-required, 2 exception-requested, and 1724 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_LFGList.LfgSearchResultData.generalPlaystyle
 
 Classified `C_LFGList.LfgSearchResultData.generalPlaystyle` as best-effort/behavioral, bounded to seeded `GetSearchResultInfo()` payload field presence and numeric publication. Nullable omission, exact enum validation, invalid values, mutation, serialization, filtering effects, persistence, refresh, and full retail lifecycle remain unclaimed. This search-result field is distinct from `C_LFGList.LfgEntryData.generalPlaystyle` and `C_LFGList.LfgListingCreateData.generalPlaystyle`. Current totals are **891 best-effort, 792 evidence-required, 2 exception-requested, and 1725 untriaged** (3410 rows).

@@ -378,7 +378,7 @@
 378. [evidence-required] `added:C_LFGList.LfgEntryData.generalPlaystyle` — unsafe
 379. [evidence-required] `added:C_LFGList.LfgListingCreateData.generalPlaystyle` — unsafe
 380. [best-effort] `added:C_LFGList.LfgSearchResultData.generalPlaystyle` — behavioral
-381. [untriaged] `added:C_LimitedInput.LimitedInputAllowed` — untriaged
+381. [evidence-required] `added:C_LimitedInput.LimitedInputAllowed` — unsafe
 382. [untriaged] `added:C_MajorFactions.MajorFactionData.description` — untriaged
 383. [untriaged] `added:C_MajorFactions.MajorFactionData.highlights` — untriaged
 384. [untriaged] `added:C_MajorFactions.MajorFactionData.playerCompanionID` — untriaged
