@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify three HousingCatalogEntryInfo fields
+
+Classified `HousingCatalogEntryInfo.isUniqueTrophy` and `HousingCatalogEntryInfo.itemID` as best-effort/behavioral only for focused seeded entry 1001 proof of boolean false and numeric 1001; exact trophy classification, nullable/missing item IDs, other entries, authoritative item data, validation, mutation, persistence, refresh, and lifecycle remain unclaimed. Classified `HousingCatalogEntryInfo.dyeIDs` as evidence-required/unsafe because the required numeric-array field is absent and no dye-ID state exists. Current totals are **878 best-effort, 772 evidence-required, 2 exception-requested, and 1758 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify two HousingBundleInfo fields
 
 Classified `HousingBundleInfo.canPreview` as best-effort/behavioral only for focused seeded bundle 5001 proof that the field is boolean true; dynamic preview eligibility, other-bundle behavior, mutation, validation, persistence, refresh, and lifecycle remain unclaimed. Classified `HousingBundleInfo.originalPrice` as evidence-required/unsafe because the current payload publishes nil only and lacks numeric original-price, discount, and currency semantics. Current totals are **876 best-effort, 771 evidence-required, 2 exception-requested, and 1761 untriaged** (3410 rows).

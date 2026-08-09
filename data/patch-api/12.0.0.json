@@ -11196,49 +11196,104 @@
       "id": "added:C_HousingCatalog.HousingCatalogEntryInfo.dyeIDs",
       "symbol": "C_HousingCatalog.HousingCatalogEntryInfo.dyeIDs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingCatalogEntryInfo.dyeIDs as an array of numbers.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current catalog entry payloads omit dyeIDs and expose only an unrelated empty dyeSlots table without dye-ID backing state.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the required field is absent, and no numeric dye-ID contents, ordering, empty/non-empty behavior, ownership, refresh, reset, or lifecycle is modeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingCatalogEntryInfo.isUniqueTrophy",
       "symbol": "C_HousingCatalog.HousingCatalogEntryInfo.isUniqueTrophy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingCatalogEntryInfo.isUniqueTrophy as boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Seeded catalog entry payloads 1001 and 1002 publish isUniqueTrophy = false through catalog entry getters.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_catalog.rs",
+          "summary": "Focused seeded catalog entry assertion proves isUniqueTrophy is boolean false for entry 1001.",
+          "source_hash": "1d2cd5bf04a6f57219e67d36e10ba09b1bb7cf8c6408c38278075f9d818ecc11"
+        }
+      ],
+      "tests": [
+        "tests/housing_catalog.rs::housing_catalog_market_and_variant_methods_use_seeded_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded entry 1001 publication of boolean isUniqueTrophy=false. Exact trophy classification, other entries, mutation, persistence, refresh, validation, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingCatalog.HousingCatalogEntryInfo.itemID",
       "symbol": "C_HousingCatalog.HousingCatalogEntryInfo.itemID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingCatalogEntryInfo.itemID as nullable number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Seeded catalog entry 1001 publishes numeric itemID 1001 through catalog entry getters.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_catalog.rs",
+          "summary": "Focused seeded catalog entry assertion proves itemID is numeric 1001 for entry 1001.",
+          "source_hash": "1d2cd5bf04a6f57219e67d36e10ba09b1bb7cf8c6408c38278075f9d818ecc11"
+        }
+      ],
+      "tests": [
+        "tests/housing_catalog.rs::housing_catalog_market_and_variant_methods_use_seeded_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded entry 1001 numeric itemID publication. Nullable/missing-item cases, authoritative item data, other entries, validation, mutation, persistence, refresh, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData",

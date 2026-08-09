@@ -2,7 +2,7 @@
 
 LLM-maintained knowledge base for the wow-ui-sim project.
 
-| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 876 best-effort rows; 771 evidence-required, 2 exception-requested, and 1761 untriaged rows (3410 total). The housing-catalog slice limits `GetBundleInfo` to seeded bundle 5001 lookup/two entries/wasViewed false→true and `HousingBundleInfo.canPreview` to boolean true proof; `HousingBundleInfo.originalPrice` remains evidence-required/unsafe because current payloads publish nil only without numeric price, discount, or currency semantics. |
+| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 878 best-effort rows; 772 evidence-required, 2 exception-requested, and 1758 untriaged rows (3410 total). `HousingCatalogEntryInfo.isUniqueTrophy` and `itemID` are best-effort/behavioral only for focused seeded entry 1001 proof of boolean false and numeric 1001; exact trophy classification, nullable/missing item IDs, other entries, authoritative item data, validation, mutation, persistence, refresh, and lifecycle remain unclaimed. `HousingCatalogEntryInfo.dyeIDs` is evidence-required/unsafe because the required numeric-array field is absent and no dye-ID state exists. |
 
 ## design/
 

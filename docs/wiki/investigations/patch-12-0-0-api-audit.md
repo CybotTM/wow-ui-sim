@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **876 best-effort, 771 evidence-required, 2 exception-requested, and 1761 untriaged rows** (3410 total).
+Current manifest totals are **878 best-effort, 772 evidence-required, 2 exception-requested, and 1758 untriaged rows** (3410 total).
+
+The bounded three-field `HousingCatalogEntryInfo` slice classifies `isUniqueTrophy` and `itemID` as best-effort/behavioral only for focused seeded entry 1001 proof of boolean false and numeric 1001; exact trophy classification, nullable/missing item IDs, other entries, authoritative item data, validation, mutation, persistence, refresh, and lifecycle remain unclaimed. `dyeIDs` is evidence-required/unsafe because the required numeric-array field is absent and no dye-ID state exists.
 
 The bounded four-row 12.0.0 housing-catalog slice classifies `GetBundleInfo` as best-effort/behavioral only for seeded bundle 5001 lookup, two entries, and `wasViewed` false→true proof; exact schema, unknown IDs, clone isolation, pricing/product semantics, validation, persistence, refresh, and lifecycle remain unclaimed. `GetCartSizeLimit` is best-effort/behavioral only for callable publication and the seeded one-number value 20; dynamic enforcement/configuration, consumers, persistence, and lifecycle remain unclaimed. `GetCatalogEntryRefundTimeStampByRecordID` is evidence-required/unsafe because it ignores arguments and always returns nil without keyed refund state/window semantics. `HasFeaturedEntries` is evidence-required/unsafe because it hardcodes true rather than deriving from featured catalog contents or state transitions. `HousingBundleInfo.canPreview` is best-effort/behavioral only for focused seeded bundle 5001 proof that the field is boolean true; dynamic preview eligibility, other-bundle behavior, mutation, validation, persistence, refresh, and lifecycle remain unclaimed. `HousingBundleInfo.originalPrice` is evidence-required/unsafe because the current payload publishes nil only and lacks numeric original-price, discount, and currency semantics.
 

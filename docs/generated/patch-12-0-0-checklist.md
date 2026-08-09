@@ -341,9 +341,9 @@
 341. [evidence-required] `added:C_HousingCatalog.HasFeaturedEntries` — unsafe
 342. [best-effort] `added:C_HousingCatalog.HousingBundleInfo.canPreview` — behavioral
 343. [evidence-required] `added:C_HousingCatalog.HousingBundleInfo.originalPrice` — unsafe
-344. [untriaged] `added:C_HousingCatalog.HousingCatalogEntryInfo.dyeIDs` — untriaged
-345. [untriaged] `added:C_HousingCatalog.HousingCatalogEntryInfo.isUniqueTrophy` — untriaged
-346. [untriaged] `added:C_HousingCatalog.HousingCatalogEntryInfo.itemID` — untriaged
+344. [evidence-required] `added:C_HousingCatalog.HousingCatalogEntryInfo.dyeIDs` — unsafe
+345. [best-effort] `added:C_HousingCatalog.HousingCatalogEntryInfo.isUniqueTrophy` — behavioral
+346. [best-effort] `added:C_HousingCatalog.HousingCatalogEntryInfo.itemID` — behavioral
 347. [best-effort] `added:C_HousingCatalog.HousingPreviewItemData` — provenance-only
 348. [untriaged] `added:C_HousingCatalog.HousingPreviewItemData.bundleCatalogShopProductID` — untriaged
 349. [untriaged] `added:C_HousingCatalog.HousingPreviewItemData.decorGUID` — untriaged
