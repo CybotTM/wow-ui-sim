@@ -10998,65 +10998,133 @@
       "id": "added:C_HousingCatalog.GetBundleInfo",
       "symbol": "C_HousingCatalog.GetBundleInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetBundleInfo(bundleCatalogShopProductID: number) returning nullable HousingBundleInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary catalog state returns cloned seeded bundle 5001 data and tracks wasViewed through HousingMarketActionViewBundle.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_catalog.rs",
+          "summary": "Focused catalog test proves seeded bundle lookup, two entries, initial wasViewed false, and mutation to true after viewing.",
+          "source_hash": "33b8dc222b1ebc5b565431a294acc590487f4ac2be287d64a3cc544c9eb21d02"
+        }
+      ],
+      "tests": [
+        "tests/housing_catalog.rs::housing_catalog_market_and_variant_methods_use_seeded_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "dd28c2ba8bb9ae9bc547e1fd844060794242c440",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers seeded bundle 5001 lookup, two-entry shape, and wasViewed state mutation. Exact retail schema, unknown-ID behavior, clone isolation, pricing/product semantics, validation, persistence, refresh, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingCatalog.GetCartSizeLimit",
       "symbol": "C_HousingCatalog.GetCartSizeLimit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetCartSizeLimit() returning required numeric cartSizeLimit.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary catalog surface publishes GetCartSizeLimit as the seeded numeric constant 20.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_catalog.rs",
+          "summary": "Focused test proves callable publication, exactly one numeric return, and seeded value 20.",
+          "source_hash": "33b8dc222b1ebc5b565431a294acc590487f4ac2be287d64a3cc544c9eb21d02"
+        }
+      ],
+      "tests": [
+        "tests/housing_catalog.rs::housing_catalog_cart_size_limit_returns_seeded_limit"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to callable publication, one numeric return, and seeded value 20. Dynamic enforcement, configurability, consumers, persistence, refresh, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingCatalog.GetCatalogEntryRefundTimeStampByRecordID",
       "symbol": "C_HousingCatalog.GetCatalogEntryRefundTimeStampByRecordID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetCatalogEntryRefundTimeStampByRecordID(entryType, recordID) returning nullable number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary implementation ignores both arguments and always returns nil without refund-timestamp state.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: unconditional nil does not establish keyed refund timestamps, refundable/non-refundable distinctions, unknown records, argument handling, refund windows, refresh, or lifecycle."
     },
     {
       "id": "added:C_HousingCatalog.HasFeaturedEntries",
       "symbol": "C_HousingCatalog.HasFeaturedEntries",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HasFeaturedEntries() returning required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary implementation hardcodes true instead of deriving from featured catalog state.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: hardcoded true does not establish empty/populated catalog behavior, state derivation, refresh transitions, persistence, or exact featured-entry semantics."
     },
     {
       "id": "added:C_HousingCatalog.HousingBundleInfo.canPreview",

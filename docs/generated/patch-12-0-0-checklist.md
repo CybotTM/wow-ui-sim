@@ -335,10 +335,10 @@
 335. [evidence-required] `added:C_HousingBasicMode.SetFreePlaceEnabled` — unsafe
 336. [evidence-required] `added:C_HousingBasicMode.StartPlacingPreviewDecor` — unsafe
 337. [evidence-required] `added:C_HousingCatalog.DeletePreviewCartDecor` — unsafe
-338. [untriaged] `added:C_HousingCatalog.GetBundleInfo` — untriaged
-339. [untriaged] `added:C_HousingCatalog.GetCartSizeLimit` — untriaged
-340. [untriaged] `added:C_HousingCatalog.GetCatalogEntryRefundTimeStampByRecordID` — untriaged
-341. [untriaged] `added:C_HousingCatalog.HasFeaturedEntries` — untriaged
+338. [best-effort] `added:C_HousingCatalog.GetBundleInfo` — behavioral
+339. [best-effort] `added:C_HousingCatalog.GetCartSizeLimit` — behavioral
+340. [evidence-required] `added:C_HousingCatalog.GetCatalogEntryRefundTimeStampByRecordID` — unsafe
+341. [evidence-required] `added:C_HousingCatalog.HasFeaturedEntries` — unsafe
 342. [untriaged] `added:C_HousingCatalog.HousingBundleInfo.canPreview` — untriaged
 343. [untriaged] `added:C_HousingCatalog.HousingBundleInfo.originalPrice` — untriaged
 344. [untriaged] `added:C_HousingCatalog.HousingCatalogEntryInfo.dyeIDs` — untriaged

@@ -4,6 +4,10 @@
 
 ## Content
 
+Current manifest totals are **875 best-effort, 770 evidence-required, 2 exception-requested, and 1763 untriaged rows** (3410 total).
+
+The bounded four-row 12.0.0 housing-catalog slice classifies `GetBundleInfo` as best-effort/behavioral only for seeded bundle 5001 lookup, two entries, and `wasViewed` false→true proof; exact schema, unknown IDs, clone isolation, pricing/product semantics, validation, persistence, refresh, and lifecycle remain unclaimed. `GetCartSizeLimit` is best-effort/behavioral only for callable publication and the seeded one-number value 20; dynamic enforcement/configuration, consumers, persistence, and lifecycle remain unclaimed. `GetCatalogEntryRefundTimeStampByRecordID` is evidence-required/unsafe because it ignores arguments and always returns nil without keyed refund state/window semantics. `HasFeaturedEntries` is evidence-required/unsafe because it hardcodes true rather than deriving from featured catalog contents or state transitions.
+
 ### Source boundary
 
 The generator compares the last explicit retail 11.2.7 snapshot at build `65299` (`d9efaadf92f558e2b4fbef622c7b8af0e843849a`) with the final explicit retail 12.0.0 snapshot at build `65727` (`a6d2717d06f9255e507ab07f811c1bafaea64939`). It also retains six 12.0.0 snapshots:

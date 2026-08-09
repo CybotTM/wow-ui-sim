@@ -2,6 +2,8 @@
 
 LLM-maintained knowledge base for the wow-ui-sim project.
 
+| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 875 best-effort rows; 770 evidence-required, 2 exception-requested, and 1763 untriaged rows (3410 total). The housing-catalog slice limits `GetBundleInfo` to seeded bundle 5001 lookup/two entries/wasViewed false→true, `GetCartSizeLimit` to callable seeded value 20, and classifies `GetCatalogEntryRefundTimeStampByRecordID` and `HasFeaturedEntries` as evidence-required/unsafe. |
+
 ## design/
 
 | Page | Summary |
