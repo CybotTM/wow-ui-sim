@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_MajorFactions.ShouldUseJourneyRewardTrack
+
+Classified `C_MajorFactions.ShouldUseJourneyRewardTrack` as evidence-required/unsafe: the source requires a boolean by faction ID, but the temporary fallback is constant false with no per-faction journey reward-track model. Focused probes prove only fallback callability/default; positive/negative faction policy, unknown IDs, argument/security restrictions, transitions, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 802 evidence-required, 2 exception-requested, and 1715 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_MajorFactions.ShouldDisplayMajorFactionAsJourney
 
 Classified `C_MajorFactions.ShouldDisplayMajorFactionAsJourney` as evidence-required/unsafe: the source requires a boolean by faction ID, but the temporary fallback is constant false; an existing probe proves fallback only. Per-faction policy, positive cases, unknown IDs, argument/security restrictions, transitions, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 801 evidence-required, 2 exception-requested, and 1716 untriaged** (3410 rows).

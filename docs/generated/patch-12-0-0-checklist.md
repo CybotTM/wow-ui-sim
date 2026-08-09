@@ -388,7 +388,7 @@
 388. [evidence-required] `added:C_MajorFactions.RenownHighlightInfo.level` — unsafe
 389. [evidence-required] `added:C_MajorFactions.RenownHighlightInfo.title` — unsafe
 390. [evidence-required] `added:C_MajorFactions.ShouldDisplayMajorFactionAsJourney` — unsafe
-391. [untriaged] `added:C_MajorFactions.ShouldUseJourneyRewardTrack` — untriaged
+391. [evidence-required] `added:C_MajorFactions.ShouldUseJourneyRewardTrack` — unsafe
 392. [evidence-required] `added:C_NamePlate.GetNamePlateSize` — unsafe
 393. [evidence-required] `added:C_NamePlate.SetNamePlateSize` — unsafe
 394. [evidence-required] `added:C_NamePlateManager.GetNamePlateHitTestInsets` — unsafe

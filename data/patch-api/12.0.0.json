@@ -12807,17 +12807,36 @@
       "id": "added:C_MajorFactions.ShouldUseJourneyRewardTrack",
       "symbol": "C_MajorFactions.ShouldUseJourneyRewardTrack",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines ShouldUseJourneyRewardTrack(majorFactionID: number) returning one required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/major_faction_display_defaults.rs",
+          "summary": "Current temporary fallback returns constant false for every faction ID and has no modeled per-faction journey reward-track policy.",
+          "source_hash": "3f4334265d2eab6e33fc00f41a00839105cd905d17eaeccc7aaae48f4ff0a60c"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_major_faction_display_defaults_probes.rs",
+          "summary": "Existing focused probe confirms only the constant-false fallback for faction 2507; it does not establish faction-specific retail semantics.",
+          "source_hash": "cd850e270dcb2b810b64cbdabd62cee2d7566b45a9814a8434199e900b5945fd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: constant false does not establish per-faction journey reward-track policy, positive cases, unknown-ID behavior, argument/security restrictions, state transitions, refresh, or lifecycle. Callability/default fallback proof is insufficient."
     },
     {
       "id": "added:C_NamePlate.GetNamePlateSize",
