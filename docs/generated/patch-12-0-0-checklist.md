@@ -573,8 +573,8 @@
 573. [evidence-required] `added:C_StringUtil.WrapString` — unsafe
 574. [evidence-required] `added:C_TaskQuest.GetQuestUIWidgetSetByType` — unsafe
 575. [untriaged] `added:C_TooltipComparison.CompareItem` — untriaged
-576. [untriaged] `added:C_TooltipInfo.GetOutfit` — untriaged
-577. [untriaged] `added:C_TooltipInfo.GetUnitAuraByAuraInstanceID` — untriaged
+576. [evidence-required] `added:C_TooltipInfo.GetOutfit` — unsafe
+577. [evidence-required] `added:C_TooltipInfo.GetUnitAuraByAuraInstanceID` — unsafe
 578. [best-effort] `added:C_TradeSkillUI.GetDependentReagents` — behavioral
 579. [evidence-required] `added:C_TradeSkillUI.GetItemCraftedQualityInfo` — unsafe
 580. [evidence-required] `added:C_TradeSkillUI.GetItemReagentQualityInfo` — unsafe
@@ -2585,8 +2585,8 @@
 2585. [evidence-required] `changed:C_Timer.After` — unsafe
 2586. [best-effort] `changed:C_Timer.NewTicker` — behavioral
 2587. [best-effort] `changed:C_Timer.NewTimer` — behavioral
-2588. [untriaged] `changed:C_TooltipInfo.GetRecipeResultItem` — untriaged
-2589. [untriaged] `changed:C_TooltipInfo.GetRecipeResultItemForOrder` — untriaged
+2588. [evidence-required] `changed:C_TooltipInfo.GetRecipeResultItem` — unsafe
+2589. [evidence-required] `changed:C_TooltipInfo.GetRecipeResultItemForOrder` — unsafe
 2590. [evidence-required] `changed:C_TradeSkillUI.GetEnchantItems` — unsafe
 2591. [evidence-required] `changed:C_TradeSkillUI.GetRecraftRemovalWarnings` — unsafe
 2592. [evidence-required] `changed:C_TradeSkillUI.IsRecraftReagentValid` — unsafe

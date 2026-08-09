@@ -18824,33 +18824,65 @@
       "id": "added:C_TooltipInfo.GetOutfit",
       "symbol": "C_TooltipInfo.GetOutfit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds GetOutfit with numeric outfitID input and a nilable TooltipData result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/tooltip_info/mod.rs",
+          "summary": "Current C_TooltipInfo registration omits GetOutfit and exposes no outfit tooltip implementation.",
+          "source_hash": "e7b43aed2323d8de2ae90117934e415249849e7f1018f209fa9df96dd77f0679"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: GetOutfit is not registered and no outfit-tooltip backing model exists. Valid/unknown outfit behavior, tooltip payload shape, lines, item/source resolution, secret values, caching, and lifecycle remain unproven."
     },
     {
       "id": "added:C_TooltipInfo.GetUnitAuraByAuraInstanceID",
       "symbol": "C_TooltipInfo.GetUnitAuraByAuraInstanceID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds unit-token, aura-instance-ID, and optional-filter inputs with a nilable TooltipData result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/tooltip_info/probes.rs",
+          "summary": "Current explicit probe implementation provides only partial static/player-backed tooltip behavior and ignores contract inputs described in the row notes.",
+          "source_hash": "b2234ab45c80f376834a99754bf75311f1e51f2ce82414c372a93a2348ff457e"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_tooltip.rs",
+          "summary": "Focused tests prove narrow seeded tooltip results only and do not establish the full 12.0.0 contract.",
+          "source_hash": "a5cb583adf5c564b63095a94673c651d2acde100d8988976d097c7552a2409e0"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current implementation resolves only player auras, ignores the filter, and returns an empty UnitAura tooltip for unsupported/missing cases. Unit-token coverage, filtering, aura payload fidelity, secret/private aura behavior, removal/update transitions, and lifecycle remain unproven."
     },
     {
       "id": "added:C_TradeSkillUI.GetDependentReagents",
@@ -66007,33 +66039,71 @@
       "id": "changed:C_TooltipInfo.GetRecipeResultItem",
       "symbol": "C_TooltipInfo.GetRecipeResultItem",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source changes the recipe-result contract by renaming craftingReagents to reagentInfos while retaining optional recraft, level, and quality inputs.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/tooltip_info/probes.rs",
+          "summary": "Current explicit probe implementation provides only partial static/player-backed tooltip behavior and ignores contract inputs described in the row notes.",
+          "source_hash": "b2234ab45c80f376834a99754bf75311f1e51f2ce82414c372a93a2348ff457e"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_tooltip.rs",
+          "summary": "Focused tests prove narrow seeded tooltip results only and do not establish the full 12.0.0 contract.",
+          "source_hash": "a5cb583adf5c564b63095a94673c651d2acde100d8988976d097c7552a2409e0"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current implementation ignores reagentInfos and all optional recraft, level, and quality inputs, returning only a static recipe output-item tooltip. Changed-parameter semantics, crafted stats/quality, missing recipe behavior, secret values, and lifecycle remain unproven."
     },
     {
       "id": "changed:C_TooltipInfo.GetRecipeResultItemForOrder",
       "symbol": "C_TooltipInfo.GetRecipeResultItemForOrder",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source changes the order recipe-result contract by renaming craftingReagents to reagentInfos while retaining optional order/recraft/level/quality inputs.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/tooltip_info/probes.rs",
+          "summary": "Current explicit probe implementation provides only partial static/player-backed tooltip behavior and ignores contract inputs described in the row notes.",
+          "source_hash": "b2234ab45c80f376834a99754bf75311f1e51f2ce82414c372a93a2348ff457e"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_tooltip.rs",
+          "summary": "Focused tests prove narrow seeded tooltip results only and do not establish the full 12.0.0 contract.",
+          "source_hash": "a5cb583adf5c564b63095a94673c651d2acde100d8988976d097c7552a2409e0"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current implementation ignores orderID, reagentInfos, and all optional recraft, level, and quality inputs, returning only a static recipe output-item tooltip. Order/reagent semantics, crafted stats/quality, missing-order behavior, secret values, and lifecycle remain unproven."
     },
     {
       "id": "changed:C_TradeSkillUI.GetEnchantItems",

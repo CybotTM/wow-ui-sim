@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_TooltipInfo APIs
+
+Classified `C_TooltipInfo.GetOutfit`, `GetUnitAuraByAuraInstanceID`, `GetRecipeResultItem`, and `GetRecipeResultItemForOrder` as evidence-required/unsafe: GetOutfit is absent; aura implementation is player-only and ignores filter; recipe methods ignore reagent/order/recraft/level/quality inputs and return static output-item tooltips. Full payload/secret/lifecycle semantics remain unresolved. Current totals are **892 best-effort, 917 evidence-required, 2 exception-requested, and 1599 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_TaskQuest.GetQuestUIWidgetSetByType
 
 Classified `C_TaskQuest.GetQuestUIWidgetSetByType` as evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved. Current totals are **892 best-effort, 913 evidence-required, 2 exception-requested, and 1603 untriaged** (3410 rows).
