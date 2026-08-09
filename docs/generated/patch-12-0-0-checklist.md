@@ -403,7 +403,7 @@
 403. [evidence-required] `added:C_NeighborhoodInitiative.GetInitiativeTaskInfo` — unsafe
 404. [evidence-required] `added:C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo` — unsafe
 405. [evidence-required] `added:C_NeighborhoodInitiative.GetRequiredLevel` — unsafe
-406. [untriaged] `added:C_NeighborhoodInitiative.GetTrackedInitiativeTasks` — untriaged
+406. [evidence-required] `added:C_NeighborhoodInitiative.GetTrackedInitiativeTasks` — unsafe
 407. [best-effort] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry` — provenance-only
 408. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.amount` — untriaged
 409. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.completionTime` — untriaged

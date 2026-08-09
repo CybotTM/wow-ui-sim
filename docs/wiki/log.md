@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetTrackedInitiativeTasks
+
+Classified `C_NeighborhoodInitiative.GetTrackedInitiativeTasks` as evidence-required/unsafe: the source returns InitiativeTasksTracked with numeric trackedIDs, but the fallback always returns an empty table shape and the focused probe proves only that shape. No tracked-task state exists, so add/remove, duplicate, invalid/unknown ID, ordering, refresh, persistence, events, and lifecycle remain unproven. Current totals are **891 best-effort, 810 evidence-required, 2 exception-requested, and 1707 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetRequiredLevel
 
 Classified `C_NeighborhoodInitiative.GetRequiredLevel` as evidence-required/unsafe: the source requires one numeric level, but no explicit method or initiative required-level state exists; namespace defaults omit it and generic fallback returns nil. No-initiative behavior, valid levels, transitions, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 809 evidence-required, 2 exception-requested, and 1708 untriaged** (3410 rows).
