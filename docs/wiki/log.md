@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetActiveNeighborhood
+
+Classified `C_NeighborhoodInitiative.GetActiveNeighborhood` as evidence-required/unsafe: the source requires one neighborhoodGUID string, but no explicit method or active-neighborhood model exists; namespace defaults omit it and generic fallback returns nil. No-active behavior, valid GUID output, state transitions, refresh, events, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 804 evidence-required, 2 exception-requested, and 1713 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.AddTrackedInitiativeTask
 
 Classified `C_NeighborhoodInitiative.AddTrackedInitiativeTask` as evidence-required/unsafe: the source accepts a numeric initiativeTaskID with no declared return, but the current temporary fallback is a no-op and `trackedIDs` stays empty; focused probes prove only callability and nil return. Task mutation, valid/unknown IDs, duplicate handling, ordering, removal interaction, task info, persistence, event dispatch, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 803 evidence-required, 2 exception-requested, and 1714 untriaged** (3410 rows).
