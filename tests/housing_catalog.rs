@@ -18,6 +18,34 @@ const HOUSING_CART_SIZE_LIMIT_SCRIPT: &str = r#"
     return "ok"
 "#;
 
+const HOUSING_PREVIEW_CART_SCRIPT: &str = r#"
+    local previewGUID = "Preview-Decor-1001"
+
+    if C_HousingCatalog.IsPreviewCartItemShown(previewGUID) ~= false then
+        return "unknown_preview_should_be_hidden"
+    end
+
+    C_HousingCatalog.SetPreviewCartItemShown(previewGUID, true)
+    if C_HousingCatalog.IsPreviewCartItemShown(previewGUID) ~= true then
+        return "preview_true_not_reflected"
+    end
+
+    C_HousingCatalog.SetPreviewCartItemShown(previewGUID, false)
+    if C_HousingCatalog.IsPreviewCartItemShown(previewGUID) ~= false then
+        return "preview_false_not_reflected"
+    end
+
+    if C_HousingCatalog.PromotePreviewDecor(1001, previewGUID) ~= true then
+        return "preview_promotion_failed"
+    end
+
+    if C_HousingCatalog.IsPreviewCartItemShown(previewGUID) ~= true then
+        return "preview_promotion_not_reflected"
+    end
+
+    return "ok"
+"#;
+
 const HOUSING_CATALOG_SCRIPT: &str = r#"
     local featured = C_HousingCatalog.GetFeaturedSmallProducts()
     if #featured ~= 2 then
@@ -120,6 +148,15 @@ fn housing_catalog_cart_size_limit_returns_seeded_limit() {
     let result: String = env
         .eval(HOUSING_CART_SIZE_LIMIT_SCRIPT)
         .expect("seeded C_HousingCatalog cart size limit should be queryable");
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn housing_preview_cart_state_round_trips_and_promotes() {
+    let env = env();
+    let result: String = env
+        .eval(HOUSING_PREVIEW_CART_SCRIPT)
+        .expect("seeded C_HousingCatalog preview cart state should be queryable");
     assert_eq!(result, "ok");
 }
 
