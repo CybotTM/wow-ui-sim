@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeActivityLogInfo.isLoaded
+
+Classified `C_NeighborhoodInitiative.InitiativeActivityLogInfo.isLoaded` as evidence-required/unsafe: the source defines a required boolean isLoaded field, but no InitiativeActivityLogInfo runtime model or producer exists; generic fallback produces no payload. Loaded-state presence/values, absent/present logs, refresh/update transitions, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 816 evidence-required, 2 exception-requested, and 1701 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskName
 
 Classified `C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskName` as evidence-required/unsafe: the source defines a required string taskName field, but no InitiativeActivityLogEntry runtime model or activity-log producer exists; generic fallback produces no payload. String field presence/values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 815 evidence-required, 2 exception-requested, and 1702 untriaged** (3410 rows).

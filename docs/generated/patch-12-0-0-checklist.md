@@ -411,7 +411,7 @@
 411. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskID` — unsafe
 412. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskName` — unsafe
 413. [best-effort] `added:C_NeighborhoodInitiative.InitiativeActivityLogInfo` — provenance-only
-414. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogInfo.isLoaded` — untriaged
+414. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeActivityLogInfo.isLoaded` — unsafe
 415. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogInfo.neighborhoodGUID` — untriaged
 416. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogInfo.nextUpdateTime` — untriaged
 417. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogInfo.taskActivity` — untriaged
