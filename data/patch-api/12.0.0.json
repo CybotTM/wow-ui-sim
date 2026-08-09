@@ -4075,8 +4075,8 @@
       "tests": [
         "tests/c_adventure_map/quests.rs::get_quest_portrait_info_populates_documented_fields",
         "tests/c_adventure_map/quests.rs::get_quest_portrait_info_returns_nil_model_scene_when_unset",
-        "tests/c_adventure_map/quests.rs::unknown_quest_portrait_returns_no_values",
-        "tests/c_adventure_map/quests.rs::nonnumeric_quest_portrait_returns_no_values"
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_returns_no_values_for_unknown_quest",
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_returns_no_values_for_non_numeric_argument"
       ],
       "assertions": [],
       "commit": "7b47a196e9db8a4ee22d3abfe617ae782ccb0788",
