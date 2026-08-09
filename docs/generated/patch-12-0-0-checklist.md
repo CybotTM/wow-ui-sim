@@ -233,7 +233,7 @@
 233. [evidence-required] `added:C_DeathRecap.GetRecapLink` — unsafe
 234. [evidence-required] `added:C_DeathRecap.HasRecapEvents` — unsafe
 235. [evidence-required] `added:C_DelvesUI.GetLockedTextForCompanion` — unsafe
-236. [untriaged] `added:C_DelvesUI.IsTraitTreeForCompanion` — untriaged
+236. [evidence-required] `added:C_DelvesUI.IsTraitTreeForCompanion` — unsafe
 237. [best-effort] `added:C_DurationUtil.CreateDuration` — behavioral
 238. [evidence-required] `added:C_DurationUtil.GetCurrentTime` — unsafe
 239. [evidence-required] `added:C_EncounterTimeline.AddEditModeEvents` — unsafe
@@ -323,14 +323,14 @@
 323. [evidence-required] `added:C_GameRules.IsPersonalResourceDisplayEnabled` — unsafe
 324. [best-effort] `added:C_HouseExterior.GetCurrentHouseExteriorType` — behavioral
 325. [evidence-required] `added:C_HouseExterior.GetFixtureDebugInfoForGUID` — unsafe
-326. [untriaged] `added:C_HouseExterior.GetHouseExteriorSizeOptions` — untriaged
+326. [best-effort] `added:C_HouseExterior.GetHouseExteriorSizeOptions` — behavioral
 327. [untriaged] `added:C_HouseExterior.GetHouseExteriorTypeOptions` — untriaged
 328. [untriaged] `added:C_HouseExterior.GetHoveredFixtureDebugInfo` — untriaged
 329. [untriaged] `added:C_HouseExterior.GetSelectedFixtureDebugInfo` — untriaged
 330. [untriaged] `added:C_HouseExterior.SetHouseExteriorSize` — untriaged
 331. [untriaged] `added:C_HouseExterior.SetHouseExteriorType` — untriaged
 332. [evidence-required] `added:C_Housing.IsHousingMarketShopEnabled` — unsafe
-333. [untriaged] `added:C_Housing.OnHouseFinderClickPlot` — untriaged
+333. [evidence-required] `added:C_Housing.OnHouseFinderClickPlot` — unsafe
 334. [evidence-required] `added:C_HousingBasicMode.IsFreePlaceEnabled` — unsafe
 335. [untriaged] `added:C_HousingBasicMode.SetFreePlaceEnabled` — untriaged
 336. [untriaged] `added:C_HousingBasicMode.StartPlacingPreviewDecor` — untriaged

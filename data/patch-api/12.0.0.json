@@ -7975,17 +7975,30 @@
       "id": "added:C_DelvesUI.IsTraitTreeForCompanion",
       "symbol": "C_DelvesUI.IsTraitTreeForCompanion",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsTraitTreeForCompanion(traitTreeID: number) returning required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/delves_ui.rs",
+          "summary": "Current C_DelvesUI surface omits IsTraitTreeForCompanion and has no trait-tree ownership/classification model.",
+          "source_hash": "0ffb728d39dd735ad432d082bb8da47ea05c3fbf3fc772cb35f1737da96393ab"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the predicate is absent, and no companion, non-companion, unknown, or invalid trait-tree classification behavior is modeled."
     },
     {
       "id": "added:C_DurationUtil.CreateDuration",
@@ -10609,17 +10622,38 @@
       "id": "added:C_HouseExterior.GetHouseExteriorSizeOptions",
       "symbol": "C_HouseExterior.GetHouseExteriorSizeOptions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetHouseExteriorSizeOptions() returning nullable HouseExteriorSizeOptionsInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary housing state publishes seeded selectedSize 3 with Medium and Large size option records.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/house_exterior.rs",
+          "summary": "Focused test proves callable publication, one table return, selectedSize 3, and exactly two options: Medium/3 and Large/4.",
+          "source_hash": "b3b8936bbf2af5abfa5b9f0a853bc157b5329a32b2cccfb48630abdf0c95440f"
+        }
+      ],
+      "tests": [
+        "tests/house_exterior.rs::house_exterior_size_options_return_seeded_options"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to callable publication and seeded selectedSize/options table values. Exact option structure, enum fidelity, mutation, persistence, refresh, validation, and lifecycle semantics remain unclaimed."
     },
     {
       "id": "added:C_HouseExterior.GetHouseExteriorTypeOptions",
@@ -10740,17 +10774,36 @@
       "id": "added:C_Housing.OnHouseFinderClickPlot",
       "symbol": "C_Housing.OnHouseFinderClickPlot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines OnHouseFinderClickPlot(plotID: number) with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_housing.rs",
+          "summary": "Current Rust C_Housing model does not register OnHouseFinderClickPlot or model selected-plot interaction side effects.",
+          "source_hash": "211566972d653075b177290db9a91d8ee1ef6700320549c5e42b8cec620e80f2"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/housing.rs",
+          "summary": "Current Lua C_Housing surface omits OnHouseFinderClickPlot; generic no-op compatibility does not establish service-side click behavior.",
+          "source_hash": "0144ea0220337c90444ab2ab23c06c6b09d64507d2c5401c9e80580b4667d083"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no explicit callback or selected-plot request/event/state model exists, so numeric argument validation, click side effects, repeated clicks, and unknown plot behavior are unproven."
     },
     {
       "id": "added:C_HousingBasicMode.IsFreePlaceEnabled",
