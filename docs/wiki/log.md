@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify eight C_EventScheduler rows
+
+Classified `C_EventScheduler.CanShowEvents` as best-effort/behavioral only for simulator visibility derivation from explicit override, suppression, event-list state, and request repopulation; retail availability, refresh timing, persistence, full lifecycle, and edge semantics remain unclaimed. Classified `EventDisplayInfo.hideDescription`, `EventDisplayInfo.hideTimeLeft`, `EventDisplayInfo.overrideAtlas`, `EventDisplayInfo.overrideTooltipWidgetSetID`, `OngoingEventInfo.displayInfo`, `ScheduledEventInfo.displayInfo`, and `ScheduledEventInfo.eventID` as evidence-required/unsafe because temporary empty/seeded compatibility payloads do not establish documented typed field values, shape, producers, or lifecycle. Current totals are **869 best-effort, 753 evidence-required, 2 exception-requested, and 1786 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify three C_CooldownViewer gaps
 
 Classified `C_CooldownViewer.CooldownViewerCooldown.category`, `C_CooldownViewer.CooldownViewerCooldown.cooldownID`, and `C_CooldownViewer.GetValidAlertTypes` as `evidence-required`/`unsafe`. The current temporary surface returns nil/empty defaults and has no typed cooldown producer, category/ID records, ordered alert-type arrays, validation, routing, Settings UI behavior, or lifecycle. Current totals are **868 best-effort, 746 evidence-required, 2 exception-requested, and 1794 untriaged** (3410 rows).

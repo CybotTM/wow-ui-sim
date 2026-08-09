@@ -10177,17 +10177,42 @@
       "id": "added:C_EventScheduler.CanShowEvents",
       "symbol": "C_EventScheduler.CanShowEvents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines CanShowEvents() returning required boolean canShow.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Current temporary scheduler state derives visibility from explicit override, suppression, and ongoing/scheduled event lists.",
+          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/event_scheduler.rs",
+          "summary": "Focused scheduler tests cover empty/seeded visibility, explicit true/false overrides, event-list derivation, suppression, and request reseeding.",
+          "source_hash": "c8bc417b2b4d0d4111e70255334a3c1d6d33e3682e19de5792a43890f09e9811"
+        }
+      ],
+      "tests": [
+        "tests/event_scheduler.rs::event_scheduler_defaults_to_hidden_without_events",
+        "tests/event_scheduler.rs::event_scheduler_starts_with_seeded_events_and_default_visibility",
+        "tests/event_scheduler.rs::event_scheduler_override_flag_controls_visibility",
+        "tests/event_scheduler.rs::event_scheduler_derives_visibility_from_event_lists",
+        "tests/event_scheduler.rs::event_scheduler_request_events_repopulates_seeded_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7690fa2cee89bf2e2b5a7f0f9a2e694b73b53a4b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers tested simulator visibility derivation from explicit overrides, suppression, and event-list state. Retail event availability, refresh timing, persistence, full lifecycle, and edge semantics remain unclaimed."
     },
     {
       "id": "added:C_EventScheduler.EventDisplayInfo",
@@ -10217,113 +10242,204 @@
       "id": "added:C_EventScheduler.EventDisplayInfo.hideDescription",
       "symbol": "C_EventScheduler.EventDisplayInfo.hideDescription",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_EventScheduler.EventDisplayInfo.hideDescription occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.EventDisplayInfo.hideDescription authoritative semantics.",
+          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: empty displayInfo tables do not publish required boolean hideDescription/default false or establish description visibility, producer, or consumer semantics."
     },
     {
       "id": "added:C_EventScheduler.EventDisplayInfo.hideTimeLeft",
       "symbol": "C_EventScheduler.EventDisplayInfo.hideTimeLeft",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_EventScheduler.EventDisplayInfo.hideTimeLeft occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.EventDisplayInfo.hideTimeLeft authoritative semantics.",
+          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: empty displayInfo tables do not publish required boolean hideTimeLeft/default false or establish time-left visibility, producer, or consumer semantics."
     },
     {
       "id": "added:C_EventScheduler.EventDisplayInfo.overrideAtlas",
       "symbol": "C_EventScheduler.EventDisplayInfo.overrideAtlas",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_EventScheduler.EventDisplayInfo.overrideAtlas occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.EventDisplayInfo.overrideAtlas authoritative semantics.",
+          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: absent nullable overrideAtlas does not establish populated atlas values, producer behavior, validation, or UI override/fallback semantics."
     },
     {
       "id": "added:C_EventScheduler.EventDisplayInfo.overrideTooltipWidgetSetID",
       "symbol": "C_EventScheduler.EventDisplayInfo.overrideTooltipWidgetSetID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_EventScheduler.EventDisplayInfo.overrideTooltipWidgetSetID occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.EventDisplayInfo.overrideTooltipWidgetSetID authoritative semantics.",
+          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: absent nullable overrideTooltipWidgetSetID does not establish numeric values, producer behavior, validation, or tooltip override/fallback semantics."
     },
     {
       "id": "added:C_EventScheduler.OngoingEventInfo.displayInfo",
       "symbol": "C_EventScheduler.OngoingEventInfo.displayInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_EventScheduler.OngoingEventInfo.displayInfo occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.OngoingEventInfo.displayInfo authoritative semantics.",
+          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: empty-table publication does not establish required typed EventDisplayInfo shape, documented fields, producer behavior, refresh lifecycle, or consumers."
     },
     {
       "id": "added:C_EventScheduler.ScheduledEventInfo.displayInfo",
       "symbol": "C_EventScheduler.ScheduledEventInfo.displayInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_EventScheduler.ScheduledEventInfo.displayInfo occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.ScheduledEventInfo.displayInfo authoritative semantics.",
+          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: empty-table publication does not establish required typed EventDisplayInfo shape, documented fields, producer behavior, refresh lifecycle, or consumers."
     },
     {
       "id": "added:C_EventScheduler.ScheduledEventInfo.eventID",
       "symbol": "C_EventScheduler.ScheduledEventInfo.eventID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_EventScheduler.ScheduledEventInfo.eventID occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.ScheduledEventInfo.eventID authoritative semantics.",
+          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: temporary seeded numeric event IDs lack focused field/type/value/reset proof and do not establish authoritative scheduler identity or lifecycle semantics."
     },
     {
       "id": "added:C_EventUtils.IsCallbackEvent",
