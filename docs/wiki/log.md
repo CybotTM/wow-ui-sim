@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify LFG general playstyle field
+
+Classified `C_LFGList.AdvancedFilterOptions.generalPlaystyle1` as best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean field with exact default false from modeled `LfgAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves the default. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed. Current totals are **887 best-effort, 790 evidence-required, 2 exception-requested, and 1731 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify two C_InstanceEncounter rows
 
 Classified `C_InstanceEncounter.IsEncounterInProgress` as best-effort/behavioral: its state-backed boolean query shares `world.encounter_in_progress` with the legacy global, and a focused test proves false by default and true when enabled; encounter producers, events, and lifecycle remain unclaimed. Classified `C_InstanceEncounter.IsEncounterLimitingResurrections` as evidence-required/unsafe because no resurrection-limiting state or explicit method is modeled, and the generic nil fallback does not satisfy the required boolean contract. Current totals are **886 best-effort, 787 evidence-required, 2 exception-requested, and 1735 untriaged** (3410 rows).
