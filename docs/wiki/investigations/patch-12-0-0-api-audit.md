@@ -4,9 +4,11 @@
 
 ## Content
 
-Current manifest totals are **891 best-effort, 867 evidence-required, 2 exception-requested, and 1650 untriaged rows** (3410 total).
+Current manifest totals are **891 best-effort, 890 evidence-required, 2 exception-requested, and 1627 untriaged rows** (3410 total).
 
 `C_Ping.IsPingSystemEnabled` is evidence-required/unsafe: the source requires a boolean enabled result, but temporary ping defaults have no ping availability state or explicit method; generic fallback does not model it. Enabled/disabled states, context changes, transitions, refresh, events, and lifecycle remain unproven.
+
+`C_PvP.BattlegroundInfo` fields plus `AreTrainingGroundsEnabled`, `CanPlayerUseTrainingGroundsUI`, `GetBattlegroundInfo`, `GetRandomTrainingGroundRewards`, `GetTrainingGrounds`, `HasMatchStarted`, `HasRandomTrainingGroundWinToday`, `JoinRandomTrainingGround`, and `JoinTrainingGround` are evidence-required/unsafe: the simulator only has legacy positional battleground probes/state, not C_PvP.BattlegroundInfo or Training Grounds availability/catalog/rewards/queue/match/daily-win models. Required/nilable fields, structure-return contract, eligibility/reasons, lists/rewards, match/win transitions, join validation/events/persistence/lifecycle remain unproven.
 
 `C_NeighborhoodInitiative.PlayerHasInitiativeAccess`, `C_NeighborhoodInitiative.PlayerMeetsRequiredLevel`, `C_NeighborhoodInitiative.RemoveTrackedInitiativeTask`, `C_NeighborhoodInitiative.RequestInitiativeActivityLog`, `C_NeighborhoodInitiative.RequestNeighborhoodInitiativeInfo`, `C_NeighborhoodInitiative.SetActiveNeighborhood`, and `C_NeighborhoodInitiative.SetViewingNeighborhood` are evidence-required/unsafe: access/level queries lack eligibility state and fallback nil; tracked-task removal is a no-op; request and active/viewing setters lack request/producers/context state. Boolean eligibility, valid/invalid IDs/GUIDs, mutations, request timing/results/events, transitions, refresh, persistence, and lifecycle remain unproven.
 

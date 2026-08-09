@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_PvP BattlegroundInfo and Training Grounds APIs
+
+Classified all 23 added C_PvP rows as evidence-required/unsafe: the simulator only has legacy positional battleground probes/state, not C_PvP.BattlegroundInfo or Training Grounds availability/catalog/rewards/queue/match/daily-win models. Required/nilable fields, structure-return contract, eligibility/reasons, lists/rewards, match/win transitions, join validation/events/persistence/lifecycle remain unproven. Current totals are **891 best-effort, 890 evidence-required, 2 exception-requested, and 1627 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_Ping.IsPingSystemEnabled
 
 Classified `C_Ping.IsPingSystemEnabled` as evidence-required/unsafe: the source requires a boolean enabled result, but temporary ping defaults have no ping availability state or explicit method; generic fallback does not model it. Enabled/disabled states, context changes, transitions, refresh, events, and lifecycle remain unproven. Current totals are **891 best-effort, 867 evidence-required, 2 exception-requested, and 1650 untriaged** (3410 rows).

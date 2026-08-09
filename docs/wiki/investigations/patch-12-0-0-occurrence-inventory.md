@@ -536,30 +536,30 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_NeighborhoodInitiative.SetActiveNeighborhood` | evidence-required | api | added | Evidence required: no active-neighborhood state model exists. GUID validation, valid/invalid and unavailable neighborhoods, state transitions, refresh, events, persistence, and lifecycle remain unproven. |
 | `C_NeighborhoodInitiative.SetViewingNeighborhood` | evidence-required | api | added | Evidence required: no viewing-neighborhood state model exists. GUID validation, valid/invalid and unavailable neighborhoods, view transitions, refresh, events, persistence, and lifecycle remain unproven. |
 | `C_Ping.IsPingSystemEnabled` | evidence-required | api | added | Evidence required: no ping-system availability state or explicit boolean implementation exists. Enabled/disabled states, player and context changes, transitions, refresh, events, and lifecycle remain unproven. |
-| `C_PvP.AreTrainingGroundsEnabled` | untriaged | api | added | api added in 12.0.0. |
+| `C_PvP.AreTrainingGroundsEnabled` | evidence-required | api | added | Evidence required: no Training Grounds availability state exists. Enabled/disabled states, context transitions, refresh, events, and lifecycle remain unproven. |
 | `C_PvP.BattlegroundInfo` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
-| `C_PvP.BattlegroundInfo.battlegroundID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.canEnter` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.gameType` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.icon` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.isHoliday` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.isRandom` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.isTrainingGround` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.lfgDungeonID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.longDescription` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.mapDescription` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.mapID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.maxPlayers` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.name` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.BattlegroundInfo.shortDescription` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_PvP.CanPlayerUseTrainingGroundsUI` | untriaged | api | added | api added in 12.0.0. |
-| `C_PvP.GetBattlegroundInfo` | untriaged | api | added | api added in 12.0.0. |
-| `C_PvP.GetRandomTrainingGroundRewards` | untriaged | api | added | api added in 12.0.0. |
-| `C_PvP.GetTrainingGrounds` | untriaged | api | added | api added in 12.0.0. |
-| `C_PvP.HasMatchStarted` | untriaged | api | added | api added in 12.0.0. |
-| `C_PvP.HasRandomTrainingGroundWinToday` | untriaged | api | added | api added in 12.0.0. |
-| `C_PvP.JoinRandomTrainingGround` | untriaged | api | added | api added in 12.0.0. |
-| `C_PvP.JoinTrainingGround` | untriaged | api | added | api added in 12.0.0. |
+| `C_PvP.BattlegroundInfo.battlegroundID` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Battleground identifier nil/populated behavior and values, variants, ordering, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.canEnter` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Entry-eligibility values and rejection conditions, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.gameType` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Game-type values, localization/format, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.icon` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Icon nil/populated behavior and file identifiers, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.isHoliday` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Holiday-state values and calendar transitions, variants, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.isRandom` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Random-battleground classification, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.isTrainingGround` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Training-ground classification, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.lfgDungeonID` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. LFG dungeon identifier nil/populated behavior and values, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.longDescription` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Long-description values, localization, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.mapDescription` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Map-description values, localization, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.mapID` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Map identifier nil/populated behavior and values, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.maxPlayers` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Maximum-player values and mode-specific limits, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.name` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Battleground names, localization, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.BattlegroundInfo.shortDescription` | evidence-required | structure-field | added | Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Short-description values, localization, variants, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.CanPlayerUseTrainingGroundsUI` | evidence-required | api | added | Evidence required: no Training Grounds eligibility model or failure-reason producer exists. Success and rejection paths, exact reasons, context transitions, refresh, events, and lifecycle remain unproven. |
+| `C_PvP.GetBattlegroundInfo` | evidence-required | api | added | Evidence required: only the legacy global tuple API exists; no C_PvP structure-return producer exists. Valid/invalid indexes, nil behavior, field values, variants, ordering, updates, refresh, and lifecycle remain unproven. |
+| `C_PvP.GetRandomTrainingGroundRewards` | evidence-required | api | added | Evidence required: no Training Grounds reward state or producer exists. Empty/populated rewards, nested structures, role bonuses, values, transitions, refresh, and lifecycle remain unproven. |
+| `C_PvP.GetTrainingGrounds` | evidence-required | api | added | Evidence required: no ordered Training Grounds catalog or BattlegroundInfo producer exists. Empty/populated lists, ordering, field values, availability changes, refresh, and lifecycle remain unproven. |
+| `C_PvP.HasMatchStarted` | evidence-required | api | added | Evidence required: no Training Grounds match-session state exists. Queue, loading, active, finished transitions, refresh, events, and lifecycle remain unproven. |
+| `C_PvP.HasRandomTrainingGroundWinToday` | evidence-required | api | added | Evidence required: no daily Training Grounds win state or reset model exists. Before/after-win behavior, account/day rollover, refresh, events, persistence, and lifecycle remain unproven. |
+| `C_PvP.JoinRandomTrainingGround` | evidence-required | api | added | Evidence required: no random Training Grounds queue/join producer exists. Eligibility and rejection paths, duplicate joins, queue transitions, events, persistence, and lifecycle remain unproven. |
+| `C_PvP.JoinTrainingGround` | evidence-required | api | added | Evidence required: no Training Grounds ID catalog or queue/join producer exists. Valid/unknown IDs, eligibility failures, duplicate joins, queue transitions, events, persistence, and lifecycle remain unproven. |
 | `C_QuestInfoSystem.GetQuestLogRewardFavor` | untriaged | api | added | api added in 12.0.0. |
 | `C_QuestLog.GetActivePreyQuest` | untriaged | api | added | api added in 12.0.0. |
 | `C_Reputation.IsFactionParagonForCurrentPlayer` | untriaged | api | added | api added in 12.0.0. |

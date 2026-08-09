@@ -15498,17 +15498,36 @@
       "id": "added:C_PvP.AreTrainingGroundsEnabled",
       "symbol": "C_PvP.AreTrainingGroundsEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines AreTrainingGroundsEnabled as a no-argument API returning a required boolean areTrainingGroundsEnabled value.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/character_world.rs",
+          "summary": "Current character-world state contains legacy PvP data but no Training Grounds availability, catalog, rewards, queue, match, or daily-win model.",
+          "source_hash": "2a58133defe25daae76c7fa75d423622b7664b53f3916d7da808f6e0e89e29ab"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP APIs expose legacy battleground probes only and no modeled Training Grounds behavior for this method.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no Training Grounds availability state exists. Enabled/disabled states, context transitions, refresh, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo",
@@ -15538,353 +15557,771 @@
       "id": "added:C_PvP.BattlegroundInfo.battlegroundID",
       "symbol": "C_PvP.BattlegroundInfo.battlegroundID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.battlegroundID as a nilable numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.battlegroundID field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.battlegroundID.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Battleground identifier nil/populated behavior and values, variants, ordering, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.canEnter",
       "symbol": "C_PvP.BattlegroundInfo.canEnter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.canEnter as a required boolean structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.canEnter field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.canEnter.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Entry-eligibility values and rejection conditions, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.gameType",
       "symbol": "C_PvP.BattlegroundInfo.gameType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.gameType as a required string structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.gameType field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.gameType.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Game-type values, localization/format, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.icon",
       "symbol": "C_PvP.BattlegroundInfo.icon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.icon as a nilable numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.icon field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.icon.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Icon nil/populated behavior and file identifiers, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.isHoliday",
       "symbol": "C_PvP.BattlegroundInfo.isHoliday",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.isHoliday as a required boolean structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.isHoliday field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.isHoliday.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Holiday-state values and calendar transitions, variants, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.isRandom",
       "symbol": "C_PvP.BattlegroundInfo.isRandom",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.isRandom as a required boolean structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.isRandom field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.isRandom.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Random-battleground classification, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.isTrainingGround",
       "symbol": "C_PvP.BattlegroundInfo.isTrainingGround",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.isTrainingGround as a required boolean structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.isTrainingGround field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.isTrainingGround.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Training-ground classification, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.lfgDungeonID",
       "symbol": "C_PvP.BattlegroundInfo.lfgDungeonID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.lfgDungeonID as a nilable numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.lfgDungeonID field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.lfgDungeonID.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. LFG dungeon identifier nil/populated behavior and values, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.longDescription",
       "symbol": "C_PvP.BattlegroundInfo.longDescription",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.longDescription as a required string structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.longDescription field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.longDescription.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Long-description values, localization, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.mapDescription",
       "symbol": "C_PvP.BattlegroundInfo.mapDescription",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.mapDescription as a required string structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.mapDescription field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.mapDescription.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Map-description values, localization, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.mapID",
       "symbol": "C_PvP.BattlegroundInfo.mapID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.mapID as a nilable numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.mapID field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.mapID.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Map identifier nil/populated behavior and values, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.maxPlayers",
       "symbol": "C_PvP.BattlegroundInfo.maxPlayers",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.maxPlayers as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.maxPlayers field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.maxPlayers.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Maximum-player values and mode-specific limits, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.name",
       "symbol": "C_PvP.BattlegroundInfo.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.name as a required string structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.name field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.name.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Battleground names, localization, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.BattlegroundInfo.shortDescription",
       "symbol": "C_PvP.BattlegroundInfo.shortDescription",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines BattlegroundInfo.shortDescription as a required string structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP implementation publishes only legacy positional battleground tuples and no C_PvP.BattlegroundInfo.shortDescription field.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused PvP coverage exercises legacy tuple behavior only and does not establish BattlegroundInfo.shortDescription.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_PvP.BattlegroundInfo runtime structure or C_PvP producer exists. Short-description values, localization, variants, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.CanPlayerUseTrainingGroundsUI",
       "symbol": "C_PvP.CanPlayerUseTrainingGroundsUI",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines CanPlayerUseTrainingGroundsUI as a no-argument API returning a required boolean canUseTrainingGroundsUI and required string failureReason.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/character_world.rs",
+          "summary": "Current character-world state contains legacy PvP data but no Training Grounds availability, catalog, rewards, queue, match, or daily-win model.",
+          "source_hash": "2a58133defe25daae76c7fa75d423622b7664b53f3916d7da808f6e0e89e29ab"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP APIs expose legacy battleground probes only and no modeled Training Grounds behavior for this method.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no Training Grounds eligibility model or failure-reason producer exists. Success and rejection paths, exact reasons, context transitions, refresh, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.GetBattlegroundInfo",
       "symbol": "C_PvP.GetBattlegroundInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetBattlegroundInfo as a numeric battlegroundIndex input returning a nilable BattlegroundInfo structure.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current implementation exposes only the legacy global GetBattlegroundInfo positional tuple, not C_PvP.GetBattlegroundInfo.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/pvp_info.rs",
+          "summary": "Focused tests verify only the legacy tuple and invalid-index behavior, not the C_PvP structure contract.",
+          "source_hash": "432c55a983a79855d7240973a50f97fa0b4f2ebc89bf042642826d868571773d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: only the legacy global tuple API exists; no C_PvP structure-return producer exists. Valid/invalid indexes, nil behavior, field values, variants, ordering, updates, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.GetRandomTrainingGroundRewards",
       "symbol": "C_PvP.GetRandomTrainingGroundRewards",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetRandomTrainingGroundRewards as a no-argument API returning honor, experience, nilable item/currency reward arrays, and a nilable role-shortage reward.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/character_world.rs",
+          "summary": "Current character-world state contains legacy PvP data but no Training Grounds availability, catalog, rewards, queue, match, or daily-win model.",
+          "source_hash": "2a58133defe25daae76c7fa75d423622b7664b53f3916d7da808f6e0e89e29ab"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP APIs expose legacy battleground probes only and no modeled Training Grounds behavior for this method.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no Training Grounds reward state or producer exists. Empty/populated rewards, nested structures, role bonuses, values, transitions, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.GetTrainingGrounds",
       "symbol": "C_PvP.GetTrainingGrounds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetTrainingGrounds as a no-argument API returning an array of BattlegroundInfo structures.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/character_world.rs",
+          "summary": "Current character-world state contains legacy PvP data but no Training Grounds availability, catalog, rewards, queue, match, or daily-win model.",
+          "source_hash": "2a58133defe25daae76c7fa75d423622b7664b53f3916d7da808f6e0e89e29ab"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP APIs expose legacy battleground probes only and no modeled Training Grounds behavior for this method.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no ordered Training Grounds catalog or BattlegroundInfo producer exists. Empty/populated lists, ordering, field values, availability changes, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.HasMatchStarted",
       "symbol": "C_PvP.HasMatchStarted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HasMatchStarted as a no-argument API returning a required boolean hasStarted value.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/character_world.rs",
+          "summary": "Current character-world state contains legacy PvP data but no Training Grounds availability, catalog, rewards, queue, match, or daily-win model.",
+          "source_hash": "2a58133defe25daae76c7fa75d423622b7664b53f3916d7da808f6e0e89e29ab"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP APIs expose legacy battleground probes only and no modeled Training Grounds behavior for this method.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no Training Grounds match-session state exists. Queue, loading, active, finished transitions, refresh, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.HasRandomTrainingGroundWinToday",
       "symbol": "C_PvP.HasRandomTrainingGroundWinToday",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HasRandomTrainingGroundWinToday as a no-argument API returning a required boolean daily-win value.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/character_world.rs",
+          "summary": "Current character-world state contains legacy PvP data but no Training Grounds availability, catalog, rewards, queue, match, or daily-win model.",
+          "source_hash": "2a58133defe25daae76c7fa75d423622b7664b53f3916d7da808f6e0e89e29ab"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP APIs expose legacy battleground probes only and no modeled Training Grounds behavior for this method.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no daily Training Grounds win state or reset model exists. Before/after-win behavior, account/day rollover, refresh, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.JoinRandomTrainingGround",
       "symbol": "C_PvP.JoinRandomTrainingGround",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines JoinRandomTrainingGround as a no-argument queue API with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/character_world.rs",
+          "summary": "Current character-world state contains legacy PvP data but no Training Grounds availability, catalog, rewards, queue, match, or daily-win model.",
+          "source_hash": "2a58133defe25daae76c7fa75d423622b7664b53f3916d7da808f6e0e89e29ab"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP APIs expose legacy battleground probes only and no modeled Training Grounds behavior for this method.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no random Training Grounds queue/join producer exists. Eligibility and rejection paths, duplicate joins, queue transitions, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.JoinTrainingGround",
       "symbol": "C_PvP.JoinTrainingGround",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines JoinTrainingGround as a numeric trainingGroundID input and no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/character_world.rs",
+          "summary": "Current character-world state contains legacy PvP data but no Training Grounds availability, catalog, rewards, queue, match, or daily-win model.",
+          "source_hash": "2a58133defe25daae76c7fa75d423622b7664b53f3916d7da808f6e0e89e29ab"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/pvp_probes.rs",
+          "summary": "Current PvP APIs expose legacy battleground probes only and no modeled Training Grounds behavior for this method.",
+          "source_hash": "55d28c890564e219f479958e81f4bc8f6db82af1ee40fec2e290960abb2297d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no Training Grounds ID catalog or queue/join producer exists. Valid/unknown IDs, eligibility failures, duplicate joins, queue transitions, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_QuestInfoSystem.GetQuestLogRewardFavor",
