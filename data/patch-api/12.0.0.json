@@ -11782,97 +11782,207 @@
       "id": "added:C_HousingCustomizeMode.IsHouseExteriorDoorHovered",
       "symbol": "C_HousingCustomizeMode.IsHouseExteriorDoorHovered",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsHouseExteriorDoorHovered() returning required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current C_HousingCustomizeMode surface omits this method and has no exterior-door hover/hit-test state.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the method and exterior-door hover state are absent, so hovered/non-hovered results, hit testing, transitions, validation, refresh, and lifecycle are unmodeled."
     },
     {
       "id": "added:C_HousingDecor.EnterPreviewState",
       "symbol": "C_HousingDecor.EnterPreviewState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines EnterPreviewState() with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary decor state sets its preview boolean true, consumed by IsPreviewState and GetNumPreviewDecor.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_decor.rs",
+          "summary": "Focused preview-state test proves entering changes IsPreviewState to true and preview count to 1.",
+          "source_hash": "4b590c98d23f9e679b0d7fd2ee03ff1047c90fec5b8d80c71ece5e01248df877"
+        }
+      ],
+      "tests": [
+        "tests/housing_decor.rs::housing_decor_preview_state_round_trips"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers entering the temporary preview flag and its getter/count effects. Placement, selection, cleanup, events, persistence, refresh, and exact lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingDecor.ExitPreviewState",
       "symbol": "C_HousingDecor.ExitPreviewState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines ExitPreviewState() with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary decor state clears its preview boolean, consumed by IsPreviewState and GetNumPreviewDecor.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_decor.rs",
+          "summary": "Focused preview-state test proves exiting changes IsPreviewState to false and preview count to 0.",
+          "source_hash": "4b590c98d23f9e679b0d7fd2ee03ff1047c90fec5b8d80c71ece5e01248df877"
+        }
+      ],
+      "tests": [
+        "tests/housing_decor.rs::housing_decor_preview_state_round_trips"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers exiting the temporary preview flag and its getter/count effects. Preview cleanup, cancellation, events, persistence, refresh, and exact lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingDecor.GetNumPreviewDecor",
       "symbol": "C_HousingDecor.GetNumPreviewDecor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetNumPreviewDecor() returning required number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary implementation derives numeric 0/1 from a preview boolean rather than an actual decor collection.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_decor.rs",
+          "summary": "Focused preview-state test proves count 0 initially, 1 after enter, and 0 after exit.",
+          "source_hash": "4b590c98d23f9e679b0d7fd2ee03ff1047c90fec5b8d80c71ece5e01248df877"
+        }
+      ],
+      "tests": [
+        "tests/housing_decor.rs::housing_decor_preview_state_round_trips"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers temporary preview-state-derived numeric 0/1 results. Actual decor cardinality, multiple previews, producers, validation, persistence, refresh, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingDecor.IsModeDisabledForPreviewState",
       "symbol": "C_HousingDecor.IsModeDisabledForPreviewState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsModeDisabledForPreviewState(mode: HouseEditorMode) returning required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary implementation ignores mode and always returns false without mode-availability state.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: constant false does not establish mode-dependent availability, argument validation, preview transitions, reset/isolation, refresh, or lifecycle."
     },
     {
       "id": "added:C_HousingDecor.IsPreviewState",
       "symbol": "C_HousingDecor.IsPreviewState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsPreviewState() returning required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary implementation returns the preview boolean changed by EnterPreviewState and ExitPreviewState.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_decor.rs",
+          "summary": "Focused preview-state test proves false initially, true after enter, and false after exit.",
+          "source_hash": "4b590c98d23f9e679b0d7fd2ee03ff1047c90fec5b8d80c71ece5e01248df877"
+        }
+      ],
+      "tests": [
+        "tests/housing_decor.rs::housing_decor_preview_state_round_trips"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers temporary preview-state boolean transitions. Retail side effects, integration, persistence, refresh, reset beyond test isolation, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_InstanceEncounter.IsEncounterInProgress",

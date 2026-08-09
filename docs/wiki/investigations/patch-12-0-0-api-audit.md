@@ -4,11 +4,13 @@
 
 ## Content
 
-Current manifest totals are **881 best-effort, 784 evidence-required, 2 exception-requested, and 1743 untriaged rows** (3410 total).
+Current manifest totals are **885 best-effort, 786 evidence-required, 2 exception-requested, and 1737 untriaged rows** (3410 total).
 
 The bounded eleven-field `HousingPreviewItemData` slice classifies `bundleCatalogShopProductID`, `decorGUID`, `decorID`, `icon`, `id`, `isBundleChild`, `isBundleParent`, `name`, `price`, `productID`, and `salePrice` as evidence-required/unsafe: no typed `HousingPreviewItemData` producer exists; related catalog/decor/bundle fixture fields do not establish these specific fields, nullability, identities, bundle relationships, pricing, validation, event/preview-list production, refresh, persistence, or lifecycle. No approval or exception applies.
 
 The bounded four-row preview-cart/refund slice classifies `C_HousingCatalog.IsPreviewCartItemShown`, `C_HousingCatalog.PromotePreviewDecor`, and `C_HousingCatalog.SetPreviewCartItemShown` as best-effort/behavioral only for focused in-memory unknown=false, boolean setter true/false round-trip, promotion returning true, and shown-state mutation. No GUID/decor validation, failure/repeat behavior, events/refresh, persistence, or lifecycle claims are made. `C_HousingCatalog.RequestHousingMarketRefundInfo` is evidence-required/unsafe because its no-op has no refund request/list state, population, repeated-request behavior, or `HOUSING_REFUND_LIST_UPDATED` lifecycle.
+
+The bounded six-row housing preview-state slice classifies `C_HousingDecor.EnterPreviewState`, `C_HousingDecor.ExitPreviewState`, `C_HousingDecor.GetNumPreviewDecor`, and `C_HousingDecor.IsPreviewState` as best-effort/behavioral only for focused temporary false/0 → true/1 → false/0 transitions; actual decor cardinality, placement/cleanup, events, persistence, refresh, and retail lifecycle remain unclaimed. `C_HousingCustomizeMode.IsHouseExteriorDoorHovered` is evidence-required/unsafe because the method and door-hover state are absent. `C_HousingDecor.IsModeDisabledForPreviewState` is evidence-required/unsafe because constant false ignores mode and lacks mode-aware state.
 
 The bounded three-field `HousingCatalogEntryInfo` slice classifies `isUniqueTrophy` and `itemID` as best-effort/behavioral only for focused seeded entry 1001 proof of boolean false and numeric 1001; exact trophy classification, nullable/missing item IDs, other entries, authoritative item data, validation, mutation, persistence, refresh, and lifecycle remain unclaimed. `dyeIDs` is evidence-required/unsafe because the required numeric-array field is absent and no dye-ID state exists.
 
