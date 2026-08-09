@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **892 best-effort, 892 evidence-required, 2 exception-requested, and 1624 untriaged rows** (3410 total).
+Current manifest totals are **892 best-effort, 895 evidence-required, 2 exception-requested, and 1621 untriaged rows** (3410 total).
+
+`C_RestrictedActions.CheckAllowProtectedFunctions`, `C_RestrictedActions.GetAddOnRestrictionState`, and `C_RestrictedActions.IsAddOnRestrictionActive` are evidence-required/unsafe: constant-true and constant-Inactive defaults are compatibility scaffolding, the active query is absent, and no per-object protected-function policy or per-type restriction state machine exists. Object and silent semantics, enum types, transitions, taint/restriction enforcement, refresh, events, persistence, and lifecycle remain unproven.
 
 `C_Reputation.IsFactionParagonForCurrentPlayer` is best-effort/behavioral: explicit faction-paragon state and focused tests prove registered eligible factions return true, while level-gated and missing factions return false. Live service population, refresh, events, persistence, malformed inputs, and lifecycle remain outside the claim.
 

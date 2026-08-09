@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify restricted-action policy APIs
+
+Classified `C_RestrictedActions.CheckAllowProtectedFunctions`, `C_RestrictedActions.GetAddOnRestrictionState`, and `C_RestrictedActions.IsAddOnRestrictionActive` as evidence-required/unsafe: constant-true and constant-Inactive defaults are compatibility scaffolding, the active query is absent, and no per-object protected-function policy or per-type restriction state machine exists. Object and silent semantics, enum types, transitions, taint/restriction enforcement, refresh, events, persistence, and lifecycle remain unproven. Current totals are **892 best-effort, 895 evidence-required, 2 exception-requested, and 1621 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify current-player faction paragon eligibility
 
 Classified `C_Reputation.IsFactionParagonForCurrentPlayer` as best-effort/behavioral: explicit faction-paragon state and focused tests prove registered eligible factions return true, while level-gated and missing factions return false. Live service population, refresh, events, persistence, malformed inputs, and lifecycle remain outside the claim. Current totals are **892 best-effort, 892 evidence-required, 2 exception-requested, and 1624 untriaged** (3410 rows).

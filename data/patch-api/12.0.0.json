@@ -16441,49 +16441,106 @@
       "id": "added:C_RestrictedActions.CheckAllowProtectedFunctions",
       "symbol": "C_RestrictedActions.CheckAllowProtectedFunctions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines CheckAllowProtectedFunctions(object: UIObject, silent: boolean = false) with a required boolean protectedFunctionsAllowed return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/restricted_actions_defaults.rs",
+          "summary": "Current temporary fallback ignores object and silent inputs and always returns true without restriction policy state.",
+          "source_hash": "c42575519f2887b464fdb2c893071347cce1ffcc7f9ceaef6462509d04bd0260"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/c_restricted_actions_probes.rs",
+          "summary": "Focused coverage proves only the permissive constant-true fallback and not object, taint, denial, or silent semantics.",
+          "source_hash": "e70278de56018d6beaeaf0e6fad5d6eb126ce23b0d600524278a75a4645a961e"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no protected-function restriction policy or per-object state exists; constant true is compatibility scaffolding only. Allowed/denied objects, tainted or insecure callers, silent behavior, transitions, refresh, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_RestrictedActions.GetAddOnRestrictionState",
       "symbol": "C_RestrictedActions.GetAddOnRestrictionState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetAddOnRestrictionState(AddOnRestrictionType) returning AddOnRestrictionState.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/restricted_actions_defaults.rs",
+          "summary": "Current temporary fallback ignores restriction type and always returns Inactive (0) without a state machine.",
+          "source_hash": "c42575519f2887b464fdb2c893071347cce1ffcc7f9ceaef6462509d04bd0260"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/c_restricted_actions_probes.rs",
+          "summary": "Focused coverage proves only the Combat-to-Inactive default and not other types or transitions.",
+          "source_hash": "e70278de56018d6beaeaf0e6fad5d6eb126ce23b0d600524278a75a4645a961e"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no per-type add-on restriction state machine exists; constant Inactive is compatibility scaffolding only. All restriction types, activating/active transitions, refresh, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_RestrictedActions.IsAddOnRestrictionActive",
       "symbol": "C_RestrictedActions.IsAddOnRestrictionActive",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsAddOnRestrictionActive(AddOnRestrictionType) with a required boolean active return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/restricted_actions_defaults.rs",
+          "summary": "Current temporary defaults do not implement IsAddOnRestrictionActive or per-type restriction state.",
+          "source_hash": "c42575519f2887b464fdb2c893071347cce1ffcc7f9ceaef6462509d04bd0260"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback returns nil instead of deriving a boolean from modeled restriction state.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no per-type add-on restriction state or explicit boolean implementation exists. Inactive/activating/active derivation, all restriction types, transitions, refresh, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_Secrets.GetPowerTypeSecrecy",

@@ -495,9 +495,9 @@
 495. [evidence-required] `added:C_QuestInfoSystem.GetQuestLogRewardFavor` — unsafe
 496. [evidence-required] `added:C_QuestLog.GetActivePreyQuest` — unsafe
 497. [best-effort] `added:C_Reputation.IsFactionParagonForCurrentPlayer` — behavioral
-498. [untriaged] `added:C_RestrictedActions.CheckAllowProtectedFunctions` — untriaged
-499. [untriaged] `added:C_RestrictedActions.GetAddOnRestrictionState` — untriaged
-500. [untriaged] `added:C_RestrictedActions.IsAddOnRestrictionActive` — untriaged
+498. [evidence-required] `added:C_RestrictedActions.CheckAllowProtectedFunctions` — unsafe
+499. [evidence-required] `added:C_RestrictedActions.GetAddOnRestrictionState` — unsafe
+500. [evidence-required] `added:C_RestrictedActions.IsAddOnRestrictionActive` — unsafe
 501. [evidence-required] `added:C_Secrets.GetPowerTypeSecrecy` — unsafe
 502. [evidence-required] `added:C_Secrets.GetSpellAuraSecrecy` — unsafe
 503. [evidence-required] `added:C_Secrets.GetSpellCastSecrecy` — unsafe
