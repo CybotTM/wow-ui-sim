@@ -373,7 +373,7 @@
 373. [evidence-required] `added:C_Item.IsItemBindToAccount` — unsafe
 374. [best-effort] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle1` — behavioral
 375. [best-effort] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle2` — behavioral
-376. [untriaged] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle3` — untriaged
+376. [best-effort] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle3` — behavioral
 377. [untriaged] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle4` — untriaged
 378. [untriaged] `added:C_LFGList.LfgEntryData.generalPlaystyle` — untriaged
 379. [untriaged] `added:C_LFGList.LfgListingCreateData.generalPlaystyle` — untriaged
