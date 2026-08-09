@@ -561,7 +561,7 @@
 561. [evidence-required] `added:C_SpellDiminish.SpellDiminishTrackerInfo.isImmune` — unsafe
 562. [evidence-required] `added:C_SpellDiminish.SpellDiminishTrackerInfo.showCountdown` — unsafe
 563. [evidence-required] `added:C_SpellDiminish.SpellDiminishTrackerInfo.startTime` — unsafe
-564. [untriaged] `added:C_StableInfo.IsBonusPetSlotAvailable` — untriaged
+564. [evidence-required] `added:C_StableInfo.IsBonusPetSlotAvailable` — unsafe
 565. [evidence-required] `added:C_StringUtil.EscapeLuaFormatString` — unsafe
 566. [evidence-required] `added:C_StringUtil.EscapeLuaPatterns` — unsafe
 567. [best-effort] `added:C_StringUtil.EscapeQuotedCodes` — behavioral

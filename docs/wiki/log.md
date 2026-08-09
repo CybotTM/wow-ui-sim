@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_StableInfo.IsBonusPetSlotAvailable
+
+Classified `C_StableInfo.IsBonusPetSlotAvailable` as evidence-required/unsafe: implementation has `IsAtPetStable` only; no Beast Master Animal Companion or active-combat-configuration availability model exists. Boolean results, configuration transitions, stable UI refresh, events, persistence, and lifecycle remain unresolved. Current totals are **892 best-effort, 910 evidence-required, 2 exception-requested, and 1606 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_SpellBook lookup and duration APIs
 
 Classified `C_SpellBook.FindBaseSpellByID`, `FindFlyoutSlotBySpellID`, `FindSpellOverrideByID`, `GetSpellBookItemChargeDuration`, `GetSpellBookItemCooldownDuration`, and `GetSpellBookItemLossOfControlCooldownDuration` as evidence-required/unsafe: mapping fallbacks are nil/input-ID compatibility only and no flyout/override model exists; duration APIs lack slot/bank cooldown state and a LuaDurationObject producer. Known/unknown mappings, required/nilable results, valid slots/banks, timing/expiration, refresh, object lifetime, and lifecycle remain unproven. Current totals are **892 best-effort, 909 evidence-required, 2 exception-requested, and 1607 untriaged** (3410 rows).

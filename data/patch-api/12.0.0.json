@@ -18457,17 +18457,36 @@
       "id": "added:C_StableInfo.IsBonusPetSlotAvailable",
       "symbol": "C_StableInfo.IsBonusPetSlotAvailable",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsBonusPetSlotAvailable as a no-argument API returning a required boolean isAvailable value.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_stable_info.rs",
+          "summary": "Current C_StableInfo implementation models IsAtPetStable only and has no bonus-pet-slot availability or active combat configuration state.",
+          "source_hash": "98800cc7b4a690d160390e7fc13d01ab4ec27b37f204e48e444f3eb29cb263fd"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/blizzard_stable_ui_loads.rs",
+          "summary": "Existing stable UI coverage proves vendor references and refresh wiring only, not the API result or talent/configuration transitions.",
+          "source_hash": "ae180ca2bf98cf4324a7f32d52486d4a6dc90c70f951365f98751dc96ddd5809"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no bonus-pet-slot availability model exists. Beast Master Animal Companion and active combat-configuration states, available/unavailable results, configuration transitions, stable UI refresh, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_StringUtil.EscapeLuaFormatString",
