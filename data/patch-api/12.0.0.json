@@ -1894,81 +1894,146 @@
       "id": "added:C_ActionBar.ActionBarChargeInfo.chargeModRate",
       "symbol": "C_ActionBar.ActionBarChargeInfo.chargeModRate",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required ActionBarChargeInfo.chargeModRate structure-field contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current C_ActionBar.GetActionCharges publishes chargeModRate in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: static ActionBarChargeInfo.chargeModRate publication does not establish authoritative slot-dependent charge values, field relationships, cooldown progression, validation, secret behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_ActionBar.ActionBarChargeInfo.cooldownDuration",
       "symbol": "C_ActionBar.ActionBarChargeInfo.cooldownDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required ActionBarChargeInfo.cooldownDuration structure-field contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current C_ActionBar.GetActionCharges publishes cooldownDuration in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: static ActionBarChargeInfo.cooldownDuration publication does not establish authoritative slot-dependent charge values, field relationships, cooldown progression, validation, secret behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_ActionBar.ActionBarChargeInfo.cooldownStartTime",
       "symbol": "C_ActionBar.ActionBarChargeInfo.cooldownStartTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required ActionBarChargeInfo.cooldownStartTime structure-field contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current C_ActionBar.GetActionCharges publishes cooldownStartTime in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: static ActionBarChargeInfo.cooldownStartTime publication does not establish authoritative slot-dependent charge values, field relationships, cooldown progression, validation, secret behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_ActionBar.ActionBarChargeInfo.currentCharges",
       "symbol": "C_ActionBar.ActionBarChargeInfo.currentCharges",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required ActionBarChargeInfo.currentCharges structure-field contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current C_ActionBar.GetActionCharges publishes currentCharges in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: static ActionBarChargeInfo.currentCharges publication does not establish authoritative slot-dependent charge values, field relationships, cooldown progression, validation, secret behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_ActionBar.ActionBarChargeInfo.maxCharges",
       "symbol": "C_ActionBar.ActionBarChargeInfo.maxCharges",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required ActionBarChargeInfo.maxCharges structure-field contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current C_ActionBar.GetActionCharges publishes maxCharges in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: static ActionBarChargeInfo.maxCharges publication does not establish authoritative slot-dependent charge values, field relationships, cooldown progression, validation, secret behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_ActionBar.ActionBarCooldownInfo",
@@ -1998,65 +2063,117 @@
       "id": "added:C_ActionBar.ActionBarCooldownInfo.duration",
       "symbol": "C_ActionBar.ActionBarCooldownInfo.duration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required ActionBarCooldownInfo.duration structure-field contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current C_ActionBar.GetActionCooldown publishes duration in a partial table; start/duration are fixture-backed while enabled/mod-rate semantics remain constant and the complete typed contract is unproven.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current ActionBarCooldownInfo.duration publication does not establish complete typed payload fidelity, authoritative cooldown/enabled/mod-rate values, invalid-slot behavior, progression, secret behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_ActionBar.ActionBarCooldownInfo.isEnabled",
       "symbol": "C_ActionBar.ActionBarCooldownInfo.isEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required ActionBarCooldownInfo.isEnabled structure-field contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current C_ActionBar.GetActionCooldown publishes isEnabled in a partial table; start/duration are fixture-backed while enabled/mod-rate semantics remain constant and the complete typed contract is unproven.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current ActionBarCooldownInfo.isEnabled publication does not establish complete typed payload fidelity, authoritative cooldown/enabled/mod-rate values, invalid-slot behavior, progression, secret behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_ActionBar.ActionBarCooldownInfo.modRate",
       "symbol": "C_ActionBar.ActionBarCooldownInfo.modRate",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required ActionBarCooldownInfo.modRate structure-field contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current C_ActionBar.GetActionCooldown publishes modRate in a partial table; start/duration are fixture-backed while enabled/mod-rate semantics remain constant and the complete typed contract is unproven.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current ActionBarCooldownInfo.modRate publication does not establish complete typed payload fidelity, authoritative cooldown/enabled/mod-rate values, invalid-slot behavior, progression, secret behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_ActionBar.ActionBarCooldownInfo.startTime",
       "symbol": "C_ActionBar.ActionBarCooldownInfo.startTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required ActionBarCooldownInfo.startTime structure-field contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current C_ActionBar.GetActionCooldown publishes startTime in a partial table; start/duration are fixture-backed while enabled/mod-rate semantics remain constant and the complete typed contract is unproven.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current ActionBarCooldownInfo.startTime publication does not establish complete typed payload fidelity, authoritative cooldown/enabled/mod-rate values, invalid-slot behavior, progression, secret behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_ActionBar.GetActionAutocast",
