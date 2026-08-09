@@ -4088,49 +4088,88 @@
       "id": "added:C_BattleNet.SendGameData",
       "symbol": "C_BattleNet.SendGameData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines SendGameData(gameAccountID: number, prefix: string, data: string) returning Enum.SendAddonMessageResult.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_battle_net.rs",
+          "summary": "Current C_BattleNet model has no SendGameData registration, transport/result state, throttling, validation, or side effects.",
+          "source_hash": "7d3aa2265ab25aa9f7870532a9b43639141e4532cf5822a9e0766b08054f6253"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled Battle.net game-data transport or focused proof establishes namespace publication, exact SendAddonMessageResult outcomes, account/payload validation, throttling, side effects, or legacy forwarding behavior."
     },
     {
       "id": "added:C_BattleNet.SendWhisper",
       "symbol": "C_BattleNet.SendWhisper",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines restricted SendWhisper(bnetAccountID: number, text: stringView) returning boolean success.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_battle_net.rs",
+          "summary": "Current C_BattleNet model has no SendWhisper registration, whisper transport, restriction enforcement, chat-event state, validation, or side effects.",
+          "source_hash": "7d3aa2265ab25aa9f7870532a9b43639141e4532cf5822a9e0766b08054f6253"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled Battle.net whisper transport or focused proof establishes publication, exact boolean results, account/text validation, restricted/macro behavior, chat events, failures, or side effects."
     },
     {
       "id": "added:C_BattleNet.SetCustomMessage",
       "symbol": "C_BattleNet.SetCustomMessage",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines restricted SetCustomMessage(text: cstring) returning boolean success.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_battle_net.rs",
+          "summary": "Current C_BattleNet model has no SetCustomMessage registration, custom-message state, restriction enforcement, persistence, update events, or observable side effects.",
+          "source_hash": "7d3aa2265ab25aa9f7870532a9b43639141e4532cf5822a9e0766b08054f6253"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled custom-message state or focused proof establishes publication, assignment/clearing, exact success results, restrictions, persistence, validation, events, or UI-visible side effects."
     },
     {
       "id": "added:C_CatalogShop.BulkPurchaseIndividualProductResult",

@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify three C_BattleNet mutation and transport APIs
+
+Classified `C_BattleNet.SendGameData`, `C_BattleNet.SendWhisper`, and `C_BattleNet.SetCustomMessage` as `evidence-required`/`unsafe`. No current registration, backing transport/state, restriction enforcement, result model, or focused side-effect proof exists; exact account/text validation, return values, persistence, events, and consumer behavior remain unproven. Current totals are **867 best-effort, 713 evidence-required, 2 exception-requested, and 1828 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_AdventureMap quest portrait info
 
 Classified the six-row `C_AdventureMap.GetQuestPortraitInfo` slice—the API plus five portrait fields—as bounded `best-effort`/`behavioral` claims from focused `tests/c_adventure_map/quests.rs` proof. Claims cover injected-state lookup, typed five-field publication, unknown/nonnumeric zero-value returns, nullable `modelSceneID`, and tested display-ID gating. Retail data population, localization, full validation/edge behavior, assets/rendering, and lifecycle remain unclaimed. `modelSceneID` is treated strictly as data under the existing permanent no-3D scope; no 3D implementation or new exception is requested. Current totals are **867 best-effort, 710 evidence-required, 2 exception-requested, and 1831 untriaged** (3410 rows).

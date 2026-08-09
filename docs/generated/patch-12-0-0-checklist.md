@@ -109,9 +109,9 @@
 109. [best-effort] `added:C_AdventureMap.AdventureMapQuestPortraitInfo.portraitDisplayID` — behavioral
 110. [best-effort] `added:C_AdventureMap.AdventureMapQuestPortraitInfo.text` — behavioral
 111. [best-effort] `added:C_AdventureMap.GetQuestPortraitInfo` — behavioral
-112. [untriaged] `added:C_BattleNet.SendGameData` — untriaged
-113. [untriaged] `added:C_BattleNet.SendWhisper` — untriaged
-114. [untriaged] `added:C_BattleNet.SetCustomMessage` — untriaged
+112. [evidence-required] `added:C_BattleNet.SendGameData` — unsafe
+113. [evidence-required] `added:C_BattleNet.SendWhisper` — unsafe
+114. [evidence-required] `added:C_BattleNet.SetCustomMessage` — unsafe
 115. [best-effort] `added:C_CatalogShop.BulkPurchaseIndividualProductResult` — provenance-only
 116. [untriaged] `added:C_CatalogShop.BulkPurchaseIndividualProductResult.entitlementId` — untriaged
 117. [untriaged] `added:C_CatalogShop.BulkPurchaseIndividualProductResult.externalTransactionId` — untriaged
