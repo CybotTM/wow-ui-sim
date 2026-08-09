@@ -4199,305 +4199,560 @@
       "id": "added:C_CatalogShop.BulkPurchaseIndividualProductResult.entitlementId",
       "symbol": "C_CatalogShop.BulkPurchaseIndividualProductResult.entitlementId",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.BulkPurchaseIndividualProductResult.entitlementId occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.BulkPurchaseIndividualProductResult.entitlementId; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled BulkPurchaseIndividualProductResult producer establishes required string entitlementId publication, value preservation, event array placement, validation, or lifecycle semantics."
     },
     {
       "id": "added:C_CatalogShop.BulkPurchaseIndividualProductResult.externalTransactionId",
       "symbol": "C_CatalogShop.BulkPurchaseIndividualProductResult.externalTransactionId",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.BulkPurchaseIndividualProductResult.externalTransactionId occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.BulkPurchaseIndividualProductResult.externalTransactionId; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled BulkPurchaseIndividualProductResult producer establishes required string externalTransactionId publication, value preservation, event array placement, validation, or lifecycle semantics."
     },
     {
       "id": "added:C_CatalogShop.BulkPurchaseIndividualProductResult.parentProductId",
       "symbol": "C_CatalogShop.BulkPurchaseIndividualProductResult.parentProductId",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.BulkPurchaseIndividualProductResult.parentProductId occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.BulkPurchaseIndividualProductResult.parentProductId; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled BulkPurchaseIndividualProductResult producer establishes nullable numeric parentProductId publication, absent/present values, event array placement, consumer behavior, or lifecycle semantics."
     },
     {
       "id": "added:C_CatalogShop.BulkPurchaseIndividualProductResult.recordId",
       "symbol": "C_CatalogShop.BulkPurchaseIndividualProductResult.recordId",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.BulkPurchaseIndividualProductResult.recordId occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.BulkPurchaseIndividualProductResult.recordId; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled BulkPurchaseIndividualProductResult producer establishes required numeric recordId publication, exact values, event array placement, validation, or lifecycle semantics."
     },
     {
       "id": "added:C_CatalogShop.BulkPurchaseIndividualProductResult.status",
       "symbol": "C_CatalogShop.BulkPurchaseIndividualProductResult.status",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.BulkPurchaseIndividualProductResult.status occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.BulkPurchaseIndividualProductResult.status; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled BulkPurchaseIndividualProductResult producer establishes required Enum.SimpleOrderStatus publication, exact values, event array placement, validation, or lifecycle semantics."
     },
     {
       "id": "added:C_CatalogShop.BulkPurchaseProducts",
       "symbol": "C_CatalogShop.BulkPurchaseProducts",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.BulkPurchaseProducts occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.BulkPurchaseProducts; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled bulk-purchase transaction establishes numeric-array validation, restricted invocation, exact boolean result, entitlement/currency state mutation, result events, or failure semantics."
     },
     {
       "id": "added:C_CatalogShop.CatalogShopCategoryInfo.showPersistentRefundButton",
       "symbol": "C_CatalogShop.CatalogShopCategoryInfo.showPersistentRefundButton",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.CatalogShopCategoryInfo.showPersistentRefundButton occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.CatalogShopCategoryInfo.showPersistentRefundButton; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: seeded constant-false category data does not establish required boolean field fidelity, category-dependent values, persistent-refund button behavior, or retail catalog lifecycle semantics."
     },
     {
       "id": "added:C_CatalogShop.CatalogShopProductInfo.consumableQuantity",
       "symbol": "C_CatalogShop.CatalogShopProductInfo.consumableQuantity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.CatalogShopProductInfo.consumableQuantity occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.CatalogShopProductInfo.consumableQuantity; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current product payload omits nullable consumableQuantity and does not establish absent/populated numeric values, bundle behavior, consumer display, or lifecycle semantics."
     },
     {
       "id": "added:C_CatalogShop.ConfirmHousingPurchase",
       "symbol": "C_CatalogShop.ConfirmHousingPurchase",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.ConfirmHousingPurchase occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.ConfirmHousingPurchase; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current no-op does not establish product-array validation, purchase transitions, currency/entitlement mutation, success/failure behavior, events, or UI updates."
     },
     {
       "id": "added:C_CatalogShop.GetFirstCategoryByProductID",
       "symbol": "C_CatalogShop.GetFirstCategoryByProductID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.GetFirstCategoryByProductID occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.GetFirstCategoryByProductID; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: temporary three-product mapping does not establish general nullable category lookup, category ordering, bundle behavior, invalid inputs, payload fidelity, or retail catalog semantics."
     },
     {
       "id": "added:C_CatalogShop.GetNewProducts",
       "symbol": "C_CatalogShop.GetNewProducts",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.GetNewProducts occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.GetNewProducts; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no new-product ID state or API implementation establishes numeric-array output, viewed/refresh transitions, persistence, empty behavior, or consumers."
     },
     {
       "id": "added:C_CatalogShop.GetProductIDsForCategory",
       "symbol": "C_CatalogShop.GetProductIDsForCategory",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.GetProductIDsForCategory occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.GetProductIDsForCategory; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: seeded category arrays and weak shape-only coverage do not establish authoritative ordered membership, numeric element types, unknown-category behavior, or retail catalog lifecycle semantics."
     },
     {
       "id": "added:C_CatalogShop.GetRefundableDecors",
       "symbol": "C_CatalogShop.GetRefundableDecors",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.GetRefundableDecors occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.GetRefundableDecors; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: empty placeholder results ignore optional filtering and do not establish RefundableDecorInfo payloads, minimum remaining time, refresh lifecycle, or consumer behavior."
     },
     {
       "id": "added:C_CatalogShop.GetVirtualCurrencyBalance",
       "symbol": "C_CatalogShop.GetVirtualCurrencyBalance",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.GetVirtualCurrencyBalance occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.GetVirtualCurrencyBalance; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current numeric zero return violates the nullable-string contract and no currency-code keyed balance state, refresh lifecycle, or consumer behavior is modeled."
     },
     {
       "id": "added:C_CatalogShop.HasNewProducts",
       "symbol": "C_CatalogShop.HasNewProducts",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HasNewProducts() returning required boolean hasNewProducts.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state publishes HasNewProducts as constant false.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/startup_namespaces.rs",
+          "summary": "Focused startup service namespace test asserts HasNewProducts publication, boolean type, and exact false result.",
+          "source_hash": "d8e85f71ee7d0b7a1519ce204e9d7ab80b45f46db0bdfb834731af7eabb9b99d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/startup_namespaces.rs::test_startup_service_namespaces_exist"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to function publication and exact constant-false boolean result. New-product detection, viewed/refresh transitions, persistence, notification events, and consumer badge behavior remain unclaimed."
     },
     {
       "id": "added:C_CatalogShop.OpenCatalogShopInteractionFromHouse",
       "symbol": "C_CatalogShop.OpenCatalogShopInteractionFromHouse",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.OpenCatalogShopInteractionFromHouse occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.OpenCatalogShopInteractionFromHouse; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: constant seeded session ID and refresh events do not establish house-bound session identity, lifecycle, validation, ordering, repeated calls, or purchase state."
     },
     {
       "id": "added:C_CatalogShop.OpenCatalogShopInteractionFromShop",
       "symbol": "C_CatalogShop.OpenCatalogShopInteractionFromShop",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.OpenCatalogShopInteractionFromShop occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.OpenCatalogShopInteractionFromShop; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: constant seeded session ID and refresh events do not establish shop session identity, lifecycle, validation, ordering, repeated calls, or purchase state."
     },
     {
       "id": "added:C_CatalogShop.RefreshRefundableDecors",
       "symbol": "C_CatalogShop.RefreshRefundableDecors",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.RefreshRefundableDecors occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.RefreshRefundableDecors; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no refresh implementation/state establishes updated refundable results, event ordering, repeated/empty/failure behavior, or consumer effects."
     },
     {
       "id": "added:C_CatalogShop.RefreshVirtualCurrencyBalance",
       "symbol": "C_CatalogShop.RefreshVirtualCurrencyBalance",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.RefreshVirtualCurrencyBalance occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.RefreshVirtualCurrencyBalance; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current no-op does not establish currency-code validation, balance refresh state, success/failure events, ordering, repeated calls, or consumers."
     },
     {
       "id": "added:C_CatalogShop.RefundableDecorInfo",
@@ -4527,65 +4782,117 @@
       "id": "added:C_CatalogShop.RefundableDecorInfo.decorGUID",
       "symbol": "C_CatalogShop.RefundableDecorInfo.decorGUID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.RefundableDecorInfo.decorGUID occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.RefundableDecorInfo.decorGUID; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no RefundableDecorInfo producer establishes required WOWGUID/string decorGUID publication, exact values, filtering, refresh behavior, or consumer semantics."
     },
     {
       "id": "added:C_CatalogShop.RefundableDecorInfo.standaloneDecorProductID",
       "symbol": "C_CatalogShop.RefundableDecorInfo.standaloneDecorProductID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.RefundableDecorInfo.standaloneDecorProductID occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.RefundableDecorInfo.standaloneDecorProductID; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no RefundableDecorInfo producer establishes required numeric standaloneDecorProductID publication, exact values, filtering, refresh behavior, or consumer semantics."
     },
     {
       "id": "added:C_CatalogShop.RefundableDecorInfo.timeRemainingSeconds",
       "symbol": "C_CatalogShop.RefundableDecorInfo.timeRemainingSeconds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.RefundableDecorInfo.timeRemainingSeconds occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.RefundableDecorInfo.timeRemainingSeconds; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no RefundableDecorInfo producer establishes required numeric timeRemainingSeconds publication, countdown/sorting behavior, filtering, refresh lifecycle, or consumer semantics."
     },
     {
       "id": "added:C_CatalogShop.StartHousingVCPurchaseConfirmation",
       "symbol": "C_CatalogShop.StartHousingVCPurchaseConfirmation",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CatalogShop.StartHousingVCPurchaseConfirmation occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary CatalogShop compatibility state is absent, no-op, incomplete, or seeded for C_CatalogShop.StartHousingVCPurchaseConfirmation; authoritative producer/state semantics are unmodeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no housing virtual-currency confirmation state establishes product validation, session creation, balance/top-up transitions, events, repeated/invalid calls, or consumers."
     },
     {
       "id": "added:C_CharacterServices.AssignFCMDistribution",

@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify 23 C_CatalogShop API and structure rows
+
+Classified `C_CatalogShop.HasNewProducts` as `best-effort`/`behavioral` only for publication and the exact constant-false boolean result proven by `test_startup_service_namespaces_exist`. Classified the other 22 rows as `evidence-required`/`unsafe` because current CatalogShop state is absent, no-op, incomplete, seeded, wrong-typed, or untested and does not establish purchase, category/product, refundable-decor, currency, session, refresh, restriction, payload, event, or lifecycle semantics. Current totals are **868 best-effort, 735 evidence-required, 2 exception-requested, and 1805 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify three C_BattleNet mutation and transport APIs
 
 Classified `C_BattleNet.SendGameData`, `C_BattleNet.SendWhisper`, and `C_BattleNet.SetCustomMessage` as `evidence-required`/`unsafe`. No current registration, backing transport/state, restriction enforcement, result model, or focused side-effect proof exists; exact account/text validation, return values, persistence, events, and consumer behavior remain unproven. Current totals are **867 best-effort, 713 evidence-required, 2 exception-requested, and 1828 untriaged** (3410 rows).
