@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **892 best-effort, 903 evidence-required, 2 exception-requested, and 1613 untriaged rows** (3410 total).
+Current manifest totals are **892 best-effort, 909 evidence-required, 2 exception-requested, and 1607 untriaged rows** (3410 total).
+
+`C_SpellBook.FindBaseSpellByID`, `FindFlyoutSlotBySpellID`, `FindSpellOverrideByID`, `GetSpellBookItemChargeDuration`, `GetSpellBookItemCooldownDuration`, and `GetSpellBookItemLossOfControlCooldownDuration` are evidence-required/unsafe: mapping fallbacks are nil/input-ID compatibility only and no flyout/override model exists; duration APIs lack slot/bank cooldown state and a LuaDurationObject producer. Known/unknown mappings, required/nilable results, valid slots/banks, timing/expiration, refresh, object lifetime, and lifecycle remain unproven.
 
 `C_Sound.PlaySound` is evidence-required/unsafe: the silent no-op fallback proves callability only and ignores inputs and returns; no-audio builds are not a scope exception. Input defaults, invalid IDs, success/failure, handles, duplicate suppression, finish callbacks, priority, backend behavior, and lifecycle remain unproven.
 

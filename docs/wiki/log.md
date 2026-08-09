@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_SpellBook lookup and duration APIs
+
+Classified `C_SpellBook.FindBaseSpellByID`, `FindFlyoutSlotBySpellID`, `FindSpellOverrideByID`, `GetSpellBookItemChargeDuration`, `GetSpellBookItemCooldownDuration`, and `GetSpellBookItemLossOfControlCooldownDuration` as evidence-required/unsafe: mapping fallbacks are nil/input-ID compatibility only and no flyout/override model exists; duration APIs lack slot/bank cooldown state and a LuaDurationObject producer. Known/unknown mappings, required/nilable results, valid slots/banks, timing/expiration, refresh, object lifetime, and lifecycle remain unproven. Current totals are **892 best-effort, 909 evidence-required, 2 exception-requested, and 1607 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_Sound.PlaySound
 
 Classified `C_Sound.PlaySound` as evidence-required/unsafe: the silent no-op fallback proves callability only and ignores inputs and returns; no-audio builds are not a scope exception. Input defaults, invalid IDs, success/failure, handles, duplicate suppression, finish callbacks, priority, backend behavior, and lifecycle remain unproven. Current totals are **892 best-effort, 903 evidence-required, 2 exception-requested, and 1613 untriaged** (3410 rows).

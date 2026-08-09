@@ -17841,97 +17841,211 @@
       "id": "added:C_SpellBook.FindBaseSpellByID",
       "symbol": "C_SpellBook.FindBaseSpellByID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines FindBaseSpellByID with numeric spellID input and nilable numeric baseSpellID return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/spell_book_static_defaults.rs",
+          "summary": "Current temporary fallback returns no value and has no base-spell mapping state.",
+          "source_hash": "ac6dcf5d2ba13e86356e9d1af794b0a35385fca9b17c669a619c0a6a9cc8f0c6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/legacy_spell_globals.rs",
+          "summary": "Legacy wrappers only forward to the same fallback and do not establish mapping behavior.",
+          "source_hash": "2373fc61216aef6de8ec11515fe2ad29ef81bf11d839bdb66a91851fc1cf9885"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no spell override/base-spell mapping model exists. Known/unknown IDs, nil versus mapped values, replacement transitions, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SpellBook.FindFlyoutSlotBySpellID",
       "symbol": "C_SpellBook.FindFlyoutSlotBySpellID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines FindFlyoutSlotBySpellID with numeric spellID input and required numeric flyoutSlot return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/spell_book_static_defaults.rs",
+          "summary": "Current temporary fallback returns no value despite the required numeric contract and has no flyout catalog.",
+          "source_hash": "ac6dcf5d2ba13e86356e9d1af794b0a35385fca9b17c669a619c0a6a9cc8f0c6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/legacy_spell_globals.rs",
+          "summary": "Legacy wrappers only prove callability and do not establish slot lookup behavior.",
+          "source_hash": "2373fc61216aef6de8ec11515fe2ad29ef81bf11d839bdb66a91851fc1cf9885"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no spellbook flyout catalog or slot mapping exists. Known/unknown IDs, required numeric results, ordering, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SpellBook.FindSpellOverrideByID",
       "symbol": "C_SpellBook.FindSpellOverrideByID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines FindSpellOverrideByID with numeric spellID input and nilable numeric overrideSpellID return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/spell_book_static_defaults.rs",
+          "summary": "Current temporary fallback returns the input spell ID without override mapping state.",
+          "source_hash": "ac6dcf5d2ba13e86356e9d1af794b0a35385fca9b17c669a619c0a6a9cc8f0c6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/legacy_spell_globals.rs",
+          "summary": "Legacy wrappers only forward to the same compatibility default and do not establish override semantics.",
+          "source_hash": "2373fc61216aef6de8ec11515fe2ad29ef81bf11d839bdb66a91851fc1cf9885"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no spell override mapping model exists; returning the input ID is compatibility scaffolding. Known/unknown IDs, nil versus override values, replacement transitions, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SpellBook.GetSpellBookItemChargeDuration",
       "symbol": "C_SpellBook.GetSpellBookItemChargeDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetSpellBookItemChargeDuration with numeric slot and SpellBookSpellBank inputs with an optional LuaDurationObject return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/spell_book_static_defaults.rs",
+          "summary": "Current spellbook defaults contain no charge-duration producer or slot/bank state.",
+          "source_hash": "ac6dcf5d2ba13e86356e9d1af794b0a35385fca9b17c669a619c0a6a9cc8f0c6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback returns no duration object and does not model charge timing or lifetime.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no spellbook slot/bank charge-duration state or LuaDurationObject producer exists. Valid/invalid slots, bank differences, charge start/expiration, refresh, object lifetime, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SpellBook.GetSpellBookItemCooldownDuration",
       "symbol": "C_SpellBook.GetSpellBookItemCooldownDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetSpellBookItemCooldownDuration with numeric slot and SpellBookSpellBank inputs with an optional LuaDurationObject return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/spell_book_static_defaults.rs",
+          "summary": "Current spellbook defaults contain no cooldown-duration producer or slot/bank state.",
+          "source_hash": "ac6dcf5d2ba13e86356e9d1af794b0a35385fca9b17c669a619c0a6a9cc8f0c6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback returns no duration object and does not model cooldown timing or lifetime.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no spellbook slot/bank cooldown state or LuaDurationObject producer exists. Valid/invalid slots, bank differences, cooldown start/expiration, refresh, object lifetime, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SpellBook.GetSpellBookItemLossOfControlCooldownDuration",
       "symbol": "C_SpellBook.GetSpellBookItemLossOfControlCooldownDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetSpellBookItemLossOfControlCooldownDuration with numeric slot and SpellBookSpellBank inputs with an optional LuaDurationObject return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/spell_book_static_defaults.rs",
+          "summary": "Current spellbook defaults contain no loss-of-control cooldown producer or slot/bank state.",
+          "source_hash": "ac6dcf5d2ba13e86356e9d1af794b0a35385fca9b17c669a619c0a6a9cc8f0c6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback returns no duration object and does not model loss-of-control timing or lifetime.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no spellbook loss-of-control cooldown state or LuaDurationObject producer exists. Valid/invalid slots, bank differences, control-loss transitions, expiration, refresh, object lifetime, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SpellDiminish.GetAllSpellDiminishCategories",
