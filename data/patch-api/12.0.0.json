@@ -11642,65 +11642,141 @@
       "id": "added:C_HousingCatalog.IsPreviewCartItemShown",
       "symbol": "C_HousingCatalog.IsPreviewCartItemShown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsPreviewCartItemShown(decorGUID: string) returning required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary preview-cart map defaults unknown GUIDs to false and is shared with setter and promotion methods.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_catalog.rs",
+          "summary": "Focused preview-cart test proves unknown false, setter true/false round-trip, and promotion-visible state.",
+          "source_hash": "e564a1b0224e68d495fb63c7f6bc12d89993c8543e16d964dcac6dcb19b5b5e8"
+        }
+      ],
+      "tests": [
+        "tests/housing_catalog.rs::housing_preview_cart_state_round_trips_and_promotes"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers in-memory unknown=false, setter round-trip, and promotion-visible preview GUID state. GUID validation, events/refresh, persistence, repeated/unknown semantics, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingCatalog.PromotePreviewDecor",
       "symbol": "C_HousingCatalog.PromotePreviewDecor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines PromotePreviewDecor(decorID: number, previewDecorGUID: string) returning required boolean success.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary implementation returns true and marks the preview GUID visible while ignoring decorID.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_catalog.rs",
+          "summary": "Focused preview-cart test proves promotion returns true and changes shown state to true.",
+          "source_hash": "e564a1b0224e68d495fb63c7f6bc12d89993c8543e16d964dcac6dcb19b5b5e8"
+        }
+      ],
+      "tests": [
+        "tests/housing_catalog.rs::housing_preview_cart_state_round_trips_and_promotes"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers successful preview-GUID promotion and observable shown-state mutation. decorID validation/use, failures, repeated promotion, events, persistence, refresh, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingCatalog.RequestHousingMarketRefundInfo",
       "symbol": "C_HousingCatalog.RequestHousingMarketRefundInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records RequestHousingMarketRefundInfo as an added API without retained inputs or outputs.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary method is a no-op with no refund request/list state or HOUSING_REFUND_LIST_UPDATED event lifecycle.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: a no-op cannot establish request side effects, refund-list population, empty/populated data, repeated requests, event timing, refresh, or lifecycle."
     },
     {
       "id": "added:C_HousingCatalog.SetPreviewCartItemShown",
       "symbol": "C_HousingCatalog.SetPreviewCartItemShown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines SetPreviewCartItemShown(decorGUID: string, shown: boolean) with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary implementation stores normalized boolean state observable through IsPreviewCartItemShown.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_catalog.rs",
+          "summary": "Focused preview-cart test proves true and false setter values round-trip through the getter.",
+          "source_hash": "e564a1b0224e68d495fb63c7f6bc12d89993c8543e16d964dcac6dcb19b5b5e8"
+        }
+      ],
+      "tests": [
+        "tests/housing_catalog.rs::housing_preview_cart_state_round_trips_and_promotes"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers in-memory boolean storage observable through the getter. GUID validation, events/refresh, persistence, reset/isolation beyond test environment, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingCustomizeMode.IsHouseExteriorDoorHovered",

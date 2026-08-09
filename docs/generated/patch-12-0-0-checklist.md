@@ -356,10 +356,10 @@
 356. [evidence-required] `added:C_HousingCatalog.HousingPreviewItemData.price` — unsafe
 357. [evidence-required] `added:C_HousingCatalog.HousingPreviewItemData.productID` — unsafe
 358. [evidence-required] `added:C_HousingCatalog.HousingPreviewItemData.salePrice` — unsafe
-359. [untriaged] `added:C_HousingCatalog.IsPreviewCartItemShown` — untriaged
-360. [untriaged] `added:C_HousingCatalog.PromotePreviewDecor` — untriaged
-361. [untriaged] `added:C_HousingCatalog.RequestHousingMarketRefundInfo` — untriaged
-362. [untriaged] `added:C_HousingCatalog.SetPreviewCartItemShown` — untriaged
+359. [best-effort] `added:C_HousingCatalog.IsPreviewCartItemShown` — behavioral
+360. [best-effort] `added:C_HousingCatalog.PromotePreviewDecor` — behavioral
+361. [evidence-required] `added:C_HousingCatalog.RequestHousingMarketRefundInfo` — unsafe
+362. [best-effort] `added:C_HousingCatalog.SetPreviewCartItemShown` — behavioral
 363. [untriaged] `added:C_HousingCustomizeMode.IsHouseExteriorDoorHovered` — untriaged
 364. [untriaged] `added:C_HousingDecor.EnterPreviewState` — untriaged
 365. [untriaged] `added:C_HousingDecor.ExitPreviewState` — untriaged

@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify four preview-cart/refund rows
+
+Classified `C_HousingCatalog.IsPreviewCartItemShown`, `C_HousingCatalog.PromotePreviewDecor`, and `C_HousingCatalog.SetPreviewCartItemShown` as best-effort/behavioral only for focused in-memory unknown=false, boolean setter true/false round-trip, promotion returning true, and shown-state mutation. No GUID/decor validation, failure/repeat behavior, events/refresh, persistence, or lifecycle claims are made. Classified `C_HousingCatalog.RequestHousingMarketRefundInfo` as evidence-required/unsafe because its no-op has no refund request/list state, population, repeated-request behavior, or `HOUSING_REFUND_LIST_UPDATED` lifecycle. Current totals are **881 best-effort, 784 evidence-required, 2 exception-requested, and 1743 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify eleven HousingPreviewItemData fields
 
 Classified `HousingPreviewItemData.bundleCatalogShopProductID`, `decorGUID`, `decorID`, `icon`, `id`, `isBundleChild`, `isBundleParent`, `name`, `price`, `productID`, and `salePrice` as evidence-required/unsafe. No typed `HousingPreviewItemData` producer exists; related catalog/decor/bundle fixture fields do not establish these specific fields, nullability, identities, bundle relationships, pricing, validation, event/preview-list production, refresh, persistence, or lifecycle. No approval or exception applies. Current totals are **878 best-effort, 783 evidence-required, 2 exception-requested, and 1747 untriaged** (3410 rows).
