@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_MajorFactions.RenownHighlightInfo.description
+
+Classified `C_MajorFactions.RenownHighlightInfo.description` as evidence-required/unsafe: the source requires a string, but no `RenownHighlightInfo` model or highlights producer exists and `GetMajorFactionData` omits highlights. Required strings, element schema/order, empty/non-empty behavior, per-faction values, unknown behavior, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 798 evidence-required, 2 exception-requested, and 1719 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_MajorFactions.MajorFactionRenownRewardInfo.rewardType
 
 Classified `C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` as evidence-required/unsafe: the source requires a nullable number, but no `MajorFactionRenownRewardInfo` model or producer exists and `C_MajorFactions.GetRenownRewardsForLevel` returns an empty table. Present/nil values, numeric meanings, per-level rewards, ordering, unknown behavior, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 797 evidence-required, 2 exception-requested, and 1720 untriaged** (3410 rows).

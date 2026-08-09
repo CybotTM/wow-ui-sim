@@ -4,11 +4,13 @@
 
 ## Content
 
-Current manifest totals are **891 best-effort, 797 evidence-required, 2 exception-requested, and 1720 untriaged rows** (3410 total). `C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` is evidence-required/unsafe: the source requires a nullable number, but no `MajorFactionRenownRewardInfo` model or producer exists and `C_MajorFactions.GetRenownRewardsForLevel` returns an empty table. Present/nil values, numeric meanings, per-level rewards, ordering, unknown behavior, refresh, and lifecycle remain unproven.
+Current manifest totals are **891 best-effort, 798 evidence-required, 2 exception-requested, and 1719 untriaged rows** (3410 total). `C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` is evidence-required/unsafe: the source requires a nullable number, but no `MajorFactionRenownRewardInfo` model or producer exists and `C_MajorFactions.GetRenownRewardsForLevel` returns an empty table. Present/nil values, numeric meanings, per-level rewards, ordering, unknown behavior, refresh, and lifecycle remain unproven.
 
 `C_MajorFactions.MajorFactionData.description` is evidence-required/unsafe: the source requires a string field, but the current state model lacks description and `GetMajorFactionData` omits it. Exact strings/defaults/per-faction values/unknown behavior/mutation/refresh/lifecycle remain unproven; `name` and `unlockDescription` are separate fields.
 
 `C_MajorFactions.MajorFactionData.highlights` is evidence-required/unsafe: the source requires an array of `RenownHighlightInfo`, but the current `MajorFactionData` has no highlights state and `GetMajorFactionData` emits no array. Element schema/order, empty/non-empty behavior, per-faction values, mutation, refresh, and lifecycle remain unproven.
+
+`C_MajorFactions.RenownHighlightInfo.description` is evidence-required/unsafe: no `RenownHighlightInfo` model or highlights producer exists, so required strings, element schema/order, empty/non-empty behavior, per-faction values, unknown behavior, refresh, and lifecycle remain unproven.
 
 `C_MajorFactions.MajorFactionData.playerCompanionID` is evidence-required/unsafe: the source requires a nullable number, but current `MajorFactionData` has no companion association and `GetMajorFactionData` omits the field. Present/nil behavior, authoritative IDs, per-faction values, unknown behavior, mutation, refresh, and lifecycle remain unproven.
 

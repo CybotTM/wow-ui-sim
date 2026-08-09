@@ -384,7 +384,7 @@
 384. [evidence-required] `added:C_MajorFactions.MajorFactionData.playerCompanionID` — unsafe
 385. [evidence-required] `added:C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` — unsafe
 386. [best-effort] `added:C_MajorFactions.RenownHighlightInfo` — provenance-only
-387. [untriaged] `added:C_MajorFactions.RenownHighlightInfo.description` — untriaged
+387. [evidence-required] `added:C_MajorFactions.RenownHighlightInfo.description` — unsafe
 388. [untriaged] `added:C_MajorFactions.RenownHighlightInfo.level` — untriaged
 389. [untriaged] `added:C_MajorFactions.RenownHighlightInfo.title` — untriaged
 390. [untriaged] `added:C_MajorFactions.ShouldDisplayMajorFactionAsJourney` — untriaged
