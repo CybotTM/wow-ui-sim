@@ -14120,225 +14120,491 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.ID",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.ID as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing ID.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.ID.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Task identifier presence and values, valid/unknown IDs, populated tasks, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.completed",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.completed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.completed as a required boolean structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing completed.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.completed.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Completion-state presence and values, completion transitions, duplicate completion, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.criteriaList",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.criteriaList",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.criteriaList as a required array of CriteriaRequiredValue structures.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing criteriaList.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.criteriaList.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Criteria-array presence, order, entry shape and values, empty/populated criteria, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.description",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.description",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.description as a required string structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing description.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.description.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Description presence and values, localization behavior, populated tasks, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.inProgress",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.inProgress",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.inProgress as a required boolean structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing inProgress.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.inProgress.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. In-progress presence and values, progress transitions, completion interaction, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.progressContributionAmount",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.progressContributionAmount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.progressContributionAmount as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing progressContributionAmount.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.progressContributionAmount.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Contribution amount presence and values, progress transitions, completion thresholds, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.requirementsList",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.requirementsList",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.requirementsList as a required array of CriteriaRequirement structures.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing requirementsList.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.requirementsList.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Requirement-array presence, order, entry shape and values, empty/populated requirements, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.rewardQuestID",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.rewardQuestID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.rewardQuestID as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing rewardQuestID.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.rewardQuestID.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Reward quest identifier presence and values, unknown quests, populated tasks, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.sortOrder",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.sortOrder",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.sortOrder as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing sortOrder.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.sortOrder.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Sort-order presence and values, task ordering and ties, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.supersedes",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.supersedes",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.supersedes as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing supersedes.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.supersedes.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Superseded-task identifiers, absent/default behavior, task replacement transitions, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.taskName",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.taskName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.taskName as a required string structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing taskName.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.taskName.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Task-name presence and values, localization behavior, populated tasks, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.taskType",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.taskType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.taskType as a required NeighborhoodInitiativeTaskType enum structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing taskType.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.taskType.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Enum presence and values, task-type-specific behavior, unknown values, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.timesCompleted",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.timesCompleted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.timesCompleted as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing timesCompleted.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.timesCompleted.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Completion-count presence and values, increment/reset behavior, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo.tracked",
       "symbol": "C_NeighborhoodInitiative.InitiativeTaskInfo.tracked",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTaskInfo.tracked as a required boolean structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no InitiativeTaskInfo model or task records and return nil instead of publishing tracked.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused default coverage proves only that GetInitiativeTaskInfo(1) returns nil and does not establish InitiativeTaskInfo.tracked.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeTaskInfo runtime model, task state, or populated task producer exists. Tracked-state presence and values, add/remove transitions, tracked-ID consistency, updates, refresh, persistence, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTasksTracked",
