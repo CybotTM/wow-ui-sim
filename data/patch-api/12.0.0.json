@@ -54402,33 +54402,75 @@
       "id": "added:Sound_EnableEncounterWarningsSounds",
       "symbol": "Sound_EnableEncounterWarningsSounds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar Sound_EnableEncounterWarningsSounds with exact default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish Sound_EnableEncounterWarningsSounds with exact startup/default value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:Sound_EncounterWarningsVolume",
       "symbol": "Sound_EncounterWarningsVolume",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar Sound_EncounterWarningsVolume with exact default '1.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish Sound_EncounterWarningsVolume with exact startup/default value '1.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:SpellCooldownInfo.isOnGCD",
@@ -55098,17 +55140,38 @@
       "id": "added:UnitCreatureID",
       "symbol": "UnitCreatureID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitCreatureID as an added API/structure occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_misc.rs",
+          "summary": "Current modeled GUID resolution returns numeric creature ID 0 for the configured creature target and nil for the player GUID.",
+          "source_hash": "7fd14c7c58ac6278058a90499b71c76543311554247473fc234d56ecf86f860c"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/unit_api.rs",
+          "summary": "Focused behavioral test `test_unit_creature_id_target_from_guid` proves the bounded behavior described above.",
+          "source_hash": "c315b726837c2f0b873f58a2af1ec9b589f0ce3c0ad7cff6eb411f099721a550"
+        }
+      ],
+      "tests": [
+        "tests/unit_api.rs::test_unit_creature_id_target_from_guid"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "f2d131db76f52192873060d5b8fe10067fe4d13e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named focused test and current modeled/vendor behavior: Current modeled GUID resolution returns numeric creature ID 0 for the configured creature target and nil for the player GUID. Full retail semantics, invalid inputs, lifecycle, and untested unit/state cases remain unclaimed."
     },
     {
       "id": "added:UnitEmpoweredChannelDuration",
@@ -56053,17 +56116,38 @@
       "id": "added:UnitHealPredictionValues.totalDamageAbsorbs",
       "symbol": "UnitHealPredictionValues.totalDamageAbsorbs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitHealPredictionValues.totalDamageAbsorbs as an added API/structure occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current detailed heal-prediction payload publishes a numeric default of 0; focused test asserts the field alongside the existing health/incoming-heal payload.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_health_power_api.rs",
+          "summary": "Focused behavioral test `unit_detailed_heal_prediction_populates_calculator` proves the bounded behavior described above.",
+          "source_hash": "802108038745dcc1dcb4433c820374fc002a819aaa1c0887e85e43e0eea70dee"
+        }
+      ],
+      "tests": [
+        "tests/admin_health_power_api.rs::unit_detailed_heal_prediction_populates_calculator"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6592606040205b1c0692b235b751d0393eca0501",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named focused test and current modeled/vendor behavior: Current detailed heal-prediction payload publishes a numeric default of 0; focused test asserts the field alongside the existing health/incoming-heal payload. Full retail semantics, invalid inputs, lifecycle, and untested unit/state cases remain unclaimed."
     },
     {
       "id": "added:UnitHealPredictionValues.totalHealAbsorbs",
@@ -56223,17 +56307,38 @@
       "id": "added:UnitIsHumanPlayer",
       "symbol": "UnitIsHumanPlayer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitIsHumanPlayer as an added API/structure occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_probes.rs",
+          "summary": "Current modeled token resolution returns true for player/party and false for unset target/pet.",
+          "source_hash": "7c6918670c333a3230f9b02559a37a5a27ae07fdb1934d90242871b2f3f3952d"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/startup_api_widgets.rs",
+          "summary": "Focused behavioral test `unit_is_human_player_matches_simulated_player_tokens` proves the bounded behavior described above.",
+          "source_hash": "427a42008ebd5bb2281d0fc396cd79378ac5e8dfaa2a450485b359f466563d8c"
+        }
+      ],
+      "tests": [
+        "tests/startup_api_widgets.rs::unit_is_human_player_matches_simulated_player_tokens"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "42a6b74518f08120215acd55337998fb20589705",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named focused test and current modeled/vendor behavior: Current modeled token resolution returns true for player/party and false for unset target/pet. Full retail semantics, invalid inputs, lifecycle, and untested unit/state cases remain unclaimed."
     },
     {
       "id": "added:UnitIsLieutenant",
@@ -56287,17 +56392,32 @@
       "id": "added:UnitIsSpellTarget",
       "symbol": "UnitIsSpellTarget",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records UnitIsSpellTarget as an added API/structure occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_deprecated_loads.rs",
+          "summary": "Focused behavioral test `blizzard_deprecated_unit_is_spell_target_returns_false_for_non_player_target` proves the bounded behavior described above.",
+          "source_hash": "24cd1fdb77acb26ff99f081982f7c073c486403038019a8a77bbaaf685e52e8b"
+        }
+      ],
+      "tests": [
+        "tests/blizzard_deprecated_loads.rs::blizzard_deprecated_unit_is_spell_target_returns_false_for_non_player_target"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "0b6bc9a3a6cbabca0c0e38c5789c7896fb562c61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to the named focused test and current modeled/vendor behavior: Deprecated vendor shim publication is proven, and the focused test proves a non-player target returns false. Full retail semantics, invalid inputs, lifecycle, and untested unit/state cases remain unclaimed."
     },
     {
       "id": "added:UnitNameFromGUID",
@@ -56575,273 +56695,630 @@
       "id": "added:WorldTextCritScreenY_v2",
       "symbol": "WorldTextCritScreenY_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextCritScreenY_v2 with exact default '0.0275'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextCritScreenY_v2 with exact startup/default value '0.0275'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextGravity_v2",
       "symbol": "WorldTextGravity_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextGravity_v2 with exact default '0.500000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextGravity_v2 with exact startup/default value '0.500000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextMinAlpha_v2",
       "symbol": "WorldTextMinAlpha_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextMinAlpha_v2 with exact default '0.500000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextMinAlpha_v2 with exact startup/default value '0.500000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextNonRandomZ_v2",
       "symbol": "WorldTextNonRandomZ_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextNonRandomZ_v2 with exact default '2.5'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextNonRandomZ_v2 with exact startup/default value '2.5'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextRampDuration_v2",
       "symbol": "WorldTextRampDuration_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextRampDuration_v2 with exact default '1.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextRampDuration_v2 with exact startup/default value '1.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextRampPowCrit_v2",
       "symbol": "WorldTextRampPowCrit_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextRampPowCrit_v2 with exact default '8.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextRampPowCrit_v2 with exact startup/default value '8.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextRampPow_v2",
       "symbol": "WorldTextRampPow_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextRampPow_v2 with exact default '1.900000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextRampPow_v2 with exact startup/default value '1.900000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextRandomXY_v2",
       "symbol": "WorldTextRandomXY_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextRandomXY_v2 with exact default '0.0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextRandomXY_v2 with exact startup/default value '0.0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextRandomZMax_v2",
       "symbol": "WorldTextRandomZMax_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextRandomZMax_v2 with exact default '1.5'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextRandomZMax_v2 with exact startup/default value '1.5'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextRandomZMin_v2",
       "symbol": "WorldTextRandomZMin_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextRandomZMin_v2 with exact default '0.8'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextRandomZMin_v2 with exact startup/default value '0.8'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextScale_v2",
       "symbol": "WorldTextScale_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextScale_v2 with exact default '1.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextScale_v2 with exact startup/default value '1.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextScreenY_v2",
       "symbol": "WorldTextScreenY_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextScreenY_v2 with exact default '0.015'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextScreenY_v2 with exact startup/default value '0.015'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:WorldTextStartPosRandomness_v2",
       "symbol": "WorldTextStartPosRandomness_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar WorldTextStartPosRandomness_v2 with exact default '1.0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish WorldTextStartPosRandomness_v2 with exact startup/default value '1.0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:addonChatRestrictionsForced",
       "symbol": "addonChatRestrictionsForced",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar addonChatRestrictionsForced with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish addonChatRestrictionsForced with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:alwaysShowRuneIcons",
       "symbol": "alwaysShowRuneIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar alwaysShowRuneIcons with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish alwaysShowRuneIcons with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:auctionSortByBuyoutPrice",
       "symbol": "auctionSortByBuyoutPrice",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar auctionSortByBuyoutPrice with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish auctionSortByBuyoutPrice with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:auctionSortByUnitPrice",
       "symbol": "auctionSortByUnitPrice",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar auctionSortByUnitPrice with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish auctionSortByUnitPrice with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:canaccessallvalues",
@@ -56911,65 +57388,149 @@
       "id": "added:chatBubblesRaid",
       "symbol": "chatBubblesRaid",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar chatBubblesRaid with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish chatBubblesRaid with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:combatWarningsEnabled",
       "symbol": "combatWarningsEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar combatWarningsEnabled with exact default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish combatWarningsEnabled with exact startup/default value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:damageMeterEnabled",
       "symbol": "damageMeterEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar damageMeterEnabled with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish damageMeterEnabled with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:disableSuggestedLevelActivityFilter",
       "symbol": "disableSuggestedLevelActivityFilter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar disableSuggestedLevelActivityFilter with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish disableSuggestedLevelActivityFilter with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for all 23 selected CVars against exact source-register defaults.",
+          "source_hash": "bd7d8054f97585e8cfa75f2c885b06fd2268430746a01889e2d6547141a66a24"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. Rendering, audio/UI effects, policy enforcement, persistence timing, validation/clamping, and consumer semantics are not claimed."
     },
     {
       "id": "added:docs.extra_apis.C_CombatLogInternal.GetCurrentEventInfo",

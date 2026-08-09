@@ -1,3 +1,11 @@
+## [2026-08-09] investigation | Classify 23 CVar-default rows
+
+Classified 23 added CVar-default rows as bounded `best-effort`/`behavioral` claims using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; mutation, events, persistence, secure/read-only flags, consumers, and later-epoch behavior remain unclaimed. Current totals are **827 best-effort, 687 evidence-required, 2 exception-requested, and 1894 untriaged** (3410 rows).
+
+## [2026-08-09] investigation | Classify four unit/heal-prediction rows
+
+Classified `UnitCreatureID`, `UnitIsHumanPlayer`, `UnitIsSpellTarget`, and `UnitHealPredictionValues.totalDamageAbsorbs` as bounded `best-effort`/`behavioral` claims. Existing focused tests cover the token/GUID/vendor-shim cases; `unit_detailed_heal_prediction_populates_calculator` now asserts the numeric zero absorb field. Full retail semantics, invalid inputs, lifecycle, and untested states remain unclaimed. Current totals are **804 best-effort, 687 evidence-required, 2 exception-requested, and 1917 untriaged**.
+
 ## [2026-08-09] investigation | Classify miscellaneous payload fields
 
 Classified eight ExpansionDisplayInfo, LuaColorCurvePoint, PrivateAuraIconInfo, and SpellCooldownInfo structure fields as `evidence-required`/`unsafe`. Current behavior is absent, nil-only, generic, or placeholder-backed and does not establish exact contracts, state/security, or consumer semantics; tests remain empty with null commit, approval, and scope exception. Current totals are **800 best-effort, 687 evidence-required, 2 exception-requested, and 1921 untriaged**.

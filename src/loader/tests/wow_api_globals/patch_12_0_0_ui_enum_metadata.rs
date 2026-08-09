@@ -238,6 +238,57 @@ fn test_patch_12_0_0_ui_global_constant_values() {
 }
 
 #[test]
+fn test_patch_12_0_0_cvar_defaults() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local expected = {
+                    Sound_EnableEncounterWarningsSounds = "1",
+                    Sound_EncounterWarningsVolume = "1.000000",
+                    WorldTextCritScreenY_v2 = "0.0275",
+                    WorldTextGravity_v2 = "0.500000",
+                    WorldTextMinAlpha_v2 = "0.500000",
+                    WorldTextNonRandomZ_v2 = "2.5",
+                    WorldTextRampDuration_v2 = "1.000000",
+                    WorldTextRampPowCrit_v2 = "8.000000",
+                    WorldTextRampPow_v2 = "1.900000",
+                    WorldTextRandomXY_v2 = "0.0",
+                    WorldTextRandomZMax_v2 = "1.5",
+                    WorldTextRandomZMin_v2 = "0.8",
+                    WorldTextScale_v2 = "1.000000",
+                    WorldTextScreenY_v2 = "0.015",
+                    WorldTextStartPosRandomness_v2 = "1.0",
+                    addonChatRestrictionsForced = "0",
+                    alwaysShowRuneIcons = "0",
+                    auctionSortByBuyoutPrice = "0",
+                    auctionSortByUnitPrice = "0",
+                    chatBubblesRaid = "0",
+                    combatWarningsEnabled = "1",
+                    damageMeterEnabled = "0",
+                    disableSuggestedLevelActivityFilter = "0",
+                }
+                for name, expected_value in pairs(expected) do
+                    local value = GetCVar(name)
+                    if value ~= expected_value then
+                        return name .. ":value=" .. tostring(value)
+                    end
+                    local default_value = GetCVarDefault(name)
+                    if default_value ~= expected_value then
+                        return name .. ":default=" .. tostring(default_value)
+                    end
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "retail 12.0.0 CVar defaults did not match the source register"
+    );
+}
+
+#[test]
 fn test_patch_12_0_0_cooldown_alert_event_type_omits_later_members() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
