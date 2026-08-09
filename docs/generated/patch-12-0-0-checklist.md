@@ -467,7 +467,7 @@
 467. [evidence-required] `added:C_NeighborhoodInitiative.RequestNeighborhoodInitiativeInfo` — unsafe
 468. [evidence-required] `added:C_NeighborhoodInitiative.SetActiveNeighborhood` — unsafe
 469. [evidence-required] `added:C_NeighborhoodInitiative.SetViewingNeighborhood` — unsafe
-470. [untriaged] `added:C_Ping.IsPingSystemEnabled` — untriaged
+470. [evidence-required] `added:C_Ping.IsPingSystemEnabled` — unsafe
 471. [untriaged] `added:C_PvP.AreTrainingGroundsEnabled` — untriaged
 472. [best-effort] `added:C_PvP.BattlegroundInfo` — provenance-only
 473. [untriaged] `added:C_PvP.BattlegroundInfo.battlegroundID` — untriaged

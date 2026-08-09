@@ -535,7 +535,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_NeighborhoodInitiative.RequestNeighborhoodInitiativeInfo` | evidence-required | api | added | Evidence required: no initiative-info request state or populated producer exists. Request timing, empty/populated results, completion events, failure behavior, refresh, persistence, and lifecycle remain unproven. |
 | `C_NeighborhoodInitiative.SetActiveNeighborhood` | evidence-required | api | added | Evidence required: no active-neighborhood state model exists. GUID validation, valid/invalid and unavailable neighborhoods, state transitions, refresh, events, persistence, and lifecycle remain unproven. |
 | `C_NeighborhoodInitiative.SetViewingNeighborhood` | evidence-required | api | added | Evidence required: no viewing-neighborhood state model exists. GUID validation, valid/invalid and unavailable neighborhoods, view transitions, refresh, events, persistence, and lifecycle remain unproven. |
-| `C_Ping.IsPingSystemEnabled` | untriaged | api | added | api added in 12.0.0. |
+| `C_Ping.IsPingSystemEnabled` | evidence-required | api | added | Evidence required: no ping-system availability state or explicit boolean implementation exists. Enabled/disabled states, player and context changes, transitions, refresh, events, and lifecycle remain unproven. |
 | `C_PvP.AreTrainingGroundsEnabled` | untriaged | api | added | api added in 12.0.0. |
 | `C_PvP.BattlegroundInfo` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
 | `C_PvP.BattlegroundInfo.battlegroundID` | untriaged | structure-field | added | structure-field added in 12.0.0. |

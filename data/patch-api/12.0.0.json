@@ -15463,17 +15463,36 @@
       "id": "added:C_Ping.IsPingSystemEnabled",
       "symbol": "C_Ping.IsPingSystemEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsPingSystemEnabled as a no-argument API returning a required boolean isEnabled value.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ping_defaults.rs",
+          "summary": "Current temporary ping defaults model options and macro-send failure only; no ping-enabled state or IsPingSystemEnabled implementation exists.",
+          "source_hash": "05461b4416f60986b9aa6042e55cfacd5f3a7b01d6cdcc779d2ad7fee45ff08f"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback does not provide a modeled ping-enabled boolean or state transitions.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no ping-system availability state or explicit boolean implementation exists. Enabled/disabled states, player and context changes, transitions, refresh, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_PvP.AreTrainingGroundsEnabled",
