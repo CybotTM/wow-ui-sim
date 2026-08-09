@@ -370,7 +370,7 @@
 370. [evidence-required] `added:C_InstanceEncounter.IsEncounterLimitingResurrections` — unsafe
 371. [evidence-required] `added:C_InstanceEncounter.IsEncounterSuppressingRelease` — unsafe
 372. [evidence-required] `added:C_InstanceEncounter.ShouldShowTimelineForEncounter` — unsafe
-373. [untriaged] `added:C_Item.IsItemBindToAccount` — untriaged
+373. [evidence-required] `added:C_Item.IsItemBindToAccount` — unsafe
 374. [untriaged] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle1` — untriaged
 375. [untriaged] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle2` — untriaged
 376. [untriaged] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle3` — untriaged

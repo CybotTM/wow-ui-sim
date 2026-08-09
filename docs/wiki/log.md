@@ -2,6 +2,10 @@
 
 Classified `C_InstanceEncounter.IsEncounterInProgress` as best-effort/behavioral: its state-backed boolean query shares `world.encounter_in_progress` with the legacy global, and a focused test proves false by default and true when enabled; encounter producers, events, and lifecycle remain unclaimed. Classified `C_InstanceEncounter.IsEncounterLimitingResurrections` as evidence-required/unsafe because no resurrection-limiting state or explicit method is modeled, and the generic nil fallback does not satisfy the required boolean contract. Current totals are **886 best-effort, 787 evidence-required, 2 exception-requested, and 1735 untriaged** (3410 rows).
 
+## [2026-08-09] investigation | Classify C_Item account-binding row
+
+Classified `C_Item.IsItemBindToAccount` as evidence-required/unsafe: the target method is absent; related `IsBound` and `IsBoundToAccountUntilEquip` reuse constant false; current item records have numeric bonding metadata but no bonding 7 or 8 positive account-bound fixture; and generic missing-method fallback returns nil. ItemInfo parsing, true/false classification, unknown-item behavior, and binding fidelity remain unproven. Current totals are **886 best-effort, 790 evidence-required, 2 exception-requested, and 1732 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify two additional C_InstanceEncounter rows
 
 Classified `C_InstanceEncounter.IsEncounterSuppressingRelease` and `C_InstanceEncounter.ShouldShowTimelineForEncounter` as evidence-required/unsafe because no explicit methods or backing state exist, and generic nil fallback does not satisfy their required boolean contracts. Current totals are **886 best-effort, 789 evidence-required, 2 exception-requested, and 1733 untriaged** (3410 rows).

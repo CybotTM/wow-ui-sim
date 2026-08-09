@@ -12130,17 +12130,42 @@
       "id": "added:C_Item.IsItemBindToAccount",
       "symbol": "C_Item.IsItemBindToAccount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsItemBindToAccount(itemInfo: string) returning one required boolean isItemBindToAccount result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/item_spell/c_item.rs",
+          "summary": "Current explicit C_Item surface omits IsItemBindToAccount; the related IsBound and IsBoundToAccountUntilEquip registrations both reuse a constant-false placeholder rather than item binding metadata.",
+          "source_hash": "94fb0015a1a8976112d95e23a1f18ee7dcb98df586b416a4c5389e90cc65e89a"
+        },
+        {
+          "kind": "source",
+          "reference": "data/items.rs",
+          "summary": "Checked-in item records carry numeric bonding metadata, but contain no bonding 7 or 8 account-bound fixtures; the dataset has only values 0, 1, 2, and one value 9, so no representative positive API behavior is available.",
+          "source_hash": "596e4ee186c4740e2dce06f7c199ef769280182f796cb8a36a94f5075750bf9d"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic namespace fallback synthesizes the missing method as a nil-returning placeholder, which does not satisfy the required boolean contract or account-binding semantics.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the target method is absent, related binding probes are constant false, and the checked-in item dataset lacks account-bound bonding 7/8 fixtures. ItemInfo parsing, true/false classification, unknown-item behavior, and binding-state fidelity remain unproven."
     },
     {
       "id": "added:C_LFGList.AdvancedFilterOptions.generalPlaystyle1",

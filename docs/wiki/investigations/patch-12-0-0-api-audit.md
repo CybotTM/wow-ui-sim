@@ -4,9 +4,11 @@
 
 ## Content
 
-Current manifest totals are **886 best-effort, 789 evidence-required, 2 exception-requested, and 1733 untriaged rows** (3410 total).
+Current manifest totals are **886 best-effort, 790 evidence-required, 2 exception-requested, and 1732 untriaged rows** (3410 total).
 
 The bounded `C_InstanceEncounter` slice classifies `C_InstanceEncounter.IsEncounterInProgress` as best-effort/behavioral: its state-backed boolean query shares `world.encounter_in_progress` with the legacy global, and a focused test proves false by default and true when enabled; encounter producers, events, and lifecycle remain unclaimed. `C_InstanceEncounter.IsEncounterLimitingResurrections` is evidence-required/unsafe because no resurrection-limiting state or explicit method is modeled, and the generic nil fallback does not satisfy the required boolean contract. `C_InstanceEncounter.IsEncounterSuppressingRelease` and `C_InstanceEncounter.ShouldShowTimelineForEncounter` are evidence-required/unsafe because no explicit methods or backing state exist, and generic nil fallback does not satisfy their required boolean contracts.
+
+`C_Item.IsItemBindToAccount` is evidence-required/unsafe because the target method is absent; related `IsBound` and `IsBoundToAccountUntilEquip` reuse constant false, current item records have numeric bonding metadata but no bonding 7 or 8 positive account-bound fixture, and generic missing-method fallback returns nil. ItemInfo parsing, true/false classification, unknown-item behavior, and binding fidelity remain unproven.
 
 The bounded eleven-field `HousingPreviewItemData` slice classifies `bundleCatalogShopProductID`, `decorGUID`, `decorID`, `icon`, `id`, `isBundleChild`, `isBundleParent`, `name`, `price`, `productID`, and `salePrice` as evidence-required/unsafe: no typed `HousingPreviewItemData` producer exists; related catalog/decor/bundle fixture fields do not establish these specific fields, nullability, identities, bundle relationships, pricing, validation, event/preview-list production, refresh, persistence, or lifecycle. No approval or exception applies.
 
