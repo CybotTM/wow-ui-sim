@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_MajorFactions.MajorFactionData.playerCompanionID
+
+Classified `C_MajorFactions.MajorFactionData.playerCompanionID` as evidence-required/unsafe: the source requires a nullable number, but current `MajorFactionData` has no companion association and `GetMajorFactionData` omits the field. Present/nil behavior, authoritative IDs, per-faction values, unknown behavior, mutation, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 796 evidence-required, 2 exception-requested, and 1721 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_MajorFactions.MajorFactionData.highlights
 
 Classified `C_MajorFactions.MajorFactionData.highlights` as evidence-required/unsafe: the source requires an array of `RenownHighlightInfo`, but the current `MajorFactionData` has no highlights state and `GetMajorFactionData` emits no array. Element schema/order, empty/non-empty behavior, per-faction values, mutation, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 795 evidence-required, 2 exception-requested, and 1722 untriaged** (3410 rows).

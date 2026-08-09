@@ -381,7 +381,7 @@
 381. [evidence-required] `added:C_LimitedInput.LimitedInputAllowed` — unsafe
 382. [evidence-required] `added:C_MajorFactions.MajorFactionData.description` — unsafe
 383. [evidence-required] `added:C_MajorFactions.MajorFactionData.highlights` — unsafe
-384. [untriaged] `added:C_MajorFactions.MajorFactionData.playerCompanionID` — untriaged
+384. [evidence-required] `added:C_MajorFactions.MajorFactionData.playerCompanionID` — unsafe
 385. [untriaged] `added:C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` — untriaged
 386. [best-effort] `added:C_MajorFactions.RenownHighlightInfo` — provenance-only
 387. [untriaged] `added:C_MajorFactions.RenownHighlightInfo.description` — untriaged
