@@ -1,11 +1,11 @@
-1. [untriaged] `added:ADDON_RESTRICTION_STATE_CHANGED` — untriaged
+1. [evidence-required] `added:ADDON_RESTRICTION_STATE_CHANGED` — unsafe
 2. [best-effort] `added:AbbreviateConfig` — behavioral
 3. [best-effort] `added:AbbreviateConfig.GetAbbreviateNumberData` — behavioral
 4. [best-effort] `added:AbbreviateConfig.SetAbbreviateNumberData` — behavioral
 5. [evidence-required] `added:AbbreviateLargeNumbers` — unsafe
 6. [evidence-required] `added:AbbreviateNumbers` — unsafe
 7. [best-effort] `added:AddSourceLocationExclude` — behavioral
-8. [untriaged] `added:BULK_PURCHASE_RESULT_RECEIVED` — untriaged
+8. [evidence-required] `added:BULK_PURCHASE_RESULT_RECEIVED` — unsafe
 9. [best-effort] `added:CAAEnabled` — behavioral
 10. [best-effort] `added:CAAInterruptCast` — behavioral
 11. [best-effort] `added:CAAInterruptCastSuccess` — behavioral

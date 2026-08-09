@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify two 12.0.0 event rows
+
+Classified `ADDON_RESTRICTION_STATE_CHANGED` and `BULK_PURCHASE_RESULT_RECEIVED` as `evidence-required`/`unsafe`. Registration and enum publication exist, but no modeled transition/purchase producer or focused proof establishes exact payload values/structures/arity, synchronous timing, ordering, duplicate behavior, lifecycle, or consumers. Current totals are **835 best-effort, 691 evidence-required, 2 exception-requested, and 1882 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify three global-utility rows
 
 Classified `AbbreviateLargeNumbers` and `AbbreviateNumbers` as `evidence-required`/`unsafe` because temporary fallbacks ignore `NumberAbbrevOptions` and do not model abbreviation, localization, or validation. Classified `AddSourceLocationExclude` as bounded `best-effort`/`behavioral` for nil-guarded global publication and successful string-argument no-op invocation through `installs_debug_environment_defaults`; exclusion, filtering, and debug semantics remain unclaimed. Current totals are **835 best-effort, 689 evidence-required, 2 exception-requested, and 1884 untriaged** (3410 rows).

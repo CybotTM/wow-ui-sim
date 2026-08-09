@@ -23,17 +23,36 @@
       "id": "added:ADDON_RESTRICTION_STATE_CHANGED",
       "symbol": "ADDON_RESTRICTION_STATE_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines synchronous ADDON_RESTRICTION_STATE_CHANGED payloads type: Enum.AddOnRestrictionType and state: Enum.AddOnRestrictionState.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts ADDON_RESTRICTION_STATE_CHANGED, but registration does not establish production or payload behavior.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/restricted_actions_defaults.rs",
+          "summary": "Current restricted-actions compatibility fallback returns constant state 0 and has no modeled restriction-state transitions or event producer.",
+          "source_hash": "c42575519f2887b464fdb2c893071347cce1ffcc7f9ceaef6462509d04bd0260"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled addon-restriction transition producer or focused proof establishes exact enum payload values, synchronous timing, ordering, duplicate suppression, or lifecycle behavior."
     },
     {
       "id": "added:AbbreviateConfig",
@@ -257,17 +276,36 @@
       "id": "added:BULK_PURCHASE_RESULT_RECEIVED",
       "symbol": "BULK_PURCHASE_RESULT_RECEIVED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines synchronous BULK_PURCHASE_RESULT_RECEIVED payloads result: Enum.BulkPurchaseResult and productResults: C_CatalogShop.BulkPurchaseIndividualProductResult[].",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts BULK_PURCHASE_RESULT_RECEIVED, but registration does not establish production or payload behavior.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current compatibility enum data publishes BulkPurchaseResult values, but no bulk-purchase state model or typed product-result payload producer exists.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled bulk-purchase producer or focused proof establishes exact result values, product-result structures, payload arity, consumer behavior, synchronous timing, ordering, or lifecycle semantics."
     },
     {
       "id": "added:CAAEnabled",
