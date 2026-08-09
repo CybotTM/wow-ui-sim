@@ -11323,177 +11323,320 @@
       "id": "added:C_HousingCatalog.HousingPreviewItemData.bundleCatalogShopProductID",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.bundleCatalogShopProductID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.bundleCatalogShopProductID as nullable number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish bundleCatalogShopProductID field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so bundle product identity and nil/populated behavior, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.decorGUID",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.decorGUID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.decorGUID as nullable string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish decorGUID field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so preview decor GUID identity and nil/populated behavior, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.decorID",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.decorID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.decorID as required number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish decorID field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so preview decor identity, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.icon",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.icon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.icon as required number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish icon field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so numeric preview icon identity, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.id",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.id",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.id as required number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish id field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so preview-item identity, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.isBundleChild",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.isBundleChild",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.isBundleChild as required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish isBundleChild field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so bundle-child classification, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.isBundleParent",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.isBundleParent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.isBundleParent as required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish isBundleParent field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so bundle-parent classification, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.name",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.name as required string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish name field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so preview-item naming, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.price",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.price",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.price as required number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish price field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so preview-item base pricing, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.productID",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.productID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.productID as nullable number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish productID field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so market product identity and nil/populated behavior, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.HousingPreviewItemData.salePrice",
       "symbol": "C_HousingCatalog.HousingPreviewItemData.salePrice",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingPreviewItemData.salePrice as nullable number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing catalog state has no typed HousingPreviewItemData producer and does not establish salePrice field semantics.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no HousingPreviewItemData producer publishes this field, so sale pricing and nil/populated behavior, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled."
     },
     {
       "id": "added:C_HousingCatalog.IsPreviewCartItemShown",

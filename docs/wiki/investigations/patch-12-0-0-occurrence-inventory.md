@@ -25,6 +25,8 @@ The bounded two-field `HousingBundleInfo` slice classifies `canPreview` as best-
 
 The bounded three-field `HousingCatalogEntryInfo` slice classifies `isUniqueTrophy` and `itemID` as best-effort/behavioral only for tested seeded entry 1001 boolean false and numeric 1001 publication. Exact trophy classification, nullable/missing item IDs, other entries, authoritative item data, validation, mutation, persistence, refresh, and lifecycle remain unclaimed. `dyeIDs` is evidence-required/unsafe because catalog payloads omit the required numeric array and have no dye-ID state.
 
+The bounded eleven-field `HousingPreviewItemData` slice classifies `bundleCatalogShopProductID`, `decorGUID`, `decorID`, `icon`, `id`, `isBundleChild`, `isBundleParent`, `name`, `price`, `productID`, and `salePrice` as evidence-required/unsafe. No typed preview-item payload producer exists; related catalog/decor/bundle fixture fields do not establish these specific fields, nullability, identities, relationships, pricing, validation, event/preview-list production, refresh, persistence, or lifecycle.
+
 The bounded 33-row 12.0.0 CAA CVar-default slice classifies the existing 27 CAA CVars plus six additional target-health, voice, and volume CAA CVars as best-effort/behavioral using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed.
 
 The bounded six-row `C_AdventureMap.GetQuestPortraitInfo` slice classifies the API plus five portrait fields as best-effort/behavioral from focused `tests/c_adventure_map/quests.rs` proof. Claims cover injected-state lookup, typed five-field publication, unknown/nonnumeric zero-value returns, nullable `modelSceneID`, and tested display-ID gating. Retail data population, localization, full validation/edge behavior, assets/rendering, and lifecycle remain unclaimed. `modelSceneID` is treated strictly as data under the existing permanent no-3D scope; no 3D implementation or new exception is requested.
@@ -52,7 +54,7 @@ The bounded 12.0.0 `C_CombatLogSecure` slice classifies exactly nine added secur
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 878 best-effort, 772 evidence-required, 2 exception-requested, 1758 untriaged
+- **Rows:** 3410 total — 0 implemented, 878 best-effort, 783 evidence-required, 2 exception-requested, 1747 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -407,17 +409,17 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_HousingCatalog.HousingCatalogEntryInfo.isUniqueTrophy` | best-effort | structure-field | added | Best-effort behavioral evidence is limited to seeded entry 1001 publication of boolean isUniqueTrophy=false. Exact trophy classification, other entries, mutation, persistence, refresh, validation, and lifecycle remain unclaimed. |
 | `C_HousingCatalog.HousingCatalogEntryInfo.itemID` | best-effort | structure-field | added | Best-effort behavioral evidence is limited to seeded entry 1001 numeric itemID publication. Nullable/missing-item cases, authoritative item data, other entries, validation, mutation, persistence, refresh, and lifecycle remain unclaimed. |
 | `C_HousingCatalog.HousingPreviewItemData` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
-| `C_HousingCatalog.HousingPreviewItemData.bundleCatalogShopProductID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.decorGUID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.decorID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.icon` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.id` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.isBundleChild` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.isBundleParent` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.name` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.price` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.productID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `C_HousingCatalog.HousingPreviewItemData.salePrice` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `C_HousingCatalog.HousingPreviewItemData.bundleCatalogShopProductID` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so bundle product identity and nil/populated behavior, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.decorGUID` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so preview decor GUID identity and nil/populated behavior, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.decorID` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so preview decor identity, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.icon` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so numeric preview icon identity, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.id` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so preview-item identity, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.isBundleChild` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so bundle-child classification, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.isBundleParent` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so bundle-parent classification, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.name` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so preview-item naming, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.price` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so preview-item base pricing, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.productID` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so market product identity and nil/populated behavior, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
+| `C_HousingCatalog.HousingPreviewItemData.salePrice` | evidence-required | structure-field | added | Evidence required: no HousingPreviewItemData producer publishes this field, so sale pricing and nil/populated behavior, payload shape, validation, event/preview-list production, refresh, persistence, and lifecycle remain unmodeled. |
 | `C_HousingCatalog.IsPreviewCartItemShown` | untriaged | api | added | api added in 12.0.0. |
 | `C_HousingCatalog.PromotePreviewDecor` | untriaged | api | added | api added in 12.0.0. |
 | `C_HousingCatalog.RequestHousingMarketRefundInfo` | untriaged | api | added | api added in 12.0.0. |

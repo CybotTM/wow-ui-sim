@@ -2,7 +2,7 @@
 
 LLM-maintained knowledge base for the wow-ui-sim project.
 
-| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 878 best-effort rows; 772 evidence-required, 2 exception-requested, and 1758 untriaged rows (3410 total). `HousingCatalogEntryInfo.isUniqueTrophy` and `itemID` are best-effort/behavioral only for focused seeded entry 1001 proof of boolean false and numeric 1001; exact trophy classification, nullable/missing item IDs, other entries, authoritative item data, validation, mutation, persistence, refresh, and lifecycle remain unclaimed. `HousingCatalogEntryInfo.dyeIDs` is evidence-required/unsafe because the required numeric-array field is absent and no dye-ID state exists. |
+| [[patch-12-0-0-api-audit]] | 12.0.0 wowless snapshot audit: 878 best-effort rows; 783 evidence-required, 2 exception-requested, and 1747 untriaged rows (3410 total). `HousingPreviewItemData.bundleCatalogShopProductID`, `decorGUID`, `decorID`, `icon`, `id`, `isBundleChild`, `isBundleParent`, `name`, `price`, `productID`, and `salePrice` are evidence-required/unsafe: no typed `HousingPreviewItemData` producer exists; related catalog/decor/bundle fixture fields do not establish these specific fields, nullability, identities, bundle relationships, pricing, validation, event/preview-list production, refresh, persistence, or lifecycle. No approval or exception applies. |
 
 ## design/
 

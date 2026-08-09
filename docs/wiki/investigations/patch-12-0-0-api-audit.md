@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **878 best-effort, 772 evidence-required, 2 exception-requested, and 1758 untriaged rows** (3410 total).
+Current manifest totals are **878 best-effort, 783 evidence-required, 2 exception-requested, and 1747 untriaged rows** (3410 total).
+
+The bounded eleven-field `HousingPreviewItemData` slice classifies `bundleCatalogShopProductID`, `decorGUID`, `decorID`, `icon`, `id`, `isBundleChild`, `isBundleParent`, `name`, `price`, `productID`, and `salePrice` as evidence-required/unsafe: no typed `HousingPreviewItemData` producer exists; related catalog/decor/bundle fixture fields do not establish these specific fields, nullability, identities, bundle relationships, pricing, validation, event/preview-list production, refresh, persistence, or lifecycle. No approval or exception applies.
 
 The bounded three-field `HousingCatalogEntryInfo` slice classifies `isUniqueTrophy` and `itemID` as best-effort/behavioral only for focused seeded entry 1001 proof of boolean false and numeric 1001; exact trophy classification, nullable/missing item IDs, other entries, authoritative item data, validation, mutation, persistence, refresh, and lifecycle remain unclaimed. `dyeIDs` is evidence-required/unsafe because the required numeric-array field is absent and no dye-ID state exists.
 
