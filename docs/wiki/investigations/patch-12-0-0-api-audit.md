@@ -4,13 +4,15 @@
 
 ## Content
 
-Current manifest totals are **889 best-effort, 790 evidence-required, 2 exception-requested, and 1729 untriaged rows** (3410 total).
+Current manifest totals are **890 best-effort, 790 evidence-required, 2 exception-requested, and 1728 untriaged rows** (3410 total).
 
 `C_LFGList.AdvancedFilterOptions.generalPlaystyle1` is best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean `generalPlaystyle1` with exact default false from modeled `LfgAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves the default. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed.
 
 `C_LFGList.AdvancedFilterOptions.generalPlaystyle2` is best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean `generalPlaystyle2` with exact default false from modeled state; the existing `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves the default. Mutation, serialization, validation, search filtering, persistence, refresh, and broader retail LFG semantics remain unclaimed.
 
 `C_LFGList.AdvancedFilterOptions.generalPlaystyle3` is best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean `generalPlaystyle3` with exact default false from modeled state; the existing focused test proves the default. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed.
+
+`C_LFGList.AdvancedFilterOptions.generalPlaystyle4` is best-effort/behavioral, bounded to modeled boolean publication and exact false default through `GetAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves it. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed.
 
 The bounded `C_InstanceEncounter` slice classifies `C_InstanceEncounter.IsEncounterInProgress` as best-effort/behavioral: its state-backed boolean query shares `world.encounter_in_progress` with the legacy global, and a focused test proves false by default and true when enabled; encounter producers, events, and lifecycle remain unclaimed. `C_InstanceEncounter.IsEncounterLimitingResurrections` is evidence-required/unsafe because no resurrection-limiting state or explicit method is modeled, and the generic nil fallback does not satisfy the required boolean contract. `C_InstanceEncounter.IsEncounterSuppressingRelease` and `C_InstanceEncounter.ShouldShowTimelineForEncounter` are evidence-required/unsafe because no explicit methods or backing state exist, and generic nil fallback does not satisfy their required boolean contracts.
 
