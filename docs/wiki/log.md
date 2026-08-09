@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify 12.0.0 housing payload fields
+
+Classified 16 exterior size/type, house-level, and decor-refund structure fields as `evidence-required`/`unsafe`. Current temporary housing data is absent or fixture-backed and does not establish exact contracts, authoritative values, state transitions, ordering/localization, or consumer behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **795 best-effort, 659 evidence-required, 2 exception-requested, and 1954 untriaged**.
+
 ## [2026-08-08] investigation | Classify 12.0.0 general events
 
 Classified nine faction, initiative, loot-rule, nameplate, and neighborhood events as `evidence-required`/`unsafe`. Retail registration exists, but no modeled producer or focused proof establishes each source payload contract, timing, lifecycle, ordering, or duplicate behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **795 best-effort, 643 evidence-required, 2 exception-requested, and 1970 untriaged**.

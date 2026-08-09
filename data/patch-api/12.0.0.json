@@ -50367,49 +50367,88 @@
       "id": "added:HouseExteriorSizeOption.isLocked",
       "symbol": "HouseExteriorSizeOption.isLocked",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorSizeOption.isLocked as an added structure field with contract {\"type\":\"boolean\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorSizeOption.isLocked; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorSizeOption.isLocked contract ({\"type\":\"boolean\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseExteriorSizeOption.name",
       "symbol": "HouseExteriorSizeOption.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorSizeOption.name as an added structure field with contract {\"type\":\"string\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorSizeOption.name; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorSizeOption.name contract ({\"type\":\"string\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseExteriorSizeOption.size",
       "symbol": "HouseExteriorSizeOption.size",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorSizeOption.size as an added structure field with contract {\"type\":{\"enum\":\"HousingFixtureSize\"}}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorSizeOption.size; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorSizeOption.size contract ({\"type\":{\"enum\":\"HousingFixtureSize\"}}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseExteriorSizeOptionsInfo",
@@ -50439,33 +50478,59 @@
       "id": "added:HouseExteriorSizeOptionsInfo.options",
       "symbol": "HouseExteriorSizeOptionsInfo.options",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorSizeOptionsInfo.options as an added structure field with contract {\"type\":{\"arrayof\":{\"structure\":\"HouseExteriorSizeOption\"}}}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorSizeOptionsInfo.options; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorSizeOptionsInfo.options contract ({\"type\":{\"arrayof\":{\"structure\":\"HouseExteriorSizeOption\"}}}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseExteriorSizeOptionsInfo.selectedSize",
       "symbol": "HouseExteriorSizeOptionsInfo.selectedSize",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorSizeOptionsInfo.selectedSize as an added structure field with contract {\"type\":{\"enum\":\"HousingFixtureSize\"}}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorSizeOptionsInfo.selectedSize; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorSizeOptionsInfo.selectedSize contract ({\"type\":{\"enum\":\"HousingFixtureSize\"}}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseExteriorTypeOption",
@@ -50511,49 +50576,88 @@
       "id": "added:HouseExteriorTypeOption.isLocked",
       "symbol": "HouseExteriorTypeOption.isLocked",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorTypeOption.isLocked as an added structure field with contract {\"type\":\"boolean\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorTypeOption.isLocked; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorTypeOption.isLocked contract ({\"type\":\"boolean\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseExteriorTypeOption.lockReasonString",
       "symbol": "HouseExteriorTypeOption.lockReasonString",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorTypeOption.lockReasonString as an added structure field with contract {\"type\":\"string\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorTypeOption.lockReasonString; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorTypeOption.lockReasonString contract ({\"type\":\"string\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseExteriorTypeOption.name",
       "symbol": "HouseExteriorTypeOption.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorTypeOption.name as an added structure field with contract {\"type\":\"string\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorTypeOption.name; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorTypeOption.name contract ({\"type\":\"string\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseExteriorTypeOptionsInfo",
@@ -50583,33 +50687,59 @@
       "id": "added:HouseExteriorTypeOptionsInfo.options",
       "symbol": "HouseExteriorTypeOptionsInfo.options",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorTypeOptionsInfo.options as an added structure field with contract {\"type\":{\"arrayof\":{\"structure\":\"HouseExteriorTypeOption\"}}}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorTypeOptionsInfo.options; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorTypeOptionsInfo.options contract ({\"type\":{\"arrayof\":{\"structure\":\"HouseExteriorTypeOption\"}}}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseExteriorTypeOptionsInfo.selectedExteriorType",
       "symbol": "HouseExteriorTypeOptionsInfo.selectedExteriorType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseExteriorTypeOptionsInfo.selectedExteriorType as an added structure field with contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseExteriorTypeOptionsInfo.selectedExteriorType; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseExteriorTypeOptionsInfo.selectedExteriorType contract ({\"type\":\"number\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseLevelInfo",
@@ -50639,97 +50769,175 @@
       "id": "added:HouseLevelInfo.exteriorDecorPlacementBudget",
       "symbol": "HouseLevelInfo.exteriorDecorPlacementBudget",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseLevelInfo.exteriorDecorPlacementBudget as an added structure field with contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseLevelInfo.exteriorDecorPlacementBudget; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseLevelInfo.exteriorDecorPlacementBudget contract ({\"type\":\"number\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseLevelInfo.exteriorFixtureBudget",
       "symbol": "HouseLevelInfo.exteriorFixtureBudget",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseLevelInfo.exteriorFixtureBudget as an added structure field with contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseLevelInfo.exteriorFixtureBudget; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseLevelInfo.exteriorFixtureBudget contract ({\"type\":\"number\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseLevelInfo.interiorDecorPlacementBudget",
       "symbol": "HouseLevelInfo.interiorDecorPlacementBudget",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseLevelInfo.interiorDecorPlacementBudget as an added structure field with contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseLevelInfo.interiorDecorPlacementBudget; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseLevelInfo.interiorDecorPlacementBudget contract ({\"type\":\"number\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseLevelInfo.level",
       "symbol": "HouseLevelInfo.level",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseLevelInfo.level as an added structure field with contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseLevelInfo.level; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseLevelInfo.level contract ({\"type\":\"number\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HouseLevelInfo.roomPlacementBudget",
       "symbol": "HouseLevelInfo.roomPlacementBudget",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HouseLevelInfo.roomPlacementBudget as an added structure field with contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HouseLevelInfo.roomPlacementBudget; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HouseLevelInfo.roomPlacementBudget contract ({\"type\":\"number\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:HousingDecorInstanceInfo.isRefundable",
       "symbol": "HousingDecorInstanceInfo.isRefundable",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records HousingDecorInstanceInfo.isRefundable as an added structure field with contract {\"type\":\"boolean\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary housing data does not provide authoritative focused proof for HousingDecorInstanceInfo.isRefundable; fields are absent, fixed placeholders, or fixture-backed values.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current temporary housing data does not establish the exact HousingDecorInstanceInfo.isRefundable contract ({\"type\":\"boolean\"}), authoritative values, state transitions, ordering, localization, or consumer behavior. No focused behavioral proof exists, so fixture presence or absence cannot close this row."
     },
     {
       "id": "added:INITIATIVE_ACTIVITY_LOG_UPDATED",
