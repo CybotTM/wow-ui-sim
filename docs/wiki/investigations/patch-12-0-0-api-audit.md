@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **892 best-effort, 902 evidence-required, 2 exception-requested, and 1614 untriaged rows** (3410 total).
+Current manifest totals are **892 best-effort, 903 evidence-required, 2 exception-requested, and 1613 untriaged rows** (3410 total).
+
+`C_Sound.PlaySound` is evidence-required/unsafe: the silent no-op fallback proves callability only and ignores inputs and returns; no-audio builds are not a scope exception. Input defaults, invalid IDs, success/failure, handles, duplicate suppression, finish callbacks, priority, backend behavior, and lifecycle remain unproven.
 
 `C_SettingsUtil.NotifySettingsLoaded` and `C_SettingsUtil.OpenSettingsPanel` are evidence-required/unsafe: current settings defaults model partial Settings categories/panel helpers only; no C_SettingsUtil namespace, SETTINGS_LOADED dispatch, or category+element scrolling implementation exists. Event timing/order, nil/valid/unknown category and element targets, repeated opens, visibility/scrolling, and lifecycle remain unproven.
 

@@ -17458,17 +17458,36 @@
       "id": "added:C_Sound.PlaySound",
       "symbol": "C_Sound.PlaySound",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines C_Sound.PlaySound with soundKitID, defaulted subtype/duplicate/callback inputs, optional overridePriority, and optional success plus soundHandle returns.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/sound_driver_defaults.rs",
+          "summary": "Current temporary fallback is a silent no-op that ignores every argument and returns no success value or sound handle.",
+          "source_hash": "4b55a37d380760d1f5cab58044fcc57d8ea601bf86b4105012382ba0c4d0e1ef"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/sound_driver_defaults.rs",
+          "summary": "Focused fallback tests prove callability and installation/preservation only, not documented arguments, results, handles, duplicate suppression, callbacks, or priority.",
+          "source_hash": "4b55a37d380760d1f5cab58044fcc57d8ea601bf86b4105012382ba0c4d0e1ef"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the silent no-op fallback does not model C_Sound.PlaySound semantics. Input defaults, invalid sound kits, success/failure results, sound handles, duplicate suppression, finish callbacks, priority, backend behavior, and lifecycle remain unproven; no-audio builds do not create a scope exception."
     },
     {
       "id": "added:C_Spell.GetSpellChargeDuration",
