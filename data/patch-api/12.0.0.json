@@ -14634,65 +14634,141 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeTasksTracked.trackedIDs",
       "symbol": "C_NeighborhoodInitiative.InitiativeTasksTracked.trackedIDs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeTasksTracked.trackedIDs as a required array of numbers.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current fallback returns only an empty trackedIDs table and has no tracked-task state or add/remove synchronization.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/c_tracking_defaults_probes.rs",
+          "summary": "Focused coverage proves only the empty trackedIDs table shape and does not establish numeric IDs or transitions.",
+          "source_hash": "df72a7b7ff97aa354d78a8087c2476b9d8c6feccb9aba9559ea3b34eefd1af47"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no tracked initiative-task state or producer exists. Numeric IDs, valid/invalid and duplicate handling, add/remove transitions, ordering, refresh, persistence, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.IsInitiativeEnabled",
       "symbol": "C_NeighborhoodInitiative.IsInitiativeEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsInitiativeEnabled as a no-argument API returning a required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current temporary fallback returns constant false without initiative availability state.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Focused coverage proves only the constant false default and does not establish enabled-state semantics.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no initiative availability state model exists; constant false is compatibility scaffolding only. Enabled/disabled states, player and neighborhood context, transitions, refresh, events, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.IsPlayerInNeighborhoodGroup",
       "symbol": "C_NeighborhoodInitiative.IsPlayerInNeighborhoodGroup",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsPlayerInNeighborhoodGroup as a no-argument API returning a required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults do not implement IsPlayerInNeighborhoodGroup or any group-validity state.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback returns nil instead of a modeled group-validity boolean.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no neighborhood group-membership or validity model exists. Solo, valid-group, invalid-group, transition, refresh, event, and lifecycle behavior remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.IsViewingActiveNeighborhood",
       "symbol": "C_NeighborhoodInitiative.IsViewingActiveNeighborhood",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsViewingActiveNeighborhood as a no-argument API returning a required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults do not implement IsViewingActiveNeighborhood or active-view state.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback returns nil instead of a modeled active-neighborhood-view boolean.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no active-neighborhood viewing-context model exists. Active/inactive views, view transitions, refresh, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.NeighborhoodInitiativeInfo",

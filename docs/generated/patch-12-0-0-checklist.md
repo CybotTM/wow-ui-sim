@@ -443,10 +443,10 @@
 443. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeTaskInfo.timesCompleted` — unsafe
 444. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeTaskInfo.tracked` — unsafe
 445. [best-effort] `added:C_NeighborhoodInitiative.InitiativeTasksTracked` — provenance-only
-446. [untriaged] `added:C_NeighborhoodInitiative.InitiativeTasksTracked.trackedIDs` — untriaged
-447. [untriaged] `added:C_NeighborhoodInitiative.IsInitiativeEnabled` — untriaged
-448. [untriaged] `added:C_NeighborhoodInitiative.IsPlayerInNeighborhoodGroup` — untriaged
-449. [untriaged] `added:C_NeighborhoodInitiative.IsViewingActiveNeighborhood` — untriaged
+446. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeTasksTracked.trackedIDs` — unsafe
+447. [evidence-required] `added:C_NeighborhoodInitiative.IsInitiativeEnabled` — unsafe
+448. [evidence-required] `added:C_NeighborhoodInitiative.IsPlayerInNeighborhoodGroup` — unsafe
+449. [evidence-required] `added:C_NeighborhoodInitiative.IsViewingActiveNeighborhood` — unsafe
 450. [best-effort] `added:C_NeighborhoodInitiative.NeighborhoodInitiativeInfo` — provenance-only
 451. [untriaged] `added:C_NeighborhoodInitiative.NeighborhoodInitiativeInfo.currentCycleID` — untriaged
 452. [untriaged] `added:C_NeighborhoodInitiative.NeighborhoodInitiativeInfo.currentProgress` — untriaged
