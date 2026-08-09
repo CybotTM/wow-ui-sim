@@ -405,7 +405,7 @@
 405. [evidence-required] `added:C_NeighborhoodInitiative.GetRequiredLevel` — unsafe
 406. [evidence-required] `added:C_NeighborhoodInitiative.GetTrackedInitiativeTasks` — unsafe
 407. [best-effort] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry` — provenance-only
-408. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.amount` — untriaged
+408. [evidence-required] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.amount` — unsafe
 409. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.completionTime` — untriaged
 410. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.playerName` — untriaged
 411. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskID` — untriaged
