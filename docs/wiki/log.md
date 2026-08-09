@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify six additional CAA CVar-default rows
+
+Classified six additional target-health, voice, and volume CAA CVar rows as bounded `best-effort`/`behavioral` claims using `test_patch_12_0_0_cvar_defaults`. Consolidated with the prior 27-row slice, the cumulative CAA CVar-default slice covers 33 rows. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed. Current totals are **861 best-effort, 691 evidence-required, 2 exception-requested, and 1856 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify 20 additional CAA CVar-default rows
 
 Classified 20 additional player-, resource-, speech-, and target-cast CAA CVar rows as bounded `best-effort`/`behavioral` claims using `test_patch_12_0_0_cvar_defaults`. Consolidated with the prior seven-row slice, the cumulative CAA CVar-default slice covers 27 rows. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed. Current totals are **855 best-effort, 691 evidence-required, 2 exception-requested, and 1862 untriaged** (3410 rows).
