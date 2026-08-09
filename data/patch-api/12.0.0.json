@@ -11130,33 +11130,67 @@
       "id": "added:C_HousingCatalog.HousingBundleInfo.canPreview",
       "symbol": "C_HousingCatalog.HousingBundleInfo.canPreview",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingBundleInfo.canPreview as boolean with default true.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary seeded bundle 5001 publishes canPreview = true through GetBundleInfo cloning.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/housing_catalog.rs",
+          "summary": "Focused seeded bundle test proves canPreview is boolean true.",
+          "source_hash": "b45eb3dad9f8d233577fbc252c800e6d93729c524892aa9552e20321445f67f3"
+        }
+      ],
+      "tests": [
+        "tests/housing_catalog.rs::housing_catalog_market_and_variant_methods_use_seeded_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to seeded bundle 5001 publication of boolean canPreview=true. Exact preview eligibility calculation, mutation, validation, other bundles, persistence, refresh, and lifecycle remain unclaimed."
     },
     {
       "id": "added:C_HousingCatalog.HousingBundleInfo.originalPrice",
       "symbol": "C_HousingCatalog.HousingBundleInfo.originalPrice",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines HousingBundleInfo.originalPrice as nullable number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current seeded bundle publishes originalPrice = nil and has no original-pricing or discount model.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: nil-only fixture publication does not establish populated numeric prices, no-discount nil behavior, discount/currency semantics, validation, persistence, refresh, or lifecycle."
     },
     {
       "id": "added:C_HousingCatalog.HousingCatalogEntryInfo.dyeIDs",
