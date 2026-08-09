@@ -2,9 +2,9 @@
 2. [best-effort] `added:AbbreviateConfig` — behavioral
 3. [best-effort] `added:AbbreviateConfig.GetAbbreviateNumberData` — behavioral
 4. [best-effort] `added:AbbreviateConfig.SetAbbreviateNumberData` — behavioral
-5. [untriaged] `added:AbbreviateLargeNumbers` — untriaged
-6. [untriaged] `added:AbbreviateNumbers` — untriaged
-7. [untriaged] `added:AddSourceLocationExclude` — untriaged
+5. [evidence-required] `added:AbbreviateLargeNumbers` — unsafe
+6. [evidence-required] `added:AbbreviateNumbers` — unsafe
+7. [best-effort] `added:AddSourceLocationExclude` — behavioral
 8. [untriaged] `added:BULK_PURCHASE_RESULT_RECEIVED` — untriaged
 9. [best-effort] `added:CAAEnabled` — behavioral
 10. [best-effort] `added:CAAInterruptCast` — behavioral

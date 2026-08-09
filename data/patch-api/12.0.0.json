@@ -162,49 +162,96 @@
       "id": "added:AbbreviateLargeNumbers",
       "symbol": "AbbreviateLargeNumbers",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines AbbreviateLargeNumbers(number, NumberAbbrevOptions?) -> string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/formatting_utility_defaults.rs",
+          "summary": "Current temporary fallback ignores NumberAbbrevOptions and returns a floored numeric string; abbreviation thresholds, localization, options, validation, and edge semantics are unmodeled.",
+          "source_hash": "ef91cc6927098cb33bb2b14928da6dacaf1617a0f083e5ba05fea3da2a0687d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: Current temporary fallback ignores NumberAbbrevOptions and returns a floored numeric string; abbreviation thresholds, localization, options, validation, and edge semantics are unmodeled."
     },
     {
       "id": "added:AbbreviateNumbers",
       "symbol": "AbbreviateNumbers",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines AbbreviateNumbers(number, NumberAbbrevOptions?) -> string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/formatting_utility_defaults.rs",
+          "summary": "Current temporary fallback ignores NumberAbbrevOptions and returns a direct string conversion; abbreviation thresholds, localization, options, validation, and edge semantics are unmodeled.",
+          "source_hash": "ef91cc6927098cb33bb2b14928da6dacaf1617a0f083e5ba05fea3da2a0687d4"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: Current temporary fallback ignores NumberAbbrevOptions and returns a direct string conversion; abbreviation thresholds, localization, options, validation, and edge semantics are unmodeled."
     },
     {
       "id": "added:AddSourceLocationExclude",
       "symbol": "AddSourceLocationExclude",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines AddSourceLocationExclude(fileName: string) with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/debug_environment_defaults.rs",
+          "summary": "Current temporary fallback publishes AddSourceLocationExclude as a nil-guarded no-op compatibility global.",
+          "source_hash": "8ec4e2676102a632858c31bd1ecdd3369083d78803033e6b3be38980ca195afe"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/debug_environment_defaults.rs",
+          "summary": "Focused installation test invokes AddSourceLocationExclude(\"example.lua\") and proves the current no-op compatibility call succeeds.",
+          "source_hash": "8ec4e2676102a632858c31bd1ecdd3369083d78803033e6b3be38980ca195afe"
+        }
+      ],
+      "tests": [
+        "src/lua_api/workarounds/temporary/debug_environment_defaults.rs::installs_debug_environment_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "763d7e20af91b080f56f3b3eb23a468deb466c00",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to global publication and successful string-argument no-op invocation. Source-location exclusion storage, filtering, debug output effects, validation, and lifecycle semantics are not claimed."
     },
     {
       "id": "added:BULK_PURCHASE_RESULT_RECEIVED",
