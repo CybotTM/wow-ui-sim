@@ -324,8 +324,8 @@
 324. [best-effort] `added:C_HouseExterior.GetCurrentHouseExteriorType` — behavioral
 325. [evidence-required] `added:C_HouseExterior.GetFixtureDebugInfoForGUID` — unsafe
 326. [best-effort] `added:C_HouseExterior.GetHouseExteriorSizeOptions` — behavioral
-327. [untriaged] `added:C_HouseExterior.GetHouseExteriorTypeOptions` — untriaged
-328. [untriaged] `added:C_HouseExterior.GetHoveredFixtureDebugInfo` — untriaged
+327. [best-effort] `added:C_HouseExterior.GetHouseExteriorTypeOptions` — behavioral
+328. [evidence-required] `added:C_HouseExterior.GetHoveredFixtureDebugInfo` — unsafe
 329. [untriaged] `added:C_HouseExterior.GetSelectedFixtureDebugInfo` — untriaged
 330. [untriaged] `added:C_HouseExterior.SetHouseExteriorSize` — untriaged
 331. [untriaged] `added:C_HouseExterior.SetHouseExteriorType` — untriaged

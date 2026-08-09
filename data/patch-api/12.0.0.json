@@ -10659,33 +10659,67 @@
       "id": "added:C_HouseExterior.GetHouseExteriorTypeOptions",
       "symbol": "C_HouseExterior.GetHouseExteriorTypeOptions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetHouseExteriorTypeOptions() returning nullable HouseExteriorTypeOptionsInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary housing state publishes selectedExteriorType 1 with Sunspire Cottage and Sunspire Manor option records.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/house_exterior.rs",
+          "summary": "Focused test proves callable publication, one table return, selectedExteriorType 1, and exactly Cottage/1 plus Manor/2 options.",
+          "source_hash": "386e4b6b8ebbe1b6a082c31e1b711902f9bf7be049b0dae272eb0914e419b038"
+        }
+      ],
+      "tests": [
+        "tests/house_exterior.rs::house_exterior_type_options_return_seeded_options"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to callable publication and seeded selectedExteriorType/options table values. Exact option metadata, selection mutation, persistence, refresh, validation, and lifecycle semantics remain unclaimed."
     },
     {
       "id": "added:C_HouseExterior.GetHoveredFixtureDebugInfo",
       "symbol": "C_HouseExterior.GetHoveredFixtureDebugInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records GetHoveredFixtureDebugInfo as an added API name without signature or return semantics.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary implementation returns nil and has no hovered-fixture debug payload or backing state.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the source preserves publication provenance only, while the nil fallback cannot establish an unknown signature, payload shape, hovered-fixture state, or lifecycle."
     },
     {
       "id": "added:C_HouseExterior.GetSelectedFixtureDebugInfo",
