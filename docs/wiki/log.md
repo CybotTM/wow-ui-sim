@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_CharacterServices.AssignFCMDistribution
+
+Classified `C_CharacterServices.AssignFCMDistribution` as `evidence-required`/`unsafe`. The source register provides no signature/result metadata, and the simulator has no FCM validation/assignment model; account/realm/character checks, validation-only behavior, exact results, state transitions, persistence, and events remain unproven. Current totals are **868 best-effort, 736 evidence-required, 2 exception-requested, and 1804 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify 23 C_CatalogShop API and structure rows
 
 Classified `C_CatalogShop.HasNewProducts` as `best-effort`/`behavioral` only for publication and the exact constant-false boolean result proven by `test_startup_service_namespaces_exist`. Classified the other 22 rows as `evidence-required`/`unsafe` because current CatalogShop state is absent, no-op, incomplete, seeded, wrong-typed, or untested and does not establish purchase, category/product, refundable-decor, currency, session, refresh, restriction, payload, event, or lifecycle semantics. Current totals are **868 best-effort, 735 evidence-required, 2 exception-requested, and 1805 untriaged** (3410 rows).

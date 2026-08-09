@@ -4898,17 +4898,30 @@
       "id": "added:C_CharacterServices.AssignFCMDistribution",
       "symbol": "C_CharacterServices.AssignFCMDistribution",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records AssignFCMDistribution as added but supplies no signature, return, restriction, or payload metadata.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_character_services.rs",
+          "summary": "Current C_CharacterServices model has no AssignFCMDistribution registration or free-character-move validation/assignment state.",
+          "source_hash": "dc38ed036873d71097686487078182c7033394661a8aa3c6aabacaf065b616cc"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: authoritative signature/result metadata is incomplete and no modeled free-character-move validation/assignment state establishes realm/account/character checks, validation-only behavior, exact results, transitions, persistence, or events."
     },
     {
       "id": "added:C_ChatInfo.CancelEmote",

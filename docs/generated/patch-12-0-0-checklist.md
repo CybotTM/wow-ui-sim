@@ -137,7 +137,7 @@
 137. [evidence-required] `added:C_CatalogShop.RefundableDecorInfo.standaloneDecorProductID` — unsafe
 138. [evidence-required] `added:C_CatalogShop.RefundableDecorInfo.timeRemainingSeconds` — unsafe
 139. [evidence-required] `added:C_CatalogShop.StartHousingVCPurchaseConfirmation` — unsafe
-140. [untriaged] `added:C_CharacterServices.AssignFCMDistribution` — untriaged
+140. [evidence-required] `added:C_CharacterServices.AssignFCMDistribution` — unsafe
 141. [untriaged] `added:C_ChatInfo.CancelEmote` — untriaged
 142. [untriaged] `added:C_ChatInfo.InChatMessagingLockdown` — untriaged
 143. [untriaged] `added:C_ChatInfo.PerformEmote` — untriaged
