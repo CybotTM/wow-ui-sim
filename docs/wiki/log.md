@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo
+
+Classified `C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo` as evidence-required/unsafe: the source returns a nilable NeighborhoodInitiativeInfo payload with progress, milestone, task, contribution, timing, and neighborhood fields, but no explicit method or state model exists, namespace defaults omit it, and generic fallback returns nil. Nil alone does not establish populated payloads, field types/values, transitions, refresh, persistence, or lifecycle. Current totals are **891 best-effort, 808 evidence-required, 2 exception-requested, and 1709 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetInitiativeTaskInfo
 
 Classified `C_NeighborhoodInitiative.GetInitiativeTaskInfo` as evidence-required/unsafe: the source returns a nilable InitiativeTaskInfo by numeric task ID, but the current explicit fallback always returns nil with no task records or payload model; the focused probe proves only nil for ID 1. Valid/unknown IDs, exact fields/types, updates, tracked-task interaction, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 807 evidence-required, 2 exception-requested, and 1710 untriaged** (3410 rows).
