@@ -53584,81 +53584,146 @@
       "id": "added:NumberAbbrevData.abbreviation",
       "symbol": "NumberAbbrevData.abbreviation",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevData.abbreviation with structure-field contract {\"type\":\"string\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current generic AbbreviateConfig proxy does not model typed NumberAbbrevData.abbreviation publication or number-abbreviation semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: generic AbbreviateConfig table round-tripping does not establish the typed NumberAbbrevData.abbreviation contract ({\"type\":\"string\"}), field defaults/nullability, validation, ordering, or formatting behavior. No focused proof exists."
     },
     {
       "id": "added:NumberAbbrevData.abbreviationIsGlobal",
       "symbol": "NumberAbbrevData.abbreviationIsGlobal",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevData.abbreviationIsGlobal with structure-field contract {\"default\":true,\"type\":\"boolean\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current generic AbbreviateConfig proxy does not model typed NumberAbbrevData.abbreviationIsGlobal publication or number-abbreviation semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: generic AbbreviateConfig table round-tripping does not establish the typed NumberAbbrevData.abbreviationIsGlobal contract ({\"default\":true,\"type\":\"boolean\"}), field defaults/nullability, validation, ordering, or formatting behavior. No focused proof exists."
     },
     {
       "id": "added:NumberAbbrevData.breakpoint",
       "symbol": "NumberAbbrevData.breakpoint",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevData.breakpoint with structure-field contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current generic AbbreviateConfig proxy does not model typed NumberAbbrevData.breakpoint publication or number-abbreviation semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: generic AbbreviateConfig table round-tripping does not establish the typed NumberAbbrevData.breakpoint contract ({\"type\":\"number\"}), field defaults/nullability, validation, ordering, or formatting behavior. No focused proof exists."
     },
     {
       "id": "added:NumberAbbrevData.fractionDivisor",
       "symbol": "NumberAbbrevData.fractionDivisor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevData.fractionDivisor with structure-field contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current generic AbbreviateConfig proxy does not model typed NumberAbbrevData.fractionDivisor publication or number-abbreviation semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: generic AbbreviateConfig table round-tripping does not establish the typed NumberAbbrevData.fractionDivisor contract ({\"type\":\"number\"}), field defaults/nullability, validation, ordering, or formatting behavior. No focused proof exists."
     },
     {
       "id": "added:NumberAbbrevData.significandDivisor",
       "symbol": "NumberAbbrevData.significandDivisor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevData.significandDivisor with structure-field contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current generic AbbreviateConfig proxy does not model typed NumberAbbrevData.significandDivisor publication or number-abbreviation semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: generic AbbreviateConfig table round-tripping does not establish the typed NumberAbbrevData.significandDivisor contract ({\"type\":\"number\"}), field defaults/nullability, validation, ordering, or formatting behavior. No focused proof exists."
     },
     {
       "id": "added:NumberAbbrevOptions",
@@ -53699,49 +53764,88 @@
       "id": "added:NumberAbbrevOptions.breakpointData",
       "symbol": "NumberAbbrevOptions.breakpointData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevOptions.breakpointData with structure-field contract {\"nilable\":true,\"type\":{\"arrayof\":{\"structure\":\"NumberAbbrevData\"}}}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current generic AbbreviateConfig proxy does not model typed NumberAbbrevOptions.breakpointData publication or number-abbreviation semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: generic AbbreviateConfig table round-tripping does not establish the typed NumberAbbrevOptions.breakpointData contract ({\"nilable\":true,\"type\":{\"arrayof\":{\"structure\":\"NumberAbbrevData\"}}}), field defaults/nullability, validation, ordering, or formatting behavior. No focused proof exists."
     },
     {
       "id": "added:NumberAbbrevOptions.config",
       "symbol": "NumberAbbrevOptions.config",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevOptions.config with structure-field contract {\"nilable\":true,\"type\":{\"luaobject\":\"AbbreviateConfig\"}}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current generic AbbreviateConfig proxy does not model typed NumberAbbrevOptions.config publication or number-abbreviation semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: generic AbbreviateConfig table round-tripping does not establish the typed NumberAbbrevOptions.config contract ({\"nilable\":true,\"type\":{\"luaobject\":\"AbbreviateConfig\"}}), field defaults/nullability, validation, ordering, or formatting behavior. No focused proof exists."
     },
     {
       "id": "added:NumberAbbrevOptions.locale",
       "symbol": "NumberAbbrevOptions.locale",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NumberAbbrevOptions.locale with structure-field contract {\"nilable\":true,\"type\":\"string\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current generic AbbreviateConfig proxy does not model typed NumberAbbrevOptions.locale publication or number-abbreviation semantics.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: generic AbbreviateConfig table round-tripping does not establish the typed NumberAbbrevOptions.locale contract ({\"nilable\":true,\"type\":\"string\"}), field defaults/nullability, validation, ordering, or formatting behavior. No focused proof exists."
     },
     {
       "id": "added:PARTY_KILL",

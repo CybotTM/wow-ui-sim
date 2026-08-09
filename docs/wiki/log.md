@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify number-abbreviation fields
+
+Classified eight `NumberAbbrevData`/`NumberAbbrevOptions` structure fields as `evidence-required`/`unsafe`. Generic `AbbreviateConfig` proxy round-tripping does not establish typed contracts, defaults/nullability, validation, ordering, or formatting behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **800 best-effort, 679 evidence-required, 2 exception-requested, and 1929 untriaged**.
+
 ## [2026-08-08] investigation | Classify conflicting 12.0.0 error globals
 
 Classified 12 added `LE_GAME_ERR_*` globals as `evidence-required`/`unsafe` because checked-in 12.0.0 source-register values conflict with current nil-guarded fallback publication. Authoritative epoch/value reconciliation is required before changing runtime behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **800 best-effort, 671 evidence-required, 2 exception-requested, and 1937 untriaged**.
