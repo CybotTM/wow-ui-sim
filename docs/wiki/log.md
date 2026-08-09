@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeMilestoneInfo.requiredContributionAmount
+
+Classified `C_NeighborhoodInitiative.InitiativeMilestoneInfo.requiredContributionAmount` as evidence-required/unsafe: the source defines a required numeric requiredContributionAmount field, but no InitiativeMilestoneInfo runtime model or initiative payload producer exists; generic fallback produces no milestones. Contribution thresholds, empty/populated milestones, ordering/progress comparisons, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 821 evidence-required, 2 exception-requested, and 1696 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeMilestoneInfo.milestoneOrderIndex
 
 Classified `C_NeighborhoodInitiative.InitiativeMilestoneInfo.milestoneOrderIndex` as evidence-required/unsafe: the source defines a required numeric milestoneOrderIndex field, but no InitiativeMilestoneInfo runtime model or initiative payload producer exists; generic fallback produces no milestones. Numeric indexes, ordering, empty/populated milestones, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 820 evidence-required, 2 exception-requested, and 1697 untriaged** (3410 rows).
