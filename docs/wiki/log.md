@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_LFGList.LfgListingCreateData.generalPlaystyle
+
+Classified `C_LFGList.LfgListingCreateData.generalPlaystyle` as evidence-required/unsafe: the source requires an `Enum.LFGEntryGeneralPlaystyle` input with default 0, but current `C_LFGList` has no `CreateListing`/`UpdateListing` implementation; generic fallback returns nil and seeded `PremadeListing` output is a different contract. Input parsing/defaults, validation, create/update state, result propagation, errors, and lifecycle remain unproven. Current totals are **890 best-effort, 792 evidence-required, 2 exception-requested, and 1726 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_LFGList.LfgEntryData.generalPlaystyle
 
 Classified `C_LFGList.LfgEntryData.generalPlaystyle` as evidence-required/unsafe: the source field is nullable `Enum.LFGEntryGeneralPlaystyle`, but no active-listing model exists and `GetActiveEntryInfo()` always returns nil. The separate search-result `generalPlaystyle` field is a different structure; field presence, nilability, enum values, mutation, serialization, validation, and lifecycle remain unproven. Current totals are **890 best-effort, 791 evidence-required, 2 exception-requested, and 1727 untriaged** (3410 rows).

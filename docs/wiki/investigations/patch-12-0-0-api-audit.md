@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **890 best-effort, 791 evidence-required, 2 exception-requested, and 1727 untriaged rows** (3410 total).
+Current manifest totals are **890 best-effort, 792 evidence-required, 2 exception-requested, and 1726 untriaged rows** (3410 total).
 
 `C_LFGList.AdvancedFilterOptions.generalPlaystyle1` is best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean `generalPlaystyle1` with exact default false from modeled `LfgAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves the default. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed.
 
@@ -15,6 +15,8 @@ Current manifest totals are **890 best-effort, 791 evidence-required, 2 exceptio
 `C_LFGList.AdvancedFilterOptions.generalPlaystyle4` is best-effort/behavioral, bounded to modeled boolean publication and exact false default through `GetAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves it. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed.
 
 `C_LFGList.LfgEntryData.generalPlaystyle` is evidence-required/unsafe: the nullable `Enum.LFGEntryGeneralPlaystyle` field has no active-listing model because `GetActiveEntryInfo()` always returns nil; the separate search-result `generalPlaystyle` field is a different structure. Field presence, nilability, enum values, mutation, serialization, validation, and lifecycle remain unproven.
+
+`C_LFGList.LfgListingCreateData.generalPlaystyle` is evidence-required/unsafe: the source requires an `Enum.LFGEntryGeneralPlaystyle` input with default 0, but current `C_LFGList` has no `CreateListing`/`UpdateListing` implementation; generic fallback returns nil and seeded `PremadeListing` output is a different contract. Input parsing/defaults, validation, create/update state, result propagation, errors, and lifecycle remain unproven.
 
 The bounded `C_InstanceEncounter` slice classifies `C_InstanceEncounter.IsEncounterInProgress` as best-effort/behavioral: its state-backed boolean query shares `world.encounter_in_progress` with the legacy global, and a focused test proves false by default and true when enabled; encounter producers, events, and lifecycle remain unclaimed. `C_InstanceEncounter.IsEncounterLimitingResurrections` is evidence-required/unsafe because no resurrection-limiting state or explicit method is modeled, and the generic nil fallback does not satisfy the required boolean contract. `C_InstanceEncounter.IsEncounterSuppressingRelease` and `C_InstanceEncounter.ShouldShowTimelineForEncounter` are evidence-required/unsafe because no explicit methods or backing state exist, and generic nil fallback does not satisfy their required boolean contracts.
 

@@ -12378,17 +12378,42 @@
       "id": "added:C_LFGList.LfgListingCreateData.generalPlaystyle",
       "symbol": "C_LFGList.LfgListingCreateData.generalPlaystyle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines LfgListingCreateData.generalPlaystyle as a required Enum.LFGEntryGeneralPlaystyle input field with default 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lfg_list.rs",
+          "summary": "Current explicit C_LFGList registration has no CreateListing or UpdateListing implementation, so the input structure is not parsed or consumed.",
+          "source_hash": "2ed0040e7ce5d812af97ccd638b42c8d69f361b9b07bb962c8d68f8f3fb932fd"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "summary": "PremadeListing stores general_playstyle only for seeded/admin search-result state; this does not establish LfgListingCreateData input parsing, defaults, validation, or create/update side effects.",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic namespace fallback supplies missing CreateListing/UpdateListing methods that return nil, which does not satisfy input parsing or modeled listing mutation.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: CreateListing and UpdateListing are absent, so required/default generalPlaystyle input handling, enum validation, listing creation/update state, result propagation, errors, and lifecycle remain unproven. Seeded search-result output is a different contract."
     },
     {
       "id": "added:C_LFGList.LfgSearchResultData.generalPlaystyle",
