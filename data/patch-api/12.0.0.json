@@ -7946,17 +7946,30 @@
       "id": "added:C_DelvesUI.GetLockedTextForCompanion",
       "symbol": "C_DelvesUI.GetLockedTextForCompanion",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetLockedTextForCompanion(companionID: number?) returning required string text.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/delves_ui.rs",
+          "summary": "Current C_DelvesUI registration omits GetLockedTextForCompanion and has no companion lock-state or lock-text model.",
+          "source_hash": "0ffb728d39dd735ad432d082bb8da47ea05c3fbf3fc772cb35f1737da96393ab"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the method is absent, and no companion lock state, lock reason, progression state, text selection, nil-ID, or unknown-ID behavior is modeled."
     },
     {
       "id": "added:C_DelvesUI.IsTraitTreeForCompanion",
@@ -10567,17 +10580,30 @@
       "id": "added:C_HouseExterior.GetFixtureDebugInfoForGUID",
       "symbol": "C_HouseExterior.GetFixtureDebugInfoForGUID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records GetFixtureDebugInfoForGUID as an added C_HouseExterior API name but does not preserve its signature or return semantics.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary C_HouseExterior surface omits GetFixtureDebugInfoForGUID and has no GUID-indexed fixture-debug backing model.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the checked-in source preserves publication provenance only, while the method, exact signature, return payload, GUID lookup, and fixture-debug state are absent."
     },
     {
       "id": "added:C_HouseExterior.GetHouseExteriorSizeOptions",
@@ -10679,17 +10705,36 @@
       "id": "added:C_Housing.IsHousingMarketShopEnabled",
       "symbol": "C_Housing.IsHousingMarketShopEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsHousingMarketShopEnabled() returning required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_housing.rs",
+          "summary": "Current Rust C_Housing model backs housing service state but does not register or model housing-market-shop availability.",
+          "source_hash": "211566972d653075b177290db9a91d8ee1ef6700320549c5e42b8cec620e80f2"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/housing.rs",
+          "summary": "Current Lua C_Housing registrations omit IsHousingMarketShopEnabled; generic missing-member compatibility does not establish the required boolean contract.",
+          "source_hash": "0144ea0220337c90444ab2ab23c06c6b09d64507d2c5401c9e80580b4667d083"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no explicit method or dedicated market-shop availability state exists, and generic fallback behavior does not establish the required boolean result."
     },
     {
       "id": "added:C_Housing.OnHouseFinderClickPlot",
@@ -10711,17 +10756,30 @@
       "id": "added:C_HousingBasicMode.IsFreePlaceEnabled",
       "symbol": "C_HousingBasicMode.IsFreePlaceEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsFreePlaceEnabled() returning required boolean freePlaceEnabled.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary implementation hardcodes true while paired SetFreePlaceEnabled is a no-op, so no mutable free-placement state is modeled.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: hardcoded true and a no-op setter do not establish default, setter/getter state transitions, reset/isolation, persistence, or exact free-placement semantics."
     },
     {
       "id": "added:C_HousingBasicMode.SetFreePlaceEnabled",

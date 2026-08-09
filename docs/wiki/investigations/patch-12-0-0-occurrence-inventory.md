@@ -9,6 +9,8 @@ The bounded eight-row `C_EventScheduler` slice classifies `C_EventScheduler.CanS
 
 The bounded four-row API slice classifies `C_EventUtils.IsCallbackEvent` and `C_HouseExterior.GetCurrentHouseExteriorType` as best-effort/behavioral from focused positive/negative callback-event and seeded two-return exterior-type tests. Exact callback registry completeness, argument validation, housing mutation, persistence, refresh, and lifecycle semantics remain unclaimed. `C_CreatureInfo.GetCreatureID` and `C_GameRules.IsPersonalResourceDisplayEnabled` are evidence-required/unsafe because the first is absent without a creature identity model and the second falls through to a nil-returning temporary function instead of its required boolean contract.
 
+The bounded four-row Delves/housing gap classifies `C_DelvesUI.GetLockedTextForCompanion`, `C_HouseExterior.GetFixtureDebugInfoForGUID`, `C_Housing.IsHousingMarketShopEnabled`, and `C_HousingBasicMode.IsFreePlaceEnabled` as evidence-required/unsafe. The first three are absent without their required companion-lock, fixture-debug, or market-shop backing systems; the fixture-debug source also lacks a retained signature. `IsFreePlaceEnabled` hardcodes true while its setter is a no-op, so state transitions and exact semantics are not modeled.
+
 The bounded 33-row 12.0.0 CAA CVar-default slice classifies the existing 27 CAA CVars plus six additional target-health, voice, and volume CAA CVars as best-effort/behavioral using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed.
 
 The bounded six-row `C_AdventureMap.GetQuestPortraitInfo` slice classifies the API plus five portrait fields as best-effort/behavioral from focused `tests/c_adventure_map/quests.rs` proof. Claims cover injected-state lookup, typed five-field publication, unknown/nonnumeric zero-value returns, nullable `modelSceneID`, and tested display-ID gating. Retail data population, localization, full validation/edge behavior, assets/rendering, and lifecycle remain unclaimed. `modelSceneID` is treated strictly as data under the existing permanent no-3D scope; no 3D implementation or new exception is requested.
@@ -278,7 +280,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_DeathRecap.GetRecapEvents` | evidence-required | api | added | Signatures establish only an optional recap ID and table return. Event fields, ordering, default/no-argument selection, and unknown-ID behavior remain unproven; current simulator has no event-record model. |
 | `C_DeathRecap.GetRecapLink` | evidence-required | api | added | Signatures and vendor display use establish only an optional recap ID and displayable string; link format and missing/unknown recap behavior remain unproven, with no current link model. |
 | `C_DeathRecap.HasRecapEvents` | evidence-required | api | added | Do not infer a best-effort non-empty check from killing-blow state. Default/no-argument selection, unknown-ID handling, and the event-presence predicate remain unproven. |
-| `C_DelvesUI.GetLockedTextForCompanion` | untriaged | api | added | api added in 12.0.0. |
+| `C_DelvesUI.GetLockedTextForCompanion` | evidence-required | api | added | Evidence required: the method is absent, and no companion lock state, lock reason, progression state, text selection, nil-ID, or unknown-ID behavior is modeled. |
 | `C_DelvesUI.IsTraitTreeForCompanion` | untriaged | api | added | api added in 12.0.0. |
 | `C_DurationUtil.CreateDuration` | best-effort | api | added | Best-effort behavioral evidence covers factory return shape and LuaDurationObject method exposure; full time, secret, and curve semantics are not established. |
 | `C_DurationUtil.GetCurrentTime` | evidence-required | api | added | Current behavior is constant (returns 0); authoritative time semantics or a correct modeled implementation is required, and no approval can close this row. |
@@ -368,16 +370,16 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_EventUtils.IsCallbackEvent` | best-effort | api | added | Best-effort behavioral evidence covers current static-registry positive/negative classification for COMBAT_LOG_EVENT and PLAYER_LOGIN. Exact 12.0.0 registry completeness, argument validation, dynamic behavior, and lifecycle semantics remain unclaimed. |
 | `C_GameRules.IsPersonalResourceDisplayEnabled` | evidence-required | api | added | Evidence required: current fallback returns nil instead of boolean, and no personal-resource-display backing state, default, mutation path, or settings integration is modeled. |
 | `C_HouseExterior.GetCurrentHouseExteriorType` | best-effort | api | added | Best-effort behavioral evidence is limited to callable publication and the seeded two-return shape/types/values 1 and Sunspire Cottage. Retail housing selection, mutation, persistence, refresh, validation, and lifecycle semantics remain unclaimed. |
-| `C_HouseExterior.GetFixtureDebugInfoForGUID` | untriaged | api | added | api added in 12.0.0. |
+| `C_HouseExterior.GetFixtureDebugInfoForGUID` | evidence-required | api | added | Evidence required: the checked-in source preserves publication provenance only, while the method, exact signature, return payload, GUID lookup, and fixture-debug state are absent. |
 | `C_HouseExterior.GetHouseExteriorSizeOptions` | untriaged | api | added | api added in 12.0.0. |
 | `C_HouseExterior.GetHouseExteriorTypeOptions` | untriaged | api | added | api added in 12.0.0. |
 | `C_HouseExterior.GetHoveredFixtureDebugInfo` | untriaged | api | added | api added in 12.0.0. |
 | `C_HouseExterior.GetSelectedFixtureDebugInfo` | untriaged | api | added | api added in 12.0.0. |
 | `C_HouseExterior.SetHouseExteriorSize` | untriaged | api | added | api added in 12.0.0. |
 | `C_HouseExterior.SetHouseExteriorType` | untriaged | api | added | api added in 12.0.0. |
-| `C_Housing.IsHousingMarketShopEnabled` | untriaged | api | added | api added in 12.0.0. |
+| `C_Housing.IsHousingMarketShopEnabled` | evidence-required | api | added | Evidence required: no explicit method or dedicated market-shop availability state exists, and generic fallback behavior does not establish the required boolean result. |
 | `C_Housing.OnHouseFinderClickPlot` | untriaged | api | added | api added in 12.0.0. |
-| `C_HousingBasicMode.IsFreePlaceEnabled` | untriaged | api | added | api added in 12.0.0. |
+| `C_HousingBasicMode.IsFreePlaceEnabled` | evidence-required | api | added | Evidence required: hardcoded true and a no-op setter do not establish default, setter/getter state transitions, reset/isolation, persistence, or exact free-placement semantics. |
 | `C_HousingBasicMode.SetFreePlaceEnabled` | untriaged | api | added | api added in 12.0.0. |
 | `C_HousingBasicMode.StartPlacingPreviewDecor` | untriaged | api | added | api added in 12.0.0. |
 | `C_HousingCatalog.DeletePreviewCartDecor` | untriaged | api | added | api added in 12.0.0. |
