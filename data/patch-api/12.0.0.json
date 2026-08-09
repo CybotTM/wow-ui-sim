@@ -51244,193 +51244,349 @@
       "id": "added:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_OWNERSHIP_TRANSFER_SUCCESS",
       "symbol": "LE_GAME_ERR_CHARTER_NEIGHBORHOOD_OWNERSHIP_TRANSFER_SUCCESS",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_CHARTER_NEIGHBORHOOD_OWNERSHIP_TRANSFER_SUCCESS as an added global with exact numeric value 1231.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_CHARTER_NEIGHBORHOOD_OWNERSHIP_TRANSFER_SUCCESS with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1231, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME_NOTIFICATION_S",
       "symbol": "LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME_NOTIFICATION_S",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME_NOTIFICATION_S as an added global with exact numeric value 1232.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME_NOTIFICATION_S with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1232, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_CHARTER_SIGNATURE_REMOVED",
       "symbol": "LE_GAME_ERR_CHARTER_SIGNATURE_REMOVED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_CHARTER_SIGNATURE_REMOVED as an added global with exact numeric value 1225.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_CHARTER_SIGNATURE_REMOVED with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1225, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_ENDEAVOR_REWARD_AVAILABLE",
       "symbol": "LE_GAME_ERR_ENDEAVOR_REWARD_AVAILABLE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_ENDEAVOR_REWARD_AVAILABLE as an added global with exact numeric value 1226.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_ENDEAVOR_REWARD_AVAILABLE with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1226, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_HOUSING_EXTERIOR_FAILSAFE_RESET",
       "symbol": "LE_GAME_ERR_HOUSING_EXTERIOR_FAILSAFE_RESET",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_HOUSING_EXTERIOR_FAILSAFE_RESET as an added global with exact numeric value 1217.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_EXTERIOR_FAILSAFE_RESET with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1217, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_HOUSING_RESULT_COSMETIC_OWNER_NOT_IN_GUILD",
       "symbol": "LE_GAME_ERR_HOUSING_RESULT_COSMETIC_OWNER_NOT_IN_GUILD",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_HOUSING_RESULT_COSMETIC_OWNER_NOT_IN_GUILD as an added global with exact numeric value 1227.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_RESULT_COSMETIC_OWNER_NOT_IN_GUILD with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1227, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_HOUSING_RESULT_MISSING_PRIVATE_NEIGHBORHOOD_INVITE",
       "symbol": "LE_GAME_ERR_HOUSING_RESULT_MISSING_PRIVATE_NEIGHBORHOOD_INVITE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_HOUSING_RESULT_MISSING_PRIVATE_NEIGHBORHOOD_INVITE as an added global with exact numeric value 1230.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_RESULT_MISSING_PRIVATE_NEIGHBORHOOD_INVITE with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1230, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_HOUSING_RESULT_PLOT_NOT_VACANT",
       "symbol": "LE_GAME_ERR_HOUSING_RESULT_PLOT_NOT_VACANT",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_HOUSING_RESULT_PLOT_NOT_VACANT as an added global with exact numeric value 1228.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_RESULT_PLOT_NOT_VACANT with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1228, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_HOUSING_RESULT_PLOT_RESERVED",
       "symbol": "LE_GAME_ERR_HOUSING_RESULT_PLOT_RESERVED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_HOUSING_RESULT_PLOT_RESERVED as an added global with exact numeric value 1229.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_RESULT_PLOT_RESERVED with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1229, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_LFG_JOINED_TRAINING_GROUNDS_QUEUE",
       "symbol": "LE_GAME_ERR_LFG_JOINED_TRAINING_GROUNDS_QUEUE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_LFG_JOINED_TRAINING_GROUNDS_QUEUE as an added global with exact numeric value 1236.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_LFG_JOINED_TRAINING_GROUNDS_QUEUE with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1236, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_PVP_TRAINING_GROUNDS_DISABLED",
       "symbol": "LE_GAME_ERR_PVP_TRAINING_GROUNDS_DISABLED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_PVP_TRAINING_GROUNDS_DISABLED as an added global with exact numeric value 1234.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_PVP_TRAINING_GROUNDS_DISABLED with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1234, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_GAME_ERR_SOLO_JOIN_TRAINING_GROUND",
       "symbol": "LE_GAME_ERR_SOLO_JOIN_TRAINING_GROUND",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_GAME_ERR_SOLO_JOIN_TRAINING_GROUND as an added global with exact numeric value 1235.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_SOLO_JOIN_TRAINING_GROUND with a conflicting value; exact 12.0.0 behavior is unresolved.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the checked-in 12.0.0 source value is 1235, but current nil-guarded publication conflicts. Reconcile authoritative epoch/value evidence before changing runtime behavior; no exact startup claim is closed."
     },
     {
       "id": "added:LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS",

@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify conflicting 12.0.0 error globals
+
+Classified 12 added `LE_GAME_ERR_*` globals as `evidence-required`/`unsafe` because checked-in 12.0.0 source-register values conflict with current nil-guarded fallback publication. Authoritative epoch/value reconciliation is required before changing runtime behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **800 best-effort, 671 evidence-required, 2 exception-requested, and 1937 untriaged**.
+
 ## [2026-08-09] investigation | Classify 12.0.0 tutorial and pet constants
 
 Classified five tutorial/pet globals as bounded `best-effort`/`behavioral` startup claims. `test_patch_12_0_0_ui_global_constant_values` proves numeric Lua publication and exact source-register values; tutorial and pet-journal behavior, consumers, lifecycle, and historical load timing remain unclaimed. Current totals are **800 best-effort, 659 evidence-required, 2 exception-requested, and 1949 untriaged**.
