@@ -4927,49 +4927,88 @@
       "id": "added:C_ChatInfo.CancelEmote",
       "symbol": "C_ChatInfo.CancelEmote",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_ChatInfo.CancelEmote occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/c_chat_info_defaults.rs",
+          "summary": "Current C_ChatInfo compatibility fallback publishes CancelEmote as a no-op with no active-emote state or cancellation transition.",
+          "source_hash": "efe05338a18f6bfa00b6867d4ef338a22a8b42993674888cebab430f2665a4fc"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled active-emote state or focused proof establishes cancellation transitions, repeated/no-active behavior, events, validation, or consumer effects."
     },
     {
       "id": "added:C_ChatInfo.InChatMessagingLockdown",
       "symbol": "C_ChatInfo.InChatMessagingLockdown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_ChatInfo.InChatMessagingLockdown occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/c_chat_info_defaults.rs",
+          "summary": "Current C_ChatInfo compatibility surface has no InChatMessagingLockdown registration or chat-lockdown state model.",
+          "source_hash": "efe05338a18f6bfa00b6867d4ef338a22a8b42993674888cebab430f2665a4fc"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled chat-lockdown state or focused proof establishes boolean restriction results, nullable reason enum, encounter/PvP/keystone transitions, ordering, or reset behavior."
     },
     {
       "id": "added:C_ChatInfo.PerformEmote",
       "symbol": "C_ChatInfo.PerformEmote",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_ChatInfo.PerformEmote occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/c_chat_info_defaults.rs",
+          "summary": "Current C_ChatInfo compatibility fallback ignores target/suppression arguments and returns constant false without emote state or restriction enforcement.",
+          "source_hash": "efe05338a18f6bfa00b6867d4ef338a22a8b42993674888cebab430f2665a4fc"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled emote state or focused proof establishes argument/default handling, exact success/failure, valid/invalid emotes, target/suppression behavior, restrictions, movement errors, or events."
     },
     {
       "id": "added:C_ColorUtil.ConvertHSLToHSV",
@@ -6122,65 +6161,117 @@
       "id": "added:C_CombatText.GetActiveUnit",
       "symbol": "C_CombatText.GetActiveUnit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CombatText.GetActiveUnit occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Current adjacent combat-log workaround does not implement C_CombatText active-unit state or GetActiveUnit.",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_CombatText namespace/state or focused proof establishes no-value behavior, valid unit round-trip, invalid/secret/declassified-unit handling, or consumer routing."
     },
     {
       "id": "added:C_CombatText.GetCurrentEventInfo",
       "symbol": "C_CombatText.GetCurrentEventInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CombatText.GetCurrentEventInfo occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Current adjacent combat-log state does not implement C_CombatText.GetCurrentEventInfo or an authoritative combat-text event result contract.",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: source metadata lacks result semantics and no modeled combat-text event state establishes no-event behavior, result arity/values, active-unit interaction, advancement, clearing, or lifecycle."
     },
     {
       "id": "added:C_CombatText.SetActiveUnit",
       "symbol": "C_CombatText.SetActiveUnit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_CombatText.SetActiveUnit occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Current adjacent combat-log workaround does not model C_CombatText active-unit state; historical aliases/stubs do not establish behavior.",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled active-unit state or focused proof establishes valid/invalid unit handling, declassified-unit restrictions, GetActiveUnit round-trip, or CombatText event routing."
     },
     {
       "id": "added:C_Commentator.GetCombatEventInfo",
       "symbol": "C_Commentator.GetCombatEventInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines the C_Commentator.GetCombatEventInfo occurrence contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/inert_global_defaults.rs",
+          "summary": "Current Commentator compatibility surface publishes only inert IsSpectating/SendAddonMessage helpers and has no GetCombatEventInfo or combat-event state.",
+          "source_hash": "babd3de9ccceeedd13011d1b69eefda4d91c105915632b45b05c1fd1afac4da2"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: source metadata lacks an authoritative result contract and no modeled commentator combat-event state establishes publication, return values, event ordering, empty/repeated behavior, or lifecycle."
     },
     {
       "id": "added:C_CooldownViewer.CooldownViewerCooldown.category",

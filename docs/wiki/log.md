@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify seven C_ChatInfo, C_CombatText, and C_Commentator API gaps
+
+Classified the seven-row `C_ChatInfo`/`C_CombatText`/`C_Commentator` API-gap slice as `evidence-required`/`unsafe`. Current fallbacks are absent, no-op, constant-false, or adjacent-state only and do not model lockdown, emote, active-unit, combat-text, or commentator event state, restrictions, result contracts, transitions, events, ordering, or lifecycle. Current totals are **868 best-effort, 743 evidence-required, 2 exception-requested, and 1797 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_CharacterServices.AssignFCMDistribution
 
 Classified `C_CharacterServices.AssignFCMDistribution` as `evidence-required`/`unsafe`. The source register provides no signature/result metadata, and the simulator has no FCM validation/assignment model; account/realm/character checks, validation-only behavior, exact results, state transitions, persistence, and events remain unproven. Current totals are **868 best-effort, 736 evidence-required, 2 exception-requested, and 1804 untriaged** (3410 rows).

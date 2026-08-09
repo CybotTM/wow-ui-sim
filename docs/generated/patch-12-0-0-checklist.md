@@ -138,9 +138,9 @@
 138. [evidence-required] `added:C_CatalogShop.RefundableDecorInfo.timeRemainingSeconds` — unsafe
 139. [evidence-required] `added:C_CatalogShop.StartHousingVCPurchaseConfirmation` — unsafe
 140. [evidence-required] `added:C_CharacterServices.AssignFCMDistribution` — unsafe
-141. [untriaged] `added:C_ChatInfo.CancelEmote` — untriaged
-142. [untriaged] `added:C_ChatInfo.InChatMessagingLockdown` — untriaged
-143. [untriaged] `added:C_ChatInfo.PerformEmote` — untriaged
+141. [evidence-required] `added:C_ChatInfo.CancelEmote` — unsafe
+142. [evidence-required] `added:C_ChatInfo.InChatMessagingLockdown` — unsafe
+143. [evidence-required] `added:C_ChatInfo.PerformEmote` — unsafe
 144. [evidence-required] `added:C_ColorUtil.ConvertHSLToHSV` — unsafe
 145. [evidence-required] `added:C_ColorUtil.ConvertHSVToHSL` — unsafe
 146. [evidence-required] `added:C_ColorUtil.ConvertHSVToRGB` — unsafe
@@ -180,10 +180,10 @@
 180. [evidence-required] `added:C_CombatLogSecure.SeekToNewestEntry` — unsafe
 181. [evidence-required] `added:C_CombatLogSecure.SeekToPreviousEntry` — unsafe
 182. [evidence-required] `added:C_CombatLogSecure.ShouldShowCurrentEntry` — unsafe
-183. [untriaged] `added:C_CombatText.GetActiveUnit` — untriaged
-184. [untriaged] `added:C_CombatText.GetCurrentEventInfo` — untriaged
-185. [untriaged] `added:C_CombatText.SetActiveUnit` — untriaged
-186. [untriaged] `added:C_Commentator.GetCombatEventInfo` — untriaged
+183. [evidence-required] `added:C_CombatText.GetActiveUnit` — unsafe
+184. [evidence-required] `added:C_CombatText.GetCurrentEventInfo` — unsafe
+185. [evidence-required] `added:C_CombatText.SetActiveUnit` — unsafe
+186. [evidence-required] `added:C_Commentator.GetCombatEventInfo` — unsafe
 187. [untriaged] `added:C_CooldownViewer.CooldownViewerCooldown.category` — untriaged
 188. [untriaged] `added:C_CooldownViewer.CooldownViewerCooldown.cooldownID` — untriaged
 189. [untriaged] `added:C_CooldownViewer.GetValidAlertTypes` — untriaged

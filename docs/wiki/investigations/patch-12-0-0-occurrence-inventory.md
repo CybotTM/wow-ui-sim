@@ -30,7 +30,7 @@ The bounded 12.0.0 `C_CombatLogSecure` slice classifies exactly nine added secur
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 868 best-effort, 736 evidence-required, 2 exception-requested, 1804 untriaged
+- **Rows:** 3410 total — 0 implemented, 868 best-effort, 743 evidence-required, 2 exception-requested, 1797 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -178,9 +178,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_CatalogShop.RefundableDecorInfo.timeRemainingSeconds` | evidence-required | structure-field | added | Evidence required: no RefundableDecorInfo producer establishes required numeric timeRemainingSeconds publication, countdown/sorting behavior, filtering, refresh lifecycle, or consumer semantics. |
 | `C_CatalogShop.StartHousingVCPurchaseConfirmation` | evidence-required | api | added | Evidence required: no housing virtual-currency confirmation state establishes product validation, session creation, balance/top-up transitions, events, repeated/invalid calls, or consumers. |
 | `C_CharacterServices.AssignFCMDistribution` | evidence-required | api | added | Evidence required: authoritative signature/result metadata is incomplete and no modeled free-character-move validation/assignment state establishes realm/account/character checks, validation-only behavior, exact results, transitions, persistence, or events. |
-| `C_ChatInfo.CancelEmote` | untriaged | api | added | api added in 12.0.0. |
-| `C_ChatInfo.InChatMessagingLockdown` | untriaged | api | added | api added in 12.0.0. |
-| `C_ChatInfo.PerformEmote` | untriaged | api | added | api added in 12.0.0. |
+| `C_ChatInfo.CancelEmote` | evidence-required | api | added | Evidence required: no modeled active-emote state or focused proof establishes cancellation transitions, repeated/no-active behavior, events, validation, or consumer effects. |
+| `C_ChatInfo.InChatMessagingLockdown` | evidence-required | api | added | Evidence required: no modeled chat-lockdown state or focused proof establishes boolean restriction results, nullable reason enum, encounter/PvP/keystone transitions, ordering, or reset behavior. |
+| `C_ChatInfo.PerformEmote` | evidence-required | api | added | Evidence required: no modeled emote state or focused proof establishes argument/default handling, exact success/failure, valid/invalid emotes, target/suppression behavior, restrictions, movement errors, or events. |
 | `C_ColorUtil.ConvertHSLToHSV` | evidence-required | api | added | Current C_ColorUtil conversion behavior is absent or placeholder/identity/max-channel only; authoritative semantics or a correct modeled implementation/test are required, and no approval can close the row. |
 | `C_ColorUtil.ConvertHSVToHSL` | evidence-required | api | added | Current C_ColorUtil conversion behavior is absent or placeholder/identity/max-channel only; authoritative semantics or a correct modeled implementation/test are required, and no approval can close the row. |
 | `C_ColorUtil.ConvertHSVToRGB` | evidence-required | api | added | Current C_ColorUtil conversion behavior is absent or placeholder/identity/max-channel only; authoritative semantics or a correct modeled implementation/test are required, and no approval can close the row. |
@@ -220,10 +220,10 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_CombatLogSecure.SeekToNewestEntry` | evidence-required | api | added | secure-only API; permissive temporary model and secure/filter/payload/navigation/lifecycle semantics remain unproven. |
 | `C_CombatLogSecure.SeekToPreviousEntry` | evidence-required | api | added | secure-only API; permissive temporary model and secure/filter/payload/navigation/lifecycle semantics remain unproven. |
 | `C_CombatLogSecure.ShouldShowCurrentEntry` | evidence-required | api | added | secure-only API; permissive temporary model and secure/filter/payload/navigation/lifecycle semantics remain unproven. |
-| `C_CombatText.GetActiveUnit` | untriaged | api | added | api added in 12.0.0. |
-| `C_CombatText.GetCurrentEventInfo` | untriaged | api | added | api added in 12.0.0. |
-| `C_CombatText.SetActiveUnit` | untriaged | api | added | api added in 12.0.0. |
-| `C_Commentator.GetCombatEventInfo` | untriaged | api | added | api added in 12.0.0. |
+| `C_CombatText.GetActiveUnit` | evidence-required | api | added | Evidence required: no C_CombatText namespace/state or focused proof establishes no-value behavior, valid unit round-trip, invalid/secret/declassified-unit handling, or consumer routing. |
+| `C_CombatText.GetCurrentEventInfo` | evidence-required | api | added | Evidence required: source metadata lacks result semantics and no modeled combat-text event state establishes no-event behavior, result arity/values, active-unit interaction, advancement, clearing, or lifecycle. |
+| `C_CombatText.SetActiveUnit` | evidence-required | api | added | Evidence required: no modeled active-unit state or focused proof establishes valid/invalid unit handling, declassified-unit restrictions, GetActiveUnit round-trip, or CombatText event routing. |
+| `C_Commentator.GetCombatEventInfo` | evidence-required | api | added | Evidence required: source metadata lacks an authoritative result contract and no modeled commentator combat-event state establishes publication, return values, event ordering, empty/repeated behavior, or lifecycle. |
 | `C_CooldownViewer.CooldownViewerCooldown.category` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_CooldownViewer.CooldownViewerCooldown.cooldownID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_CooldownViewer.GetValidAlertTypes` | untriaged | api | added | api added in 12.0.0. |
@@ -3486,3 +3486,5 @@ The bounded remaining-removal slice classifies exactly 19 removed runtime API ro
 ## See Also
 
 - [[patch-api-audit-manifest]] — register schema and completion contract.
+
+The bounded seven-row `C_ChatInfo`/`C_CombatText`/`C_Commentator` API-gap slice classifies all seven rows as evidence-required/unsafe. Current fallbacks are absent, no-op, constant-false, or adjacent-state only and do not model lockdown, emote, active-unit, combat-text, or commentator event state, restrictions, result contracts, transitions, events, ordering, or lifecycle.
