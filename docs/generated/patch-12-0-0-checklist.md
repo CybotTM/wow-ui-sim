@@ -375,7 +375,7 @@
 375. [best-effort] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle2` — behavioral
 376. [best-effort] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle3` — behavioral
 377. [best-effort] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle4` — behavioral
-378. [untriaged] `added:C_LFGList.LfgEntryData.generalPlaystyle` — untriaged
+378. [evidence-required] `added:C_LFGList.LfgEntryData.generalPlaystyle` — unsafe
 379. [untriaged] `added:C_LFGList.LfgListingCreateData.generalPlaystyle` — untriaged
 380. [untriaged] `added:C_LFGList.LfgSearchResultData.generalPlaystyle` — untriaged
 381. [untriaged] `added:C_LimitedInput.LimitedInputAllowed` — untriaged

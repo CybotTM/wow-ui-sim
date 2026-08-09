@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_LFGList.LfgEntryData.generalPlaystyle
+
+Classified `C_LFGList.LfgEntryData.generalPlaystyle` as evidence-required/unsafe: the source field is nullable `Enum.LFGEntryGeneralPlaystyle`, but no active-listing model exists and `GetActiveEntryInfo()` always returns nil. The separate search-result `generalPlaystyle` field is a different structure; field presence, nilability, enum values, mutation, serialization, validation, and lifecycle remain unproven. Current totals are **890 best-effort, 791 evidence-required, 2 exception-requested, and 1727 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_LFGList generalPlaystyle4 field
 
 Classified `C_LFGList.AdvancedFilterOptions.generalPlaystyle4` as best-effort/behavioral, bounded to modeled boolean publication and exact false default through `C_LFGList.GetAdvancedFilter()`; the focused test proves it. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed. Current totals are **890 best-effort, 790 evidence-required, 2 exception-requested, and 1728 untriaged** (3410 rows).

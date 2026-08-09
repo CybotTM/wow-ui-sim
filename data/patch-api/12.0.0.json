@@ -12343,17 +12343,36 @@
       "id": "added:C_LFGList.LfgEntryData.generalPlaystyle",
       "symbol": "C_LFGList.LfgEntryData.generalPlaystyle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines LfgEntryData.generalPlaystyle as a nullable Enum.LFGEntryGeneralPlaystyle field with no explicit default.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lfg_list/catalog.rs",
+          "summary": "Current C_LFGList.GetActiveEntryInfo always returns nil because the simulator has no own-listing model, so no LfgEntryData payload or generalPlaystyle field is produced.",
+          "source_hash": "09102912d47bc941ff1f28e9dd830b86c36a8ae01acd399e6704c0b049585137"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/lfg_categories.rs",
+          "summary": "Existing focused test confirms GetActiveEntryInfo returns nil; it therefore proves the required LfgEntryData field is not currently observable, not that its contract is implemented.",
+          "source_hash": "597438511459a24a51d65d3622f8906b0cfbbe2265e875b15ef86b2419323410"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no active-listing model produces LfgEntryData, so field presence, nullable behavior, enum values, mutation, serialization, validation, and lifecycle remain unproven. The separate search-result generalPlaystyle field does not satisfy this structure contract."
     },
     {
       "id": "added:C_LFGList.LfgListingCreateData.generalPlaystyle",
