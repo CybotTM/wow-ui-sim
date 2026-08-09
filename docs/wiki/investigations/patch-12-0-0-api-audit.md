@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **891 best-effort, 793 evidence-required, 2 exception-requested, and 1724 untriaged rows** (3410 total).
+Current manifest totals are **891 best-effort, 794 evidence-required, 2 exception-requested, and 1723 untriaged rows** (3410 total).
+
+`C_MajorFactions.MajorFactionData.description` is evidence-required/unsafe: the source requires a string field, but the current state model lacks description and `GetMajorFactionData` omits it. Exact strings/defaults/per-faction values/unknown behavior/mutation/refresh/lifecycle remain unproven; `name` and `unlockDescription` are separate fields.
 
 `C_LimitedInput.LimitedInputAllowed` is evidence-required/unsafe: the source requires an `Enum.LimitedInputType` input and boolean result, but no allowance, budget, or policy state or namespace method exists; generic fallback returns nil. Authorization/taint rules, budget exhaustion, validation, boolean results, transitions, and lifecycle remain unproven.
 

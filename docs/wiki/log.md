@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_MajorFactions.MajorFactionData.description
+
+Classified `C_MajorFactions.MajorFactionData.description` as evidence-required/unsafe: the source requires a string field, but the current state model lacks description and `GetMajorFactionData` omits it. Exact strings/defaults/per-faction values/unknown behavior/mutation/refresh/lifecycle remain unproven; `name` and `unlockDescription` are separate fields. Current totals are **891 best-effort, 794 evidence-required, 2 exception-requested, and 1723 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_LimitedInput.LimitedInputAllowed
 
 Classified `C_LimitedInput.LimitedInputAllowed` as evidence-required/unsafe: the source requires an `Enum.LimitedInputType` input and boolean result, but no allowance, budget, or policy state or namespace method exists; generic fallback returns nil. Authorization/taint rules, budget exhaustion, validation, boolean results, transitions, and lifecycle remain unproven. Current totals are **891 best-effort, 793 evidence-required, 2 exception-requested, and 1724 untriaged** (3410 rows).

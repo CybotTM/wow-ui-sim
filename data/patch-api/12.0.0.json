@@ -12497,17 +12497,36 @@
       "id": "added:C_MajorFactions.MajorFactionData.description",
       "symbol": "C_MajorFactions.MajorFactionData.description",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines MajorFactionData.description as a required string field with no explicit default.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current MajorFactionData state model has name and unlock_description fields but no description field or authoritative description state.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_major_factions.rs",
+          "summary": "C_MajorFactions.GetMajorFactionData emits name, unlockDescription, textureKit, and other fields, but does not publish description.",
+          "source_hash": "9ee7329717a4f07ae594b770dba1e2df8aaed6c3417d5a4ecccb9b79c31d7972"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: MajorFactionData has no description state and GetMajorFactionData does not emit the required field. Exact strings, defaults, per-faction values, unknown behavior, mutation, refresh, and lifecycle remain unproven; name and unlockDescription are different contracts."
     },
     {
       "id": "added:C_MajorFactions.MajorFactionData.highlights",
