@@ -244,6 +244,13 @@ fn test_patch_12_0_0_cvar_defaults() {
         .eval(
             r#"
                 local expected = {
+                    CAAEnabled = "0",
+                    CAAInterruptCast = "0",
+                    CAAInterruptCastSuccess = "0",
+                    CAAPartyHealthFrequency = "0",
+                    CAAPartyHealthPercent = "0",
+                    CAAPlayerCastFormat = "4",
+                    CAAPlayerCastMinTime = "1.500000",
                     Sound_EnableEncounterWarningsSounds = "1",
                     Sound_EncounterWarningsVolume = "1.000000",
                     WorldTextCritScreenY_v2 = "0.0275",

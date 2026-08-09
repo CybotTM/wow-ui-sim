@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify seven CAA CVar-default rows
+
+Classified `CAAEnabled`, `CAAInterruptCast`, `CAAInterruptCastSuccess`, `CAAPartyHealthFrequency`, `CAAPartyHealthPercent`, `CAAPlayerCastFormat`, and `CAAPlayerCastMinTime` as bounded `best-effort`/`behavioral` claims using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed. Current totals are **834 best-effort, 687 evidence-required, 2 exception-requested, and 1887 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify 23 CVar-default rows
 
 Classified 23 added CVar-default rows as bounded `best-effort`/`behavioral` claims using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; mutation, events, persistence, secure/read-only flags, consumers, and later-epoch behavior remain unclaimed. Current totals are **827 best-effort, 687 evidence-required, 2 exception-requested, and 1894 untriaged** (3410 rows).

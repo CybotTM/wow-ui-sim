@@ -3,6 +3,7 @@ Occurrence-level register derived from explicit wowless retail snapshots. Eight 
 The bounded 12.0.0 miscellaneous payload-field slice classifies eight ExpansionDisplayInfo, LuaColorCurvePoint, PrivateAuraIconInfo, and SpellCooldownInfo fields as evidence-required/unsafe. Current behavior is absent, nil-only, generic, or placeholder-backed and does not establish exact contracts, state/security, or consumer semantics.
 The bounded 12.0.0 unit/heal-prediction slice classifies four added rows as best-effort/behavioral from focused tests; full retail semantics remain unclaimed.
 The bounded 23-row 12.0.0 CVar-default slice classifies the added encounter-warning, WorldText, chat-restriction, rune-icon, auction-sort, chat-bubble, combat-warning, damage-meter, and suggested-level-filter CVars as best-effort/behavioral using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; mutation, events, persistence, secure/read-only flags, consumers, and later-epoch behavior remain unclaimed.
+The bounded seven-row 12.0.0 CAA CVar slice classifies `CAAEnabled`, `CAAInterruptCast`, `CAAInterruptCastSuccess`, `CAAPartyHealthFrequency`, `CAAPartyHealthPercent`, `CAAPlayerCastFormat`, and `CAAPlayerCastMinTime` as best-effort/behavioral using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed.
 The bounded 12.0.0 number-abbreviation field slice classifies eight `NumberAbbrevData`/`NumberAbbrevOptions` fields as evidence-required/unsafe. Generic `AbbreviateConfig` proxy round-tripping does not establish typed contracts, defaults/nullability, validation, ordering, or formatting behavior.
 The bounded 12.0.0 tutorial/pet global-constant slice classifies five added globals as best-effort/behavioral. Focused startup proof establishes numeric publication and exact values only; tutorial and pet-journal behavior, consumers, lifecycle, and historical load timing remain unclaimed.
 The bounded 12.0.0 conflicting-global slice classifies 12 LE_GAME_ERR globals as evidence-required/unsafe because source-register values conflict with current fallback publication; authoritative epoch/value reconciliation is required before implementation.
@@ -17,7 +18,7 @@ The bounded 12.0.0 `C_CombatLogSecure` slice classifies exactly nine added secur
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 827 best-effort, 687 evidence-required, 2 exception-requested, 1894 untriaged
+- **Rows:** 3410 total — 0 implemented, 834 best-effort, 687 evidence-required, 2 exception-requested, 1887 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -33,13 +34,13 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `AbbreviateNumbers` | untriaged | api | added | api added in 12.0.0. |
 | `AddSourceLocationExclude` | untriaged | api | added | api added in 12.0.0. |
 | `BULK_PURCHASE_RESULT_RECEIVED` | untriaged | event | added | event added in 12.0.0. |
-| `CAAEnabled` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `CAAInterruptCast` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `CAAInterruptCastSuccess` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `CAAPartyHealthFrequency` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `CAAPartyHealthPercent` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `CAAPlayerCastFormat` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `CAAPlayerCastMinTime` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `CAAEnabled` | best-effort | cvar | added | Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed. |
+| `CAAInterruptCast` | best-effort | cvar | added | Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed. |
+| `CAAInterruptCastSuccess` | best-effort | cvar | added | Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed. |
+| `CAAPartyHealthFrequency` | best-effort | cvar | added | Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed. |
+| `CAAPartyHealthPercent` | best-effort | cvar | added | Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed. |
+| `CAAPlayerCastFormat` | best-effort | cvar | added | Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed. |
+| `CAAPlayerCastMinTime` | best-effort | cvar | added | Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed. |
 | `CAAPlayerCastMode` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `CAAPlayerCastThrottle` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `CAAPlayerHealthFormat` | untriaged | cvar | added | cvar added in 12.0.0. |
