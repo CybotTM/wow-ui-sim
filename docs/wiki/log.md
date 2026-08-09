@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeActivityLogEntry.completionTime
+
+Classified `C_NeighborhoodInitiative.InitiativeActivityLogEntry.completionTime` as evidence-required/unsafe: the source defines a required numeric completionTime field, but no InitiativeActivityLogEntry runtime model or activity-log producer exists and generic fallback produces no payload. Numeric time presence/values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 812 evidence-required, 2 exception-requested, and 1705 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeActivityLogEntry.amount
 
 Classified `C_NeighborhoodInitiative.InitiativeActivityLogEntry.amount` as evidence-required/unsafe: the source defines a required numeric amount field, but no InitiativeActivityLogEntry runtime model or activity-log producer exists and generic fallback produces no payload. Numeric field presence/values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 811 evidence-required, 2 exception-requested, and 1706 untriaged** (3410 rows).

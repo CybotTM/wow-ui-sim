@@ -474,7 +474,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_NeighborhoodInitiative.GetTrackedInitiativeTasks` | evidence-required | api | added | Evidence required: the fixed empty payload proves only placeholder shape. Empty, add/remove, duplicate, invalid/unknown ID, ordering, refresh, persistence, event, and lifecycle behavior remain unproven without tracked-task state. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry.amount` | evidence-required | structure-field | added | Evidence required: no InitiativeActivityLogEntry runtime model or producer exists. Numeric field presence and values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. |
-| `C_NeighborhoodInitiative.InitiativeActivityLogEntry.completionTime` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `C_NeighborhoodInitiative.InitiativeActivityLogEntry.completionTime` | evidence-required | structure-field | added | Evidence required: no InitiativeActivityLogEntry runtime model or producer exists. Numeric completion-time presence and values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry.playerName` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskName` | untriaged | structure-field | added | structure-field added in 12.0.0. |
