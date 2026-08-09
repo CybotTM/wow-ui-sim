@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeMilestoneInfo.rewards and InitiativeMilestoneRewardInfo fields
+
+Classified `C_NeighborhoodInitiative.InitiativeMilestoneInfo.rewards` plus `C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.decorID`, `decorQuantity`, `description`, `favor`, `money`, `rewardQuestID`, and `title` as evidence-required/unsafe: the source defines a required reward array and seven required fields, but no InitiativeMilestoneInfo/InitiativeMilestoneRewardInfo runtime model or initiative payload producer exists; generic fallback produces no milestones. Reward arrays/order, entry shape/types/values, empty/populated milestones, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 829 evidence-required, 2 exception-requested, and 1688 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeMilestoneInfo.requiredContributionAmount
 
 Classified `C_NeighborhoodInitiative.InitiativeMilestoneInfo.requiredContributionAmount` as evidence-required/unsafe: the source defines a required numeric requiredContributionAmount field, but no InitiativeMilestoneInfo runtime model or initiative payload producer exists; generic fallback produces no milestones. Contribution thresholds, empty/populated milestones, ordering/progress comparisons, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 821 evidence-required, 2 exception-requested, and 1696 untriaged** (3410 rows).

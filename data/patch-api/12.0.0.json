@@ -13792,17 +13792,36 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneInfo.rewards",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneInfo.rewards",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeMilestoneInfo.rewards as a required array of InitiativeMilestoneRewardInfo structures.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no milestone reward model and no initiative payload producer that could publish rewards.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or rewards field are produced.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeMilestoneInfo/InitiativeMilestoneRewardInfo runtime model or producer exists. Reward-array presence and ordering, entry shape and field values, empty/populated milestones, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo",
@@ -13832,113 +13851,246 @@
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.decorID",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.decorID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeMilestoneRewardInfo.decorID as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no milestone reward model and no initiative payload producer that could publish decorID.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or decorID field are produced.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeMilestoneInfo/InitiativeMilestoneRewardInfo runtime model or producer exists. Decor identifier presence and values, empty/populated rewards, reward ordering, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.decorQuantity",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.decorQuantity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeMilestoneRewardInfo.decorQuantity as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no milestone reward model and no initiative payload producer that could publish decorQuantity.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or decorQuantity field are produced.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeMilestoneInfo/InitiativeMilestoneRewardInfo runtime model or producer exists. Decor quantity presence and values, pairing with decor identifiers, empty/populated rewards, ordering, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.description",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.description",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeMilestoneRewardInfo.description as a required string structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no milestone reward model and no initiative payload producer that could publish description.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or description field are produced.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeMilestoneInfo/InitiativeMilestoneRewardInfo runtime model or producer exists. Description presence and values, empty/populated rewards, ordering, localization behavior, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.favor",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.favor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeMilestoneRewardInfo.favor as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no milestone reward model and no initiative payload producer that could publish favor.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or favor field are produced.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeMilestoneInfo/InitiativeMilestoneRewardInfo runtime model or producer exists. Favor amount presence and values, empty/populated rewards, ordering, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.money",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.money",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeMilestoneRewardInfo.money as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no milestone reward model and no initiative payload producer that could publish money.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or money field are produced.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeMilestoneInfo/InitiativeMilestoneRewardInfo runtime model or producer exists. Money amount presence and values, empty/populated rewards, ordering, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.rewardQuestID",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.rewardQuestID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeMilestoneRewardInfo.rewardQuestID as a required numeric structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no milestone reward model and no initiative payload producer that could publish rewardQuestID.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or rewardQuestID field are produced.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeMilestoneInfo/InitiativeMilestoneRewardInfo runtime model or producer exists. Reward quest identifier presence and values, unknown quests, empty/populated rewards, ordering, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.title",
       "symbol": "C_NeighborhoodInitiative.InitiativeMilestoneRewardInfo.title",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines InitiativeMilestoneRewardInfo.title as a required string structure field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults contain no milestone reward model and no initiative payload producer that could publish title.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or title field are produced.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no InitiativeMilestoneInfo/InitiativeMilestoneRewardInfo runtime model or producer exists. Title presence and values, empty/populated rewards, ordering, localization behavior, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.InitiativeTaskInfo",
