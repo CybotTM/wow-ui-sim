@@ -17388,33 +17388,71 @@
       "id": "added:C_SettingsUtil.NotifySettingsLoaded",
       "symbol": "C_SettingsUtil.NotifySettingsLoaded",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines NotifySettingsLoaded as a no-argument API with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/settings_surface_defaults.rs",
+          "summary": "Current settings defaults model partial Settings categories and panel helpers, but no C_SettingsUtil notification method or SETTINGS_LOADED dispatch.",
+          "source_hash": "db2d636b9e9276e3ddbc35cbfeacc82ee331245923b5b57922237a9cae540b12"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback is a no-op and does not establish event timing, delivery, or repeated-call behavior.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_SettingsUtil notification implementation or settings-loaded event lifecycle exists. Initial/repeated calls, exact SETTINGS_LOADED dispatch timing, ordering, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_SettingsUtil.OpenSettingsPanel",
       "symbol": "C_SettingsUtil.OpenSettingsPanel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines OpenSettingsPanel with optional numeric openToCategoryID and optional string scrollToElementName inputs and no returns.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/settings_surface_defaults.rs",
+          "summary": "Current settings defaults model Settings.OpenToCategory and panel visibility only, not the C_SettingsUtil API or scroll-target behavior.",
+          "source_hash": "db2d636b9e9276e3ddbc35cbfeacc82ee331245923b5b57922237a9cae540b12"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic fallback is a no-op and does not open, select, or scroll the Settings panel.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no C_SettingsUtil panel-opening and scroll-target implementation exists. Nil/valid/unknown category IDs, valid/unknown element names, repeated opens, selection, scrolling, visibility, and lifecycle remain unproven."
     },
     {
       "id": "added:C_Sound.PlaySound",

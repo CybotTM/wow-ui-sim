@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **892 best-effort, 900 evidence-required, 2 exception-requested, and 1616 untriaged rows** (3410 total).
+Current manifest totals are **892 best-effort, 902 evidence-required, 2 exception-requested, and 1614 untriaged rows** (3410 total).
+
+`C_SettingsUtil.NotifySettingsLoaded` and `C_SettingsUtil.OpenSettingsPanel` are evidence-required/unsafe: current settings defaults model partial Settings categories/panel helpers only; no C_SettingsUtil namespace, SETTINGS_LOADED dispatch, or category+element scrolling implementation exists. Event timing/order, nil/valid/unknown category and element targets, repeated opens, visibility/scrolling, and lifecycle remain unproven.
 
 `C_SecureTransfer.Cancel`, `C_SecureTransfer.CompleteHousingPurchase`, `C_SecureTransfer.CompleteHousingVCPurchase`, `C_SecureTransfer.GetHousingPurchaseCost`, and `C_SecureTransfer.GetHousingVCPurchaseProductID` are evidence-required/unsafe: current temporary state exposes counters/lastAction and manually injected numeric query values only; no secure transaction, pricing/product producer, validation, authorization, purchase mutation, cancellation/rollback, callbacks/events exists. Exact costs/products and valid/invalid/repeated transaction lifecycle remain unproven.
 

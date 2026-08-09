@@ -526,8 +526,8 @@
 526. [evidence-required] `added:C_SecureTransfer.CompleteHousingVCPurchase` — unsafe
 527. [evidence-required] `added:C_SecureTransfer.GetHousingPurchaseCost` — unsafe
 528. [evidence-required] `added:C_SecureTransfer.GetHousingVCPurchaseProductID` — unsafe
-529. [untriaged] `added:C_SettingsUtil.NotifySettingsLoaded` — untriaged
-530. [untriaged] `added:C_SettingsUtil.OpenSettingsPanel` — untriaged
+529. [evidence-required] `added:C_SettingsUtil.NotifySettingsLoaded` — unsafe
+530. [evidence-required] `added:C_SettingsUtil.OpenSettingsPanel` — unsafe
 531. [untriaged] `added:C_Sound.PlaySound` — untriaged
 532. [evidence-required] `added:C_Spell.GetSpellChargeDuration` — unsafe
 533. [evidence-required] `added:C_Spell.GetSpellCooldownDuration` — unsafe
