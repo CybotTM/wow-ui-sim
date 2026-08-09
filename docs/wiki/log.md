@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetInitiativeActivityLogInfo
+
+Classified `C_NeighborhoodInitiative.GetInitiativeActivityLogInfo` as evidence-required/unsafe: the source returns a nilable InitiativeActivityLogInfo payload, but no explicit method or activity-log state model exists, namespace defaults omit it, and generic fallback returns nil. Nil alone does not establish absent/present behavior, payload fields/entries, update timing, refresh/events, persistence, or lifecycle. Current totals are **891 best-effort, 805 evidence-required, 2 exception-requested, and 1712 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetActiveNeighborhood
 
 Classified `C_NeighborhoodInitiative.GetActiveNeighborhood` as evidence-required/unsafe: the source requires one neighborhoodGUID string, but no explicit method or active-neighborhood model exists; namespace defaults omit it and generic fallback returns nil. No-active behavior, valid GUID output, state transitions, refresh, events, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 804 evidence-required, 2 exception-requested, and 1713 untriaged** (3410 rows).

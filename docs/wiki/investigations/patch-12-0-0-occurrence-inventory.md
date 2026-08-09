@@ -466,7 +466,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_NamePlateManager.SetNamePlateSimplified` | evidence-required | api | added | No modeled nameplate-manager simplified-state subsystem exists; exact 12.0.0 semantics remain unproven. |
 | `C_NeighborhoodInitiative.AddTrackedInitiativeTask` | evidence-required | api | added | Evidence required: the no-op fallback does not add a task or establish valid/unknown ID behavior, duplicate handling, ordering, removal interaction, returned task information, persistence, event dispatch, refresh, or lifecycle. Callability and nil return are insufficient. |
 | `C_NeighborhoodInitiative.GetActiveNeighborhood` | evidence-required | api | added | Evidence required: the method and active-neighborhood state are absent, while generic fallback returns nil instead of the required GUID string. No-active behavior, valid GUID output, state transitions, refresh, event integration, persistence, and lifecycle remain unproven. |
-| `C_NeighborhoodInitiative.GetInitiativeActivityLogInfo` | untriaged | api | added | api added in 12.0.0. |
+| `C_NeighborhoodInitiative.GetInitiativeActivityLogInfo` | evidence-required | api | added | Evidence required: no activity-log model or explicit method exists. Generic nil fallback does not establish absent/present behavior, payload field types and contents, task-entry arrays, update timing, refresh/event behavior, persistence, or lifecycle. |
 | `C_NeighborhoodInitiative.GetInitiativeTaskChatLink` | untriaged | api | added | api added in 12.0.0. |
 | `C_NeighborhoodInitiative.GetInitiativeTaskInfo` | untriaged | api | added | api added in 12.0.0. |
 | `C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo` | untriaged | api | added | api added in 12.0.0. |

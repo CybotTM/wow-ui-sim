@@ -398,7 +398,7 @@
 398. [evidence-required] `added:C_NamePlateManager.SetNamePlateSimplified` — unsafe
 399. [evidence-required] `added:C_NeighborhoodInitiative.AddTrackedInitiativeTask` — unsafe
 400. [evidence-required] `added:C_NeighborhoodInitiative.GetActiveNeighborhood` — unsafe
-401. [untriaged] `added:C_NeighborhoodInitiative.GetInitiativeActivityLogInfo` — untriaged
+401. [evidence-required] `added:C_NeighborhoodInitiative.GetInitiativeActivityLogInfo` — unsafe
 402. [untriaged] `added:C_NeighborhoodInitiative.GetInitiativeTaskChatLink` — untriaged
 403. [untriaged] `added:C_NeighborhoodInitiative.GetInitiativeTaskInfo` — untriaged
 404. [untriaged] `added:C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo` — untriaged
