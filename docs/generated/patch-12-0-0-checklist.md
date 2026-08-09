@@ -571,7 +571,7 @@
 571. [evidence-required] `added:C_StringUtil.StripHyperlinks` — unsafe
 572. [evidence-required] `added:C_StringUtil.TruncateWhenZero` — unsafe
 573. [evidence-required] `added:C_StringUtil.WrapString` — unsafe
-574. [untriaged] `added:C_TaskQuest.GetQuestUIWidgetSetByType` — untriaged
+574. [evidence-required] `added:C_TaskQuest.GetQuestUIWidgetSetByType` — unsafe
 575. [untriaged] `added:C_TooltipComparison.CompareItem` — untriaged
 576. [untriaged] `added:C_TooltipInfo.GetOutfit` — untriaged
 577. [untriaged] `added:C_TooltipInfo.GetUnitAuraByAuraInstanceID` — untriaged

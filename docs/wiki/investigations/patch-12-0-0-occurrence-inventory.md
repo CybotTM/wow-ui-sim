@@ -639,7 +639,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_StringUtil.StripHyperlinks` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
 | `C_StringUtil.TruncateWhenZero` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
 | `C_StringUtil.WrapString` | evidence-required | api | added | Current C_StringUtil model does not publish the function; authoritative semantics or a correct implementation are required, and no approval can close the row. |
-| `C_TaskQuest.GetQuestUIWidgetSetByType` | untriaged | api | added | api added in 12.0.0. |
+| `C_TaskQuest.GetQuestUIWidgetSetByType` | evidence-required | api | added | Evidence required: the current API returns synthetic widget-set IDs from static world-quest fixtures. Authoritative per-quest/type mapping, enum validation, nil behavior, data refresh, UI widget contents, events, persistence, and lifecycle remain unproven. |
 | `C_TooltipComparison.CompareItem` | untriaged | api | added | api added in 12.0.0. |
 | `C_TooltipInfo.GetOutfit` | untriaged | api | added | api added in 12.0.0. |
 | `C_TooltipInfo.GetUnitAuraByAuraInstanceID` | untriaged | api | added | api added in 12.0.0. |

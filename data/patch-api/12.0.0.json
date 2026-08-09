@@ -18761,17 +18761,48 @@
       "id": "added:C_TaskQuest.GetQuestUIWidgetSetByType",
       "symbol": "C_TaskQuest.GetQuestUIWidgetSetByType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source defines questID and MapIconUIWidgetSetType inputs with a nilable numeric widgetSet result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/quest_surface/register.rs",
+          "summary": "The API is explicitly registered through the task-quest surface.",
+          "source_hash": "3ffbdb9ff3a168f074cec30a3c69f67def6c2d88078a4887fc9a58b8b9b6061c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/quest_surface/task_quest.rs",
+          "summary": "Current implementation returns synthetic IDs for seeded world quests and nil otherwise, without an authoritative widget-set mapping or enum validation.",
+          "source_hash": "badcf3f6c69fd38d1f578f11a4034c1f18a364fb450f25c1a2c32203029623ce"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/quest_surface/data.rs",
+          "summary": "Backing world-quest data is a static synthetic fixture rather than retail per-quest widget-set state.",
+          "source_hash": "34104b6ec6700e8fbcbcf8045f06b17076f5b7f421d4c2ea9f5675f5e9fc1acf"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_adventuremap/behavior_quest_dialog_refresh_details_branches_on_widgets_and_rewards.rs",
+          "summary": "Existing consumer coverage replaces this API with a test stub and therefore does not prove the simulator mapping.",
+          "source_hash": "76a8e2153ade96ffefdd1176a40b12f59a4d59c1a8f9e1822efc7857843495b2"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the current API returns synthetic widget-set IDs from static world-quest fixtures. Authoritative per-quest/type mapping, enum validation, nil behavior, data refresh, UI widget contents, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_TooltipComparison.CompareItem",

@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_TaskQuest.GetQuestUIWidgetSetByType
+
+Classified `C_TaskQuest.GetQuestUIWidgetSetByType` as evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved. Current totals are **892 best-effort, 913 evidence-required, 2 exception-requested, and 1603 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_Transmog.TransmogApplyWarningInfo fields
 
 Classified `C_Transmog.TransmogApplyWarningInfo.itemLink` and `.text` as evidence-required/unsafe: removed parent structure/fields lack runtime absence and exact removal/load timing proof; source-token coverage is insufficient. Current totals are **892 best-effort, 912 evidence-required, 2 exception-requested, and 1604 untriaged** (3410 rows).
