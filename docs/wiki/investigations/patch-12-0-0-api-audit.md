@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **891 best-effort, 798 evidence-required, 2 exception-requested, and 1719 untriaged rows** (3410 total). `C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` is evidence-required/unsafe: the source requires a nullable number, but no `MajorFactionRenownRewardInfo` model or producer exists and `C_MajorFactions.GetRenownRewardsForLevel` returns an empty table. Present/nil values, numeric meanings, per-level rewards, ordering, unknown behavior, refresh, and lifecycle remain unproven.
+Current manifest totals are **891 best-effort, 799 evidence-required, 2 exception-requested, and 1718 untriaged rows** (3410 total). `C_MajorFactions.RenownHighlightInfo.level` is evidence-required/unsafe: the source requires a number, but no `RenownHighlightInfo` model or highlights producer exists; existing `RenownLevelInfo.level` is a different structure. Numeric values, schema/order, empty/non-empty behavior, per-faction values, unknown behavior, refresh, and lifecycle remain unproven.
+
+`C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` is evidence-required/unsafe: the source requires a nullable number, but no `MajorFactionRenownRewardInfo` model or producer exists and `C_MajorFactions.GetRenownRewardsForLevel` returns an empty table. Present/nil values, numeric meanings, per-level rewards, ordering, unknown behavior, refresh, and lifecycle remain unproven.
 
 `C_MajorFactions.MajorFactionData.description` is evidence-required/unsafe: the source requires a string field, but the current state model lacks description and `GetMajorFactionData` omits it. Exact strings/defaults/per-faction values/unknown behavior/mutation/refresh/lifecycle remain unproven; `name` and `unlockDescription` are separate fields.
 

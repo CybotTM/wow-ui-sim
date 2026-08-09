@@ -453,7 +453,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` | evidence-required | structure-field | added | Evidence required: no MajorFactionRenownRewardInfo model or producer exists, and the major-faction reward query returns an empty table. Present/nil rewardType behavior, numeric meanings, per-level rewards, ordering, unknown behavior, refresh, and lifecycle remain unproven. |
 | `C_MajorFactions.RenownHighlightInfo` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
 | `C_MajorFactions.RenownHighlightInfo.description` | evidence-required | structure-field | added | Evidence required: no RenownHighlightInfo model or highlights producer exists. Required description strings, element schema, ordering, empty/non-empty behavior, per-faction values, unknown behavior, refresh, and lifecycle remain unproven. |
-| `C_MajorFactions.RenownHighlightInfo.level` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `C_MajorFactions.RenownHighlightInfo.level` | evidence-required | structure-field | added | Evidence required: no RenownHighlightInfo model or highlights producer exists. Required numeric levels, distinction from RenownLevelInfo, element schema, ordering, empty/non-empty behavior, per-faction values, unknown behavior, refresh, and lifecycle remain unproven. |
 | `C_MajorFactions.RenownHighlightInfo.title` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_MajorFactions.ShouldDisplayMajorFactionAsJourney` | untriaged | api | added | api added in 12.0.0. |
 | `C_MajorFactions.ShouldUseJourneyRewardTrack` | untriaged | api | added | api added in 12.0.0. |

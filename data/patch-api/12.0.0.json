@@ -12702,17 +12702,36 @@
       "id": "added:C_MajorFactions.RenownHighlightInfo.level",
       "symbol": "C_MajorFactions.RenownHighlightInfo.level",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines RenownHighlightInfo.level as a required number field with no explicit default.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current major-faction state types contain RenownLevelInfo.level for a different structure, but no RenownHighlightInfo model or highlight level field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_major_factions.rs",
+          "summary": "C_MajorFactions.GetMajorFactionData omits highlights entirely, so no RenownHighlightInfo level value is produced.",
+          "source_hash": "9ee7329717a4f07ae594b770dba1e2df8aaed6c3417d5a4ecccb9b79c31d7972"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no RenownHighlightInfo model or highlights producer exists. Required numeric levels, distinction from RenownLevelInfo, element schema, ordering, empty/non-empty behavior, per-faction values, unknown behavior, refresh, and lifecycle remain unproven."
     },
     {
       "id": "added:C_MajorFactions.RenownHighlightInfo.title",
