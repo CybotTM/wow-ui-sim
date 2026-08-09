@@ -187,7 +187,7 @@
 187. [evidence-required] `added:C_CooldownViewer.CooldownViewerCooldown.category` — unsafe
 188. [evidence-required] `added:C_CooldownViewer.CooldownViewerCooldown.cooldownID` — unsafe
 189. [evidence-required] `added:C_CooldownViewer.GetValidAlertTypes` — unsafe
-190. [untriaged] `added:C_CreatureInfo.GetCreatureID` — untriaged
+190. [evidence-required] `added:C_CreatureInfo.GetCreatureID` — unsafe
 191. [best-effort] `added:C_CurveUtil.CreateColorCurve` — behavioral
 192. [best-effort] `added:C_CurveUtil.CreateCurve` — behavioral
 193. [evidence-required] `added:C_CurveUtil.EvaluateColorFromBoolean` — unsafe
@@ -319,9 +319,9 @@
 319. [evidence-required] `added:C_EventScheduler.OngoingEventInfo.displayInfo` — unsafe
 320. [evidence-required] `added:C_EventScheduler.ScheduledEventInfo.displayInfo` — unsafe
 321. [evidence-required] `added:C_EventScheduler.ScheduledEventInfo.eventID` — unsafe
-322. [untriaged] `added:C_EventUtils.IsCallbackEvent` — untriaged
-323. [untriaged] `added:C_GameRules.IsPersonalResourceDisplayEnabled` — untriaged
-324. [untriaged] `added:C_HouseExterior.GetCurrentHouseExteriorType` — untriaged
+322. [best-effort] `added:C_EventUtils.IsCallbackEvent` — behavioral
+323. [evidence-required] `added:C_GameRules.IsPersonalResourceDisplayEnabled` — unsafe
+324. [best-effort] `added:C_HouseExterior.GetCurrentHouseExteriorType` — behavioral
 325. [untriaged] `added:C_HouseExterior.GetFixtureDebugInfoForGUID` — untriaged
 326. [untriaged] `added:C_HouseExterior.GetHouseExteriorSizeOptions` — untriaged
 327. [untriaged] `added:C_HouseExterior.GetHouseExteriorTypeOptions` — untriaged

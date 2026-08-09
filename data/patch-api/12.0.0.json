@@ -6364,17 +6364,30 @@
       "id": "added:C_CreatureInfo.GetCreatureID",
       "symbol": "C_CreatureInfo.GetCreatureID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines C_CreatureInfo.GetCreatureID(creatureGUID: string) returning nullable numeric creatureID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/creature_info.rs",
+          "summary": "Current C_CreatureInfo registration omits GetCreatureID and has no creature-GUID parsing or creature identity backing model.",
+          "source_hash": "2898607aba754988b4c6d1d1f0c96b7356025913aa42866f0d27c7cb2dc8c7a3"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: GetCreatureID is absent, and no creature-GUID parser, identity table, valid/non-creature distinction, or nullable result behavior is modeled."
     },
     {
       "id": "added:C_CurveUtil.CreateColorCurve",
@@ -10445,49 +10458,110 @@
       "id": "added:C_EventUtils.IsCallbackEvent",
       "symbol": "C_EventUtils.IsCallbackEvent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines C_EventUtils.IsCallbackEvent(eventName: string) returning required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/small_namespaces.rs",
+          "summary": "Current C_EventUtils implementation delegates IsCallbackEvent to the simulator callback-event registry.",
+          "source_hash": "19d9f5a1d9a99712c237a28d25821518ab4baa73af948f8828555c895109f896"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/autoroll_compat.rs",
+          "summary": "Focused test proves COMBAT_LOG_EVENT is recognized as a callback event while PLAYER_LOGIN is not.",
+          "source_hash": "65baa06ae142cb9c0540eb167d2b0173ad3f1df540f1d32834dbbca125a34c18"
+        }
+      ],
+      "tests": [
+        "tests/autoroll_compat.rs::test_event_utils_rejects_non_event_method_names"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d93c8747ac64d23d96b70838e3423b1494c266b6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers current static-registry positive/negative classification for COMBAT_LOG_EVENT and PLAYER_LOGIN. Exact 12.0.0 registry completeness, argument validation, dynamic behavior, and lifecycle semantics remain unclaimed."
     },
     {
       "id": "added:C_GameRules.IsPersonalResourceDisplayEnabled",
       "symbol": "C_GameRules.IsPersonalResourceDisplayEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines C_GameRules.IsPersonalResourceDisplayEnabled() returning required boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/game_rules.rs",
+          "summary": "Current explicit C_GameRules registration omits IsPersonalResourceDisplayEnabled and has no dedicated personal-resource-display state.",
+          "source_hash": "5d65de8aa0202c385c2d1c93ec39be72f00d1266465490864b7f6af868c0b5da"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/game_rules_namespace_fallback.rs",
+          "summary": "Temporary namespace fallback exposes missing C_GameRules members as no-op functions returning nil, not the required boolean.",
+          "source_hash": "630a341a0c5f4431d7c7d752b69b3ca4aebc6f6060f7e0fc04ce80216194ded3"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current fallback returns nil instead of boolean, and no personal-resource-display backing state, default, mutation path, or settings integration is modeled."
     },
     {
       "id": "added:C_HouseExterior.GetCurrentHouseExteriorType",
       "symbol": "C_HouseExterior.GetCurrentHouseExteriorType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetCurrentHouseExteriorType() returning nullable numeric ID and nullable string name.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Temporary housing state publishes the getter from seeded selected exterior type ID and name fields.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/house_exterior.rs",
+          "summary": "Focused test proves callable publication and exactly two seeded returns: numeric 1 and string Sunspire Cottage.",
+          "source_hash": "d7b9fa483ff456fc0d52a1e47b92c4835428e76447d7ef96826c7ed1dfa60f8c"
+        }
+      ],
+      "tests": [
+        "tests/house_exterior.rs::current_house_exterior_type_returns_seeded_type_and_name"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7563366e679c112b27c9d5aca5b5f2e09f321882",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to callable publication and the seeded two-return shape/types/values 1 and Sunspire Cottage. Retail housing selection, mutation, persistence, refresh, validation, and lifecycle semantics remain unclaimed."
     },
     {
       "id": "added:C_HouseExterior.GetFixtureDebugInfoForGUID",
