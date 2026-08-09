@@ -399,7 +399,7 @@
 399. [evidence-required] `added:C_NeighborhoodInitiative.AddTrackedInitiativeTask` — unsafe
 400. [evidence-required] `added:C_NeighborhoodInitiative.GetActiveNeighborhood` — unsafe
 401. [evidence-required] `added:C_NeighborhoodInitiative.GetInitiativeActivityLogInfo` — unsafe
-402. [untriaged] `added:C_NeighborhoodInitiative.GetInitiativeTaskChatLink` — untriaged
+402. [evidence-required] `added:C_NeighborhoodInitiative.GetInitiativeTaskChatLink` — unsafe
 403. [untriaged] `added:C_NeighborhoodInitiative.GetInitiativeTaskInfo` — untriaged
 404. [untriaged] `added:C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo` — untriaged
 405. [untriaged] `added:C_NeighborhoodInitiative.GetRequiredLevel` — untriaged

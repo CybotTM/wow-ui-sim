@@ -13160,17 +13160,36 @@
       "id": "added:C_NeighborhoodInitiative.GetInitiativeTaskChatLink",
       "symbol": "C_NeighborhoodInitiative.GetInitiativeTaskChatLink",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetInitiativeTaskChatLink(initiativeTaskID: number) returning one required link string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current neighborhood-initiative defaults install only task list/info/add/remove placeholders; they do not publish this method or model initiative-task chat links.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic namespace fallback synthesizes the missing method as a nil-returning placeholder, which does not satisfy the required string contract.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the method and initiative-task chat-link model are absent, while generic fallback returns nil instead of the required string. Valid and unknown task IDs, exact link format, absent-task behavior, updates, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.GetInitiativeTaskInfo",
