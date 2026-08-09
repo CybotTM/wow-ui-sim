@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetRequiredLevel
+
+Classified `C_NeighborhoodInitiative.GetRequiredLevel` as evidence-required/unsafe: the source requires one numeric level, but no explicit method or initiative required-level state exists; namespace defaults omit it and generic fallback returns nil. No-initiative behavior, valid levels, transitions, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 809 evidence-required, 2 exception-requested, and 1708 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo
 
 Classified `C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo` as evidence-required/unsafe: the source returns a nilable NeighborhoodInitiativeInfo payload with progress, milestone, task, contribution, timing, and neighborhood fields, but no explicit method or state model exists, namespace defaults omit it, and generic fallback returns nil. Nil alone does not establish populated payloads, field types/values, transitions, refresh, persistence, or lifecycle. Current totals are **891 best-effort, 808 evidence-required, 2 exception-requested, and 1709 untriaged** (3410 rows).

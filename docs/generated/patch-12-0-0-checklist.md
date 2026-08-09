@@ -402,7 +402,7 @@
 402. [evidence-required] `added:C_NeighborhoodInitiative.GetInitiativeTaskChatLink` — unsafe
 403. [evidence-required] `added:C_NeighborhoodInitiative.GetInitiativeTaskInfo` — unsafe
 404. [evidence-required] `added:C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo` — unsafe
-405. [untriaged] `added:C_NeighborhoodInitiative.GetRequiredLevel` — untriaged
+405. [evidence-required] `added:C_NeighborhoodInitiative.GetRequiredLevel` — unsafe
 406. [untriaged] `added:C_NeighborhoodInitiative.GetTrackedInitiativeTasks` — untriaged
 407. [best-effort] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry` — provenance-only
 408. [untriaged] `added:C_NeighborhoodInitiative.InitiativeActivityLogEntry.amount` — untriaged
