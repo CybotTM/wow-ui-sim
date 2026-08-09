@@ -475,7 +475,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry.amount` | evidence-required | structure-field | added | Evidence required: no InitiativeActivityLogEntry runtime model or producer exists. Numeric field presence and values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry.completionTime` | evidence-required | structure-field | added | Evidence required: no InitiativeActivityLogEntry runtime model or producer exists. Numeric completion-time presence and values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. |
-| `C_NeighborhoodInitiative.InitiativeActivityLogEntry.playerName` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `C_NeighborhoodInitiative.InitiativeActivityLogEntry.playerName` | evidence-required | structure-field | added | Evidence required: no InitiativeActivityLogEntry runtime model or producer exists. String player-name presence and values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskName` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogInfo` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
