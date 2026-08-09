@@ -85,6 +85,10 @@ const HOUSING_CATALOG_SCRIPT: &str = r#"
         return "wrong_initial_bundle_info"
     end
 
+    if type(bundle.canPreview) ~= "boolean" or bundle.canPreview ~= true then
+        return "wrong_bundle_can_preview"
+    end
+
     if C_HousingCatalog.HousingMarketActionViewBundle(5001) ~= true then
         return "view_bundle_failed"
     end
