@@ -480,7 +480,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskName` | evidence-required | structure-field | added | Evidence required: no InitiativeActivityLogEntry runtime model or producer exists. String task-name presence and values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogInfo` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogInfo.isLoaded` | evidence-required | structure-field | added | Evidence required: no InitiativeActivityLogInfo runtime model or producer exists. Boolean loaded-state presence and values, absent/present logs, refresh/update transitions, persistence, and lifecycle remain unproven. |
-| `C_NeighborhoodInitiative.InitiativeActivityLogInfo.neighborhoodGUID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `C_NeighborhoodInitiative.InitiativeActivityLogInfo.neighborhoodGUID` | evidence-required | structure-field | added | Evidence required: no InitiativeActivityLogInfo runtime model or producer exists. GUID string presence and values, absent/present logs, refresh/update transitions, persistence, and lifecycle remain unproven. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogInfo.nextUpdateTime` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_NeighborhoodInitiative.InitiativeActivityLogInfo.taskActivity` | untriaged | structure-field | added | structure-field added in 12.0.0. |
 | `C_NeighborhoodInitiative.InitiativeMilestoneInfo` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
