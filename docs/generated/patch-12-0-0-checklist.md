@@ -326,9 +326,9 @@
 326. [best-effort] `added:C_HouseExterior.GetHouseExteriorSizeOptions` — behavioral
 327. [best-effort] `added:C_HouseExterior.GetHouseExteriorTypeOptions` — behavioral
 328. [evidence-required] `added:C_HouseExterior.GetHoveredFixtureDebugInfo` — unsafe
-329. [untriaged] `added:C_HouseExterior.GetSelectedFixtureDebugInfo` — untriaged
-330. [untriaged] `added:C_HouseExterior.SetHouseExteriorSize` — untriaged
-331. [untriaged] `added:C_HouseExterior.SetHouseExteriorType` — untriaged
+329. [evidence-required] `added:C_HouseExterior.GetSelectedFixtureDebugInfo` — unsafe
+330. [evidence-required] `added:C_HouseExterior.SetHouseExteriorSize` — unsafe
+331. [evidence-required] `added:C_HouseExterior.SetHouseExteriorType` — unsafe
 332. [evidence-required] `added:C_Housing.IsHousingMarketShopEnabled` — unsafe
 333. [evidence-required] `added:C_Housing.OnHouseFinderClickPlot` — unsafe
 334. [evidence-required] `added:C_HousingBasicMode.IsFreePlaceEnabled` — unsafe

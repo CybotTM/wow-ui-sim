@@ -15,6 +15,8 @@ The bounded three-row Delves/housing slice classifies `C_HouseExterior.GetHouseE
 
 The bounded two-row exterior-type/debug slice classifies `C_HouseExterior.GetHouseExteriorTypeOptions` as best-effort/behavioral only for its tested selectedExteriorType 1 and Sunspire Cottage/1 plus Sunspire Manor/2 option table. Exact option metadata, selection mutation, persistence, refresh, validation, and lifecycle remain unclaimed. `C_HouseExterior.GetHoveredFixtureDebugInfo` is evidence-required/unsafe because the retained source has no signature and the temporary nil fallback has no hovered-fixture debug payload or state.
 
+The bounded three-row exterior mutation/debug gap classifies `C_HouseExterior.GetSelectedFixtureDebugInfo`, `C_HouseExterior.SetHouseExteriorSize`, and `C_HouseExterior.SetHouseExteriorType` as evidence-required/unsafe. The selected-debug API is absent with no retained signature or payload model; both setters are no-ops that do not update getter-visible state, validate values, resolve names, persist, refresh, reset, or model lifecycle behavior.
+
 The bounded 33-row 12.0.0 CAA CVar-default slice classifies the existing 27 CAA CVars plus six additional target-health, voice, and volume CAA CVars as best-effort/behavioral using `test_patch_12_0_0_cvar_defaults`. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed.
 
 The bounded six-row `C_AdventureMap.GetQuestPortraitInfo` slice classifies the API plus five portrait fields as best-effort/behavioral from focused `tests/c_adventure_map/quests.rs` proof. Claims cover injected-state lookup, typed five-field publication, unknown/nonnumeric zero-value returns, nullable `modelSceneID`, and tested display-ID gating. Retail data population, localization, full validation/edge behavior, assets/rendering, and lifecycle remain unclaimed. `modelSceneID` is treated strictly as data under the existing permanent no-3D scope; no 3D implementation or new exception is requested.
@@ -42,7 +44,7 @@ The bounded 12.0.0 `C_CombatLogSecure` slice classifies exactly nine added secur
 - **Source:** `data/patch-api/sources/12.0.0-register.json`
 - **Source SHA-256:** `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`
 - **Boundary:** retail 11.2.7 build 65299 → final explicit retail 12.0.0 build 65727
-- **Rows:** 3410 total — 0 implemented, 873 best-effort, 762 evidence-required, 2 exception-requested, 1773 untriaged
+- **Rows:** 3410 total — 0 implemented, 873 best-effort, 765 evidence-required, 2 exception-requested, 1770 untriaged
 - **Directions:** 2554 added, 313 changed, 543 removed
 - **Limit:** no historical 12.0.0 FrameXML tree or live SavedVariables capture is claimed.
 
@@ -378,9 +380,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_HouseExterior.GetHouseExteriorSizeOptions` | best-effort | api | added | Best-effort behavioral evidence is limited to callable publication and seeded selectedSize/options table values. Exact option structure, enum fidelity, mutation, persistence, refresh, validation, and lifecycle semantics remain unclaimed. |
 | `C_HouseExterior.GetHouseExteriorTypeOptions` | best-effort | api | added | Best-effort behavioral evidence is limited to callable publication and seeded selectedExteriorType/options table values. Exact option metadata, selection mutation, persistence, refresh, validation, and lifecycle semantics remain unclaimed. |
 | `C_HouseExterior.GetHoveredFixtureDebugInfo` | evidence-required | api | added | Evidence required: the source preserves publication provenance only, while the nil fallback cannot establish an unknown signature, payload shape, hovered-fixture state, or lifecycle. |
-| `C_HouseExterior.GetSelectedFixtureDebugInfo` | untriaged | api | added | api added in 12.0.0. |
-| `C_HouseExterior.SetHouseExteriorSize` | untriaged | api | added | api added in 12.0.0. |
-| `C_HouseExterior.SetHouseExteriorType` | untriaged | api | added | api added in 12.0.0. |
+| `C_HouseExterior.GetSelectedFixtureDebugInfo` | evidence-required | api | added | Evidence required: the source preserves publication provenance only, while the function, unknown signature/payload, selected-fixture debug lookup, and lifecycle are absent. |
+| `C_HouseExterior.SetHouseExteriorSize` | evidence-required | api | added | Evidence required: the no-op setter does not model valid size transitions, enum validation, getter-visible state, persistence, refresh, reset/isolation, or lifecycle. |
+| `C_HouseExterior.SetHouseExteriorType` | evidence-required | api | added | Evidence required: the no-op setter does not model valid/invalid type selection, name resolution, getter round-trip, persistence, refresh, reset/isolation, or lifecycle. |
 | `C_Housing.IsHousingMarketShopEnabled` | evidence-required | api | added | Evidence required: no explicit method or dedicated market-shop availability state exists, and generic fallback behavior does not establish the required boolean result. |
 | `C_Housing.OnHouseFinderClickPlot` | evidence-required | api | added | Evidence required: no explicit callback or selected-plot request/event/state model exists, so numeric argument validation, click side effects, repeated clicks, and unknown plot behavior are unproven. |
 | `C_HousingBasicMode.IsFreePlaceEnabled` | evidence-required | api | added | Evidence required: hardcoded true and a no-op setter do not establish default, setter/getter state transitions, reset/isolation, persistence, or exact free-placement semantics. |

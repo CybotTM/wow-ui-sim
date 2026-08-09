@@ -10725,49 +10725,88 @@
       "id": "added:C_HouseExterior.GetSelectedFixtureDebugInfo",
       "symbol": "C_HouseExterior.GetSelectedFixtureDebugInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records GetSelectedFixtureDebugInfo as an added API name without signature or return semantics.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary C_HouseExterior surface omits GetSelectedFixtureDebugInfo and has no selected-fixture debug payload or backing state.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the source preserves publication provenance only, while the function, unknown signature/payload, selected-fixture debug lookup, and lifecycle are absent."
     },
     {
       "id": "added:C_HouseExterior.SetHouseExteriorSize",
       "symbol": "C_HouseExterior.SetHouseExteriorSize",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines SetHouseExteriorSize(size: HousingFixtureSize) with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary setter is a no-op and does not update the selectedSize exposed by GetHouseExteriorSizeOptions.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the no-op setter does not model valid size transitions, enum validation, getter-visible state, persistence, refresh, reset/isolation, or lifecycle."
     },
     {
       "id": "added:C_HouseExterior.SetHouseExteriorType",
       "symbol": "C_HouseExterior.SetHouseExteriorType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines SetHouseExteriorType(houseExteriorTypeID: number) with no return values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current temporary setter is a no-op and does not update selectedExteriorType or its displayed name.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the no-op setter does not model valid/invalid type selection, name resolution, getter round-trip, persistence, refresh, reset/isolation, or lifecycle."
     },
     {
       "id": "added:C_Housing.IsHousingMarketShopEnabled",

@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify three C_HouseExterior mutation/debug gaps
+
+Classified `C_HouseExterior.GetSelectedFixtureDebugInfo`, `SetHouseExteriorSize`, and `SetHouseExteriorType` as evidence-required/unsafe. The debug API retains only a name without signature/returns and lacks selected-fixture debug state; both setters are published no-ops that do not update getter-visible selected state, validate values, resolve names, persist, refresh, reset/isolate, or model lifecycle. Current totals are **873 best-effort, 765 evidence-required, 2 exception-requested, and 1770 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify two C_HouseExterior rows
 
 The bounded two-row `C_HouseExterior` slice classifies `GetHouseExteriorTypeOptions` as best-effort/behavioral only for focused callable publication, one returned table, `selectedExteriorType` 1, and tested `Cottage`/1 plus `Manor`/2 options; metadata, mutation, persistence, refresh, validation, and lifecycle semantics remain unclaimed. `GetHoveredFixtureDebugInfo` is evidence-required/unsafe because only its API name is retained, its signature and returns are unknown, and the nil fallback has no hovered-fixture debug state. Current totals are **873 best-effort, 762 evidence-required, 2 exception-requested, and 1773 untriaged** (3410 rows).
