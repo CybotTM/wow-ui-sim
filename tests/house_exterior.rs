@@ -11,6 +11,39 @@ const HOUSE_EXTERIOR_TYPE_SCRIPT: &str = r#"
     return type(exteriorType), returnCount, exteriorType, exteriorTypeName
 "#;
 
+const HOUSE_EXTERIOR_SIZE_OPTIONS_SCRIPT: &str = r#"
+    local getHouseExteriorSizeOptions = C_HouseExterior.GetHouseExteriorSizeOptions
+    if type(getHouseExteriorSizeOptions) ~= "function" then
+        return "not_callable"
+    end
+
+    local returnCount = select('#', getHouseExteriorSizeOptions())
+    local result = getHouseExteriorSizeOptions()
+    if returnCount ~= 1 or type(result) ~= "table" then
+        return "wrong_return_shape"
+    end
+
+    if type(result.selectedSize) ~= "number" or result.selectedSize ~= 3 then
+        return "wrong_selected_size"
+    end
+
+    if type(result.options) ~= "table" or #result.options ~= 2 then
+        return "wrong_options_table"
+    end
+
+    local medium = result.options[1]
+    if type(medium) ~= "table" or medium.size ~= 3 or medium.name ~= "Medium" then
+        return "wrong_medium_option"
+    end
+
+    local large = result.options[2]
+    if type(large) ~= "table" or large.size ~= 4 or large.name ~= "Large" then
+        return "wrong_large_option"
+    end
+
+    return "ok"
+"#;
+
 const HOUSE_EXTERIOR_SCRIPT: &str = r#"
     if C_HouseExterior.IsExteriorDecorHidden() ~= false then
         return "wrong_initial_hidden_state"
@@ -68,6 +101,15 @@ fn current_house_exterior_type_returns_seeded_type_and_name() {
     assert_eq!(return_count, 2);
     assert_eq!(exterior_type, 1);
     assert_eq!(exterior_type_name, "Sunspire Cottage");
+}
+
+#[test]
+fn house_exterior_size_options_return_seeded_options() {
+    let env = env();
+    let result: String = env
+        .eval(HOUSE_EXTERIOR_SIZE_OPTIONS_SCRIPT)
+        .expect("seeded C_HouseExterior size options should be queryable");
+    assert_eq!(result, "ok");
 }
 
 #[test]
