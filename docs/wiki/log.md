@@ -1,3 +1,7 @@
+## [2026-08-08] investigation | Classify 12.0.0 general events
+
+Classified nine faction, initiative, loot-rule, nameplate, and neighborhood events as `evidence-required`/`unsafe`. Retail registration exists, but no modeled producer or focused proof establishes each source payload contract, timing, lifecycle, ordering, or duplicate behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **795 best-effort, 643 evidence-required, 2 exception-requested, and 1970 untriaged**.
+
 ## [2026-08-08] investigation | Classify 12.0.0 housing events
 
 Classified 12 added housing events as `evidence-required`/`unsafe`. The retail event registry accepts each name, but no modeled producer or focused proof establishes its source payload contract, timing, lifecycle, ordering, or duplicate behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **795 best-effort, 634 evidence-required, 2 exception-requested, and 1979 untriaged**.

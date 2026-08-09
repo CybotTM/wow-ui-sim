@@ -49583,17 +49583,30 @@
       "id": "added:FACTION_STANDING_CHANGED",
       "symbol": "FACTION_STANDING_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records FACTION_STANDING_CHANGED as an added event with payload contract: factionID: number, updatedStanding: number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts FACTION_STANDING_CHANGED; registration alone does not establish an event producer or payload semantics.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts FACTION_STANDING_CHANGED, but no modeled producer or focused proof establishes the source payload contract (factionID: number, updatedStanding: number), timing, lifecycle, ordering, or duplicate behavior. Registration and generic dispatch alone cannot close this row."
     },
     {
       "id": "added:FontString.GetScaleAnimationMode",
@@ -50722,81 +50735,146 @@
       "id": "added:INITIATIVE_ACTIVITY_LOG_UPDATED",
       "symbol": "INITIATIVE_ACTIVITY_LOG_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records INITIATIVE_ACTIVITY_LOG_UPDATED as an added event with payload contract: no arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts INITIATIVE_ACTIVITY_LOG_UPDATED; registration alone does not establish an event producer or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts INITIATIVE_ACTIVITY_LOG_UPDATED, but no modeled producer or focused proof establishes the source payload contract (no arguments), timing, lifecycle, ordering, or duplicate behavior. Registration and generic dispatch alone cannot close this row."
     },
     {
       "id": "added:INITIATIVE_COMPLETED",
       "symbol": "INITIATIVE_COMPLETED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records INITIATIVE_COMPLETED as an added event with payload contract: initiativeTitle: string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts INITIATIVE_COMPLETED; registration alone does not establish an event producer or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts INITIATIVE_COMPLETED, but no modeled producer or focused proof establishes the source payload contract (initiativeTitle: string), timing, lifecycle, ordering, or duplicate behavior. Registration and generic dispatch alone cannot close this row."
     },
     {
       "id": "added:INITIATIVE_TASKS_TRACKED_LIST_CHANGED",
       "symbol": "INITIATIVE_TASKS_TRACKED_LIST_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records INITIATIVE_TASKS_TRACKED_LIST_CHANGED as an added event with payload contract: initiativeTaskID: number, added: boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts INITIATIVE_TASKS_TRACKED_LIST_CHANGED; registration alone does not establish an event producer or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts INITIATIVE_TASKS_TRACKED_LIST_CHANGED, but no modeled producer or focused proof establishes the source payload contract (initiativeTaskID: number, added: boolean), timing, lifecycle, ordering, or duplicate behavior. Registration and generic dispatch alone cannot close this row."
     },
     {
       "id": "added:INITIATIVE_TASKS_TRACKED_UPDATED",
       "symbol": "INITIATIVE_TASKS_TRACKED_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records INITIATIVE_TASKS_TRACKED_UPDATED as an added event with payload contract: no arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts INITIATIVE_TASKS_TRACKED_UPDATED; registration alone does not establish an event producer or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts INITIATIVE_TASKS_TRACKED_UPDATED, but no modeled producer or focused proof establishes the source payload contract (no arguments), timing, lifecycle, ordering, or duplicate behavior. Registration and generic dispatch alone cannot close this row."
     },
     {
       "id": "added:INITIATIVE_TASK_COMPLETED",
       "symbol": "INITIATIVE_TASK_COMPLETED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records INITIATIVE_TASK_COMPLETED as an added event with payload contract: taskName: string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts INITIATIVE_TASK_COMPLETED; registration alone does not establish an event producer or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts INITIATIVE_TASK_COMPLETED, but no modeled producer or focused proof establishes the source payload contract (taskName: string), timing, lifecycle, ordering, or duplicate behavior. Registration and generic dispatch alone cannot close this row."
     },
     {
       "id": "added:IsRaidMarkerSystemEnabled",
@@ -50818,17 +50896,30 @@
       "id": "added:LEGACY_LOOT_RULES_CHANGED",
       "symbol": "LEGACY_LOOT_RULES_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LEGACY_LOOT_RULES_CHANGED as an added event with payload contract: isLegacyLootModeEnabled: boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts LEGACY_LOOT_RULES_CHANGED; registration alone does not establish an event producer or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts LEGACY_LOOT_RULES_CHANGED, but no modeled producer or focused proof establishes the source payload contract (isLegacyLootModeEnabled: boolean), timing, lifecycle, ordering, or duplicate behavior. Registration and generic dispatch alone cannot close this row."
     },
     {
       "id": "added:LE_FRAME_TUTORIAL_JOURNEYS_TAB",
@@ -52915,33 +53006,59 @@
       "id": "added:NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED",
       "symbol": "NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED as an added event with payload contract: unitTarget: unit, isBehindCamera: boolean.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED; registration alone does not establish an event producer or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED, but no modeled producer or focused proof establishes the source payload contract (unitTarget: unit, isBehindCamera: boolean), timing, lifecycle, ordering, or duplicate behavior. Registration and generic dispatch alone cannot close this row."
     },
     {
       "id": "added:NEIGHBORHOOD_INITIATIVE_UPDATED",
       "symbol": "NEIGHBORHOOD_INITIATIVE_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records NEIGHBORHOOD_INITIATIVE_UPDATED as an added event with payload contract: no arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Current retail event registry accepts NEIGHBORHOOD_INITIATIVE_UPDATED; registration alone does not establish an event producer or payload semantics.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: the event registry accepts NEIGHBORHOOD_INITIATIVE_UPDATED, but no modeled producer or focused proof establishes the source payload contract (no arguments), timing, lifecycle, ordering, or duplicate behavior. Registration and generic dispatch alone cannot close this row."
     },
     {
       "id": "added:NewCraftingOrderInfo.reagentInfos",
