@@ -2948,8 +2948,8 @@
 2948. [best-effort] `removed:C_Transmog.LoadOutfit` — behavioral
 2949. [best-effort] `removed:C_Transmog.SetPending` — behavioral
 2950. [evidence-required] `removed:C_Transmog.TransmogApplyWarningInfo` — unsafe
-2951. [untriaged] `removed:C_Transmog.TransmogApplyWarningInfo.itemLink` — untriaged
-2952. [untriaged] `removed:C_Transmog.TransmogApplyWarningInfo.text` — untriaged
+2951. [evidence-required] `removed:C_Transmog.TransmogApplyWarningInfo.itemLink` — unsafe
+2952. [evidence-required] `removed:C_Transmog.TransmogApplyWarningInfo.text` — unsafe
 2953. [best-effort] `removed:C_TransmogCollection.DeleteOutfit` — behavioral
 2954. [best-effort] `removed:C_TransmogCollection.GetItemTransmogInfoListFromOutfitHyperlink` — behavioral
 2955. [best-effort] `removed:C_TransmogCollection.GetNumMaxOutfits` — behavioral

@@ -75898,33 +75898,71 @@
       "id": "removed:C_Transmog.TransmogApplyWarningInfo.itemLink",
       "symbol": "C_Transmog.TransmogApplyWarningInfo.itemLink",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source records removal of the string itemLink field from the removed TransmogApplyWarningInfo structure.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current transmog surface does not publish GetApplyWarnings or model the removed TransmogApplyWarningInfo structure and fields.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "summary": "Existing strict-removal coverage scans source metadata only and does not prove 12.0.0 runtime structure absence or removal timing.",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the removed TransmogApplyWarningInfo field has no runtime absence or load-timing proof. Historical publication, removal boundary, typed warning-array shape, replacement behavior, and field lifecycle remain unproven."
     },
     {
       "id": "removed:C_Transmog.TransmogApplyWarningInfo.text",
       "symbol": "C_Transmog.TransmogApplyWarningInfo.text",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source records removal of the string text field from the removed TransmogApplyWarningInfo structure.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/transmog.rs",
+          "summary": "Current transmog surface does not publish GetApplyWarnings or model the removed TransmogApplyWarningInfo structure and fields.",
+          "source_hash": "768a38ccc21b0d9aec3f9687180bc0d3f64f883416baa17c58459ba58af53771"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_1/strict_removals.rs",
+          "summary": "Existing strict-removal coverage scans source metadata only and does not prove 12.0.0 runtime structure absence or removal timing.",
+          "source_hash": "b8de5ca2009ccddffd23d4f471a23700cdc9a05ecd18316765085c4ddb764190"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: the removed TransmogApplyWarningInfo field has no runtime absence or load-timing proof. Historical publication, removal boundary, typed warning-array shape, replacement behavior, and field lifecycle remain unproven."
     },
     {
       "id": "removed:C_TransmogCollection.DeleteOutfit",

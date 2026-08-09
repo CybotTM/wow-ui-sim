@@ -4,9 +4,11 @@
 
 ## Content
 
-Current manifest totals are **892 best-effort, 910 evidence-required, 2 exception-requested, and 1606 untriaged rows** (3410 total).
+Current manifest totals are **892 best-effort, 912 evidence-required, 2 exception-requested, and 1604 untriaged rows** (3410 total).
 
 `C_StableInfo.IsBonusPetSlotAvailable` is evidence-required/unsafe: implementation has `IsAtPetStable` only; no Beast Master Animal Companion or active-combat-configuration availability model exists. Boolean results, configuration transitions, stable UI refresh, events, persistence, and lifecycle remain unresolved.
+
+`C_Transmog.TransmogApplyWarningInfo.itemLink` and `.text` are evidence-required/unsafe: removed parent structure/fields lack runtime absence and exact removal/load timing proof; source-token coverage is insufficient.
 
 `C_SpellBook.FindBaseSpellByID`, `FindFlyoutSlotBySpellID`, `FindSpellOverrideByID`, `GetSpellBookItemChargeDuration`, `GetSpellBookItemCooldownDuration`, and `GetSpellBookItemLossOfControlCooldownDuration` are evidence-required/unsafe: mapping fallbacks are nil/input-ID compatibility only and no flyout/override model exists; duration APIs lack slot/bank cooldown state and a LuaDurationObject producer. Known/unknown mappings, required/nilable results, valid slots/banks, timing/expiration, refresh, object lifetime, and lifecycle remain unproven.
 
