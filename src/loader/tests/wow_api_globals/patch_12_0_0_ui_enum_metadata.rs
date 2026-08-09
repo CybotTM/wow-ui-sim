@@ -206,6 +206,38 @@ fn test_patch_12_0_0_vas_transaction_purchase_result_value() {
 }
 
 #[test]
+fn test_patch_12_0_0_ui_global_constant_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local expected = {
+                    LE_FRAME_TUTORIAL_JOURNEYS_TAB = 163,
+                    LE_FRAME_TUTORIAL_LINK_TRANSMOG_CUSTOM_SET = 110,
+                    LE_FRAME_TUTORIAL_TRANSMOG_CUSTOM_SET_DROPDOWN = 38,
+                    LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS = 3,
+                    LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS = 4,
+                }
+                for name, expected_value in pairs(expected) do
+                    local value = _G[name]
+                    if type(value) ~= "number" then
+                        return name .. ":type=" .. type(value)
+                    end
+                    if value ~= expected_value then
+                        return name .. ":value=" .. tostring(value)
+                    end
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "retail 12.0.0 UI global constants did not match the source register"
+    );
+}
+
+#[test]
 fn test_patch_12_0_0_cooldown_alert_event_type_omits_later_members() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

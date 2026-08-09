@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify 12.0.0 tutorial and pet constants
+
+Classified five tutorial/pet globals as bounded `best-effort`/`behavioral` startup claims. `test_patch_12_0_0_ui_global_constant_values` proves numeric Lua publication and exact source-register values; tutorial and pet-journal behavior, consumers, lifecycle, and historical load timing remain unclaimed. Current totals are **800 best-effort, 659 evidence-required, 2 exception-requested, and 1949 untriaged**.
+
 ## [2026-08-09] investigation | Classify 12.0.0 housing payload fields
 
 Classified 16 exterior size/type, house-level, and decor-refund structure fields as `evidence-required`/`unsafe`. Current temporary housing data is absent or fixture-backed and does not establish exact contracts, authoritative values, state transitions, ordering/localization, or consumer behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **795 best-effort, 659 evidence-required, 2 exception-requested, and 1954 untriaged**.

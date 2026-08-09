@@ -51133,49 +51133,112 @@
       "id": "added:LE_FRAME_TUTORIAL_JOURNEYS_TAB",
       "symbol": "LE_FRAME_TUTORIAL_JOURNEYS_TAB",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_FRAME_TUTORIAL_JOURNEYS_TAB as an added global with exact numeric value 163.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/strings/string_data/game_enums.rs",
+          "summary": "Current retail 12.0.0 startup initialization publishes LE_FRAME_TUTORIAL_JOURNEYS_TAB as a Lua number with exact value 163.",
+          "source_hash": "e6f55764165ac1dab7d635ef3cc6126ad11db8e6dc635649132175538ae7f266"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts five UI globals, numeric Lua types, and exact source-register values.",
+          "source_hash": "c961fba2b158cc9510e35307e19113d11ccf88dff9ff0fa27fa1ad084c5bb01a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_global_constant_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2b96ef952",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup global publication, numeric Lua type, and exact 12.0.0 value. Tutorial/pet-journal behavior, consumers, lifecycle, and historical load timing are not claimed."
     },
     {
       "id": "added:LE_FRAME_TUTORIAL_LINK_TRANSMOG_CUSTOM_SET",
       "symbol": "LE_FRAME_TUTORIAL_LINK_TRANSMOG_CUSTOM_SET",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_FRAME_TUTORIAL_LINK_TRANSMOG_CUSTOM_SET as an added global with exact numeric value 110.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/strings/string_data/game_enums.rs",
+          "summary": "Current retail 12.0.0 startup initialization publishes LE_FRAME_TUTORIAL_LINK_TRANSMOG_CUSTOM_SET as a Lua number with exact value 110.",
+          "source_hash": "e6f55764165ac1dab7d635ef3cc6126ad11db8e6dc635649132175538ae7f266"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts five UI globals, numeric Lua types, and exact source-register values.",
+          "source_hash": "c961fba2b158cc9510e35307e19113d11ccf88dff9ff0fa27fa1ad084c5bb01a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_global_constant_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2b96ef952",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup global publication, numeric Lua type, and exact 12.0.0 value. Tutorial/pet-journal behavior, consumers, lifecycle, and historical load timing are not claimed."
     },
     {
       "id": "added:LE_FRAME_TUTORIAL_TRANSMOG_CUSTOM_SET_DROPDOWN",
       "symbol": "LE_FRAME_TUTORIAL_TRANSMOG_CUSTOM_SET_DROPDOWN",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_FRAME_TUTORIAL_TRANSMOG_CUSTOM_SET_DROPDOWN as an added global with exact numeric value 38.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/strings/string_data/game_enums.rs",
+          "summary": "Current retail 12.0.0 startup initialization publishes LE_FRAME_TUTORIAL_TRANSMOG_CUSTOM_SET_DROPDOWN as a Lua number with exact value 38.",
+          "source_hash": "e6f55764165ac1dab7d635ef3cc6126ad11db8e6dc635649132175538ae7f266"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts five UI globals, numeric Lua types, and exact source-register values.",
+          "source_hash": "c961fba2b158cc9510e35307e19113d11ccf88dff9ff0fa27fa1ad084c5bb01a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_global_constant_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2b96ef952",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup global publication, numeric Lua type, and exact 12.0.0 value. Tutorial/pet-journal behavior, consumers, lifecycle, and historical load timing are not claimed."
     },
     {
       "id": "added:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_OWNERSHIP_TRANSFER_SUCCESS",
@@ -51373,33 +51436,75 @@
       "id": "added:LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS",
       "symbol": "LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS as an added global with exact numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS as a Lua number with exact value 3.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts five UI globals, numeric Lua types, and exact source-register values.",
+          "source_hash": "c961fba2b158cc9510e35307e19113d11ccf88dff9ff0fa27fa1ad084c5bb01a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_global_constant_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup global publication, numeric Lua type, and exact 12.0.0 value. Tutorial/pet-journal behavior, consumers, lifecycle, and historical load timing are not claimed."
     },
     {
       "id": "added:LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS",
       "symbol": "LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS as an added global with exact numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Current retail 12.0.0 startup initialization publishes LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS as a Lua number with exact value 4.",
+          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts five UI globals, numeric Lua types, and exact source-register values.",
+          "source_hash": "c961fba2b158cc9510e35307e19113d11ccf88dff9ff0fa27fa1ad084c5bb01a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_ui_global_constant_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "b14f2a854b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup global publication, numeric Lua type, and exact 12.0.0 value. Tutorial/pet-journal behavior, consumers, lifecycle, and historical load timing are not claimed."
     },
     {
       "id": "added:LayeredRegion.SetVertexColorFromBoolean",

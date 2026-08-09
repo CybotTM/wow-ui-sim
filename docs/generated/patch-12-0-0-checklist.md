@@ -2197,9 +2197,9 @@
 2197. [evidence-required] `added:INITIATIVE_TASK_COMPLETED` — unsafe
 2198. [untriaged] `added:IsRaidMarkerSystemEnabled` — untriaged
 2199. [evidence-required] `added:LEGACY_LOOT_RULES_CHANGED` — unsafe
-2200. [untriaged] `added:LE_FRAME_TUTORIAL_JOURNEYS_TAB` — untriaged
-2201. [untriaged] `added:LE_FRAME_TUTORIAL_LINK_TRANSMOG_CUSTOM_SET` — untriaged
-2202. [untriaged] `added:LE_FRAME_TUTORIAL_TRANSMOG_CUSTOM_SET_DROPDOWN` — untriaged
+2200. [best-effort] `added:LE_FRAME_TUTORIAL_JOURNEYS_TAB` — behavioral
+2201. [best-effort] `added:LE_FRAME_TUTORIAL_LINK_TRANSMOG_CUSTOM_SET` — behavioral
+2202. [best-effort] `added:LE_FRAME_TUTORIAL_TRANSMOG_CUSTOM_SET_DROPDOWN` — behavioral
 2203. [untriaged] `added:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_OWNERSHIP_TRANSFER_SUCCESS` — untriaged
 2204. [untriaged] `added:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME_NOTIFICATION_S` — untriaged
 2205. [untriaged] `added:LE_GAME_ERR_CHARTER_SIGNATURE_REMOVED` — untriaged
@@ -2212,8 +2212,8 @@
 2212. [untriaged] `added:LE_GAME_ERR_LFG_JOINED_TRAINING_GROUNDS_QUEUE` — untriaged
 2213. [untriaged] `added:LE_GAME_ERR_PVP_TRAINING_GROUNDS_DISABLED` — untriaged
 2214. [untriaged] `added:LE_GAME_ERR_SOLO_JOIN_TRAINING_GROUND` — untriaged
-2215. [untriaged] `added:LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS` — untriaged
-2216. [untriaged] `added:LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS` — untriaged
+2215. [best-effort] `added:LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS` — behavioral
+2216. [best-effort] `added:LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS` — behavioral
 2217. [evidence-required] `added:LayeredRegion.SetVertexColorFromBoolean` — unsafe
 2218. [best-effort] `added:LuaColorCurveObject` — behavioral
 2219. [evidence-required] `added:LuaColorCurveObject.AddPoint` — unsafe
