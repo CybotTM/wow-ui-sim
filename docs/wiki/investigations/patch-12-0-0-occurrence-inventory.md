@@ -434,8 +434,8 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_HousingDecor.GetNumPreviewDecor` | best-effort | api | added | Best-effort behavioral evidence covers temporary preview-state-derived numeric 0/1 results. Actual decor cardinality, multiple previews, producers, validation, persistence, refresh, and lifecycle remain unclaimed. |
 | `C_HousingDecor.IsModeDisabledForPreviewState` | evidence-required | api | added | Evidence required: constant false does not establish mode-dependent availability, argument validation, preview transitions, reset/isolation, refresh, or lifecycle. |
 | `C_HousingDecor.IsPreviewState` | best-effort | api | added | Best-effort behavioral evidence covers temporary preview-state boolean transitions. Retail side effects, integration, persistence, refresh, reset beyond test isolation, and lifecycle remain unclaimed. |
-| `C_InstanceEncounter.IsEncounterInProgress` | untriaged | api | added | api added in 12.0.0. |
-| `C_InstanceEncounter.IsEncounterLimitingResurrections` | untriaged | api | added | api added in 12.0.0. |
+| `C_InstanceEncounter.IsEncounterInProgress` | best-effort | api | added | Best-effort behavioral evidence covers boolean default/state reads and parity with the shared legacy encounter flag. Encounter start/end producers, event timing, persistence, reset beyond test isolation, and full encounter lifecycle remain unclaimed. |
+| `C_InstanceEncounter.IsEncounterLimitingResurrections` | evidence-required | api | added | Evidence required: no modeled resurrection-limiting encounter state, explicit API method, producer, transition behavior, or focused boolean proof exists; generic nil fallback and deprecated-wrapper publication are insufficient. |
 | `C_InstanceEncounter.IsEncounterSuppressingRelease` | untriaged | api | added | api added in 12.0.0. |
 | `C_InstanceEncounter.ShouldShowTimelineForEncounter` | untriaged | api | added | api added in 12.0.0. |
 | `C_Item.IsItemBindToAccount` | untriaged | api | added | api added in 12.0.0. |

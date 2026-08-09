@@ -366,8 +366,8 @@
 366. [best-effort] `added:C_HousingDecor.GetNumPreviewDecor` — behavioral
 367. [evidence-required] `added:C_HousingDecor.IsModeDisabledForPreviewState` — unsafe
 368. [best-effort] `added:C_HousingDecor.IsPreviewState` — behavioral
-369. [untriaged] `added:C_InstanceEncounter.IsEncounterInProgress` — untriaged
-370. [untriaged] `added:C_InstanceEncounter.IsEncounterLimitingResurrections` — untriaged
+369. [best-effort] `added:C_InstanceEncounter.IsEncounterInProgress` — behavioral
+370. [evidence-required] `added:C_InstanceEncounter.IsEncounterLimitingResurrections` — unsafe
 371. [untriaged] `added:C_InstanceEncounter.IsEncounterSuppressingRelease` — untriaged
 372. [untriaged] `added:C_InstanceEncounter.ShouldShowTimelineForEncounter` — untriaged
 373. [untriaged] `added:C_Item.IsItemBindToAccount` — untriaged

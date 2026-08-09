@@ -11988,33 +11988,73 @@
       "id": "added:C_InstanceEncounter.IsEncounterInProgress",
       "symbol": "C_InstanceEncounter.IsEncounterInProgress",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsEncounterInProgress() with no arguments and one required boolean isInProgress result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_instance_encounter.rs",
+          "summary": "State-backed C_InstanceEncounter method returns the shared world.encounter_in_progress flag also used by the deprecated legacy global.",
+          "source_hash": "de3b7b794262b62d4f5aae8958d22b1033925bef951f67cf3ad5381141596d86"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/combat_probes.rs",
+          "summary": "Focused test proves the namespaced and legacy queries both return false by default and true after the shared encounter state is enabled.",
+          "source_hash": "31f2e4a3ff6d55acd13142072b575d473af16851f60885c4253e5ff6307c834a"
+        }
+      ],
+      "tests": [
+        "tests/combat_probes.rs::instance_encounter_progress_reads_the_legacy_encounter_state"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "83cce9184ba6aa9656e2bcaf8ea2f95f442c60f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers boolean default/state reads and parity with the shared legacy encounter flag. Encounter start/end producers, event timing, persistence, reset beyond test isolation, and full encounter lifecycle remain unclaimed."
     },
     {
       "id": "added:C_InstanceEncounter.IsEncounterLimitingResurrections",
       "symbol": "C_InstanceEncounter.IsEncounterLimitingResurrections",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsEncounterLimitingResurrections() with no arguments and one required boolean isLimitingResurrections result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_instance_encounter.rs",
+          "summary": "Current explicit C_InstanceEncounter model registers only IsEncounterInProgress; no resurrection-limiting state or method is modeled.",
+          "source_hash": "de3b7b794262b62d4f5aae8958d22b1033925bef951f67cf3ad5381141596d86"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "summary": "Generic namespace fallback synthesizes missing methods that return nil, which does not satisfy the required boolean contract or establish encounter resurrection-limit semantics.",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled resurrection-limiting encounter state, explicit API method, producer, transition behavior, or focused boolean proof exists; generic nil fallback and deprecated-wrapper publication are insufficient."
     },
     {
       "id": "added:C_InstanceEncounter.IsEncounterSuppressingRelease",
