@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_AdventureMap quest portrait info
+
+Classified the six-row `C_AdventureMap.GetQuestPortraitInfo` slice—the API plus five portrait fields—as bounded `best-effort`/`behavioral` claims from focused `tests/c_adventure_map/quests.rs` proof. Claims cover injected-state lookup, typed five-field publication, unknown/nonnumeric zero-value returns, nullable `modelSceneID`, and tested display-ID gating. Retail data population, localization, full validation/edge behavior, assets/rendering, and lifecycle remain unclaimed. `modelSceneID` is treated strictly as data under the existing permanent no-3D scope; no 3D implementation or new exception is requested. Current totals are **867 best-effort, 710 evidence-required, 2 exception-requested, and 1831 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify nine C_ActionBar charge/cooldown structure fields
 
 Classified the nine `C_ActionBar.ActionBarChargeInfo`/`ActionBarCooldownInfo` structure fields as `evidence-required`/`unsafe`. `GetActionCharges` returns static placeholder charge fields; `GetActionCooldown` returns a partial table with fixture-backed start/duration and constant enabled/mod-rate. Neither establishes authoritative typed payload fidelity, slot-dependent charges, field relationships, invalid-slot behavior, progression, secrets, or lifecycle. Current totals are **861 best-effort, 710 evidence-required, 2 exception-requested, and 1837 untriaged** (3410 rows).

@@ -3825,97 +3825,264 @@
       "id": "added:C_AdventureMap.AdventureMapQuestPortraitInfo.modelSceneID",
       "symbol": "C_AdventureMap.AdventureMapQuestPortraitInfo.modelSceneID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines nullable numeric-or-nil AdventureMapQuestPortraitInfo.modelSceneID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types/adventure_map.rs",
+          "summary": "Current AdventureMapQuestPortrait state models modelSceneID and its required/nullability shape.",
+          "source_hash": "b583b6d455c305e8cef1db4b8a77f3b236240c18f4ba3786861cbc814c7b6305"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/adventure_map.rs",
+          "summary": "C_AdventureMap.GetQuestPortraitInfo publishes modelSceneID from the modeled portrait record.",
+          "source_hash": "f65501e7ada681e261a8746af385349708b3d978941e3e906355ab4782c08f19"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_adventure_map/quests.rs",
+          "summary": "Focused AdventureMap tests assert modelSceneID publication and the listed bounded cases.",
+          "source_hash": "a9e3f5b6a11a62b9c05cbdf53ef1e695f93cfe5561ed54887d65ac6da54766c6"
+        }
+      ],
+      "tests": [
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_populates_documented_fields",
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_returns_nil_model_scene_when_unset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7b47a196e9db8a4ee22d3abfe617ae782ccb0788",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to numeric-or-nil modelSceneID publication from injected portrait state. ModelScene rendering, camera, actors, and visual behavior remain outside scope; retail data population and edge semantics are unclaimed."
     },
     {
       "id": "added:C_AdventureMap.AdventureMapQuestPortraitInfo.mountPortraitDisplayID",
       "symbol": "C_AdventureMap.AdventureMapQuestPortraitInfo.mountPortraitDisplayID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required numeric AdventureMapQuestPortraitInfo.mountPortraitDisplayID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types/adventure_map.rs",
+          "summary": "Current AdventureMapQuestPortrait state models mountPortraitDisplayID and its required/nullability shape.",
+          "source_hash": "b583b6d455c305e8cef1db4b8a77f3b236240c18f4ba3786861cbc814c7b6305"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/adventure_map.rs",
+          "summary": "C_AdventureMap.GetQuestPortraitInfo publishes mountPortraitDisplayID from the modeled portrait record.",
+          "source_hash": "f65501e7ada681e261a8746af385349708b3d978941e3e906355ab4782c08f19"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_adventure_map/quests.rs",
+          "summary": "Focused AdventureMap tests assert mountPortraitDisplayID publication and the listed bounded cases.",
+          "source_hash": "a9e3f5b6a11a62b9c05cbdf53ef1e695f93cfe5561ed54887d65ac6da54766c6"
+        }
+      ],
+      "tests": [
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_populates_documented_fields"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7b47a196e9db8a4ee22d3abfe617ae782ccb0788",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to required numeric mountPortraitDisplayID publication from injected portrait state and the tested zero value. Display-ID validity, mount selection, rendering, and edge semantics are unclaimed."
     },
     {
       "id": "added:C_AdventureMap.AdventureMapQuestPortraitInfo.name",
       "symbol": "C_AdventureMap.AdventureMapQuestPortraitInfo.name",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required string AdventureMapQuestPortraitInfo.name.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types/adventure_map.rs",
+          "summary": "Current AdventureMapQuestPortrait state models name and its required/nullability shape.",
+          "source_hash": "b583b6d455c305e8cef1db4b8a77f3b236240c18f4ba3786861cbc814c7b6305"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/adventure_map.rs",
+          "summary": "C_AdventureMap.GetQuestPortraitInfo publishes name from the modeled portrait record.",
+          "source_hash": "f65501e7ada681e261a8746af385349708b3d978941e3e906355ab4782c08f19"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_adventure_map/quests.rs",
+          "summary": "Focused AdventureMap tests assert name publication and the listed bounded cases.",
+          "source_hash": "a9e3f5b6a11a62b9c05cbdf53ef1e695f93cfe5561ed54887d65ac6da54766c6"
+        }
+      ],
+      "tests": [
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_populates_documented_fields"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7b47a196e9db8a4ee22d3abfe617ae782ccb0788",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to required string name publication from injected portrait state. Retail data production, localization, missing-field behavior, and lifecycle semantics are unclaimed."
     },
     {
       "id": "added:C_AdventureMap.AdventureMapQuestPortraitInfo.portraitDisplayID",
       "symbol": "C_AdventureMap.AdventureMapQuestPortraitInfo.portraitDisplayID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required numeric AdventureMapQuestPortraitInfo.portraitDisplayID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types/adventure_map.rs",
+          "summary": "Current AdventureMapQuestPortrait state models portraitDisplayID and its required/nullability shape.",
+          "source_hash": "b583b6d455c305e8cef1db4b8a77f3b236240c18f4ba3786861cbc814c7b6305"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/adventure_map.rs",
+          "summary": "C_AdventureMap.GetQuestPortraitInfo publishes portraitDisplayID from the modeled portrait record.",
+          "source_hash": "f65501e7ada681e261a8746af385349708b3d978941e3e906355ab4782c08f19"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_adventure_map/quests.rs",
+          "summary": "Focused AdventureMap tests assert portraitDisplayID publication and the listed bounded cases.",
+          "source_hash": "a9e3f5b6a11a62b9c05cbdf53ef1e695f93cfe5561ed54887d65ac6da54766c6"
+        }
+      ],
+      "tests": [
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_populates_documented_fields",
+        "tests/c_adventure_map/quests.rs::refresh_portrait_pattern_skips_when_display_id_zero"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7b47a196e9db8a4ee22d3abfe617ae782ccb0788",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to required numeric portraitDisplayID publication, exact seeded value, and tested zero-sentinel consumer gating. Display-ID validity, asset loading, rendering, and lifecycle semantics are unclaimed."
     },
     {
       "id": "added:C_AdventureMap.AdventureMapQuestPortraitInfo.text",
       "symbol": "C_AdventureMap.AdventureMapQuestPortraitInfo.text",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines required string AdventureMapQuestPortraitInfo.text.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types/adventure_map.rs",
+          "summary": "Current AdventureMapQuestPortrait state models text and its required/nullability shape.",
+          "source_hash": "b583b6d455c305e8cef1db4b8a77f3b236240c18f4ba3786861cbc814c7b6305"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/adventure_map.rs",
+          "summary": "C_AdventureMap.GetQuestPortraitInfo publishes text from the modeled portrait record.",
+          "source_hash": "f65501e7ada681e261a8746af385349708b3d978941e3e906355ab4782c08f19"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_adventure_map/quests.rs",
+          "summary": "Focused AdventureMap tests assert text publication and the listed bounded cases.",
+          "source_hash": "a9e3f5b6a11a62b9c05cbdf53ef1e695f93cfe5561ed54887d65ac6da54766c6"
+        }
+      ],
+      "tests": [
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_populates_documented_fields"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7b47a196e9db8a4ee22d3abfe617ae782ccb0788",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to required string text publication from injected portrait state. Retail data production, localization, empty/missing-field behavior, and lifecycle semantics are unclaimed."
     },
     {
       "id": "added:C_AdventureMap.GetQuestPortraitInfo",
       "symbol": "C_AdventureMap.GetQuestPortraitInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetQuestPortraitInfo(questID: number) returning nullable AdventureMapQuestPortraitInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types/adventure_map.rs",
+          "summary": "Current AdventureMap state stores injected quest portrait records keyed by quest ID.",
+          "source_hash": "b583b6d455c305e8cef1db4b8a77f3b236240c18f4ba3786861cbc814c7b6305"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/adventure_map.rs",
+          "summary": "Current C_AdventureMap.GetQuestPortraitInfo returns zero values for missing/nonnumeric IDs or a five-field portrait table for known IDs.",
+          "source_hash": "f65501e7ada681e261a8746af385349708b3d978941e3e906355ab4782c08f19"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_adventure_map/quests.rs",
+          "summary": "Focused tests cover publication, known/unknown/nonnumeric inputs, all five fields, nullable modelSceneID, and portrait-display consumer gating.",
+          "source_hash": "a9e3f5b6a11a62b9c05cbdf53ef1e695f93cfe5561ed54887d65ac6da54766c6"
+        }
+      ],
+      "tests": [
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_populates_documented_fields",
+        "tests/c_adventure_map/quests.rs::get_quest_portrait_info_returns_nil_model_scene_when_unset",
+        "tests/c_adventure_map/quests.rs::unknown_quest_portrait_returns_no_values",
+        "tests/c_adventure_map/quests.rs::nonnumeric_quest_portrait_returns_no_values"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "7b47a196e9db8a4ee22d3abfe617ae782ccb0788",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers current injected-state lookup, five-field return shape, unknown/nonnumeric zero-value returns, nullable modelSceneID, and tested portrait-display consumer gating. Retail data population, full validation/edge semantics, and ModelScene rendering remain unclaimed."
     },
     {
       "id": "added:C_BattleNet.SendGameData",
