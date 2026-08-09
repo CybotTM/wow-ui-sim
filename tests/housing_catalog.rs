@@ -1,5 +1,23 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+const HOUSING_CART_SIZE_LIMIT_SCRIPT: &str = r#"
+    local getCartSizeLimit = C_HousingCatalog.GetCartSizeLimit
+    if type(getCartSizeLimit) ~= "function" then
+        return "not_callable"
+    end
+
+    local returnCount, cartSizeLimit = select('#', getCartSizeLimit()), getCartSizeLimit()
+    if returnCount ~= 1 or type(cartSizeLimit) ~= "number" then
+        return "wrong_return_shape"
+    end
+
+    if cartSizeLimit ~= 20 then
+        return "wrong_value:" .. tostring(cartSizeLimit)
+    end
+
+    return "ok"
+"#;
+
 const HOUSING_CATALOG_SCRIPT: &str = r#"
     local featured = C_HousingCatalog.GetFeaturedSmallProducts()
     if #featured ~= 2 then
@@ -81,6 +99,15 @@ const HOUSING_CATALOG_SCRIPT: &str = r#"
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+#[test]
+fn housing_catalog_cart_size_limit_returns_seeded_limit() {
+    let env = env();
+    let result: String = env
+        .eval(HOUSING_CART_SIZE_LIMIT_SCRIPT)
+        .expect("seeded C_HousingCatalog cart size limit should be queryable");
+    assert_eq!(result, "ok");
 }
 
 #[test]
