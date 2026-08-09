@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **890 best-effort, 792 evidence-required, 2 exception-requested, and 1726 untriaged rows** (3410 total).
+Current manifest totals are **891 best-effort, 792 evidence-required, 2 exception-requested, and 1725 untriaged rows** (3410 total).
 
 `C_LFGList.AdvancedFilterOptions.generalPlaystyle1` is best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean `generalPlaystyle1` with exact default false from modeled `LfgAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves the default. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed.
 
@@ -13,6 +13,8 @@ Current manifest totals are **890 best-effort, 792 evidence-required, 2 exceptio
 `C_LFGList.AdvancedFilterOptions.generalPlaystyle3` is best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean `generalPlaystyle3` with exact default false from modeled state; the existing focused test proves the default. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed.
 
 `C_LFGList.AdvancedFilterOptions.generalPlaystyle4` is best-effort/behavioral, bounded to modeled boolean publication and exact false default through `GetAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves it. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed.
+
+`C_LFGList.LfgSearchResultData.generalPlaystyle` is best-effort/behavioral, bounded to seeded `GetSearchResultInfo()` payload field presence and numeric publication. Nullable omission, exact enum validation, invalid values, mutation, serialization, filtering effects, persistence, refresh, and full retail lifecycle remain unclaimed.
 
 `C_LFGList.LfgEntryData.generalPlaystyle` is evidence-required/unsafe: the nullable `Enum.LFGEntryGeneralPlaystyle` field has no active-listing model because `GetActiveEntryInfo()` always returns nil; the separate search-result `generalPlaystyle` field is a different structure. Field presence, nilability, enum values, mutation, serialization, validation, and lifecycle remain unproven.
 

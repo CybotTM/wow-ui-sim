@@ -377,7 +377,7 @@
 377. [best-effort] `added:C_LFGList.AdvancedFilterOptions.generalPlaystyle4` — behavioral
 378. [evidence-required] `added:C_LFGList.LfgEntryData.generalPlaystyle` — unsafe
 379. [evidence-required] `added:C_LFGList.LfgListingCreateData.generalPlaystyle` — unsafe
-380. [untriaged] `added:C_LFGList.LfgSearchResultData.generalPlaystyle` — untriaged
+380. [best-effort] `added:C_LFGList.LfgSearchResultData.generalPlaystyle` — behavioral
 381. [untriaged] `added:C_LimitedInput.LimitedInputAllowed` — untriaged
 382. [untriaged] `added:C_MajorFactions.MajorFactionData.description` — untriaged
 383. [untriaged] `added:C_MajorFactions.MajorFactionData.highlights` — untriaged

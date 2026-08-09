@@ -12419,17 +12419,44 @@
       "id": "added:C_LFGList.LfgSearchResultData.generalPlaystyle",
       "symbol": "C_LFGList.LfgSearchResultData.generalPlaystyle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines LfgSearchResultData.generalPlaystyle as a nullable Enum.LFGEntryGeneralPlaystyle field with no explicit default.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "summary": "PremadeListing stores general_playstyle as a numeric field for seeded and admin-created search-result state.",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lfg_list.rs",
+          "summary": "C_LFGList.GetSearchResultInfo publishes PremadeListing.general_playstyle as numeric generalPlaystyle in LfgSearchResultData.",
+          "source_hash": "2ed0040e7ce5d812af97ccd638b42c8d69f361b9b07bb962c8d68f8f3fb932fd"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/test_premade_groups.rs",
+          "summary": "Focused search-result schema test proves generalPlaystyle is present and numeric in a seeded GetSearchResultInfo payload.",
+          "source_hash": "c2fe2db8ac20c2baa86849829b5efc42fc101e717ed3383606bfea45ef94ee4d"
+        }
+      ],
+      "tests": [
+        "tests/test_premade_groups.rs::search_result_info_has_full_blizzard_schema"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1ba8eb126fd109f8aee96b9d632c227a65f8d256",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers seeded search-result field presence and numeric publication. Nullable omission, exact enum-value validation, invalid values, mutation, serialization, filtering effects, persistence, refresh, and full retail search-result lifecycle remain unclaimed."
     },
     {
       "id": "added:C_LimitedInput.LimitedInputAllowed",
