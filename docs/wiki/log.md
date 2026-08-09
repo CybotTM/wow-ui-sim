@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify 20 additional CAA CVar-default rows
+
+Classified 20 additional player-, resource-, speech-, and target-cast CAA CVar rows as bounded `best-effort`/`behavioral` claims using `test_patch_12_0_0_cvar_defaults`. Consolidated with the prior seven-row slice, the cumulative CAA CVar-default slice covers 27 rows. The focused test proves only startup `GetCVar`/`GetCVarDefault` exact string defaults; CAA behavior, UI/audio effects, mutation, persistence, events, flags, consumers, and later-epoch semantics remain unclaimed. Current totals are **855 best-effort, 691 evidence-required, 2 exception-requested, and 1862 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify two 12.0.0 event rows
 
 Classified `ADDON_RESTRICTION_STATE_CHANGED` and `BULK_PURCHASE_RESULT_RECEIVED` as `evidence-required`/`unsafe`. Registration and enum publication exist, but no modeled transition/purchase producer or focused proof establishes exact payload values/structures/arity, synchronous timing, ordering, duplicate behavior, lifecycle, or consumers. Current totals are **835 best-effort, 691 evidence-required, 2 exception-requested, and 1882 untriaged** (3410 rows).

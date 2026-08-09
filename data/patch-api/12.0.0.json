@@ -570,321 +570,741 @@
       "id": "added:CAAPlayerCastMode",
       "symbol": "CAAPlayerCastMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAPlayerCastMode with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAPlayerCastMode with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAPlayerCastThrottle",
       "symbol": "CAAPlayerCastThrottle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAPlayerCastThrottle with exact default '0.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAPlayerCastThrottle with exact startup/default value '0.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAPlayerHealthFormat",
       "symbol": "CAAPlayerHealthFormat",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAPlayerHealthFormat with exact default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAPlayerHealthFormat with exact startup/default value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAPlayerHealthPercent",
       "symbol": "CAAPlayerHealthPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAPlayerHealthPercent with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAPlayerHealthPercent with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAPlayerHealthThrottle",
       "symbol": "CAAPlayerHealthThrottle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAPlayerHealthThrottle with exact default '0.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAPlayerHealthThrottle with exact startup/default value '0.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAResource1Formats",
       "symbol": "CAAResource1Formats",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAResource1Formats with exact default ''.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAResource1Formats with exact startup/default value ''.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAResource1Percents",
       "symbol": "CAAResource1Percents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAResource1Percents with exact default ''.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAResource1Percents with exact startup/default value ''.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAResource1Throttle",
       "symbol": "CAAResource1Throttle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAResource1Throttle with exact default '0.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAResource1Throttle with exact startup/default value '0.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAResource2Formats",
       "symbol": "CAAResource2Formats",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAResource2Formats with exact default ''.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAResource2Formats with exact startup/default value ''.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAResource2Percents",
       "symbol": "CAAResource2Percents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAResource2Percents with exact default ''.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAResource2Percents with exact startup/default value ''.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAAResource2Throttle",
       "symbol": "CAAResource2Throttle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAAResource2Throttle with exact default '0.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAAResource2Throttle with exact startup/default value '0.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAASayCombatEnd",
       "symbol": "CAASayCombatEnd",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAASayCombatEnd with exact default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAASayCombatEnd with exact startup/default value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAASayCombatStart",
       "symbol": "CAASayCombatStart",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAASayCombatStart with exact default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAASayCombatStart with exact startup/default value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAASayIfTargeted",
       "symbol": "CAASayIfTargeted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAASayIfTargeted with exact default ''.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAASayIfTargeted with exact startup/default value ''.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAASayTargetName",
       "symbol": "CAASayTargetName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAASayTargetName with exact default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAASayTargetName with exact startup/default value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAASpeed",
       "symbol": "CAASpeed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAASpeed with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAASpeed with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAATargetCastFormat",
       "symbol": "CAATargetCastFormat",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAATargetCastFormat with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAATargetCastFormat with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAATargetCastMinTime",
       "symbol": "CAATargetCastMinTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAATargetCastMinTime with exact default '1.500000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAATargetCastMinTime with exact startup/default value '1.500000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAATargetCastMode",
       "symbol": "CAATargetCastMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAATargetCastMode with exact default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAATargetCastMode with exact startup/default value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAATargetCastThrottle",
       "symbol": "CAATargetCastThrottle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records CVar CAATargetCastThrottle with exact default '0.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current CVar defaults publish CAATargetCastThrottle with exact startup/default value '0.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault for the selected CAA CVars against exact source-register defaults.",
+          "source_hash": "1673b5cd6e4102be85f066876f7fa14fd351b3a5ff922fc714bba7eb5b34e695"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d1386d47b5f90e7d88bec6fba67e1667693b4c09",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to current startup/default CVar publication and exact 12.0.0 string value. CAA behavior, UI/audio effects, mutation, persistence, events, secure/read-only flags, consumers, and later-epoch semantics are not claimed."
     },
     {
       "id": "added:CAATargetDeathBehavior",
