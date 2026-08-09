@@ -1,6 +1,6 @@
-## [2026-08-09] investigation | Classify LFG general playstyle field
+## [2026-08-09] investigation | Classify LFG general playstyle fields
 
-Classified `C_LFGList.AdvancedFilterOptions.generalPlaystyle1` as best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean field with exact default false from modeled `LfgAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves the default. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed. Current totals are **887 best-effort, 790 evidence-required, 2 exception-requested, and 1731 untriaged** (3410 rows).
+Classified `C_LFGList.AdvancedFilterOptions.generalPlaystyle1` as best-effort/behavioral, bounded to `C_LFGList.GetAdvancedFilter()` publishing a boolean field with exact default false from modeled `LfgAdvancedFilter`; `tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive` proves the default. Mutation, serialization, validation, search semantics, persistence, refresh, and broader retail LFG behavior remain unclaimed. Classified `C_LFGList.AdvancedFilterOptions.generalPlaystyle2` with the same bounded best-effort/behavioral claim: `GetAdvancedFilter()` publishes a boolean field with exact false default from modeled state, proven by the existing focused test; mutation, serialization, validation, search filtering, persistence, refresh, and broader retail LFG semantics remain unclaimed. Current totals are **888 best-effort, 790 evidence-required, 2 exception-requested, and 1730 untriaged** (3410 rows).
 
 ## [2026-08-09] investigation | Classify two C_InstanceEncounter rows
 

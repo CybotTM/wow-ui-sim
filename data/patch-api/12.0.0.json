@@ -12214,17 +12214,44 @@
       "id": "added:C_LFGList.AdvancedFilterOptions.generalPlaystyle2",
       "symbol": "C_LFGList.AdvancedFilterOptions.generalPlaystyle2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines generalPlaystyle2 as a required boolean AdvancedFilterOptions field with default false.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "summary": "LfgAdvancedFilter stores general_playstyle2 as a boolean and derives a false default.",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lfg_list/catalog.rs",
+          "summary": "C_LFGList.GetAdvancedFilter publishes the stored field as generalPlaystyle2 with a Lua boolean value.",
+          "source_hash": "09102912d47bc941ff1f28e9dd830b86c36a8ae01acd399e6704c0b049585137"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/test_premade_groups.rs",
+          "summary": "Focused advanced-filter test asserts generalPlaystyle2 is exactly false in the default returned table.",
+          "source_hash": "c2fe2db8ac20c2baa86849829b5efc42fc101e717ed3383606bfea45ef94ee4d"
+        }
+      ],
+      "tests": [
+        "tests/test_premade_groups.rs::get_advanced_filter_default_is_permissive"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "1ba8eb126fd109f8aee96b9d632c227a65f8d256",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers returned boolean field publication and the exact false default. Mutation, serialization, validation, interaction with search filtering, persistence, refresh, and broader retail LFG semantics remain unclaimed."
     },
     {
       "id": "added:C_LFGList.AdvancedFilterOptions.generalPlaystyle3",
