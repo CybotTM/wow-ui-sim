@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_MajorFactions.MajorFactionData.highlights
+
+Classified `C_MajorFactions.MajorFactionData.highlights` as evidence-required/unsafe: the source requires an array of `RenownHighlightInfo`, but the current `MajorFactionData` has no highlights state and `GetMajorFactionData` emits no array. Element schema/order, empty/non-empty behavior, per-faction values, mutation, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 795 evidence-required, 2 exception-requested, and 1722 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_MajorFactions.MajorFactionData.description
 
 Classified `C_MajorFactions.MajorFactionData.description` as evidence-required/unsafe: the source requires a string field, but the current state model lacks description and `GetMajorFactionData` omits it. Exact strings/defaults/per-faction values/unknown behavior/mutation/refresh/lifecycle remain unproven; `name` and `unlockDescription` are separate fields. Current totals are **891 best-effort, 794 evidence-required, 2 exception-requested, and 1723 untriaged** (3410 rows).

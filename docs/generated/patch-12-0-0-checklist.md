@@ -380,7 +380,7 @@
 380. [best-effort] `added:C_LFGList.LfgSearchResultData.generalPlaystyle` — behavioral
 381. [evidence-required] `added:C_LimitedInput.LimitedInputAllowed` — unsafe
 382. [evidence-required] `added:C_MajorFactions.MajorFactionData.description` — unsafe
-383. [untriaged] `added:C_MajorFactions.MajorFactionData.highlights` — untriaged
+383. [evidence-required] `added:C_MajorFactions.MajorFactionData.highlights` — unsafe
 384. [untriaged] `added:C_MajorFactions.MajorFactionData.playerCompanionID` — untriaged
 385. [untriaged] `added:C_MajorFactions.MajorFactionRenownRewardInfo.rewardType` — untriaged
 386. [best-effort] `added:C_MajorFactions.RenownHighlightInfo` — provenance-only
