@@ -49535,49 +49535,88 @@
       "id": "added:ExpansionDisplayInfo.glueAmbianceSoundKit",
       "symbol": "ExpansionDisplayInfo.glueAmbianceSoundKit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records ExpansionDisplayInfo.glueAmbianceSoundKit with structure-field contract {\"nilable\":true,\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/client_info_defaults.rs",
+          "summary": "Current implementation does not provide authoritative focused proof for ExpansionDisplayInfo.glueAmbianceSoundKit; the field is absent, nil-only, or generic/placeholder-backed.",
+          "source_hash": "ed4caecd965acfd891b2e5921a61e46ab1e9c77aa392c875523f5adfbe753e49"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current implementation does not establish the exact ExpansionDisplayInfo.glueAmbianceSoundKit contract ({\"nilable\":true,\"type\":\"number\"}), field presence/nullability, authoritative values, state transitions, security, or consumer behavior. No focused proof exists."
     },
     {
       "id": "added:ExpansionDisplayInfo.glueCreditsSoundKit",
       "symbol": "ExpansionDisplayInfo.glueCreditsSoundKit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records ExpansionDisplayInfo.glueCreditsSoundKit with structure-field contract {\"nilable\":true,\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/client_info_defaults.rs",
+          "summary": "Current implementation does not provide authoritative focused proof for ExpansionDisplayInfo.glueCreditsSoundKit; the field is absent, nil-only, or generic/placeholder-backed.",
+          "source_hash": "ed4caecd965acfd891b2e5921a61e46ab1e9c77aa392c875523f5adfbe753e49"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current implementation does not establish the exact ExpansionDisplayInfo.glueCreditsSoundKit contract ({\"nilable\":true,\"type\":\"number\"}), field presence/nullability, authoritative values, state transitions, security, or consumer behavior. No focused proof exists."
     },
     {
       "id": "added:ExpansionDisplayInfo.glueMusicSoundKit",
       "symbol": "ExpansionDisplayInfo.glueMusicSoundKit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records ExpansionDisplayInfo.glueMusicSoundKit with structure-field contract {\"nilable\":true,\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/client_info_defaults.rs",
+          "summary": "Current implementation does not provide authoritative focused proof for ExpansionDisplayInfo.glueMusicSoundKit; the field is absent, nil-only, or generic/placeholder-backed.",
+          "source_hash": "ed4caecd965acfd891b2e5921a61e46ab1e9c77aa392c875523f5adfbe753e49"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current implementation does not establish the exact ExpansionDisplayInfo.glueMusicSoundKit contract ({\"nilable\":true,\"type\":\"number\"}), field presence/nullability, authoritative values, state transitions, security, or consumer behavior. No focused proof exists."
     },
     {
       "id": "added:FACTION_STANDING_CHANGED",
@@ -52094,33 +52133,59 @@
       "id": "added:LuaColorCurvePoint.x",
       "symbol": "LuaColorCurvePoint.x",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaColorCurvePoint.x with structure-field contract {\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current implementation does not provide authoritative focused proof for LuaColorCurvePoint.x; the field is absent, nil-only, or generic/placeholder-backed.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current implementation does not establish the exact LuaColorCurvePoint.x contract ({\"type\":\"number\"}), field presence/nullability, authoritative values, state transitions, security, or consumer behavior. No focused proof exists."
     },
     {
       "id": "added:LuaColorCurvePoint.y",
       "symbol": "LuaColorCurvePoint.y",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records LuaColorCurvePoint.y with structure-field contract {\"type\":{\"structure\":\"colorRGBA\"}}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
+          "summary": "Current implementation does not provide authoritative focused proof for LuaColorCurvePoint.y; the field is absent, nil-only, or generic/placeholder-backed.",
+          "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current implementation does not establish the exact LuaColorCurvePoint.y contract ({\"type\":{\"structure\":\"colorRGBA\"}}), field presence/nullability, authoritative values, state transitions, security, or consumer behavior. No focused proof exists."
     },
     {
       "id": "added:LuaCurveObject",
@@ -53883,17 +53948,30 @@
       "id": "added:PrivateAuraIconInfo.borderScale",
       "symbol": "PrivateAuraIconInfo.borderScale",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records PrivateAuraIconInfo.borderScale with structure-field contract {\"nilable\":true,\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
+          "summary": "Current implementation does not provide authoritative focused proof for PrivateAuraIconInfo.borderScale; the field is absent, nil-only, or generic/placeholder-backed.",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current implementation does not establish the exact PrivateAuraIconInfo.borderScale contract ({\"nilable\":true,\"type\":\"number\"}), field presence/nullability, authoritative values, state transitions, security, or consumer behavior. No focused proof exists."
     },
     {
       "id": "added:REMOVE_NEIGHBORHOOD_CHARTER_SIGNATURE",
@@ -54356,33 +54434,59 @@
       "id": "added:SpellCooldownInfo.isOnGCD",
       "symbol": "SpellCooldownInfo.isOnGCD",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records SpellCooldownInfo.isOnGCD with structure-field contract {\"nilable\":true,\"type\":\"boolean\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Current implementation does not provide authoritative focused proof for SpellCooldownInfo.isOnGCD; the field is absent, nil-only, or generic/placeholder-backed.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current implementation does not establish the exact SpellCooldownInfo.isOnGCD contract ({\"nilable\":true,\"type\":\"boolean\"}), field presence/nullability, authoritative values, state transitions, security, or consumer behavior. No focused proof exists."
     },
     {
       "id": "added:SpellCooldownInfo.timeUntilEndOfStartRecovery",
       "symbol": "SpellCooldownInfo.timeUntilEndOfStartRecovery",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records SpellCooldownInfo.timeUntilEndOfStartRecovery with structure-field contract {\"nilable\":true,\"type\":\"number\"}.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_spell.rs",
+          "summary": "Current implementation does not provide authoritative focused proof for SpellCooldownInfo.timeUntilEndOfStartRecovery; the field is absent, nil-only, or generic/placeholder-backed.",
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required unsafe: current implementation does not establish the exact SpellCooldownInfo.timeUntilEndOfStartRecovery contract ({\"nilable\":true,\"type\":\"number\"}), field presence/nullability, authoritative values, state transitions, security, or consumer behavior. No focused proof exists."
     },
     {
       "id": "added:StatusBar.GetInterpolatedValue",

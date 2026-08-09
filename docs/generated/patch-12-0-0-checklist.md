@@ -2143,9 +2143,9 @@
 2143. [best-effort] `added:Enum.UnitIncomingHealClampModeMeta.MinValue` — behavioral
 2144. [best-effort] `added:Enum.UnitIncomingHealClampModeMeta.NumValues` — behavioral
 2145. [best-effort] `added:Enum.VasTransactionPurchaseResult.DbHouseOwnerRestriction` — behavioral
-2146. [untriaged] `added:ExpansionDisplayInfo.glueAmbianceSoundKit` — untriaged
-2147. [untriaged] `added:ExpansionDisplayInfo.glueCreditsSoundKit` — untriaged
-2148. [untriaged] `added:ExpansionDisplayInfo.glueMusicSoundKit` — untriaged
+2146. [evidence-required] `added:ExpansionDisplayInfo.glueAmbianceSoundKit` — unsafe
+2147. [evidence-required] `added:ExpansionDisplayInfo.glueCreditsSoundKit` — unsafe
+2148. [evidence-required] `added:ExpansionDisplayInfo.glueMusicSoundKit` — unsafe
 2149. [evidence-required] `added:FACTION_STANDING_CHANGED` — unsafe
 2150. [evidence-required] `added:FontString.GetScaleAnimationMode` — unsafe
 2151. [evidence-required] `added:FontString.SetScaleAnimationMode` — unsafe
@@ -2228,8 +2228,8 @@
 2228. [evidence-required] `added:LuaColorCurveObject.SetPoints` — unsafe
 2229. [evidence-required] `added:LuaColorCurveObject.SetToDefaults` — unsafe
 2230. [evidence-required] `added:LuaColorCurvePoint` — unsafe
-2231. [untriaged] `added:LuaColorCurvePoint.x` — untriaged
-2232. [untriaged] `added:LuaColorCurvePoint.y` — untriaged
+2231. [evidence-required] `added:LuaColorCurvePoint.x` — unsafe
+2232. [evidence-required] `added:LuaColorCurvePoint.y` — unsafe
 2233. [best-effort] `added:LuaCurveObject` — behavioral
 2234. [best-effort] `added:LuaCurveObject.AddPoint` — behavioral
 2235. [evidence-required] `added:LuaCurveObject.ClearPoints` — unsafe
@@ -2287,7 +2287,7 @@
 2287. [evidence-required] `added:NumberAbbrevOptions.locale` — unsafe
 2288. [untriaged] `added:PARTY_KILL` — untriaged
 2289. [untriaged] `added:PLAYER_TARGET_DIED` — untriaged
-2290. [untriaged] `added:PrivateAuraIconInfo.borderScale` — untriaged
+2290. [evidence-required] `added:PrivateAuraIconInfo.borderScale` — unsafe
 2291. [untriaged] `added:REMOVE_NEIGHBORHOOD_CHARTER_SIGNATURE` — untriaged
 2292. [evidence-required] `added:Region.IsAnchoringSecret` — unsafe
 2293. [best-effort] `added:Region.SetAlphaFromBoolean` — behavioral
@@ -2314,8 +2314,8 @@
 2314. [untriaged] `added:SimulateMouseWheel` — untriaged
 2315. [untriaged] `added:Sound_EnableEncounterWarningsSounds` — untriaged
 2316. [untriaged] `added:Sound_EncounterWarningsVolume` — untriaged
-2317. [untriaged] `added:SpellCooldownInfo.isOnGCD` — untriaged
-2318. [untriaged] `added:SpellCooldownInfo.timeUntilEndOfStartRecovery` — untriaged
+2317. [evidence-required] `added:SpellCooldownInfo.isOnGCD` — unsafe
+2318. [evidence-required] `added:SpellCooldownInfo.timeUntilEndOfStartRecovery` — unsafe
 2319. [best-effort] `added:StatusBar.GetInterpolatedValue` — behavioral
 2320. [best-effort] `added:StatusBar.GetTimerDuration` — behavioral
 2321. [best-effort] `added:StatusBar.IsInterpolating` — behavioral

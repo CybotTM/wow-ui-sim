@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify miscellaneous payload fields
+
+Classified eight ExpansionDisplayInfo, LuaColorCurvePoint, PrivateAuraIconInfo, and SpellCooldownInfo structure fields as `evidence-required`/`unsafe`. Current behavior is absent, nil-only, generic, or placeholder-backed and does not establish exact contracts, state/security, or consumer semantics; tests remain empty with null commit, approval, and scope exception. Current totals are **800 best-effort, 687 evidence-required, 2 exception-requested, and 1921 untriaged**.
+
 ## [2026-08-09] investigation | Classify number-abbreviation fields
 
 Classified eight `NumberAbbrevData`/`NumberAbbrevOptions` structure fields as `evidence-required`/`unsafe`. Generic `AbbreviateConfig` proxy round-tripping does not establish typed contracts, defaults/nullability, validation, ordering, or formatting behavior; tests remain empty with null commit, approval, and scope exception. Current totals are **800 best-effort, 679 evidence-required, 2 exception-requested, and 1929 untriaged**.
