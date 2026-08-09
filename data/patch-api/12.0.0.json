@@ -1532,161 +1532,339 @@
       "id": "added:CATALOG_SHOP_REFUNDABLE_DECORS_UPDATED",
       "symbol": "CATALOG_SHOP_REFUNDABLE_DECORS_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines synchronous CATALOG_SHOP_REFUNDABLE_DECORS_UPDATED with zero payload arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts CATALOG_SHOP_REFUNDABLE_DECORS_UPDATED, but registration does not establish production or behavior.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current CatalogShop compatibility state returns placeholder refundable-decor data and does not model refresh/event production.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled refundable-decor refresh producer or focused proof establishes zero-payload dispatch, state-update ordering, lifecycle, duplicate behavior, or CatalogShop consumer effects."
     },
     {
       "id": "added:CATALOG_SHOP_VIRTUAL_CURRENCY_BALANCE_UPDATE",
       "symbol": "CATALOG_SHOP_VIRTUAL_CURRENCY_BALANCE_UPDATE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines synchronous CATALOG_SHOP_VIRTUAL_CURRENCY_BALANCE_UPDATE payloads currencyCode: string and balance: string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts CATALOG_SHOP_VIRTUAL_CURRENCY_BALANCE_UPDATE, but registration does not establish production or payload behavior.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current CatalogShop compatibility state has no virtual-currency string state or success-event producer; refresh is a no-op.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled virtual-currency balance producer or focused proof establishes exact string payloads, success ordering, lifecycle, duplicate behavior, or CatalogShop consumers."
     },
     {
       "id": "added:CATALOG_SHOP_VIRTUAL_CURRENCY_BALANCE_UPDATE_FAILURE",
       "symbol": "CATALOG_SHOP_VIRTUAL_CURRENCY_BALANCE_UPDATE_FAILURE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines synchronous CATALOG_SHOP_VIRTUAL_CURRENCY_BALANCE_UPDATE_FAILURE payload currencyCode: string.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts CATALOG_SHOP_VIRTUAL_CURRENCY_BALANCE_UPDATE_FAILURE, but registration does not establish production or payload behavior.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "summary": "Current CatalogShop compatibility state has no virtual-currency failure state or failure-event producer; refresh is a no-op.",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled virtual-currency failure producer or focused proof establishes exact currencyCode delivery, failure conditions, ordering, lifecycle, duplicate behavior, or consumers."
     },
     {
       "id": "added:CHAT_MSG_ENCOUNTER_EVENT",
       "symbol": "CHAT_MSG_ENCOUNTER_EVENT",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines CHAT_MSG_ENCOUNTER_EVENT with the 17-field encounter-chat payload.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "summary": "Current strict retail event validation does not preserve this historical valid-but-non-registerable event contract, and no producer is modeled.",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: authoritative validity/registerability behavior and exact 17-field producer semantics are unresolved; no focused proof establishes dispatch, payload values/types, timing, or lifecycle."
     },
     {
       "id": "added:COMBAT_LOG_APPLY_FILTER_SETTINGS",
       "symbol": "COMBAT_LOG_APPLY_FILTER_SETTINGS",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines restricted callback event COMBAT_LOG_APPLY_FILTER_SETTINGS with filterSettings: table.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "summary": "Current event metadata recognizes restricted/callback behavior, but ordinary registration and callback semantics do not establish production.",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Current temporary combat-log ApplyFilterSettings behavior is a no-op and does not produce the event or model filter state.",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled filter-settings producer or focused proof establishes restricted callback registration, exact table payload, state mutation, dispatch timing, ordering, lifecycle, or consumer effects."
     },
     {
       "id": "added:COMBAT_LOG_ENTRIES_CLEARED",
       "symbol": "COMBAT_LOG_ENTRIES_CLEARED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines synchronous COMBAT_LOG_ENTRIES_CLEARED with zero payload arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts COMBAT_LOG_ENTRIES_CLEARED, but registration does not establish production.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Current temporary combat-log ClearEntries mutates fixture state but does not dispatch COMBAT_LOG_ENTRIES_CLEARED.",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled clear-event producer or focused proof establishes zero-payload dispatch, timing, ordering, repeated clears, empty-state behavior, or lifecycle."
     },
     {
       "id": "added:COMBAT_LOG_MESSAGE",
       "symbol": "COMBAT_LOG_MESSAGE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines synchronous COMBAT_LOG_MESSAGE payloads message, colorR, colorG, colorB, and Enum.CombatLogMessageOrder.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts COMBAT_LOG_MESSAGE, but registration does not establish production or payload behavior.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Current temporary combat-log message helpers do not produce or dispatch COMBAT_LOG_MESSAGE with the required payload.",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled combat-message producer or focused proof establishes exact message/RGB/order payloads, synchronous dispatch, callback rules, ordering, or lifecycle."
     },
     {
       "id": "added:COMBAT_LOG_MESSAGE_LIMIT_CHANGED",
       "symbol": "COMBAT_LOG_MESSAGE_LIMIT_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines synchronous COMBAT_LOG_MESSAGE_LIMIT_CHANGED payload messageLimit: number.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts COMBAT_LOG_MESSAGE_LIMIT_CHANGED, but registration does not establish production.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Current temporary SetMessageLimit mutates fixture state but does not dispatch COMBAT_LOG_MESSAGE_LIMIT_CHANGED.",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled message-limit event producer or focused proof establishes exact numeric payload, timing, repeated/invalid updates, ordering, lifecycle, or consumers."
     },
     {
       "id": "added:COMBAT_LOG_REFILTER_ENTRIES",
       "symbol": "COMBAT_LOG_REFILTER_ENTRIES",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines restricted non-registerable callback event COMBAT_LOG_REFILTER_ENTRIES with zero payload arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "summary": "Current event metadata recognizes restricted/callback behavior, but no focused proof establishes exact registration results or dispatch semantics.",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Current temporary combat-log state has no refilter-event producer or modeled refilter lifecycle.",
+          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled refilter producer or focused proof establishes restricted callback registration, zero-payload dispatch, callback ordering, duplicate behavior, lifecycle, or actual refilter effects."
     },
     {
       "id": "added:COMMENTATOR_COMBAT_EVENT",
       "symbol": "COMMENTATOR_COMBAT_EVENT",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records synchronous COMMENTATOR_COMBAT_EVENT with no payload arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Current retail event registry accepts COMMENTATOR_COMBAT_EVENT, but registration does not establish production or state behavior.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no modeled commentator combat-event producer/state or focused proof resolves the zero-payload source contract against consumer state queries, dispatch timing, ordering, repeated events, or lifecycle."
     },
     {
       "id": "added:C_ActionBar.ActionBarChargeInfo",
