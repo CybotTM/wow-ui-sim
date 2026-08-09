@@ -1,7 +1,9 @@
 - The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, and 15 DeprecatedCombatLog wrappers (10 CombatLog, 2 CombatText, 3 DeathRecap), plus 3 InstanceEncounter wrappers, are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The five chat/spell wrappers are separately covered by `patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward`; `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` are classified evidence-required/unsafe because their retained fixture-only compatibility semantics remain unproven.
 # Patch API audit manifest
 
-The current 12.0.0 manifest has **891 best-effort, 892 evidence-required, 2 exception-requested, and 1625 untriaged rows** (3410 total).
+The current 12.0.0 manifest has **892 best-effort, 892 evidence-required, 2 exception-requested, and 1624 untriaged rows** (3410 total).
+
+`C_Reputation.IsFactionParagonForCurrentPlayer` is best-effort/behavioral: explicit faction-paragon state and focused tests prove registered eligible factions return true, while level-gated and missing factions return false. Live service population, refresh, events, persistence, malformed inputs, and lifecycle remain outside the claim.
 
 `C_QuestInfoSystem.GetQuestLogRewardFavor` and `C_QuestLog.GetActivePreyQuest` are evidence-required/unsafe: no quest-specific favor or cycle-cap model and no active-prey quest state exist; current quest surfaces cover other classification, log, and reward behavior only. Quest IDs, favor amounts and clamping, inactive nil and active prey IDs, transitions, refresh, events, persistence, and lifecycle remain unproven.
 

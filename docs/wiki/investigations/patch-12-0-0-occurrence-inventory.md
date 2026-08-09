@@ -562,7 +562,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_PvP.JoinTrainingGround` | evidence-required | api | added | Evidence required: no Training Grounds ID catalog or queue/join producer exists. Valid/unknown IDs, eligibility failures, duplicate joins, queue transitions, events, persistence, and lifecycle remain unproven. |
 | `C_QuestInfoSystem.GetQuestLogRewardFavor` | evidence-required | api | added | Evidence required: no quest-specific favor reward or initiative cycle-cap model exists. Unknown quests, zero/nonzero rewards, unclamped/clamped amounts, cap transitions, refresh, persistence, and lifecycle remain unproven. |
 | `C_QuestLog.GetActivePreyQuest` | evidence-required | api | added | Evidence required: no active-prey quest state or explicit API implementation exists. Inactive nil behavior, active numeric IDs, invalid/unavailable quests, quest-log consistency, transitions, refresh, events, and lifecycle remain unproven. |
-| `C_Reputation.IsFactionParagonForCurrentPlayer` | untriaged | api | added | api added in 12.0.0. |
+| `C_Reputation.IsFactionParagonForCurrentPlayer` | best-effort | api | added | Best-effort behavioral evidence covers modeled faction-paragon eligibility: registered eligible factions return true, level-gated and missing factions return false. Live service population, state refresh, events, persistence, malformed argument handling, and lifecycle semantics are not claimed. |
 | `C_RestrictedActions.CheckAllowProtectedFunctions` | untriaged | api | added | api added in 12.0.0. |
 | `C_RestrictedActions.GetAddOnRestrictionState` | untriaged | api | added | api added in 12.0.0. |
 | `C_RestrictedActions.IsAddOnRestrictionActive` | untriaged | api | added | api added in 12.0.0. |

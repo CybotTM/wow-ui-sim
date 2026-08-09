@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify current-player faction paragon eligibility
+
+Classified `C_Reputation.IsFactionParagonForCurrentPlayer` as best-effort/behavioral: explicit faction-paragon state and focused tests prove registered eligible factions return true, while level-gated and missing factions return false. Live service population, refresh, events, persistence, malformed inputs, and lifecycle remain outside the claim. Current totals are **892 best-effort, 892 evidence-required, 2 exception-requested, and 1624 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify quest favor and active prey APIs
 
 Classified `C_QuestInfoSystem.GetQuestLogRewardFavor` and `C_QuestLog.GetActivePreyQuest` as evidence-required/unsafe: no quest-specific favor or cycle-cap model and no active-prey quest state exist; current quest surfaces cover other classification, log, and reward behavior only. Quest IDs, favor amounts and clamping, inactive nil and active prey IDs, transitions, refresh, events, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 892 evidence-required, 2 exception-requested, and 1625 untriaged** (3410 rows).

@@ -16397,17 +16397,45 @@
       "id": "added:C_Reputation.IsFactionParagonForCurrentPlayer",
       "symbol": "C_Reputation.IsFactionParagonForCurrentPlayer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines IsFactionParagonForCurrentPlayer(factionID: number) with a required boolean currentPlayerHasParagon return.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/faction_probes.rs",
+          "summary": "Explicit Rust implementation reads faction_paragon state and returns true only for a registered faction not gated by too_low_level_for_paragon; missing or invalid IDs return false.",
+          "source_hash": "c4c2304e6d4da928743a7cd3281fe173e43997ecb29906fc5b0afade76497bcb"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "FactionParagonInfo provides the modeled too_low_level_for_paragon state used by the API.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_reputation_paragon.rs",
+          "summary": "Focused tests prove registered eligible true, registered level-gated false, unregistered false, and Blizzard-style paragon reward-bar branching.",
+          "source_hash": "cdd74a753cb26b654631d946ed3049c5d16b71852ae068b2d1eb62c576c453bf"
+        }
+      ],
+      "tests": [
+        "tests/c_reputation_paragon.rs::is_faction_paragon_for_current_player_requires_eligible_level",
+        "tests/c_reputation_paragon.rs::is_faction_paragon_for_current_player_is_false_when_unregistered"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "de0307f7da450f7d37bcaed9de18e0f0326a5534",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers modeled faction-paragon eligibility: registered eligible factions return true, level-gated and missing factions return false. Live service population, state refresh, events, persistence, malformed argument handling, and lifecycle semantics are not claimed."
     },
     {
       "id": "added:C_RestrictedActions.CheckAllowProtectedFunctions",

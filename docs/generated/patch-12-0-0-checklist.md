@@ -494,7 +494,7 @@
 494. [evidence-required] `added:C_PvP.JoinTrainingGround` — unsafe
 495. [evidence-required] `added:C_QuestInfoSystem.GetQuestLogRewardFavor` — unsafe
 496. [evidence-required] `added:C_QuestLog.GetActivePreyQuest` — unsafe
-497. [untriaged] `added:C_Reputation.IsFactionParagonForCurrentPlayer` — untriaged
+497. [best-effort] `added:C_Reputation.IsFactionParagonForCurrentPlayer` — behavioral
 498. [untriaged] `added:C_RestrictedActions.CheckAllowProtectedFunctions` — untriaged
 499. [untriaged] `added:C_RestrictedActions.GetAddOnRestrictionState` — untriaged
 500. [untriaged] `added:C_RestrictedActions.IsAddOnRestrictionActive` — untriaged

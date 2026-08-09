@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **891 best-effort, 892 evidence-required, 2 exception-requested, and 1625 untriaged rows** (3410 total).
+Current manifest totals are **892 best-effort, 892 evidence-required, 2 exception-requested, and 1624 untriaged rows** (3410 total).
+
+`C_Reputation.IsFactionParagonForCurrentPlayer` is best-effort/behavioral: explicit faction-paragon state and focused tests prove registered eligible factions return true, while level-gated and missing factions return false. Live service population, refresh, events, persistence, malformed inputs, and lifecycle remain outside the claim.
 
 `C_QuestInfoSystem.GetQuestLogRewardFavor` and `C_QuestLog.GetActivePreyQuest` are evidence-required/unsafe: no quest-specific favor or cycle-cap model and no active-prey quest state exist; current quest surfaces cover other classification, log, and reward behavior only. Quest IDs, favor amounts and clamping, inactive nil and active prey IDs, transitions, refresh, events, persistence, and lifecycle remain unproven.
 
