@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.AddTrackedInitiativeTask
+
+Classified `C_NeighborhoodInitiative.AddTrackedInitiativeTask` as evidence-required/unsafe: the source accepts a numeric initiativeTaskID with no declared return, but the current temporary fallback is a no-op and `trackedIDs` stays empty; focused probes prove only callability and nil return. Task mutation, valid/unknown IDs, duplicate handling, ordering, removal interaction, task info, persistence, event dispatch, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 803 evidence-required, 2 exception-requested, and 1714 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_MajorFactions.ShouldUseJourneyRewardTrack
 
 Classified `C_MajorFactions.ShouldUseJourneyRewardTrack` as evidence-required/unsafe: the source requires a boolean by faction ID, but the temporary fallback is constant false with no per-faction journey reward-track model. Focused probes prove only fallback callability/default; positive/negative faction policy, unknown IDs, argument/security restrictions, transitions, refresh, and lifecycle remain unproven. Current totals are **891 best-effort, 802 evidence-required, 2 exception-requested, and 1715 untriaged** (3410 rows).
