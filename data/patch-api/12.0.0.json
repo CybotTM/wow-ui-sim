@@ -13195,17 +13195,36 @@
       "id": "added:C_NeighborhoodInitiative.GetInitiativeTaskInfo",
       "symbol": "C_NeighborhoodInitiative.GetInitiativeTaskInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register defines GetInitiativeTaskInfo(initiativeTaskID: number) returning one nilable InitiativeTaskInfo payload.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current temporary fallback returns nil unconditionally and has no initiative-task records, payload construction, ID validation, or lifecycle state.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_tracking_defaults_probes.rs",
+          "summary": "Existing focused probe confirms only GetInitiativeTaskInfo(1) returning nil; it does not establish valid task payload semantics.",
+          "source_hash": "df72a7b7ff97aa354d78a8087c2476b9d8c6feccb9aba9559ea3b34eefd1af47"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: constant nil covers only a placeholder absent case. Valid and unknown task IDs, exact payload fields and types, task updates, tracked-task interaction, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo",

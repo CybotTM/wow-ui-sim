@@ -400,7 +400,7 @@
 400. [evidence-required] `added:C_NeighborhoodInitiative.GetActiveNeighborhood` — unsafe
 401. [evidence-required] `added:C_NeighborhoodInitiative.GetInitiativeActivityLogInfo` — unsafe
 402. [evidence-required] `added:C_NeighborhoodInitiative.GetInitiativeTaskChatLink` — unsafe
-403. [untriaged] `added:C_NeighborhoodInitiative.GetInitiativeTaskInfo` — untriaged
+403. [evidence-required] `added:C_NeighborhoodInitiative.GetInitiativeTaskInfo` — unsafe
 404. [untriaged] `added:C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo` — untriaged
 405. [untriaged] `added:C_NeighborhoodInitiative.GetRequiredLevel` — untriaged
 406. [untriaged] `added:C_NeighborhoodInitiative.GetTrackedInitiativeTasks` — untriaged

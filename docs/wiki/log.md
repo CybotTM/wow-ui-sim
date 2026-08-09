@@ -1,6 +1,10 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetInitiativeTaskInfo
+
+Classified `C_NeighborhoodInitiative.GetInitiativeTaskInfo` as evidence-required/unsafe: the source returns a nilable InitiativeTaskInfo by numeric task ID, but the current explicit fallback always returns nil with no task records or payload model; the focused probe proves only nil for ID 1. Valid/unknown IDs, exact fields/types, updates, tracked-task interaction, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 807 evidence-required, 2 exception-requested, and 1710 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetInitiativeTaskChatLink
 
-Classified `C_NeighborhoodInitiative.GetInitiativeTaskChatLink` as evidence-required/unsafe: the source requires a string chat link by numeric task ID, but no explicit method or task/chat-link model exists, namespace defaults omit it, and generic fallback returns nil. Valid/unknown IDs, exact link format, absent-task behavior, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 806 evidence-required, 2 exception-requested, and 1711 untriaged** (3410 rows).
+Classified `C_NeighborhoodInitiative.GetInitiativeTaskChatLink` as evidence-required/unsafe: the source requires a string chat link by numeric task ID, but no explicit method or task/chat-link model exists, namespace defaults omit it, and generic fallback returns nil. Valid/unknown IDs, exact link format, absent-task behavior, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 807 evidence-required, 2 exception-requested, and 1710 untriaged** (3410 rows).
 
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.GetInitiativeActivityLogInfo
 
