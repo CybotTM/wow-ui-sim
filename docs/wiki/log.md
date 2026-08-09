@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskName
+
+Classified `C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskName` as evidence-required/unsafe: the source defines a required string taskName field, but no InitiativeActivityLogEntry runtime model or activity-log producer exists; generic fallback produces no payload. String field presence/values, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 815 evidence-required, 2 exception-requested, and 1702 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskID
 
 Classified `C_NeighborhoodInitiative.InitiativeActivityLogEntry.taskID` as evidence-required/unsafe: the source defines a required numeric taskID field, but no InitiativeActivityLogEntry runtime model or activity-log producer exists; generic fallback produces no payload. Numeric task-ID presence/values, invalid/unknown tasks, empty/present logs, updates, refresh, persistence, and lifecycle remain unproven. Current totals are **891 best-effort, 814 evidence-required, 2 exception-requested, and 1703 untriaged** (3410 rows).
