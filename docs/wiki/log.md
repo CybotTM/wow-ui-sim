@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify encounter timeline track enums
+
+The eight retail 12.0.0 `Enum.EncounterTimelineTrack.*` and `Enum.EncounterTimelineTrackMeta.*` rows are best-effort/behavioral: `Queued=0`, `Short=1`, `Medium=2`, `Long=3`, `Indeterminate=4`; metadata `MinValue=0`, `MaxValue=4`, `NumValues=5`. Focused proof is at `1abf8c72f3adabf9c8f50c53870c2a2f643b9fb6`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; queueing, timing, track behavior, ordering, consumers, persistence, and lifecycle remain unclaimed. Current totals are **1380 best-effort, 982 evidence-required, 2 exception-requested, and 1046 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify enemy-player nameplate aura-display enums
 
 The seven retail 12.0.0 `Enum.NamePlateEnemyPlayerAuraDisplay.*` and `Enum.NamePlateEnemyPlayerAuraDisplayMeta.*` rows are best-effort/behavioral: `None=0, Buffs=1, Debuffs=2, LossOfControl=3`; metadata `MinValue=0, MaxValue=3, NumValues=4`. Focused proof is at `cc2e085ff2e15b6a617df21e19833db20417524b`; it asserts the exact complete set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; nameplate aura rendering, cast-bar behavior, consumers, persistence, and lifecycle remain unclaimed. Current totals are **1372 best-effort, 982 evidence-required, 2 exception-requested, and 1054 untriaged** (3410 rows).
