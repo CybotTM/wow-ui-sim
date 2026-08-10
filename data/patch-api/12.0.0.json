@@ -37582,7 +37582,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerCast with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -37627,7 +37627,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerHealth with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -37672,7 +37672,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource1 with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -37717,7 +37717,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource2 with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -37762,7 +37762,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.Sample with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -37807,7 +37807,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetCast with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -37852,7 +37852,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetHealth with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -37897,7 +37897,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MaxValue with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -37942,7 +37942,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MinValue with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -37987,7 +37987,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.NumValues with the exact value and removes later same-percent throttle members.",
-          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
         },
         {
           "kind": "test",
@@ -40170,7 +40170,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40221,7 +40221,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40272,7 +40272,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40323,7 +40323,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40368,7 +40368,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MaxValue with exact numeric value 4."
         },
         {
@@ -40405,7 +40405,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MinValue with exact numeric value 1."
         },
         {
@@ -40442,7 +40442,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "91b45768d53fc1ce52778d6354dcc4226bb351ca2b9f08a8aa10b3f2793690b9",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.NumValues with exact numeric value 4."
         },
         {
@@ -45516,7 +45516,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "446abc7680acd88f642b26fae4e2dd4dc12f7bffc742f293744c1159363def58",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -45554,7 +45554,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "446abc7680acd88f642b26fae4e2dd4dc12f7bffc742f293744c1159363def58",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -45592,7 +45592,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "446abc7680acd88f642b26fae4e2dd4dc12f7bffc742f293744c1159363def58",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -45630,7 +45630,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "446abc7680acd88f642b26fae4e2dd4dc12f7bffc742f293744c1159363def58",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -53927,7 +53927,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "446abc7680acd88f642b26fae4e2dd4dc12f7bffc742f293744c1159363def58",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.MaxValue with exact numeric value 262144."
         },
         {
@@ -53965,7 +53965,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "446abc7680acd88f642b26fae4e2dd4dc12f7bffc742f293744c1159363def58",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.MinValue with exact numeric value 1."
         },
         {
@@ -54003,7 +54003,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "446abc7680acd88f642b26fae4e2dd4dc12f7bffc742f293744c1159363def58",
+          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.NumValues with exact numeric value 24."
         },
         {
