@@ -43,6 +43,7 @@ mod patch_12_0_0_crafting_order_result_enums;
 mod patch_12_0_0_damage_meter_numbers_enums;
 mod patch_12_0_0_damage_meter_override_type_enums;
 mod patch_12_0_0_damage_meter_session_type_enums;
+mod patch_12_0_0_damage_meter_spell_details_display_type_enums;
 mod patch_12_0_0_expansion_landing_page_type_removals;
 mod patch_12_0_0_item_creation_context_removals;
 mod patch_12_0_0_small_enums;

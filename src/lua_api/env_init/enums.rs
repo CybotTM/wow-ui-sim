@@ -38,6 +38,10 @@ Enum.CombatAudioAlertThrottleMeta = {
     MinValue = 0,
     NumValues = 7,
 }
+Enum.DamageMeterSpellDetailsDisplayType.Deaths = nil
+Enum.DamageMeterSpellDetailsDisplayType.EnemyDamageTaken = nil
+Enum.DamageMeterSpellDetailsDisplayTypeMeta.MaxValue = 2
+Enum.DamageMeterSpellDetailsDisplayTypeMeta.NumValues = 3
 Enum.SecretAspect.Attributes = nil
 Enum.SecretAspect.CooldownStyle = nil
 Enum.SecretAspectMeta = {
