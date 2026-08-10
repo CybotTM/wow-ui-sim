@@ -33,9 +33,19 @@ fn test_patch_12_0_0_edit_mode_encounter_events_settings_enum_values() {
                             .. ", got " .. tostring(value)
                     end
                 end
-                if setting.TooltipAnchor ~= nil then
-                    return "TooltipAnchor: expected nil"
+                local absent = {
+                    "TooltipAnchor",
+                    "ViewType",
+                    "FlipHorizontally",
+                    "BarWidth",
+                    "Padding",
+                }
+                for _, name in ipairs(absent) do
+                    if setting[name] ~= nil then
+                        return name .. ": expected nil"
+                    end
                 end
+
                 local meta = Enum.EditModeEncounterEventsSettingMeta
                 if type(meta) ~= "table" then
                     return "EditModeEncounterEventsSettingMeta: expected table"
