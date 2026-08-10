@@ -37561,161 +37561,451 @@
       "id": "added:Enum.CombatAudioAlertThrottle.PlayerCast",
       "symbol": "Enum.CombatAudioAlertThrottle.PlayerCast",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottle.PlayerCast as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base enum publication for Enum.CombatAudioAlertThrottle.PlayerCast.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerCast with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final enum table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottle.PlayerCast as Lua number with exact value 3."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 3, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottle.PlayerHealth",
       "symbol": "Enum.CombatAudioAlertThrottle.PlayerHealth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottle.PlayerHealth as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base enum publication for Enum.CombatAudioAlertThrottle.PlayerHealth.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerHealth with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final enum table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottle.PlayerHealth as Lua number with exact value 1."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 1, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottle.PlayerResource1",
       "symbol": "Enum.CombatAudioAlertThrottle.PlayerResource1",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottle.PlayerResource1 as numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base enum publication for Enum.CombatAudioAlertThrottle.PlayerResource1.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource1 with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final enum table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottle.PlayerResource1 as Lua number with exact value 5."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 5, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottle.PlayerResource2",
       "symbol": "Enum.CombatAudioAlertThrottle.PlayerResource2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottle.PlayerResource2 as numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base enum publication for Enum.CombatAudioAlertThrottle.PlayerResource2.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource2 with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final enum table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottle.PlayerResource2 as Lua number with exact value 6."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 6, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottle.Sample",
       "symbol": "Enum.CombatAudioAlertThrottle.Sample",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottle.Sample as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base enum publication for Enum.CombatAudioAlertThrottle.Sample.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.Sample with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final enum table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottle.Sample as Lua number with exact value 0."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 0, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottle.TargetCast",
       "symbol": "Enum.CombatAudioAlertThrottle.TargetCast",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottle.TargetCast as numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base enum publication for Enum.CombatAudioAlertThrottle.TargetCast.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetCast with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final enum table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottle.TargetCast as Lua number with exact value 4."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 4, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottle.TargetHealth",
       "symbol": "Enum.CombatAudioAlertThrottle.TargetHealth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottle.TargetHealth as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base enum publication for Enum.CombatAudioAlertThrottle.TargetHealth.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetHealth with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final enum table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottle.TargetHealth as Lua number with exact value 2."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 2, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottleMeta.MaxValue",
       "symbol": "Enum.CombatAudioAlertThrottleMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottleMeta.MaxValue as numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base metadata publication for Enum.CombatAudioAlertThrottleMeta.MaxValue.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MaxValue with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final metadata table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottleMeta.MaxValue as Lua number with exact value 6."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, exact value 6, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottleMeta.MinValue",
       "symbol": "Enum.CombatAudioAlertThrottleMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottleMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base metadata publication for Enum.CombatAudioAlertThrottleMeta.MinValue.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MinValue with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final metadata table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottleMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, exact value 0, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottleMeta.NumValues",
       "symbol": "Enum.CombatAudioAlertThrottleMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertThrottleMeta.NumValues as numeric value 7.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Combat-audio enum definitions include the base metadata publication for Enum.CombatAudioAlertThrottleMeta.NumValues.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.NumValues with the exact value and removes later same-percent throttle members.",
+          "source_hash": "2c0157c792081578af6dda32157e9f527e8253b33de6f6789a46ac081f3adeb2"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the final metadata table, Lua numeric type, exact value, and absence of later-epoch same-percent members.",
+          "source_hash": "048f486d965ab429e05dfa35ded004d9f0d402aa691bc33f63b06e6a64672ece"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_throttle_enums.rs::test_patch_12_0_0_combat_audio_throttle_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertThrottleMeta.NumValues as Lua number with exact value 7."
+      ],
+      "commit": "8096cc84cb9e200840507937c0b379bb6f0ca656",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, exact value 7, and exclusion of later-epoch same-percent throttle members. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 8096cc84cb9e200840507937c0b379bb6f0ca656."
     },
     {
       "id": "added:Enum.CombatAudioAlertType.Cast",
