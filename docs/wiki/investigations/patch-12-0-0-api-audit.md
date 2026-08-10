@@ -1,10 +1,12 @@
 # Patch 12.0.0 API Audit
 
+The seven retail 12.0.0 `Enum.EncounterTimelineEventState.*` rows are best-effort/behavioral: `Active=0`, `Paused=1`, `Finished=2`, `Canceled=3`; metadata `MinValue=0`, `MaxValue=3`, `NumValues=4`. Focused proof is at `171ce8632e17cd4d0141a704daf3d7cc99c888e3`; it asserts the exact four-member set, Lua numeric types, and metadata. The runtime state enum matches retail 12.0.0 with no drift. Claims are bounded to startup publication and exact values/metadata; state transitions, timing, producers, consumers, persistence, and lifecycle remain unclaimed.
+
 12.0.0 occurrence audit generated reproducibly from versioned wowless retail snapshots. It records schema-surface deltas plus bounded evidence-backed behavioral slices; it does not claim historical 12.0.0 FrameXML or live runtime behavior.
 
 ## Content
 
-Current manifest totals are **1333 best-effort, 982 evidence-required, 2 exception-requested, and 1093 untriaged rows** (3410 total).
+Current manifest totals are **1340 best-effort, 982 evidence-required, 2 exception-requested, and 1086 untriaged rows** (3410 total).
 
 The five retail 12.0.0 `Enum.EncounterTimelineEventSortDirection.*` rows are best-effort/behavioral: `Descending=0`, `Ascending=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`. Focused proof is at `16469db1abdc879db2d2c0617a49583d86a7b4b8`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle remain unclaimed.
 

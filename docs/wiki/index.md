@@ -1,5 +1,7 @@
 The five retail 12.0.0 `Enum.EncounterTimelineEventSortDirection.*` rows are best-effort/behavioral: `Descending=0`, `Ascending=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`. Focused proof is at `16469db1abdc879db2d2c0617a49583d86a7b4b8`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
+The seven retail 12.0.0 `Enum.EncounterTimelineEventState.*` rows are best-effort/behavioral: `Active=0`, `Paused=1`, `Finished=2`, `Canceled=3`; metadata `MinValue=0`, `MaxValue=3`, `NumValues=4`. Focused proof is at `171ce8632e17cd4d0141a704daf3d7cc99c888e3`; it asserts the exact four-member set, Lua numeric types, and metadata. The runtime state enum matches retail 12.0.0 with no drift. Claims are bounded to startup publication and exact values/metadata; state transitions, timing, producers, consumers, persistence, and lifecycle remain unclaimed.
+
 The six retail 12.0.0 `Enum.EncounterTimelineEventSource.*` and `Enum.EncounterTimelineEventSourceMeta.*` rows are best-effort/behavioral: `Encounter=0`, `Script=1`, `EditMode=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`. Focused proof is at `4fd68742c715f44d43f2afc017816fa198cedc40`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; source routing, event producers, ordering, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
 # Wiki Index
@@ -14,7 +16,7 @@ The six retail 12.0.0 `Enum.EncounterEventSeverity.*` rows are best-effort/behav
 
 LLM-maintained knowledge base for the wow-ui-sim project.
 
-The current 12.0.0 audit totals are **1333 best-effort, 982 evidence-required, 2 exception-requested, and 1093 untriaged rows** (3410 total).
+The current 12.0.0 audit totals are **1340 best-effort, 982 evidence-required, 2 exception-requested, and 1086 untriaged rows** (3410 total).
 
 The three retail 12.0.0 `Enum.EditModeSystem.*` rows are best-effort/behavioral: `PersonalResourceDisplay=21`, `EncounterEvents=22`, and `DamageMeter=23`. Focused proof is at `4d883c9647cf972d6b12b7b4982b9de634d293c5`; it asserts startup table existence, Lua numeric types, exact values, absence of later `TotemActionBar`, and metadata `MinValue=0`, `MaxValue=23`, `NumValues=24`. Root cause: shared sequential enum data included later `TotemActionBar=24`; the retail 12.0.0 override removes that member without shifting these values. Claims are bounded to startup publication, type, exact value, and namespace boundary; Edit Mode behavior, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
