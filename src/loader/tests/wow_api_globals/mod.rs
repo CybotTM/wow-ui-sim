@@ -62,6 +62,7 @@ mod patch_12_0_0_encounter_event_iconmask_enums;
 mod patch_12_0_0_encounter_event_severity_enums;
 mod patch_12_0_0_encounter_events_icon_direction_enums;
 mod patch_12_0_0_encounter_events_orientation_enums;
+mod patch_12_0_0_encounter_events_visibility_enums;
 mod patch_12_0_0_expansion_landing_page_type_removals;
 mod patch_12_0_0_item_creation_context_removals;
 mod patch_12_0_0_small_enums;
