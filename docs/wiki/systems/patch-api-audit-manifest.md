@@ -1,11 +1,11 @@
 - The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, and 15 DeprecatedCombatLog wrappers (10 CombatLog, 2 CombatText, 3 DeathRecap), plus 3 InstanceEncounter wrappers, are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The five chat/spell wrappers are covered by `vendor_deprecated_chat_spell.rs` with focused forwarding checks; `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` are classified evidence-required/unsafe because their retained fixture-only compatibility semantics remain unproven.
 # Patch API Audit Manifest
 
-The current 12.0.0 audit totals are **901 best-effort, 946 evidence-required, 2 exception-requested, and 1561 untriaged occurrences** (3410 total).
+The current 12.0.0 audit totals are **939 best-effort, 946 evidence-required, 2 exception-requested, and 1523 untriaged occurrences** (3410 total).
 
 `C_Tutorial.GetCombatEventInfo` is evidence-required/unsafe: the explicit implementation is a zero-result no-op while the checked-in source provides no output schema; authoritative return semantics, combat state/producer/timing, persistence, and lifecycle remain unresolved.
 
-The nine CatalogShopVirtualCurrencyConstants and CombatLog constants are best-effort/behavioral: HEARTHSTEEL=`XVV`, TRADERS_TENDER=`XWP`, message limits `300`/`1000`, and object masks `15`/`768`/`240`/`-65536`/`64512`. Focused test proof at `a5a3d167b3e0e747e02e7c711b4255efe0488cef` establishes startup Lua type/value only; consumer, mutation, protection, and broader semantics remain unclaimed.
+The 38 grouped constants are best-effort/behavioral: six misc target/currency/item/profession/transmog constants, 12 EncounterTimeline constants, six TTS constants, 13 UICharacterClasses constants, and UnitEventConstants.MAX_UNIT_TOKENS_IN_EVENT. Focused grouped test proof at `1895cacebd8fa8f881f053694ec61de9a645824c` establishes startup Lua numeric type/value only; consumer, mutation, protection, and subsystem semantics remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 

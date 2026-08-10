@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify grouped constants
+
+Classified 38 grouped constants as best-effort/behavioral: six misc target/currency/item/profession/transmog constants, 12 EncounterTimeline constants, six TTS constants, 13 UICharacterClasses constants, and `UnitEventConstants.MAX_UNIT_TOKENS_IN_EVENT`. Focused grouped test proof at `1895cacebd8fa8f881f053694ec61de9a645824c` establishes startup Lua numeric type/value only; consumer, mutation, protection, and subsystem semantics remain unclaimed. Current totals are **939 best-effort, 946 evidence-required, 2 exception-requested, and 1523 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify WeeklyRewards progress rows
 
 Classified `C_WeeklyRewards.GetSortedProgressForActivity` and `WeeklyRewardActivityTierProgress.activityTierID`, `.difficulty`, and `.numPoints` as evidence-required/unsafe: the API is absent, and current Great Vault state lacks tier IDs, difficulty, points, and shared-difficulty sorting. Field/result/event/persistence/lifecycle semantics remain unresolved. Current totals are **901 best-effort, 946 evidence-required, 2 exception-requested, and 1561 untriaged** (3410 rows).

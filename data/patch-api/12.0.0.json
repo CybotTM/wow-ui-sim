@@ -26519,609 +26519,1483 @@
       "id": "added:Constants.CombatLogObjectTargetMasks.COMBATLOG_OBJECT_RAID_MASK",
       "symbol": "Constants.CombatLogObjectTargetMasks.COMBATLOG_OBJECT_RAID_MASK",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CombatLogObjectTargetMasks.COMBATLOG_OBJECT_RAID_MASK as numeric value -1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CombatLogObjectTargetMasks.COMBATLOG_OBJECT_RAID_MASK as Lua number with exact value -1."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value -1. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.CombatLogObjectTargetMasks.COMBATLOG_OBJECT_RAID_TARGET_MASK",
       "symbol": "Constants.CombatLogObjectTargetMasks.COMBATLOG_OBJECT_RAID_TARGET_MASK",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CombatLogObjectTargetMasks.COMBATLOG_OBJECT_RAID_TARGET_MASK as numeric value 255.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CombatLogObjectTargetMasks.COMBATLOG_OBJECT_RAID_TARGET_MASK as Lua number with exact value 255."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 255. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.CurrencyConsts.CURRENCY_WALLET_TYPE_WOWMONEY",
       "symbol": "Constants.CurrencyConsts.CURRENCY_WALLET_TYPE_WOWMONEY",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CurrencyConsts.CURRENCY_WALLET_TYPE_WOWMONEY as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CurrencyConsts.CURRENCY_WALLET_TYPE_WOWMONEY as Lua number with exact value 0."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 0. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineEventConstants.ENCOUNTER_TIMELINE_INVALID_EVENT",
       "symbol": "Constants.EncounterTimelineEventConstants.ENCOUNTER_TIMELINE_INVALID_EVENT",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineEventConstants.ENCOUNTER_TIMELINE_INVALID_EVENT as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineEventConstants.ENCOUNTER_TIMELINE_INVALID_EVENT as Lua number with exact value 0."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 0. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineEventConstants.ENCOUNTER_TIMELINE_RESERVED_EVENT_COUNT",
       "symbol": "Constants.EncounterTimelineEventConstants.ENCOUNTER_TIMELINE_RESERVED_EVENT_COUNT",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineEventConstants.ENCOUNTER_TIMELINE_RESERVED_EVENT_COUNT as numeric value 40.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineEventConstants.ENCOUNTER_TIMELINE_RESERVED_EVENT_COUNT as Lua number with exact value 40."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 40. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineAllIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineAllIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineAllIcons as numeric value 1023.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineAllIcons as Lua number with exact value 1023."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 1023. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineDamageAlertIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineDamageAlertIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineDamageAlertIcons as numeric value 512.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineDamageAlertIcons as Lua number with exact value 512."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 512. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineDeadlyIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineDeadlyIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineDeadlyIcons as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineDeadlyIcons as Lua number with exact value 1."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 1. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineDispelIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineDispelIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineDispelIcons as numeric value 124.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineDispelIcons as Lua number with exact value 124."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 124. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineEnrageIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineEnrageIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineEnrageIcons as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineEnrageIcons as Lua number with exact value 2."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 2. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineHealerAlertIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineHealerAlertIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineHealerAlertIcons as numeric value 256.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineHealerAlertIcons as Lua number with exact value 256."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 256. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineNoIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineNoIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineNoIcons as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineNoIcons as Lua number with exact value 0."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 0. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineOtherIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineOtherIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineOtherIcons as numeric value 127.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineOtherIcons as Lua number with exact value 127."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 127. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineRoleIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineRoleIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineRoleIcons as numeric value 896.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineRoleIcons as Lua number with exact value 896."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 896. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.EncounterTimelineIconMasks.EncounterTimelineTankAlertIcons",
       "symbol": "Constants.EncounterTimelineIconMasks.EncounterTimelineTankAlertIcons",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.EncounterTimelineIconMasks.EncounterTimelineTankAlertIcons as numeric value 128.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.EncounterTimelineIconMasks.EncounterTimelineTankAlertIcons as Lua number with exact value 128."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 128. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.ItemConsts_Mainline.HWM_SQUISH_ERA_PLAYER_DATA_ACCOUNT_ELEMENT_ID",
       "symbol": "Constants.ItemConsts_Mainline.HWM_SQUISH_ERA_PLAYER_DATA_ACCOUNT_ELEMENT_ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.ItemConsts_Mainline.HWM_SQUISH_ERA_PLAYER_DATA_ACCOUNT_ELEMENT_ID as numeric value 212.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.ItemConsts_Mainline.HWM_SQUISH_ERA_PLAYER_DATA_ACCOUNT_ELEMENT_ID as Lua number with exact value 212."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 212. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.ProfessionConsts.CRAFTING_ORDER_CURRENCY_WALLET_ITEM_ID",
       "symbol": "Constants.ProfessionConsts.CRAFTING_ORDER_CURRENCY_WALLET_ITEM_ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.ProfessionConsts.CRAFTING_ORDER_CURRENCY_WALLET_ITEM_ID as numeric value 262724.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.ProfessionConsts.CRAFTING_ORDER_CURRENCY_WALLET_ITEM_ID as Lua number with exact value 262724."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 262724. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.TTSConstants.TTSRateDefault",
       "symbol": "Constants.TTSConstants.TTSRateDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.TTSConstants.TTSRateDefault as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.TTSConstants.TTSRateDefault as Lua number with exact value 0."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 0. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.TTSConstants.TTSRateMax",
       "symbol": "Constants.TTSConstants.TTSRateMax",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.TTSConstants.TTSRateMax as numeric value 10.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.TTSConstants.TTSRateMax as Lua number with exact value 10."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 10. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.TTSConstants.TTSRateMin",
       "symbol": "Constants.TTSConstants.TTSRateMin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.TTSConstants.TTSRateMin as numeric value -10.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.TTSConstants.TTSRateMin as Lua number with exact value -10."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value -10. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.TTSConstants.TTSVolumeDefault",
       "symbol": "Constants.TTSConstants.TTSVolumeDefault",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.TTSConstants.TTSVolumeDefault as numeric value 100.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.TTSConstants.TTSVolumeDefault as Lua number with exact value 100."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 100. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.TTSConstants.TTSVolumeMax",
       "symbol": "Constants.TTSConstants.TTSVolumeMax",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.TTSConstants.TTSVolumeMax as numeric value 100.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.TTSConstants.TTSVolumeMax as Lua number with exact value 100."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 100. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.TTSConstants.TTSVolumeMin",
       "symbol": "Constants.TTSConstants.TTSVolumeMin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.TTSConstants.TTSVolumeMin as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.TTSConstants.TTSVolumeMin as Lua number with exact value 0."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 0. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.TransmogOutfitDataConsts.EQUIP_TRANSMOG_OUTFIT_MANUAL_SPELL_ID",
       "symbol": "Constants.TransmogOutfitDataConsts.EQUIP_TRANSMOG_OUTFIT_MANUAL_SPELL_ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.TransmogOutfitDataConsts.EQUIP_TRANSMOG_OUTFIT_MANUAL_SPELL_ID as numeric value 1247613.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.TransmogOutfitDataConsts.EQUIP_TRANSMOG_OUTFIT_MANUAL_SPELL_ID as Lua number with exact value 1247613."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 1247613. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.DeathKnight",
       "symbol": "Constants.UICharacterClasses.DeathKnight",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.DeathKnight as numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.DeathKnight as Lua number with exact value 6."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 6. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.DemonHunter",
       "symbol": "Constants.UICharacterClasses.DemonHunter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.DemonHunter as numeric value 12.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.DemonHunter as Lua number with exact value 12."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 12. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Druid",
       "symbol": "Constants.UICharacterClasses.Druid",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Druid as numeric value 11.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Druid as Lua number with exact value 11."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 11. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Evoker",
       "symbol": "Constants.UICharacterClasses.Evoker",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Evoker as numeric value 13.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Evoker as Lua number with exact value 13."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 13. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Hunter",
       "symbol": "Constants.UICharacterClasses.Hunter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Hunter as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Hunter as Lua number with exact value 3."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 3. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Mage",
       "symbol": "Constants.UICharacterClasses.Mage",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Mage as numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Mage as Lua number with exact value 8."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 8. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Monk",
       "symbol": "Constants.UICharacterClasses.Monk",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Monk as numeric value 10.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Monk as Lua number with exact value 10."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 10. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Paladin",
       "symbol": "Constants.UICharacterClasses.Paladin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Paladin as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Paladin as Lua number with exact value 2."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 2. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Priest",
       "symbol": "Constants.UICharacterClasses.Priest",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Priest as numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Priest as Lua number with exact value 5."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 5. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Rogue",
       "symbol": "Constants.UICharacterClasses.Rogue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Rogue as numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Rogue as Lua number with exact value 4."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 4. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Shaman",
       "symbol": "Constants.UICharacterClasses.Shaman",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Shaman as numeric value 7.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Shaman as Lua number with exact value 7."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 7. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Warlock",
       "symbol": "Constants.UICharacterClasses.Warlock",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Warlock as numeric value 9.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Warlock as Lua number with exact value 9."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 9. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UICharacterClasses.Warrior",
       "symbol": "Constants.UICharacterClasses.Warrior",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UICharacterClasses.Warrior as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UICharacterClasses.Warrior as Lua number with exact value 1."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 1. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UnitEventConstants.MAX_UNIT_TOKENS_IN_EVENT",
       "symbol": "Constants.UnitEventConstants.MAX_UNIT_TOKENS_IN_EVENT",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UnitEventConstants.MAX_UNIT_TOKENS_IN_EVENT as numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "8ce1cb49899860034cbd664c7b59641f0c6f90a51f148dc4124fa510b37e18a5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_constants.rs::test_patch_12_0_0_grouped_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UnitEventConstants.MAX_UNIT_TOKENS_IN_EVENT as Lua number with exact value 4."
+      ],
+      "commit": "1895cacebd8fa8f881f053694ec61de9a645824c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact value 4. Consumer behavior, mutation/protection, validation, and broader subsystem semantics are not claimed. Proof commit: 1895cacebd8fa8f881f053694ec61de9a645824c."
     },
     {
       "id": "added:Constants.UnitPowerSpellIDs.COLLAPSING_STAR_PASSIVE_SPELL_ID",

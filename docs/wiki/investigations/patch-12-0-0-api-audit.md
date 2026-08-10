@@ -4,11 +4,11 @@
 
 ## Content
 
-Current manifest totals are **901 best-effort, 946 evidence-required, 2 exception-requested, and 1561 untriaged rows** (3410 total).
+Current manifest totals are **939 best-effort, 946 evidence-required, 2 exception-requested, and 1523 untriaged rows** (3410 total).
 
 `C_Tutorial.GetCombatEventInfo` is evidence-required/unsafe: the explicit implementation is a zero-result no-op while the checked-in source provides no output schema; authoritative return semantics, combat state/producer/timing, persistence, and lifecycle remain unresolved.
 
-The nine CatalogShopVirtualCurrencyConstants and CombatLog constants are best-effort/behavioral: HEARTHSTEEL=`XVV`, TRADERS_TENDER=`XWP`, message limits `300`/`1000`, and object masks `15`/`768`/`240`/`-65536`/`64512`. Focused test proof at `a5a3d167b3e0e747e02e7c711b4255efe0488cef` establishes startup Lua type/value only; consumer, mutation, protection, and broader semantics remain unclaimed.
+The 38 grouped constants are best-effort/behavioral: six misc target/currency/item/profession/transmog constants, 12 EncounterTimeline constants, six TTS constants, 13 UICharacterClasses constants, and UnitEventConstants.MAX_UNIT_TOKENS_IN_EVENT. Focused grouped test proof at `1895cacebd8fa8f881f053694ec61de9a645824c` establishes startup Lua numeric type/value only; consumer, mutation, protection, and subsystem semantics remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 
