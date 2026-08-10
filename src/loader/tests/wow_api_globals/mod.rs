@@ -86,6 +86,7 @@ mod patch_12_0_0_status_bar_timer_direction_enums;
 mod patch_12_0_0_tooltip_data_line_type_enums;
 mod patch_12_0_0_transmog_outfit_display_type_enums;
 mod patch_12_0_0_transmog_outfit_entry_flags_enums;
+mod patch_12_0_0_transmog_outfit_entry_source_enums;
 mod patch_12_0_0_ui_enum_metadata;
 mod patch_12_0_0_unit_power_spell_ids;
 mod patch_12_1_service_payloads;
