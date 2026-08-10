@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify combat-audio targeted-state enums
+
+Classified the seven `Enum.CombatAudioAlertSayIfTargetedType.*` and `Enum.CombatAudioAlertSayIfTargetedTypeMeta.*` rows as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; aggro/target detection, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1056 best-effort, 982 evidence-required, 2 exception-requested, and 1370 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify combat-audio player-resource format enums
 
 Classified the nine `Enum.CombatAudioAlertPlayerResourceFormatValues.*` and `Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.*` rows as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; resource narration, percent/divisor formatting, resource selection, configuration, sound side effects, and lifecycle remain unclaimed. Current totals are **1049 best-effort, 982 evidence-required, 2 exception-requested, and 1377 untriaged** (3410 rows).
