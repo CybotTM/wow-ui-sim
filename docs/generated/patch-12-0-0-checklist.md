@@ -1890,10 +1890,10 @@
 1890. [untriaged] `added:Enum.TraitNodeEntryType.SpendCapstoneCircle` — untriaged
 1891. [untriaged] `added:Enum.TraitNodeEntryType.SpendCapstoneSquare` — untriaged
 1892. [best-effort] `added:Enum.TraitNodeFlag.ShowTierTrack` — behavioral
-1893. [untriaged] `added:Enum.TransmogOutfitDataFlags.IsCachedLocally` — untriaged
-1894. [untriaged] `added:Enum.TransmogOutfitDataFlagsMeta.MaxValue` — untriaged
-1895. [untriaged] `added:Enum.TransmogOutfitDataFlagsMeta.MinValue` — untriaged
-1896. [untriaged] `added:Enum.TransmogOutfitDataFlagsMeta.NumValues` — untriaged
+1893. [best-effort] `added:Enum.TransmogOutfitDataFlags.IsCachedLocally` — behavioral
+1894. [best-effort] `added:Enum.TransmogOutfitDataFlagsMeta.MaxValue` — behavioral
+1895. [best-effort] `added:Enum.TransmogOutfitDataFlagsMeta.MinValue` — behavioral
+1896. [best-effort] `added:Enum.TransmogOutfitDataFlagsMeta.NumValues` — behavioral
 1897. [best-effort] `added:Enum.TransmogOutfitDisplayType.Assigned` — behavioral
 1898. [best-effort] `added:Enum.TransmogOutfitDisplayType.Equipped` — behavioral
 1899. [best-effort] `added:Enum.TransmogOutfitDisplayType.Hidden` — behavioral

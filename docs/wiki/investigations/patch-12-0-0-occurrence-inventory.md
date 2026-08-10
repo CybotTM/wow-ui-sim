@@ -1959,10 +1959,10 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.TraitNodeEntryType.SpendCapstoneCircle` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TraitNodeEntryType.SpendCapstoneSquare` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TraitNodeFlag.ShowTierTrack` | best-effort | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDataFlags.IsCachedLocally` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDataFlagsMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDataFlagsMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDataFlagsMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.TransmogOutfitDataFlags.IsCachedLocally` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete one-member family, and metadata are covered by proof commit 2f67fd253; caching semantics and later lifecycle are not claimed. |
+| `Enum.TransmogOutfitDataFlagsMeta.MaxValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete one-member family, and metadata are covered by proof commit 2f67fd253; caching semantics and later lifecycle are not claimed. |
+| `Enum.TransmogOutfitDataFlagsMeta.MinValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete one-member family, and metadata are covered by proof commit 2f67fd253; caching semantics and later lifecycle are not claimed. |
+| `Enum.TransmogOutfitDataFlagsMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete one-member family, and metadata are covered by proof commit 2f67fd253; caching semantics and later lifecycle are not claimed. |
 | `Enum.TransmogOutfitDisplayType.Assigned` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
 | `Enum.TransmogOutfitDisplayType.Equipped` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
 | `Enum.TransmogOutfitDisplayType.Hidden` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
