@@ -60408,145 +60408,460 @@
       "id": "added:Enum.NeighborhoodInitiativeChestResult.NiNoHouseFound",
       "symbol": "Enum.NeighborhoodInitiativeChestResult.NiNoHouseFound",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeChestResult.NiNoHouseFound with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) and matching metadata (MinValue=0, MaxValue=5, NumValues=6); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeChestResult definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs",
+          "summary": "The focused startup test asserts the exact complete six-member NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) as Lua numbers with no extras and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "bcd6b891b55c24ffc1f38790bd80956452ff40ef4a6e58620c5b9cdbe20e3a71"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeChestResult.NiNoHouseFound with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs::test_patch_12_0_0_neighborhood_initiative_chest_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeChestResult.NiNoHouseFound as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact complete six-member NeighborhoodInitiativeChestResult family and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 2, exact complete NeighborhoodInitiativeChestResult family membership, and metadata MinValue=0, MaxValue=5, NumValues=6. Initiative chest reward/service behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: 1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeChestResult.NiNoRewards",
       "symbol": "Enum.NeighborhoodInitiativeChestResult.NiNoRewards",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeChestResult.NiNoRewards with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) and matching metadata (MinValue=0, MaxValue=5, NumValues=6); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeChestResult definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs",
+          "summary": "The focused startup test asserts the exact complete six-member NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) as Lua numbers with no extras and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "bcd6b891b55c24ffc1f38790bd80956452ff40ef4a6e58620c5b9cdbe20e3a71"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeChestResult.NiNoRewards with numeric value 3.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs::test_patch_12_0_0_neighborhood_initiative_chest_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeChestResult.NiNoRewards as a Lua number with exact retail 12.0.0 value 3; the focused namespace test also requires the exact complete six-member NeighborhoodInitiativeChestResult family and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 3, exact complete NeighborhoodInitiativeChestResult family membership, and metadata MinValue=0, MaxValue=5, NumValues=6. Initiative chest reward/service behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: 1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeChestResult.NiServiceDisabled",
       "symbol": "Enum.NeighborhoodInitiativeChestResult.NiServiceDisabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeChestResult.NiServiceDisabled with numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) and matching metadata (MinValue=0, MaxValue=5, NumValues=6); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeChestResult definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs",
+          "summary": "The focused startup test asserts the exact complete six-member NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) as Lua numbers with no extras and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "bcd6b891b55c24ffc1f38790bd80956452ff40ef4a6e58620c5b9cdbe20e3a71"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeChestResult.NiServiceDisabled with numeric value 5.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs::test_patch_12_0_0_neighborhood_initiative_chest_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeChestResult.NiServiceDisabled as a Lua number with exact retail 12.0.0 value 5; the focused namespace test also requires the exact complete six-member NeighborhoodInitiativeChestResult family and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 5, exact complete NeighborhoodInitiativeChestResult family membership, and metadata MinValue=0, MaxValue=5, NumValues=6. Initiative chest reward/service behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: 1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeChestResult.NiSuccess",
       "symbol": "Enum.NeighborhoodInitiativeChestResult.NiSuccess",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeChestResult.NiSuccess with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) and matching metadata (MinValue=0, MaxValue=5, NumValues=6); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeChestResult definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs",
+          "summary": "The focused startup test asserts the exact complete six-member NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) as Lua numbers with no extras and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "bcd6b891b55c24ffc1f38790bd80956452ff40ef4a6e58620c5b9cdbe20e3a71"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeChestResult.NiSuccess with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs::test_patch_12_0_0_neighborhood_initiative_chest_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeChestResult.NiSuccess as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact complete six-member NeighborhoodInitiativeChestResult family and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact complete NeighborhoodInitiativeChestResult family membership, and metadata MinValue=0, MaxValue=5, NumValues=6. Initiative chest reward/service behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: 1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeChestResult.NiThrottled",
       "symbol": "Enum.NeighborhoodInitiativeChestResult.NiThrottled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeChestResult.NiThrottled with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) and matching metadata (MinValue=0, MaxValue=5, NumValues=6); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeChestResult definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs",
+          "summary": "The focused startup test asserts the exact complete six-member NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) as Lua numbers with no extras and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "bcd6b891b55c24ffc1f38790bd80956452ff40ef4a6e58620c5b9cdbe20e3a71"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeChestResult.NiThrottled with numeric value 4.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs::test_patch_12_0_0_neighborhood_initiative_chest_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeChestResult.NiThrottled as a Lua number with exact retail 12.0.0 value 4; the focused namespace test also requires the exact complete six-member NeighborhoodInitiativeChestResult family and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 4, exact complete NeighborhoodInitiativeChestResult family membership, and metadata MinValue=0, MaxValue=5, NumValues=6. Initiative chest reward/service behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: 1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeChestResult.NiUnspecifiedFailure",
       "symbol": "Enum.NeighborhoodInitiativeChestResult.NiUnspecifiedFailure",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeChestResult.NiUnspecifiedFailure with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) and matching metadata (MinValue=0, MaxValue=5, NumValues=6); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeChestResult definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs",
+          "summary": "The focused startup test asserts the exact complete six-member NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) as Lua numbers with no extras and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "bcd6b891b55c24ffc1f38790bd80956452ff40ef4a6e58620c5b9cdbe20e3a71"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeChestResult.NiUnspecifiedFailure with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs::test_patch_12_0_0_neighborhood_initiative_chest_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeChestResult.NiUnspecifiedFailure as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact complete six-member NeighborhoodInitiativeChestResult family and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, exact complete NeighborhoodInitiativeChestResult family membership, and metadata MinValue=0, MaxValue=5, NumValues=6. Initiative chest reward/service behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: 1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeChestResultMeta.MaxValue",
       "symbol": "Enum.NeighborhoodInitiativeChestResultMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeChestResultMeta.MaxValue with numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) and matching metadata (MinValue=0, MaxValue=5, NumValues=6); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeChestResult definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs",
+          "summary": "The focused startup test asserts the exact complete six-member NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) as Lua numbers with no extras and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "bcd6b891b55c24ffc1f38790bd80956452ff40ef4a6e58620c5b9cdbe20e3a71"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeChestResultMeta.MaxValue with numeric value 5.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs::test_patch_12_0_0_neighborhood_initiative_chest_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeChestResultMeta.MaxValue as a Lua number with exact retail 12.0.0 value 5; the focused namespace test also requires the exact complete six-member NeighborhoodInitiativeChestResult family and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 5, exact complete NeighborhoodInitiativeChestResult family membership, and metadata MinValue=0, MaxValue=5, NumValues=6. Initiative chest reward/service behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: 1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeChestResultMeta.MinValue",
       "symbol": "Enum.NeighborhoodInitiativeChestResultMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeChestResultMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) and matching metadata (MinValue=0, MaxValue=5, NumValues=6); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeChestResult definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs",
+          "summary": "The focused startup test asserts the exact complete six-member NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) as Lua numbers with no extras and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "bcd6b891b55c24ffc1f38790bd80956452ff40ef4a6e58620c5b9cdbe20e3a71"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeChestResultMeta.MinValue with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs::test_patch_12_0_0_neighborhood_initiative_chest_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeChestResultMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact complete six-member NeighborhoodInitiativeChestResult family and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact complete NeighborhoodInitiativeChestResult family membership, and metadata MinValue=0, MaxValue=5, NumValues=6. Initiative chest reward/service behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: 1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeChestResultMeta.NumValues",
       "symbol": "Enum.NeighborhoodInitiativeChestResultMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeChestResultMeta.NumValues with numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) and matching metadata (MinValue=0, MaxValue=5, NumValues=6); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeChestResult definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs",
+          "summary": "The focused startup test asserts the exact complete six-member NeighborhoodInitiativeChestResult family (NiSuccess=0, NiUnspecifiedFailure=1, NiNoHouseFound=2, NiNoRewards=3, NiThrottled=4, NiServiceDisabled=5) as Lua numbers with no extras and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "bcd6b891b55c24ffc1f38790bd80956452ff40ef4a6e58620c5b9cdbe20e3a71"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeChestResultMeta.NumValues with numeric value 6.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_chest_result_enums.rs::test_patch_12_0_0_neighborhood_initiative_chest_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeChestResultMeta.NumValues as a Lua number with exact retail 12.0.0 value 6; the focused namespace test also requires the exact complete six-member NeighborhoodInitiativeChestResult family and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 6, exact complete NeighborhoodInitiativeChestResult family membership, and metadata MinValue=0, MaxValue=5, NumValues=6. Initiative chest reward/service behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: 1c17a5e5c0afbee1358d2ad0cd237d1e12cfa659."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeFlags.Disabled",
