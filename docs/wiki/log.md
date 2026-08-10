@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify encounter-events orientation enums
+
+Classified exactly five retail 12.0.0 `Enum.EncounterEventsOrientation.*` rows as best-effort/behavioral: Horizontal=0, Vertical=1; metadata MinValue=0, MaxValue=1, NumValues=2. Evidence is bounded to startup publication, Lua numeric types, exact complete member set, and metadata. Focused proof is at f59d146fd340eddd9761c1828e00f672afcd4ba3. No runtime drift was found. Layout/orientation behavior, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1316 best-effort, 982 evidence-required, 2 exception-requested, and 1110 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify encounter-event severity enums
 
 The seven retail 12.0.0 `Enum.EncounterEventsIconDirection.*` rows are best-effort/behavioral: `Top=0`, `Bottom=1`, `Left=0`, and `Right=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=4`. Focused proof is at `49b052e36826a5ab70241fd242f4031e23b57805`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; encounter layout/direction behavior, consumers, persistence, transitions, and lifecycle remain unclaimed.

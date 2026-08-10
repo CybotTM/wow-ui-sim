@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1311 best-effort, 982 evidence-required, 2 exception-requested, and 1115 untriaged rows** (3410 total).
+Current manifest totals are **1316 best-effort, 982 evidence-required, 2 exception-requested, and 1110 untriaged rows** (3410 total).
 
 The three retail 12.0.0 `Enum.EditModeSystem.*` rows are best-effort/behavioral: `PersonalResourceDisplay=21`, `EncounterEvents=22`, and `DamageMeter=23`. Focused proof is at `4d883c9647cf972d6b12b7b4982b9de634d293c5`; it asserts startup table existence, Lua numeric types, exact values, absence of later `TotemActionBar`, and metadata `MinValue=0`, `MaxValue=23`, `NumValues=24`. Root cause: shared sequential enum data included later `TotemActionBar=24`; the retail 12.0.0 override removes that member without shifting these values. Claims are bounded to startup publication, type, exact value, and namespace boundary; Edit Mode behavior, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
@@ -14,6 +14,8 @@ The six retail 12.0.0 `Enum.EncounterEventCastState.*` and `Enum.EncounterEventC
 The thirteen retail 12.0.0 `Enum.EncounterEventIconmask.*` and `Enum.EncounterEventIconmaskMeta.*` rows are best-effort/behavioral: `DeadlyEffect=1`, `EnrageEffect=2`, `BleedEffect=4`, `MagicEffect=8`, `DiseaseEffect=16`, `CurseEffect=32`, `PoisonEffect=64`, `TankRole=128`, `HealerRole=256`, `DpsRole=512`; metadata `MinValue=1`, `MaxValue=512`, `NumValues=10`. Focused proof is at `0de2bc41145abf8518ff9ec602c7428cc3afc728`; it asserts the exact complete member set with Lua numeric types and metadata. The guarded runtime fallback matches retail 12.0.0 with no drift. Claims are bounded to startup publication, numeric types, exact bitmask member values, and metadata; icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle remain unclaimed.
 
 The seven retail 12.0.0 `Enum.EncounterEventsIconDirection.*` rows are best-effort/behavioral: `Top=0`, `Bottom=1`, `Left=0`, and `Right=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=4`. Focused proof is at `49b052e36826a5ab70241fd242f4031e23b57805`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; encounter layout/direction behavior, consumers, persistence, transitions, and lifecycle remain unclaimed.
+
+The five retail 12.0.0 `Enum.EncounterEventsOrientation.*` rows are best-effort/behavioral: `Horizontal=0`, `Vertical=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`. Focused proof is at `f59d146fd340eddd9761c1828e00f672afcd4ba3`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; layout/orientation behavior, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
 The six retail 12.0.0 `Enum.EncounterEventSeverity.*` rows are best-effort/behavioral: `Low=0`, `Medium=1`, `High=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`. Focused proof is at `6a0012bc8a670c04e8a5413a06903b35d4d5e090`; it asserts the exact complete member set, Lua numeric types, and metadata. The guarded runtime fallback matches retail 12.0.0 with no drift. Claims are bounded to startup publication and exact values/metadata; encounter severity interpretation, producers, consumers, ordering, transitions, persistence, and lifecycle remain unclaimed.
 

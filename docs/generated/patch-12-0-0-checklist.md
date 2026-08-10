@@ -1419,11 +1419,11 @@
 1419. [best-effort] `added:Enum.EncounterEventsIconDirectionMeta.MaxValue` — behavioral
 1420. [best-effort] `added:Enum.EncounterEventsIconDirectionMeta.MinValue` — behavioral
 1421. [best-effort] `added:Enum.EncounterEventsIconDirectionMeta.NumValues` — behavioral
-1422. [untriaged] `added:Enum.EncounterEventsOrientation.Horizontal` — untriaged
-1423. [untriaged] `added:Enum.EncounterEventsOrientation.Vertical` — untriaged
-1424. [untriaged] `added:Enum.EncounterEventsOrientationMeta.MaxValue` — untriaged
-1425. [untriaged] `added:Enum.EncounterEventsOrientationMeta.MinValue` — untriaged
-1426. [untriaged] `added:Enum.EncounterEventsOrientationMeta.NumValues` — untriaged
+1422. [best-effort] `added:Enum.EncounterEventsOrientation.Horizontal` — behavioral
+1423. [best-effort] `added:Enum.EncounterEventsOrientation.Vertical` — behavioral
+1424. [best-effort] `added:Enum.EncounterEventsOrientationMeta.MaxValue` — behavioral
+1425. [best-effort] `added:Enum.EncounterEventsOrientationMeta.MinValue` — behavioral
+1426. [best-effort] `added:Enum.EncounterEventsOrientationMeta.NumValues` — behavioral
 1427. [untriaged] `added:Enum.EncounterEventsVisibility.Always` — untriaged
 1428. [untriaged] `added:Enum.EncounterEventsVisibility.DeprecatedHidden` — untriaged
 1429. [untriaged] `added:Enum.EncounterEventsVisibility.InEncounter` — untriaged
