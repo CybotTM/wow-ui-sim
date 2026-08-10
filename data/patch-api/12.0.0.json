@@ -43173,129 +43173,313 @@
       "id": "added:Enum.DamageMeterOverrideType.AllowFriendlyFire",
       "symbol": "Enum.DamageMeterOverrideType.AllowFriendlyFire",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterOverrideType.AllowFriendlyFire with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DamageMeterOverrideType.AllowFriendlyFire with numeric value 1 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterOverrideType members and metadata are Lua numbers with exact values.",
+          "source_hash": "be01f43fe2f5dcfc5edcf08f27a4d075fa0d3697ec3c44ff7fe6647c1535b04d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs::test_patch_12_0_0_damage_meter_override_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterOverrideType.AllowFriendlyFire as Lua number with exact value 1."
+      ],
+      "commit": "cbbb9064bab0a7aebe4451834bbe77e89d5b951d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DamageMeterOverrideType.AllowFriendlyFire. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: cbbb9064bab0a7aebe4451834bbe77e89d5b951d."
     },
     {
       "id": "added:Enum.DamageMeterOverrideType.Ignore",
       "symbol": "Enum.DamageMeterOverrideType.Ignore",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterOverrideType.Ignore with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DamageMeterOverrideType.Ignore with numeric value 0 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterOverrideType members and metadata are Lua numbers with exact values.",
+          "source_hash": "be01f43fe2f5dcfc5edcf08f27a4d075fa0d3697ec3c44ff7fe6647c1535b04d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs::test_patch_12_0_0_damage_meter_override_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterOverrideType.Ignore as Lua number with exact value 0."
+      ],
+      "commit": "cbbb9064bab0a7aebe4451834bbe77e89d5b951d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DamageMeterOverrideType.Ignore. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: cbbb9064bab0a7aebe4451834bbe77e89d5b951d."
     },
     {
       "id": "added:Enum.DamageMeterOverrideType.IgnoreForAbsorbSpell",
       "symbol": "Enum.DamageMeterOverrideType.IgnoreForAbsorbSpell",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterOverrideType.IgnoreForAbsorbSpell with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DamageMeterOverrideType.IgnoreForAbsorbSpell with numeric value 4 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterOverrideType members and metadata are Lua numbers with exact values.",
+          "source_hash": "be01f43fe2f5dcfc5edcf08f27a4d075fa0d3697ec3c44ff7fe6647c1535b04d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs::test_patch_12_0_0_damage_meter_override_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterOverrideType.IgnoreForAbsorbSpell as Lua number with exact value 4."
+      ],
+      "commit": "cbbb9064bab0a7aebe4451834bbe77e89d5b951d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 4 for Enum.DamageMeterOverrideType.IgnoreForAbsorbSpell. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: cbbb9064bab0a7aebe4451834bbe77e89d5b951d."
     },
     {
       "id": "added:Enum.DamageMeterOverrideType.RedirectSourceToAuraCaster",
       "symbol": "Enum.DamageMeterOverrideType.RedirectSourceToAuraCaster",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterOverrideType.RedirectSourceToAuraCaster with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DamageMeterOverrideType.RedirectSourceToAuraCaster with numeric value 3 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterOverrideType members and metadata are Lua numbers with exact values.",
+          "source_hash": "be01f43fe2f5dcfc5edcf08f27a4d075fa0d3697ec3c44ff7fe6647c1535b04d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs::test_patch_12_0_0_damage_meter_override_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterOverrideType.RedirectSourceToAuraCaster as Lua number with exact value 3."
+      ],
+      "commit": "cbbb9064bab0a7aebe4451834bbe77e89d5b951d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 3 for Enum.DamageMeterOverrideType.RedirectSourceToAuraCaster. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: cbbb9064bab0a7aebe4451834bbe77e89d5b951d."
     },
     {
       "id": "added:Enum.DamageMeterOverrideType.RedirectSourceToOwner",
       "symbol": "Enum.DamageMeterOverrideType.RedirectSourceToOwner",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterOverrideType.RedirectSourceToOwner with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DamageMeterOverrideType.RedirectSourceToOwner with numeric value 2 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterOverrideType members and metadata are Lua numbers with exact values.",
+          "source_hash": "be01f43fe2f5dcfc5edcf08f27a4d075fa0d3697ec3c44ff7fe6647c1535b04d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs::test_patch_12_0_0_damage_meter_override_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterOverrideType.RedirectSourceToOwner as Lua number with exact value 2."
+      ],
+      "commit": "cbbb9064bab0a7aebe4451834bbe77e89d5b951d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.DamageMeterOverrideType.RedirectSourceToOwner. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: cbbb9064bab0a7aebe4451834bbe77e89d5b951d."
     },
     {
       "id": "added:Enum.DamageMeterOverrideTypeMeta.MaxValue",
       "symbol": "Enum.DamageMeterOverrideTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterOverrideTypeMeta.MaxValue with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DamageMeterOverrideTypeMeta.MaxValue with numeric value 4 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterOverrideType members and metadata are Lua numbers with exact values.",
+          "source_hash": "be01f43fe2f5dcfc5edcf08f27a4d075fa0d3697ec3c44ff7fe6647c1535b04d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs::test_patch_12_0_0_damage_meter_override_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterOverrideTypeMeta.MaxValue as Lua number with exact value 4."
+      ],
+      "commit": "cbbb9064bab0a7aebe4451834bbe77e89d5b951d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 4 for Enum.DamageMeterOverrideTypeMeta.MaxValue. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: cbbb9064bab0a7aebe4451834bbe77e89d5b951d."
     },
     {
       "id": "added:Enum.DamageMeterOverrideTypeMeta.MinValue",
       "symbol": "Enum.DamageMeterOverrideTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterOverrideTypeMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DamageMeterOverrideTypeMeta.MinValue with numeric value 0 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterOverrideType members and metadata are Lua numbers with exact values.",
+          "source_hash": "be01f43fe2f5dcfc5edcf08f27a4d075fa0d3697ec3c44ff7fe6647c1535b04d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs::test_patch_12_0_0_damage_meter_override_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterOverrideTypeMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "cbbb9064bab0a7aebe4451834bbe77e89d5b951d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DamageMeterOverrideTypeMeta.MinValue. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: cbbb9064bab0a7aebe4451834bbe77e89d5b951d."
     },
     {
       "id": "added:Enum.DamageMeterOverrideTypeMeta.NumValues",
       "symbol": "Enum.DamageMeterOverrideTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterOverrideTypeMeta.NumValues with numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DamageMeterOverrideTypeMeta.NumValues with numeric value 5 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterOverrideType members and metadata are Lua numbers with exact values.",
+          "source_hash": "be01f43fe2f5dcfc5edcf08f27a4d075fa0d3697ec3c44ff7fe6647c1535b04d"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_override_type_enums.rs::test_patch_12_0_0_damage_meter_override_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterOverrideTypeMeta.NumValues as Lua number with exact value 5."
+      ],
+      "commit": "cbbb9064bab0a7aebe4451834bbe77e89d5b951d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 5 for Enum.DamageMeterOverrideTypeMeta.NumValues. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: cbbb9064bab0a7aebe4451834bbe77e89d5b951d."
     },
     {
       "id": "added:Enum.DamageMeterSessionType.Current",
