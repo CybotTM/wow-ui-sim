@@ -40660,97 +40660,235 @@
       "id": "added:Enum.CraftingOrderItemFlags.HasEnchantmentData",
       "symbol": "Enum.CraftingOrderItemFlags.HasEnchantmentData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CraftingOrderItemFlags.HasEnchantmentData as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order enum fallback publishes Enum.CraftingOrderItemFlags.HasEnchantmentData with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact crafting-order item-flag value.",
+          "source_hash": "c1bbedb9776e07ae7aed9815bb62779bb1910e28073079049e8b6ef22e799d92"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs::test_patch_12_0_0_crafting_order_item_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemFlags.HasEnchantmentData as Lua number with exact value 2."
+      ],
+      "commit": "3bacb64a269eecc6c1b74838f256b6e0a4473911",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 2. Flag assignment, enchantment/NPC item semantics, order payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: 3bacb64a269eecc6c1b74838f256b6e0a4473911."
     },
     {
       "id": "added:Enum.CraftingOrderItemFlags.None",
       "symbol": "Enum.CraftingOrderItemFlags.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CraftingOrderItemFlags.None as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order enum fallback publishes Enum.CraftingOrderItemFlags.None with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact crafting-order item-flag value.",
+          "source_hash": "c1bbedb9776e07ae7aed9815bb62779bb1910e28073079049e8b6ef22e799d92"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs::test_patch_12_0_0_crafting_order_item_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemFlags.None as Lua number with exact value 0."
+      ],
+      "commit": "3bacb64a269eecc6c1b74838f256b6e0a4473911",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 0. Flag assignment, enchantment/NPC item semantics, order payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: 3bacb64a269eecc6c1b74838f256b6e0a4473911."
     },
     {
       "id": "added:Enum.CraftingOrderItemFlags.NpcProvided",
       "symbol": "Enum.CraftingOrderItemFlags.NpcProvided",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CraftingOrderItemFlags.NpcProvided as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order enum fallback publishes Enum.CraftingOrderItemFlags.NpcProvided with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact crafting-order item-flag value.",
+          "source_hash": "c1bbedb9776e07ae7aed9815bb62779bb1910e28073079049e8b6ef22e799d92"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs::test_patch_12_0_0_crafting_order_item_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemFlags.NpcProvided as Lua number with exact value 1."
+      ],
+      "commit": "3bacb64a269eecc6c1b74838f256b6e0a4473911",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 1. Flag assignment, enchantment/NPC item semantics, order payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: 3bacb64a269eecc6c1b74838f256b6e0a4473911."
     },
     {
       "id": "added:Enum.CraftingOrderItemFlagsMeta.MaxValue",
       "symbol": "Enum.CraftingOrderItemFlagsMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CraftingOrderItemFlagsMeta.MaxValue as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order metadata fallback publishes Enum.CraftingOrderItemFlagsMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact crafting-order item-flag value.",
+          "source_hash": "c1bbedb9776e07ae7aed9815bb62779bb1910e28073079049e8b6ef22e799d92"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs::test_patch_12_0_0_crafting_order_item_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemFlagsMeta.MaxValue as Lua number with exact value 2."
+      ],
+      "commit": "3bacb64a269eecc6c1b74838f256b6e0a4473911",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 2. Flag assignment, enchantment/NPC item semantics, order payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: 3bacb64a269eecc6c1b74838f256b6e0a4473911."
     },
     {
       "id": "added:Enum.CraftingOrderItemFlagsMeta.MinValue",
       "symbol": "Enum.CraftingOrderItemFlagsMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CraftingOrderItemFlagsMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order metadata fallback publishes Enum.CraftingOrderItemFlagsMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact crafting-order item-flag value.",
+          "source_hash": "c1bbedb9776e07ae7aed9815bb62779bb1910e28073079049e8b6ef22e799d92"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs::test_patch_12_0_0_crafting_order_item_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemFlagsMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "3bacb64a269eecc6c1b74838f256b6e0a4473911",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 0. Flag assignment, enchantment/NPC item semantics, order payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: 3bacb64a269eecc6c1b74838f256b6e0a4473911."
     },
     {
       "id": "added:Enum.CraftingOrderItemFlagsMeta.NumValues",
       "symbol": "Enum.CraftingOrderItemFlagsMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CraftingOrderItemFlagsMeta.NumValues as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order metadata fallback publishes Enum.CraftingOrderItemFlagsMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact crafting-order item-flag value.",
+          "source_hash": "c1bbedb9776e07ae7aed9815bb62779bb1910e28073079049e8b6ef22e799d92"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_flags_enums.rs::test_patch_12_0_0_crafting_order_item_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemFlagsMeta.NumValues as Lua number with exact value 3."
+      ],
+      "commit": "3bacb64a269eecc6c1b74838f256b6e0a4473911",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 3. Flag assignment, enchantment/NPC item semantics, order payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: 3bacb64a269eecc6c1b74838f256b6e0a4473911."
     },
     {
       "id": "added:Enum.CraftingOrderItemType.Currency",

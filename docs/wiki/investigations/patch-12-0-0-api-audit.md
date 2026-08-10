@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1121 best-effort, 982 evidence-required, 2 exception-requested, and 1305 untriaged rows** (3410 total).
+Current manifest totals are **1127 best-effort, 982 evidence-required, 2 exception-requested, and 1299 untriaged rows** (3410 total).
 
 The five `Enum.CombatAudioAlertType.*` and `Enum.CombatAudioAlertTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Health=0`, `Cast=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `0c51d4c32a8ae89fffdf3ca67bf80d03926496d2`. Health/cast classification behavior, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 
@@ -13,6 +13,8 @@ The ten `Enum.CombatAudioAlertThrottle.*` and `Enum.CombatAudioAlertThrottleMeta
 The five `Enum.CombatAudioAlertUnit.*` and `Enum.CombatAudioAlertUnitMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Player=0`, `Target=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `5f5635e7b99954ae0f057deb93292e39ddba3bfa`. Unit selection, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed. The five `Enum.CombatLogMessageOrder.*` and `Enum.CombatLogMessageOrderMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Newest=0`, `Oldest=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `2d6495a732f7cb598cf67871eae507c28fc7c3bb`. Combat-log storage order, query behavior, persistence, UI consumers, transitions, and lifecycle remain unclaimed.
 
 The five `Enum.CooldownViewerAlertType.*` and `Enum.CooldownViewerAlertTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Sound=1`, `Visual=2`; metadata `MinValue=1`, `MaxValue=2`, `NumValues=2`). Focused final-runtime proof is at `5fe329d4d5d852365e81839df992d904d291305d`. Alert triggering, sound/visual effects, configuration, persistence, transitions, and lifecycle remain unclaimed.
+
+The six `Enum.CraftingOrderItemFlags.*` and `Enum.CraftingOrderItemFlagsMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`None=0`, `NpcProvided=1`, `HasEnchantmentData=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`). Focused proof is at `3bacb64a269eecc6c1b74838f256b6e0a4473911`. Flag assignment, enchantment/NPC item semantics, order payload behavior, persistence, transitions, and lifecycle remain unclaimed.
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
