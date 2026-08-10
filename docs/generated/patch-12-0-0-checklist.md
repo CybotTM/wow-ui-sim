@@ -1430,11 +1430,11 @@
 1430. [best-effort] `added:Enum.EncounterEventsVisibilityMeta.MaxValue` — behavioral
 1431. [best-effort] `added:Enum.EncounterEventsVisibilityMeta.MinValue` — behavioral
 1432. [best-effort] `added:Enum.EncounterEventsVisibilityMeta.NumValues` — behavioral
-1433. [untriaged] `added:Enum.EncounterTimelineEventSortDirection.Ascending` — untriaged
-1434. [untriaged] `added:Enum.EncounterTimelineEventSortDirection.Descending` — untriaged
-1435. [untriaged] `added:Enum.EncounterTimelineEventSortDirectionMeta.MaxValue` — untriaged
-1436. [untriaged] `added:Enum.EncounterTimelineEventSortDirectionMeta.MinValue` — untriaged
-1437. [untriaged] `added:Enum.EncounterTimelineEventSortDirectionMeta.NumValues` — untriaged
+1433. [best-effort] `added:Enum.EncounterTimelineEventSortDirection.Ascending` — behavioral
+1434. [best-effort] `added:Enum.EncounterTimelineEventSortDirection.Descending` — behavioral
+1435. [best-effort] `added:Enum.EncounterTimelineEventSortDirectionMeta.MaxValue` — behavioral
+1436. [best-effort] `added:Enum.EncounterTimelineEventSortDirectionMeta.MinValue` — behavioral
+1437. [best-effort] `added:Enum.EncounterTimelineEventSortDirectionMeta.NumValues` — behavioral
 1438. [untriaged] `added:Enum.EncounterTimelineEventSource.EditMode` — untriaged
 1439. [untriaged] `added:Enum.EncounterTimelineEventSource.Encounter` — untriaged
 1440. [untriaged] `added:Enum.EncounterTimelineEventSource.Script` — untriaged

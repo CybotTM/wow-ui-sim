@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify encounter-timeline sort-direction enums
+
+The five retail 12.0.0 `Enum.EncounterTimelineEventSortDirection.*` rows are best-effort/behavioral: `Descending=0`, `Ascending=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`. Focused proof is at `16469db1abdc879db2d2c0617a49583d86a7b4b8`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1327 best-effort, 982 evidence-required, 2 exception-requested, and 1099 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify encounter events visibility enums
 
 The six retail 12.0.0 `Enum.EncounterEventsVisibility.*` and `Enum.EncounterEventsVisibilityMeta.*` rows are best-effort/behavioral: Always=0, InEncounter=1, DeprecatedHidden=2; metadata MinValue=0, MaxValue=2, NumValues=3. Evidence is bounded to startup publication, Lua numeric types, exact complete member set, and metadata. Focused proof is at bf17614b988cba98d936c789b30c919bf20f5952. No runtime drift was found. Encounter-event visibility behavior, transitions, consumers, persistence, and lifecycle remain unclaimed. Current totals are **1322 best-effort, 982 evidence-required, 2 exception-requested, and 1104 untriaged** (3410 rows).

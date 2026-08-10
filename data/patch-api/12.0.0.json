@@ -51525,81 +51525,256 @@
       "id": "added:Enum.EncounterTimelineEventSortDirection.Ascending",
       "symbol": "Enum.EncounterTimelineEventSortDirection.Ascending",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterTimelineEventSortDirection.Ascending with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes EncounterTimelineEventSortDirection Descending=0, Ascending=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs",
+          "summary": "The focused startup test asserts the exact complete set Descending=0 and Ascending=1 as Lua numbers with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "ecee9c38788e402cabe11311d3def0ad29d300ce38e4a275c2d0ec153f95ca72"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterTimelineEventSortDirection.Ascending with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs::test_patch_12_0_0_encounter_timeline_event_sort_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterTimelineEventSortDirection.Ascending as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact two-member set and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "16469db1abdc879db2d2c0617a49583d86a7b4b8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, exact family membership, and metadata. Sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 16469db1abdc879db2d2c0617a49583d86a7b4b8."
     },
     {
       "id": "added:Enum.EncounterTimelineEventSortDirection.Descending",
       "symbol": "Enum.EncounterTimelineEventSortDirection.Descending",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterTimelineEventSortDirection.Descending with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes EncounterTimelineEventSortDirection Descending=0, Ascending=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs",
+          "summary": "The focused startup test asserts the exact complete set Descending=0 and Ascending=1 as Lua numbers with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "ecee9c38788e402cabe11311d3def0ad29d300ce38e4a275c2d0ec153f95ca72"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterTimelineEventSortDirection.Descending with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs::test_patch_12_0_0_encounter_timeline_event_sort_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterTimelineEventSortDirection.Descending as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact two-member set and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "16469db1abdc879db2d2c0617a49583d86a7b4b8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact family membership, and metadata. Sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 16469db1abdc879db2d2c0617a49583d86a7b4b8."
     },
     {
       "id": "added:Enum.EncounterTimelineEventSortDirectionMeta.MaxValue",
       "symbol": "Enum.EncounterTimelineEventSortDirectionMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterTimelineEventSortDirectionMeta.MaxValue with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes EncounterTimelineEventSortDirection Descending=0, Ascending=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs",
+          "summary": "The focused startup test asserts the exact complete set Descending=0 and Ascending=1 as Lua numbers with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "ecee9c38788e402cabe11311d3def0ad29d300ce38e4a275c2d0ec153f95ca72"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterTimelineEventSortDirectionMeta.MaxValue with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs::test_patch_12_0_0_encounter_timeline_event_sort_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterTimelineEventSortDirectionMeta.MaxValue as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact two-member set and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "16469db1abdc879db2d2c0617a49583d86a7b4b8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, exact family membership, and metadata. Sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 16469db1abdc879db2d2c0617a49583d86a7b4b8."
     },
     {
       "id": "added:Enum.EncounterTimelineEventSortDirectionMeta.MinValue",
       "symbol": "Enum.EncounterTimelineEventSortDirectionMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterTimelineEventSortDirectionMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes EncounterTimelineEventSortDirection Descending=0, Ascending=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs",
+          "summary": "The focused startup test asserts the exact complete set Descending=0 and Ascending=1 as Lua numbers with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "ecee9c38788e402cabe11311d3def0ad29d300ce38e4a275c2d0ec153f95ca72"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterTimelineEventSortDirectionMeta.MinValue with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs::test_patch_12_0_0_encounter_timeline_event_sort_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterTimelineEventSortDirectionMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact two-member set and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "16469db1abdc879db2d2c0617a49583d86a7b4b8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact family membership, and metadata. Sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 16469db1abdc879db2d2c0617a49583d86a7b4b8."
     },
     {
       "id": "added:Enum.EncounterTimelineEventSortDirectionMeta.NumValues",
       "symbol": "Enum.EncounterTimelineEventSortDirectionMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterTimelineEventSortDirectionMeta.NumValues with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes EncounterTimelineEventSortDirection Descending=0, Ascending=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs",
+          "summary": "The focused startup test asserts the exact complete set Descending=0 and Ascending=1 as Lua numbers with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "ecee9c38788e402cabe11311d3def0ad29d300ce38e4a275c2d0ec153f95ca72"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterTimelineEventSortDirectionMeta.NumValues with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_timeline_event_sort_direction_enums.rs::test_patch_12_0_0_encounter_timeline_event_sort_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterTimelineEventSortDirectionMeta.NumValues as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact two-member set and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "16469db1abdc879db2d2c0617a49583d86a7b4b8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 2, exact family membership, and metadata. Sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 16469db1abdc879db2d2c0617a49583d86a7b4b8."
     },
     {
       "id": "added:Enum.EncounterTimelineEventSource.EditMode",
