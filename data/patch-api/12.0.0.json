@@ -25624,145 +25624,352 @@
       "id": "added:Constants.CatalogShopVirtualCurrencyConstants.HEARTHSTEEL_VC_CURRENCY_CODE",
       "symbol": "Constants.CatalogShopVirtualCurrencyConstants.HEARTHSTEEL_VC_CURRENCY_CODE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CatalogShopVirtualCurrencyConstants.HEARTHSTEEL_VC_CURRENCY_CODE as string value 'XVV'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua type and value.",
+          "source_hash": "0ec2b8ecf044b6068207656a9ed213f4058591c35835cf08b5e76791e9863e3c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_catalog_and_combat_log_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CatalogShopVirtualCurrencyConstants.HEARTHSTEEL_VC_CURRENCY_CODE as Lua string with exact value 'XVV'."
+      ],
+      "commit": "a5a3d167b3e0e747e02e7c711b4255efe0488cef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for Constants.CatalogShopVirtualCurrencyConstants.HEARTHSTEEL_VC_CURRENCY_CODE. Consumer behavior, mutation/protection, validation, and broader currency/combat-log semantics are not claimed. Proof commit: a5a3d167b3e0e747e02e7c711b4255efe0488cef."
     },
     {
       "id": "added:Constants.CatalogShopVirtualCurrencyConstants.TRADERS_TENDER_VC_CURRENCY_CODE",
       "symbol": "Constants.CatalogShopVirtualCurrencyConstants.TRADERS_TENDER_VC_CURRENCY_CODE",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CatalogShopVirtualCurrencyConstants.TRADERS_TENDER_VC_CURRENCY_CODE as string value 'XWP'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua type and value.",
+          "source_hash": "0ec2b8ecf044b6068207656a9ed213f4058591c35835cf08b5e76791e9863e3c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_catalog_and_combat_log_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CatalogShopVirtualCurrencyConstants.TRADERS_TENDER_VC_CURRENCY_CODE as Lua string with exact value 'XWP'."
+      ],
+      "commit": "a5a3d167b3e0e747e02e7c711b4255efe0488cef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for Constants.CatalogShopVirtualCurrencyConstants.TRADERS_TENDER_VC_CURRENCY_CODE. Consumer behavior, mutation/protection, validation, and broader currency/combat-log semantics are not claimed. Proof commit: a5a3d167b3e0e747e02e7c711b4255efe0488cef."
     },
     {
       "id": "added:Constants.CombatLogMessageLimits.CombatLogDefaultMessageLimit",
       "symbol": "Constants.CombatLogMessageLimits.CombatLogDefaultMessageLimit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CombatLogMessageLimits.CombatLogDefaultMessageLimit as number value 300.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua type and value.",
+          "source_hash": "0ec2b8ecf044b6068207656a9ed213f4058591c35835cf08b5e76791e9863e3c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_catalog_and_combat_log_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CombatLogMessageLimits.CombatLogDefaultMessageLimit as Lua number with exact value 300."
+      ],
+      "commit": "a5a3d167b3e0e747e02e7c711b4255efe0488cef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for Constants.CombatLogMessageLimits.CombatLogDefaultMessageLimit. Consumer behavior, mutation/protection, validation, and broader currency/combat-log semantics are not claimed. Proof commit: a5a3d167b3e0e747e02e7c711b4255efe0488cef."
     },
     {
       "id": "added:Constants.CombatLogMessageLimits.CombatLogMaximumMessageLimit",
       "symbol": "Constants.CombatLogMessageLimits.CombatLogMaximumMessageLimit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CombatLogMessageLimits.CombatLogMaximumMessageLimit as number value 1000.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua type and value.",
+          "source_hash": "0ec2b8ecf044b6068207656a9ed213f4058591c35835cf08b5e76791e9863e3c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_catalog_and_combat_log_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CombatLogMessageLimits.CombatLogMaximumMessageLimit as Lua number with exact value 1000."
+      ],
+      "commit": "a5a3d167b3e0e747e02e7c711b4255efe0488cef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for Constants.CombatLogMessageLimits.CombatLogMaximumMessageLimit. Consumer behavior, mutation/protection, validation, and broader currency/combat-log semantics are not claimed. Proof commit: a5a3d167b3e0e747e02e7c711b4255efe0488cef."
     },
     {
       "id": "added:Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_AFFILIATION_MASK",
       "symbol": "Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_AFFILIATION_MASK",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_AFFILIATION_MASK as number value 15.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua type and value.",
+          "source_hash": "0ec2b8ecf044b6068207656a9ed213f4058591c35835cf08b5e76791e9863e3c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_catalog_and_combat_log_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_AFFILIATION_MASK as Lua number with exact value 15."
+      ],
+      "commit": "a5a3d167b3e0e747e02e7c711b4255efe0488cef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_AFFILIATION_MASK. Consumer behavior, mutation/protection, validation, and broader currency/combat-log semantics are not claimed. Proof commit: a5a3d167b3e0e747e02e7c711b4255efe0488cef."
     },
     {
       "id": "added:Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_CONTROL_MASK",
       "symbol": "Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_CONTROL_MASK",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_CONTROL_MASK as number value 768.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua type and value.",
+          "source_hash": "0ec2b8ecf044b6068207656a9ed213f4058591c35835cf08b5e76791e9863e3c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_catalog_and_combat_log_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_CONTROL_MASK as Lua number with exact value 768."
+      ],
+      "commit": "a5a3d167b3e0e747e02e7c711b4255efe0488cef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_CONTROL_MASK. Consumer behavior, mutation/protection, validation, and broader currency/combat-log semantics are not claimed. Proof commit: a5a3d167b3e0e747e02e7c711b4255efe0488cef."
     },
     {
       "id": "added:Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_REACTION_MASK",
       "symbol": "Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_REACTION_MASK",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_REACTION_MASK as number value 240.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua type and value.",
+          "source_hash": "0ec2b8ecf044b6068207656a9ed213f4058591c35835cf08b5e76791e9863e3c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_catalog_and_combat_log_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_REACTION_MASK as Lua number with exact value 240."
+      ],
+      "commit": "a5a3d167b3e0e747e02e7c711b4255efe0488cef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_REACTION_MASK. Consumer behavior, mutation/protection, validation, and broader currency/combat-log semantics are not claimed. Proof commit: a5a3d167b3e0e747e02e7c711b4255efe0488cef."
     },
     {
       "id": "added:Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_SPECIAL_MASK",
       "symbol": "Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_SPECIAL_MASK",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_SPECIAL_MASK as number value -65536.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua type and value.",
+          "source_hash": "0ec2b8ecf044b6068207656a9ed213f4058591c35835cf08b5e76791e9863e3c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_catalog_and_combat_log_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_SPECIAL_MASK as Lua number with exact value -65536."
+      ],
+      "commit": "a5a3d167b3e0e747e02e7c711b4255efe0488cef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_SPECIAL_MASK. Consumer behavior, mutation/protection, validation, and broader currency/combat-log semantics are not claimed. Proof commit: a5a3d167b3e0e747e02e7c711b4255efe0488cef."
     },
     {
       "id": "added:Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_TYPE_MASK",
       "symbol": "Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_TYPE_MASK",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_TYPE_MASK as number value 64512.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the namespace entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua type and value.",
+          "source_hash": "0ec2b8ecf044b6068207656a9ed213f4058591c35835cf08b5e76791e9863e3c"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_catalog_and_combat_log_constant_values"
+      ],
+      "assertions": [
+        "Publishes Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_TYPE_MASK as Lua number with exact value 64512."
+      ],
+      "commit": "a5a3d167b3e0e747e02e7c711b4255efe0488cef",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, exact Lua type, and exact value for Constants.CombatLogObjectMasks.COMBATLOG_OBJECT_TYPE_MASK. Consumer behavior, mutation/protection, validation, and broader currency/combat-log semantics are not claimed. Proof commit: a5a3d167b3e0e747e02e7c711b4255efe0488cef."
     },
     {
       "id": "added:Constants.CombatLogObjectTargetMasks.COMBATLOG_OBJECT_RAID_MASK",

@@ -1,7 +1,9 @@
 - The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, and 15 DeprecatedCombatLog wrappers (10 CombatLog, 2 CombatText, 3 DeathRecap), plus 3 InstanceEncounter wrappers, are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The five chat/spell wrappers are covered by `vendor_deprecated_chat_spell.rs` with focused forwarding checks; `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` are classified evidence-required/unsafe because their retained fixture-only compatibility semantics remain unproven.
 # Patch API Audit Manifest
 
-The current 12.0.0 audit totals are **892 best-effort, 924 evidence-required, 2 exception-requested, and 1592 untriaged occurrences** (3410 total).
+The current 12.0.0 audit totals are **901 best-effort, 924 evidence-required, 2 exception-requested, and 1583 untriaged occurrences** (3410 total).
+
+The nine CatalogShopVirtualCurrencyConstants and CombatLog constants are best-effort/behavioral: HEARTHSTEEL=`XVV`, TRADERS_TENDER=`XWP`, message limits `300`/`1000`, and object masks `15`/`768`/`240`/`-65536`/`64512`. Focused test proof at `a5a3d167b3e0e747e02e7c711b4255efe0488cef` establishes startup Lua type/value only; consumer, mutation, protection, and broader semantics remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 
