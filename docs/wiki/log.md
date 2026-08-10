@@ -4,7 +4,7 @@ Classified exactly sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and
 
 ## [2026-08-10] investigation | Classify Edit Mode account/aura setting enums
 
-Classified exactly seven retail 12.0.0 `Enum.EditModeAccountSetting.*` and `Enum.EditModeAuraFrameSetting.*` rows as best-effort/behavioral: account `ShowPersonalResourceDisplay=29`, `ShowEncounterEvents=30`, `ShowDamageMeter=31`, `ShowExternalDefensives=32`; aura `VisibleSetting=8`, `Opacity=9`, `ShowDispelType=10`. Evidence is bounded to startup enum publication, Lua numeric type, and exact values. Focused proof is at `25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7`. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle remain unclaimed. Current totals are **1255 best-effort, 982 evidence-required, 2 exception-requested, and 1171 untriaged** (3410 rows).
+Classified exactly seven retail 12.0.0 `Enum.EditModeAccountSetting.*` and `Enum.EditModeAuraFrameSetting.*` rows as best-effort/behavioral: account `ShowPersonalResourceDisplay=29`, `ShowEncounterEvents=30`, `ShowDamageMeter=31`, `ShowExternalDefensives=32`; aura `VisibleSetting=8`, `Opacity=9`, `ShowDispelType=10`. Evidence is bounded to startup enum publication, Lua numeric type, and exact values. Focused proof is at `0dfaa313be82192f753688ecc1dc2547df75bcea`. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle remain unclaimed. Current totals are **1255 best-effort, 982 evidence-required, 2 exception-requested, and 1171 untriaged** (3410 rows).
 
 ## [2026-08-10] investigation | Classify DurationTimeModifier enums
 
