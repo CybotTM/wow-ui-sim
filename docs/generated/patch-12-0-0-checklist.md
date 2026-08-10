@@ -1380,9 +1380,9 @@
 1380. [best-effort] `added:Enum.EditModeSystem.DamageMeter` — behavioral
 1381. [best-effort] `added:Enum.EditModeSystem.EncounterEvents` — behavioral
 1382. [best-effort] `added:Enum.EditModeSystem.PersonalResourceDisplay` — behavioral
-1383. [untriaged] `added:Enum.EditModeUnitFrameSetting.AuraOrganizationType` — untriaged
-1384. [untriaged] `added:Enum.EditModeUnitFrameSetting.IconSize` — untriaged
-1385. [untriaged] `added:Enum.EditModeUnitFrameSetting.Opacity` — untriaged
+1383. [best-effort] `added:Enum.EditModeUnitFrameSetting.AuraOrganizationType` — behavioral
+1384. [best-effort] `added:Enum.EditModeUnitFrameSetting.IconSize` — behavioral
+1385. [best-effort] `added:Enum.EditModeUnitFrameSetting.Opacity` — behavioral
 1386. [untriaged] `added:Enum.EncounterEventCastState.Casting` — untriaged
 1387. [untriaged] `added:Enum.EncounterEventCastState.Expired` — untriaged
 1388. [untriaged] `added:Enum.EncounterEventCastState.NotCasting` — untriaged

@@ -37582,7 +37582,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerCast with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -37627,7 +37627,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerHealth with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -37672,7 +37672,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource1 with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -37717,7 +37717,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource2 with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -37762,7 +37762,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.Sample with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -37807,7 +37807,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetCast with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -37852,7 +37852,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetHealth with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -37897,7 +37897,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MaxValue with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -37942,7 +37942,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MinValue with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -37987,7 +37987,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.NumValues with the exact value and removes later same-percent throttle members.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -40170,7 +40170,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40221,7 +40221,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40272,7 +40272,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40323,7 +40323,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40368,7 +40368,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MaxValue with exact numeric value 4."
         },
         {
@@ -40405,7 +40405,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MinValue with exact numeric value 1."
         },
         {
@@ -40442,7 +40442,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.NumValues with exact numeric value 4."
         },
         {
@@ -43740,7 +43740,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -43785,7 +43785,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -43830,7 +43830,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -43875,7 +43875,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -43920,7 +43920,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -43965,7 +43965,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44010,7 +44010,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44055,7 +44055,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44100,7 +44100,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44145,7 +44145,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44190,7 +44190,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44235,7 +44235,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44280,7 +44280,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44325,7 +44325,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44370,7 +44370,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44415,7 +44415,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44719,7 +44719,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44764,7 +44764,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44809,7 +44809,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44854,7 +44854,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44899,7 +44899,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44944,7 +44944,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -44989,7 +44989,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -45034,7 +45034,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -45079,7 +45079,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -45124,7 +45124,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -45169,7 +45169,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -45214,7 +45214,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -46741,7 +46741,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ShowTotemActionBar and corrects metadata to MinValue 0, MaxValue 32, NumValues 33.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -46786,7 +46786,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ShowTotemActionBar and corrects metadata to MinValue 0, MaxValue 32, NumValues 33.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -46831,7 +46831,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ShowTotemActionBar and corrects metadata to MinValue 0, MaxValue 32, NumValues 33.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -46876,7 +46876,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ShowTotemActionBar and corrects metadata to MinValue 0, MaxValue 32, NumValues 33.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -47736,7 +47736,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -47781,7 +47781,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -47826,7 +47826,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -47871,7 +47871,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -47916,7 +47916,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -47961,7 +47961,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48006,7 +48006,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48051,7 +48051,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48096,7 +48096,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48141,7 +48141,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48186,7 +48186,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48231,7 +48231,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48276,7 +48276,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ViewType, FlipHorizontally, BarWidth, and Padding settings and corrects metadata to MinValue 0, MaxValue 9, NumValues 10.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48580,7 +48580,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization replaces the later namespace with exactly HideHealthAndPower=0 and OnlyShowInCombat=1 and metadata 0/1/2.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48625,7 +48625,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization replaces the later namespace with exactly HideHealthAndPower=0 and OnlyShowInCombat=1 and metadata 0/1/2.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48670,7 +48670,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization replaces the later namespace with exactly HideHealthAndPower=0 and OnlyShowInCombat=1 and metadata 0/1/2.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48715,7 +48715,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization replaces the later namespace with exactly HideHealthAndPower=0 and OnlyShowInCombat=1 and metadata 0/1/2.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48760,7 +48760,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization replaces the later namespace with exactly HideHealthAndPower=0 and OnlyShowInCombat=1 and metadata 0/1/2.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48805,7 +48805,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes the later EditModeSystem.TotemActionBar member while preserving the tested values and metadata boundary.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48856,7 +48856,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes the later EditModeSystem.TotemActionBar member while preserving the tested values and metadata boundary.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48907,7 +48907,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes the later EditModeSystem.TotemActionBar member while preserving the tested values and metadata boundary.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -48937,49 +48937,172 @@
       "id": "added:Enum.EditModeUnitFrameSetting.AuraOrganizationType",
       "symbol": "Enum.EditModeUnitFrameSetting.AuraOrganizationType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeUnitFrameSetting.AuraOrganizationType with numeric value 18.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Shared sequential enum data publishes AuraOrganizationType=18, IconSize=19, and Opacity=20 before the later BigDefensiveIconSize member.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes later BigDefensiveIconSize and broader metadata that require the retail epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later BigDefensiveIconSize and restores metadata to MinValue 0, MaxValue 20, NumValues 21.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three settings have exact numeric values, BigDefensiveIconSize is absent, and metadata is 0/20/21.",
+          "source_hash": "030ac112264dfea9dad5c363d61e890a635408ee68d1bfa9490269ff7cf8ae58"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EditModeUnitFrameSetting.AuraOrganizationType with numeric value 18.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs::test_patch_12_0_0_edit_mode_unit_frame_setting_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeUnitFrameSetting.AuraOrganizationType as a Lua number with exact retail 12.0.0 value 18; the focused namespace test also requires BigDefensiveIconSize absent and metadata MinValue=0, MaxValue=20, NumValues=21."
+      ],
+      "commit": "509daf308b3e76d5f9768f8e694c887902190ca1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 18 for Enum.EditModeUnitFrameSetting.AuraOrganizationType, absence of later BigDefensiveIconSize, and metadata MinValue=0, MaxValue=20, NumValues=21. Unit-frame behavior, aura organization, sizing, opacity rendering, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 509daf308b3e76d5f9768f8e694c887902190ca1."
     },
     {
       "id": "added:Enum.EditModeUnitFrameSetting.IconSize",
       "symbol": "Enum.EditModeUnitFrameSetting.IconSize",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeUnitFrameSetting.IconSize with numeric value 19.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Shared sequential enum data publishes AuraOrganizationType=18, IconSize=19, and Opacity=20 before the later BigDefensiveIconSize member.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes later BigDefensiveIconSize and broader metadata that require the retail epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later BigDefensiveIconSize and restores metadata to MinValue 0, MaxValue 20, NumValues 21.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three settings have exact numeric values, BigDefensiveIconSize is absent, and metadata is 0/20/21.",
+          "source_hash": "030ac112264dfea9dad5c363d61e890a635408ee68d1bfa9490269ff7cf8ae58"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EditModeUnitFrameSetting.IconSize with numeric value 19.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs::test_patch_12_0_0_edit_mode_unit_frame_setting_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeUnitFrameSetting.IconSize as a Lua number with exact retail 12.0.0 value 19; the focused namespace test also requires BigDefensiveIconSize absent and metadata MinValue=0, MaxValue=20, NumValues=21."
+      ],
+      "commit": "509daf308b3e76d5f9768f8e694c887902190ca1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 19 for Enum.EditModeUnitFrameSetting.IconSize, absence of later BigDefensiveIconSize, and metadata MinValue=0, MaxValue=20, NumValues=21. Unit-frame behavior, aura organization, sizing, opacity rendering, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 509daf308b3e76d5f9768f8e694c887902190ca1."
     },
     {
       "id": "added:Enum.EditModeUnitFrameSetting.Opacity",
       "symbol": "Enum.EditModeUnitFrameSetting.Opacity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeUnitFrameSetting.Opacity with numeric value 20.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Shared sequential enum data publishes AuraOrganizationType=18, IconSize=19, and Opacity=20 before the later BigDefensiveIconSize member.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes later BigDefensiveIconSize and broader metadata that require the retail epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later BigDefensiveIconSize and restores metadata to MinValue 0, MaxValue 20, NumValues 21.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three settings have exact numeric values, BigDefensiveIconSize is absent, and metadata is 0/20/21.",
+          "source_hash": "030ac112264dfea9dad5c363d61e890a635408ee68d1bfa9490269ff7cf8ae58"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EditModeUnitFrameSetting.Opacity with numeric value 20.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs::test_patch_12_0_0_edit_mode_unit_frame_setting_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeUnitFrameSetting.Opacity as a Lua number with exact retail 12.0.0 value 20; the focused namespace test also requires BigDefensiveIconSize absent and metadata MinValue=0, MaxValue=20, NumValues=21."
+      ],
+      "commit": "509daf308b3e76d5f9768f8e694c887902190ca1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 20 for Enum.EditModeUnitFrameSetting.Opacity, absence of later BigDefensiveIconSize, and metadata MinValue=0, MaxValue=20, NumValues=21. Unit-frame behavior, aura organization, sizing, opacity rendering, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 509daf308b3e76d5f9768f8e694c887902190ca1."
     },
     {
       "id": "added:Enum.EncounterEventCastState.Casting",
@@ -49095,7 +49218,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -49133,7 +49256,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -49171,7 +49294,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -49209,7 +49332,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -57506,7 +57629,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.MaxValue with exact numeric value 262144."
         },
         {
@@ -57544,7 +57667,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.MinValue with exact numeric value 1."
         },
         {
@@ -57582,7 +57705,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.NumValues with exact numeric value 24."
         },
         {
@@ -77968,7 +78091,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ShowTotemActionBar and corrects metadata to MinValue 0, MaxValue 32, NumValues 33.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -77980,7 +78103,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 epoch override publishes Enum.EditModeAccountSettingMeta.MaxValue as numeric value 32 and removes later ShowTotemActionBar.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         }
       ],
       "tests": [
@@ -78019,7 +78142,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later ShowTotemActionBar and corrects metadata to MinValue 0, MaxValue 32, NumValues 33.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -78031,7 +78154,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 epoch override publishes Enum.EditModeAccountSettingMeta.NumValues as numeric value 33 and removes later ShowTotemActionBar.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         }
       ],
       "tests": [
@@ -91187,7 +91310,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageType.Dragonflight from the effective startup surface.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -91232,7 +91355,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageType.None from the effective startup surface.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -91277,7 +91400,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageType.WarWithin from the effective startup surface.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -91322,7 +91445,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageTypeMeta.MaxValue from the effective startup surface.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -91367,7 +91490,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageTypeMeta.MinValue from the effective startup surface.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
@@ -91412,7 +91535,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageTypeMeta.NumValues from the effective startup surface.",
-          "source_hash": "cf21eab5e08f796c57438c9006f78f3289344885a8e96f66103caa379ab9a46f"
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
         },
         {
           "kind": "test",
