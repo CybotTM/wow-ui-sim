@@ -1,7 +1,7 @@
 - The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, and 15 DeprecatedCombatLog wrappers (10 CombatLog, 2 CombatText, 3 DeathRecap), plus 3 InstanceEncounter wrappers, are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The five chat/spell wrappers are separately covered by `patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward`; `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` are classified evidence-required/unsafe because their retained fixture-only compatibility semantics remain unproven.
 # Patch API audit manifest
 
-The current 12.0.0 manifest has **1040 best-effort, 982 evidence-required, 2 exception-requested, and 1386 untriaged rows** (3410 total).
+The current 12.0.0 manifest has **1049 best-effort, 982 evidence-required, 2 exception-requested, and 1377 untriaged rows** (3410 total).
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
@@ -22,6 +22,8 @@ The 14 `Enum.CombatAudioAlertPartyPercentValues.*` and `Enum.CombatAudioAlertPar
 The eight `Enum.CombatAudioAlertPlayerCastFormatValues.*` and `Enum.CombatAudioAlertPlayerCastFormatValuesMeta.*` rows are best-effort/behavioral, bounded to exact startup enum/metadata numeric publication and values; narration, cast detection, spell-name formatting, configuration, sound side effects, and lifecycle remain unclaimed.
 
 The nine `Enum.CombatAudioAlertPlayerHealthFormatValues.*` and `Enum.CombatAudioAlertPlayerHealthFormatValuesMeta.*` rows are best-effort/behavioral, bounded to exact startup enum/metadata numeric publication and values; health narration, percent/divisor formatting, configuration, sound side effects, and lifecycle remain unclaimed.
+
+The nine `Enum.CombatAudioAlertPlayerResourceFormatValues.*` and `Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.*` rows are best-effort/behavioral, bounded to exact startup enum/metadata numeric publication and values; resource narration, percent/divisor formatting, resource selection, configuration, sound side effects, and lifecycle remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 

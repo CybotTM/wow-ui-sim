@@ -35524,145 +35524,352 @@
       "id": "added:Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceFull",
       "symbol": "Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceFull",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceFull as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceFull with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the namespace/table, Lua numeric type, and exact player-resource format value.",
+          "source_hash": "6db967d6eede039806add202544818636bf964d85a41d746f0ad653eea241d6a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs::test_patch_12_0_0_combat_audio_player_resource_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceFull as Lua number with exact value 3."
+      ],
+      "commit": "0b0972426745f362cec5ec2f787094aad7222956",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 3. Combat-audio resource narration, resource interpretation, configuration, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: 0b0972426745f362cec5ec2f787094aad7222956."
     },
     {
       "id": "added:Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercent",
       "symbol": "Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercent as numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercent with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the namespace/table, Lua numeric type, and exact player-resource format value.",
+          "source_hash": "6db967d6eede039806add202544818636bf964d85a41d746f0ad653eea241d6a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs::test_patch_12_0_0_combat_audio_player_resource_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercent as Lua number with exact value 4."
+      ],
+      "commit": "0b0972426745f362cec5ec2f787094aad7222956",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 4. Combat-audio resource narration, resource interpretation, configuration, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: 0b0972426745f362cec5ec2f787094aad7222956."
     },
     {
       "id": "added:Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercentDiv10",
       "symbol": "Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercentDiv10",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercentDiv10 as numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercentDiv10 with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the namespace/table, Lua numeric type, and exact player-resource format value.",
+          "source_hash": "6db967d6eede039806add202544818636bf964d85a41d746f0ad653eea241d6a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs::test_patch_12_0_0_combat_audio_player_resource_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertPlayerResourceFormatValues.NoResourceNoPercentDiv10 as Lua number with exact value 5."
+      ],
+      "commit": "0b0972426745f362cec5ec2f787094aad7222956",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 5. Combat-audio resource narration, resource interpretation, configuration, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: 0b0972426745f362cec5ec2f787094aad7222956."
     },
     {
       "id": "added:Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceFull",
       "symbol": "Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceFull",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceFull as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceFull with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the namespace/table, Lua numeric type, and exact player-resource format value.",
+          "source_hash": "6db967d6eede039806add202544818636bf964d85a41d746f0ad653eea241d6a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs::test_patch_12_0_0_combat_audio_player_resource_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceFull as Lua number with exact value 0."
+      ],
+      "commit": "0b0972426745f362cec5ec2f787094aad7222956",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 0. Combat-audio resource narration, resource interpretation, configuration, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: 0b0972426745f362cec5ec2f787094aad7222956."
     },
     {
       "id": "added:Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercent",
       "symbol": "Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercent as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercent with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the namespace/table, Lua numeric type, and exact player-resource format value.",
+          "source_hash": "6db967d6eede039806add202544818636bf964d85a41d746f0ad653eea241d6a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs::test_patch_12_0_0_combat_audio_player_resource_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercent as Lua number with exact value 1."
+      ],
+      "commit": "0b0972426745f362cec5ec2f787094aad7222956",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 1. Combat-audio resource narration, resource interpretation, configuration, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: 0b0972426745f362cec5ec2f787094aad7222956."
     },
     {
       "id": "added:Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercentDiv10",
       "symbol": "Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercentDiv10",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercentDiv10 as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercentDiv10 with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the namespace/table, Lua numeric type, and exact player-resource format value.",
+          "source_hash": "6db967d6eede039806add202544818636bf964d85a41d746f0ad653eea241d6a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs::test_patch_12_0_0_combat_audio_player_resource_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertPlayerResourceFormatValues.ResourceNoPercentDiv10 as Lua number with exact value 2."
+      ],
+      "commit": "0b0972426745f362cec5ec2f787094aad7222956",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 2. Combat-audio resource narration, resource interpretation, configuration, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: 0b0972426745f362cec5ec2f787094aad7222956."
     },
     {
       "id": "added:Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MaxValue",
       "symbol": "Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MaxValue as numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the namespace/table, Lua numeric type, and exact player-resource format value.",
+          "source_hash": "6db967d6eede039806add202544818636bf964d85a41d746f0ad653eea241d6a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs::test_patch_12_0_0_combat_audio_player_resource_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MaxValue as Lua number with exact value 5."
+      ],
+      "commit": "0b0972426745f362cec5ec2f787094aad7222956",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 5. Combat-audio resource narration, resource interpretation, configuration, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: 0b0972426745f362cec5ec2f787094aad7222956."
     },
     {
       "id": "added:Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MinValue",
       "symbol": "Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the namespace/table, Lua numeric type, and exact player-resource format value.",
+          "source_hash": "6db967d6eede039806add202544818636bf964d85a41d746f0ad653eea241d6a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs::test_patch_12_0_0_combat_audio_player_resource_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "0b0972426745f362cec5ec2f787094aad7222956",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 0. Combat-audio resource narration, resource interpretation, configuration, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: 0b0972426745f362cec5ec2f787094aad7222956."
     },
     {
       "id": "added:Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.NumValues",
       "symbol": "Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.NumValues as numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the namespace/table, Lua numeric type, and exact player-resource format value.",
+          "source_hash": "6db967d6eede039806add202544818636bf964d85a41d746f0ad653eea241d6a"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_player_resource_format_enums.rs::test_patch_12_0_0_combat_audio_player_resource_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.NumValues as Lua number with exact value 6."
+      ],
+      "commit": "0b0972426745f362cec5ec2f787094aad7222956",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 6. Combat-audio resource narration, resource interpretation, configuration, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: 0b0972426745f362cec5ec2f787094aad7222956."
     },
     {
       "id": "added:Enum.CombatAudioAlertSayIfTargetedType.Aggro",

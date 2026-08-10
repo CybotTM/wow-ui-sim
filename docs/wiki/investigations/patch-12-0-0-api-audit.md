@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1040 best-effort, 982 evidence-required, 2 exception-requested, and 1386 untriaged rows** (3410 total).
+Current manifest totals are **1049 best-effort, 982 evidence-required, 2 exception-requested, and 1377 untriaged rows** (3410 total).
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
@@ -25,6 +25,8 @@ The 14 `Enum.CombatAudioAlertPartyPercentValues.*` and `Enum.CombatAudioAlertPar
 The eight `Enum.CombatAudioAlertPlayerCastFormatValues.*` and `Enum.CombatAudioAlertPlayerCastFormatValuesMeta.*` rows are best-effort/behavioral, bounded to exact startup enum/metadata numeric publication and values; narration, cast detection, spell-name formatting, configuration, sound side effects, and lifecycle remain unclaimed.
 
 The nine `Enum.CombatAudioAlertPlayerHealthFormatValues.*` and `Enum.CombatAudioAlertPlayerHealthFormatValuesMeta.*` rows are best-effort/behavioral, bounded to exact startup enum/metadata numeric publication and values; health narration, percent/divisor formatting, configuration, sound side effects, and lifecycle remain unclaimed.
+
+The nine `Enum.CombatAudioAlertPlayerResourceFormatValues.*` and `Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.*` rows are best-effort/behavioral, bounded to exact startup enum/metadata numeric publication and values; resource narration, percent/divisor formatting, resource selection, configuration, sound side effects, and lifecycle remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 
