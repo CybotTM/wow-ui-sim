@@ -1182,8 +1182,8 @@
 1182. [best-effort] `added:Enum.CraftingOrderItemType.Currency` — behavioral
 1183. [best-effort] `added:Enum.CraftingOrderItemType.Deprecated` — behavioral
 1184. [best-effort] `added:Enum.CraftingOrderItemType.Item` — behavioral
-1185. [untriaged] `added:Enum.CraftingOrderResult.MissingCurrency` — untriaged
-1186. [untriaged] `added:Enum.CraftingOrderResult.TooManyCurrencies` — untriaged
+1185. [best-effort] `added:Enum.CraftingOrderResult.MissingCurrency` — behavioral
+1186. [best-effort] `added:Enum.CraftingOrderResult.TooManyCurrencies` — behavioral
 1187. [best-effort] `added:Enum.CreateAllAccountData.AccountCurrenciesDone` — behavioral
 1188. [best-effort] `added:Enum.CreateAllAccountData.AccountDynamicCriteriaDone` — behavioral
 1189. [best-effort] `added:Enum.CreateAllAccountData.AccountFactionsDone` — behavioral

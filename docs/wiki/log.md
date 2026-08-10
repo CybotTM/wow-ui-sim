@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify crafting-order result enums
+
+Classified exactly two retail 12.0.0 `Enum.CraftingOrderResult.*` rows as best-effort/behavioral: `MissingCurrency=30` and `TooManyCurrencies=46`. Evidence is bounded to startup enum publication, Lua numeric type, and exact values. Focused proof is at `ac04f9fc55381073c01ba07d794d0ba0d06b0b91`. Crafting-order result production, interpretation, persistence, transitions, consumers, and lifecycle remain unclaimed. Current totals are **1144 best-effort, 982 evidence-required, 2 exception-requested, and 1282 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify ItemCreationContext removals
 
 Classified exactly two removed retail 12.0.0 `Enum.ItemCreationContext.*` rows as best-effort/behavioral: `Placeholder_12_0_0` (prior 186) and `Timewalker` (prior 22) are absent at startup. Focused proof is at `4919858d04ce4b3e4418ed334f4c228de8129daa`. Item-creation context selection, item provenance, consumers, transitions, and lifecycle remain unclaimed. Current totals are **1142 best-effort, 982 evidence-required, 2 exception-requested, and 1284 untriaged** (3410 rows).

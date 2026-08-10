@@ -1,7 +1,7 @@
 - The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, and 15 DeprecatedCombatLog wrappers (10 CombatLog, 2 CombatText, 3 DeathRecap), plus 3 InstanceEncounter wrappers, are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The five chat/spell wrappers are covered by `vendor_deprecated_chat_spell.rs` with focused forwarding checks; `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` are classified evidence-required/unsafe because their retained fixture-only compatibility semantics remain unproven.
 # Patch API Audit Manifest
 
-The current 12.0.0 audit totals are **1142 best-effort, 982 evidence-required, 2 exception-requested, and 1284 untriaged occurrences** (3410 total).
+The current 12.0.0 audit totals are **1144 best-effort, 982 evidence-required, 2 exception-requested, and 1282 untriaged occurrences** (3410 total).
 
 The six removed `Enum.ExpansionLandingPageType.*` and `Enum.ExpansionLandingPageTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup absence of `None`, `Dragonflight`, `WarWithin`, and metadata `MinValue`, `MaxValue`, and `NumValues` after the retail-12.0.0 post-compat epoch override. Focused proof is at `54416879b5c6305ed956f347fe0a17e9fb2ccb28`. Landing-page selection, UI behavior, transitions, and lifecycle remain unclaimed.
 
@@ -18,6 +18,8 @@ The six `Enum.CraftingOrderItemFlags.*` and `Enum.CraftingOrderItemFlagsMeta.*` 
 The seven `Enum.CraftingOrderItemType.*` and `Enum.CraftingOrderItemTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup values: added `Item=0`, `Deprecated=4`, and `Currency=5`; changed metadata `MaxValue=5` and `NumValues=6`; removed `NpcProvided` (prior value 4) and `Reagent` (prior value 0) are absent. Focused proof is at `a72ad8574f25a5e7ed6e58065ee5da615a1c2233`, with unchanged `Recraft=1`, `CraftedResult=2`, `RemoveReagent=3`, and metadata `MinValue=0` asserted as context. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle remain unclaimed.
 
 The two removed `Enum.ItemCreationContext.*` rows—`Placeholder_12_0_0` (prior 186) and `Timewalker` (prior 22)—are best-effort/behavioral, bounded to retail 12.0.0 startup absence of exactly those members. Focused proof is at `4919858d04ce4b3e4418ed334f4c228de8129daa`. Item-creation context selection, item provenance, consumers, transitions, and lifecycle remain unclaimed.
+
+The two retail 12.0.0 `Enum.CraftingOrderResult.*` rows—`MissingCurrency=30` and `TooManyCurrencies=46`—are best-effort/behavioral, bounded to startup enum publication, Lua numeric type, and exact values. Focused proof is at `ac04f9fc55381073c01ba07d794d0ba0d06b0b91`. Crafting-order result production, interpretation, persistence, transitions, consumers, and lifecycle remain unclaimed.
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
