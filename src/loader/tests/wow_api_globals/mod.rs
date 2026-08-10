@@ -40,6 +40,7 @@ mod patch_12_0_0_cooldown_viewer_alert_type_enums;
 mod patch_12_0_0_crafting_order_item_flags_enums;
 mod patch_12_0_0_crafting_order_item_type_enums;
 mod patch_12_0_0_expansion_landing_page_type_removals;
+mod patch_12_0_0_item_creation_context_removals;
 mod patch_12_0_0_small_enums;
 mod patch_12_0_0_ui_enum_metadata;
 mod patch_12_0_0_unit_power_spell_ids;
