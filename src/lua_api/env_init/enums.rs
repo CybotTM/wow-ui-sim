@@ -46,6 +46,18 @@ Enum.SecretAspectMeta = {
     NumValues = 24,
 }
 "#;
+const RETAIL_12_0_0_POST_COMPAT_ENUM_OVERRIDES_LUA: &str = r#"
+if Enum.ExpansionLandingPageType then
+    Enum.ExpansionLandingPageType.None = nil
+    Enum.ExpansionLandingPageType.Dragonflight = nil
+    Enum.ExpansionLandingPageType.WarWithin = nil
+end
+if Enum.ExpansionLandingPageTypeMeta then
+    Enum.ExpansionLandingPageTypeMeta.MaxValue = nil
+    Enum.ExpansionLandingPageTypeMeta.MinValue = nil
+    Enum.ExpansionLandingPageTypeMeta.NumValues = nil
+end
+"#;
 const MISSING_CONSTANTS_LUA: &str = include_str!("../globals/enum_data/missing_constants.lua");
 const CONSTANTS_VALUES_LUA: &str = include_str!("../globals/enum_data/constants_values.lua");
 const COMPAT_CONSTANTS_LUA: &str = include_str!("../globals/enum_data/compat_constants.lua");
@@ -74,6 +86,9 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         lua.exec(RETAIL_12_0_0_ENUM_OVERRIDES_LUA)?;
     }
     lua.exec(COMPAT_ENUMS_LUA)?;
+    if ACTIVE_RETAIL_API_EPOCH == RetailApiEpoch::Retail12_0_0 {
+        lua.exec(RETAIL_12_0_0_POST_COMPAT_ENUM_OVERRIDES_LUA)?;
+    }
     #[cfg(feature = "retail-12-1-0")]
     {
         let state = lua.state_mut();
