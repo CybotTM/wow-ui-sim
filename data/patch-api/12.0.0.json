@@ -45979,129 +45979,313 @@
       "id": "added:Enum.DungeonEncounterTriggerType.Invalid",
       "symbol": "Enum.DungeonEncounterTriggerType.Invalid",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterTriggerType.Invalid with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterTriggerType.Invalid with numeric value 0 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterTriggerType members and metadata are Lua numbers with exact values.",
+          "source_hash": "743f79e8d3fa5347ea8f9259bf3be93f769b20f5b9bd7e4bb298097cc96cc29f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs::test_patch_12_0_0_dungeon_encounter_trigger_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterTriggerType.Invalid as Lua number with exact value 0."
+      ],
+      "commit": "17cd655bc64490cb39b0377f669160d876ef8af8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DungeonEncounterTriggerType.Invalid. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 17cd655bc64490cb39b0377f669160d876ef8af8."
     },
     {
       "id": "added:Enum.DungeonEncounterTriggerType.OnComplete",
       "symbol": "Enum.DungeonEncounterTriggerType.OnComplete",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterTriggerType.OnComplete with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterTriggerType.OnComplete with numeric value 2 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterTriggerType members and metadata are Lua numbers with exact values.",
+          "source_hash": "743f79e8d3fa5347ea8f9259bf3be93f769b20f5b9bd7e4bb298097cc96cc29f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs::test_patch_12_0_0_dungeon_encounter_trigger_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterTriggerType.OnComplete as Lua number with exact value 2."
+      ],
+      "commit": "17cd655bc64490cb39b0377f669160d876ef8af8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.DungeonEncounterTriggerType.OnComplete. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 17cd655bc64490cb39b0377f669160d876ef8af8."
     },
     {
       "id": "added:Enum.DungeonEncounterTriggerType.OnEnd",
       "symbol": "Enum.DungeonEncounterTriggerType.OnEnd",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterTriggerType.OnEnd with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterTriggerType.OnEnd with numeric value 3 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterTriggerType members and metadata are Lua numbers with exact values.",
+          "source_hash": "743f79e8d3fa5347ea8f9259bf3be93f769b20f5b9bd7e4bb298097cc96cc29f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs::test_patch_12_0_0_dungeon_encounter_trigger_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterTriggerType.OnEnd as Lua number with exact value 3."
+      ],
+      "commit": "17cd655bc64490cb39b0377f669160d876ef8af8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 3 for Enum.DungeonEncounterTriggerType.OnEnd. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 17cd655bc64490cb39b0377f669160d876ef8af8."
     },
     {
       "id": "added:Enum.DungeonEncounterTriggerType.OnStart",
       "symbol": "Enum.DungeonEncounterTriggerType.OnStart",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterTriggerType.OnStart with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterTriggerType.OnStart with numeric value 1 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterTriggerType members and metadata are Lua numbers with exact values.",
+          "source_hash": "743f79e8d3fa5347ea8f9259bf3be93f769b20f5b9bd7e4bb298097cc96cc29f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs::test_patch_12_0_0_dungeon_encounter_trigger_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterTriggerType.OnStart as Lua number with exact value 1."
+      ],
+      "commit": "17cd655bc64490cb39b0377f669160d876ef8af8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DungeonEncounterTriggerType.OnStart. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 17cd655bc64490cb39b0377f669160d876ef8af8."
     },
     {
       "id": "added:Enum.DungeonEncounterTriggerType.PreviouslyCompleted",
       "symbol": "Enum.DungeonEncounterTriggerType.PreviouslyCompleted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterTriggerType.PreviouslyCompleted with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterTriggerType.PreviouslyCompleted with numeric value 4 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterTriggerType members and metadata are Lua numbers with exact values.",
+          "source_hash": "743f79e8d3fa5347ea8f9259bf3be93f769b20f5b9bd7e4bb298097cc96cc29f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs::test_patch_12_0_0_dungeon_encounter_trigger_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterTriggerType.PreviouslyCompleted as Lua number with exact value 4."
+      ],
+      "commit": "17cd655bc64490cb39b0377f669160d876ef8af8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 4 for Enum.DungeonEncounterTriggerType.PreviouslyCompleted. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 17cd655bc64490cb39b0377f669160d876ef8af8."
     },
     {
       "id": "added:Enum.DungeonEncounterTriggerTypeMeta.MaxValue",
       "symbol": "Enum.DungeonEncounterTriggerTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterTriggerTypeMeta.MaxValue with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterTriggerTypeMeta.MaxValue with numeric value 4 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterTriggerType members and metadata are Lua numbers with exact values.",
+          "source_hash": "743f79e8d3fa5347ea8f9259bf3be93f769b20f5b9bd7e4bb298097cc96cc29f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs::test_patch_12_0_0_dungeon_encounter_trigger_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterTriggerTypeMeta.MaxValue as Lua number with exact value 4."
+      ],
+      "commit": "17cd655bc64490cb39b0377f669160d876ef8af8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 4 for Enum.DungeonEncounterTriggerTypeMeta.MaxValue. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 17cd655bc64490cb39b0377f669160d876ef8af8."
     },
     {
       "id": "added:Enum.DungeonEncounterTriggerTypeMeta.MinValue",
       "symbol": "Enum.DungeonEncounterTriggerTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterTriggerTypeMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterTriggerTypeMeta.MinValue with numeric value 0 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterTriggerType members and metadata are Lua numbers with exact values.",
+          "source_hash": "743f79e8d3fa5347ea8f9259bf3be93f769b20f5b9bd7e4bb298097cc96cc29f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs::test_patch_12_0_0_dungeon_encounter_trigger_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterTriggerTypeMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "17cd655bc64490cb39b0377f669160d876ef8af8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DungeonEncounterTriggerTypeMeta.MinValue. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 17cd655bc64490cb39b0377f669160d876ef8af8."
     },
     {
       "id": "added:Enum.DungeonEncounterTriggerTypeMeta.NumValues",
       "symbol": "Enum.DungeonEncounterTriggerTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterTriggerTypeMeta.NumValues with numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterTriggerTypeMeta.NumValues with numeric value 5 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterTriggerType members and metadata are Lua numbers with exact values.",
+          "source_hash": "743f79e8d3fa5347ea8f9259bf3be93f769b20f5b9bd7e4bb298097cc96cc29f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_trigger_type_enums.rs::test_patch_12_0_0_dungeon_encounter_trigger_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterTriggerTypeMeta.NumValues as Lua number with exact value 5."
+      ],
+      "commit": "17cd655bc64490cb39b0377f669160d876ef8af8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 5 for Enum.DungeonEncounterTriggerTypeMeta.NumValues. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 17cd655bc64490cb39b0377f669160d876ef8af8."
     },
     {
       "id": "added:Enum.DungeonEncounterXCreatureFlags.BossCreature",
