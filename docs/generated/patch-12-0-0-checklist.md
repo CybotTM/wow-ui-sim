@@ -1114,11 +1114,11 @@
 1114. [best-effort] `added:Enum.CombatAudioAlertUnitMeta.MaxValue` — behavioral
 1115. [best-effort] `added:Enum.CombatAudioAlertUnitMeta.MinValue` — behavioral
 1116. [best-effort] `added:Enum.CombatAudioAlertUnitMeta.NumValues` — behavioral
-1117. [untriaged] `added:Enum.CombatLogMessageOrder.Newest` — untriaged
-1118. [untriaged] `added:Enum.CombatLogMessageOrder.Oldest` — untriaged
-1119. [untriaged] `added:Enum.CombatLogMessageOrderMeta.MaxValue` — untriaged
-1120. [untriaged] `added:Enum.CombatLogMessageOrderMeta.MinValue` — untriaged
-1121. [untriaged] `added:Enum.CombatLogMessageOrderMeta.NumValues` — untriaged
+1117. [best-effort] `added:Enum.CombatLogMessageOrder.Newest` — behavioral
+1118. [best-effort] `added:Enum.CombatLogMessageOrder.Oldest` — behavioral
+1119. [best-effort] `added:Enum.CombatLogMessageOrderMeta.MaxValue` — behavioral
+1120. [best-effort] `added:Enum.CombatLogMessageOrderMeta.MinValue` — behavioral
+1121. [best-effort] `added:Enum.CombatLogMessageOrderMeta.NumValues` — behavioral
 1122. [best-effort] `added:Enum.CombatLogObject.AffiliationMine` — behavioral
 1123. [best-effort] `added:Enum.CombatLogObject.AffiliationOutsider` — behavioral
 1124. [best-effort] `added:Enum.CombatLogObject.AffiliationParty` — behavioral

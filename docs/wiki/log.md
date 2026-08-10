@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify combat-log message-order enums
+
+Classified exactly five retail 12.0.0 `Enum.CombatLogMessageOrder.*` and `Enum.CombatLogMessageOrderMeta.*` rows as best-effort/behavioral, bounded to startup enum/metadata numeric publication and exact values (`Newest=0`, `Oldest=1`, `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `2d6495a732f7cb598cf67871eae507c28fc7c3bb`. Combat-log storage order, query behavior, persistence, UI consumers, transitions, and lifecycle remain unclaimed. Current totals are **1116 best-effort, 982 evidence-required, 2 exception-requested, and 1310 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify combat-audio unit enums
 
 Classified exactly five retail 12.0.0 `Enum.CombatAudioAlertUnit.*` and `Enum.CombatAudioAlertUnitMeta.*` rows as best-effort/behavioral, bounded to startup enum/metadata numeric publication and exact values (`Player=0`, `Target=1`, `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `5f5635e7b99954ae0f057deb93292e39ddba3bfa`. Unit selection, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1111 best-effort, 982 evidence-required, 2 exception-requested, and 1315 untriaged** (3410 rows).

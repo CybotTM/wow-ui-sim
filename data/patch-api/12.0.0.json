@@ -38401,81 +38401,196 @@
       "id": "added:Enum.CombatLogMessageOrder.Newest",
       "symbol": "Enum.CombatLogMessageOrder.Newest",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatLogMessageOrder.Newest as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime combat-log enum fallback publishes Enum.CombatLogMessageOrder.Newest with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact combat-log message-order value.",
+          "source_hash": "58b4a0e90bea51dedbf438b530f6c88628bace45b70f13b6697d4e8992f7ffcb"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs::test_patch_12_0_0_combat_log_message_order_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatLogMessageOrder.Newest as Lua number with exact value 0."
+      ],
+      "commit": "2d6495a732f7cb598cf67871eae507c28fc7c3bb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 0. Combat-log storage order, query behavior, persistence, UI consumers, transitions, and lifecycle are not claimed. Proof commit: 2d6495a732f7cb598cf67871eae507c28fc7c3bb."
     },
     {
       "id": "added:Enum.CombatLogMessageOrder.Oldest",
       "symbol": "Enum.CombatLogMessageOrder.Oldest",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatLogMessageOrder.Oldest as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime combat-log enum fallback publishes Enum.CombatLogMessageOrder.Oldest with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact combat-log message-order value.",
+          "source_hash": "58b4a0e90bea51dedbf438b530f6c88628bace45b70f13b6697d4e8992f7ffcb"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs::test_patch_12_0_0_combat_log_message_order_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatLogMessageOrder.Oldest as Lua number with exact value 1."
+      ],
+      "commit": "2d6495a732f7cb598cf67871eae507c28fc7c3bb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 1. Combat-log storage order, query behavior, persistence, UI consumers, transitions, and lifecycle are not claimed. Proof commit: 2d6495a732f7cb598cf67871eae507c28fc7c3bb."
     },
     {
       "id": "added:Enum.CombatLogMessageOrderMeta.MaxValue",
       "symbol": "Enum.CombatLogMessageOrderMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatLogMessageOrderMeta.MaxValue as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime combat-log metadata fallback publishes Enum.CombatLogMessageOrderMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact combat-log message-order value.",
+          "source_hash": "58b4a0e90bea51dedbf438b530f6c88628bace45b70f13b6697d4e8992f7ffcb"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs::test_patch_12_0_0_combat_log_message_order_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatLogMessageOrderMeta.MaxValue as Lua number with exact value 1."
+      ],
+      "commit": "2d6495a732f7cb598cf67871eae507c28fc7c3bb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 1. Combat-log storage order, query behavior, persistence, UI consumers, transitions, and lifecycle are not claimed. Proof commit: 2d6495a732f7cb598cf67871eae507c28fc7c3bb."
     },
     {
       "id": "added:Enum.CombatLogMessageOrderMeta.MinValue",
       "symbol": "Enum.CombatLogMessageOrderMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatLogMessageOrderMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime combat-log metadata fallback publishes Enum.CombatLogMessageOrderMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact combat-log message-order value.",
+          "source_hash": "58b4a0e90bea51dedbf438b530f6c88628bace45b70f13b6697d4e8992f7ffcb"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs::test_patch_12_0_0_combat_log_message_order_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatLogMessageOrderMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "2d6495a732f7cb598cf67871eae507c28fc7c3bb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 0. Combat-log storage order, query behavior, persistence, UI consumers, transitions, and lifecycle are not claimed. Proof commit: 2d6495a732f7cb598cf67871eae507c28fc7c3bb."
     },
     {
       "id": "added:Enum.CombatLogMessageOrderMeta.NumValues",
       "symbol": "Enum.CombatLogMessageOrderMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatLogMessageOrderMeta.NumValues as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime combat-log metadata fallback publishes Enum.CombatLogMessageOrderMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact combat-log message-order value.",
+          "source_hash": "58b4a0e90bea51dedbf438b530f6c88628bace45b70f13b6697d4e8992f7ffcb"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_log_message_order_enums.rs::test_patch_12_0_0_combat_log_message_order_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatLogMessageOrderMeta.NumValues as Lua number with exact value 2."
+      ],
+      "commit": "2d6495a732f7cb598cf67871eae507c28fc7c3bb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 2. Combat-log storage order, query behavior, persistence, UI consumers, transitions, and lifecycle are not claimed. Proof commit: 2d6495a732f7cb598cf67871eae507c28fc7c3bb."
     },
     {
       "id": "added:Enum.CombatLogObject.AffiliationMine",
