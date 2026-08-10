@@ -28001,81 +28001,196 @@
       "id": "added:Constants.UnitPowerSpellIDs.COLLAPSING_STAR_PASSIVE_SPELL_ID",
       "symbol": "Constants.UnitPowerSpellIDs.COLLAPSING_STAR_PASSIVE_SPELL_ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UnitPowerSpellIDs.COLLAPSING_STAR_PASSIVE_SPELL_ID as numeric value 1221167.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the UnitPowerSpellIDs entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "c335c182b3805e0c6f4003e52cd6c53b66a4458aced7c4aa21458a666ee825e5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs::test_patch_12_0_0_unit_power_spell_ids_publish_exact_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UnitPowerSpellIDs.COLLAPSING_STAR_PASSIVE_SPELL_ID as Lua number with exact value 1221167."
+      ],
+      "commit": "ce4ea294bff9f41401f74e3e9e5ca40d42ea4516",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact spell ID 1221167. Spell/aura mechanics, alternate-power behavior, consumer semantics, mutation/protection, and lifecycle are not claimed. Proof commit: ce4ea294bff9f41401f74e3e9e5ca40d42ea4516."
     },
     {
       "id": "added:Constants.UnitPowerSpellIDs.COLLAPSING_STAR_SPELL_ID",
       "symbol": "Constants.UnitPowerSpellIDs.COLLAPSING_STAR_SPELL_ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UnitPowerSpellIDs.COLLAPSING_STAR_SPELL_ID as numeric value 1221150.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the UnitPowerSpellIDs entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "c335c182b3805e0c6f4003e52cd6c53b66a4458aced7c4aa21458a666ee825e5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs::test_patch_12_0_0_unit_power_spell_ids_publish_exact_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UnitPowerSpellIDs.COLLAPSING_STAR_SPELL_ID as Lua number with exact value 1221150."
+      ],
+      "commit": "ce4ea294bff9f41401f74e3e9e5ca40d42ea4516",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact spell ID 1221150. Spell/aura mechanics, alternate-power behavior, consumer semantics, mutation/protection, and lifecycle are not claimed. Proof commit: ce4ea294bff9f41401f74e3e9e5ca40d42ea4516."
     },
     {
       "id": "added:Constants.UnitPowerSpellIDs.DARK_HEART_SPELL_ID",
       "symbol": "Constants.UnitPowerSpellIDs.DARK_HEART_SPELL_ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UnitPowerSpellIDs.DARK_HEART_SPELL_ID as numeric value 1225789.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the UnitPowerSpellIDs entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "c335c182b3805e0c6f4003e52cd6c53b66a4458aced7c4aa21458a666ee825e5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs::test_patch_12_0_0_unit_power_spell_ids_publish_exact_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UnitPowerSpellIDs.DARK_HEART_SPELL_ID as Lua number with exact value 1225789."
+      ],
+      "commit": "ce4ea294bff9f41401f74e3e9e5ca40d42ea4516",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact spell ID 1225789. Spell/aura mechanics, alternate-power behavior, consumer semantics, mutation/protection, and lifecycle are not claimed. Proof commit: ce4ea294bff9f41401f74e3e9e5ca40d42ea4516."
     },
     {
       "id": "added:Constants.UnitPowerSpellIDs.SILENCE_THE_WHISPERS_SPELL_ID",
       "symbol": "Constants.UnitPowerSpellIDs.SILENCE_THE_WHISPERS_SPELL_ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UnitPowerSpellIDs.SILENCE_THE_WHISPERS_SPELL_ID as numeric value 1227702.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the UnitPowerSpellIDs entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "c335c182b3805e0c6f4003e52cd6c53b66a4458aced7c4aa21458a666ee825e5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs::test_patch_12_0_0_unit_power_spell_ids_publish_exact_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UnitPowerSpellIDs.SILENCE_THE_WHISPERS_SPELL_ID as Lua number with exact value 1227702."
+      ],
+      "commit": "ce4ea294bff9f41401f74e3e9e5ca40d42ea4516",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact spell ID 1227702. Spell/aura mechanics, alternate-power behavior, consumer semantics, mutation/protection, and lifecycle are not claimed. Proof commit: ce4ea294bff9f41401f74e3e9e5ca40d42ea4516."
     },
     {
       "id": "added:Constants.UnitPowerSpellIDs.VOID_METAMORPHOSIS_SPELL_ID",
       "symbol": "Constants.UnitPowerSpellIDs.VOID_METAMORPHOSIS_SPELL_ID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "constant",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Constants.UnitPowerSpellIDs.VOID_METAMORPHOSIS_SPELL_ID as numeric value 1217607.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/constants_values.lua",
+          "summary": "Constants bootstrap explicitly publishes the UnitPowerSpellIDs entry with the checked-in 12.0.0 value.",
+          "source_hash": "6f80e4a96337b973c024f9157d8a35a52186f83614c6bab64a47a92e8ab3ab9d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact Lua numeric type and value.",
+          "source_hash": "c335c182b3805e0c6f4003e52cd6c53b66a4458aced7c4aa21458a666ee825e5"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_unit_power_spell_ids.rs::test_patch_12_0_0_unit_power_spell_ids_publish_exact_values"
+      ],
+      "assertions": [
+        "Publishes Constants.UnitPowerSpellIDs.VOID_METAMORPHOSIS_SPELL_ID as Lua number with exact value 1217607."
+      ],
+      "commit": "ce4ea294bff9f41401f74e3e9e5ca40d42ea4516",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup publication, Lua numeric type, and exact spell ID 1217607. Spell/aura mechanics, alternate-power behavior, consumer semantics, mutation/protection, and lifecycle are not claimed. Proof commit: ce4ea294bff9f41401f74e3e9e5ca40d42ea4516."
     },
     {
       "id": "added:Cooldown.GetCountdownFontString",

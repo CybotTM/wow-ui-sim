@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify UnitPowerSpellIDs constants
+
+Classified the five `Constants.UnitPowerSpellIDs` rows as best-effort/behavioral: focused exact type/value proof at `ce4ea294bff9f41401f74e3e9e5ca40d42ea4516` covers startup publication only; spell, aura, alternate-power, consumer, mutation, and lifecycle semantics remain unclaimed. Current totals are **944 best-effort, 982 evidence-required, 2 exception-requested, and 1482 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify Damage Meter events
 
 Classified `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` as evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved. Current totals are **939 best-effort, 982 evidence-required, 2 exception-requested, and 1487 untriaged** (3410 rows).

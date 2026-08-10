@@ -846,11 +846,11 @@
 846. [best-effort] `added:Constants.UICharacterClasses.Warlock` — behavioral
 847. [best-effort] `added:Constants.UICharacterClasses.Warrior` — behavioral
 848. [best-effort] `added:Constants.UnitEventConstants.MAX_UNIT_TOKENS_IN_EVENT` — behavioral
-849. [untriaged] `added:Constants.UnitPowerSpellIDs.COLLAPSING_STAR_PASSIVE_SPELL_ID` — untriaged
-850. [untriaged] `added:Constants.UnitPowerSpellIDs.COLLAPSING_STAR_SPELL_ID` — untriaged
-851. [untriaged] `added:Constants.UnitPowerSpellIDs.DARK_HEART_SPELL_ID` — untriaged
-852. [untriaged] `added:Constants.UnitPowerSpellIDs.SILENCE_THE_WHISPERS_SPELL_ID` — untriaged
-853. [untriaged] `added:Constants.UnitPowerSpellIDs.VOID_METAMORPHOSIS_SPELL_ID` — untriaged
+849. [best-effort] `added:Constants.UnitPowerSpellIDs.COLLAPSING_STAR_PASSIVE_SPELL_ID` — behavioral
+850. [best-effort] `added:Constants.UnitPowerSpellIDs.COLLAPSING_STAR_SPELL_ID` — behavioral
+851. [best-effort] `added:Constants.UnitPowerSpellIDs.DARK_HEART_SPELL_ID` — behavioral
+852. [best-effort] `added:Constants.UnitPowerSpellIDs.SILENCE_THE_WHISPERS_SPELL_ID` — behavioral
+853. [best-effort] `added:Constants.UnitPowerSpellIDs.VOID_METAMORPHOSIS_SPELL_ID` — behavioral
 854. [best-effort] `added:Cooldown.GetCountdownFontString` — behavioral
 855. [best-effort] `added:Cooldown.SetCooldownFromDurationObject` — behavioral
 856. [best-effort] `added:Cooldown.SetCooldownFromExpirationTime` — behavioral
