@@ -51183,97 +51183,343 @@
       "id": "added:Enum.EncounterEventsVisibility.Always",
       "symbol": "Enum.EncounterEventsVisibility.Always",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventsVisibility.Always with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Shared Edit Mode enum data publishes the EncounterEventsVisibility member values Always=0, InEncounter=1, and DeprecatedHidden=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes the matching EncounterEventsVisibility members and metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching explicit and guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete set Always=0, InEncounter=1, DeprecatedHidden=2 as Lua numbers with no extras, plus metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "42a664c627f2a9b1935000b21152cbb6b02a27146217816c665d0068b896656f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventsVisibility.Always with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs::test_patch_12_0_0_encounter_events_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsVisibility.Always as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact three-member set and metadata MinValue=0, MaxValue=2, NumValues=3."
+      ],
+      "commit": "bf17614b988cba98d936c789b30c919bf20f5952",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact family membership, and metadata. Encounter-event visibility behavior, transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: bf17614b988cba98d936c789b30c919bf20f5952."
     },
     {
       "id": "added:Enum.EncounterEventsVisibility.DeprecatedHidden",
       "symbol": "Enum.EncounterEventsVisibility.DeprecatedHidden",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventsVisibility.DeprecatedHidden with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Shared Edit Mode enum data publishes the EncounterEventsVisibility member values Always=0, InEncounter=1, and DeprecatedHidden=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes the matching EncounterEventsVisibility members and metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching explicit and guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete set Always=0, InEncounter=1, DeprecatedHidden=2 as Lua numbers with no extras, plus metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "42a664c627f2a9b1935000b21152cbb6b02a27146217816c665d0068b896656f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventsVisibility.DeprecatedHidden with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs::test_patch_12_0_0_encounter_events_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsVisibility.DeprecatedHidden as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact three-member set and metadata MinValue=0, MaxValue=2, NumValues=3."
+      ],
+      "commit": "bf17614b988cba98d936c789b30c919bf20f5952",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 2, exact family membership, and metadata. Encounter-event visibility behavior, transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: bf17614b988cba98d936c789b30c919bf20f5952."
     },
     {
       "id": "added:Enum.EncounterEventsVisibility.InEncounter",
       "symbol": "Enum.EncounterEventsVisibility.InEncounter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventsVisibility.InEncounter with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Shared Edit Mode enum data publishes the EncounterEventsVisibility member values Always=0, InEncounter=1, and DeprecatedHidden=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes the matching EncounterEventsVisibility members and metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching explicit and guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete set Always=0, InEncounter=1, DeprecatedHidden=2 as Lua numbers with no extras, plus metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "42a664c627f2a9b1935000b21152cbb6b02a27146217816c665d0068b896656f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventsVisibility.InEncounter with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs::test_patch_12_0_0_encounter_events_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsVisibility.InEncounter as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact three-member set and metadata MinValue=0, MaxValue=2, NumValues=3."
+      ],
+      "commit": "bf17614b988cba98d936c789b30c919bf20f5952",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, exact family membership, and metadata. Encounter-event visibility behavior, transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: bf17614b988cba98d936c789b30c919bf20f5952."
     },
     {
       "id": "added:Enum.EncounterEventsVisibilityMeta.MaxValue",
       "symbol": "Enum.EncounterEventsVisibilityMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventsVisibilityMeta.MaxValue with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Shared Edit Mode enum data publishes the EncounterEventsVisibility member values Always=0, InEncounter=1, and DeprecatedHidden=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes the matching EncounterEventsVisibility members and metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching explicit and guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete set Always=0, InEncounter=1, DeprecatedHidden=2 as Lua numbers with no extras, plus metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "42a664c627f2a9b1935000b21152cbb6b02a27146217816c665d0068b896656f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventsVisibilityMeta.MaxValue with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs::test_patch_12_0_0_encounter_events_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsVisibilityMeta.MaxValue as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact three-member set and metadata MinValue=0, MaxValue=2, NumValues=3."
+      ],
+      "commit": "bf17614b988cba98d936c789b30c919bf20f5952",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 2, exact family membership, and metadata. Encounter-event visibility behavior, transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: bf17614b988cba98d936c789b30c919bf20f5952."
     },
     {
       "id": "added:Enum.EncounterEventsVisibilityMeta.MinValue",
       "symbol": "Enum.EncounterEventsVisibilityMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventsVisibilityMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Shared Edit Mode enum data publishes the EncounterEventsVisibility member values Always=0, InEncounter=1, and DeprecatedHidden=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes the matching EncounterEventsVisibility members and metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching explicit and guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete set Always=0, InEncounter=1, DeprecatedHidden=2 as Lua numbers with no extras, plus metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "42a664c627f2a9b1935000b21152cbb6b02a27146217816c665d0068b896656f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventsVisibilityMeta.MinValue with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs::test_patch_12_0_0_encounter_events_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsVisibilityMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact three-member set and metadata MinValue=0, MaxValue=2, NumValues=3."
+      ],
+      "commit": "bf17614b988cba98d936c789b30c919bf20f5952",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact family membership, and metadata. Encounter-event visibility behavior, transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: bf17614b988cba98d936c789b30c919bf20f5952."
     },
     {
       "id": "added:Enum.EncounterEventsVisibilityMeta.NumValues",
       "symbol": "Enum.EncounterEventsVisibilityMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventsVisibilityMeta.NumValues with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Shared Edit Mode enum data publishes the EncounterEventsVisibility member values Always=0, InEncounter=1, and DeprecatedHidden=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime fallback publishes the matching EncounterEventsVisibility members and metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching explicit and guarded enum data without a retail 12.0.0 correction for this family.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete set Always=0, InEncounter=1, DeprecatedHidden=2 as Lua numbers with no extras, plus metadata MinValue=0, MaxValue=2, NumValues=3.",
+          "source_hash": "42a664c627f2a9b1935000b21152cbb6b02a27146217816c665d0068b896656f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventsVisibilityMeta.NumValues with numeric value 3.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_visibility_enums.rs::test_patch_12_0_0_encounter_events_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsVisibilityMeta.NumValues as a Lua number with exact retail 12.0.0 value 3; the focused namespace test also requires the exact three-member set and metadata MinValue=0, MaxValue=2, NumValues=3."
+      ],
+      "commit": "bf17614b988cba98d936c789b30c919bf20f5952",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 3, exact family membership, and metadata. Encounter-event visibility behavior, transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: bf17614b988cba98d936c789b30c919bf20f5952."
     },
     {
       "id": "added:Enum.EncounterTimelineEventSortDirection.Ascending",

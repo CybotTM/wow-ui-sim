@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify encounter events visibility enums
+
+The six retail 12.0.0 `Enum.EncounterEventsVisibility.*` and `Enum.EncounterEventsVisibilityMeta.*` rows are best-effort/behavioral: Always=0, InEncounter=1, DeprecatedHidden=2; metadata MinValue=0, MaxValue=2, NumValues=3. Evidence is bounded to startup publication, Lua numeric types, exact complete member set, and metadata. Focused proof is at bf17614b988cba98d936c789b30c919bf20f5952. No runtime drift was found. Encounter-event visibility behavior, transitions, consumers, persistence, and lifecycle remain unclaimed. Current totals are **1322 best-effort, 982 evidence-required, 2 exception-requested, and 1104 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify encounter-events orientation enums
 
 Classified exactly five retail 12.0.0 `Enum.EncounterEventsOrientation.*` rows as best-effort/behavioral: Horizontal=0, Vertical=1; metadata MinValue=0, MaxValue=1, NumValues=2. Evidence is bounded to startup publication, Lua numeric types, exact complete member set, and metadata. Focused proof is at f59d146fd340eddd9761c1828e00f672afcd4ba3. No runtime drift was found. Layout/orientation behavior, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1316 best-effort, 982 evidence-required, 2 exception-requested, and 1110 untriaged** (3410 rows).
