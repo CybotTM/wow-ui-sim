@@ -18,6 +18,7 @@ mod frames_and_attributes;
 mod global_functions;
 mod housing_result;
 mod item_collection_secret_aspects;
+mod patch_12_0_0_audit_enums;
 mod patch_12_0_0_constants;
 mod patch_12_0_0_cooldown_housing_enums;
 mod patch_12_0_0_small_enums;
