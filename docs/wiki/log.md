@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Correct and classify combat-audio spec-setting enums
+
+Corrected the retail 12.0.0 `Enum.CombatAudioAlertSpecSetting` fallback by removing later-epoch `Resource1Voice`, `Resource1Volume`, `Resource2Voice`, and `Resource2Volume` members and restoring the checked-in values: `Resource1Percent=0`, `Resource1Format=1`, `Resource2Percent=2`, `Resource2Format=3`, and `SayIfTargeted=4`; metadata is `MinValue=0`, `MaxValue=4`, `NumValues=5`. Focused startup proof is committed at `5ff1d782f8c83aa8d972a608c31b62c6d89e92a6`. The eight rows are best-effort/behavioral, limited to exact numeric publication, metadata, and absence of those later-epoch members; combat-audio configuration persistence, narration, resource/target state, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1064 best-effort, 982 evidence-required, 2 exception-requested, and 1362 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify combat-audio targeted-state enums
 
 Classified the seven `Enum.CombatAudioAlertSayIfTargetedType.*` and `Enum.CombatAudioAlertSayIfTargetedTypeMeta.*` rows as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; aggro/target detection, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1056 best-effort, 982 evidence-required, 2 exception-requested, and 1370 untriaged** (3410 rows).

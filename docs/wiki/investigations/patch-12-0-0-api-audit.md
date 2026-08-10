@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1056 best-effort, 982 evidence-required, 2 exception-requested, and 1370 untriaged rows** (3410 total).
+Current manifest totals are **1064 best-effort, 982 evidence-required, 2 exception-requested, and 1362 untriaged rows** (3410 total).
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
@@ -27,6 +27,8 @@ The eight `Enum.CombatAudioAlertPlayerCastFormatValues.*` and `Enum.CombatAudioA
 The nine `Enum.CombatAudioAlertPlayerHealthFormatValues.*` and `Enum.CombatAudioAlertPlayerHealthFormatValuesMeta.*` rows are best-effort/behavioral, bounded to exact startup enum/metadata numeric publication and values; health narration, percent/divisor formatting, configuration, sound side effects, and lifecycle remain unclaimed.
 
 The nine `Enum.CombatAudioAlertPlayerResourceFormatValues.*` and `Enum.CombatAudioAlertPlayerResourceFormatValuesMeta.*` rows are best-effort/behavioral, bounded to exact startup enum/metadata numeric publication and values; resource narration, percent/divisor formatting, resource selection, configuration, sound side effects, and lifecycle remain unclaimed. The seven `Enum.CombatAudioAlertSayIfTargetedType.*` and `Enum.CombatAudioAlertSayIfTargetedTypeMeta.*` rows are best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; aggro/target detection, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
+
+The eight `Enum.CombatAudioAlertSpecSetting.*` and `Enum.CombatAudioAlertSpecSettingMeta.*` rows are best-effort/behavioral. Focused retail 12.0.0 startup proof at `5ff1d782f8c83aa8d972a608c31b62c6d89e92a6` asserts exact Lua numeric publication: `Resource1Percent=0`, `Resource1Format=1`, `Resource2Percent=2`, `Resource2Format=3`, `SayIfTargeted=4`, with metadata `MinValue=0`, `MaxValue=4`, and `NumValues=5`; it also asserts later-epoch `Resource1Voice`, `Resource1Volume`, `Resource2Voice`, and `Resource2Volume` members are absent after correcting the stale fallback. Combat-audio configuration persistence, narration, resource/target state, sound side effects, transitions, and lifecycle remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 
