@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify DamageMeterSessionType enums
+
+Classified exactly six retail 12.0.0 `Enum.DamageMeterSessionType.*` and `Enum.DamageMeterSessionTypeMeta.*` rows as best-effort/behavioral: `Overall=0`, `Current=1`, `Expired=2`; metadata `MinValue=0`, `MaxValue=2`, and `NumValues=3`. Evidence is bounded to startup enum/metadata publication, Lua numeric type, and exact values. Focused proof is at `319d5c3ee5837ffe5a7bf1b8ba92d0892a00a0bf`. Damage-meter session selection, aggregation, expiration, persistence, consumers, transitions, and lifecycle remain unclaimed. Current totals are **1164 best-effort, 982 evidence-required, 2 exception-requested, and 1262 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify DamageMeterOverrideType enums
 
 Classified exactly eight retail 12.0.0 `Enum.DamageMeterOverrideType.*` and `Enum.DamageMeterOverrideTypeMeta.*` rows as best-effort/behavioral: `Ignore=0`, `AllowFriendlyFire=1`, `RedirectSourceToOwner=2`, `RedirectSourceToAuraCaster=3`, and `IgnoreForAbsorbSpell=4`; metadata `MinValue=0`, `MaxValue=4`, and `NumValues=5`. Evidence is bounded to startup enum/metadata publication, Lua numeric type, and exact values. Focused proof is at `cbbb9064bab0a7aebe4451834bbe77e89d5b951d`. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1158 best-effort, 982 evidence-required, 2 exception-requested, and 1268 untriaged** (3410 rows).
