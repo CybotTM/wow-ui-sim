@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify WeeklyRewards progress rows
+
+Classified `C_WeeklyRewards.GetSortedProgressForActivity` and `WeeklyRewardActivityTierProgress.activityTierID`, `.difficulty`, and `.numPoints` as evidence-required/unsafe: the API is absent, and current Great Vault state lacks tier IDs, difficulty, points, and shared-difficulty sorting. Field/result/event/persistence/lifecycle semantics remain unresolved. Current totals are **901 best-effort, 946 evidence-required, 2 exception-requested, and 1561 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify Prey Hunt widget visualization
 
 Classified `C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo` and its 16 `PreyHuntProgressWidgetVisualizationInfo` fields as evidence-required/unsafe: the API is absent and no Prey Hunt widget state or payload producer exists. Widget lookup, typed fields, timer/progress/animation/tooltip/texture/model values, refresh, events, persistence, and lifecycle remain unresolved. Current totals are **901 best-effort, 942 evidence-required, 2 exception-requested, and 1565 untriaged** (3410 rows).

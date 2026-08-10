@@ -24796,17 +24796,42 @@
       "id": "added:C_WeeklyRewards.GetSortedProgressForActivity",
       "symbol": "C_WeeklyRewards.GetSortedProgressForActivity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds WeeklyRewardChestThresholdType and combineSharedDifficulty inputs returning an array of WeeklyRewardActivityTierProgress.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/state_backed_queries.rs",
+          "summary": "Current C_WeeklyRewards registration models basic activities and reward flags only, not sorted tier progress or shared-difficulty aggregation.",
+          "source_hash": "a1333759cfa3b256db3736104b61dc14bd14df01c4dcc482b1c0b24fa4442b21"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "summary": "Current GreatVaultActivity state has activity type/index/threshold/progress/level only and no tier ID, difficulty, or numPoints fields.",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_vault_api.rs",
+          "summary": "Existing vault tests cover basic activity mutation/filtering/clearing, not sorted tier progress or these fields.",
+          "source_hash": "f349298b69164370534171ab9406a8148149aaede56e4918cdbc7bdff70eb9e9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: GetSortedProgressForActivity is absent and current vault state has no tier sorting or shared-difficulty aggregation. Threshold-type behavior, result ordering, empty/combined cases, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_WeeklyRewards.WeeklyRewardActivityTierProgress",
@@ -24836,49 +24861,124 @@
       "id": "added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.activityTierID",
       "symbol": "C_WeeklyRewards.WeeklyRewardActivityTierProgress.activityTierID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required numeric activityTierID field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/state_backed_queries.rs",
+          "summary": "Current C_WeeklyRewards registration models basic activities and reward flags only, not sorted tier progress or shared-difficulty aggregation.",
+          "source_hash": "a1333759cfa3b256db3736104b61dc14bd14df01c4dcc482b1c0b24fa4442b21"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "summary": "Current GreatVaultActivity state has activity type/index/threshold/progress/level only and no tier ID, difficulty, or numPoints fields.",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_vault_api.rs",
+          "summary": "Existing vault tests cover basic activity mutation/filtering/clearing, not sorted tier progress or these fields.",
+          "source_hash": "f349298b69164370534171ab9406a8148149aaede56e4918cdbc7bdff70eb9e9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current weekly-reward activity rows do not emit activityTierID and no tier model exists. Field presence/type/value, tier relationships, sorting, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.difficulty",
       "symbol": "C_WeeklyRewards.WeeklyRewardActivityTierProgress.difficulty",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required numeric difficulty field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/state_backed_queries.rs",
+          "summary": "Current C_WeeklyRewards registration models basic activities and reward flags only, not sorted tier progress or shared-difficulty aggregation.",
+          "source_hash": "a1333759cfa3b256db3736104b61dc14bd14df01c4dcc482b1c0b24fa4442b21"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "summary": "Current GreatVaultActivity state has activity type/index/threshold/progress/level only and no tier ID, difficulty, or numPoints fields.",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_vault_api.rs",
+          "summary": "Existing vault tests cover basic activity mutation/filtering/clearing, not sorted tier progress or these fields.",
+          "source_hash": "f349298b69164370534171ab9406a8148149aaede56e4918cdbc7bdff70eb9e9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current weekly-reward activity rows do not emit difficulty and no tier-difficulty model exists. Field presence/type/value, shared-difficulty aggregation, sorting, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.numPoints",
       "symbol": "C_WeeklyRewards.WeeklyRewardActivityTierProgress.numPoints",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required numeric numPoints field.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/state_backed_queries.rs",
+          "summary": "Current C_WeeklyRewards registration models basic activities and reward flags only, not sorted tier progress or shared-difficulty aggregation.",
+          "source_hash": "a1333759cfa3b256db3736104b61dc14bd14df01c4dcc482b1c0b24fa4442b21"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/collections.rs",
+          "summary": "Current GreatVaultActivity state has activity type/index/threshold/progress/level only and no tier ID, difficulty, or numPoints fields.",
+          "source_hash": "799d20167dd15d6ba1989771a7607f960ff2f9a5e44475ffa85da705bb8c1dcf"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_vault_api.rs",
+          "summary": "Existing vault tests cover basic activity mutation/filtering/clearing, not sorted tier progress or these fields.",
+          "source_hash": "f349298b69164370534171ab9406a8148149aaede56e4918cdbc7bdff70eb9e9"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: current weekly-reward activity rows expose progress rather than tier numPoints and no points-per-tier model exists. Field presence/type/value, aggregation, sorting, refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:Constants.CAAConstants.CAAEnabledDefault",

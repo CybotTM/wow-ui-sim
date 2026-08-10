@@ -1,7 +1,7 @@
 - The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, and 15 DeprecatedCombatLog wrappers (10 CombatLog, 2 CombatText, 3 DeathRecap), plus 3 InstanceEncounter wrappers, are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The five chat/spell wrappers are separately covered by `patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward`; `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` are classified evidence-required/unsafe because their retained fixture-only compatibility semantics remain unproven.
 # Patch API audit manifest
 
-The current 12.0.0 manifest has **901 best-effort, 942 evidence-required, 2 exception-requested, and 1565 untriaged rows** (3410 total).
+The current 12.0.0 manifest has **901 best-effort, 946 evidence-required, 2 exception-requested, and 1561 untriaged rows** (3410 total).
 
 `C_Tutorial.GetCombatEventInfo` is evidence-required/unsafe: the explicit implementation is a zero-result no-op while the checked-in source provides no output schema; authoritative return semantics, combat state/producer/timing, persistence, and lifecycle remain unresolved.
 
@@ -18,6 +18,8 @@ The nine CatalogShopVirtualCurrencyConstants and CombatLog constants are best-ef
 `C_TooltipComparison.CompareItem` is evidence-required/unsafe: no native C_TooltipComparison implementation or comparison-data model exists. Protected-call behavior, item selection, tooltip rendering/anchors/deltas, cleanup, and lifecycle remain unresolved.
 
 `C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo` and its 16 `PreyHuntProgressWidgetVisualizationInfo` fields are evidence-required/unsafe: the API is absent and no Prey Hunt widget state or payload producer exists. Widget lookup, typed fields, timer/progress/animation/tooltip/texture/model values, refresh, events, persistence, and lifecycle remain unresolved.
+
+`C_WeeklyRewards.GetSortedProgressForActivity` and `WeeklyRewardActivityTierProgress.activityTierID`, `.difficulty`, and `.numPoints` are evidence-required/unsafe: the API is absent, and current Great Vault state lacks tier IDs, difficulty, points, and shared-difficulty sorting. Field/result/event/persistence/lifecycle semantics remain unresolved.
 
 `C_SpellBook.FindBaseSpellByID`, `FindFlyoutSlotBySpellID`, `FindSpellOverrideByID`, `GetSpellBookItemChargeDuration`, `GetSpellBookItemCooldownDuration`, and `GetSpellBookItemLossOfControlCooldownDuration` are evidence-required/unsafe: mapping fallbacks are nil/input-ID compatibility only and no flyout/override model exists; duration APIs lack slot/bank cooldown state and a LuaDurationObject producer. Known/unknown mappings, required/nilable results, valid slots/banks, timing/expiration, refresh, object lifetime, and lifecycle remain unproven.
 

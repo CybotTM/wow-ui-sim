@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **901 best-effort, 942 evidence-required, 2 exception-requested, and 1565 untriaged rows** (3410 total).
+Current manifest totals are **901 best-effort, 946 evidence-required, 2 exception-requested, and 1561 untriaged rows** (3410 total).
 
 `C_Tutorial.GetCombatEventInfo` is evidence-required/unsafe: the explicit implementation is a zero-result no-op while the checked-in source provides no output schema; authoritative return semantics, combat state/producer/timing, persistence, and lifecycle remain unresolved.
 
@@ -21,6 +21,8 @@ The nine CatalogShopVirtualCurrencyConstants and CombatLog constants are best-ef
 `C_TooltipComparison.CompareItem` is evidence-required/unsafe: no native C_TooltipComparison implementation or comparison-data model exists. Protected-call behavior, item selection, tooltip rendering/anchors/deltas, cleanup, and lifecycle remain unresolved.
 
 `C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo` and its 16 `PreyHuntProgressWidgetVisualizationInfo` fields are evidence-required/unsafe: the API is absent and no Prey Hunt widget state or payload producer exists. Widget lookup, typed fields, timer/progress/animation/tooltip/texture/model values, refresh, events, persistence, and lifecycle remain unresolved.
+
+`C_WeeklyRewards.GetSortedProgressForActivity` and `WeeklyRewardActivityTierProgress.activityTierID`, `.difficulty`, and `.numPoints` are evidence-required/unsafe: the API is absent, and current Great Vault state lacks tier IDs, difficulty, points, and shared-difficulty sorting. Field/result/event/persistence/lifecycle semantics remain unresolved.
 
 `C_SpellBook.FindBaseSpellByID`, `FindFlyoutSlotBySpellID`, `FindSpellOverrideByID`, `GetSpellBookItemChargeDuration`, `GetSpellBookItemCooldownDuration`, and `GetSpellBookItemLossOfControlCooldownDuration` are evidence-required/unsafe: mapping fallbacks are nil/input-ID compatibility only and no flyout/override model exists; duration APIs lack slot/bank cooldown state and a LuaDurationObject producer. Known/unknown mappings, required/nilable results, valid slots/banks, timing/expiration, refresh, object lifetime, and lifecycle remain unproven.
 

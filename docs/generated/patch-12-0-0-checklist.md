@@ -762,11 +762,11 @@
 762. [evidence-required] `added:C_UnitAuras.GetUnitAuraInstanceIDs` — unsafe
 763. [evidence-required] `added:C_UnitAuras.TriggerPrivateAuraShowDispelType` — unsafe
 764. [evidence-required] `added:C_UnitAurasPrivate.SetShowDispelTypeCallback` — unsafe
-765. [untriaged] `added:C_WeeklyRewards.GetSortedProgressForActivity` — untriaged
+765. [evidence-required] `added:C_WeeklyRewards.GetSortedProgressForActivity` — unsafe
 766. [best-effort] `added:C_WeeklyRewards.WeeklyRewardActivityTierProgress` — provenance-only
-767. [untriaged] `added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.activityTierID` — untriaged
-768. [untriaged] `added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.difficulty` — untriaged
-769. [untriaged] `added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.numPoints` — untriaged
+767. [evidence-required] `added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.activityTierID` — unsafe
+768. [evidence-required] `added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.difficulty` — unsafe
+769. [evidence-required] `added:C_WeeklyRewards.WeeklyRewardActivityTierProgress.numPoints` — unsafe
 770. [best-effort] `added:Constants.CAAConstants.CAAEnabledDefault` — behavioral
 771. [best-effort] `added:Constants.CAAConstants.CAAFrequencyDefault` — behavioral
 772. [best-effort] `added:Constants.CAAConstants.CAAFrequencyMax` — behavioral
