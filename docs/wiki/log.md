@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify DurationTimeModifier enums
+
+Classified exactly five retail 12.0.0 `Enum.DurationTimeModifier.*` and `Enum.DurationTimeModifierMeta.*` rows as best-effort/behavioral: `RealTime=0`, `BaseTime=1`; metadata `MinValue=0`, `MaxValue=1`, and `NumValues=2`. Evidence is bounded to startup enum/metadata publication, Lua numeric type, and exact values. Focused proof is at `b846f4833e508d4f440b5a89c3194cc91a5f0384`. Duration calculations, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1230 best-effort, 982 evidence-required, 2 exception-requested, and 1196 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify DungeonEncounterXCreatureFlags enums
 
 Classified exactly six retail 12.0.0 `Enum.DungeonEncounterXCreatureFlags.*` and `Enum.DungeonEncounterXCreatureFlagsMeta.*` rows as best-effort/behavioral: `BossCreature=1`, `DropLootImmediately=2`, `DoNotDespawnOnSuccess=4`; metadata `MinValue=1`, `MaxValue=4`, and `NumValues=3`. Evidence is bounded to startup enum/metadata publication, Lua numeric type, and exact values. Focused proof is at `8cb0dda90867aed71a06eb707b2c836dcc2d872c`. Creature flag interpretation, loot timing, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1225 best-effort, 982 evidence-required, 2 exception-requested, and 1201 untriaged** (3410 rows).

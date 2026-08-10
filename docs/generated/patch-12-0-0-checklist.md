@@ -1322,11 +1322,11 @@
 1322. [best-effort] `added:Enum.DungeonEncounterXCreatureFlagsMeta.MaxValue` — behavioral
 1323. [best-effort] `added:Enum.DungeonEncounterXCreatureFlagsMeta.MinValue` — behavioral
 1324. [best-effort] `added:Enum.DungeonEncounterXCreatureFlagsMeta.NumValues` — behavioral
-1325. [untriaged] `added:Enum.DurationTimeModifier.BaseTime` — untriaged
-1326. [untriaged] `added:Enum.DurationTimeModifier.RealTime` — untriaged
-1327. [untriaged] `added:Enum.DurationTimeModifierMeta.MaxValue` — untriaged
-1328. [untriaged] `added:Enum.DurationTimeModifierMeta.MinValue` — untriaged
-1329. [untriaged] `added:Enum.DurationTimeModifierMeta.NumValues` — untriaged
+1325. [best-effort] `added:Enum.DurationTimeModifier.BaseTime` — behavioral
+1326. [best-effort] `added:Enum.DurationTimeModifier.RealTime` — behavioral
+1327. [best-effort] `added:Enum.DurationTimeModifierMeta.MaxValue` — behavioral
+1328. [best-effort] `added:Enum.DurationTimeModifierMeta.MinValue` — behavioral
+1329. [best-effort] `added:Enum.DurationTimeModifierMeta.NumValues` — behavioral
 1330. [untriaged] `added:Enum.EditModeAccountSetting.ShowDamageMeter` — untriaged
 1331. [untriaged] `added:Enum.EditModeAccountSetting.ShowEncounterEvents` — untriaged
 1332. [untriaged] `added:Enum.EditModeAccountSetting.ShowExternalDefensives` — untriaged

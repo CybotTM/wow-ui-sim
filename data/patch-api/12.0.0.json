@@ -46525,81 +46525,196 @@
       "id": "added:Enum.DurationTimeModifier.BaseTime",
       "symbol": "Enum.DurationTimeModifier.BaseTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DurationTimeModifier.BaseTime with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DurationTimeModifier.BaseTime with numeric value 1 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DurationTimeModifier members and metadata are Lua numbers with exact values.",
+          "source_hash": "d298d3bd060ca8e8bf1f49cec1a8ddf5795409c499009f5d4ca4f5df2db20458"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs::test_patch_12_0_0_duration_time_modifier_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DurationTimeModifier.BaseTime as Lua number with exact value 1."
+      ],
+      "commit": "b846f4833e508d4f440b5a89c3194cc91a5f0384",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DurationTimeModifier.BaseTime. Duration calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b846f4833e508d4f440b5a89c3194cc91a5f0384."
     },
     {
       "id": "added:Enum.DurationTimeModifier.RealTime",
       "symbol": "Enum.DurationTimeModifier.RealTime",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DurationTimeModifier.RealTime with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DurationTimeModifier.RealTime with numeric value 0 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DurationTimeModifier members and metadata are Lua numbers with exact values.",
+          "source_hash": "d298d3bd060ca8e8bf1f49cec1a8ddf5795409c499009f5d4ca4f5df2db20458"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs::test_patch_12_0_0_duration_time_modifier_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DurationTimeModifier.RealTime as Lua number with exact value 0."
+      ],
+      "commit": "b846f4833e508d4f440b5a89c3194cc91a5f0384",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DurationTimeModifier.RealTime. Duration calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b846f4833e508d4f440b5a89c3194cc91a5f0384."
     },
     {
       "id": "added:Enum.DurationTimeModifierMeta.MaxValue",
       "symbol": "Enum.DurationTimeModifierMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DurationTimeModifierMeta.MaxValue with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DurationTimeModifierMeta.MaxValue with numeric value 1 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DurationTimeModifier members and metadata are Lua numbers with exact values.",
+          "source_hash": "d298d3bd060ca8e8bf1f49cec1a8ddf5795409c499009f5d4ca4f5df2db20458"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs::test_patch_12_0_0_duration_time_modifier_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DurationTimeModifierMeta.MaxValue as Lua number with exact value 1."
+      ],
+      "commit": "b846f4833e508d4f440b5a89c3194cc91a5f0384",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DurationTimeModifierMeta.MaxValue. Duration calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b846f4833e508d4f440b5a89c3194cc91a5f0384."
     },
     {
       "id": "added:Enum.DurationTimeModifierMeta.MinValue",
       "symbol": "Enum.DurationTimeModifierMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DurationTimeModifierMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DurationTimeModifierMeta.MinValue with numeric value 0 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DurationTimeModifier members and metadata are Lua numbers with exact values.",
+          "source_hash": "d298d3bd060ca8e8bf1f49cec1a8ddf5795409c499009f5d4ca4f5df2db20458"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs::test_patch_12_0_0_duration_time_modifier_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DurationTimeModifierMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "b846f4833e508d4f440b5a89c3194cc91a5f0384",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DurationTimeModifierMeta.MinValue. Duration calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b846f4833e508d4f440b5a89c3194cc91a5f0384."
     },
     {
       "id": "added:Enum.DurationTimeModifierMeta.NumValues",
       "symbol": "Enum.DurationTimeModifierMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DurationTimeModifierMeta.NumValues with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DurationTimeModifierMeta.NumValues with numeric value 2 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DurationTimeModifier members and metadata are Lua numbers with exact values.",
+          "source_hash": "d298d3bd060ca8e8bf1f49cec1a8ddf5795409c499009f5d4ca4f5df2db20458"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_duration_time_modifier_enums.rs::test_patch_12_0_0_duration_time_modifier_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DurationTimeModifierMeta.NumValues as Lua number with exact value 2."
+      ],
+      "commit": "b846f4833e508d4f440b5a89c3194cc91a5f0384",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.DurationTimeModifierMeta.NumValues. Duration calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b846f4833e508d4f440b5a89c3194cc91a5f0384."
     },
     {
       "id": "added:Enum.EditModeAccountSetting.ShowDamageMeter",

@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1225 best-effort, 982 evidence-required, 2 exception-requested, and 1201 untriaged rows** (3410 total).
+Current manifest totals are **1230 best-effort, 982 evidence-required, 2 exception-requested, and 1196 untriaged rows** (3410 total).
 
 The six retail 12.0.0 `Enum.DamageMeterVisibility.*` and `Enum.DamageMeterVisibilityMeta.*` rows are best-effort/behavioral, bounded to startup enum/metadata publication, Lua numeric type, and exact values (`Always=0`, `InCombat=1`, `Hidden=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`). Focused proof is at `7652c9bbee3fe0f41a924ec47689ae311afa34a0`. Visibility behavior, combat transitions, consumers, persistence, and lifecycle remain unclaimed.
 
@@ -13,6 +13,8 @@ The thirteen retail 12.0.0 `Enum.DungeonEncounterFlags.*` and `Enum.DungeonEncou
 The eight retail 12.0.0 `Enum.DungeonEncounterTriggerType.*` and `Enum.DungeonEncounterTriggerTypeMeta.*` rows are best-effort/behavioral, bounded to startup enum/metadata publication, Lua numeric type, and exact values (`Invalid=0`, `OnStart=1`, `OnComplete=2`, `OnEnd=3`, `PreviouslyCompleted=4`; metadata `MinValue=0`, `MaxValue=4`, `NumValues=5`). Focused proof is at `17cd655bc64490cb39b0377f669160d876ef8af8`. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
 The six retail 12.0.0 `Enum.DungeonEncounterXCreatureFlags.*` and `Enum.DungeonEncounterXCreatureFlagsMeta.*` rows are best-effort/behavioral, bounded to startup enum/metadata publication, Lua numeric type, and exact values (`BossCreature=1`, `DropLootImmediately=2`, `DoNotDespawnOnSuccess=4`; metadata `MinValue=1`, `MaxValue=4`, `NumValues=3`). Focused proof is at `8cb0dda90867aed71a06eb707b2c836dcc2d872c`. Creature flag interpretation, loot timing, consumers, persistence, transitions, and lifecycle remain unclaimed.
+
+The five retail 12.0.0 `Enum.DurationTimeModifier.*` and `Enum.DurationTimeModifierMeta.*` rows are best-effort/behavioral, bounded to startup enum/metadata publication, Lua numeric type, and exact values (`RealTime=0`, `BaseTime=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `b846f4833e508d4f440b5a89c3194cc91a5f0384`. Duration calculations, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
 The six removed `Enum.ExpansionLandingPageType.*` and `Enum.ExpansionLandingPageTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup absence of `None`, `Dragonflight`, `WarWithin`, and metadata `MinValue`, `MaxValue`, and `NumValues` after the retail-12.0.0 post-compat epoch override. Focused proof is at `54416879b5c6305ed956f347fe0a17e9fb2ccb28`. Landing-page selection, UI behavior, transitions, and lifecycle remain unclaimed.
 
