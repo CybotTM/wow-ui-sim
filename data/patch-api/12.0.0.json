@@ -56685,113 +56685,358 @@
       "id": "added:Enum.NamePlateEnemyNpcAuraDisplay.Buffs",
       "symbol": "Enum.NamePlateEnemyNpcAuraDisplay.Buffs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateEnemyNpcAuraDisplay.Buffs with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateEnemyNpcAuraDisplay.Buffs as a Lua number with exact value 1.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete four-member set (None=0, Buffs=1, Debuffs=2, CrowdControl=3) as Lua numbers with metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "2732ac6c6d9d424094fb9ff310b5d83eafbe381348871f9eb0710589f6be4963"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateEnemyNpcAuraDisplay.Buffs with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateEnemyNpcAuraDisplay.Buffs as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact four-member set and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "6f44ef24d370a7b292a389b6e2dc634d56746671",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, exact family membership, and metadata. Nameplate aura rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: 6f44ef24d370a7b292a389b6e2dc634d56746671."
     },
     {
       "id": "added:Enum.NamePlateEnemyNpcAuraDisplay.CrowdControl",
       "symbol": "Enum.NamePlateEnemyNpcAuraDisplay.CrowdControl",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateEnemyNpcAuraDisplay.CrowdControl with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateEnemyNpcAuraDisplay.CrowdControl as a Lua number with exact value 3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete four-member set (None=0, Buffs=1, Debuffs=2, CrowdControl=3) as Lua numbers with metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "2732ac6c6d9d424094fb9ff310b5d83eafbe381348871f9eb0710589f6be4963"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateEnemyNpcAuraDisplay.CrowdControl with numeric value 3.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateEnemyNpcAuraDisplay.CrowdControl as a Lua number with exact retail 12.0.0 value 3; the focused namespace test also requires the exact four-member set and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "6f44ef24d370a7b292a389b6e2dc634d56746671",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 3, exact family membership, and metadata. Nameplate aura rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: 6f44ef24d370a7b292a389b6e2dc634d56746671."
     },
     {
       "id": "added:Enum.NamePlateEnemyNpcAuraDisplay.Debuffs",
       "symbol": "Enum.NamePlateEnemyNpcAuraDisplay.Debuffs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateEnemyNpcAuraDisplay.Debuffs with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateEnemyNpcAuraDisplay.Debuffs as a Lua number with exact value 2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete four-member set (None=0, Buffs=1, Debuffs=2, CrowdControl=3) as Lua numbers with metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "2732ac6c6d9d424094fb9ff310b5d83eafbe381348871f9eb0710589f6be4963"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateEnemyNpcAuraDisplay.Debuffs with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateEnemyNpcAuraDisplay.Debuffs as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact four-member set and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "6f44ef24d370a7b292a389b6e2dc634d56746671",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 2, exact family membership, and metadata. Nameplate aura rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: 6f44ef24d370a7b292a389b6e2dc634d56746671."
     },
     {
       "id": "added:Enum.NamePlateEnemyNpcAuraDisplay.None",
       "symbol": "Enum.NamePlateEnemyNpcAuraDisplay.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateEnemyNpcAuraDisplay.None with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateEnemyNpcAuraDisplay.None as a Lua number with exact value 0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete four-member set (None=0, Buffs=1, Debuffs=2, CrowdControl=3) as Lua numbers with metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "2732ac6c6d9d424094fb9ff310b5d83eafbe381348871f9eb0710589f6be4963"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateEnemyNpcAuraDisplay.None with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateEnemyNpcAuraDisplay.None as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact four-member set and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "6f44ef24d370a7b292a389b6e2dc634d56746671",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact family membership, and metadata. Nameplate aura rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: 6f44ef24d370a7b292a389b6e2dc634d56746671."
     },
     {
       "id": "added:Enum.NamePlateEnemyNpcAuraDisplayMeta.MaxValue",
       "symbol": "Enum.NamePlateEnemyNpcAuraDisplayMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateEnemyNpcAuraDisplayMeta.MaxValue with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback metadata publishes MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete four-member set (None=0, Buffs=1, Debuffs=2, CrowdControl=3) as Lua numbers with metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "2732ac6c6d9d424094fb9ff310b5d83eafbe381348871f9eb0710589f6be4963"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateEnemyNpcAuraDisplayMeta.MaxValue with numeric value 3.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateEnemyNpcAuraDisplayMeta.MaxValue as a Lua number with exact retail 12.0.0 value 3; the focused namespace test also requires the exact four-member set and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "6f44ef24d370a7b292a389b6e2dc634d56746671",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, exact value 3, and the exact enemy-NPC aura display family boundary. Nameplate aura rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: 6f44ef24d370a7b292a389b6e2dc634d56746671."
     },
     {
       "id": "added:Enum.NamePlateEnemyNpcAuraDisplayMeta.MinValue",
       "symbol": "Enum.NamePlateEnemyNpcAuraDisplayMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateEnemyNpcAuraDisplayMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback metadata publishes MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete four-member set (None=0, Buffs=1, Debuffs=2, CrowdControl=3) as Lua numbers with metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "2732ac6c6d9d424094fb9ff310b5d83eafbe381348871f9eb0710589f6be4963"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateEnemyNpcAuraDisplayMeta.MinValue with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateEnemyNpcAuraDisplayMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact four-member set and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "6f44ef24d370a7b292a389b6e2dc634d56746671",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, exact value 0, and the exact enemy-NPC aura display family boundary. Nameplate aura rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: 6f44ef24d370a7b292a389b6e2dc634d56746671."
     },
     {
       "id": "added:Enum.NamePlateEnemyNpcAuraDisplayMeta.NumValues",
       "symbol": "Enum.NamePlateEnemyNpcAuraDisplayMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateEnemyNpcAuraDisplayMeta.NumValues with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback metadata publishes MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete four-member set (None=0, Buffs=1, Debuffs=2, CrowdControl=3) as Lua numbers with metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "2732ac6c6d9d424094fb9ff310b5d83eafbe381348871f9eb0710589f6be4963"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateEnemyNpcAuraDisplayMeta.NumValues with numeric value 4.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_enemy_npc_aura_display_enums.rs::test_patch_12_0_0_nameplate_enemy_npc_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateEnemyNpcAuraDisplayMeta.NumValues as a Lua number with exact retail 12.0.0 value 4; the focused namespace test also requires the exact four-member set and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "6f44ef24d370a7b292a389b6e2dc634d56746671",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, exact value 4, and the exact enemy-NPC aura display family boundary. Nameplate aura rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: 6f44ef24d370a7b292a389b6e2dc634d56746671."
     },
     {
       "id": "added:Enum.NamePlateEnemyPlayerAuraDisplay.Buffs",
