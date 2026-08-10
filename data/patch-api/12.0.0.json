@@ -42939,97 +42939,235 @@
       "id": "added:Enum.DamageMeterNumbers.Compact",
       "symbol": "Enum.DamageMeterNumbers.Compact",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterNumbers.Compact with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current enum data publishes Enum.DamageMeterNumbers.Compact with numeric value 1.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterNumbers members and metadata are Lua numbers with exact values.",
+          "source_hash": "68357587415211ed0dcaa8acf84109fcb1e3853c5a20eee985c1b2fba78bb5cc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs::test_patch_12_0_0_damage_meter_numbers_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterNumbers.Compact as Lua number with exact value 1."
+      ],
+      "commit": "fdcfc288a2048f1c29eb541e6699018cb56804fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DamageMeterNumbers.Compact. Damage-meter number formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: fdcfc288a2048f1c29eb541e6699018cb56804fe."
     },
     {
       "id": "added:Enum.DamageMeterNumbers.Complete",
       "symbol": "Enum.DamageMeterNumbers.Complete",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterNumbers.Complete with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current enum data publishes Enum.DamageMeterNumbers.Complete with numeric value 2.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterNumbers members and metadata are Lua numbers with exact values.",
+          "source_hash": "68357587415211ed0dcaa8acf84109fcb1e3853c5a20eee985c1b2fba78bb5cc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs::test_patch_12_0_0_damage_meter_numbers_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterNumbers.Complete as Lua number with exact value 2."
+      ],
+      "commit": "fdcfc288a2048f1c29eb541e6699018cb56804fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.DamageMeterNumbers.Complete. Damage-meter number formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: fdcfc288a2048f1c29eb541e6699018cb56804fe."
     },
     {
       "id": "added:Enum.DamageMeterNumbers.Minimal",
       "symbol": "Enum.DamageMeterNumbers.Minimal",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterNumbers.Minimal with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current enum data publishes Enum.DamageMeterNumbers.Minimal with numeric value 0.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterNumbers members and metadata are Lua numbers with exact values.",
+          "source_hash": "68357587415211ed0dcaa8acf84109fcb1e3853c5a20eee985c1b2fba78bb5cc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs::test_patch_12_0_0_damage_meter_numbers_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterNumbers.Minimal as Lua number with exact value 0."
+      ],
+      "commit": "fdcfc288a2048f1c29eb541e6699018cb56804fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DamageMeterNumbers.Minimal. Damage-meter number formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: fdcfc288a2048f1c29eb541e6699018cb56804fe."
     },
     {
       "id": "added:Enum.DamageMeterNumbersMeta.MaxValue",
       "symbol": "Enum.DamageMeterNumbersMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterNumbersMeta.MaxValue with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current enum data publishes Enum.DamageMeterNumbersMeta.MaxValue with numeric value 2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterNumbers members and metadata are Lua numbers with exact values.",
+          "source_hash": "68357587415211ed0dcaa8acf84109fcb1e3853c5a20eee985c1b2fba78bb5cc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs::test_patch_12_0_0_damage_meter_numbers_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterNumbersMeta.MaxValue as Lua number with exact value 2."
+      ],
+      "commit": "fdcfc288a2048f1c29eb541e6699018cb56804fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.DamageMeterNumbersMeta.MaxValue. Damage-meter number formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: fdcfc288a2048f1c29eb541e6699018cb56804fe."
     },
     {
       "id": "added:Enum.DamageMeterNumbersMeta.MinValue",
       "symbol": "Enum.DamageMeterNumbersMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterNumbersMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current enum data publishes Enum.DamageMeterNumbersMeta.MinValue with numeric value 0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterNumbers members and metadata are Lua numbers with exact values.",
+          "source_hash": "68357587415211ed0dcaa8acf84109fcb1e3853c5a20eee985c1b2fba78bb5cc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs::test_patch_12_0_0_damage_meter_numbers_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterNumbersMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "fdcfc288a2048f1c29eb541e6699018cb56804fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DamageMeterNumbersMeta.MinValue. Damage-meter number formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: fdcfc288a2048f1c29eb541e6699018cb56804fe."
     },
     {
       "id": "added:Enum.DamageMeterNumbersMeta.NumValues",
       "symbol": "Enum.DamageMeterNumbersMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.DamageMeterNumbersMeta.NumValues with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current enum data publishes Enum.DamageMeterNumbersMeta.NumValues with numeric value 3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterNumbers members and metadata are Lua numbers with exact values.",
+          "source_hash": "68357587415211ed0dcaa8acf84109fcb1e3853c5a20eee985c1b2fba78bb5cc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_numbers_enums.rs::test_patch_12_0_0_damage_meter_numbers_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterNumbersMeta.NumValues as Lua number with exact value 3."
+      ],
+      "commit": "fdcfc288a2048f1c29eb541e6699018cb56804fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 3 for Enum.DamageMeterNumbersMeta.NumValues. Damage-meter number formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: fdcfc288a2048f1c29eb541e6699018cb56804fe."
     },
     {
       "id": "added:Enum.DamageMeterOverrideType.AllowFriendlyFire",

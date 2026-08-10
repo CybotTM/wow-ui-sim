@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify DamageMeterNumbers enums
+
+Classified exactly six retail 12.0.0 `Enum.DamageMeterNumbers.*` and `Enum.DamageMeterNumbersMeta.*` rows as best-effort/behavioral: `Minimal=0`, `Compact=1`, `Complete=2`; metadata `MinValue=0`, `MaxValue=2`, and `NumValues=3`. Evidence is bounded to startup enum/metadata publication, Lua numeric type, and exact values. Focused proof is at `fdcfc288a2048f1c29eb541e6699018cb56804fe`. Damage-meter number formatting, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1150 best-effort, 982 evidence-required, 2 exception-requested, and 1276 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify crafting-order result enums
 
 Classified exactly two retail 12.0.0 `Enum.CraftingOrderResult.*` rows as best-effort/behavioral: `MissingCurrency=30` and `TooManyCurrencies=46`. Evidence is bounded to startup enum publication, Lua numeric type, and exact values. Focused proof is at `ac04f9fc55381073c01ba07d794d0ba0d06b0b91`. Crafting-order result production, interpretation, persistence, transitions, consumers, and lifecycle remain unclaimed. Current totals are **1144 best-effort, 982 evidence-required, 2 exception-requested, and 1282 untriaged** (3410 rows).
