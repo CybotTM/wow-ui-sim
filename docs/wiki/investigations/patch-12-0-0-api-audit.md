@@ -4,11 +4,13 @@
 
 ## Content
 
-Current manifest totals are **1279 best-effort, 982 evidence-required, 2 exception-requested, and 1147 untriaged rows** (3410 total).
+Current manifest totals are **1285 best-effort, 982 evidence-required, 2 exception-requested, and 1141 untriaged rows** (3410 total).
 
 The three retail 12.0.0 `Enum.EditModeSystem.*` rows are best-effort/behavioral: `PersonalResourceDisplay=21`, `EncounterEvents=22`, and `DamageMeter=23`. Focused proof is at `4d883c9647cf972d6b12b7b4982b9de634d293c5`; it asserts startup table existence, Lua numeric types, exact values, absence of later `TotemActionBar`, and metadata `MinValue=0`, `MaxValue=23`, `NumValues=24`. Root cause: shared sequential enum data included later `TotemActionBar=24`; the retail 12.0.0 override removes that member without shifting these values. Claims are bounded to startup publication, type, exact value, and namespace boundary; Edit Mode behavior, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
 The three retail 12.0.0 `Enum.EditModeUnitFrameSetting.*` rows are best-effort/behavioral: `AuraOrganizationType=18`, `IconSize=19`, and `Opacity=20`. Focused proof is at `509daf308b3e76d5f9768f8e694c887902190ca1`; it asserts startup table existence, Lua numeric types, exact values, absence of later `BigDefensiveIconSize`, and metadata `MinValue=0`, `MaxValue=20`, `NumValues=21`. Root cause: shared/current sequential enum data includes later `BigDefensiveIconSize=21` and fallback metadata `MaxValue=21`/`NumValues=22`; the retail 12.0.0 override removes that member and restores the metadata boundary without shifting the three target values. Claims are bounded to startup publication, type, exact values, and namespace boundary; unit-frame behavior, aura organization, sizing, opacity rendering, consumers, persistence, transitions, and lifecycle remain unclaimed.
+
+The six retail 12.0.0 `Enum.EncounterEventCastState.*` and `Enum.EncounterEventCastStateMeta.*` rows are best-effort/behavioral: `Casting=1`, `NotCasting=2`, `Expired=3`; metadata `MinValue=1`, `MaxValue=3`, `NumValues=3`. Focused proof is at `23852ce7b301bffecc3688984eab8b615a6df02f`; it asserts the exact three-member set, Lua numeric types, and metadata. The guarded runtime fallback matches retail 12.0.0 with no drift. Claims are bounded to startup publication and exact values/metadata; encounter-event cast behavior, producers, transitions, consumers, persistence, ordering, and lifecycle remain unclaimed.
 
 The six retail 12.0.0 `Enum.DamageMeterVisibility.*` and `Enum.DamageMeterVisibilityMeta.*` rows are best-effort/behavioral, bounded to startup enum/metadata publication, Lua numeric type, and exact values (`Always=0`, `InCombat=1`, `Hidden=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`). Focused proof is at `7652c9bbee3fe0f41a924ec47689ae311afa34a0`. Visibility behavior, combat transitions, consumers, persistence, and lifecycle remain unclaimed.
 
