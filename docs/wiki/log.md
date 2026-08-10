@@ -1,6 +1,10 @@
+## [2026-08-10] investigation | Classify nameplate threat-display enums
+
+The seven retail 12.0.0 `Enum.NamePlateThreatDisplay.*` and `Enum.NamePlateThreatDisplayMeta.*` rows are best-effort/behavioral: `None=0`, `Progressive=1`, `Flash=2`, `HealthBarColor=3`; metadata `MinValue=0`, `MaxValue=3`, `NumValues=4`. Focused proof is at `ad7cae26a`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found; the guarded fallback is authoritative. Claims are bounded to startup publication and exact values/metadata; nameplate threat rendering/display behavior, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1424 best-effort, 982 evidence-required, 2 exception-requested, and 1002 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify nameplate stack-type enums
 
-The six retail 12.0.0 `Enum.NamePlateStackType.*` and `Enum.NamePlateStackTypeMeta.*` rows are best-effort/behavioral: `None=0`, `Enemy=1`, `Friendly=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`. Focused proof is at `eece809a72b113d512b828e0d8163c4adb4296de`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found; the guarded fallback is authoritative. Claims are bounded to startup publication and exact values/metadata; nameplate stacking/layout/rendering, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1417 best-effort, 982 evidence-required, 2 exception-requested, and 1009 untriaged** (3410 rows).
+The six retail 12.0.0 `Enum.NamePlateStackType.*` and `Enum.NamePlateStackTypeMeta.*` rows are best-effort/behavioral: `None=0`, `Enemy=1`, `Friendly=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`. Focused proof is at `eece809a72b113d512b828e0d8163c4adb4296de`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found; the guarded fallback is authoritative. Claims are bounded to startup publication and exact values/metadata; nameplate stacking/layout/rendering, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1424 best-effort, 982 evidence-required, 2 exception-requested, and 1002 untriaged** (3410 rows).
 
 ## [2026-08-10] investigation | Classify nameplate style enums
 

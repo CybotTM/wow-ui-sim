@@ -59796,113 +59796,358 @@
       "id": "added:Enum.NamePlateThreatDisplay.Flash",
       "symbol": "Enum.NamePlateThreatDisplay.Flash",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NamePlateThreatDisplay.Flash with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3) and matching metadata (MinValue=0, MaxValue=3, NumValues=4); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for NamePlateThreatDisplay without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete four-member NamePlateThreatDisplay set as Lua numbers with no extras and metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "e37ee66997c14f7e7e425eff578396c2c62ddb5a32c33168a86016a30a1750b0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NamePlateThreatDisplay.Flash with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs::test_patch_12_0_0_nameplate_threat_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NamePlateThreatDisplay.Flash as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact four-member NamePlateThreatDisplay family and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "ad7cae26a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication as Lua numbers, the exact complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3), and metadata MinValue=0, MaxValue=3, NumValues=4. No runtime drift; the guarded fallback is authoritative. Nameplate threat rendering/display behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad7cae26a."
     },
     {
       "id": "added:Enum.NamePlateThreatDisplay.HealthBarColor",
       "symbol": "Enum.NamePlateThreatDisplay.HealthBarColor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NamePlateThreatDisplay.HealthBarColor with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3) and matching metadata (MinValue=0, MaxValue=3, NumValues=4); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for NamePlateThreatDisplay without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete four-member NamePlateThreatDisplay set as Lua numbers with no extras and metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "e37ee66997c14f7e7e425eff578396c2c62ddb5a32c33168a86016a30a1750b0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NamePlateThreatDisplay.HealthBarColor with numeric value 3.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs::test_patch_12_0_0_nameplate_threat_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NamePlateThreatDisplay.HealthBarColor as a Lua number with exact retail 12.0.0 value 3; the focused namespace test also requires the exact four-member NamePlateThreatDisplay family and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "ad7cae26a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication as Lua numbers, the exact complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3), and metadata MinValue=0, MaxValue=3, NumValues=4. No runtime drift; the guarded fallback is authoritative. Nameplate threat rendering/display behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad7cae26a."
     },
     {
       "id": "added:Enum.NamePlateThreatDisplay.None",
       "symbol": "Enum.NamePlateThreatDisplay.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NamePlateThreatDisplay.None with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3) and matching metadata (MinValue=0, MaxValue=3, NumValues=4); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for NamePlateThreatDisplay without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete four-member NamePlateThreatDisplay set as Lua numbers with no extras and metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "e37ee66997c14f7e7e425eff578396c2c62ddb5a32c33168a86016a30a1750b0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NamePlateThreatDisplay.None with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs::test_patch_12_0_0_nameplate_threat_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NamePlateThreatDisplay.None as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact four-member NamePlateThreatDisplay family and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "ad7cae26a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication as Lua numbers, the exact complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3), and metadata MinValue=0, MaxValue=3, NumValues=4. No runtime drift; the guarded fallback is authoritative. Nameplate threat rendering/display behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad7cae26a."
     },
     {
       "id": "added:Enum.NamePlateThreatDisplay.Progressive",
       "symbol": "Enum.NamePlateThreatDisplay.Progressive",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NamePlateThreatDisplay.Progressive with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3) and matching metadata (MinValue=0, MaxValue=3, NumValues=4); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for NamePlateThreatDisplay without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete four-member NamePlateThreatDisplay set as Lua numbers with no extras and metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "e37ee66997c14f7e7e425eff578396c2c62ddb5a32c33168a86016a30a1750b0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NamePlateThreatDisplay.Progressive with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs::test_patch_12_0_0_nameplate_threat_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NamePlateThreatDisplay.Progressive as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact four-member NamePlateThreatDisplay family and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "ad7cae26a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication as Lua numbers, the exact complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3), and metadata MinValue=0, MaxValue=3, NumValues=4. No runtime drift; the guarded fallback is authoritative. Nameplate threat rendering/display behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad7cae26a."
     },
     {
       "id": "added:Enum.NamePlateThreatDisplayMeta.MaxValue",
       "symbol": "Enum.NamePlateThreatDisplayMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NamePlateThreatDisplayMeta.MaxValue with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3) and matching metadata (MinValue=0, MaxValue=3, NumValues=4); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for NamePlateThreatDisplay without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete four-member NamePlateThreatDisplay set as Lua numbers with no extras and metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "e37ee66997c14f7e7e425eff578396c2c62ddb5a32c33168a86016a30a1750b0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NamePlateThreatDisplayMeta.MaxValue with numeric value 3.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs::test_patch_12_0_0_nameplate_threat_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NamePlateThreatDisplayMeta.MaxValue as a Lua number with exact retail 12.0.0 value 3; the focused namespace test also requires the exact four-member NamePlateThreatDisplay family and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "ad7cae26a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication as Lua numbers, the exact complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3), and metadata MinValue=0, MaxValue=3, NumValues=4. No runtime drift; the guarded fallback is authoritative. Nameplate threat rendering/display behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad7cae26a."
     },
     {
       "id": "added:Enum.NamePlateThreatDisplayMeta.MinValue",
       "symbol": "Enum.NamePlateThreatDisplayMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NamePlateThreatDisplayMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3) and matching metadata (MinValue=0, MaxValue=3, NumValues=4); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for NamePlateThreatDisplay without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete four-member NamePlateThreatDisplay set as Lua numbers with no extras and metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "e37ee66997c14f7e7e425eff578396c2c62ddb5a32c33168a86016a30a1750b0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NamePlateThreatDisplayMeta.MinValue with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs::test_patch_12_0_0_nameplate_threat_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NamePlateThreatDisplayMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact four-member NamePlateThreatDisplay family and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "ad7cae26a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication as Lua numbers, the exact complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3), and metadata MinValue=0, MaxValue=3, NumValues=4. No runtime drift; the guarded fallback is authoritative. Nameplate threat rendering/display behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad7cae26a."
     },
     {
       "id": "added:Enum.NamePlateThreatDisplayMeta.NumValues",
       "symbol": "Enum.NamePlateThreatDisplayMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NamePlateThreatDisplayMeta.NumValues with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3) and matching metadata (MinValue=0, MaxValue=3, NumValues=4); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for NamePlateThreatDisplay without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete four-member NamePlateThreatDisplay set as Lua numbers with no extras and metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "e37ee66997c14f7e7e425eff578396c2c62ddb5a32c33168a86016a30a1750b0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NamePlateThreatDisplayMeta.NumValues with numeric value 4.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_threat_display_enums.rs::test_patch_12_0_0_nameplate_threat_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NamePlateThreatDisplayMeta.NumValues as a Lua number with exact retail 12.0.0 value 4; the focused namespace test also requires the exact four-member NamePlateThreatDisplay family and metadata MinValue=0, MaxValue=3, NumValues=4."
+      ],
+      "commit": "ad7cae26a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication as Lua numbers, the exact complete NamePlateThreatDisplay family (None=0, Progressive=1, Flash=2, HealthBarColor=3), and metadata MinValue=0, MaxValue=3, NumValues=4. No runtime drift; the guarded fallback is authoritative. Nameplate threat rendering/display behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad7cae26a."
     },
     {
       "id": "added:Enum.NamePlateType.Enemy",
