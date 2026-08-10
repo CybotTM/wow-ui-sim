@@ -43719,97 +43719,271 @@
       "id": "added:Enum.DamageMeterSpellDetailsDisplayType.SpellAffected",
       "symbol": "Enum.DamageMeterSpellDetailsDisplayType.SpellAffected",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterSpellDetailsDisplayType.SpellAffected with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared generated enum data publishes the spell-details display namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
+          "source_hash": "8384807146217c1c330ea4121d806e5a92aa8dd5e0bc1cc800fa9de538dc21be"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "622e7301880e2e13da69034662e9a1c9a9df525a4c021443dd5d8b1db12381fc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs::test_patch_12_0_0_damage_meter_spell_details_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterSpellDetailsDisplayType.SpellAffected as Lua number with exact value 2 in the retail 12.0.0 surface."
+      ],
+      "commit": "5fce4c9814293c336b3b580c868ee992a00c79f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 2 for Enum.DamageMeterSpellDetailsDisplayType.SpellAffected, and absence of later Deaths and EnemyDamageTaken members. Spell-details display selection, formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fce4c9814293c336b3b580c868ee992a00c79f1."
     },
     {
       "id": "added:Enum.DamageMeterSpellDetailsDisplayType.SpellCasted",
       "symbol": "Enum.DamageMeterSpellDetailsDisplayType.SpellCasted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterSpellDetailsDisplayType.SpellCasted with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared generated enum data publishes the spell-details display namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
+          "source_hash": "8384807146217c1c330ea4121d806e5a92aa8dd5e0bc1cc800fa9de538dc21be"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "622e7301880e2e13da69034662e9a1c9a9df525a4c021443dd5d8b1db12381fc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs::test_patch_12_0_0_damage_meter_spell_details_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterSpellDetailsDisplayType.SpellCasted as Lua number with exact value 0 in the retail 12.0.0 surface."
+      ],
+      "commit": "5fce4c9814293c336b3b580c868ee992a00c79f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 0 for Enum.DamageMeterSpellDetailsDisplayType.SpellCasted, and absence of later Deaths and EnemyDamageTaken members. Spell-details display selection, formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fce4c9814293c336b3b580c868ee992a00c79f1."
     },
     {
       "id": "added:Enum.DamageMeterSpellDetailsDisplayType.UnitSpecificSpellCasted",
       "symbol": "Enum.DamageMeterSpellDetailsDisplayType.UnitSpecificSpellCasted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterSpellDetailsDisplayType.UnitSpecificSpellCasted with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared generated enum data publishes the spell-details display namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
+          "source_hash": "8384807146217c1c330ea4121d806e5a92aa8dd5e0bc1cc800fa9de538dc21be"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "622e7301880e2e13da69034662e9a1c9a9df525a4c021443dd5d8b1db12381fc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs::test_patch_12_0_0_damage_meter_spell_details_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterSpellDetailsDisplayType.UnitSpecificSpellCasted as Lua number with exact value 1 in the retail 12.0.0 surface."
+      ],
+      "commit": "5fce4c9814293c336b3b580c868ee992a00c79f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 1 for Enum.DamageMeterSpellDetailsDisplayType.UnitSpecificSpellCasted, and absence of later Deaths and EnemyDamageTaken members. Spell-details display selection, formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fce4c9814293c336b3b580c868ee992a00c79f1."
     },
     {
       "id": "added:Enum.DamageMeterSpellDetailsDisplayTypeMeta.MaxValue",
       "symbol": "Enum.DamageMeterSpellDetailsDisplayTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterSpellDetailsDisplayTypeMeta.MaxValue with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared generated enum data publishes the spell-details display namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
+          "source_hash": "8384807146217c1c330ea4121d806e5a92aa8dd5e0bc1cc800fa9de538dc21be"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "622e7301880e2e13da69034662e9a1c9a9df525a4c021443dd5d8b1db12381fc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs::test_patch_12_0_0_damage_meter_spell_details_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterSpellDetailsDisplayTypeMeta.MaxValue as Lua number with exact value 2 in the retail 12.0.0 surface."
+      ],
+      "commit": "5fce4c9814293c336b3b580c868ee992a00c79f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 2 for Enum.DamageMeterSpellDetailsDisplayTypeMeta.MaxValue, and absence of later Deaths and EnemyDamageTaken members. Spell-details display selection, formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fce4c9814293c336b3b580c868ee992a00c79f1."
     },
     {
       "id": "added:Enum.DamageMeterSpellDetailsDisplayTypeMeta.MinValue",
       "symbol": "Enum.DamageMeterSpellDetailsDisplayTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterSpellDetailsDisplayTypeMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared generated enum data publishes the spell-details display namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
+          "source_hash": "8384807146217c1c330ea4121d806e5a92aa8dd5e0bc1cc800fa9de538dc21be"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "622e7301880e2e13da69034662e9a1c9a9df525a4c021443dd5d8b1db12381fc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs::test_patch_12_0_0_damage_meter_spell_details_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterSpellDetailsDisplayTypeMeta.MinValue as Lua number with exact value 0 in the retail 12.0.0 surface."
+      ],
+      "commit": "5fce4c9814293c336b3b580c868ee992a00c79f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 0 for Enum.DamageMeterSpellDetailsDisplayTypeMeta.MinValue, and absence of later Deaths and EnemyDamageTaken members. Spell-details display selection, formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fce4c9814293c336b3b580c868ee992a00c79f1."
     },
     {
       "id": "added:Enum.DamageMeterSpellDetailsDisplayTypeMeta.NumValues",
       "symbol": "Enum.DamageMeterSpellDetailsDisplayTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterSpellDetailsDisplayTypeMeta.NumValues with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared generated enum data publishes the spell-details display namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
+          "source_hash": "8384807146217c1c330ea4121d806e5a92aa8dd5e0bc1cc800fa9de538dc21be"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "622e7301880e2e13da69034662e9a1c9a9df525a4c021443dd5d8b1db12381fc"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_spell_details_display_type_enums.rs::test_patch_12_0_0_damage_meter_spell_details_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterSpellDetailsDisplayTypeMeta.NumValues as Lua number with exact value 3 in the retail 12.0.0 surface."
+      ],
+      "commit": "5fce4c9814293c336b3b580c868ee992a00c79f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 3 for Enum.DamageMeterSpellDetailsDisplayTypeMeta.NumValues, and absence of later Deaths and EnemyDamageTaken members. Spell-details display selection, formatting, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fce4c9814293c336b3b580c868ee992a00c79f1."
     },
     {
       "id": "added:Enum.DamageMeterStorageType.Absorbs",

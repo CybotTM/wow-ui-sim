@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1164 best-effort, 982 evidence-required, 2 exception-requested, and 1262 untriaged rows** (3410 total).
+Current manifest totals are **1170 best-effort, 982 evidence-required, 2 exception-requested, and 1256 untriaged rows** (3410 total).
 
 The six removed `Enum.ExpansionLandingPageType.*` and `Enum.ExpansionLandingPageTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup absence of `None`, `Dragonflight`, `WarWithin`, and metadata `MinValue`, `MaxValue`, and `NumValues` after the retail-12.0.0 post-compat epoch override. Focused proof is at `54416879b5c6305ed956f347fe0a17e9fb2ccb28`. Landing-page selection, UI behavior, transitions, and lifecycle remain unclaimed.
 
@@ -29,6 +29,8 @@ The six retail 12.0.0 `Enum.DamageMeterSessionType.*` and `Enum.DamageMeterSessi
 The six retail 12.0.0 `Enum.DamageMeterNumbers.*` and `Enum.DamageMeterNumbersMeta.*` rows are best-effort/behavioral, bounded to startup enum/metadata publication, Lua numeric type, and exact values (`Minimal=0`, `Compact=1`, `Complete=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`). Focused proof is at `fdcfc288a2048f1c29eb541e6699018cb56804fe`. Damage-meter number formatting, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
 The eight retail 12.0.0 `Enum.DamageMeterOverrideType.*` and `Enum.DamageMeterOverrideTypeMeta.*` rows are best-effort/behavioral, bounded to startup enum/metadata publication, Lua numeric type, and exact values (`Ignore=0`, `AllowFriendlyFire=1`, `RedirectSourceToOwner=2`, `RedirectSourceToAuraCaster=3`, `IgnoreForAbsorbSpell=4`; metadata `MinValue=0`, `MaxValue=4`, `NumValues=5`). Focused proof is at `cbbb9064bab0a7aebe4451834bbe77e89d5b951d`. Damage-meter override interpretation, consumers, persistence, transitions, and lifecycle remain unclaimed.
+
+The six retail 12.0.0 `Enum.DamageMeterSpellDetailsDisplayType.*` and `Enum.DamageMeterSpellDetailsDisplayTypeMeta.*` rows are best-effort/behavioral, bounded to startup enum/metadata publication, Lua numeric type, exact values (`SpellCasted=0`, `UnitSpecificSpellCasted=1`, `SpellAffected=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`), and absence of later `Deaths` and `EnemyDamageTaken` members. Focused proof is at `5fce4c9814293c336b3b580c868ee992a00c79f1`. Root cause: shared generated runtime data also published the later `Deaths=3` and `EnemyDamageTaken=4` members with `MaxValue=4`/`NumValues=5`; the retail 12.0.0 epoch override now removes those later members and restores the 12.0.0 metadata. Spell-details display selection, formatting, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
