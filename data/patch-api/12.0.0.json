@@ -32497,7 +32497,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Enum registration publishes Enum.AuraFrameVisibleSetting.Always from the checked-in ordered sequence with numeric value 0.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -32536,7 +32536,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Enum registration publishes Enum.AuraFrameVisibleSetting.Hidden from the checked-in ordered sequence with numeric value 2.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -32575,7 +32575,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Enum registration publishes Enum.AuraFrameVisibleSetting.InCombat from the checked-in ordered sequence with numeric value 1.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -42954,7 +42954,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current enum data publishes Enum.DamageMeterNumbers.Compact with numeric value 1.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -42993,7 +42993,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current enum data publishes Enum.DamageMeterNumbers.Complete with numeric value 2.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -43032,7 +43032,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current enum data publishes Enum.DamageMeterNumbers.Minimal with numeric value 0.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -44453,7 +44453,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum publication defines Enum.DamageMeterStyle.Bordered with exact numeric value 2."
         },
         {
@@ -44490,7 +44490,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum publication defines Enum.DamageMeterStyle.Default with exact numeric value 0."
         },
         {
@@ -44527,7 +44527,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum publication defines Enum.DamageMeterStyle.FullBackground with exact numeric value 3."
         },
         {
@@ -44564,7 +44564,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum publication defines Enum.DamageMeterStyle.Thin with exact numeric value 1."
         },
         {
@@ -45253,7 +45253,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current enum data publishes Enum.DamageMeterVisibility.Always with numeric value 0.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -45292,7 +45292,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current enum data publishes Enum.DamageMeterVisibility.Hidden with numeric value 2.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -45331,7 +45331,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current enum data publishes Enum.DamageMeterVisibility.InCombat with numeric value 1.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -46735,7 +46735,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Shared sequential enum data publishes the Edit Mode account-setting namespace including a later member.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "source",
@@ -46780,7 +46780,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Shared sequential enum data publishes the Edit Mode account-setting namespace including a later member.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "source",
@@ -46825,7 +46825,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Shared sequential enum data publishes the Edit Mode account-setting namespace including a later member.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "source",
@@ -46870,7 +46870,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Shared sequential enum data publishes the Edit Mode account-setting namespace including a later member.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "source",
@@ -46915,7 +46915,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeAuraFrameSetting.Opacity with numeric value 9.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -46954,7 +46954,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeAuraFrameSetting.ShowDispelType with numeric value 10.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -46993,7 +46993,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeAuraFrameSetting.VisibleSetting with numeric value 8.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47031,7 +47031,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum data publishes Enum.EditModeAuraFrameSystemIndices.ExternalDefensivesFrame with exact numeric value 3."
         },
         {
@@ -47068,7 +47068,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum data publishes Enum.EditModeCooldownViewerSetting.BarWidthScale with exact numeric value 11."
         },
         {
@@ -47106,7 +47106,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.BackgroundTransparency with numeric value 12.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47145,7 +47145,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.BarHeight with numeric value 10.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47184,7 +47184,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.FrameHeight with numeric value 4.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47223,7 +47223,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.FrameWidth with numeric value 3.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47262,7 +47262,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Numbers with numeric value 2.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47301,7 +47301,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.ObsoleteReuse1 with numeric value 7.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47340,7 +47340,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Padding with numeric value 5.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47379,7 +47379,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.ShowClassColor with numeric value 9.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47418,7 +47418,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.ShowSpecIcon with numeric value 8.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47457,7 +47457,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Style with numeric value 1.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47496,7 +47496,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.TextSize with numeric value 11.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47535,7 +47535,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Transparency with numeric value 6.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47574,7 +47574,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Visibility with numeric value 0.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47613,7 +47613,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSettingMeta.MaxValue with numeric value 12.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47652,7 +47652,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSettingMeta.MinValue with numeric value 0.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47691,7 +47691,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
           "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSettingMeta.NumValues with numeric value 13.",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
         },
         {
           "kind": "test",
@@ -47937,7 +47937,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum publication defines Enum.EditModeEncounterEventsSystemIndices.CriticalWarnings with exact numeric value 2."
         },
         {
@@ -47974,7 +47974,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum publication defines Enum.EditModeEncounterEventsSystemIndices.MediumWarnings with exact numeric value 3."
         },
         {
@@ -48011,7 +48011,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum publication defines Enum.EditModeEncounterEventsSystemIndices.NormalWarnings with exact numeric value 4."
         },
         {
@@ -48048,7 +48048,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
-          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
           "summary": "Current startup enum publication defines Enum.EditModeEncounterEventsSystemIndices.Timeline with exact numeric value 1."
         },
         {
