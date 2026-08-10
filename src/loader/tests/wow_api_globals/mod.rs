@@ -70,6 +70,7 @@ mod patch_12_0_0_encounter_timeline_icon_set_enums;
 mod patch_12_0_0_encounter_timeline_track_enums;
 mod patch_12_0_0_expansion_landing_page_type_removals;
 mod patch_12_0_0_item_creation_context_removals;
+mod patch_12_0_0_nameplate_cast_bar_display_enums;
 mod patch_12_0_0_small_enums;
 mod patch_12_0_0_ui_enum_metadata;
 mod patch_12_0_0_unit_power_spell_ids;
