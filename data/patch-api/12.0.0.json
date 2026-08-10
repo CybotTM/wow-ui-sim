@@ -56226,145 +56226,460 @@
       "id": "added:Enum.NamePlateCastBarDisplay.HighlightImportantCasts",
       "symbol": "Enum.NamePlateCastBarDisplay.HighlightImportantCasts",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateCastBarDisplay.HighlightImportantCasts with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateCastBarDisplay.HighlightImportantCasts as a Lua number with exact value 4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete six-member set (None=0, SpellName=1, SpellIcon=2, SpellTarget=3, HighlightImportantCasts=4, HighlightWhenCastTarget=5) as Lua numbers with metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "77c50575fb4489cb2cb5bd876d2f097249df6b4f288d136f6c40bbfa58528043"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateCastBarDisplay.HighlightImportantCasts with numeric value 4.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateCastBarDisplay.HighlightImportantCasts as a Lua number with exact retail 12.0.0 value 4; the focused namespace test also requires the exact six-member set and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "bc15bc6b4814c0bc7f28ebd815697454f4cc5f60",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 4, exact family membership, and metadata. Nameplate rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: bc15bc6b4814c0bc7f28ebd815697454f4cc5f60."
     },
     {
       "id": "added:Enum.NamePlateCastBarDisplay.HighlightWhenCastTarget",
       "symbol": "Enum.NamePlateCastBarDisplay.HighlightWhenCastTarget",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateCastBarDisplay.HighlightWhenCastTarget with numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateCastBarDisplay.HighlightWhenCastTarget as a Lua number with exact value 5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete six-member set (None=0, SpellName=1, SpellIcon=2, SpellTarget=3, HighlightImportantCasts=4, HighlightWhenCastTarget=5) as Lua numbers with metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "77c50575fb4489cb2cb5bd876d2f097249df6b4f288d136f6c40bbfa58528043"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateCastBarDisplay.HighlightWhenCastTarget with numeric value 5.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateCastBarDisplay.HighlightWhenCastTarget as a Lua number with exact retail 12.0.0 value 5; the focused namespace test also requires the exact six-member set and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "bc15bc6b4814c0bc7f28ebd815697454f4cc5f60",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 5, exact family membership, and metadata. Nameplate rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: bc15bc6b4814c0bc7f28ebd815697454f4cc5f60."
     },
     {
       "id": "added:Enum.NamePlateCastBarDisplay.None",
       "symbol": "Enum.NamePlateCastBarDisplay.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateCastBarDisplay.None with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateCastBarDisplay.None as a Lua number with exact value 0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete six-member set (None=0, SpellName=1, SpellIcon=2, SpellTarget=3, HighlightImportantCasts=4, HighlightWhenCastTarget=5) as Lua numbers with metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "77c50575fb4489cb2cb5bd876d2f097249df6b4f288d136f6c40bbfa58528043"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateCastBarDisplay.None with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateCastBarDisplay.None as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact six-member set and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "bc15bc6b4814c0bc7f28ebd815697454f4cc5f60",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact family membership, and metadata. Nameplate rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: bc15bc6b4814c0bc7f28ebd815697454f4cc5f60."
     },
     {
       "id": "added:Enum.NamePlateCastBarDisplay.SpellIcon",
       "symbol": "Enum.NamePlateCastBarDisplay.SpellIcon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateCastBarDisplay.SpellIcon with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateCastBarDisplay.SpellIcon as a Lua number with exact value 2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete six-member set (None=0, SpellName=1, SpellIcon=2, SpellTarget=3, HighlightImportantCasts=4, HighlightWhenCastTarget=5) as Lua numbers with metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "77c50575fb4489cb2cb5bd876d2f097249df6b4f288d136f6c40bbfa58528043"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateCastBarDisplay.SpellIcon with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateCastBarDisplay.SpellIcon as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact six-member set and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "bc15bc6b4814c0bc7f28ebd815697454f4cc5f60",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 2, exact family membership, and metadata. Nameplate rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: bc15bc6b4814c0bc7f28ebd815697454f4cc5f60."
     },
     {
       "id": "added:Enum.NamePlateCastBarDisplay.SpellName",
       "symbol": "Enum.NamePlateCastBarDisplay.SpellName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateCastBarDisplay.SpellName with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateCastBarDisplay.SpellName as a Lua number with exact value 1.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete six-member set (None=0, SpellName=1, SpellIcon=2, SpellTarget=3, HighlightImportantCasts=4, HighlightWhenCastTarget=5) as Lua numbers with metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "77c50575fb4489cb2cb5bd876d2f097249df6b4f288d136f6c40bbfa58528043"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateCastBarDisplay.SpellName with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateCastBarDisplay.SpellName as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact six-member set and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "bc15bc6b4814c0bc7f28ebd815697454f4cc5f60",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, exact family membership, and metadata. Nameplate rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: bc15bc6b4814c0bc7f28ebd815697454f4cc5f60."
     },
     {
       "id": "added:Enum.NamePlateCastBarDisplay.SpellTarget",
       "symbol": "Enum.NamePlateCastBarDisplay.SpellTarget",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateCastBarDisplay.SpellTarget with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateCastBarDisplay.SpellTarget as a Lua number with exact value 3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete six-member set (None=0, SpellName=1, SpellIcon=2, SpellTarget=3, HighlightImportantCasts=4, HighlightWhenCastTarget=5) as Lua numbers with metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "77c50575fb4489cb2cb5bd876d2f097249df6b4f288d136f6c40bbfa58528043"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateCastBarDisplay.SpellTarget with numeric value 3.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateCastBarDisplay.SpellTarget as a Lua number with exact retail 12.0.0 value 3; the focused namespace test also requires the exact six-member set and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "bc15bc6b4814c0bc7f28ebd815697454f4cc5f60",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 3, exact family membership, and metadata. Nameplate rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: bc15bc6b4814c0bc7f28ebd815697454f4cc5f60."
     },
     {
       "id": "added:Enum.NamePlateCastBarDisplayMeta.MaxValue",
       "symbol": "Enum.NamePlateCastBarDisplayMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateCastBarDisplayMeta.MaxValue with numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback metadata publishes MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete six-member set (None=0, SpellName=1, SpellIcon=2, SpellTarget=3, HighlightImportantCasts=4, HighlightWhenCastTarget=5) as Lua numbers with metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "77c50575fb4489cb2cb5bd876d2f097249df6b4f288d136f6c40bbfa58528043"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateCastBarDisplayMeta.MaxValue with numeric value 5.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateCastBarDisplayMeta.MaxValue as a Lua number with exact retail 12.0.0 value 5; the focused namespace test also requires the exact six-member set and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "bc15bc6b4814c0bc7f28ebd815697454f4cc5f60",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, exact value 5, and the exact cast-bar display family boundary. Nameplate rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: bc15bc6b4814c0bc7f28ebd815697454f4cc5f60."
     },
     {
       "id": "added:Enum.NamePlateCastBarDisplayMeta.MinValue",
       "symbol": "Enum.NamePlateCastBarDisplayMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateCastBarDisplayMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback metadata publishes MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete six-member set (None=0, SpellName=1, SpellIcon=2, SpellTarget=3, HighlightImportantCasts=4, HighlightWhenCastTarget=5) as Lua numbers with metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "77c50575fb4489cb2cb5bd876d2f097249df6b4f288d136f6c40bbfa58528043"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateCastBarDisplayMeta.MinValue with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateCastBarDisplayMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact six-member set and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "bc15bc6b4814c0bc7f28ebd815697454f4cc5f60",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, exact value 0, and the exact cast-bar display family boundary. Nameplate rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: bc15bc6b4814c0bc7f28ebd815697454f4cc5f60."
     },
     {
       "id": "added:Enum.NamePlateCastBarDisplayMeta.NumValues",
       "symbol": "Enum.NamePlateCastBarDisplayMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.NamePlateCastBarDisplayMeta.NumValues with numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback metadata publishes MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback enum data for this namespace.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values",
+          "summary": "The focused startup test asserts the exact complete six-member set (None=0, SpellName=1, SpellIcon=2, SpellTarget=3, HighlightImportantCasts=4, HighlightWhenCastTarget=5) as Lua numbers with metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "77c50575fb4489cb2cb5bd876d2f097249df6b4f288d136f6c40bbfa58528043"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.NamePlateCastBarDisplayMeta.NumValues with numeric value 6.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cast_bar_display_enums.rs::test_patch_12_0_0_nameplate_cast_bar_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateCastBarDisplayMeta.NumValues as a Lua number with exact retail 12.0.0 value 6; the focused namespace test also requires the exact six-member set and metadata MinValue=0, MaxValue=5, NumValues=6."
+      ],
+      "commit": "bc15bc6b4814c0bc7f28ebd815697454f4cc5f60",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, exact value 6, and the exact cast-bar display family boundary. Nameplate rendering, cast-bar behavior, consumers, persistence, and lifecycle are not claimed. Proof commit: bc15bc6b4814c0bc7f28ebd815697454f4cc5f60."
     },
     {
       "id": "added:Enum.NamePlateEnemyNpcAuraDisplay.Buffs",
