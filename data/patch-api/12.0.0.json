@@ -46750,7 +46750,7 @@
       "assertions": [
         "Publishes Enum.EditModeAccountSetting.ShowDamageMeter as Lua number with exact value 31."
       ],
-      "commit": "c2db8984d1d865e5780a238ee8613ed9d2dd7652",
+      "commit": "25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7",
       "approval_id": null,
       "scope_exception": null,
       "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 31 for Enum.EditModeAccountSetting.ShowDamageMeter. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: c2db8984d1d865e5780a238ee8613ed9d2dd7652."
@@ -46789,7 +46789,7 @@
       "assertions": [
         "Publishes Enum.EditModeAccountSetting.ShowEncounterEvents as Lua number with exact value 30."
       ],
-      "commit": "c2db8984d1d865e5780a238ee8613ed9d2dd7652",
+      "commit": "25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7",
       "approval_id": null,
       "scope_exception": null,
       "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 30 for Enum.EditModeAccountSetting.ShowEncounterEvents. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: c2db8984d1d865e5780a238ee8613ed9d2dd7652."
@@ -46828,7 +46828,7 @@
       "assertions": [
         "Publishes Enum.EditModeAccountSetting.ShowExternalDefensives as Lua number with exact value 32."
       ],
-      "commit": "c2db8984d1d865e5780a238ee8613ed9d2dd7652",
+      "commit": "25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7",
       "approval_id": null,
       "scope_exception": null,
       "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 32 for Enum.EditModeAccountSetting.ShowExternalDefensives. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: c2db8984d1d865e5780a238ee8613ed9d2dd7652."
@@ -46867,7 +46867,7 @@
       "assertions": [
         "Publishes Enum.EditModeAccountSetting.ShowPersonalResourceDisplay as Lua number with exact value 29."
       ],
-      "commit": "c2db8984d1d865e5780a238ee8613ed9d2dd7652",
+      "commit": "25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7",
       "approval_id": null,
       "scope_exception": null,
       "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 29 for Enum.EditModeAccountSetting.ShowPersonalResourceDisplay. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: c2db8984d1d865e5780a238ee8613ed9d2dd7652."
@@ -46906,7 +46906,7 @@
       "assertions": [
         "Publishes Enum.EditModeAuraFrameSetting.Opacity as Lua number with exact value 9."
       ],
-      "commit": "c2db8984d1d865e5780a238ee8613ed9d2dd7652",
+      "commit": "25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7",
       "approval_id": null,
       "scope_exception": null,
       "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 9 for Enum.EditModeAuraFrameSetting.Opacity. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: c2db8984d1d865e5780a238ee8613ed9d2dd7652."
@@ -46945,7 +46945,7 @@
       "assertions": [
         "Publishes Enum.EditModeAuraFrameSetting.ShowDispelType as Lua number with exact value 10."
       ],
-      "commit": "c2db8984d1d865e5780a238ee8613ed9d2dd7652",
+      "commit": "25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7",
       "approval_id": null,
       "scope_exception": null,
       "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 10 for Enum.EditModeAuraFrameSetting.ShowDispelType. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: c2db8984d1d865e5780a238ee8613ed9d2dd7652."
@@ -46984,7 +46984,7 @@
       "assertions": [
         "Publishes Enum.EditModeAuraFrameSetting.VisibleSetting as Lua number with exact value 8."
       ],
-      "commit": "c2db8984d1d865e5780a238ee8613ed9d2dd7652",
+      "commit": "25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7",
       "approval_id": null,
       "scope_exception": null,
       "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 8 for Enum.EditModeAuraFrameSetting.VisibleSetting. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: c2db8984d1d865e5780a238ee8613ed9d2dd7652."
@@ -76928,33 +76928,79 @@
       "id": "changed:Enum.EditModeAccountSettingMeta.MaxValue",
       "symbol": "Enum.EditModeAccountSettingMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source changes Enum.EditModeAccountSettingMeta.MaxValue to numeric value 32.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode account-setting enum data publishes Enum.EditModeAccountSettingMeta.MaxValue with numeric value 32.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_account_aura_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts new account settings, account metadata, and absence of later ShowTotemActionBar.",
+          "source_hash": "5963951e51d9e20fdfc7e34395c7f6c43f75c81d2101536ebb6bf5b018f7c2a0"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_account_aura_settings_enums.rs::test_patch_12_0_0_edit_mode_account_aura_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeAccountSettingMeta.MaxValue as Lua number with exact value 32."
+      ],
+      "commit": "25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, and exact value 32 for Enum.EditModeAccountSettingMeta.MaxValue. Edit Mode account-setting behavior, persistence, consumers, transitions, and lifecycle are not claimed."
     },
     {
       "id": "changed:Enum.EditModeAccountSettingMeta.NumValues",
       "symbol": "Enum.EditModeAccountSettingMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source changes Enum.EditModeAccountSettingMeta.NumValues to numeric value 33.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode account-setting enum data publishes Enum.EditModeAccountSettingMeta.NumValues with numeric value 33.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_account_aura_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts new account settings, account metadata, and absence of later ShowTotemActionBar.",
+          "source_hash": "5963951e51d9e20fdfc7e34395c7f6c43f75c81d2101536ebb6bf5b018f7c2a0"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_account_aura_settings_enums.rs::test_patch_12_0_0_edit_mode_account_aura_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeAccountSettingMeta.NumValues as Lua number with exact value 33."
+      ],
+      "commit": "25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, and exact value 33 for Enum.EditModeAccountSettingMeta.NumValues. Edit Mode account-setting behavior, persistence, consumers, transitions, and lifecycle are not claimed."
     },
     {
       "id": "changed:Enum.EditModeAuraFrameSettingMeta.MaxValue",

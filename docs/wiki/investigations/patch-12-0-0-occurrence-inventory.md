@@ -2709,8 +2709,8 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.CurrencyDestroyReasonMeta.NumValues` | best-effort | enum | changed | enum changed in 12.0.0. |
 | `Enum.CurrencySourceMeta.MaxValue` | best-effort | enum | changed | enum changed in 12.0.0. |
 | `Enum.CurrencySourceMeta.NumValues` | best-effort | enum | changed | enum changed in 12.0.0. |
-| `Enum.EditModeAccountSettingMeta.MaxValue` | untriaged | enum | changed | enum changed in 12.0.0. |
-| `Enum.EditModeAccountSettingMeta.NumValues` | untriaged | enum | changed | enum changed in 12.0.0. |
+| `Enum.EditModeAccountSettingMeta.MaxValue` | best-effort | enum | changed | Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, and exact value 32 for Enum.EditModeAccountSettingMeta.MaxValue. Edit Mode account-setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: 25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7. |
+| `Enum.EditModeAccountSettingMeta.NumValues` | best-effort | enum | changed | Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua numeric type, and exact value 33 for Enum.EditModeAccountSettingMeta.NumValues. Edit Mode account-setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: 25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7. |
 | `Enum.EditModeAuraFrameSettingMeta.MaxValue` | untriaged | enum | changed | enum changed in 12.0.0. |
 | `Enum.EditModeAuraFrameSettingMeta.NumValues` | untriaged | enum | changed | enum changed in 12.0.0. |
 | `Enum.EditModeAuraFrameSystemIndicesMeta.MaxValue` | best-effort | enum | changed | enum changed in 12.0.0. |
