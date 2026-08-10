@@ -45238,97 +45238,235 @@
       "id": "added:Enum.DamageMeterVisibility.Always",
       "symbol": "Enum.DamageMeterVisibility.Always",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterVisibility.Always with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current enum data publishes Enum.DamageMeterVisibility.Always with numeric value 0.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterVisibility members and metadata are Lua numbers with exact values.",
+          "source_hash": "7d640110cb4b9c78f097f70f7bfe855d8cb84fb756fc6ff45e9d5149ab476ffe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs::test_patch_12_0_0_damage_meter_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterVisibility.Always as Lua number with exact value 0."
+      ],
+      "commit": "7652c9bbee3fe0f41a924ec47689ae311afa34a0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DamageMeterVisibility.Always. Damage-meter visibility behavior, combat transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: 7652c9bbee3fe0f41a924ec47689ae311afa34a0."
     },
     {
       "id": "added:Enum.DamageMeterVisibility.Hidden",
       "symbol": "Enum.DamageMeterVisibility.Hidden",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterVisibility.Hidden with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current enum data publishes Enum.DamageMeterVisibility.Hidden with numeric value 2.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterVisibility members and metadata are Lua numbers with exact values.",
+          "source_hash": "7d640110cb4b9c78f097f70f7bfe855d8cb84fb756fc6ff45e9d5149ab476ffe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs::test_patch_12_0_0_damage_meter_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterVisibility.Hidden as Lua number with exact value 2."
+      ],
+      "commit": "7652c9bbee3fe0f41a924ec47689ae311afa34a0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.DamageMeterVisibility.Hidden. Damage-meter visibility behavior, combat transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: 7652c9bbee3fe0f41a924ec47689ae311afa34a0."
     },
     {
       "id": "added:Enum.DamageMeterVisibility.InCombat",
       "symbol": "Enum.DamageMeterVisibility.InCombat",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterVisibility.InCombat with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current enum data publishes Enum.DamageMeterVisibility.InCombat with numeric value 1.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterVisibility members and metadata are Lua numbers with exact values.",
+          "source_hash": "7d640110cb4b9c78f097f70f7bfe855d8cb84fb756fc6ff45e9d5149ab476ffe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs::test_patch_12_0_0_damage_meter_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterVisibility.InCombat as Lua number with exact value 1."
+      ],
+      "commit": "7652c9bbee3fe0f41a924ec47689ae311afa34a0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DamageMeterVisibility.InCombat. Damage-meter visibility behavior, combat transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: 7652c9bbee3fe0f41a924ec47689ae311afa34a0."
     },
     {
       "id": "added:Enum.DamageMeterVisibilityMeta.MaxValue",
       "symbol": "Enum.DamageMeterVisibilityMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterVisibilityMeta.MaxValue with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current enum data publishes Enum.DamageMeterVisibilityMeta.MaxValue with numeric value 2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterVisibility members and metadata are Lua numbers with exact values.",
+          "source_hash": "7d640110cb4b9c78f097f70f7bfe855d8cb84fb756fc6ff45e9d5149ab476ffe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs::test_patch_12_0_0_damage_meter_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterVisibilityMeta.MaxValue as Lua number with exact value 2."
+      ],
+      "commit": "7652c9bbee3fe0f41a924ec47689ae311afa34a0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.DamageMeterVisibilityMeta.MaxValue. Damage-meter visibility behavior, combat transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: 7652c9bbee3fe0f41a924ec47689ae311afa34a0."
     },
     {
       "id": "added:Enum.DamageMeterVisibilityMeta.MinValue",
       "symbol": "Enum.DamageMeterVisibilityMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterVisibilityMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current enum data publishes Enum.DamageMeterVisibilityMeta.MinValue with numeric value 0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterVisibility members and metadata are Lua numbers with exact values.",
+          "source_hash": "7d640110cb4b9c78f097f70f7bfe855d8cb84fb756fc6ff45e9d5149ab476ffe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs::test_patch_12_0_0_damage_meter_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterVisibilityMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "7652c9bbee3fe0f41a924ec47689ae311afa34a0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.DamageMeterVisibilityMeta.MinValue. Damage-meter visibility behavior, combat transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: 7652c9bbee3fe0f41a924ec47689ae311afa34a0."
     },
     {
       "id": "added:Enum.DamageMeterVisibilityMeta.NumValues",
       "symbol": "Enum.DamageMeterVisibilityMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterVisibilityMeta.NumValues with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current enum data publishes Enum.DamageMeterVisibilityMeta.NumValues with numeric value 3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DamageMeterVisibility members and metadata are Lua numbers with exact values.",
+          "source_hash": "7d640110cb4b9c78f097f70f7bfe855d8cb84fb756fc6ff45e9d5149ab476ffe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_visibility_enums.rs::test_patch_12_0_0_damage_meter_visibility_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterVisibilityMeta.NumValues as Lua number with exact value 3."
+      ],
+      "commit": "7652c9bbee3fe0f41a924ec47689ae311afa34a0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 3 for Enum.DamageMeterVisibilityMeta.NumValues. Damage-meter visibility behavior, combat transitions, consumers, persistence, and lifecycle are not claimed. Proof commit: 7652c9bbee3fe0f41a924ec47689ae311afa34a0."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.AutoEnd",
