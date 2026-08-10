@@ -59,6 +59,7 @@ mod patch_12_0_0_edit_mode_system_enums;
 mod patch_12_0_0_edit_mode_unit_frame_settings_enums;
 mod patch_12_0_0_encounter_event_cast_state_enums;
 mod patch_12_0_0_encounter_event_iconmask_enums;
+mod patch_12_0_0_encounter_event_severity_enums;
 mod patch_12_0_0_expansion_landing_page_type_removals;
 mod patch_12_0_0_item_creation_context_removals;
 mod patch_12_0_0_small_enums;
