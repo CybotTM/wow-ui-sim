@@ -1377,9 +1377,9 @@
 1377. [best-effort] `added:Enum.EditModePersonalResourceDisplaySettingMeta.MaxValue` — behavioral
 1378. [best-effort] `added:Enum.EditModePersonalResourceDisplaySettingMeta.MinValue` — behavioral
 1379. [best-effort] `added:Enum.EditModePersonalResourceDisplaySettingMeta.NumValues` — behavioral
-1380. [untriaged] `added:Enum.EditModeSystem.DamageMeter` — untriaged
-1381. [untriaged] `added:Enum.EditModeSystem.EncounterEvents` — untriaged
-1382. [untriaged] `added:Enum.EditModeSystem.PersonalResourceDisplay` — untriaged
+1380. [best-effort] `added:Enum.EditModeSystem.DamageMeter` — behavioral
+1381. [best-effort] `added:Enum.EditModeSystem.EncounterEvents` — behavioral
+1382. [best-effort] `added:Enum.EditModeSystem.PersonalResourceDisplay` — behavioral
 1383. [untriaged] `added:Enum.EditModeUnitFrameSetting.AuraOrganizationType` — untriaged
 1384. [untriaged] `added:Enum.EditModeUnitFrameSetting.IconSize` — untriaged
 1385. [untriaged] `added:Enum.EditModeUnitFrameSetting.Opacity` — untriaged
