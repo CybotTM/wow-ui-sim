@@ -36,6 +36,7 @@ mod patch_12_0_0_combat_audio_unit_enums;
 mod patch_12_0_0_combat_log_message_order_enums;
 mod patch_12_0_0_constants;
 mod patch_12_0_0_cooldown_housing_enums;
+mod patch_12_0_0_cooldown_viewer_alert_type_enums;
 mod patch_12_0_0_small_enums;
 mod patch_12_0_0_ui_enum_metadata;
 mod patch_12_0_0_unit_power_spell_ids;
