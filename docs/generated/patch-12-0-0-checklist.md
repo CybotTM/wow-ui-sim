@@ -1960,9 +1960,9 @@
 1960. [best-effort] `added:Enum.TransmogOutfitSlotError.NotSoulbound` — behavioral
 1961. [best-effort] `added:Enum.TransmogOutfitSlotError.Ok` — behavioral
 1962. [best-effort] `added:Enum.TransmogOutfitSlotError.SameItem` — behavioral
-1963. [untriaged] `added:Enum.TransmogOutfitSlotErrorMeta.MaxValue` — untriaged
-1964. [untriaged] `added:Enum.TransmogOutfitSlotErrorMeta.MinValue` — untriaged
-1965. [untriaged] `added:Enum.TransmogOutfitSlotErrorMeta.NumValues` — untriaged
+1963. [best-effort] `added:Enum.TransmogOutfitSlotErrorMeta.MaxValue` — behavioral
+1964. [best-effort] `added:Enum.TransmogOutfitSlotErrorMeta.MinValue` — behavioral
+1965. [best-effort] `added:Enum.TransmogOutfitSlotErrorMeta.NumValues` — behavioral
 1966. [untriaged] `added:Enum.TransmogOutfitSlotFlags.CanHaveIllusions` — untriaged
 1967. [untriaged] `added:Enum.TransmogOutfitSlotFlags.CannotBeHidden` — untriaged
 1968. [untriaged] `added:Enum.TransmogOutfitSlotFlags.IsSecondarySlot` — untriaged
