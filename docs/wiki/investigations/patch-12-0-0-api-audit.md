@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **1101 best-effort, 982 evidence-required, 2 exception-requested, and 1325 untriaged rows** (3410 total).
+Current manifest totals are **1106 best-effort, 982 evidence-required, 2 exception-requested, and 1320 untriaged rows** (3410 total).
+
+The five `Enum.CombatAudioAlertType.*` and `Enum.CombatAudioAlertTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Health=0`, `Cast=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `0c51d4c32a8ae89fffdf3ca67bf80d03926496d2`. Health/cast classification behavior, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 
 The ten `Enum.CombatAudioAlertThrottle.*` and `Enum.CombatAudioAlertThrottleMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata Lua numeric publication, exact values (`Sample=0`, `PlayerHealth=1`, `TargetHealth=2`, `PlayerCast=3`, `TargetCast=4`, `PlayerResource1=5`, `PlayerResource2=6`; metadata `MinValue=0`, `MaxValue=6`, `NumValues=7`), and absence of later-epoch `PlayerHealthSamePercent`, `TargetHealthSamePercent`, `PlayerResource1SamePercent`, and `PlayerResource2SamePercent` members after the retail-12.0.0 override. Focused proof is at `8096cc84cb9e200840507937c0b379bb6f0ca656`. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 
