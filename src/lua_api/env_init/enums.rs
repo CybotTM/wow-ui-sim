@@ -1,6 +1,6 @@
 //! Enum and constant globals: `Enum.*`, `Constants.*`, LE_* values.
 
-use crate::client_profile::{ACTIVE_RETAIL_API_EPOCH, RetailApiEpoch};
+use crate::client_profile::{RetailApiEpoch, ACTIVE_RETAIL_API_EPOCH};
 use crate::lua_api::globals::enum_data::{EXPLICIT_ENUMS, SEQUENTIAL_ENUMS};
 use crate::lua_api::methods::{create_table, table_get, table_set};
 use rilua::LuaApiMut;
@@ -23,6 +23,20 @@ Enum.CooldownViewerAlertEventTypeMeta = {
     MaxValue = 4,
     MinValue = 1,
     NumValues = 4,
+}
+Enum.CombatAudioAlertThrottle = {
+    Sample = 0,
+    PlayerHealth = 1,
+    TargetHealth = 2,
+    PlayerCast = 3,
+    TargetCast = 4,
+    PlayerResource1 = 5,
+    PlayerResource2 = 6,
+}
+Enum.CombatAudioAlertThrottleMeta = {
+    MaxValue = 6,
+    MinValue = 0,
+    NumValues = 7,
 }
 Enum.SecretAspect.Attributes = nil
 Enum.SecretAspect.CooldownStyle = nil

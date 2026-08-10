@@ -30,6 +30,7 @@ mod patch_12_0_0_combat_audio_spec_setting_enums;
 mod patch_12_0_0_combat_audio_target_cast_format_enums;
 mod patch_12_0_0_combat_audio_target_death_behavior_enums;
 mod patch_12_0_0_combat_audio_target_health_format_enums;
+mod patch_12_0_0_combat_audio_throttle_enums;
 mod patch_12_0_0_constants;
 mod patch_12_0_0_cooldown_housing_enums;
 mod patch_12_0_0_small_enums;
