@@ -36,6 +36,21 @@ fn test_patch_12_0_0_edit_mode_account_aura_settings_enum_values() {
                         end
                     end
                 end
+
+                if Enum.EditModeAccountSetting.ShowTotemActionBar ~= nil then
+                    return "Enum.EditModeAccountSetting.ShowTotemActionBar: expected nil"
+                end
+                local account_meta = Enum.EditModeAccountSettingMeta
+                if type(account_meta) ~= "table" then
+                    return "Enum.EditModeAccountSettingMeta: expected table"
+                end
+                if account_meta.MinValue ~= 0
+                    or account_meta.MaxValue ~= 32
+                    or account_meta.NumValues ~= 33
+                then
+                    return "Enum.EditModeAccountSettingMeta: metadata mismatch"
+                end
+
                 return "ok"
             "#,
         )
