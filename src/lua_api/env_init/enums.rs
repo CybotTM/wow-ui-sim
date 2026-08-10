@@ -59,6 +59,15 @@ Enum.EditModeEncounterEventsSetting.BarWidth = nil
 Enum.EditModeEncounterEventsSetting.Padding = nil
 Enum.EditModeEncounterEventsSettingMeta.MaxValue = 9
 Enum.EditModeEncounterEventsSettingMeta.NumValues = 10
+Enum.EditModePersonalResourceDisplaySetting = {
+    HideHealthAndPower = 0,
+    OnlyShowInCombat = 1,
+}
+Enum.EditModePersonalResourceDisplaySettingMeta = {
+    MinValue = 0,
+    MaxValue = 1,
+    NumValues = 2,
+}
 Enum.SecretAspect.Attributes = nil
 Enum.SecretAspect.CooldownStyle = nil
 Enum.SecretAspectMeta = {
