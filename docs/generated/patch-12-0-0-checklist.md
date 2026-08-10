@@ -1109,11 +1109,11 @@
 1109. [best-effort] `added:Enum.CombatAudioAlertTypeMeta.MaxValue` — behavioral
 1110. [best-effort] `added:Enum.CombatAudioAlertTypeMeta.MinValue` — behavioral
 1111. [best-effort] `added:Enum.CombatAudioAlertTypeMeta.NumValues` — behavioral
-1112. [untriaged] `added:Enum.CombatAudioAlertUnit.Player` — untriaged
-1113. [untriaged] `added:Enum.CombatAudioAlertUnit.Target` — untriaged
-1114. [untriaged] `added:Enum.CombatAudioAlertUnitMeta.MaxValue` — untriaged
-1115. [untriaged] `added:Enum.CombatAudioAlertUnitMeta.MinValue` — untriaged
-1116. [untriaged] `added:Enum.CombatAudioAlertUnitMeta.NumValues` — untriaged
+1112. [best-effort] `added:Enum.CombatAudioAlertUnit.Player` — behavioral
+1113. [best-effort] `added:Enum.CombatAudioAlertUnit.Target` — behavioral
+1114. [best-effort] `added:Enum.CombatAudioAlertUnitMeta.MaxValue` — behavioral
+1115. [best-effort] `added:Enum.CombatAudioAlertUnitMeta.MinValue` — behavioral
+1116. [best-effort] `added:Enum.CombatAudioAlertUnitMeta.NumValues` — behavioral
 1117. [untriaged] `added:Enum.CombatLogMessageOrder.Newest` — untriaged
 1118. [untriaged] `added:Enum.CombatLogMessageOrder.Oldest` — untriaged
 1119. [untriaged] `added:Enum.CombatLogMessageOrderMeta.MaxValue` — untriaged

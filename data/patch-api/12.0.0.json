@@ -38206,81 +38206,196 @@
       "id": "added:Enum.CombatAudioAlertUnit.Player",
       "symbol": "Enum.CombatAudioAlertUnit.Player",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertUnit.Player as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime combat-audio enum publication defines Enum.CombatAudioAlertUnit.Player with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact combat-audio unit value.",
+          "source_hash": "839e76d50856dec866a13c7f18f61414bae28128c90f98851578e34b4aed5ab9"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs::test_patch_12_0_0_combat_audio_unit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertUnit.Player as Lua number with exact value 0."
+      ],
+      "commit": "5f5635e7b99954ae0f057deb93292e39ddba3bfa",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 0. Unit selection, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 5f5635e7b99954ae0f057deb93292e39ddba3bfa."
     },
     {
       "id": "added:Enum.CombatAudioAlertUnit.Target",
       "symbol": "Enum.CombatAudioAlertUnit.Target",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertUnit.Target as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime combat-audio enum publication defines Enum.CombatAudioAlertUnit.Target with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact combat-audio unit value.",
+          "source_hash": "839e76d50856dec866a13c7f18f61414bae28128c90f98851578e34b4aed5ab9"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs::test_patch_12_0_0_combat_audio_unit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertUnit.Target as Lua number with exact value 1."
+      ],
+      "commit": "5f5635e7b99954ae0f057deb93292e39ddba3bfa",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 1. Unit selection, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 5f5635e7b99954ae0f057deb93292e39ddba3bfa."
     },
     {
       "id": "added:Enum.CombatAudioAlertUnitMeta.MaxValue",
       "symbol": "Enum.CombatAudioAlertUnitMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertUnitMeta.MaxValue as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime combat-audio metadata publication defines Enum.CombatAudioAlertUnitMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact combat-audio unit value.",
+          "source_hash": "839e76d50856dec866a13c7f18f61414bae28128c90f98851578e34b4aed5ab9"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs::test_patch_12_0_0_combat_audio_unit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertUnitMeta.MaxValue as Lua number with exact value 1."
+      ],
+      "commit": "5f5635e7b99954ae0f057deb93292e39ddba3bfa",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 1. Unit selection, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 5f5635e7b99954ae0f057deb93292e39ddba3bfa."
     },
     {
       "id": "added:Enum.CombatAudioAlertUnitMeta.MinValue",
       "symbol": "Enum.CombatAudioAlertUnitMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertUnitMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime combat-audio metadata publication defines Enum.CombatAudioAlertUnitMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact combat-audio unit value.",
+          "source_hash": "839e76d50856dec866a13c7f18f61414bae28128c90f98851578e34b4aed5ab9"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs::test_patch_12_0_0_combat_audio_unit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertUnitMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "5f5635e7b99954ae0f057deb93292e39ddba3bfa",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 0. Unit selection, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 5f5635e7b99954ae0f057deb93292e39ddba3bfa."
     },
     {
       "id": "added:Enum.CombatAudioAlertUnitMeta.NumValues",
       "symbol": "Enum.CombatAudioAlertUnitMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertUnitMeta.NumValues as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime combat-audio metadata publication defines Enum.CombatAudioAlertUnitMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact combat-audio unit value.",
+          "source_hash": "839e76d50856dec866a13c7f18f61414bae28128c90f98851578e34b4aed5ab9"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_unit_enums.rs::test_patch_12_0_0_combat_audio_unit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertUnitMeta.NumValues as Lua number with exact value 2."
+      ],
+      "commit": "5f5635e7b99954ae0f057deb93292e39ddba3bfa",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 2. Unit selection, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 5f5635e7b99954ae0f057deb93292e39ddba3bfa."
     },
     {
       "id": "added:Enum.CombatLogMessageOrder.Newest",

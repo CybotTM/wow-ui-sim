@@ -4,11 +4,13 @@
 
 ## Content
 
-Current manifest totals are **1106 best-effort, 982 evidence-required, 2 exception-requested, and 1320 untriaged rows** (3410 total).
+Current manifest totals are **1111 best-effort, 982 evidence-required, 2 exception-requested, and 1315 untriaged rows** (3410 total).
 
 The five `Enum.CombatAudioAlertType.*` and `Enum.CombatAudioAlertTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Health=0`, `Cast=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `0c51d4c32a8ae89fffdf3ca67bf80d03926496d2`. Health/cast classification behavior, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 
 The ten `Enum.CombatAudioAlertThrottle.*` and `Enum.CombatAudioAlertThrottleMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata Lua numeric publication, exact values (`Sample=0`, `PlayerHealth=1`, `TargetHealth=2`, `PlayerCast=3`, `TargetCast=4`, `PlayerResource1=5`, `PlayerResource2=6`; metadata `MinValue=0`, `MaxValue=6`, `NumValues=7`), and absence of later-epoch `PlayerHealthSamePercent`, `TargetHealthSamePercent`, `PlayerResource1SamePercent`, and `PlayerResource2SamePercent` members after the retail-12.0.0 override. Focused proof is at `8096cc84cb9e200840507937c0b379bb6f0ca656`. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
+
+The five `Enum.CombatAudioAlertUnit.*` and `Enum.CombatAudioAlertUnitMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Player=0`, `Target=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `5f5635e7b99954ae0f057deb93292e39ddba3bfa`. Unit selection, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 

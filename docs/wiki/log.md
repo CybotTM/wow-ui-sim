@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify combat-audio unit enums
+
+Classified exactly five retail 12.0.0 `Enum.CombatAudioAlertUnit.*` and `Enum.CombatAudioAlertUnitMeta.*` rows as best-effort/behavioral, bounded to startup enum/metadata numeric publication and exact values (`Player=0`, `Target=1`, `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `5f5635e7b99954ae0f057deb93292e39ddba3bfa`. Unit selection, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1111 best-effort, 982 evidence-required, 2 exception-requested, and 1315 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify combat-audio type enums
 
 Classified exactly five retail 12.0.0 `Enum.CombatAudioAlertType.*` and `Enum.CombatAudioAlertTypeMeta.*` rows as best-effort/behavioral, bounded to startup enum/metadata numeric publication and exact values (`Health=0`, `Cast=1`, `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `0c51d4c32a8ae89fffdf3ca67bf80d03926496d2`. Health/cast classification behavior, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1106 best-effort, 982 evidence-required, 2 exception-requested, and 1320 untriaged** (3410 rows).
