@@ -49566,209 +49566,664 @@
       "id": "added:Enum.EncounterEventIconmask.BleedEffect",
       "symbol": "Enum.EncounterEventIconmask.BleedEffect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.BleedEffect with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.BleedEffect with numeric value 4; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.BleedEffect with numeric value 4.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.BleedEffect as a Lua number with exact retail 12.0.0 value 4; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 4, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.CurseEffect",
       "symbol": "Enum.EncounterEventIconmask.CurseEffect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.CurseEffect with numeric value 32.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.CurseEffect with numeric value 32; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.CurseEffect with numeric value 32.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.CurseEffect as a Lua number with exact retail 12.0.0 value 32; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 32, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.DeadlyEffect",
       "symbol": "Enum.EncounterEventIconmask.DeadlyEffect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.DeadlyEffect with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.DeadlyEffect with numeric value 1; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.DeadlyEffect with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.DeadlyEffect as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.DiseaseEffect",
       "symbol": "Enum.EncounterEventIconmask.DiseaseEffect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.DiseaseEffect with numeric value 16.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.DiseaseEffect with numeric value 16; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.DiseaseEffect with numeric value 16.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.DiseaseEffect as a Lua number with exact retail 12.0.0 value 16; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 16, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.DpsRole",
       "symbol": "Enum.EncounterEventIconmask.DpsRole",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.DpsRole with numeric value 512.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.DpsRole with numeric value 512; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.DpsRole with numeric value 512.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.DpsRole as a Lua number with exact retail 12.0.0 value 512; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 512, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.EnrageEffect",
       "symbol": "Enum.EncounterEventIconmask.EnrageEffect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.EnrageEffect with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.EnrageEffect with numeric value 2; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.EnrageEffect with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.EnrageEffect as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 2, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.HealerRole",
       "symbol": "Enum.EncounterEventIconmask.HealerRole",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.HealerRole with numeric value 256.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.HealerRole with numeric value 256; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.HealerRole with numeric value 256.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.HealerRole as a Lua number with exact retail 12.0.0 value 256; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 256, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.MagicEffect",
       "symbol": "Enum.EncounterEventIconmask.MagicEffect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.MagicEffect with numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.MagicEffect with numeric value 8; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.MagicEffect with numeric value 8.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.MagicEffect as a Lua number with exact retail 12.0.0 value 8; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 8, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.PoisonEffect",
       "symbol": "Enum.EncounterEventIconmask.PoisonEffect",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.PoisonEffect with numeric value 64.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.PoisonEffect with numeric value 64; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.PoisonEffect with numeric value 64.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.PoisonEffect as a Lua number with exact retail 12.0.0 value 64; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 64, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmask.TankRole",
       "symbol": "Enum.EncounterEventIconmask.TankRole",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmask.TankRole with numeric value 128.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmask.TankRole with numeric value 128; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmask.TankRole with numeric value 128.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmask.TankRole as a Lua number with exact retail 12.0.0 value 128; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 128, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmaskMeta.MaxValue",
       "symbol": "Enum.EncounterEventIconmaskMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmaskMeta.MaxValue with numeric value 512.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmaskMeta.MaxValue with numeric value 512; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmaskMeta.MaxValue with numeric value 512.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmaskMeta.MaxValue as a Lua number with exact retail 12.0.0 value 512; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 512, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmaskMeta.MinValue",
       "symbol": "Enum.EncounterEventIconmaskMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmaskMeta.MinValue with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmaskMeta.MinValue with numeric value 1; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmaskMeta.MinValue with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmaskMeta.MinValue as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventIconmaskMeta.NumValues",
       "symbol": "Enum.EncounterEventIconmaskMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventIconmaskMeta.NumValues with numeric value 10.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded runtime enum data publishes Enum.EncounterEventIconmaskMeta.NumValues with numeric value 10; the complete icon-mask family matches retail 12.0.0.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback and does not alter the retail 12.0.0 icon-mask members or metadata.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete EncounterEventIconmask member set as Lua numbers with exact values, no extras, and metadata MinValue=1, MaxValue=512, NumValues=10.",
+          "source_hash": "51f55cf9c1009d6ed3dd2ac9cdd266594f8965896a2e4faa21f9482b18e48808"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.EncounterEventIconmaskMeta.NumValues with numeric value 10.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_iconmask_enums.rs::test_patch_12_0_0_encounter_event_iconmask_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventIconmaskMeta.NumValues as a Lua number with exact retail 12.0.0 value 10; the focused namespace test also requires the complete ten-member set and metadata MinValue=1, MaxValue=512, NumValues=10."
+      ],
+      "commit": "0de2bc41145abf8518ff9ec602c7428cc3afc728",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 10, complete icon-mask member set, and metadata boundary. Icon-mask interpretation/operations, encounter behavior, consumers, persistence, ordering, transitions, and lifecycle are not claimed. Proof commit: 0de2bc41145abf8518ff9ec602c7428cc3afc728."
     },
     {
       "id": "added:Enum.EncounterEventSeverity.High",
