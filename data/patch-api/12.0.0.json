@@ -29172,33 +29172,83 @@
       "id": "added:CriteriaRequiredValue.criteriaID",
       "symbol": "CriteriaRequiredValue.criteriaID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required number field criteriaID to CriteriaRequiredValue.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current tracking namespace returns nil/empty defaults and constructs no criteria-value or requirement payloads.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Existing neighborhood tests cover default namespace behavior, not this field, values, or transitions.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_tracking_defaults_probes.rs",
+          "summary": "Existing tracking probes prove nil/empty compatibility defaults only and do not establish criteria/requirement structure fidelity.",
+          "source_hash": "df72a7b7ff97aa354d78a8087c2476b9d8c6feccb9aba9559ea3b34eefd1af47"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CriteriaRequiredValue.criteriaID. Field presence, number type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CriteriaRequiredValue.requiredValue",
       "symbol": "CriteriaRequiredValue.requiredValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required number field requiredValue to CriteriaRequiredValue.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current tracking namespace returns nil/empty defaults and constructs no criteria-value or requirement payloads.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Existing neighborhood tests cover default namespace behavior, not this field, values, or transitions.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_tracking_defaults_probes.rs",
+          "summary": "Existing tracking probes prove nil/empty compatibility defaults only and do not establish criteria/requirement structure fidelity.",
+          "source_hash": "df72a7b7ff97aa354d78a8087c2476b9d8c6feccb9aba9559ea3b34eefd1af47"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CriteriaRequiredValue.requiredValue. Field presence, number type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CriteriaRequirement",
@@ -29228,33 +29278,83 @@
       "id": "added:CriteriaRequirement.completed",
       "symbol": "CriteriaRequirement.completed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required boolean field completed to CriteriaRequirement.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current tracking namespace returns nil/empty defaults and constructs no criteria-value or requirement payloads.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Existing neighborhood tests cover default namespace behavior, not this field, values, or transitions.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_tracking_defaults_probes.rs",
+          "summary": "Existing tracking probes prove nil/empty compatibility defaults only and do not establish criteria/requirement structure fidelity.",
+          "source_hash": "df72a7b7ff97aa354d78a8087c2476b9d8c6feccb9aba9559ea3b34eefd1af47"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CriteriaRequirement.completed. Field presence, boolean type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CriteriaRequirement.requirementText",
       "symbol": "CriteriaRequirement.requirementText",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field requirementText to CriteriaRequirement.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/tracking_namespace_defaults.rs",
+          "summary": "Current tracking namespace returns nil/empty defaults and constructs no criteria-value or requirement payloads.",
+          "source_hash": "db5040407aead23ef410ffc573c40cf673e9e99027a641370eee4c1239a00754"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/neighborhood_initiative.rs",
+          "summary": "Existing neighborhood tests cover default namespace behavior, not this field, values, or transitions.",
+          "source_hash": "7249dd6050e467d41a2e8381cd109c662e92380fb4c3026d163b16f159868304"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_tracking_defaults_probes.rs",
+          "summary": "Existing tracking probes prove nil/empty compatibility defaults only and do not establish criteria/requirement structure fidelity.",
+          "source_hash": "df72a7b7ff97aa354d78a8087c2476b9d8c6feccb9aba9559ea3b34eefd1af47"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CriteriaRequirement.requirementText. Field presence, string type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:DAMAGE_METER_COMBAT_SESSION_UPDATED",

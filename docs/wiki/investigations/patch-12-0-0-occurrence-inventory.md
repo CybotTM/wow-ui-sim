@@ -947,11 +947,11 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `CreateAbbreviateConfig` | best-effort | api | added | Best-effort behavioral evidence covers factory/table proxy behavior, method dispatch, round-trip storage, per-instance isolation, read-only keys, and tostring; exact arrayof NumberAbbrevData structure fidelity is not established. |
 | `CreateUnitHealPredictionCalculator` | best-effort | api | added | Best-effort behavioral evidence covers only proxy/default/health/incoming-heal behavior; exact clamp/absorb/overflow/secret/full typed semantics are not established. |
 | `CriteriaRequiredValue` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
-| `CriteriaRequiredValue.criteriaID` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `CriteriaRequiredValue.requiredValue` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `CriteriaRequiredValue.criteriaID` | evidence-required | structure-field | added | Evidence required: no runtime producer populates CriteriaRequiredValue.criteriaID. Field presence, number type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven. |
+| `CriteriaRequiredValue.requiredValue` | evidence-required | structure-field | added | Evidence required: no runtime producer populates CriteriaRequiredValue.requiredValue. Field presence, number type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven. |
 | `CriteriaRequirement` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
-| `CriteriaRequirement.completed` | untriaged | structure-field | added | structure-field added in 12.0.0. |
-| `CriteriaRequirement.requirementText` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `CriteriaRequirement.completed` | evidence-required | structure-field | added | Evidence required: no runtime producer populates CriteriaRequirement.completed. Field presence, boolean type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven. |
+| `CriteriaRequirement.requirementText` | evidence-required | structure-field | added | Evidence required: no runtime producer populates CriteriaRequirement.requirementText. Field presence, string type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven. |
 | `DAMAGE_METER_COMBAT_SESSION_UPDATED` | untriaged | event | added | event added in 12.0.0. |
 | `DAMAGE_METER_CURRENT_SESSION_UPDATED` | untriaged | event | added | event added in 12.0.0. |
 | `DAMAGE_METER_RESET` | untriaged | event | added | event added in 12.0.0. |

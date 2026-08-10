@@ -879,11 +879,11 @@
 879. [best-effort] `added:CreateAbbreviateConfig` — behavioral
 880. [best-effort] `added:CreateUnitHealPredictionCalculator` — behavioral
 881. [best-effort] `added:CriteriaRequiredValue` — provenance-only
-882. [untriaged] `added:CriteriaRequiredValue.criteriaID` — untriaged
-883. [untriaged] `added:CriteriaRequiredValue.requiredValue` — untriaged
+882. [evidence-required] `added:CriteriaRequiredValue.criteriaID` — unsafe
+883. [evidence-required] `added:CriteriaRequiredValue.requiredValue` — unsafe
 884. [best-effort] `added:CriteriaRequirement` — provenance-only
-885. [untriaged] `added:CriteriaRequirement.completed` — untriaged
-886. [untriaged] `added:CriteriaRequirement.requirementText` — untriaged
+885. [evidence-required] `added:CriteriaRequirement.completed` — unsafe
+886. [evidence-required] `added:CriteriaRequirement.requirementText` — unsafe
 887. [untriaged] `added:DAMAGE_METER_COMBAT_SESSION_UPDATED` — untriaged
 888. [untriaged] `added:DAMAGE_METER_CURRENT_SESSION_UPDATED` — untriaged
 889. [untriaged] `added:DAMAGE_METER_RESET` — untriaged

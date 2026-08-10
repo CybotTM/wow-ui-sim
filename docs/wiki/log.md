@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify criteria tracking fields
+
+Classified `CriteriaRequiredValue.criteriaID`, `.requiredValue`, `CriteriaRequirement.completed`, and `.requirementText` as evidence-required/unsafe: the tracking namespace emits nil/empty defaults and has no criteria/requirement payload producer; field/type/value/progress/completion/localization/event/persistence/lifecycle semantics remain unresolved. Current totals are **939 best-effort, 969 evidence-required, 2 exception-requested, and 1500 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify crafting structure fields
 
 Classified the 19 crafting structure fields from `CraftingItemSlotModification.reagent` through `CraftingVariableQuantities.reagent` as evidence-required/unsafe: no typed runtime producers cover reagent, quality/icon, variable-quantity, or resource-return fields; type/value/nesting/validation/update/event/persistence/lifecycle semantics remain unresolved. Current totals are **939 best-effort, 965 evidence-required, 2 exception-requested, and 1504 untriaged** (3410 rows).
