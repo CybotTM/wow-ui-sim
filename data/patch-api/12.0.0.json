@@ -37093,193 +37093,469 @@
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValues.HealthFull",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValues.HealthFull",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValues.HealthFull as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertTargetHealthFormatValues.HealthFull with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValues.HealthFull as Lua number with exact value 3."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 3. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercent",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercent as numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercent with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercent as Lua number with exact value 4."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 4. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercentDiv10",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercentDiv10",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercentDiv10 as numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercentDiv10 with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercentDiv10 as Lua number with exact value 5."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 5. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthFull",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthFull",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthFull as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthFull with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthFull as Lua number with exact value 0."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 0. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercent",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercent as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercent with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercent as Lua number with exact value 1."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 1. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercentDiv10",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercentDiv10",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercentDiv10 as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercentDiv10 with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValues.NoHealthNoPercentDiv10 as Lua number with exact value 2."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 2. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValues.TargetFull",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValues.TargetFull",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValues.TargetFull as numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertTargetHealthFormatValues.TargetFull with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValues.TargetFull as Lua number with exact value 6."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 6. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercent",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercent as numeric value 7.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercent with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercent as Lua number with exact value 7."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 7. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercentDiv10",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercentDiv10",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercentDiv10 as numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum publication defines Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercentDiv10 with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValues.TargetNoPercentDiv10 as Lua number with exact value 8."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 8. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MaxValue",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MaxValue as numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime metadata publication defines Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MaxValue as Lua number with exact value 8."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 8. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MinValue",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime metadata publication defines Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValuesMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 0. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertTargetHealthFormatValuesMeta.NumValues",
       "symbol": "Enum.CombatAudioAlertTargetHealthFormatValuesMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertTargetHealthFormatValuesMeta.NumValues as numeric value 9.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime metadata publication defines Enum.CombatAudioAlertTargetHealthFormatValuesMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact target-health format value.",
+          "source_hash": "ff0cb1bc4c1c374cd8dfde983172a90054aa1b960193b44bc7905c4d3b38b7fe"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_combat_audio_target_health_format_enums.rs::test_patch_12_0_0_combat_audio_target_health_format_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertTargetHealthFormatValuesMeta.NumValues as Lua number with exact value 9."
+      ],
+      "commit": "3c320a56d387e716e299f114972e1c9746abc2f0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 9. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle are not claimed. Proof commit: 3c320a56d387e716e299f114972e1c9746abc2f0."
     },
     {
       "id": "added:Enum.CombatAudioAlertThrottle.PlayerCast",
