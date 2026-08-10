@@ -66276,145 +66276,469 @@
       "id": "added:Enum.TransmogOutfitEquipAction.Equip",
       "symbol": "Enum.TransmogOutfitEquipAction.Equip",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitEquipAction.Equip with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization runs the enum startup surface used by the focused proof.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the exact six-member TransmogOutfitEquipAction family (Equip=0, EquipAndLock=1, Remove=2, RemoveAndLock=3, Unlock=4, Lock=5) and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "57eddcca4d79316606294aaf64409b68eaaa008cbba3c85782bb924590a37aca"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.TransmogOutfitEquipAction.Equip with exact value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs::test_patch_12_0_0_transmog_outfit_equip_action_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEquipAction.Equip as Lua number with exact retail 12.0.0 value 0."
+      ],
+      "commit": "ad955a3a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No runtime drift; guarded missing_enums.lua is authoritative. Outfit equip/remove behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad955a3a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitEquipAction.EquipAndLock",
       "symbol": "Enum.TransmogOutfitEquipAction.EquipAndLock",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitEquipAction.EquipAndLock with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization runs the enum startup surface used by the focused proof.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the exact six-member TransmogOutfitEquipAction family (Equip=0, EquipAndLock=1, Remove=2, RemoveAndLock=3, Unlock=4, Lock=5) and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "57eddcca4d79316606294aaf64409b68eaaa008cbba3c85782bb924590a37aca"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.TransmogOutfitEquipAction.EquipAndLock with exact value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs::test_patch_12_0_0_transmog_outfit_equip_action_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEquipAction.EquipAndLock as Lua number with exact retail 12.0.0 value 1."
+      ],
+      "commit": "ad955a3a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No runtime drift; guarded missing_enums.lua is authoritative. Outfit equip/remove behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad955a3a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitEquipAction.Lock",
       "symbol": "Enum.TransmogOutfitEquipAction.Lock",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitEquipAction.Lock with exact value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization runs the enum startup surface used by the focused proof.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the exact six-member TransmogOutfitEquipAction family (Equip=0, EquipAndLock=1, Remove=2, RemoveAndLock=3, Unlock=4, Lock=5) and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "57eddcca4d79316606294aaf64409b68eaaa008cbba3c85782bb924590a37aca"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.TransmogOutfitEquipAction.Lock with exact value 5.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs::test_patch_12_0_0_transmog_outfit_equip_action_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEquipAction.Lock as Lua number with exact retail 12.0.0 value 5."
+      ],
+      "commit": "ad955a3a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No runtime drift; guarded missing_enums.lua is authoritative. Outfit equip/remove behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad955a3a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitEquipAction.Remove",
       "symbol": "Enum.TransmogOutfitEquipAction.Remove",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitEquipAction.Remove with exact value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization runs the enum startup surface used by the focused proof.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the exact six-member TransmogOutfitEquipAction family (Equip=0, EquipAndLock=1, Remove=2, RemoveAndLock=3, Unlock=4, Lock=5) and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "57eddcca4d79316606294aaf64409b68eaaa008cbba3c85782bb924590a37aca"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.TransmogOutfitEquipAction.Remove with exact value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs::test_patch_12_0_0_transmog_outfit_equip_action_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEquipAction.Remove as Lua number with exact retail 12.0.0 value 2."
+      ],
+      "commit": "ad955a3a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No runtime drift; guarded missing_enums.lua is authoritative. Outfit equip/remove behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad955a3a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitEquipAction.RemoveAndLock",
       "symbol": "Enum.TransmogOutfitEquipAction.RemoveAndLock",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitEquipAction.RemoveAndLock with exact value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization runs the enum startup surface used by the focused proof.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the exact six-member TransmogOutfitEquipAction family (Equip=0, EquipAndLock=1, Remove=2, RemoveAndLock=3, Unlock=4, Lock=5) and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "57eddcca4d79316606294aaf64409b68eaaa008cbba3c85782bb924590a37aca"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.TransmogOutfitEquipAction.RemoveAndLock with exact value 3.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs::test_patch_12_0_0_transmog_outfit_equip_action_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEquipAction.RemoveAndLock as Lua number with exact retail 12.0.0 value 3."
+      ],
+      "commit": "ad955a3a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No runtime drift; guarded missing_enums.lua is authoritative. Outfit equip/remove behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad955a3a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitEquipAction.Unlock",
       "symbol": "Enum.TransmogOutfitEquipAction.Unlock",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitEquipAction.Unlock with exact value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization runs the enum startup surface used by the focused proof.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the exact six-member TransmogOutfitEquipAction family (Equip=0, EquipAndLock=1, Remove=2, RemoveAndLock=3, Unlock=4, Lock=5) and metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "57eddcca4d79316606294aaf64409b68eaaa008cbba3c85782bb924590a37aca"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.TransmogOutfitEquipAction.Unlock with exact value 4.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs::test_patch_12_0_0_transmog_outfit_equip_action_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEquipAction.Unlock as Lua number with exact retail 12.0.0 value 4."
+      ],
+      "commit": "ad955a3a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No runtime drift; guarded missing_enums.lua is authoritative. Outfit equip/remove behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad955a3a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitEquipActionMeta.MaxValue",
       "symbol": "Enum.TransmogOutfitEquipActionMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitEquipActionMeta.MaxValue with exact metadata value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization runs the enum startup surface used by the focused proof.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TransmogOutfitEquipAction metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "57eddcca4d79316606294aaf64409b68eaaa008cbba3c85782bb924590a37aca"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.TransmogOutfitEquipActionMeta.MaxValue with exact value 5.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs::test_patch_12_0_0_transmog_outfit_equip_action_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEquipActionMeta.MaxValue as Lua number with exact retail 12.0.0 metadata value 5."
+      ],
+      "commit": "ad955a3a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No runtime drift; guarded missing_enums.lua is authoritative. Outfit equip/remove behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad955a3a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitEquipActionMeta.MinValue",
       "symbol": "Enum.TransmogOutfitEquipActionMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitEquipActionMeta.MinValue with exact metadata value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization runs the enum startup surface used by the focused proof.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TransmogOutfitEquipAction metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "57eddcca4d79316606294aaf64409b68eaaa008cbba3c85782bb924590a37aca"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.TransmogOutfitEquipActionMeta.MinValue with exact value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs::test_patch_12_0_0_transmog_outfit_equip_action_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEquipActionMeta.MinValue as Lua number with exact retail 12.0.0 metadata value 0."
+      ],
+      "commit": "ad955a3a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No runtime drift; guarded missing_enums.lua is authoritative. Outfit equip/remove behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad955a3a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitEquipActionMeta.NumValues",
       "symbol": "Enum.TransmogOutfitEquipActionMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register records Enum.TransmogOutfitEquipActionMeta.NumValues with exact metadata value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization runs the enum startup surface used by the focused proof.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TransmogOutfitEquipAction metadata MinValue=0, MaxValue=5, NumValues=6.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "57eddcca4d79316606294aaf64409b68eaaa008cbba3c85782bb924590a37aca"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records Enum.TransmogOutfitEquipActionMeta.NumValues with exact value 6.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_equip_action_enums.rs::test_patch_12_0_0_transmog_outfit_equip_action_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEquipActionMeta.NumValues as Lua number with exact retail 12.0.0 metadata value 6."
+      ],
+      "commit": "ad955a3a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No runtime drift; guarded missing_enums.lua is authoritative. Outfit equip/remove behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: ad955a3a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.TransmogOutfitSetType.CustomSet",
