@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **944 best-effort, 982 evidence-required, 2 exception-requested, and 1482 untriaged rows** (3410 total).
+Current manifest totals are **954 best-effort, 982 evidence-required, 2 exception-requested, and 1472 untriaged rows** (3410 total).
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
@@ -13,6 +13,8 @@ Current manifest totals are **944 best-effort, 982 evidence-required, 2 exceptio
 `C_Tutorial.GetCombatEventInfo` is evidence-required/unsafe: the explicit implementation is a zero-result no-op while the checked-in source provides no output schema; authoritative return semantics, combat state/producer/timing, persistence, and lifecycle remain unresolved.
 
 The 38 grouped constants are best-effort/behavioral: six misc target/currency/item/profession/transmog constants, 12 EncounterTimeline constants, six TTS constants, 13 UICharacterClasses constants, and UnitEventConstants.MAX_UNIT_TOKENS_IN_EVENT. Focused grouped test proof at `1895cacebd8fa8f881f053694ec61de9a645824c` establishes startup Lua numeric type/value only; consumer, mutation, protection, and subsystem semantics remain unclaimed. The five Constants.UnitPowerSpellIDs rows are best-effort/behavioral with focused exact type/value proof at `ce4ea294bff9f41401f74e3e9e5ca40d42ea4516`; spell, aura, alternate-power, consumer, mutation, and lifecycle semantics remain unclaimed.
+
+The four `Enum.AccountDataUpdateStatus.*`, three `Enum.AddOnRestrictionState.*`, and three `Enum.AddOnRestrictionStateMeta.*` rows are best-effort/behavioral. Evidence is bounded to startup enum/metadata numeric publication and exact values; account-data behavior and restriction policy/state transitions/enforcement/events/lifecycle remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 

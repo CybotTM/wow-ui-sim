@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify 12.0.0 enum rows
+
+Classified the four `Enum.AccountDataUpdateStatus.*`, three `Enum.AddOnRestrictionState.*`, and three `Enum.AddOnRestrictionStateMeta.*` rows as best-effort/behavioral. Evidence is bounded to startup enum/metadata numeric publication and exact values; account-data behavior and restriction policy/state transitions/enforcement/events/lifecycle remain unclaimed. Current totals are **954 best-effort, 982 evidence-required, 2 exception-requested, and 1472 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify UnitPowerSpellIDs constants
 
 Classified the five `Constants.UnitPowerSpellIDs` rows as best-effort/behavioral: focused exact type/value proof at `ce4ea294bff9f41401f74e3e9e5ca40d42ea4516` covers startup publication only; spell, aura, alternate-power, consumer, mutation, and lifecycle semantics remain unclaimed. Current totals are **944 best-effort, 982 evidence-required, 2 exception-requested, and 1482 untriaged** (3410 rows).
