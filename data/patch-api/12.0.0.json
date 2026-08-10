@@ -23731,17 +23731,42 @@
       "id": "added:C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo",
       "symbol": "C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds widgetID input and a nilable PreyHuntProgressWidgetVisualizationInfo result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: GetPreyHuntProgressWidgetVisualizationInfo is absent and no Prey Hunt widget state or payload producer exists. Widget-ID lookup, nil/valid results, timer/progress/animation/tooltip/texture/model fields, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo",
@@ -23771,257 +23796,657 @@
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.frameTextureKit",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.frameTextureKit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field frameTextureKit to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates frameTextureKit. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.hasTimer",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.hasTimer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required boolean field hasTimer to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates hasTimer. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.inAnimType",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.inAnimType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required Enum.WidgetAnimationType field inAnimType to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates inAnimType. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.layoutDirection",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.layoutDirection",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required Enum.UIWidgetLayoutDirection field layoutDirection to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates layoutDirection. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.modelSceneLayer",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.modelSceneLayer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required Enum.UIWidgetModelSceneLayer field modelSceneLayer to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates modelSceneLayer. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.orderIndex",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.orderIndex",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required number field orderIndex to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates orderIndex. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.outAnimType",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.outAnimType",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required Enum.WidgetAnimationType field outAnimType to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates outAnimType. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.progressState",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.progressState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required Enum.PreyHuntProgressState field progressState to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates progressState. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.scriptedAnimationEffectID",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.scriptedAnimationEffectID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required number field scriptedAnimationEffectID to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates scriptedAnimationEffectID. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.shownState",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.shownState",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required Enum.WidgetShownState field shownState to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates shownState. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.textureKit",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.textureKit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field textureKit to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates textureKit. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.tooltip",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.tooltip",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field tooltip to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates tooltip. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.tooltipLoc",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.tooltipLoc",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required Enum.UIWidgetTooltipLocation field tooltipLoc to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates tooltipLoc. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.widgetScale",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.widgetScale",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required Enum.UIWidgetScale field widgetScale to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates widgetScale. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.widgetSizeSetting",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.widgetSizeSetting",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required number field widgetSizeSetting to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates widgetSizeSetting. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.widgetTag",
       "symbol": "C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.widgetTag",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field widgetTag to PreyHuntProgressWidgetVisualizationInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/ui_widget_manager.rs",
+          "summary": "Current UI widget manager models generic widget-set queries only and does not register the Prey Hunt API or construct its payload.",
+          "source_hash": "d1fafe1e7647b56d20eaea59f95a1fd539eb79e8b40c84e5d875832632c95876"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
+          "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs",
+          "summary": "Existing generic widget-container coverage does not exercise Prey Hunt visualization lookup or payload fields.",
+          "source_hash": "2f67d692415160bf3aaed23224c192b2ea22277b99bbcccec9f745792c581d61"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no PreyHuntProgressWidgetVisualizationInfo runtime producer populates widgetTag. Field presence, type/value, widget-state transitions, enum validation where applicable, refresh events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UnitAuras.AuraIsBigDefensive",

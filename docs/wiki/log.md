@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify Prey Hunt widget visualization
+
+Classified `C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo` and its 16 `PreyHuntProgressWidgetVisualizationInfo` fields as evidence-required/unsafe: the API is absent and no Prey Hunt widget state or payload producer exists. Widget lookup, typed fields, timer/progress/animation/tooltip/texture/model values, refresh, events, persistence, and lifecycle remain unresolved. Current totals are **901 best-effort, 942 evidence-required, 2 exception-requested, and 1565 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_Tutorial.GetCombatEventInfo
 
 Classified `C_Tutorial.GetCombatEventInfo` as evidence-required/unsafe: the explicit implementation is a zero-result no-op while the checked-in source provides no output schema; authoritative return semantics, combat state/producer/timing, persistence, and lifecycle remain unresolved. Current totals are **901 best-effort, 925 evidence-required, 2 exception-requested, and 1582 untriaged** (3410 rows).
