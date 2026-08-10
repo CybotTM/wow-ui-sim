@@ -82,6 +82,7 @@ mod patch_12_0_0_nameplate_type_enums;
 mod patch_12_0_0_neighborhood_initiative_chest_result_enums;
 mod patch_12_0_0_neighborhood_initiative_neighborhood_types_enums;
 mod patch_12_0_0_small_enums;
+mod patch_12_0_0_status_bar_timer_direction_enums;
 mod patch_12_0_0_ui_enum_metadata;
 mod patch_12_0_0_unit_power_spell_ids;
 mod patch_12_1_service_payloads;
