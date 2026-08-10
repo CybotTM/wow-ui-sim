@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify DungeonEncounterXCreatureFlags enums
+
+Classified exactly six retail 12.0.0 `Enum.DungeonEncounterXCreatureFlags.*` and `Enum.DungeonEncounterXCreatureFlagsMeta.*` rows as best-effort/behavioral: `BossCreature=1`, `DropLootImmediately=2`, `DoNotDespawnOnSuccess=4`; metadata `MinValue=1`, `MaxValue=4`, and `NumValues=3`. Evidence is bounded to startup enum/metadata publication, Lua numeric type, and exact values. Focused proof is at `8cb0dda90867aed71a06eb707b2c836dcc2d872c`. Creature flag interpretation, loot timing, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1225 best-effort, 982 evidence-required, 2 exception-requested, and 1201 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify DungeonEncounterTriggerType enums
 
 Classified exactly eight retail 12.0.0 `Enum.DungeonEncounterTriggerType.*` and `Enum.DungeonEncounterTriggerTypeMeta.*` rows as best-effort/behavioral: `Invalid=0`, `OnStart=1`, `OnComplete=2`, `OnEnd=3`, `PreviouslyCompleted=4`; metadata `MinValue=0`, `MaxValue=4`, and `NumValues=5`. Evidence is bounded to startup enum/metadata publication, Lua numeric type, and exact values. Focused proof is at `17cd655bc64490cb39b0377f669160d876ef8af8`. Dungeon-encounter trigger behavior, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1219 best-effort, 982 evidence-required, 2 exception-requested, and 1207 untriaged** (3410 rows).

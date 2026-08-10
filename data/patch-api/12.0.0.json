@@ -46291,97 +46291,235 @@
       "id": "added:Enum.DungeonEncounterXCreatureFlags.BossCreature",
       "symbol": "Enum.DungeonEncounterXCreatureFlags.BossCreature",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterXCreatureFlags.BossCreature with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterXCreatureFlags.BossCreature with numeric value 1 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterXCreatureFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "21436b78b8baa5196e0d83a218d48efef7417b1db9fc460b9186e7a1f9c43aaa"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_creature_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterXCreatureFlags.BossCreature as Lua number with exact value 1."
+      ],
+      "commit": "8cb0dda90867aed71a06eb707b2c836dcc2d872c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DungeonEncounterXCreatureFlags.BossCreature. Dungeon-encounter creature flag interpretation, loot timing, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 8cb0dda90867aed71a06eb707b2c836dcc2d872c."
     },
     {
       "id": "added:Enum.DungeonEncounterXCreatureFlags.DoNotDespawnOnSuccess",
       "symbol": "Enum.DungeonEncounterXCreatureFlags.DoNotDespawnOnSuccess",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterXCreatureFlags.DoNotDespawnOnSuccess with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterXCreatureFlags.DoNotDespawnOnSuccess with numeric value 4 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterXCreatureFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "21436b78b8baa5196e0d83a218d48efef7417b1db9fc460b9186e7a1f9c43aaa"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_creature_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterXCreatureFlags.DoNotDespawnOnSuccess as Lua number with exact value 4."
+      ],
+      "commit": "8cb0dda90867aed71a06eb707b2c836dcc2d872c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 4 for Enum.DungeonEncounterXCreatureFlags.DoNotDespawnOnSuccess. Dungeon-encounter creature flag interpretation, loot timing, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 8cb0dda90867aed71a06eb707b2c836dcc2d872c."
     },
     {
       "id": "added:Enum.DungeonEncounterXCreatureFlags.DropLootImmediately",
       "symbol": "Enum.DungeonEncounterXCreatureFlags.DropLootImmediately",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterXCreatureFlags.DropLootImmediately with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterXCreatureFlags.DropLootImmediately with numeric value 2 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterXCreatureFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "21436b78b8baa5196e0d83a218d48efef7417b1db9fc460b9186e7a1f9c43aaa"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_creature_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterXCreatureFlags.DropLootImmediately as Lua number with exact value 2."
+      ],
+      "commit": "8cb0dda90867aed71a06eb707b2c836dcc2d872c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.DungeonEncounterXCreatureFlags.DropLootImmediately. Dungeon-encounter creature flag interpretation, loot timing, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 8cb0dda90867aed71a06eb707b2c836dcc2d872c."
     },
     {
       "id": "added:Enum.DungeonEncounterXCreatureFlagsMeta.MaxValue",
       "symbol": "Enum.DungeonEncounterXCreatureFlagsMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterXCreatureFlagsMeta.MaxValue with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterXCreatureFlagsMeta.MaxValue with numeric value 4 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterXCreatureFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "21436b78b8baa5196e0d83a218d48efef7417b1db9fc460b9186e7a1f9c43aaa"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_creature_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterXCreatureFlagsMeta.MaxValue as Lua number with exact value 4."
+      ],
+      "commit": "8cb0dda90867aed71a06eb707b2c836dcc2d872c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 4 for Enum.DungeonEncounterXCreatureFlagsMeta.MaxValue. Dungeon-encounter creature flag interpretation, loot timing, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 8cb0dda90867aed71a06eb707b2c836dcc2d872c."
     },
     {
       "id": "added:Enum.DungeonEncounterXCreatureFlagsMeta.MinValue",
       "symbol": "Enum.DungeonEncounterXCreatureFlagsMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterXCreatureFlagsMeta.MinValue with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterXCreatureFlagsMeta.MinValue with numeric value 1 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterXCreatureFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "21436b78b8baa5196e0d83a218d48efef7417b1db9fc460b9186e7a1f9c43aaa"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_creature_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterXCreatureFlagsMeta.MinValue as Lua number with exact value 1."
+      ],
+      "commit": "8cb0dda90867aed71a06eb707b2c836dcc2d872c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DungeonEncounterXCreatureFlagsMeta.MinValue. Dungeon-encounter creature flag interpretation, loot timing, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 8cb0dda90867aed71a06eb707b2c836dcc2d872c."
     },
     {
       "id": "added:Enum.DungeonEncounterXCreatureFlagsMeta.NumValues",
       "symbol": "Enum.DungeonEncounterXCreatureFlagsMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterXCreatureFlagsMeta.NumValues with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterXCreatureFlagsMeta.NumValues with numeric value 3 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterXCreatureFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "21436b78b8baa5196e0d83a218d48efef7417b1db9fc460b9186e7a1f9c43aaa"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_creature_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_creature_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterXCreatureFlagsMeta.NumValues as Lua number with exact value 3."
+      ],
+      "commit": "8cb0dda90867aed71a06eb707b2c836dcc2d872c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 3 for Enum.DungeonEncounterXCreatureFlagsMeta.NumValues. Dungeon-encounter creature flag interpretation, loot timing, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 8cb0dda90867aed71a06eb707b2c836dcc2d872c."
     },
     {
       "id": "added:Enum.DurationTimeModifier.BaseTime",
