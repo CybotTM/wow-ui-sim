@@ -50499,113 +50499,400 @@
       "id": "added:Enum.EncounterEventsIconDirection.Bottom",
       "symbol": "Enum.EncounterEventsIconDirection.Bottom",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds the four EncounterEventsIconDirection members and metadata with exact numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Runtime enum data publishes EncounterEventsIconDirection with Top=0, Bottom=1, Left=0, and Right=1.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching direction metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the runtime enum data and fallback surface for retail 12.0.0.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs",
+          "summary": "Focused startup test asserts the exact complete four-member set, numeric values, no extras, and metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "6ff7125125288a9486330a7b8665503b551291f236d2253ea7ec28e2cc071b83"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records the direction values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs::test_patch_12_0_0_encounter_events_icon_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsIconDirection.Bottom as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the complete four-member set and metadata MinValue=0, MaxValue=1, NumValues=4."
+      ],
+      "commit": "49b052e36826a5ab70241fd242f4031e23b57805",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete four-member Enum.EncounterEventsIconDirection set (Top=0, Bottom=1, Left=0, Right=1), and metadata MinValue=0, MaxValue=1, NumValues=4. Encounter layout/direction behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 49b052e36826a5ab70241fd242f4031e23b57805."
     },
     {
       "id": "added:Enum.EncounterEventsIconDirection.Left",
       "symbol": "Enum.EncounterEventsIconDirection.Left",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds the four EncounterEventsIconDirection members and metadata with exact numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Runtime enum data publishes EncounterEventsIconDirection with Top=0, Bottom=1, Left=0, and Right=1.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching direction metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the runtime enum data and fallback surface for retail 12.0.0.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs",
+          "summary": "Focused startup test asserts the exact complete four-member set, numeric values, no extras, and metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "6ff7125125288a9486330a7b8665503b551291f236d2253ea7ec28e2cc071b83"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records the direction values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs::test_patch_12_0_0_encounter_events_icon_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsIconDirection.Left as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the complete four-member set and metadata MinValue=0, MaxValue=1, NumValues=4."
+      ],
+      "commit": "49b052e36826a5ab70241fd242f4031e23b57805",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete four-member Enum.EncounterEventsIconDirection set (Top=0, Bottom=1, Left=0, Right=1), and metadata MinValue=0, MaxValue=1, NumValues=4. Encounter layout/direction behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 49b052e36826a5ab70241fd242f4031e23b57805."
     },
     {
       "id": "added:Enum.EncounterEventsIconDirection.Right",
       "symbol": "Enum.EncounterEventsIconDirection.Right",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds the four EncounterEventsIconDirection members and metadata with exact numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Runtime enum data publishes EncounterEventsIconDirection with Top=0, Bottom=1, Left=0, and Right=1.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching direction metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the runtime enum data and fallback surface for retail 12.0.0.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs",
+          "summary": "Focused startup test asserts the exact complete four-member set, numeric values, no extras, and metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "6ff7125125288a9486330a7b8665503b551291f236d2253ea7ec28e2cc071b83"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records the direction values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs::test_patch_12_0_0_encounter_events_icon_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsIconDirection.Right as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the complete four-member set and metadata MinValue=0, MaxValue=1, NumValues=4."
+      ],
+      "commit": "49b052e36826a5ab70241fd242f4031e23b57805",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete four-member Enum.EncounterEventsIconDirection set (Top=0, Bottom=1, Left=0, Right=1), and metadata MinValue=0, MaxValue=1, NumValues=4. Encounter layout/direction behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 49b052e36826a5ab70241fd242f4031e23b57805."
     },
     {
       "id": "added:Enum.EncounterEventsIconDirection.Top",
       "symbol": "Enum.EncounterEventsIconDirection.Top",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds the four EncounterEventsIconDirection members and metadata with exact numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Runtime enum data publishes EncounterEventsIconDirection with Top=0, Bottom=1, Left=0, and Right=1.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching direction metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the runtime enum data and fallback surface for retail 12.0.0.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs",
+          "summary": "Focused startup test asserts the exact complete four-member set, numeric values, no extras, and metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "6ff7125125288a9486330a7b8665503b551291f236d2253ea7ec28e2cc071b83"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records the direction values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs::test_patch_12_0_0_encounter_events_icon_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsIconDirection.Top as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the complete four-member set and metadata MinValue=0, MaxValue=1, NumValues=4."
+      ],
+      "commit": "49b052e36826a5ab70241fd242f4031e23b57805",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete four-member Enum.EncounterEventsIconDirection set (Top=0, Bottom=1, Left=0, Right=1), and metadata MinValue=0, MaxValue=1, NumValues=4. Encounter layout/direction behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 49b052e36826a5ab70241fd242f4031e23b57805."
     },
     {
       "id": "added:Enum.EncounterEventsIconDirectionMeta.MaxValue",
       "symbol": "Enum.EncounterEventsIconDirectionMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds the four EncounterEventsIconDirection members and metadata with exact numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Runtime enum data publishes EncounterEventsIconDirection with Top=0, Bottom=1, Left=0, and Right=1.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching direction metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the runtime enum data and fallback surface for retail 12.0.0.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs",
+          "summary": "Focused startup test asserts the exact complete four-member set, numeric values, no extras, and metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "6ff7125125288a9486330a7b8665503b551291f236d2253ea7ec28e2cc071b83"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records the direction values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs::test_patch_12_0_0_encounter_events_icon_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsIconDirectionMeta.MaxValue as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the complete four-member set and metadata MinValue=0, MaxValue=1, NumValues=4."
+      ],
+      "commit": "49b052e36826a5ab70241fd242f4031e23b57805",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete four-member Enum.EncounterEventsIconDirection set (Top=0, Bottom=1, Left=0, Right=1), and metadata MinValue=0, MaxValue=1, NumValues=4. Encounter layout/direction behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 49b052e36826a5ab70241fd242f4031e23b57805."
     },
     {
       "id": "added:Enum.EncounterEventsIconDirectionMeta.MinValue",
       "symbol": "Enum.EncounterEventsIconDirectionMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds the four EncounterEventsIconDirection members and metadata with exact numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Runtime enum data publishes EncounterEventsIconDirection with Top=0, Bottom=1, Left=0, and Right=1.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching direction metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the runtime enum data and fallback surface for retail 12.0.0.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs",
+          "summary": "Focused startup test asserts the exact complete four-member set, numeric values, no extras, and metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "6ff7125125288a9486330a7b8665503b551291f236d2253ea7ec28e2cc071b83"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records the direction values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs::test_patch_12_0_0_encounter_events_icon_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsIconDirectionMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the complete four-member set and metadata MinValue=0, MaxValue=1, NumValues=4."
+      ],
+      "commit": "49b052e36826a5ab70241fd242f4031e23b57805",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete four-member Enum.EncounterEventsIconDirection set (Top=0, Bottom=1, Left=0, Right=1), and metadata MinValue=0, MaxValue=1, NumValues=4. Encounter layout/direction behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 49b052e36826a5ab70241fd242f4031e23b57805."
     },
     {
       "id": "added:Enum.EncounterEventsIconDirectionMeta.NumValues",
       "symbol": "Enum.EncounterEventsIconDirectionMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds the four EncounterEventsIconDirection members and metadata with exact numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Runtime enum data publishes EncounterEventsIconDirection with Top=0, Bottom=1, Left=0, and Right=1.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching direction metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the runtime enum data and fallback surface for retail 12.0.0.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs",
+          "summary": "Focused startup test asserts the exact complete four-member set, numeric values, no extras, and metadata MinValue=0, MaxValue=1, NumValues=4.",
+          "source_hash": "6ff7125125288a9486330a7b8665503b551291f236d2253ea7ec28e2cc071b83"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records the direction values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_events_icon_direction_enums.rs::test_patch_12_0_0_encounter_events_icon_direction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventsIconDirectionMeta.NumValues as a Lua number with exact retail 12.0.0 value 4; the focused namespace test also requires the complete four-member set and metadata MinValue=0, MaxValue=1, NumValues=4."
+      ],
+      "commit": "49b052e36826a5ab70241fd242f4031e23b57805",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete four-member Enum.EncounterEventsIconDirection set (Top=0, Bottom=1, Left=0, Right=1), and metadata MinValue=0, MaxValue=1, NumValues=4. Encounter layout/direction behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 49b052e36826a5ab70241fd242f4031e23b57805."
     },
     {
       "id": "added:Enum.EncounterEventsOrientation.Horizontal",
