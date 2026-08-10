@@ -47067,257 +47067,625 @@
       "id": "added:Enum.EditModeDamageMeterSetting.BackgroundTransparency",
       "symbol": "Enum.EditModeDamageMeterSetting.BackgroundTransparency",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.BackgroundTransparency with numeric value 12.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.BackgroundTransparency with numeric value 12.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.BackgroundTransparency as Lua number with exact value 12."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 12 for Enum.EditModeDamageMeterSetting.BackgroundTransparency. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.BarHeight",
       "symbol": "Enum.EditModeDamageMeterSetting.BarHeight",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.BarHeight with numeric value 10.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.BarHeight with numeric value 10.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.BarHeight as Lua number with exact value 10."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 10 for Enum.EditModeDamageMeterSetting.BarHeight. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.FrameHeight",
       "symbol": "Enum.EditModeDamageMeterSetting.FrameHeight",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.FrameHeight with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.FrameHeight with numeric value 4.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.FrameHeight as Lua number with exact value 4."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 4 for Enum.EditModeDamageMeterSetting.FrameHeight. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.FrameWidth",
       "symbol": "Enum.EditModeDamageMeterSetting.FrameWidth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.FrameWidth with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.FrameWidth with numeric value 3.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.FrameWidth as Lua number with exact value 3."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 3 for Enum.EditModeDamageMeterSetting.FrameWidth. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.Numbers",
       "symbol": "Enum.EditModeDamageMeterSetting.Numbers",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.Numbers with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Numbers with numeric value 2.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.Numbers as Lua number with exact value 2."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.EditModeDamageMeterSetting.Numbers. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.ObsoleteReuse1",
       "symbol": "Enum.EditModeDamageMeterSetting.ObsoleteReuse1",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.ObsoleteReuse1 with numeric value 7.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.ObsoleteReuse1 with numeric value 7.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.ObsoleteReuse1 as Lua number with exact value 7."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 7 for Enum.EditModeDamageMeterSetting.ObsoleteReuse1. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.Padding",
       "symbol": "Enum.EditModeDamageMeterSetting.Padding",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.Padding with numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Padding with numeric value 5.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.Padding as Lua number with exact value 5."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 5 for Enum.EditModeDamageMeterSetting.Padding. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.ShowClassColor",
       "symbol": "Enum.EditModeDamageMeterSetting.ShowClassColor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.ShowClassColor with numeric value 9.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.ShowClassColor with numeric value 9.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.ShowClassColor as Lua number with exact value 9."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 9 for Enum.EditModeDamageMeterSetting.ShowClassColor. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.ShowSpecIcon",
       "symbol": "Enum.EditModeDamageMeterSetting.ShowSpecIcon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.ShowSpecIcon with numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.ShowSpecIcon with numeric value 8.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.ShowSpecIcon as Lua number with exact value 8."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 8 for Enum.EditModeDamageMeterSetting.ShowSpecIcon. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.Style",
       "symbol": "Enum.EditModeDamageMeterSetting.Style",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.Style with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Style with numeric value 1.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.Style as Lua number with exact value 1."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.EditModeDamageMeterSetting.Style. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.TextSize",
       "symbol": "Enum.EditModeDamageMeterSetting.TextSize",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.TextSize with numeric value 11.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.TextSize with numeric value 11.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.TextSize as Lua number with exact value 11."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 11 for Enum.EditModeDamageMeterSetting.TextSize. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.Transparency",
       "symbol": "Enum.EditModeDamageMeterSetting.Transparency",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.Transparency with numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Transparency with numeric value 6.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.Transparency as Lua number with exact value 6."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 6 for Enum.EditModeDamageMeterSetting.Transparency. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSetting.Visibility",
       "symbol": "Enum.EditModeDamageMeterSetting.Visibility",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSetting.Visibility with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSetting.Visibility with numeric value 0.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSetting.Visibility as Lua number with exact value 0."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.EditModeDamageMeterSetting.Visibility. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSettingMeta.MaxValue",
       "symbol": "Enum.EditModeDamageMeterSettingMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSettingMeta.MaxValue with numeric value 12.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSettingMeta.MaxValue with numeric value 12.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSettingMeta.MaxValue as Lua number with exact value 12."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 12 for Enum.EditModeDamageMeterSettingMeta.MaxValue. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSettingMeta.MinValue",
       "symbol": "Enum.EditModeDamageMeterSettingMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSettingMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSettingMeta.MinValue with numeric value 0.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSettingMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 0 for Enum.EditModeDamageMeterSettingMeta.MinValue. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeDamageMeterSettingMeta.NumValues",
       "symbol": "Enum.EditModeDamageMeterSettingMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EditModeDamageMeterSettingMeta.NumValues with numeric value 13.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current Edit Mode sequential enum data publishes Enum.EditModeDamageMeterSettingMeta.NumValues with numeric value 13.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts EditModeDamageMeterSetting members and metadata are Lua numbers with exact values.",
+          "source_hash": "6cee2ec9c0bfa496a87e0a55765c36eb639927a848b163400a2c68e775c3c3d1"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_damage_meter_settings_enums.rs::test_patch_12_0_0_edit_mode_damage_meter_settings_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeDamageMeterSettingMeta.NumValues as Lua number with exact value 13."
+      ],
+      "commit": "ce163833d2e0d984abd2baf0de6e498ca662f939",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 13 for Enum.EditModeDamageMeterSettingMeta.NumValues. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle are not claimed. Proof commit: ce163833d2e0d984abd2baf0de6e498ca662f939."
     },
     {
       "id": "added:Enum.EditModeEncounterEventsSetting.BackgroundTransparency",

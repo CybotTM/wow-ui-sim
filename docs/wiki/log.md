@@ -1,6 +1,10 @@
+## [2026-08-10] investigation | Classify Edit Mode damage-meter settings
+
+Classified exactly sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditModeDamageMeterSettingMeta.*` rows as best-effort/behavioral: `Visibility=0`, `Style=1`, `Numbers=2`, `FrameWidth=3`, `FrameHeight=4`, `Padding=5`, `Transparency=6`, `ObsoleteReuse1=7`, `ShowSpecIcon=8`, `ShowClassColor=9`, `BarHeight=10`, `TextSize=11`, `BackgroundTransparency=12`; metadata `MinValue=0`, `MaxValue=12`, `NumValues=13`. Focused proof is at `ce163833d2e0d984abd2baf0de6e498ca662f939`. Edit Mode damage-meter setting behavior, persistence, consumers, transitions, and lifecycle remain unclaimed. Current totals are **1255 best-effort, 982 evidence-required, 2 exception-requested, and 1171 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify Edit Mode account/aura setting enums
 
-Classified exactly seven retail 12.0.0 `Enum.EditModeAccountSetting.*` and `Enum.EditModeAuraFrameSetting.*` rows as best-effort/behavioral: account `ShowPersonalResourceDisplay=29`, `ShowEncounterEvents=30`, `ShowDamageMeter=31`, `ShowExternalDefensives=32`; aura `VisibleSetting=8`, `Opacity=9`, `ShowDispelType=10`. Evidence is bounded to startup enum publication, Lua numeric type, and exact values. Focused proof is at `25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7`. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle remain unclaimed. Current totals are **1239 best-effort, 982 evidence-required, 2 exception-requested, and 1187 untriaged** (3410 rows).
+Classified exactly seven retail 12.0.0 `Enum.EditModeAccountSetting.*` and `Enum.EditModeAuraFrameSetting.*` rows as best-effort/behavioral: account `ShowPersonalResourceDisplay=29`, `ShowEncounterEvents=30`, `ShowDamageMeter=31`, `ShowExternalDefensives=32`; aura `VisibleSetting=8`, `Opacity=9`, `ShowDispelType=10`. Evidence is bounded to startup enum publication, Lua numeric type, and exact values. Focused proof is at `25f31eed0a706fa6f9823b0a91ffb8bb6e3750b7`. Edit Mode setting behavior, persistence, consumers, transitions, and lifecycle remain unclaimed. Current totals are **1255 best-effort, 982 evidence-required, 2 exception-requested, and 1171 untriaged** (3410 rows).
 
 ## [2026-08-10] investigation | Classify DurationTimeModifier enums
 
