@@ -32716,321 +32716,781 @@
       "id": "added:Enum.BulkPurchaseResult.ResultFailed",
       "symbol": "Enum.BulkPurchaseResult.ResultFailed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResult.ResultFailed as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResult.ResultFailed with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResult.ResultFailed as Lua number with exact value 3."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 3. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResult.ResultInProgress",
       "symbol": "Enum.BulkPurchaseResult.ResultInProgress",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResult.ResultInProgress as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResult.ResultInProgress with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResult.ResultInProgress as Lua number with exact value 1."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 1. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResult.ResultInsufficientFunds",
       "symbol": "Enum.BulkPurchaseResult.ResultInsufficientFunds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResult.ResultInsufficientFunds as numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResult.ResultInsufficientFunds with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResult.ResultInsufficientFunds as Lua number with exact value 6."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 6. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResult.ResultOk",
       "symbol": "Enum.BulkPurchaseResult.ResultOk",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResult.ResultOk as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResult.ResultOk with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResult.ResultOk as Lua number with exact value 0."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 0. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResult.ResultPartialSuccess",
       "symbol": "Enum.BulkPurchaseResult.ResultPartialSuccess",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResult.ResultPartialSuccess as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResult.ResultPartialSuccess with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResult.ResultPartialSuccess as Lua number with exact value 2."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 2. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResult.ResultPurchaseTimeout",
       "symbol": "Enum.BulkPurchaseResult.ResultPurchaseTimeout",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResult.ResultPurchaseTimeout as numeric value 7.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResult.ResultPurchaseTimeout with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResult.ResultPurchaseTimeout as Lua number with exact value 7."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 7. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResult.ResultSystemDisabled",
       "symbol": "Enum.BulkPurchaseResult.ResultSystemDisabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResult.ResultSystemDisabled as numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResult.ResultSystemDisabled with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResult.ResultSystemDisabled as Lua number with exact value 5."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 5. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResult.ResultTooManyProducts",
       "symbol": "Enum.BulkPurchaseResult.ResultTooManyProducts",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResult.ResultTooManyProducts as numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResult.ResultTooManyProducts with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResult.ResultTooManyProducts as Lua number with exact value 4."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 4. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResultMeta.MaxValue",
       "symbol": "Enum.BulkPurchaseResultMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResultMeta.MaxValue as numeric value 7.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResultMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResultMeta.MaxValue as Lua number with exact value 7."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 7. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResultMeta.MinValue",
       "symbol": "Enum.BulkPurchaseResultMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResultMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResultMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResultMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 0. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResultMeta.NumValues",
       "symbol": "Enum.BulkPurchaseResultMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkPurchaseResultMeta.NumValues as numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkPurchaseResultMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkPurchaseResultMeta.NumValues as Lua number with exact value 8."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 8. Bulk purchase transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkRefundResult.ResultFailed",
       "symbol": "Enum.BulkRefundResult.ResultFailed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkRefundResult.ResultFailed as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkRefundResult.ResultFailed with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkRefundResult.ResultFailed as Lua number with exact value 1."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 1. Bulk refund transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkRefundResult.ResultInvalidRequest",
       "symbol": "Enum.BulkRefundResult.ResultInvalidRequest",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkRefundResult.ResultInvalidRequest as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkRefundResult.ResultInvalidRequest with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkRefundResult.ResultInvalidRequest as Lua number with exact value 2."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 2. Bulk refund transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkRefundResult.ResultOk",
       "symbol": "Enum.BulkRefundResult.ResultOk",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkRefundResult.ResultOk as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkRefundResult.ResultOk with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkRefundResult.ResultOk as Lua number with exact value 0."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 0. Bulk refund transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkRefundResult.ResultRefundWindowExpired",
       "symbol": "Enum.BulkRefundResult.ResultRefundWindowExpired",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkRefundResult.ResultRefundWindowExpired as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkRefundResult.ResultRefundWindowExpired with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkRefundResult.ResultRefundWindowExpired as Lua number with exact value 3."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 3. Bulk refund transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkRefundResult.ResultSystemDisabled",
       "symbol": "Enum.BulkRefundResult.ResultSystemDisabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkRefundResult.ResultSystemDisabled as numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkRefundResult.ResultSystemDisabled with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkRefundResult.ResultSystemDisabled as Lua number with exact value 4."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 4. Bulk refund transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkRefundResult.ResultTimeout",
       "symbol": "Enum.BulkRefundResult.ResultTimeout",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkRefundResult.ResultTimeout as numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkRefundResult.ResultTimeout with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkRefundResult.ResultTimeout as Lua number with exact value 5."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 5. Bulk refund transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkRefundResultMeta.MaxValue",
       "symbol": "Enum.BulkRefundResultMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkRefundResultMeta.MaxValue as numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkRefundResultMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkRefundResultMeta.MaxValue as Lua number with exact value 5."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 5. Bulk refund transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkRefundResultMeta.MinValue",
       "symbol": "Enum.BulkRefundResultMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkRefundResultMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkRefundResultMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkRefundResultMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 0. Bulk refund transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkRefundResultMeta.NumValues",
       "symbol": "Enum.BulkRefundResultMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.BulkRefundResultMeta.NumValues as numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.BulkRefundResultMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.BulkRefundResultMeta.NumValues as Lua number with exact value 6."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 6. Bulk refund transaction state, service results, side effects, error handling, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.ChatMessagingLockdownReason.ActiveEncounter",

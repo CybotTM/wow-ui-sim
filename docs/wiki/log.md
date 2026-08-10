@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify bulk purchase/refund enums
+
+Classified the 20 `Enum.BulkPurchaseResult*` and `Enum.BulkRefundResult*` rows as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; purchase/refund transaction state, services, side effects, errors, and lifecycle remain unclaimed. Current totals are **988 best-effort, 982 evidence-required, 2 exception-requested, and 1438 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify 12.0.0 enum rows
 
 Classified the four `Enum.AccountDataUpdateStatus.*`, three `Enum.AddOnRestrictionState.*`, three `Enum.AddOnRestrictionStateMeta.*`, five `Enum.AddOnRestrictionType.*`, three `Enum.AddOnRestrictionTypeMeta.*`, three `Enum.AuraFrameVisibleSetting.*`, and three `Enum.AuraFrameVisibleSettingMeta.*` rows as best-effort/behavioral. Evidence is bounded to exact startup enum/metadata numeric publication and values; restriction policy, enforcement, events, lifecycle, AuraContainer behavior, and visibility transitions remain unclaimed. Current totals are **968 best-effort, 982 evidence-required, 2 exception-requested, and 1458 untriaged** (3410 rows).
