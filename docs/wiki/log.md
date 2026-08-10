@@ -1,6 +1,6 @@
 ## [2026-08-10] investigation | Classify 12.0.0 enum rows
 
-Classified the four `Enum.AccountDataUpdateStatus.*`, three `Enum.AddOnRestrictionState.*`, and three `Enum.AddOnRestrictionStateMeta.*` rows as best-effort/behavioral. Evidence is bounded to startup enum/metadata numeric publication and exact values; account-data behavior and restriction policy/state transitions/enforcement/events/lifecycle remain unclaimed. Current totals are **954 best-effort, 982 evidence-required, 2 exception-requested, and 1472 untriaged** (3410 rows).
+Classified the four `Enum.AccountDataUpdateStatus.*`, three `Enum.AddOnRestrictionState.*`, three `Enum.AddOnRestrictionStateMeta.*`, five `Enum.AddOnRestrictionType.*`, three `Enum.AddOnRestrictionTypeMeta.*`, three `Enum.AuraFrameVisibleSetting.*`, and three `Enum.AuraFrameVisibleSettingMeta.*` rows as best-effort/behavioral. Evidence is bounded to exact startup enum/metadata numeric publication and values; restriction policy, enforcement, events, lifecycle, AuraContainer behavior, and visibility transitions remain unclaimed. Current totals are **968 best-effort, 982 evidence-required, 2 exception-requested, and 1458 untriaged** (3410 rows).
 
 ## [2026-08-10] investigation | Classify UnitPowerSpellIDs constants
 

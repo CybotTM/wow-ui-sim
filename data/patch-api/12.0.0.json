@@ -32170,225 +32170,547 @@
       "id": "added:Enum.AddOnRestrictionType.ChallengeMode",
       "symbol": "Enum.AddOnRestrictionType.ChallengeMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AddOnRestrictionType.ChallengeMode as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AddOnRestrictionType.ChallengeMode with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AddOnRestrictionType.ChallengeMode as Lua number with exact value 2."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 2. Restriction-policy state transitions, enforcement, event timing, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AddOnRestrictionType.Combat",
       "symbol": "Enum.AddOnRestrictionType.Combat",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AddOnRestrictionType.Combat as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AddOnRestrictionType.Combat with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AddOnRestrictionType.Combat as Lua number with exact value 0."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 0. Restriction-policy state transitions, enforcement, event timing, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AddOnRestrictionType.Encounter",
       "symbol": "Enum.AddOnRestrictionType.Encounter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AddOnRestrictionType.Encounter as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AddOnRestrictionType.Encounter with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AddOnRestrictionType.Encounter as Lua number with exact value 1."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 1. Restriction-policy state transitions, enforcement, event timing, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AddOnRestrictionType.Map",
       "symbol": "Enum.AddOnRestrictionType.Map",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AddOnRestrictionType.Map as numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AddOnRestrictionType.Map with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AddOnRestrictionType.Map as Lua number with exact value 4."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 4. Restriction-policy state transitions, enforcement, event timing, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AddOnRestrictionType.PvPMatch",
       "symbol": "Enum.AddOnRestrictionType.PvPMatch",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AddOnRestrictionType.PvPMatch as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AddOnRestrictionType.PvPMatch with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AddOnRestrictionType.PvPMatch as Lua number with exact value 3."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 3. Restriction-policy state transitions, enforcement, event timing, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AddOnRestrictionTypeMeta.MaxValue",
       "symbol": "Enum.AddOnRestrictionTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AddOnRestrictionTypeMeta.MaxValue as numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AddOnRestrictionTypeMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AddOnRestrictionTypeMeta.MaxValue as Lua number with exact value 4."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 4. Restriction-policy state transitions, enforcement, event timing, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AddOnRestrictionTypeMeta.MinValue",
       "symbol": "Enum.AddOnRestrictionTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AddOnRestrictionTypeMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AddOnRestrictionTypeMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AddOnRestrictionTypeMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 0. Restriction-policy state transitions, enforcement, event timing, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AddOnRestrictionTypeMeta.NumValues",
       "symbol": "Enum.AddOnRestrictionTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AddOnRestrictionTypeMeta.NumValues as numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AddOnRestrictionTypeMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AddOnRestrictionTypeMeta.NumValues as Lua number with exact value 5."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 5. Restriction-policy state transitions, enforcement, event timing, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AuraFrameVisibleSetting.Always",
       "symbol": "Enum.AuraFrameVisibleSetting.Always",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AuraFrameVisibleSetting.Always as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Enum registration publishes Enum.AuraFrameVisibleSetting.Always from the checked-in ordered sequence with numeric value 0.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AuraFrameVisibleSetting.Always as Lua number with exact value 0."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 0. AuraContainer behavior, visibility state transitions, consumers, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AuraFrameVisibleSetting.Hidden",
       "symbol": "Enum.AuraFrameVisibleSetting.Hidden",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AuraFrameVisibleSetting.Hidden as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Enum registration publishes Enum.AuraFrameVisibleSetting.Hidden from the checked-in ordered sequence with numeric value 2.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AuraFrameVisibleSetting.Hidden as Lua number with exact value 2."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 2. AuraContainer behavior, visibility state transitions, consumers, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AuraFrameVisibleSetting.InCombat",
       "symbol": "Enum.AuraFrameVisibleSetting.InCombat",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AuraFrameVisibleSetting.InCombat as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Enum registration publishes Enum.AuraFrameVisibleSetting.InCombat from the checked-in ordered sequence with numeric value 1.",
+          "source_hash": "9ccd8edc3ba573f1e71b469ba5dd1a33df4cafbc232329d4ac48b30a1b6e48e0"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AuraFrameVisibleSetting.InCombat as Lua number with exact value 1."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 1. AuraContainer behavior, visibility state transitions, consumers, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AuraFrameVisibleSettingMeta.MaxValue",
       "symbol": "Enum.AuraFrameVisibleSettingMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AuraFrameVisibleSettingMeta.MaxValue as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AuraFrameVisibleSettingMeta.MaxValue with the checked-in 12.0.0 metadata value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AuraFrameVisibleSettingMeta.MaxValue as Lua number with exact value 2."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 2. AuraContainer behavior, visibility state transitions, consumers, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AuraFrameVisibleSettingMeta.MinValue",
       "symbol": "Enum.AuraFrameVisibleSettingMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AuraFrameVisibleSettingMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AuraFrameVisibleSettingMeta.MinValue with the checked-in 12.0.0 metadata value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AuraFrameVisibleSettingMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 0. AuraContainer behavior, visibility state transitions, consumers, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.AuraFrameVisibleSettingMeta.NumValues",
       "symbol": "Enum.AuraFrameVisibleSettingMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.AuraFrameVisibleSettingMeta.NumValues as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Enum bootstrap explicitly publishes Enum.AuraFrameVisibleSettingMeta.NumValues with the checked-in 12.0.0 metadata value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "380ce6422eb34d9a5928f6961bf90a51b5c2079c6aaa6c7d7b50010ae13d91dd"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_audit_enums.rs::test_patch_12_0_0_audit_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.AuraFrameVisibleSettingMeta.NumValues as Lua number with exact value 3."
+      ],
+      "commit": "e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 3. AuraContainer behavior, visibility state transitions, consumers, and lifecycle are not claimed. Proof commit: e118a17aa9ad8b7eff57c2177a5e3cd6eebc6295."
     },
     {
       "id": "added:Enum.BulkPurchaseResult.ResultFailed",
