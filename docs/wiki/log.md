@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify chat-lockdown and combat-audio enums
+
+Classified the three `Enum.ChatMessagingLockdownReason.*`, three `Enum.ChatMessagingLockdownReasonMeta.*`, three `Enum.CombatAudioAlertCastState.*`, and three `Enum.CombatAudioAlertCastStateMeta.*` rows as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; chat-lockdown enforcement, secret/taint behavior, errors, and lifecycle; combat-audio triggers, configuration, sound side effects, and lifecycle remain unclaimed. Current totals are **1000 best-effort, 982 evidence-required, 2 exception-requested, and 1426 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify bulk purchase/refund enums
 
 Classified the 20 `Enum.BulkPurchaseResult*` and `Enum.BulkRefundResult*` rows as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; purchase/refund transaction state, services, side effects, errors, and lifecycle remain unclaimed. Current totals are **988 best-effort, 982 evidence-required, 2 exception-requested, and 1438 untriaged** (3410 rows).

@@ -33496,193 +33496,469 @@
       "id": "added:Enum.ChatMessagingLockdownReason.ActiveEncounter",
       "symbol": "Enum.ChatMessagingLockdownReason.ActiveEncounter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.ChatMessagingLockdownReason.ActiveEncounter as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum registration publishes Enum.ChatMessagingLockdownReason.ActiveEncounter with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.ChatMessagingLockdownReason.ActiveEncounter as Lua number with exact value 0."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 0. Chat-lockdown enforcement, secret/taint behavior, error shapes, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.ChatMessagingLockdownReason.ActiveMythicKeystoneOrChallengeMode",
       "symbol": "Enum.ChatMessagingLockdownReason.ActiveMythicKeystoneOrChallengeMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.ChatMessagingLockdownReason.ActiveMythicKeystoneOrChallengeMode as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum registration publishes Enum.ChatMessagingLockdownReason.ActiveMythicKeystoneOrChallengeMode with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.ChatMessagingLockdownReason.ActiveMythicKeystoneOrChallengeMode as Lua number with exact value 1."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 1. Chat-lockdown enforcement, secret/taint behavior, error shapes, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.ChatMessagingLockdownReason.ActivePvPMatch",
       "symbol": "Enum.ChatMessagingLockdownReason.ActivePvPMatch",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.ChatMessagingLockdownReason.ActivePvPMatch as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum registration publishes Enum.ChatMessagingLockdownReason.ActivePvPMatch with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.ChatMessagingLockdownReason.ActivePvPMatch as Lua number with exact value 2."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 2. Chat-lockdown enforcement, secret/taint behavior, error shapes, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.ChatMessagingLockdownReasonMeta.MaxValue",
       "symbol": "Enum.ChatMessagingLockdownReasonMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.ChatMessagingLockdownReasonMeta.MaxValue as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum registration publishes Enum.ChatMessagingLockdownReasonMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.ChatMessagingLockdownReasonMeta.MaxValue as Lua number with exact value 2."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 2. Chat-lockdown enforcement, secret/taint behavior, error shapes, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.ChatMessagingLockdownReasonMeta.MinValue",
       "symbol": "Enum.ChatMessagingLockdownReasonMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.ChatMessagingLockdownReasonMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum registration publishes Enum.ChatMessagingLockdownReasonMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.ChatMessagingLockdownReasonMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 0. Chat-lockdown enforcement, secret/taint behavior, error shapes, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.ChatMessagingLockdownReasonMeta.NumValues",
       "symbol": "Enum.ChatMessagingLockdownReasonMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.ChatMessagingLockdownReasonMeta.NumValues as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime enum registration publishes Enum.ChatMessagingLockdownReasonMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "97edda145131fd0c3e6245f38c7acaebd3e2d92daff95eafe74971d472c27070"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.ChatMessagingLockdownReasonMeta.NumValues as Lua number with exact value 3."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 3. Chat-lockdown enforcement, secret/taint behavior, error shapes, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.CombatAudioAlertCastState.Off",
       "symbol": "Enum.CombatAudioAlertCastState.Off",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertCastState.Off as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime enum registration publishes Enum.CombatAudioAlertCastState.Off with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertCastState.Off as Lua number with exact value 0."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 0. Combat-audio triggers, configuration behavior, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.CombatAudioAlertCastState.OnCastEnd",
       "symbol": "Enum.CombatAudioAlertCastState.OnCastEnd",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertCastState.OnCastEnd as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime enum registration publishes Enum.CombatAudioAlertCastState.OnCastEnd with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertCastState.OnCastEnd as Lua number with exact value 2."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 2. Combat-audio triggers, configuration behavior, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.CombatAudioAlertCastState.OnCastStart",
       "symbol": "Enum.CombatAudioAlertCastState.OnCastStart",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertCastState.OnCastStart as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime enum registration publishes Enum.CombatAudioAlertCastState.OnCastStart with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertCastState.OnCastStart as Lua number with exact value 1."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup enum publication, Lua table/member numeric type, and exact value 1. Combat-audio triggers, configuration behavior, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.CombatAudioAlertCastStateMeta.MaxValue",
       "symbol": "Enum.CombatAudioAlertCastStateMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertCastStateMeta.MaxValue as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime enum registration publishes Enum.CombatAudioAlertCastStateMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertCastStateMeta.MaxValue as Lua number with exact value 2."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 2. Combat-audio triggers, configuration behavior, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.CombatAudioAlertCastStateMeta.MinValue",
       "symbol": "Enum.CombatAudioAlertCastStateMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertCastStateMeta.MinValue as numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime enum registration publishes Enum.CombatAudioAlertCastStateMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertCastStateMeta.MinValue as Lua number with exact value 0."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 0. Combat-audio triggers, configuration behavior, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.CombatAudioAlertCastStateMeta.NumValues",
       "symbol": "Enum.CombatAudioAlertCastStateMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CombatAudioAlertCastStateMeta.NumValues as numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Runtime enum registration publishes Enum.CombatAudioAlertCastStateMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact value.",
+          "source_hash": "5545c2c1917e0c085e5f55a619a3e9f8bb87abf57572b8d9c2e1d3fb07a9a878"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_chat_combat_audio_enums.rs::test_patch_12_0_0_chat_and_combat_audio_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CombatAudioAlertCastStateMeta.NumValues as Lua number with exact value 3."
+      ],
+      "commit": "e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to startup metadata publication, Lua table/member numeric type, and exact value 3. Combat-audio triggers, configuration behavior, sound side effects, state transitions, and lifecycle are not claimed. Proof commit: e439ebbe6c8d6f0244211c8ef1da83bbc7f6bf4d."
     },
     {
       "id": "added:Enum.CombatAudioAlertPartyPercentValues.Off",

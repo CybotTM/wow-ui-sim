@@ -1,7 +1,7 @@
 - The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, and 15 DeprecatedCombatLog wrappers (10 CombatLog, 2 CombatText, 3 DeathRecap), plus 3 InstanceEncounter wrappers, are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The five chat/spell wrappers are covered by `vendor_deprecated_chat_spell.rs` with focused forwarding checks; `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` are classified evidence-required/unsafe because their retained fixture-only compatibility semantics remain unproven.
 # Patch API Audit Manifest
 
-The current 12.0.0 audit totals are **988 best-effort, 982 evidence-required, 2 exception-requested, and 1438 untriaged occurrences** (3410 total).
+The current 12.0.0 audit totals are **1000 best-effort, 982 evidence-required, 2 exception-requested, and 1426 untriaged occurrences** (3410 total).
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
@@ -14,6 +14,8 @@ The 38 grouped constants are best-effort/behavioral: six misc target/currency/it
 The four `Enum.AccountDataUpdateStatus.*`, three `Enum.AddOnRestrictionState.*`, three `Enum.AddOnRestrictionStateMeta.*`, five `Enum.AddOnRestrictionType.*`, three `Enum.AddOnRestrictionTypeMeta.*`, three `Enum.AuraFrameVisibleSetting.*`, and three `Enum.AuraFrameVisibleSettingMeta.*` rows are best-effort/behavioral. Evidence is bounded to exact startup enum/metadata numeric publication and values; restriction policy, enforcement, events, lifecycle, AuraContainer behavior, and visibility transitions remain unclaimed.
 
 The 20 `Enum.BulkPurchaseResult*` and `Enum.BulkRefundResult*` rows are best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; purchase/refund transaction state, services, side effects, errors, and lifecycle remain unclaimed.
+
+The three `Enum.ChatMessagingLockdownReason.*`, three `Enum.ChatMessagingLockdownReasonMeta.*`, three `Enum.CombatAudioAlertCastState.*`, and three `Enum.CombatAudioAlertCastStateMeta.*` rows are best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; chat-lockdown enforcement, secret/taint behavior, errors, and lifecycle; combat-audio triggers, configuration, sound side effects, and lifecycle remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 
