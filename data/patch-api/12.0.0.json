@@ -37582,7 +37582,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerCast with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -37627,7 +37627,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerHealth with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -37672,7 +37672,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource1 with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -37717,7 +37717,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource2 with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -37762,7 +37762,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.Sample with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -37807,7 +37807,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetCast with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -37852,7 +37852,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetHealth with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -37897,7 +37897,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MaxValue with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -37942,7 +37942,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MinValue with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -37987,7 +37987,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.NumValues with the exact value and removes later same-percent throttle members.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -40170,7 +40170,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40221,7 +40221,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40272,7 +40272,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40323,7 +40323,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40368,7 +40368,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MaxValue with exact numeric value 4."
         },
         {
@@ -40405,7 +40405,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MinValue with exact numeric value 1."
         },
         {
@@ -40442,7 +40442,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.NumValues with exact numeric value 4."
         },
         {
@@ -43740,7 +43740,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -43785,7 +43785,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -43830,7 +43830,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -43875,7 +43875,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -43920,7 +43920,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -43965,7 +43965,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 2, NumValues 3.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44010,7 +44010,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44055,7 +44055,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44100,7 +44100,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44145,7 +44145,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44190,7 +44190,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44235,7 +44235,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44280,7 +44280,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44325,7 +44325,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44370,7 +44370,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44415,7 +44415,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 6, NumValues 7.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -44698,193 +44698,541 @@
       "id": "added:Enum.DamageMeterType.Absorbs",
       "symbol": "Enum.DamageMeterType.Absorbs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterType.Absorbs with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Shared sequential enum data publishes the damage-meter type namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterType.Absorbs as Lua number with exact value 4 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 4 for Enum.DamageMeterType.Absorbs, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterType.AvoidableDamageTaken",
       "symbol": "Enum.DamageMeterType.AvoidableDamageTaken",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterType.AvoidableDamageTaken with numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Shared sequential enum data publishes the damage-meter type namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterType.AvoidableDamageTaken as Lua number with exact value 8 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 8 for Enum.DamageMeterType.AvoidableDamageTaken, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterType.DamageDone",
       "symbol": "Enum.DamageMeterType.DamageDone",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterType.DamageDone with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Shared sequential enum data publishes the damage-meter type namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterType.DamageDone as Lua number with exact value 0 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 0 for Enum.DamageMeterType.DamageDone, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterType.DamageTaken",
       "symbol": "Enum.DamageMeterType.DamageTaken",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterType.DamageTaken with numeric value 7.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Shared sequential enum data publishes the damage-meter type namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterType.DamageTaken as Lua number with exact value 7 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 7 for Enum.DamageMeterType.DamageTaken, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterType.Dispels",
       "symbol": "Enum.DamageMeterType.Dispels",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterType.Dispels with numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Shared sequential enum data publishes the damage-meter type namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterType.Dispels as Lua number with exact value 6 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 6 for Enum.DamageMeterType.Dispels, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterType.Dps",
       "symbol": "Enum.DamageMeterType.Dps",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterType.Dps with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Shared sequential enum data publishes the damage-meter type namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterType.Dps as Lua number with exact value 1 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 1 for Enum.DamageMeterType.Dps, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterType.HealingDone",
       "symbol": "Enum.DamageMeterType.HealingDone",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterType.HealingDone with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Shared sequential enum data publishes the damage-meter type namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterType.HealingDone as Lua number with exact value 2 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 2 for Enum.DamageMeterType.HealingDone, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterType.Hps",
       "symbol": "Enum.DamageMeterType.Hps",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterType.Hps with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Shared sequential enum data publishes the damage-meter type namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterType.Hps as Lua number with exact value 3 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 3 for Enum.DamageMeterType.Hps, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterType.Interrupts",
       "symbol": "Enum.DamageMeterType.Interrupts",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterType.Interrupts with numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Shared sequential enum data publishes the damage-meter type namespace before the retail 12.0.0 epoch correction.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterType.Interrupts as Lua number with exact value 5 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 5 for Enum.DamageMeterType.Interrupts, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterTypeMeta.MaxValue",
       "symbol": "Enum.DamageMeterTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterTypeMeta.MaxValue with numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared generated metadata publishes the later damage-meter type range before the retail 12.0.0 epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterTypeMeta.MaxValue as Lua number with exact value 8 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 8 for Enum.DamageMeterTypeMeta.MaxValue, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterTypeMeta.MinValue",
       "symbol": "Enum.DamageMeterTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterTypeMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared generated metadata publishes the later damage-meter type range before the retail 12.0.0 epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterTypeMeta.MinValue as Lua number with exact value 0 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 0 for Enum.DamageMeterTypeMeta.MinValue, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterTypeMeta.NumValues",
       "symbol": "Enum.DamageMeterTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DamageMeterTypeMeta.NumValues with numeric value 9.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared generated metadata publishes the later damage-meter type range before the retail 12.0.0 epoch correction.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization removes later Deaths and EnemyDamageTaken members and corrects metadata to MinValue 0, MaxValue 8, NumValues 9.",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the nine members and metadata are Lua numbers with exact values and later members are absent.",
+          "source_hash": "fb1245bb8c0924ce2754969785698f0e1ae44d356ceb3763fe44094064b85644"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_damage_meter_type_enums.rs::test_patch_12_0_0_damage_meter_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DamageMeterTypeMeta.NumValues as Lua number with exact value 9 in the retail 12.0.0 surface."
+      ],
+      "commit": "5395715a0ff9b71f8d66700cd0fb3eaf87322d42",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, exact value 9 for Enum.DamageMeterTypeMeta.NumValues, and absence of later Deaths and EnemyDamageTaken members. Damage-meter aggregation, calculations, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 5395715a0ff9b71f8d66700cd0fb3eaf87322d42."
     },
     {
       "id": "added:Enum.DamageMeterVisibility.Always",
@@ -46693,7 +47041,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -46731,7 +47079,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -46769,7 +47117,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -46807,7 +47155,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -55104,7 +55452,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.MaxValue with exact numeric value 262144."
         },
         {
@@ -55142,7 +55490,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.MinValue with exact numeric value 1."
         },
         {
@@ -55180,7 +55528,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d",
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.NumValues with exact numeric value 24."
         },
         {
@@ -88715,7 +89063,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageType.Dragonflight from the effective startup surface.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -88760,7 +89108,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageType.None from the effective startup surface.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -88805,7 +89153,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageType.WarWithin from the effective startup surface.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -88850,7 +89198,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageTypeMeta.MaxValue from the effective startup surface.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -88895,7 +89243,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageTypeMeta.MinValue from the effective startup surface.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
@@ -88940,7 +89288,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageTypeMeta.NumValues from the effective startup surface.",
-          "source_hash": "e86b9c728531f915cd63a075eddfd6885643115a8227a65f0e44a1d4d061696d"
+          "source_hash": "f495a9b6bdc91cb3e090b59d4f695c4b9dc4baaa7336d4f1427c5ce55de09d85"
         },
         {
           "kind": "test",
