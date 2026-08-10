@@ -28227,33 +28227,83 @@
       "id": "added:CraftingItemSlotModification.reagent",
       "symbol": "CraftingItemSlotModification.reagent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required CraftingReagent field reagent to CraftingItemSlotModification.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingItemSlotModification.reagent. Field presence, CraftingReagent type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingOrderReagentInfo.reagentInfo",
       "symbol": "CraftingOrderReagentInfo.reagentInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required CraftingReagentInfo field reagentInfo to CraftingOrderReagentInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingOrderReagentInfo.reagentInfo. Field presence, CraftingReagentInfo type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo",
@@ -28283,241 +28333,616 @@
       "id": "added:CraftingQualityInfo.barBackground",
       "symbol": "CraftingQualityInfo.barBackground",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field barBackground to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.barBackground. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.barBackgroundCap",
       "symbol": "CraftingQualityInfo.barBackgroundCap",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field barBackgroundCap to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.barBackgroundCap. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.barFill",
       "symbol": "CraftingQualityInfo.barFill",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field barFill to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.barFill. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.barHighlight",
       "symbol": "CraftingQualityInfo.barHighlight",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field barHighlight to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.barHighlight. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.icon",
       "symbol": "CraftingQualityInfo.icon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field icon to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.icon. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.iconAppear",
       "symbol": "CraftingQualityInfo.iconAppear",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field iconAppear to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.iconAppear. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.iconChat",
       "symbol": "CraftingQualityInfo.iconChat",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field iconChat to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.iconChat. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.iconDissolve",
       "symbol": "CraftingQualityInfo.iconDissolve",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field iconDissolve to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.iconDissolve. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.iconInventory",
       "symbol": "CraftingQualityInfo.iconInventory",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field iconInventory to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.iconInventory. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.iconMixed",
       "symbol": "CraftingQualityInfo.iconMixed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field iconMixed to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.iconMixed. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.iconSmall",
       "symbol": "CraftingQualityInfo.iconSmall",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required string field iconSmall to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.iconSmall. Field presence, string type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingQualityInfo.quality",
       "symbol": "CraftingQualityInfo.quality",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required number field quality to CraftingQualityInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingQualityInfo.quality. Field presence, number type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingReagentInfo.reagent",
       "symbol": "CraftingReagentInfo.reagent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required CraftingReagent field reagent to CraftingReagentInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingReagentInfo.reagent. Field presence, CraftingReagent type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingReagentSlotSchematic.variableQuantities",
       "symbol": "CraftingReagentSlotSchematic.variableQuantities",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required arrayof<CraftingVariableQuantities> field variableQuantities to CraftingReagentSlotSchematic.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingReagentSlotSchematic.variableQuantities. Field presence, arrayof<CraftingVariableQuantities> type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingResourceReturnInfo.reagent",
       "symbol": "CraftingResourceReturnInfo.reagent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required CraftingReagent field reagent to CraftingResourceReturnInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingResourceReturnInfo.reagent. Field presence, CraftingReagent type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingVariableQuantities",
@@ -28547,33 +28972,83 @@
       "id": "added:CraftingVariableQuantities.quantity",
       "symbol": "CraftingVariableQuantities.quantity",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required number field quantity to CraftingVariableQuantities.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingVariableQuantities.quantity. Field presence, number type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CraftingVariableQuantities.reagent",
       "symbol": "CraftingVariableQuantities.reagent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds required CraftingReagent field reagent to CraftingVariableQuantities.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/action_bar_api.rs",
+          "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state/support_types.rs",
+          "summary": "Current support state contains no producer or typed model for the audited crafting field.",
+          "source_hash": "346722cb5a352532d707eecddca22d0e442537dfc35384707be41d29baf4855e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/c_crafting_orders_probes.rs",
+          "summary": "Existing crafting-order probes cover basic API behavior, not this typed structure field or nested payload fidelity.",
+          "source_hash": "4c74d1f58ff11614853df7d25218506a0e118e286d7115ed29cb6415cdba8d10"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: no runtime producer populates CraftingVariableQuantities.reagent. Field presence, CraftingReagent type/value fidelity, nested structure relationships, validation, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:CreateAbbreviateConfig",

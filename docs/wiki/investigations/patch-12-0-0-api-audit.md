@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **939 best-effort, 946 evidence-required, 2 exception-requested, and 1523 untriaged rows** (3410 total).
+Current manifest totals are **939 best-effort, 965 evidence-required, 2 exception-requested, and 1504 untriaged rows** (3410 total).
 
 `C_Tutorial.GetCombatEventInfo` is evidence-required/unsafe: the explicit implementation is a zero-result no-op while the checked-in source provides no output schema; authoritative return semantics, combat state/producer/timing, persistence, and lifecycle remain unresolved.
 
@@ -23,6 +23,8 @@ The 38 grouped constants are best-effort/behavioral: six misc target/currency/it
 `C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo` and its 16 `PreyHuntProgressWidgetVisualizationInfo` fields are evidence-required/unsafe: the API is absent and no Prey Hunt widget state or payload producer exists. Widget lookup, typed fields, timer/progress/animation/tooltip/texture/model values, refresh, events, persistence, and lifecycle remain unresolved.
 
 `C_WeeklyRewards.GetSortedProgressForActivity` and `WeeklyRewardActivityTierProgress.activityTierID`, `.difficulty`, and `.numPoints` are evidence-required/unsafe: the API is absent, and current Great Vault state lacks tier IDs, difficulty, points, and shared-difficulty sorting. Field/result/event/persistence/lifecycle semantics remain unresolved.
+
+The 19 crafting structure fields from `CraftingItemSlotModification.reagent` through `CraftingVariableQuantities.reagent` are evidence-required/unsafe: no typed runtime producers cover reagent, quality/icon, variable-quantity, or resource-return fields; type/value/nesting/validation/update/event/persistence/lifecycle semantics remain unresolved.
 
 `C_SpellBook.FindBaseSpellByID`, `FindFlyoutSlotBySpellID`, `FindSpellOverrideByID`, `GetSpellBookItemChargeDuration`, `GetSpellBookItemCooldownDuration`, and `GetSpellBookItemLossOfControlCooldownDuration` are evidence-required/unsafe: mapping fallbacks are nil/input-ID compatibility only and no flyout/override model exists; duration APIs lack slot/bank cooldown state and a LuaDurationObject producer. Known/unknown mappings, required/nilable results, valid slots/banks, timing/expiration, refresh, object lifetime, and lifecycle remain unproven.
 
