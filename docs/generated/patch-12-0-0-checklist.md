@@ -1676,11 +1676,11 @@
 1676. [best-effort] `added:Enum.NamePlateThreatDisplayMeta.MaxValue` — behavioral
 1677. [best-effort] `added:Enum.NamePlateThreatDisplayMeta.MinValue` — behavioral
 1678. [best-effort] `added:Enum.NamePlateThreatDisplayMeta.NumValues` — behavioral
-1679. [untriaged] `added:Enum.NamePlateType.Enemy` — untriaged
-1680. [untriaged] `added:Enum.NamePlateType.Friendly` — untriaged
-1681. [untriaged] `added:Enum.NamePlateTypeMeta.MaxValue` — untriaged
-1682. [untriaged] `added:Enum.NamePlateTypeMeta.MinValue` — untriaged
-1683. [untriaged] `added:Enum.NamePlateTypeMeta.NumValues` — untriaged
+1679. [best-effort] `added:Enum.NamePlateType.Enemy` — behavioral
+1680. [best-effort] `added:Enum.NamePlateType.Friendly` — behavioral
+1681. [best-effort] `added:Enum.NamePlateTypeMeta.MaxValue` — behavioral
+1682. [best-effort] `added:Enum.NamePlateTypeMeta.MinValue` — behavioral
+1683. [best-effort] `added:Enum.NamePlateTypeMeta.NumValues` — behavioral
 1684. [untriaged] `added:Enum.NeighborhoodInitiativeChestResult.NiNoHouseFound` — untriaged
 1685. [untriaged] `added:Enum.NeighborhoodInitiativeChestResult.NiNoRewards` — untriaged
 1686. [untriaged] `added:Enum.NeighborhoodInitiativeChestResult.NiServiceDisabled` — untriaged
