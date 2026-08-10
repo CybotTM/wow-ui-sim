@@ -1,8 +1,10 @@
 # Wiki Index
 
+The six retail 12.0.0 `Enum.EncounterEventSeverity.*` rows are best-effort/behavioral: `Low=0`, `Medium=1`, `High=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`. Focused proof is at `6a0012bc8a670c04e8a5413a06903b35d4d5e090`; it asserts the exact complete member set, Lua numeric types, and metadata. The guarded runtime fallback matches retail 12.0.0 with no drift. Claims are bounded to startup publication and exact values/metadata; encounter severity interpretation, producers, consumers, ordering, transitions, persistence, and lifecycle remain unclaimed.
+
 LLM-maintained knowledge base for the wow-ui-sim project.
 
-The current 12.0.0 audit totals are **1298 best-effort, 982 evidence-required, 2 exception-requested, and 1128 untriaged rows** (3410 total).
+The current 12.0.0 audit totals are **1304 best-effort, 982 evidence-required, 2 exception-requested, and 1122 untriaged rows** (3410 total).
 
 The three retail 12.0.0 `Enum.EditModeSystem.*` rows are best-effort/behavioral: `PersonalResourceDisplay=21`, `EncounterEvents=22`, and `DamageMeter=23`. Focused proof is at `4d883c9647cf972d6b12b7b4982b9de634d293c5`; it asserts startup table existence, Lua numeric types, exact values, absence of later `TotemActionBar`, and metadata `MinValue=0`, `MaxValue=23`, `NumValues=24`. Root cause: shared sequential enum data included later `TotemActionBar=24`; the retail 12.0.0 override removes that member without shifting these values. Claims are bounded to startup publication, type, exact value, and namespace boundary; Edit Mode behavior, consumers, persistence, transitions, and lifecycle remain unclaimed.
 

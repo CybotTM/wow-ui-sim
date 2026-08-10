@@ -50229,97 +50229,271 @@
       "id": "added:Enum.EncounterEventSeverity.High",
       "symbol": "Enum.EncounterEventSeverity.High",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventSeverity.High with numeric value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded runtime enum fallback publishes the matching EncounterEventSeverity family and metadata without later-member drift."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs",
+          "source_hash": "24479db3eefe1cbfc8eccaf726eb425213d4038343af52e8e77175fe76caf6f2",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact three-member set, Lua numeric values, and metadata MinValue=0, MaxValue=2, NumValues=3."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail discovery records Enum.EncounterEventSeverity.High with numeric value 2."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs::test_patch_12_0_0_encounter_event_severity_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventSeverity.High as a Lua number with exact retail 12.0.0 value 2; the focused family test also asserts the complete member set and metadata."
+      ],
+      "commit": "6a0012bc8a670c04e8a5413a06903b35d4d5e090",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete three-member Enum.EncounterEventSeverity set, and metadata MinValue=0, MaxValue=2, NumValues=3. Encounter severity interpretation, producers, consumers, ordering, transitions, persistence, and lifecycle are not claimed. Proof commit: 6a0012bc8a670c04e8a5413a06903b35d4d5e090."
     },
     {
       "id": "added:Enum.EncounterEventSeverity.Low",
       "symbol": "Enum.EncounterEventSeverity.Low",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventSeverity.Low with numeric value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded runtime enum fallback publishes the matching EncounterEventSeverity family and metadata without later-member drift."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs",
+          "source_hash": "24479db3eefe1cbfc8eccaf726eb425213d4038343af52e8e77175fe76caf6f2",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact three-member set, Lua numeric values, and metadata MinValue=0, MaxValue=2, NumValues=3."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail discovery records Enum.EncounterEventSeverity.Low with numeric value 0."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs::test_patch_12_0_0_encounter_event_severity_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventSeverity.Low as a Lua number with exact retail 12.0.0 value 0; the focused family test also asserts the complete member set and metadata."
+      ],
+      "commit": "6a0012bc8a670c04e8a5413a06903b35d4d5e090",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete three-member Enum.EncounterEventSeverity set, and metadata MinValue=0, MaxValue=2, NumValues=3. Encounter severity interpretation, producers, consumers, ordering, transitions, persistence, and lifecycle are not claimed. Proof commit: 6a0012bc8a670c04e8a5413a06903b35d4d5e090."
     },
     {
       "id": "added:Enum.EncounterEventSeverity.Medium",
       "symbol": "Enum.EncounterEventSeverity.Medium",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventSeverity.Medium with numeric value 1."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded runtime enum fallback publishes the matching EncounterEventSeverity family and metadata without later-member drift."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs",
+          "source_hash": "24479db3eefe1cbfc8eccaf726eb425213d4038343af52e8e77175fe76caf6f2",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact three-member set, Lua numeric values, and metadata MinValue=0, MaxValue=2, NumValues=3."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail discovery records Enum.EncounterEventSeverity.Medium with numeric value 1."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs::test_patch_12_0_0_encounter_event_severity_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventSeverity.Medium as a Lua number with exact retail 12.0.0 value 1; the focused family test also asserts the complete member set and metadata."
+      ],
+      "commit": "6a0012bc8a670c04e8a5413a06903b35d4d5e090",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete three-member Enum.EncounterEventSeverity set, and metadata MinValue=0, MaxValue=2, NumValues=3. Encounter severity interpretation, producers, consumers, ordering, transitions, persistence, and lifecycle are not claimed. Proof commit: 6a0012bc8a670c04e8a5413a06903b35d4d5e090."
     },
     {
       "id": "added:Enum.EncounterEventSeverityMeta.MaxValue",
       "symbol": "Enum.EncounterEventSeverityMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventSeverityMeta.MaxValue with numeric value 2."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded runtime enum fallback publishes the matching EncounterEventSeverity family and metadata without later-member drift."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs",
+          "source_hash": "24479db3eefe1cbfc8eccaf726eb425213d4038343af52e8e77175fe76caf6f2",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact three-member set, Lua numeric values, and metadata MinValue=0, MaxValue=2, NumValues=3."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail discovery records Enum.EncounterEventSeverityMeta.MaxValue with numeric value 2."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs::test_patch_12_0_0_encounter_event_severity_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventSeverityMeta.MaxValue as a Lua number with exact retail 12.0.0 value 2; the focused family test also asserts the complete member set and metadata."
+      ],
+      "commit": "6a0012bc8a670c04e8a5413a06903b35d4d5e090",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete three-member Enum.EncounterEventSeverity set, and metadata MinValue=0, MaxValue=2, NumValues=3. Encounter severity interpretation, producers, consumers, ordering, transitions, persistence, and lifecycle are not claimed. Proof commit: 6a0012bc8a670c04e8a5413a06903b35d4d5e090."
     },
     {
       "id": "added:Enum.EncounterEventSeverityMeta.MinValue",
       "symbol": "Enum.EncounterEventSeverityMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventSeverityMeta.MinValue with numeric value 0."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded runtime enum fallback publishes the matching EncounterEventSeverity family and metadata without later-member drift."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs",
+          "source_hash": "24479db3eefe1cbfc8eccaf726eb425213d4038343af52e8e77175fe76caf6f2",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact three-member set, Lua numeric values, and metadata MinValue=0, MaxValue=2, NumValues=3."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail discovery records Enum.EncounterEventSeverityMeta.MinValue with numeric value 0."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs::test_patch_12_0_0_encounter_event_severity_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventSeverityMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused family test also asserts the complete member set and metadata."
+      ],
+      "commit": "6a0012bc8a670c04e8a5413a06903b35d4d5e090",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete three-member Enum.EncounterEventSeverity set, and metadata MinValue=0, MaxValue=2, NumValues=3. Encounter severity interpretation, producers, consumers, ordering, transitions, persistence, and lifecycle are not claimed. Proof commit: 6a0012bc8a670c04e8a5413a06903b35d4d5e090."
     },
     {
       "id": "added:Enum.EncounterEventSeverityMeta.NumValues",
       "symbol": "Enum.EncounterEventSeverityMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.EncounterEventSeverityMeta.NumValues with numeric value 3."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded runtime enum fallback publishes the matching EncounterEventSeverity family and metadata without later-member drift."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs",
+          "source_hash": "24479db3eefe1cbfc8eccaf726eb425213d4038343af52e8e77175fe76caf6f2",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact three-member set, Lua numeric values, and metadata MinValue=0, MaxValue=2, NumValues=3."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail discovery records Enum.EncounterEventSeverityMeta.NumValues with numeric value 3."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_encounter_event_severity_enums.rs::test_patch_12_0_0_encounter_event_severity_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EncounterEventSeverityMeta.NumValues as a Lua number with exact retail 12.0.0 value 3; the focused family test also asserts the complete member set and metadata."
+      ],
+      "commit": "6a0012bc8a670c04e8a5413a06903b35d4d5e090",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence covers retail 12.0.0 startup publication as Lua numbers, the exact complete three-member Enum.EncounterEventSeverity set, and metadata MinValue=0, MaxValue=2, NumValues=3. Encounter severity interpretation, producers, consumers, ordering, transitions, persistence, and lifecycle are not claimed. Proof commit: 6a0012bc8a670c04e8a5413a06903b35d4d5e090."
     },
     {
       "id": "added:Enum.EncounterEventsIconDirection.Bottom",
