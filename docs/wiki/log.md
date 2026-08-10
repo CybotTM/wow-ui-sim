@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_Tutorial.GetCombatEventInfo
+
+Classified `C_Tutorial.GetCombatEventInfo` as evidence-required/unsafe: the explicit implementation is a zero-result no-op while the checked-in source provides no output schema; authoritative return semantics, combat state/producer/timing, persistence, and lifecycle remain unresolved. Current totals are **901 best-effort, 925 evidence-required, 2 exception-requested, and 1582 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify catalog and combat-log constants
 
 Classified `Constants.CatalogShopVirtualCurrencyConstants.HEARTHSTEEL_VC_CURRENCY_CODE` (`XVV`), `TRADERS_TENDER_VC_CURRENCY_CODE` (`XWP`), both `CombatLogMessageLimits` values (`300`, `1000`), and all five `CombatLogObjectMasks` values (`15`, `768`, `240`, `-65536`, `64512`) as best-effort/behavioral. Focused proof at `a5a3d167b3e0e747e02e7c711b4255efe0488cef` establishes startup Lua type/value only; consumer, mutation, protection, and broader semantics remain unclaimed. Current totals are **901 best-effort, 924 evidence-required, 2 exception-requested, and 1583 untriaged** (3410 rows).

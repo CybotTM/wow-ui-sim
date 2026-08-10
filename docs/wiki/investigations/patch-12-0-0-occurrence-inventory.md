@@ -801,7 +801,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_TransmogSets.SetDefaultSetsFilters` | evidence-required | api | added | Evidence required: SetDefaultSetsFilters is absent and no filter mutation model exists. Reset values, idempotence, UI/event propagation, persistence, and lifecycle remain unproven. |
 | `C_TransmogSets.SetSetsFilter` | evidence-required | api | added | Evidence required: SetSetsFilter is absent and no filter mutation model exists. Index validation, checked-state changes, UI/event propagation, persistence, and lifecycle remain unproven. |
 | `C_TransmogSets.TransmogSetInfo.grantAsPrecedingVariant` | evidence-required | structure-field | added | Evidence required: placeholder TransmogSetInfo omits grantAsPrecedingVariant and no set-variant model exists. Field presence/type/value, preceding-variant relationships, collection effects, and lifecycle remain unproven. |
-| `C_Tutorial.GetCombatEventInfo` | untriaged | api | added | api added in 12.0.0. |
+| `C_Tutorial.GetCombatEventInfo` | evidence-required | api | added | Evidence required: GetCombatEventInfo is a zero-result no-op and the checked-in source does not specify its output shape. Authoritative return values, combat-event state/producers, transitions, timing, persistence, and lifecycle remain unproven. |
 | `C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo` | untriaged | api | added | api added in 12.0.0. |
 | `C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
 | `C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.frameTextureKit` | untriaged | structure-field | added | structure-field added in 12.0.0. |

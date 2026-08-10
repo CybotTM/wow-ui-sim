@@ -733,7 +733,7 @@
 733. [evidence-required] `added:C_TransmogSets.SetDefaultSetsFilters` — unsafe
 734. [evidence-required] `added:C_TransmogSets.SetSetsFilter` — unsafe
 735. [evidence-required] `added:C_TransmogSets.TransmogSetInfo.grantAsPrecedingVariant` — unsafe
-736. [untriaged] `added:C_Tutorial.GetCombatEventInfo` — untriaged
+736. [evidence-required] `added:C_Tutorial.GetCombatEventInfo` — unsafe
 737. [untriaged] `added:C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo` — untriaged
 738. [best-effort] `added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo` — provenance-only
 739. [untriaged] `added:C_UIWidgetManager.PreyHuntProgressWidgetVisualizationInfo.frameTextureKit` — untriaged

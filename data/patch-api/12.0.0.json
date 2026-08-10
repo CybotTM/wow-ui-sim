@@ -23696,17 +23696,36 @@
       "id": "added:C_Tutorial.GetCombatEventInfo",
       "symbol": "C_Tutorial.GetCombatEventInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds the no-argument API but records no output schema, leaving the return contract unspecified.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/tutorial.rs",
+          "summary": "Current explicit implementation is a no-op returning zero Lua results and has no combat-event information state or producer.",
+          "source_hash": "d8f57fdff3da90417c691a105ed81c9b3424f3eab9395247c7790f8cbef529eb"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/tutorial_api.rs",
+          "summary": "Existing test proves only function presence and the current zero-result placeholder, not authoritative combat-event behavior.",
+          "source_hash": "77349198df3d374ed5c42f0d2cbd2964c161b3afb5fa086819daef9b8424d356"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: GetCombatEventInfo is a zero-result no-op and the checked-in source does not specify its output shape. Authoritative return values, combat-event state/producers, transitions, timing, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_UIWidgetManager.GetPreyHuntProgressWidgetVisualizationInfo",
