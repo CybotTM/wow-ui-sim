@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify cooldown-viewer alert-type enums
+
+Classified exactly five retail 12.0.0 `Enum.CooldownViewerAlertType.*` and `Enum.CooldownViewerAlertTypeMeta.*` rows as best-effort/behavioral, bounded to startup enum/metadata numeric publication and exact values (`Sound=1`, `Visual=2`, `MinValue=1`, `MaxValue=2`, `NumValues=2`). Focused final-runtime proof is at `5fe329d4d5d852365e81839df992d904d291305d`. Alert triggering, sound/visual effects, configuration, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1121 best-effort, 982 evidence-required, 2 exception-requested, and 1305 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify combat-log message-order enums
 
 Classified exactly five retail 12.0.0 `Enum.CombatLogMessageOrder.*` and `Enum.CombatLogMessageOrderMeta.*` rows as best-effort/behavioral, bounded to startup enum/metadata numeric publication and exact values (`Newest=0`, `Oldest=1`, `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `2d6495a732f7cb598cf67871eae507c28fc7c3bb`. Combat-log storage order, query behavior, persistence, UI consumers, transitions, and lifecycle remain unclaimed. Current totals are **1116 best-effort, 982 evidence-required, 2 exception-requested, and 1310 untriaged** (3410 rows).

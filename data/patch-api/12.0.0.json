@@ -40465,81 +40465,196 @@
       "id": "added:Enum.CooldownViewerAlertType.Sound",
       "symbol": "Enum.CooldownViewerAlertType.Sound",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CooldownViewerAlertType.Sound as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime cooldown-viewer enum fallback publishes Enum.CooldownViewerAlertType.Sound with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact cooldown-viewer alert-type value.",
+          "source_hash": "48942ed2a23e9e336adbadd1c78d7b8b6d92e1114c5473e3e5b103dfe38daa5f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs::test_patch_12_0_0_cooldown_viewer_alert_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CooldownViewerAlertType.Sound as Lua number with exact value 1."
+      ],
+      "commit": "5fe329d4d5d852365e81839df992d904d291305d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 1. Alert triggering, sound/visual effects, configuration, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fe329d4d5d852365e81839df992d904d291305d."
     },
     {
       "id": "added:Enum.CooldownViewerAlertType.Visual",
       "symbol": "Enum.CooldownViewerAlertType.Visual",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CooldownViewerAlertType.Visual as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime cooldown-viewer enum fallback publishes Enum.CooldownViewerAlertType.Visual with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the enum namespace/table, Lua numeric type, and exact cooldown-viewer alert-type value.",
+          "source_hash": "48942ed2a23e9e336adbadd1c78d7b8b6d92e1114c5473e3e5b103dfe38daa5f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs::test_patch_12_0_0_cooldown_viewer_alert_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CooldownViewerAlertType.Visual as Lua number with exact value 2."
+      ],
+      "commit": "5fe329d4d5d852365e81839df992d904d291305d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, and exact value 2. Alert triggering, sound/visual effects, configuration, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fe329d4d5d852365e81839df992d904d291305d."
     },
     {
       "id": "added:Enum.CooldownViewerAlertTypeMeta.MaxValue",
       "symbol": "Enum.CooldownViewerAlertTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CooldownViewerAlertTypeMeta.MaxValue as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime cooldown-viewer metadata fallback publishes Enum.CooldownViewerAlertTypeMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact cooldown-viewer alert-type value.",
+          "source_hash": "48942ed2a23e9e336adbadd1c78d7b8b6d92e1114c5473e3e5b103dfe38daa5f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs::test_patch_12_0_0_cooldown_viewer_alert_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CooldownViewerAlertTypeMeta.MaxValue as Lua number with exact value 2."
+      ],
+      "commit": "5fe329d4d5d852365e81839df992d904d291305d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 2. Alert triggering, sound/visual effects, configuration, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fe329d4d5d852365e81839df992d904d291305d."
     },
     {
       "id": "added:Enum.CooldownViewerAlertTypeMeta.MinValue",
       "symbol": "Enum.CooldownViewerAlertTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CooldownViewerAlertTypeMeta.MinValue as numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime cooldown-viewer metadata fallback publishes Enum.CooldownViewerAlertTypeMeta.MinValue with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact cooldown-viewer alert-type value.",
+          "source_hash": "48942ed2a23e9e336adbadd1c78d7b8b6d92e1114c5473e3e5b103dfe38daa5f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs::test_patch_12_0_0_cooldown_viewer_alert_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CooldownViewerAlertTypeMeta.MinValue as Lua number with exact value 1."
+      ],
+      "commit": "5fe329d4d5d852365e81839df992d904d291305d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 1. Alert triggering, sound/visual effects, configuration, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fe329d4d5d852365e81839df992d904d291305d."
     },
     {
       "id": "added:Enum.CooldownViewerAlertTypeMeta.NumValues",
       "symbol": "Enum.CooldownViewerAlertTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CooldownViewerAlertTypeMeta.NumValues as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime cooldown-viewer metadata fallback publishes Enum.CooldownViewerAlertTypeMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the metadata namespace/table, Lua numeric type, and exact cooldown-viewer alert-type value.",
+          "source_hash": "48942ed2a23e9e336adbadd1c78d7b8b6d92e1114c5473e3e5b103dfe38daa5f"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cooldown_viewer_alert_type_enums.rs::test_patch_12_0_0_cooldown_viewer_alert_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CooldownViewerAlertTypeMeta.NumValues as Lua number with exact value 2."
+      ],
+      "commit": "5fe329d4d5d852365e81839df992d904d291305d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, and exact value 2. Alert triggering, sound/visual effects, configuration, persistence, transitions, and lifecycle are not claimed. Proof commit: 5fe329d4d5d852365e81839df992d904d291305d."
     },
     {
       "id": "added:Enum.CraftingOrderItemFlags.HasEnchantmentData",

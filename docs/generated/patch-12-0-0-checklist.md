@@ -1168,11 +1168,11 @@
 1168. [best-effort] `added:Enum.CooldownViewerAlertEventTypeMeta.MaxValue` — behavioral
 1169. [best-effort] `added:Enum.CooldownViewerAlertEventTypeMeta.MinValue` — behavioral
 1170. [best-effort] `added:Enum.CooldownViewerAlertEventTypeMeta.NumValues` — behavioral
-1171. [untriaged] `added:Enum.CooldownViewerAlertType.Sound` — untriaged
-1172. [untriaged] `added:Enum.CooldownViewerAlertType.Visual` — untriaged
-1173. [untriaged] `added:Enum.CooldownViewerAlertTypeMeta.MaxValue` — untriaged
-1174. [untriaged] `added:Enum.CooldownViewerAlertTypeMeta.MinValue` — untriaged
-1175. [untriaged] `added:Enum.CooldownViewerAlertTypeMeta.NumValues` — untriaged
+1171. [best-effort] `added:Enum.CooldownViewerAlertType.Sound` — behavioral
+1172. [best-effort] `added:Enum.CooldownViewerAlertType.Visual` — behavioral
+1173. [best-effort] `added:Enum.CooldownViewerAlertTypeMeta.MaxValue` — behavioral
+1174. [best-effort] `added:Enum.CooldownViewerAlertTypeMeta.MinValue` — behavioral
+1175. [best-effort] `added:Enum.CooldownViewerAlertTypeMeta.NumValues` — behavioral
 1176. [untriaged] `added:Enum.CraftingOrderItemFlags.HasEnchantmentData` — untriaged
 1177. [untriaged] `added:Enum.CraftingOrderItemFlags.None` — untriaged
 1178. [untriaged] `added:Enum.CraftingOrderItemFlags.NpcProvided` — untriaged
