@@ -48,6 +48,7 @@ mod patch_12_0_0_damage_meter_storage_type_enums;
 mod patch_12_0_0_damage_meter_type_enums;
 mod patch_12_0_0_damage_meter_visibility_enums;
 mod patch_12_0_0_dungeon_encounter_flags_enums;
+mod patch_12_0_0_dungeon_encounter_trigger_type_enums;
 mod patch_12_0_0_expansion_landing_page_type_removals;
 mod patch_12_0_0_item_creation_context_removals;
 mod patch_12_0_0_small_enums;
