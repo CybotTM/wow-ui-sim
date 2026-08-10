@@ -151,7 +151,7 @@ pub fn is_callback_event(name: &str) -> bool {
     CALLBACK_EVENTS.binary_search(&name).is_ok()
 }
 
-#[cfg(all(test, feature = "client-retail"))]
+#[cfg(all(test, feature = "profile-retail"))]
 mod retail_tests {
     use super::is_registerable_event;
 

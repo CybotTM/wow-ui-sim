@@ -124,7 +124,7 @@ fn ptr_manifest_includes_ptr_only_aura_container() {
 }
 
 #[test]
-#[cfg(feature = "client-retail")]
+#[cfg(feature = "profile-retail")]
 fn retail_manifest_excludes_ptr_only_aura_container() {
     let manifest: Vec<_> = manifest_entries().collect();
 
@@ -132,7 +132,7 @@ fn retail_manifest_excludes_ptr_only_aura_container() {
 }
 
 #[test]
-#[cfg(feature = "client-retail")]
+#[cfg(feature = "profile-retail")]
 fn retail_manifest_excludes_legacy_profile_sources() {
     const LEGACY_PROFILE_MARKERS: [&str; 11] = [
         "/Classic/",

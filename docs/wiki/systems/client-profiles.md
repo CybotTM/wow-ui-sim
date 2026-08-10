@@ -4,20 +4,21 @@ The simulator targets six WoW client profiles concurrently — retail, PTR, wrat
 
 ## Active profile selection
 
-`src/client_profile.rs` defines `enum ClientProfile { Retail, Ptr, Wrath, Mists, Era, Anniversary }` and a single `pub const ACTIVE: ClientProfile` resolved by cfg-blocks against the enabled `client-*` cargo feature. A `compile_error!` block enforces *exactly one* feature must be enabled.
+`src/client_profile.rs` defines `enum ClientProfile { Retail, Ptr, Wrath, Mists, Era, Anniversary }` and a single `pub const ACTIVE: ClientProfile` resolved by cfg-blocks against the enabled profile marker. Retail uses the internal `profile-retail` feature; public `client-retail` remains the current-retail bundle and enables `profile-retail` plus `retail-12-0-7`. A `compile_error!` block enforces exactly one client profile marker.
 
 Feature ↔ profile ↔ vendor source ↔ TOC suffix:
 
 | Feature              | Profile     | Cache subdir | Default API epoch | Primary TOC suffix |
 |----------------------|-------------|--------------|-------------------|--------------------|
 | `client-retail`      | Retail      | `retail`     | `retail-12-0-7` (`120007`) | `_Mainline` |
+| `profile-retail`     | Retail      | `retail`     | selected by enabled epoch | `_Mainline` |
 | `client-ptr`         | Ptr         | `ptr`        | `retail-12-1-0` (`120100`) | `_Mainline` |
 | `client-wrath`       | Wrath       | `wrath`      | `38001`          | `_Wrath`           |
 | `client-mists`       | Mists       | `mists`      | `50504`          | `_Mists`           |
 | `client-era`         | Era         | `era`        | `11507`          | `_Vanilla`         |
 | `client-anniversary` | Anniversary | `anniversary`| `11507`          | `_Vanilla`         |
 
-Retail-family epoch features are cumulative: `retail-12-0-7` includes earlier 12.0 epochs, and `retail-12-1-0` includes `retail-12-0-7`. `client-retail` currently enables `retail-12-0-7`; `client-ptr` enables `retail-12-1-0`. API surfaces, CVars, enums, events, XML elements, frame methods, and strict removals introduced by patch notes should gate on the epoch feature (`retail-12-1-0`) rather than on the channel feature (`client-ptr`). Channel/vendor behavior stays profile-gated: PTR CASC product `wowt`, `_ptr_` install paths, and `data/blizzard-ui-files/ptr.txt` remain `client-ptr` concerns.
+Retail-family epoch features are cumulative: `retail-12-0-5` includes `retail-12-0-0`, `retail-12-0-7` includes earlier 12.0 epochs, and `retail-12-1-0` includes `retail-12-0-7`. `client-retail` currently enables `retail-12-0-7`; `client-ptr` enables `retail-12-1-0`; `profile-retail` selects the retail cache without forcing an epoch. `RetailApiEpoch` and `ACTIVE_RETAIL_API_EPOCH` resolve the highest enabled cumulative retail epoch. API surfaces, CVars, enums, events, XML elements, frame methods, and strict removals introduced by patch notes should gate on the epoch feature rather than on the channel feature. Profile-specific runtime behavior gates use `profile-retail` so historical retail tests retain retail semantics. Channel/vendor behavior stays profile-gated: PTR CASC product `wowt`, `_ptr_` install paths, and `data/blizzard-ui-files/ptr.txt` remain `client-ptr` concerns.
 
 Helper functions/constants in `src/client_profile.rs`:
 
@@ -39,14 +40,16 @@ retail-12-0-5 = ["retail-12-0-0"]
 retail-12-0-7 = ["retail-12-0-5"]
 retail-12-1-0 = ["retail-12-0-7"]
 
-client-retail = ["retail-12-0-7"]
+profile-retail = []
+client-retail = ["profile-retail", "retail-12-0-7"]
 client-ptr = ["retail-12-1-0"]
 ```
 
 Rules:
 
-- `client-*` features select runtime profile: cache subdir, CASC product, install flavor, TOC profile, and interface version.
-- `retail-*` features select mainline API epoch: C_* additions, globals/removals, events, CVars, XML elements, frame methods, and patch-note compatibility bootstraps.
+- `profile-retail` and the other profile markers select runtime profile: cache subdir, CASC product, install flavor, and TOC profile. `client-retail` is the public current-retail bundle; it enables `profile-retail` and `retail-12-0-7`.
+- `retail-*` features select mainline API epoch: C_* additions, globals/removals, events, CVars, XML elements, frame methods, and patch-note compatibility bootstraps. `RetailApiEpoch` / `ACTIVE_RETAIL_API_EPOCH` select the highest enabled cumulative epoch.
+- Historical retail 12.0.0 audit tests use `cargo test --no-default-features --features profile-retail,retail-12-0-0`; profile-specific runtime behavior must gate on `profile-retail`, not `client-retail`.
 - Patch features are cumulative. Gate additions with `#[cfg(feature = "retail-12-1-0")]`; gate removals/lifetimes with `#[cfg(all(feature = "retail-12-0-0", not(feature = "retail-12-1-0")))]` or the smallest applicable lower epoch.
 - Do not gate patch-note API deltas on `client-ptr`. PTR is only the current channel pointing at the future epoch; when retail catches up, moving `client-retail` to `retail-12-1-0` should enable the same API surface.
 

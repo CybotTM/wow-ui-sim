@@ -661,7 +661,7 @@ mod tests {
         assert!(result.contains(r#"<Script file="LibStub.lua"/>"#));
     }
 
-    #[cfg(feature = "client-retail")]
+    #[cfg(feature = "profile-retail")]
     #[test]
     fn test_parse_objective_tracker_widget_container_xml_keeps_self_closing_frame() {
         let path = crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
@@ -690,7 +690,7 @@ mod tests {
         );
     }
 
-    #[cfg(feature = "client-retail")]
+    #[cfg(feature = "profile-retail")]
     #[test]
     fn test_parse_low_health_frame_xml_keeps_animations() {
         let path = crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(

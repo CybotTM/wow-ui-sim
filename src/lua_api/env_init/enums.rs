@@ -1,6 +1,6 @@
 //! Enum and constant globals: `Enum.*`, `Constants.*`, LE_* values.
 
-use crate::client_profile::{RetailApiEpoch, ACTIVE_RETAIL_API_EPOCH};
+use crate::client_profile::{ACTIVE_RETAIL_API_EPOCH, RetailApiEpoch};
 use crate::lua_api::globals::enum_data::{EXPLICIT_ENUMS, SEQUENTIAL_ENUMS};
 use crate::lua_api::methods::{create_table, table_get, table_set};
 use rilua::LuaApiMut;

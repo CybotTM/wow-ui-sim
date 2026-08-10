@@ -1,3 +1,7 @@
+## [2026-08-10] architecture | Separate retail profile selection from API epochs
+
+Documented the internal `profile-retail` Cargo feature as the retail profile marker. It selects the retail Blizzard cache without forcing the current API epoch; public `client-retail` remains the current-retail bundle and enables `profile-retail` plus cumulative `retail-12-0-7`. `RetailApiEpoch` and `ACTIVE_RETAIL_API_EPOCH` select the highest enabled cumulative retail epoch. Historical 12.0.0 audit tests use `cargo test --no-default-features --features profile-retail,retail-12-0-0`, and profile-specific runtime behavior gates use `profile-retail` so historical retail tests retain retail semantics. No 12.1, 12.0.7, or 12.0.5 audit-status changes.
+
 ## [2026-08-10] investigation | Classify cooldown-viewer alert-type enums
 
 Classified exactly five retail 12.0.0 `Enum.CooldownViewerAlertType.*` and `Enum.CooldownViewerAlertTypeMeta.*` rows as best-effort/behavioral, bounded to startup enum/metadata numeric publication and exact values (`Sound=1`, `Visual=2`, `MinValue=1`, `MaxValue=2`, `NumValues=2`). Focused final-runtime proof is at `5fe329d4d5d852365e81839df992d904d291305d`. Alert triggering, sound/visual effects, configuration, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1121 best-effort, 982 evidence-required, 2 exception-requested, and 1305 untriaged** (3410 rows).

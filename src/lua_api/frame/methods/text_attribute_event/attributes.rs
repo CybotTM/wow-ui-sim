@@ -477,7 +477,7 @@ pub(super) fn get_frame_ref(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_forbidden(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    #[cfg(feature = "client-retail")]
+    #[cfg(feature = "profile-retail")]
     {
         if !rilua::api::state_is_secure(state) {
             return Ok(0);

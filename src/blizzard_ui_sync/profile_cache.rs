@@ -486,7 +486,7 @@ fn file_contains(path: &Path, needle: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::cache_entry_is_usable;
-    #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+    #[cfg(any(feature = "profile-retail", feature = "client-ptr"))]
     use super::required_profile_cache_entries;
     use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
@@ -503,7 +503,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "client-retail")]
+    #[cfg(feature = "profile-retail")]
     fn retail_requires_runeforge_util_cache_entries() {
         let required = required_profile_cache_entries();
 
@@ -536,7 +536,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "client-retail")]
+    #[cfg(feature = "profile-retail")]
     fn retail_excludes_ptr_only_cooldown_broadcaster_bootstrap() {
         assert!(!super::sync_entry_belongs_to_active_profile(
             "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster_Bootstrap.lua"
@@ -544,7 +544,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "client-retail")]
+    #[cfg(feature = "profile-retail")]
     fn retail_rejects_runeforge_xml_without_script_include() {
         let root = unique_temp_dir("retail-runeforge-util");
         std::fs::create_dir_all(&root).expect("create cache root");
