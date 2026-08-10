@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify ItemCreationContext removals
+
+Classified exactly two removed retail 12.0.0 `Enum.ItemCreationContext.*` rows as best-effort/behavioral: `Placeholder_12_0_0` (prior 186) and `Timewalker` (prior 22) are absent at startup. Focused proof is at `4919858d04ce4b3e4418ed334f4c228de8129daa`. Item-creation context selection, item provenance, consumers, transitions, and lifecycle remain unclaimed. Current totals are **1142 best-effort, 982 evidence-required, 2 exception-requested, and 1284 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify removed expansion landing-page enums
 
 Classified exactly six removed retail 12.0.0 `Enum.ExpansionLandingPageType.*` and `Enum.ExpansionLandingPageTypeMeta.*` rows as best-effort/behavioral. The retail-12.0.0 post-compat epoch override proves `None`, `Dragonflight`, `WarWithin`, `MinValue`, `MaxValue`, and `NumValues` are absent. Focused proof is at `54416879b5c6305ed956f347fe0a17e9fb2ccb28`; landing-page selection, UI behavior, transitions, and lifecycle remain unclaimed. Current totals are **1140 best-effort, 982 evidence-required, 2 exception-requested, and 1286 untriaged** (3410 rows).

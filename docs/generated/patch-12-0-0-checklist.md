@@ -3125,8 +3125,8 @@
 3125. [evidence-required] `removed:Enum.ItemCollectionType.ItemCollectionTransmogSetFavorite` — unsafe
 3126. [evidence-required] `removed:Enum.ItemCollectionType.ItemCollectionWarbandScene` — unsafe
 3127. [evidence-required] `removed:Enum.ItemCollectionType.NumItemCollectionTypes` — unsafe
-3128. [untriaged] `removed:Enum.ItemCreationContext.Placeholder_12_0_0` — untriaged
-3129. [untriaged] `removed:Enum.ItemCreationContext.Timewalker` — untriaged
+3128. [best-effort] `removed:Enum.ItemCreationContext.Placeholder_12_0_0` — behavioral
+3129. [best-effort] `removed:Enum.ItemCreationContext.Timewalker` — behavioral
 3130. [evidence-required] `removed:Enum.ItemRecraftFlags.ItemRecraftFlagInvalid` — unsafe
 3131. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategory.Current` — untriaged
 3132. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategory.Legacy` — untriaged
