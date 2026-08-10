@@ -1872,11 +1872,11 @@
 1872. [untriaged] `added:Enum.StatusBarInterpolationMeta.MaxValue` — untriaged
 1873. [untriaged] `added:Enum.StatusBarInterpolationMeta.MinValue` — untriaged
 1874. [untriaged] `added:Enum.StatusBarInterpolationMeta.NumValues` — untriaged
-1875. [untriaged] `added:Enum.StatusBarTimerDirection.ElapsedTime` — untriaged
-1876. [untriaged] `added:Enum.StatusBarTimerDirection.RemainingTime` — untriaged
-1877. [untriaged] `added:Enum.StatusBarTimerDirectionMeta.MaxValue` — untriaged
-1878. [untriaged] `added:Enum.StatusBarTimerDirectionMeta.MinValue` — untriaged
-1879. [untriaged] `added:Enum.StatusBarTimerDirectionMeta.NumValues` — untriaged
+1875. [best-effort] `added:Enum.StatusBarTimerDirection.ElapsedTime` — behavioral
+1876. [best-effort] `added:Enum.StatusBarTimerDirection.RemainingTime` — behavioral
+1877. [best-effort] `added:Enum.StatusBarTimerDirectionMeta.MaxValue` — behavioral
+1878. [best-effort] `added:Enum.StatusBarTimerDirectionMeta.MinValue` — behavioral
+1879. [best-effort] `added:Enum.StatusBarTimerDirectionMeta.NumValues` — behavioral
 1880. [best-effort] `added:Enum.SurveyDeliveryMoment.MythicPlusCompleted` — behavioral
 1881. [untriaged] `added:Enum.TableSecurityOption.DisallowSecretKeys` — untriaged
 1882. [untriaged] `added:Enum.TableSecurityOption.DisallowTaintedAccess` — untriaged
