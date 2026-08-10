@@ -1179,9 +1179,9 @@
 1179. [best-effort] `added:Enum.CraftingOrderItemFlagsMeta.MaxValue` — behavioral
 1180. [best-effort] `added:Enum.CraftingOrderItemFlagsMeta.MinValue` — behavioral
 1181. [best-effort] `added:Enum.CraftingOrderItemFlagsMeta.NumValues` — behavioral
-1182. [untriaged] `added:Enum.CraftingOrderItemType.Currency` — untriaged
-1183. [untriaged] `added:Enum.CraftingOrderItemType.Deprecated` — untriaged
-1184. [untriaged] `added:Enum.CraftingOrderItemType.Item` — untriaged
+1182. [best-effort] `added:Enum.CraftingOrderItemType.Currency` — behavioral
+1183. [best-effort] `added:Enum.CraftingOrderItemType.Deprecated` — behavioral
+1184. [best-effort] `added:Enum.CraftingOrderItemType.Item` — behavioral
 1185. [untriaged] `added:Enum.CraftingOrderResult.MissingCurrency` — untriaged
 1186. [untriaged] `added:Enum.CraftingOrderResult.TooManyCurrencies` — untriaged
 1187. [best-effort] `added:Enum.CreateAllAccountData.AccountCurrenciesDone` — behavioral
@@ -2612,8 +2612,8 @@
 2612. [best-effort] `changed:Enum.AccountTransTypeMeta.NumValues` — behavioral
 2613. [untriaged] `changed:Enum.CharCustomizationTypeMeta.MaxValue` — untriaged
 2614. [untriaged] `changed:Enum.CharCustomizationTypeMeta.NumValues` — untriaged
-2615. [untriaged] `changed:Enum.CraftingOrderItemTypeMeta.MaxValue` — untriaged
-2616. [untriaged] `changed:Enum.CraftingOrderItemTypeMeta.NumValues` — untriaged
+2615. [best-effort] `changed:Enum.CraftingOrderItemTypeMeta.MaxValue` — behavioral
+2616. [best-effort] `changed:Enum.CraftingOrderItemTypeMeta.NumValues` — behavioral
 2617. [untriaged] `changed:Enum.CraftingOrderResult.MissingItem` — untriaged
 2618. [untriaged] `changed:Enum.CraftingOrderResult.MissingNpc` — untriaged
 2619. [untriaged] `changed:Enum.CraftingOrderResult.MissingOrder` — untriaged
@@ -3052,8 +3052,8 @@
 3052. [untriaged] `removed:Enum.CharCustomizationType.Facepaint` — untriaged
 3053. [untriaged] `removed:Enum.CharCustomizationType.FacepaintColor` — untriaged
 3054. [untriaged] `removed:Enum.CharCustomizationType.Outfit` — untriaged
-3055. [untriaged] `removed:Enum.CraftingOrderItemType.NpcProvided` — untriaged
-3056. [untriaged] `removed:Enum.CraftingOrderItemType.Reagent` — untriaged
+3055. [best-effort] `removed:Enum.CraftingOrderItemType.NpcProvided` — behavioral
+3056. [best-effort] `removed:Enum.CraftingOrderItemType.Reagent` — behavioral
 3057. [evidence-required] `removed:Enum.CreateAllAccountData.CreateAllAccountCurrenciesDone` — unsafe
 3058. [evidence-required] `removed:Enum.CreateAllAccountData.CreateAllAccountDynamicCriteriaDone` — unsafe
 3059. [evidence-required] `removed:Enum.CreateAllAccountData.CreateAllAccountFactionsDone` — unsafe

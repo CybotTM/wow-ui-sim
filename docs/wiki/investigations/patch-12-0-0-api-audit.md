@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1127 best-effort, 982 evidence-required, 2 exception-requested, and 1299 untriaged rows** (3410 total).
+Current manifest totals are **1134 best-effort, 982 evidence-required, 2 exception-requested, and 1292 untriaged rows** (3410 total).
 
 The five `Enum.CombatAudioAlertType.*` and `Enum.CombatAudioAlertTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Health=0`, `Cast=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `0c51d4c32a8ae89fffdf3ca67bf80d03926496d2`. Health/cast classification behavior, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 
@@ -15,6 +15,8 @@ The five `Enum.CombatAudioAlertUnit.*` and `Enum.CombatAudioAlertUnitMeta.*` row
 The five `Enum.CooldownViewerAlertType.*` and `Enum.CooldownViewerAlertTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Sound=1`, `Visual=2`; metadata `MinValue=1`, `MaxValue=2`, `NumValues=2`). Focused final-runtime proof is at `5fe329d4d5d852365e81839df992d904d291305d`. Alert triggering, sound/visual effects, configuration, persistence, transitions, and lifecycle remain unclaimed.
 
 The six `Enum.CraftingOrderItemFlags.*` and `Enum.CraftingOrderItemFlagsMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`None=0`, `NpcProvided=1`, `HasEnchantmentData=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`). Focused proof is at `3bacb64a269eecc6c1b74838f256b6e0a4473911`. Flag assignment, enchantment/NPC item semantics, order payload behavior, persistence, transitions, and lifecycle remain unclaimed.
+
+The seven `Enum.CraftingOrderItemType.*` and `Enum.CraftingOrderItemTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup values: added `Item=0`, `Deprecated=4`, and `Currency=5`; changed metadata `MaxValue=5` and `NumValues=6`; removed `NpcProvided` (prior value 4) and `Reagent` (prior value 0) are absent. Focused proof is at `a72ad8574f25a5e7ed6e58065ee5da615a1c2233`, with unchanged `Recraft=1`, `CraftedResult=2`, `RemoveReagent=3`, and metadata `MinValue=0` asserted as context. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle remain unclaimed.
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 

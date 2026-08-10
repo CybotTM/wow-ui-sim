@@ -40894,49 +40894,118 @@
       "id": "added:Enum.CraftingOrderItemType.Currency",
       "symbol": "Enum.CraftingOrderItemType.Currency",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CraftingOrderItemType.Currency to numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order item-type fallback publishes Enum.CraftingOrderItemType.Currency with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact current item-type values, metadata, and absence of removed NpcProvided/Reagent members.",
+          "source_hash": "033a381f0d3d379faab2f09ff06b0787455ab0969b86311d32b4b6f5e07d4a2b"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs::test_patch_12_0_0_crafting_order_item_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemType.Currency as Lua number with exact value 5."
+      ],
+      "commit": "a72ad8574f25a5e7ed6e58065ee5da615a1c2233",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 5, and focused removal checks for superseded item types. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: a72ad8574f25a5e7ed6e58065ee5da615a1c2233."
     },
     {
       "id": "added:Enum.CraftingOrderItemType.Deprecated",
       "symbol": "Enum.CraftingOrderItemType.Deprecated",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CraftingOrderItemType.Deprecated to numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order item-type fallback publishes Enum.CraftingOrderItemType.Deprecated with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact current item-type values, metadata, and absence of removed NpcProvided/Reagent members.",
+          "source_hash": "033a381f0d3d379faab2f09ff06b0787455ab0969b86311d32b4b6f5e07d4a2b"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs::test_patch_12_0_0_crafting_order_item_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemType.Deprecated as Lua number with exact value 4."
+      ],
+      "commit": "a72ad8574f25a5e7ed6e58065ee5da615a1c2233",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 4, and focused removal checks for superseded item types. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: a72ad8574f25a5e7ed6e58065ee5da615a1c2233."
     },
     {
       "id": "added:Enum.CraftingOrderItemType.Item",
       "symbol": "Enum.CraftingOrderItemType.Item",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds Enum.CraftingOrderItemType.Item to numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order item-type fallback publishes Enum.CraftingOrderItemType.Item with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact current item-type values, metadata, and absence of removed NpcProvided/Reagent members.",
+          "source_hash": "033a381f0d3d379faab2f09ff06b0787455ab0969b86311d32b4b6f5e07d4a2b"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs::test_patch_12_0_0_crafting_order_item_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemType.Item as Lua number with exact value 0."
+      ],
+      "commit": "a72ad8574f25a5e7ed6e58065ee5da615a1c2233",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua table/member numeric type, exact value 0, and focused removal checks for superseded item types. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: a72ad8574f25a5e7ed6e58065ee5da615a1c2233."
     },
     {
       "id": "added:Enum.CraftingOrderResult.MissingCurrency",
@@ -73828,33 +73897,79 @@
       "id": "changed:Enum.CraftingOrderItemTypeMeta.MaxValue",
       "symbol": "Enum.CraftingOrderItemTypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source changes Enum.CraftingOrderItemTypeMeta.MaxValue to numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order item-type fallback publishes Enum.CraftingOrderItemTypeMeta.MaxValue with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact current item-type values, metadata, and absence of removed NpcProvided/Reagent members.",
+          "source_hash": "033a381f0d3d379faab2f09ff06b0787455ab0969b86311d32b4b6f5e07d4a2b"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs::test_patch_12_0_0_crafting_order_item_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemTypeMeta.MaxValue as Lua number with exact value 5."
+      ],
+      "commit": "a72ad8574f25a5e7ed6e58065ee5da615a1c2233",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, exact value 5, and focused removal checks for superseded item types. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: a72ad8574f25a5e7ed6e58065ee5da615a1c2233."
     },
     {
       "id": "changed:Enum.CraftingOrderItemTypeMeta.NumValues",
       "symbol": "Enum.CraftingOrderItemTypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source changes Enum.CraftingOrderItemTypeMeta.NumValues to numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order item-type fallback publishes Enum.CraftingOrderItemTypeMeta.NumValues with the checked-in 12.0.0 value.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact current item-type values, metadata, and absence of removed NpcProvided/Reagent members.",
+          "source_hash": "033a381f0d3d379faab2f09ff06b0787455ab0969b86311d32b4b6f5e07d4a2b"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs::test_patch_12_0_0_crafting_order_item_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CraftingOrderItemTypeMeta.NumValues as Lua number with exact value 6."
+      ],
+      "commit": "a72ad8574f25a5e7ed6e58065ee5da615a1c2233",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup metadata publication, Lua table/member numeric type, exact value 6, and focused removal checks for superseded item types. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: a72ad8574f25a5e7ed6e58065ee5da615a1c2233."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.MissingItem",
@@ -86168,33 +86283,79 @@
       "id": "removed:Enum.CraftingOrderItemType.NpcProvided",
       "symbol": "Enum.CraftingOrderItemType.NpcProvided",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source removes Enum.CraftingOrderItemType.NpcProvided, whose prior numeric value was 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order item-type fallback omits removed member Enum.CraftingOrderItemType.NpcProvided.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact current item-type values, metadata, and absence of removed NpcProvided/Reagent members.",
+          "source_hash": "033a381f0d3d379faab2f09ff06b0787455ab0969b86311d32b4b6f5e07d4a2b"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs::test_patch_12_0_0_crafting_order_item_type_enum_values"
+      ],
+      "assertions": [
+        "Does not publish removed member Enum.CraftingOrderItemType.NpcProvided."
+      ],
+      "commit": "a72ad8574f25a5e7ed6e58065ee5da615a1c2233",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of removed member Enum.CraftingOrderItemType.NpcProvided. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: a72ad8574f25a5e7ed6e58065ee5da615a1c2233."
     },
     {
       "id": "removed:Enum.CraftingOrderItemType.Reagent",
       "symbol": "Enum.CraftingOrderItemType.Reagent",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source removes Enum.CraftingOrderItemType.Reagent, whose prior numeric value was 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Runtime crafting-order item-type fallback omits removed member Enum.CraftingOrderItemType.Reagent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact current item-type values, metadata, and absence of removed NpcProvided/Reagent members.",
+          "source_hash": "033a381f0d3d379faab2f09ff06b0787455ab0969b86311d32b4b6f5e07d4a2b"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_item_type_enums.rs::test_patch_12_0_0_crafting_order_item_type_enum_values"
+      ],
+      "assertions": [
+        "Does not publish removed member Enum.CraftingOrderItemType.Reagent."
+      ],
+      "commit": "a72ad8574f25a5e7ed6e58065ee5da615a1c2233",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of removed member Enum.CraftingOrderItemType.Reagent. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle are not claimed. Proof commit: a72ad8574f25a5e7ed6e58065ee5da615a1c2233."
     },
     {
       "id": "removed:Enum.CreateAllAccountData.CreateAllAccountCurrenciesDone",

@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify crafting-order item type
+
+Classified exactly seven retail 12.0.0 `Enum.CraftingOrderItemType.*` and `Enum.CraftingOrderItemTypeMeta.*` rows as best-effort/behavioral: added `Item=0`, `Deprecated=4`, and `Currency=5`; changed metadata `MaxValue=5` and `NumValues=6`; removed `NpcProvided` (prior value 4) and `Reagent` (prior value 0) are absent. Focused proof is at `a72ad8574f25a5e7ed6e58065ee5da615a1c2233`, with unchanged `Recraft=1`, `CraftedResult=2`, `RemoveReagent=3`, and metadata `MinValue=0` asserted as context. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1134 best-effort, 982 evidence-required, 2 exception-requested, and 1292 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify crafting-order item flags
 
 Classified exactly six retail 12.0.0 `Enum.CraftingOrderItemFlags.*` and `Enum.CraftingOrderItemFlagsMeta.*` rows as best-effort/behavioral, bounded to startup enum/metadata numeric publication and exact values (`None=0`, `NpcProvided=1`, `HasEnchantmentData=2`, `MinValue=0`, `MaxValue=2`, `NumValues=3`). Focused proof is at `3bacb64a269eecc6c1b74838f256b6e0a4473911`. Flag assignment, enchantment/NPC item semantics, order payload behavior, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1127 best-effort, 982 evidence-required, 2 exception-requested, and 1299 untriaged** (3410 rows).
