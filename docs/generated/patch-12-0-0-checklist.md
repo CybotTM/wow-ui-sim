@@ -1372,11 +1372,11 @@
 1372. [best-effort] `added:Enum.EditModeEncounterEventsSystemIndicesMeta.MaxValue` — behavioral
 1373. [best-effort] `added:Enum.EditModeEncounterEventsSystemIndicesMeta.MinValue` — behavioral
 1374. [best-effort] `added:Enum.EditModeEncounterEventsSystemIndicesMeta.NumValues` — behavioral
-1375. [untriaged] `added:Enum.EditModePersonalResourceDisplaySetting.HideHealthAndPower` — untriaged
-1376. [untriaged] `added:Enum.EditModePersonalResourceDisplaySetting.OnlyShowInCombat` — untriaged
-1377. [untriaged] `added:Enum.EditModePersonalResourceDisplaySettingMeta.MaxValue` — untriaged
-1378. [untriaged] `added:Enum.EditModePersonalResourceDisplaySettingMeta.MinValue` — untriaged
-1379. [untriaged] `added:Enum.EditModePersonalResourceDisplaySettingMeta.NumValues` — untriaged
+1375. [best-effort] `added:Enum.EditModePersonalResourceDisplaySetting.HideHealthAndPower` — behavioral
+1376. [best-effort] `added:Enum.EditModePersonalResourceDisplaySetting.OnlyShowInCombat` — behavioral
+1377. [best-effort] `added:Enum.EditModePersonalResourceDisplaySettingMeta.MaxValue` — behavioral
+1378. [best-effort] `added:Enum.EditModePersonalResourceDisplaySettingMeta.MinValue` — behavioral
+1379. [best-effort] `added:Enum.EditModePersonalResourceDisplaySettingMeta.NumValues` — behavioral
 1380. [untriaged] `added:Enum.EditModeSystem.DamageMeter` — untriaged
 1381. [untriaged] `added:Enum.EditModeSystem.EncounterEvents` — untriaged
 1382. [untriaged] `added:Enum.EditModeSystem.PersonalResourceDisplay` — untriaged

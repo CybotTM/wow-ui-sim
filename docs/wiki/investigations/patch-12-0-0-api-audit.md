@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1268 best-effort, 982 evidence-required, 2 exception-requested, and 1158 untriaged rows** (3410 total).
+Current manifest totals are **1273 best-effort, 982 evidence-required, 2 exception-requested, and 1153 untriaged rows** (3410 total).
 
 The six retail 12.0.0 `Enum.DamageMeterVisibility.*` and `Enum.DamageMeterVisibilityMeta.*` rows are best-effort/behavioral, bounded to startup enum/metadata publication, Lua numeric type, and exact values (`Always=0`, `InCombat=1`, `Hidden=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`). Focused proof is at `7652c9bbee3fe0f41a924ec47689ae311afa34a0`. Visibility behavior, combat transitions, consumers, persistence, and lifecycle remain unclaimed.
 
@@ -333,3 +333,5 @@ The bounded remaining-removal slice classifies exactly 19 removed runtime API ro
 
 
 The bounded seven-row `C_ChatInfo`/`C_CombatText`/`C_Commentator` API-gap slice classifies all seven rows as evidence-required/unsafe. Current fallbacks are absent, no-op, constant-false, or adjacent-state only and do not model lockdown, emote, active-unit, combat-text, or commentator event state, restrictions, result contracts, transitions, events, ordering, or lifecycle.
+
+The five retail 12.0.0 `Enum.EditModePersonalResourceDisplaySetting.*` and `Enum.EditModePersonalResourceDisplaySettingMeta.*` rows are best-effort/behavioral, bounded to startup exact namespace publication, Lua numeric type, and exact values (`HideHealthAndPower=0`, `OnlyShowInCombat=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `d302a414f6392978a1ccec9997cedf14345907bc`. Root cause: shared runtime used a later fifteen-member namespace with different names (`HideHealth`, `DeprecatedOnlyShowInCombat`, etc.) and metadata `0/14/15`; retail 12.0.0 epoch initialization replaces it with the exact two-member namespace and metadata `0/1/2`. Display behavior, persistence, consumers, transitions, and lifecycle remain unclaimed.
