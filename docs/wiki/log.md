@@ -1,6 +1,10 @@
+## [2026-08-10] investigation | Classify encounter timeline event-source enums
+
+The six retail 12.0.0 `Enum.EncounterTimelineEventSource.*` and `Enum.EncounterTimelineEventSourceMeta.*` rows are best-effort/behavioral: `Encounter=0`, `Script=1`, `EditMode=2`; metadata `MinValue=0`, `MaxValue=2`, `NumValues=3`. Focused proof is at `4fd68742c715f44d43f2afc017816fa198cedc40`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; source routing, event producers, ordering, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1333 best-effort, 982 evidence-required, 2 exception-requested, and 1093 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify encounter-timeline sort-direction enums
 
-The five retail 12.0.0 `Enum.EncounterTimelineEventSortDirection.*` rows are best-effort/behavioral: `Descending=0`, `Ascending=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`. Focused proof is at `16469db1abdc879db2d2c0617a49583d86a7b4b8`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1327 best-effort, 982 evidence-required, 2 exception-requested, and 1099 untriaged** (3410 rows).
+The five retail 12.0.0 `Enum.EncounterTimelineEventSortDirection.*` rows are best-effort/behavioral: `Descending=0`, `Ascending=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`. Focused proof is at `16469db1abdc879db2d2c0617a49583d86a7b4b8`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1333 best-effort, 982 evidence-required, 2 exception-requested, and 1093 untriaged** (3410 rows).
 
 ## [2026-08-10] investigation | Classify encounter events visibility enums
 
