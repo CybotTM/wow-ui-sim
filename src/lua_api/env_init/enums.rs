@@ -53,6 +53,7 @@ Enum.DamageMeterTypeMeta.NumValues = 9
 Enum.EditModeAccountSetting.ShowTotemActionBar = nil
 Enum.EditModeAccountSettingMeta.MaxValue = 32
 Enum.EditModeAccountSettingMeta.NumValues = 33
+Enum.EditModeSystem.TotemActionBar = nil
 Enum.EditModeEncounterEventsSetting.ViewType = nil
 Enum.EditModeEncounterEventsSetting.FlipHorizontally = nil
 Enum.EditModeEncounterEventsSetting.BarWidth = nil
