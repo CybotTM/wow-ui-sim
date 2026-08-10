@@ -1,3 +1,9 @@
+## [2026-08-10] investigation | Correct and classify combat-audio throttle enums
+
+Classified exactly ten retail 12.0.0 `Enum.CombatAudioAlertThrottle.*` and `Enum.CombatAudioAlertThrottleMeta.*` rows as best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata Lua numeric publication, exact values (`Sample=0`, `PlayerHealth=1`, `TargetHealth=2`, `PlayerCast=3`, `TargetCast=4`, `PlayerResource1=5`, `PlayerResource2=6`; metadata `MinValue=0`, `MaxValue=6`, `NumValues=7`), and absence of later-epoch `PlayerHealthSamePercent`, `TargetHealthSamePercent`, `PlayerResource1SamePercent`, and `PlayerResource2SamePercent` members after the retail-12.0.0 override. Focused proof is at `8096cc84cb9e200840507937c0b379bb6f0ca656`. Throttle timing, coalescing, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
+
+Current totals are **1101 best-effort, 982 evidence-required, 2 exception-requested, and 1325 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify combat-audio target-health format enums
 
 Classified exactly twelve retail 12.0.0 `Enum.CombatAudioAlertTargetHealthFormatValues.*` and `Enum.CombatAudioAlertTargetHealthFormatValuesMeta.*` rows as best-effort/behavioral. Focused startup proof at `3c320a56d387e716e299f114972e1c9746abc2f0` is limited to exact Lua numeric publication: `NoHealthFull=0`, `NoHealthNoPercent=1`, `NoHealthNoPercentDiv10=2`, `HealthFull=3`, `HealthNoPercent=4`, `HealthNoPercentDiv10=5`, `TargetFull=6`, `TargetNoPercent=7`, and `TargetNoPercentDiv10=8`, with metadata `MinValue=0`, `MaxValue=8`, and `NumValues=9`. Target-health state detection, percent/divisor formatting, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1091 best-effort, 982 evidence-required, 2 exception-requested, and 1335 untriaged** (3410 rows).
