@@ -341,7 +341,7 @@ pub const EDIT_MODE_ENCOUNTER_EVENTS_SETTING: SeqEnumDef = (
         "BackgroundTransparency",
         "Transparency",
         "Visibility",
-        "TooltipAnchor",
+        "ShowTooltips",
         "ShowTimer",
         "ViewType",
         "FlipHorizontally",
