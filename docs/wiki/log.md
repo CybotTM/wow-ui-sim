@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify combat-audio target-death behavior enums
+
+Classified exactly five retail 12.0.0 `Enum.CombatAudioAlertTargetDeathBehavior.*` and `Enum.CombatAudioAlertTargetDeathBehaviorMeta.*` rows as best-effort/behavioral. Focused startup proof at `a9860867b49d156f3d84535843b7807cb1bf646b` is limited to exact Lua numeric publication: `Default=0`, `SayTargetDead=1`, with metadata `MinValue=0`, `MaxValue=1`, and `NumValues=2`. Target-death detection, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1079 best-effort, 982 evidence-required, 2 exception-requested, and 1347 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify combat-audio target-cast format enums
 
 Classified exactly ten retail 12.0.0 `Enum.CombatAudioAlertTargetCastFormatValues.*` and `Enum.CombatAudioAlertTargetCastFormatValuesMeta.*` rows as best-effort/behavioral. Focused startup proof at `523c8cb79ebdb304c64884ff86a79a19d018d161` is limited to exact Lua numeric publication: `TargetCastingSpellname=0`, `TargetCastSpellname=1`, `CastingSpellname=2`, `CastSpellname=3`, `Casting=4`, `Cast=5`, `Spellname=6`, with metadata `MinValue=0`, `MaxValue=6`, and `NumValues=7`. Target/cast state detection, spell-name formatting, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1074 best-effort, 982 evidence-required, 2 exception-requested, and 1352 untriaged** (3410 rows).

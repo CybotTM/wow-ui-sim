@@ -1077,11 +1077,11 @@
 1077. [best-effort] `added:Enum.CombatAudioAlertTargetCastFormatValuesMeta.MaxValue` — behavioral
 1078. [best-effort] `added:Enum.CombatAudioAlertTargetCastFormatValuesMeta.MinValue` — behavioral
 1079. [best-effort] `added:Enum.CombatAudioAlertTargetCastFormatValuesMeta.NumValues` — behavioral
-1080. [untriaged] `added:Enum.CombatAudioAlertTargetDeathBehavior.Default` — untriaged
-1081. [untriaged] `added:Enum.CombatAudioAlertTargetDeathBehavior.SayTargetDead` — untriaged
-1082. [untriaged] `added:Enum.CombatAudioAlertTargetDeathBehaviorMeta.MaxValue` — untriaged
-1083. [untriaged] `added:Enum.CombatAudioAlertTargetDeathBehaviorMeta.MinValue` — untriaged
-1084. [untriaged] `added:Enum.CombatAudioAlertTargetDeathBehaviorMeta.NumValues` — untriaged
+1080. [best-effort] `added:Enum.CombatAudioAlertTargetDeathBehavior.Default` — behavioral
+1081. [best-effort] `added:Enum.CombatAudioAlertTargetDeathBehavior.SayTargetDead` — behavioral
+1082. [best-effort] `added:Enum.CombatAudioAlertTargetDeathBehaviorMeta.MaxValue` — behavioral
+1083. [best-effort] `added:Enum.CombatAudioAlertTargetDeathBehaviorMeta.MinValue` — behavioral
+1084. [best-effort] `added:Enum.CombatAudioAlertTargetDeathBehaviorMeta.NumValues` — behavioral
 1085. [untriaged] `added:Enum.CombatAudioAlertTargetHealthFormatValues.HealthFull` — untriaged
 1086. [untriaged] `added:Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercent` — untriaged
 1087. [untriaged] `added:Enum.CombatAudioAlertTargetHealthFormatValues.HealthNoPercentDiv10` — untriaged

@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1074 best-effort, 982 evidence-required, 2 exception-requested, and 1352 untriaged rows** (3410 total).
+Current manifest totals are **1079 best-effort, 982 evidence-required, 2 exception-requested, and 1347 untriaged rows** (3410 total).
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
@@ -31,6 +31,8 @@ The nine `Enum.CombatAudioAlertPlayerResourceFormatValues.*` and `Enum.CombatAud
 The eight `Enum.CombatAudioAlertSpecSetting.*` and `Enum.CombatAudioAlertSpecSettingMeta.*` rows are best-effort/behavioral. Focused retail 12.0.0 startup proof at `5ff1d782f8c83aa8d972a608c31b62c6d89e92a6` asserts exact Lua numeric publication: `Resource1Percent=0`, `Resource1Format=1`, `Resource2Percent=2`, `Resource2Format=3`, `SayIfTargeted=4`, with metadata `MinValue=0`, `MaxValue=4`, and `NumValues=5`; it also asserts later-epoch `Resource1Voice`, `Resource1Volume`, `Resource2Voice`, and `Resource2Volume` members are absent after correcting the stale fallback. Combat-audio configuration persistence, narration, resource/target state, sound side effects, transitions, and lifecycle remain unclaimed.
 
 The ten `Enum.CombatAudioAlertTargetCastFormatValues.*` and `Enum.CombatAudioAlertTargetCastFormatValuesMeta.*` rows are best-effort/behavioral. Focused retail 12.0.0 startup proof at `523c8cb79ebdb304c64884ff86a79a19d018d161` asserts exact Lua numeric publication: `TargetCastingSpellname=0`, `TargetCastSpellname=1`, `CastingSpellname=2`, `CastSpellname=3`, `Casting=4`, `Cast=5`, and `Spellname=6`, with metadata `MinValue=0`, `MaxValue=6`, and `NumValues=7`. Target/cast state detection, spell-name formatting, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
+
+The five `Enum.CombatAudioAlertTargetDeathBehavior.*` and `Enum.CombatAudioAlertTargetDeathBehaviorMeta.*` rows are best-effort/behavioral. Focused retail 12.0.0 startup proof at `a9860867b49d156f3d84535843b7807cb1bf646b` asserts exact Lua numeric publication: `Default=0`, `SayTargetDead=1`, with metadata `MinValue=0`, `MaxValue=1`, and `NumValues=2`. Target-death detection, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 
