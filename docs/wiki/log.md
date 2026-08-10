@@ -1,3 +1,7 @@
+## [2026-08-09] investigation | Classify C_TransmogSets APIs
+
+Classified `C_TransmogSets.GetAvailableSets`, `GetSetsFilter`, `IsUsingDefaultSetsFilters`, `SetDefaultSetsFilters`, `SetSetsFilter`, and `C_TransmogSets.TransmogSetInfo.grantAsPrecedingVariant` as evidence-required/unsafe: the temporary surface has empty/default compatibility only, with no wardrobe set inventory, filter state, or variant relationship. API results/mutations/field/event/persistence/lifecycle semantics remain unresolved. Current totals are **892 best-effort, 924 evidence-required, 2 exception-requested, and 1592 untriaged** (3410 rows).
+
 ## [2026-08-09] investigation | Classify C_TooltipComparison.CompareItem
 
 Classified `C_TooltipComparison.CompareItem` as evidence-required/unsafe: no native C_TooltipComparison implementation or comparison-data model exists. Protected-call behavior, item selection, tooltip rendering/anchors/deltas, cleanup, and lifecycle remain unresolved. Current totals are **892 best-effort, 918 evidence-required, 2 exception-requested, and 1598 untriaged** (3410 rows).

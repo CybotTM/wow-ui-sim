@@ -1,13 +1,15 @@
 - The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, and 15 DeprecatedCombatLog wrappers (10 CombatLog, 2 CombatText, 3 DeathRecap), plus 3 InstanceEncounter wrappers, are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The five chat/spell wrappers are separately covered by `patch-tests/patch_12_1/vendor_deprecated_chat_spell.rs::vendor_deprecated_chat_spell_globals_are_published_and_forward`; `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` are classified evidence-required/unsafe because their retained fixture-only compatibility semantics remain unproven.
 # Patch API audit manifest
 
-The current 12.0.0 manifest has **892 best-effort, 918 evidence-required, 2 exception-requested, and 1598 untriaged rows** (3410 total).
+The current 12.0.0 manifest has **892 best-effort, 924 evidence-required, 2 exception-requested, and 1592 untriaged rows** (3410 total).
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 
 `C_Transmog.TransmogApplyWarningInfo.itemLink` and `.text` are evidence-required/unsafe: removed parent structure/fields lack runtime absence and exact removal/load timing proof; source-token coverage is insufficient.
 
 `C_TooltipInfo.GetOutfit`, `GetUnitAuraByAuraInstanceID`, `GetRecipeResultItem`, and `GetRecipeResultItemForOrder` are evidence-required/unsafe: GetOutfit is absent; aura implementation is player-only and ignores filter; recipe methods ignore reagent/order/recraft/level/quality inputs and return static output-item tooltips. Full payload/secret/lifecycle semantics remain unresolved.
+
+`C_TransmogSets.GetAvailableSets`, `GetSetsFilter`, `IsUsingDefaultSetsFilters`, `SetDefaultSetsFilters`, `SetSetsFilter`, and `TransmogSetInfo.grantAsPrecedingVariant` are evidence-required/unsafe: the temporary surface has empty/default compatibility only, with no wardrobe set inventory, filter state, or variant relationship. API results/mutations/field/event/persistence/lifecycle semantics remain unresolved.
 
 `C_TooltipComparison.CompareItem` is evidence-required/unsafe: no native C_TooltipComparison implementation or comparison-data model exists. Protected-call behavior, item selection, tooltip rendering/anchors/deltas, cleanup, and lifecycle remain unresolved.
 

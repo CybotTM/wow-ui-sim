@@ -4,13 +4,15 @@
 
 ## Content
 
-Current manifest totals are **892 best-effort, 918 evidence-required, 2 exception-requested, and 1598 untriaged rows** (3410 total).
+Current manifest totals are **892 best-effort, 924 evidence-required, 2 exception-requested, and 1592 untriaged rows** (3410 total).
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 
 `C_Transmog.TransmogApplyWarningInfo.itemLink` and `.text` are evidence-required/unsafe: removed parent structure/fields lack runtime absence and exact removal/load timing proof; source-token coverage is insufficient.
 
 `C_TooltipInfo.GetOutfit`, `GetUnitAuraByAuraInstanceID`, `GetRecipeResultItem`, and `GetRecipeResultItemForOrder` are evidence-required/unsafe: GetOutfit is absent; aura implementation is player-only and ignores filter; recipe methods ignore reagent/order/recraft/level/quality inputs and return static output-item tooltips. Full payload/secret/lifecycle semantics remain unresolved.
+
+`C_TransmogSets.GetAvailableSets`, `GetSetsFilter`, `IsUsingDefaultSetsFilters`, `SetDefaultSetsFilters`, `SetSetsFilter`, and `TransmogSetInfo.grantAsPrecedingVariant` are evidence-required/unsafe: the temporary surface has empty/default compatibility only, with no wardrobe set inventory, filter state, or variant relationship. API results/mutations/field/event/persistence/lifecycle semantics remain unresolved.
 
 `C_TooltipComparison.CompareItem` is evidence-required/unsafe: no native C_TooltipComparison implementation or comparison-data model exists. Protected-call behavior, item selection, tooltip rendering/anchors/deltas, cleanup, and lifecycle remain unresolved.
 

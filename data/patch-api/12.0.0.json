@@ -23486,97 +23486,211 @@
       "id": "added:C_TransmogSets.GetAvailableSets",
       "symbol": "C_TransmogSets.GetAvailableSets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds a no-argument API returning a required array of TransmogSetInfo values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/transmog_sets_defaults.rs",
+          "summary": "Current temporary surface exposes empty/default compatibility tables only and does not implement this API or field with backing set/filter state.",
+          "source_hash": "950b9b72d88578620ca80a82a0c2d657a29f1197ec53cb481b92561d650af61d"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_transmog_loads.rs",
+          "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
+          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: GetAvailableSets is absent and no wardrobe set inventory exists. Set payloads, availability/collection rules, ordering, updates, events, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_TransmogSets.GetSetsFilter",
       "symbol": "C_TransmogSets.GetSetsFilter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds a luaIndex input and may-return-nothing boolean filter result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/transmog_sets_defaults.rs",
+          "summary": "Current temporary surface exposes empty/default compatibility tables only and does not implement this API or field with backing set/filter state.",
+          "source_hash": "950b9b72d88578620ca80a82a0c2d657a29f1197ec53cb481b92561d650af61d"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_transmog_loads.rs",
+          "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
+          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: GetSetsFilter is absent and no filter state exists. Valid/invalid indices, may-return-nothing behavior, checked values, defaults, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_TransmogSets.IsUsingDefaultSetsFilters",
       "symbol": "C_TransmogSets.IsUsingDefaultSetsFilters",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds a no-argument API returning a required boolean default-filter state.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/transmog_sets_defaults.rs",
+          "summary": "Current temporary surface exposes empty/default compatibility tables only and does not implement this API or field with backing set/filter state.",
+          "source_hash": "950b9b72d88578620ca80a82a0c2d657a29f1197ec53cb481b92561d650af61d"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_transmog_loads.rs",
+          "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
+          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: IsUsingDefaultSetsFilters is absent and no default-filter state exists. Initial value, mutations, reset behavior, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_TransmogSets.SetDefaultSetsFilters",
       "symbol": "C_TransmogSets.SetDefaultSetsFilters",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds a no-argument mutation restoring default set filters.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/transmog_sets_defaults.rs",
+          "summary": "Current temporary surface exposes empty/default compatibility tables only and does not implement this API or field with backing set/filter state.",
+          "source_hash": "950b9b72d88578620ca80a82a0c2d657a29f1197ec53cb481b92561d650af61d"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_transmog_loads.rs",
+          "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
+          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: SetDefaultSetsFilters is absent and no filter mutation model exists. Reset values, idempotence, UI/event propagation, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_TransmogSets.SetSetsFilter",
       "symbol": "C_TransmogSets.SetSetsFilter",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds luaIndex and boolean inputs for mutating a set filter.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/transmog_sets_defaults.rs",
+          "summary": "Current temporary surface exposes empty/default compatibility tables only and does not implement this API or field with backing set/filter state.",
+          "source_hash": "950b9b72d88578620ca80a82a0c2d657a29f1197ec53cb481b92561d650af61d"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_transmog_loads.rs",
+          "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
+          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: SetSetsFilter is absent and no filter mutation model exists. Index validation, checked-state changes, UI/event propagation, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:C_TransmogSets.TransmogSetInfo.grantAsPrecedingVariant",
       "symbol": "C_TransmogSets.TransmogSetInfo.grantAsPrecedingVariant",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds the required boolean grantAsPrecedingVariant field to TransmogSetInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/transmog_sets_defaults.rs",
+          "summary": "Current temporary surface exposes empty/default compatibility tables only and does not implement this API or field with backing set/filter state.",
+          "source_hash": "950b9b72d88578620ca80a82a0c2d657a29f1197ec53cb481b92561d650af61d"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_transmog_loads.rs",
+          "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
+          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: placeholder TransmogSetInfo omits grantAsPrecedingVariant and no set-variant model exists. Field presence/type/value, preceding-variant relationships, collection effects, and lifecycle remain unproven."
     },
     {
       "id": "added:C_Tutorial.GetCombatEventInfo",
