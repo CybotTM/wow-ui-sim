@@ -1,7 +1,9 @@
 - The bounded 12.0.0 vendor-present slice classifies exactly 56 removed legacy global API rows as best-effort/vendor-present using the committed full-LoD `patch-tests/patch_12_1/strict_removals.rs::vendor_deprecated_globals_are_published_and_forward` proof at `a26692e00`. The 35 ActionBar, 3 BattleNet, and 15 DeprecatedCombatLog wrappers (10 CombatLog, 2 CombatText, 3 DeathRecap), plus 3 InstanceEncounter wrappers, are published by Blizzard deprecated addons when `loadDeprecationFallbacks` is enabled; representative forwarding/alias checks prove publication ownership, not full legacy API semantic fidelity. The five chat/spell wrappers are covered by `vendor_deprecated_chat_spell.rs` with focused forwarding checks; `CombatLogAdvanceEntry` and `CombatLogSetCurrentEntry` are classified evidence-required/unsafe because their retained fixture-only compatibility semantics remain unproven.
 # Patch API Audit Manifest
 
-The current 12.0.0 audit totals are **1134 best-effort, 982 evidence-required, 2 exception-requested, and 1292 untriaged occurrences** (3410 total).
+The current 12.0.0 audit totals are **1140 best-effort, 982 evidence-required, 2 exception-requested, and 1286 untriaged occurrences** (3410 total).
+
+The six removed `Enum.ExpansionLandingPageType.*` and `Enum.ExpansionLandingPageTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup absence of `None`, `Dragonflight`, `WarWithin`, and metadata `MinValue`, `MaxValue`, and `NumValues` after the retail-12.0.0 post-compat epoch override. Focused proof is at `54416879b5c6305ed956f347fe0a17e9fb2ccb28`. Landing-page selection, UI behavior, transitions, and lifecycle remain unclaimed.
 
 The five `Enum.CombatAudioAlertType.*` and `Enum.CombatAudioAlertTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Health=0`, `Cast=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `0c51d4c32a8ae89fffdf3ca67bf80d03926496d2`. Health/cast classification behavior, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 

@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **1134 best-effort, 982 evidence-required, 2 exception-requested, and 1292 untriaged rows** (3410 total).
+Current manifest totals are **1140 best-effort, 982 evidence-required, 2 exception-requested, and 1286 untriaged rows** (3410 total).
+
+The six removed `Enum.ExpansionLandingPageType.*` and `Enum.ExpansionLandingPageTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup absence of `None`, `Dragonflight`, `WarWithin`, and metadata `MinValue`, `MaxValue`, and `NumValues` after the retail-12.0.0 post-compat epoch override. Focused proof is at `54416879b5c6305ed956f347fe0a17e9fb2ccb28`. Landing-page selection, UI behavior, transitions, and lifecycle remain unclaimed.
 
 The five `Enum.CombatAudioAlertType.*` and `Enum.CombatAudioAlertTypeMeta.*` rows are best-effort/behavioral, bounded to retail 12.0.0 startup enum/metadata numeric publication and exact values (`Health=0`, `Cast=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`). Focused proof is at `0c51d4c32a8ae89fffdf3ca67bf80d03926496d2`. Health/cast classification behavior, narration, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 

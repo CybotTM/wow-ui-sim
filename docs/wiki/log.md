@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify removed expansion landing-page enums
+
+Classified exactly six removed retail 12.0.0 `Enum.ExpansionLandingPageType.*` and `Enum.ExpansionLandingPageTypeMeta.*` rows as best-effort/behavioral. The retail-12.0.0 post-compat epoch override proves `None`, `Dragonflight`, `WarWithin`, `MinValue`, `MaxValue`, and `NumValues` are absent. Focused proof is at `54416879b5c6305ed956f347fe0a17e9fb2ccb28`; landing-page selection, UI behavior, transitions, and lifecycle remain unclaimed. Current totals are **1140 best-effort, 982 evidence-required, 2 exception-requested, and 1286 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify crafting-order item type
 
 Classified exactly seven retail 12.0.0 `Enum.CraftingOrderItemType.*` and `Enum.CraftingOrderItemTypeMeta.*` rows as best-effort/behavioral: added `Item=0`, `Deprecated=4`, and `Currency=5`; changed metadata `MaxValue=5` and `NumValues=6`; removed `NpcProvided` (prior value 4) and `Reagent` (prior value 0) are absent. Focused proof is at `a72ad8574f25a5e7ed6e58065ee5da615a1c2233`, with unchanged `Recraft=1`, `CraftedResult=2`, `RemoveReagent=3`, and metadata `MinValue=0` asserted as context. Crafting-order item classification, payload behavior, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1134 best-effort, 982 evidence-required, 2 exception-requested, and 1292 untriaged** (3410 rows).

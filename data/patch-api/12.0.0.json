@@ -37582,7 +37582,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerCast with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -37627,7 +37627,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerHealth with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -37672,7 +37672,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource1 with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -37717,7 +37717,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.PlayerResource2 with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -37762,7 +37762,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.Sample with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -37807,7 +37807,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetCast with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -37852,7 +37852,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottle.TargetHealth with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -37897,7 +37897,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MaxValue with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -37942,7 +37942,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.MinValue with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -37987,7 +37987,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
           "summary": "The retail 12.0.0 epoch override publishes Enum.CombatAudioAlertThrottleMeta.NumValues with the exact value and removes later same-percent throttle members.",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c"
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
         },
         {
           "kind": "test",
@@ -40170,7 +40170,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40221,7 +40221,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40272,7 +40272,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40323,7 +40323,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Retail 12.0.0 epoch override removes the two later CooldownViewerAlertEventType members and restores exact four-member metadata."
         },
         {
@@ -40368,7 +40368,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MaxValue with exact numeric value 4."
         },
         {
@@ -40405,7 +40405,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.MinValue with exact numeric value 1."
         },
         {
@@ -40442,7 +40442,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Current retail 12.0.0 startup initialization publishes Enum.CooldownViewerAlertEventTypeMeta.NumValues with exact numeric value 4."
         },
         {
@@ -45723,7 +45723,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -45761,7 +45761,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -45799,7 +45799,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -45837,7 +45837,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Retail API epoch initialization overrides the newer current enum snapshot only for 12.0.0, publishing the one-value EncounterEventFlags table while preserving later epochs."
         },
         {
@@ -54134,7 +54134,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.MaxValue with exact numeric value 262144."
         },
         {
@@ -54172,7 +54172,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.MinValue with exact numeric value 1."
         },
         {
@@ -54210,7 +54210,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/enums.rs",
-          "source_hash": "c071f3c2e70ad9ad69a2d1f2b695adca903988c2d8642f3ac66ad177a7c90f0c",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289",
           "summary": "Current epoch-aware startup enum publication exposes Enum.SecretAspectMeta.NumValues with exact numeric value 24."
         },
         {
@@ -87724,97 +87724,271 @@
       "id": "removed:Enum.ExpansionLandingPageType.Dragonflight",
       "symbol": "Enum.ExpansionLandingPageType.Dragonflight",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source removes Enum.ExpansionLandingPageType.Dragonflight, whose prior numeric value was 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/compat_enums.lua",
+          "summary": "Compatibility fallback previously published the removed ExpansionLandingPageType surface containing Enum.ExpansionLandingPageType.Dragonflight.",
+          "source_hash": "796745ee73edf988d48cf7c7f6ec557cdb321f1c9c251713f7ef6476a4016efc"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageType.Dragonflight from the effective startup surface.",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts all three landing-page members and all three metadata members are absent.",
+          "source_hash": "79f8c4e8d8cb8c8d323055a52c78a14c12103df287d16f3589f9b17f7056e909"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs::test_patch_12_0_0_expansion_landing_page_type_members_are_removed"
+      ],
+      "assertions": [
+        "Does not publish removed member Enum.ExpansionLandingPageType.Dragonflight."
+      ],
+      "commit": "54416879b5c6305ed956f347fe0a17e9fb2ccb28",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of removed member Enum.ExpansionLandingPageType.Dragonflight after the post-compat epoch override. Expansion landing-page selection, UI behavior, transitions, and lifecycle are not claimed. Proof commit: 54416879b5c6305ed956f347fe0a17e9fb2ccb28."
     },
     {
       "id": "removed:Enum.ExpansionLandingPageType.None",
       "symbol": "Enum.ExpansionLandingPageType.None",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source removes Enum.ExpansionLandingPageType.None, whose prior numeric value was 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/compat_enums.lua",
+          "summary": "Compatibility fallback previously published the removed ExpansionLandingPageType surface containing Enum.ExpansionLandingPageType.None.",
+          "source_hash": "796745ee73edf988d48cf7c7f6ec557cdb321f1c9c251713f7ef6476a4016efc"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageType.None from the effective startup surface.",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts all three landing-page members and all three metadata members are absent.",
+          "source_hash": "79f8c4e8d8cb8c8d323055a52c78a14c12103df287d16f3589f9b17f7056e909"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs::test_patch_12_0_0_expansion_landing_page_type_members_are_removed"
+      ],
+      "assertions": [
+        "Does not publish removed member Enum.ExpansionLandingPageType.None."
+      ],
+      "commit": "54416879b5c6305ed956f347fe0a17e9fb2ccb28",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of removed member Enum.ExpansionLandingPageType.None after the post-compat epoch override. Expansion landing-page selection, UI behavior, transitions, and lifecycle are not claimed. Proof commit: 54416879b5c6305ed956f347fe0a17e9fb2ccb28."
     },
     {
       "id": "removed:Enum.ExpansionLandingPageType.WarWithin",
       "symbol": "Enum.ExpansionLandingPageType.WarWithin",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source removes Enum.ExpansionLandingPageType.WarWithin, whose prior numeric value was 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/compat_enums.lua",
+          "summary": "Compatibility fallback previously published the removed ExpansionLandingPageType surface containing Enum.ExpansionLandingPageType.WarWithin.",
+          "source_hash": "796745ee73edf988d48cf7c7f6ec557cdb321f1c9c251713f7ef6476a4016efc"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageType.WarWithin from the effective startup surface.",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts all three landing-page members and all three metadata members are absent.",
+          "source_hash": "79f8c4e8d8cb8c8d323055a52c78a14c12103df287d16f3589f9b17f7056e909"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs::test_patch_12_0_0_expansion_landing_page_type_members_are_removed"
+      ],
+      "assertions": [
+        "Does not publish removed member Enum.ExpansionLandingPageType.WarWithin."
+      ],
+      "commit": "54416879b5c6305ed956f347fe0a17e9fb2ccb28",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of removed member Enum.ExpansionLandingPageType.WarWithin after the post-compat epoch override. Expansion landing-page selection, UI behavior, transitions, and lifecycle are not claimed. Proof commit: 54416879b5c6305ed956f347fe0a17e9fb2ccb28."
     },
     {
       "id": "removed:Enum.ExpansionLandingPageTypeMeta.MaxValue",
       "symbol": "Enum.ExpansionLandingPageTypeMeta.MaxValue",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source removes Enum.ExpansionLandingPageTypeMeta.MaxValue, whose prior numeric value was 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/compat_enums.lua",
+          "summary": "Compatibility fallback previously published the removed ExpansionLandingPageType surface containing Enum.ExpansionLandingPageTypeMeta.MaxValue.",
+          "source_hash": "796745ee73edf988d48cf7c7f6ec557cdb321f1c9c251713f7ef6476a4016efc"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageTypeMeta.MaxValue from the effective startup surface.",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts all three landing-page members and all three metadata members are absent.",
+          "source_hash": "79f8c4e8d8cb8c8d323055a52c78a14c12103df287d16f3589f9b17f7056e909"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs::test_patch_12_0_0_expansion_landing_page_type_members_are_removed"
+      ],
+      "assertions": [
+        "Does not publish removed member Enum.ExpansionLandingPageTypeMeta.MaxValue."
+      ],
+      "commit": "54416879b5c6305ed956f347fe0a17e9fb2ccb28",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of removed member Enum.ExpansionLandingPageTypeMeta.MaxValue after the post-compat epoch override. Expansion landing-page selection, UI behavior, transitions, and lifecycle are not claimed. Proof commit: 54416879b5c6305ed956f347fe0a17e9fb2ccb28."
     },
     {
       "id": "removed:Enum.ExpansionLandingPageTypeMeta.MinValue",
       "symbol": "Enum.ExpansionLandingPageTypeMeta.MinValue",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source removes Enum.ExpansionLandingPageTypeMeta.MinValue, whose prior numeric value was 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/compat_enums.lua",
+          "summary": "Compatibility fallback previously published the removed ExpansionLandingPageType surface containing Enum.ExpansionLandingPageTypeMeta.MinValue.",
+          "source_hash": "796745ee73edf988d48cf7c7f6ec557cdb321f1c9c251713f7ef6476a4016efc"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageTypeMeta.MinValue from the effective startup surface.",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts all three landing-page members and all three metadata members are absent.",
+          "source_hash": "79f8c4e8d8cb8c8d323055a52c78a14c12103df287d16f3589f9b17f7056e909"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs::test_patch_12_0_0_expansion_landing_page_type_members_are_removed"
+      ],
+      "assertions": [
+        "Does not publish removed member Enum.ExpansionLandingPageTypeMeta.MinValue."
+      ],
+      "commit": "54416879b5c6305ed956f347fe0a17e9fb2ccb28",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of removed member Enum.ExpansionLandingPageTypeMeta.MinValue after the post-compat epoch override. Expansion landing-page selection, UI behavior, transitions, and lifecycle are not claimed. Proof commit: 54416879b5c6305ed956f347fe0a17e9fb2ccb28."
     },
     {
       "id": "removed:Enum.ExpansionLandingPageTypeMeta.NumValues",
       "symbol": "Enum.ExpansionLandingPageTypeMeta.NumValues",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source removes Enum.ExpansionLandingPageTypeMeta.NumValues, whose prior numeric value was 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/compat_enums.lua",
+          "summary": "Compatibility fallback previously published the removed ExpansionLandingPageType surface containing Enum.ExpansionLandingPageTypeMeta.NumValues.",
+          "source_hash": "796745ee73edf988d48cf7c7f6ec557cdb321f1c9c251713f7ef6476a4016efc"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "The retail 12.0.0 post-compat epoch override removes Enum.ExpansionLandingPageTypeMeta.NumValues from the effective startup surface.",
+          "source_hash": "57349754ebbe97695de7be180ac1ce64932adfea7a092fa69253878532721289"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts all three landing-page members and all three metadata members are absent.",
+          "source_hash": "79f8c4e8d8cb8c8d323055a52c78a14c12103df287d16f3589f9b17f7056e909"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_landing_page_type_removals.rs::test_patch_12_0_0_expansion_landing_page_type_members_are_removed"
+      ],
+      "assertions": [
+        "Does not publish removed member Enum.ExpansionLandingPageTypeMeta.NumValues."
+      ],
+      "commit": "54416879b5c6305ed956f347fe0a17e9fb2ccb28",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of removed member Enum.ExpansionLandingPageTypeMeta.NumValues after the post-compat epoch override. Expansion landing-page selection, UI behavior, transitions, and lifecycle are not claimed. Proof commit: 54416879b5c6305ed956f347fe0a17e9fb2ccb28."
     },
     {
       "id": "removed:Enum.GossipNpcOption.Placeholder_6",
