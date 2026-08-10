@@ -21,6 +21,7 @@ mod item_collection_secret_aspects;
 mod patch_12_0_0_audit_enums;
 mod patch_12_0_0_chat_combat_audio_enums;
 mod patch_12_0_0_combat_audio_party_percent_enums;
+mod patch_12_0_0_combat_audio_percent_enums;
 mod patch_12_0_0_constants;
 mod patch_12_0_0_cooldown_housing_enums;
 mod patch_12_0_0_small_enums;
