@@ -4,7 +4,9 @@
 
 ## Content
 
-Current manifest totals are **939 best-effort, 969 evidence-required, 2 exception-requested, and 1500 untriaged rows** (3410 total).
+Current manifest totals are **939 best-effort, 972 evidence-required, 2 exception-requested, and 1497 untriaged rows** (3410 total).
+
+`DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
 `C_Tutorial.GetCombatEventInfo` is evidence-required/unsafe: the explicit implementation is a zero-result no-op while the checked-in source provides no output schema; authoritative return semantics, combat state/producer/timing, persistence, and lifecycle remain unresolved.
 

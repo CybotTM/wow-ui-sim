@@ -29360,49 +29360,106 @@
       "id": "added:DAMAGE_METER_COMBAT_SESSION_UPDATED",
       "symbol": "DAMAGE_METER_COMBAT_SESSION_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds DAMAGE_METER_COMBAT_SESSION_UPDATED with Enum.DamageMeterType type and numeric sessionID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no Damage Meter producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_damage_meter_loads.rs",
+          "summary": "Existing Damage Meter coverage proves addon/UI/constants loading only, not event production, payload, reset/session mutation, or timing.",
+          "source_hash": "fc252d9775efb0fe530a6c73992028e39686648b29bba4447135f3dc135cb62d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: DAMAGE_METER_COMBAT_SESSION_UPDATED is registered but has no simulator producer or Damage Meter session/reset state transition. Payload fidelity, emission timing/order, duplicate behavior, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:DAMAGE_METER_CURRENT_SESSION_UPDATED",
       "symbol": "DAMAGE_METER_CURRENT_SESSION_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds DAMAGE_METER_CURRENT_SESSION_UPDATED with no payload arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no Damage Meter producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_damage_meter_loads.rs",
+          "summary": "Existing Damage Meter coverage proves addon/UI/constants loading only, not event production, payload, reset/session mutation, or timing.",
+          "source_hash": "fc252d9775efb0fe530a6c73992028e39686648b29bba4447135f3dc135cb62d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: DAMAGE_METER_CURRENT_SESSION_UPDATED is registered but has no simulator producer or Damage Meter session/reset state transition. Payload fidelity, emission timing/order, duplicate behavior, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:DAMAGE_METER_RESET",
       "symbol": "DAMAGE_METER_RESET",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds DAMAGE_METER_RESET with no payload arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no Damage Meter producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_damage_meter_loads.rs",
+          "summary": "Existing Damage Meter coverage proves addon/UI/constants loading only, not event production, payload, reset/session mutation, or timing.",
+          "source_hash": "fc252d9775efb0fe530a6c73992028e39686648b29bba4447135f3dc135cb62d"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: DAMAGE_METER_RESET is registered but has no simulator producer or Damage Meter session/reset state transition. Payload fidelity, emission timing/order, duplicate behavior, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_STATE_CHANGED",

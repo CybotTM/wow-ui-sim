@@ -884,9 +884,9 @@
 884. [best-effort] `added:CriteriaRequirement` — provenance-only
 885. [evidence-required] `added:CriteriaRequirement.completed` — unsafe
 886. [evidence-required] `added:CriteriaRequirement.requirementText` — unsafe
-887. [untriaged] `added:DAMAGE_METER_COMBAT_SESSION_UPDATED` — untriaged
-888. [untriaged] `added:DAMAGE_METER_CURRENT_SESSION_UPDATED` — untriaged
-889. [untriaged] `added:DAMAGE_METER_RESET` — untriaged
+887. [evidence-required] `added:DAMAGE_METER_COMBAT_SESSION_UPDATED` — unsafe
+888. [evidence-required] `added:DAMAGE_METER_CURRENT_SESSION_UPDATED` — unsafe
+889. [evidence-required] `added:DAMAGE_METER_RESET` — unsafe
 890. [untriaged] `added:ENCOUNTER_STATE_CHANGED` — untriaged
 891. [untriaged] `added:ENCOUNTER_TIMELINE_EVENT_ADDED` — untriaged
 892. [untriaged] `added:ENCOUNTER_TIMELINE_EVENT_BLOCK_STATE_CHANGED` — untriaged

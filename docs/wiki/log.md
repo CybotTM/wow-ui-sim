@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify Damage Meter events
+
+Classified `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` as evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved. Current totals are **939 best-effort, 972 evidence-required, 2 exception-requested, and 1497 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify criteria tracking fields
 
 Classified `CriteriaRequiredValue.criteriaID`, `.requiredValue`, `CriteriaRequirement.completed`, and `.requirementText` as evidence-required/unsafe: the tracking namespace emits nil/empty defaults and has no criteria/requirement payload producer; field/type/value/progress/completion/localization/event/persistence/lifecycle semantics remain unresolved. Current totals are **939 best-effort, 969 evidence-required, 2 exception-requested, and 1500 untriaged** (3410 rows).

@@ -952,9 +952,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `CriteriaRequirement` | best-effort | structure | added | Provenance-only: no runtime behavior claimed. |
 | `CriteriaRequirement.completed` | evidence-required | structure-field | added | Evidence required: no runtime producer populates CriteriaRequirement.completed. Field presence, boolean type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven. |
 | `CriteriaRequirement.requirementText` | evidence-required | structure-field | added | Evidence required: no runtime producer populates CriteriaRequirement.requirementText. Field presence, string type/value fidelity, criteria progress/completion transitions, requirement text/localization, events, persistence, and lifecycle remain unproven. |
-| `DAMAGE_METER_COMBAT_SESSION_UPDATED` | untriaged | event | added | event added in 12.0.0. |
-| `DAMAGE_METER_CURRENT_SESSION_UPDATED` | untriaged | event | added | event added in 12.0.0. |
-| `DAMAGE_METER_RESET` | untriaged | event | added | event added in 12.0.0. |
+| `DAMAGE_METER_COMBAT_SESSION_UPDATED` | evidence-required | event | added | Evidence required: DAMAGE_METER_COMBAT_SESSION_UPDATED is registered but has no simulator producer or Damage Meter session/reset state transition. Payload fidelity, emission timing/order, duplicate behavior, UI refresh, persistence, and lifecycle remain unproven. |
+| `DAMAGE_METER_CURRENT_SESSION_UPDATED` | evidence-required | event | added | Evidence required: DAMAGE_METER_CURRENT_SESSION_UPDATED is registered but has no simulator producer or Damage Meter session/reset state transition. Payload fidelity, emission timing/order, duplicate behavior, UI refresh, persistence, and lifecycle remain unproven. |
+| `DAMAGE_METER_RESET` | evidence-required | event | added | Evidence required: DAMAGE_METER_RESET is registered but has no simulator producer or Damage Meter session/reset state transition. Payload fidelity, emission timing/order, duplicate behavior, UI refresh, persistence, and lifecycle remain unproven. |
 | `ENCOUNTER_STATE_CHANGED` | untriaged | event | added | event added in 12.0.0. |
 | `ENCOUNTER_TIMELINE_EVENT_ADDED` | untriaged | event | added | event added in 12.0.0. |
 | `ENCOUNTER_TIMELINE_EVENT_BLOCK_STATE_CHANGED` | untriaged | event | added | event added in 12.0.0. |
