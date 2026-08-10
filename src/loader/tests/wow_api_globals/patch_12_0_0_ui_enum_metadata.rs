@@ -238,6 +238,62 @@ fn test_patch_12_0_0_ui_global_constant_values() {
 }
 
 #[test]
+fn test_patch_12_0_0_catalog_and_combat_log_constant_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local function check_constant(namespace, name, expected_type, expected_value)
+                    local value = namespace[name]
+                    if type(value) ~= expected_type then
+                        return name .. ":type=" .. type(value)
+                    end
+                    if value ~= expected_value then
+                        return name .. ":value=" .. tostring(value)
+                    end
+                end
+
+                local catalog = Constants.CatalogShopVirtualCurrencyConstants
+                local error_message = check_constant(
+                    catalog, "HEARTHSTEEL_VC_CURRENCY_CODE", "string", "XVV")
+                if error_message then return error_message end
+                error_message = check_constant(
+                    catalog, "TRADERS_TENDER_VC_CURRENCY_CODE", "string", "XWP")
+                if error_message then return error_message end
+
+                local message_limits = Constants.CombatLogMessageLimits
+                error_message = check_constant(
+                    message_limits, "CombatLogDefaultMessageLimit", "number", 300)
+                if error_message then return error_message end
+                error_message = check_constant(
+                    message_limits, "CombatLogMaximumMessageLimit", "number", 1000)
+                if error_message then return error_message end
+
+                local object_masks = Constants.CombatLogObjectMasks
+                local expected_masks = {
+                    COMBATLOG_OBJECT_AFFILIATION_MASK = 15,
+                    COMBATLOG_OBJECT_CONTROL_MASK = 768,
+                    COMBATLOG_OBJECT_REACTION_MASK = 240,
+                    COMBATLOG_OBJECT_SPECIAL_MASK = -65536,
+                    COMBATLOG_OBJECT_TYPE_MASK = 64512,
+                }
+                for name, expected_value in pairs(expected_masks) do
+                    error_message = check_constant(
+                        object_masks, name, "number", expected_value)
+                    if error_message then return error_message end
+                end
+
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "retail 12.0.0 catalog and combat-log constants did not match the source register"
+    );
+}
+
+#[test]
 fn test_patch_12_0_0_cvar_defaults() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
