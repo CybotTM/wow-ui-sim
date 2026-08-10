@@ -1953,8 +1953,8 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.TableSecurityOptionMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TableSecurityOptionMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TableSecurityOptionMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TooltipDataLineType.SpellDescription` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TooltipDataLineType.SpellPassive` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.TooltipDataLineType.SpellDescription` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TooltipDataLineType.SpellPassive` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
 | `Enum.TooltipDataType.Outfit` | best-effort | enum | added | enum added in 12.0.0. |
 | `Enum.TraitNodeEntryType.SpendCapstoneCircle` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TraitNodeEntryType.SpendCapstoneSquare` | untriaged | enum | added | enum added in 12.0.0. |
@@ -1963,21 +1963,21 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.TransmogOutfitDataFlagsMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TransmogOutfitDataFlagsMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TransmogOutfitDataFlagsMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDisplayType.Assigned` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDisplayType.Equipped` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDisplayType.Hidden` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDisplayType.Unassigned` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDisplayTypeMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDisplayTypeMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitDisplayTypeMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitEntryFlags.AutomaticallyAwardedOnLogin` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitEntryFlags.OnlyAvailableDuringEvent` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitEntryFlags.SortedToTopOfList` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitEntryFlags.UseOverrideCostModifier` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitEntryFlags.UseOverrideName` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitEntryFlagsMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitEntryFlagsMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitEntryFlagsMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.TransmogOutfitDisplayType.Assigned` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitDisplayType.Equipped` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitDisplayType.Hidden` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitDisplayType.Unassigned` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitDisplayTypeMeta.MaxValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitDisplayTypeMeta.MinValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitDisplayTypeMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitEntryFlags.AutomaticallyAwardedOnLogin` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitEntryFlags.OnlyAvailableDuringEvent` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitEntryFlags.SortedToTopOfList` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitEntryFlags.UseOverrideCostModifier` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitEntryFlags.UseOverrideName` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitEntryFlagsMeta.MaxValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitEntryFlagsMeta.MinValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitEntryFlagsMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
 | `Enum.TransmogOutfitEntrySource.AutomaticallyAwarded` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TransmogOutfitEntrySource.PlayerPurchased` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TransmogOutfitEntrySource.StampedSource` | untriaged | enum | added | enum added in 12.0.0. |
@@ -2821,8 +2821,8 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.SendAddonMessageResultMeta.NumValues` | untriaged | enum | changed | enum changed in 12.0.0. |
 | `Enum.SurveyDeliveryMomentMeta.MaxValue` | best-effort | enum | changed | enum changed in 12.0.0. |
 | `Enum.SurveyDeliveryMomentMeta.NumValues` | best-effort | enum | changed | enum changed in 12.0.0. |
-| `Enum.TooltipDataLineTypeMeta.MaxValue` | untriaged | enum | changed | enum changed in 12.0.0. |
-| `Enum.TooltipDataLineTypeMeta.NumValues` | untriaged | enum | changed | enum changed in 12.0.0. |
+| `Enum.TooltipDataLineTypeMeta.MaxValue` | best-effort | enum | changed | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
+| `Enum.TooltipDataLineTypeMeta.NumValues` | best-effort | enum | changed | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and family/metadata proof are covered by proof commit 891617e4c; later enum semantics and lifecycle are not claimed. |
 | `Enum.TooltipDataTypeMeta.MaxValue` | best-effort | enum | changed | enum changed in 12.0.0. |
 | `Enum.TooltipDataTypeMeta.NumValues` | best-effort | enum | changed | enum changed in 12.0.0. |
 | `Enum.TraitNodeEntryTypeMeta.MaxValue` | untriaged | enum | changed | enum changed in 12.0.0. |

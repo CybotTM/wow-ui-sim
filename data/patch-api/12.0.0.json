@@ -65035,33 +65035,91 @@
       "id": "added:Enum.TooltipDataLineType.SpellDescription",
       "symbol": "Enum.TooltipDataLineType.SpellDescription",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TooltipDataLineType.SpellDescription with exact value 44.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs replaces the later shared TooltipDataLineType shape and publishes the exact 12.0.0 namespace/metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback contains the later TooltipDataLineType shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_tooltip_data_line_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TooltipDataLineType / Enum.TooltipDataLineTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "37d3f15adceeb15658171852b7f4183a2578335ecd60f667f9b7f570a9171635"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_tooltip_data_line_type_enums.rs::test_patch_12_0_0_tooltip_data_line_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TooltipDataLineType.SpellDescription as Lua number with exact retail 12.0.0 value 44."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TooltipDataLineType.SpellPassive",
       "symbol": "Enum.TooltipDataLineType.SpellPassive",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TooltipDataLineType.SpellPassive with exact value 43.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs replaces the later shared TooltipDataLineType shape and publishes the exact 12.0.0 namespace/metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback contains the later TooltipDataLineType shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_tooltip_data_line_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TooltipDataLineType / Enum.TooltipDataLineTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "37d3f15adceeb15658171852b7f4183a2578335ecd60f667f9b7f570a9171635"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_tooltip_data_line_type_enums.rs::test_patch_12_0_0_tooltip_data_line_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TooltipDataLineType.SpellPassive as Lua number with exact retail 12.0.0 value 43."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TooltipDataType.Outfit",
@@ -65237,241 +65295,676 @@
       "id": "added:Enum.TransmogOutfitDisplayType.Assigned",
       "symbol": "Enum.TransmogOutfitDisplayType.Assigned",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitDisplayType.Assigned with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact four-member TransmogOutfitDisplayType family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitDisplayType / Enum.TransmogOutfitDisplayTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "287f75b519dc80e358a3962b5239785270676e93a2e7b7ef490c243a11558dd8"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs::test_patch_12_0_0_transmog_outfit_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitDisplayType.Assigned as Lua number with exact retail 12.0.0 value 1."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitDisplayType.Equipped",
       "symbol": "Enum.TransmogOutfitDisplayType.Equipped",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitDisplayType.Equipped with exact value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact four-member TransmogOutfitDisplayType family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitDisplayType / Enum.TransmogOutfitDisplayTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "287f75b519dc80e358a3962b5239785270676e93a2e7b7ef490c243a11558dd8"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs::test_patch_12_0_0_transmog_outfit_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitDisplayType.Equipped as Lua number with exact retail 12.0.0 value 2."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitDisplayType.Hidden",
       "symbol": "Enum.TransmogOutfitDisplayType.Hidden",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitDisplayType.Hidden with exact value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact four-member TransmogOutfitDisplayType family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitDisplayType / Enum.TransmogOutfitDisplayTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "287f75b519dc80e358a3962b5239785270676e93a2e7b7ef490c243a11558dd8"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs::test_patch_12_0_0_transmog_outfit_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitDisplayType.Hidden as Lua number with exact retail 12.0.0 value 3."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitDisplayType.Unassigned",
       "symbol": "Enum.TransmogOutfitDisplayType.Unassigned",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitDisplayType.Unassigned with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact four-member TransmogOutfitDisplayType family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitDisplayType / Enum.TransmogOutfitDisplayTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "287f75b519dc80e358a3962b5239785270676e93a2e7b7ef490c243a11558dd8"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs::test_patch_12_0_0_transmog_outfit_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitDisplayType.Unassigned as Lua number with exact retail 12.0.0 value 0."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitDisplayTypeMeta.MaxValue",
       "symbol": "Enum.TransmogOutfitDisplayTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitDisplayTypeMeta.MaxValue with exact value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact four-member TransmogOutfitDisplayType family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitDisplayType / Enum.TransmogOutfitDisplayTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "287f75b519dc80e358a3962b5239785270676e93a2e7b7ef490c243a11558dd8"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs::test_patch_12_0_0_transmog_outfit_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitDisplayTypeMeta.MaxValue as Lua number with exact retail 12.0.0 value 3."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitDisplayTypeMeta.MinValue",
       "symbol": "Enum.TransmogOutfitDisplayTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitDisplayTypeMeta.MinValue with exact value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact four-member TransmogOutfitDisplayType family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitDisplayType / Enum.TransmogOutfitDisplayTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "287f75b519dc80e358a3962b5239785270676e93a2e7b7ef490c243a11558dd8"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs::test_patch_12_0_0_transmog_outfit_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitDisplayTypeMeta.MinValue as Lua number with exact retail 12.0.0 value 0."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitDisplayTypeMeta.NumValues",
       "symbol": "Enum.TransmogOutfitDisplayTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitDisplayTypeMeta.NumValues with exact value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact four-member TransmogOutfitDisplayType family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitDisplayType / Enum.TransmogOutfitDisplayTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "287f75b519dc80e358a3962b5239785270676e93a2e7b7ef490c243a11558dd8"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_display_type_enums.rs::test_patch_12_0_0_transmog_outfit_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitDisplayTypeMeta.NumValues as Lua number with exact retail 12.0.0 value 4."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitEntryFlags.AutomaticallyAwardedOnLogin",
       "symbol": "Enum.TransmogOutfitEntryFlags.AutomaticallyAwardedOnLogin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitEntryFlags.AutomaticallyAwardedOnLogin with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact five-member TransmogOutfitEntryFlags family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitEntryFlags / Enum.TransmogOutfitEntryFlagsMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "3008f832640896e0e1b05ea1f9b338e52f098f54608700da2a11623dbf108815"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs::test_patch_12_0_0_transmog_outfit_entry_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEntryFlags.AutomaticallyAwardedOnLogin as Lua number with exact retail 12.0.0 value 1."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitEntryFlags.OnlyAvailableDuringEvent",
       "symbol": "Enum.TransmogOutfitEntryFlags.OnlyAvailableDuringEvent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitEntryFlags.OnlyAvailableDuringEvent with exact value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact five-member TransmogOutfitEntryFlags family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitEntryFlags / Enum.TransmogOutfitEntryFlagsMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "3008f832640896e0e1b05ea1f9b338e52f098f54608700da2a11623dbf108815"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs::test_patch_12_0_0_transmog_outfit_entry_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEntryFlags.OnlyAvailableDuringEvent as Lua number with exact retail 12.0.0 value 4."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitEntryFlags.SortedToTopOfList",
       "symbol": "Enum.TransmogOutfitEntryFlags.SortedToTopOfList",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitEntryFlags.SortedToTopOfList with exact value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact five-member TransmogOutfitEntryFlags family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitEntryFlags / Enum.TransmogOutfitEntryFlagsMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "3008f832640896e0e1b05ea1f9b338e52f098f54608700da2a11623dbf108815"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs::test_patch_12_0_0_transmog_outfit_entry_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEntryFlags.SortedToTopOfList as Lua number with exact retail 12.0.0 value 8."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitEntryFlags.UseOverrideCostModifier",
       "symbol": "Enum.TransmogOutfitEntryFlags.UseOverrideCostModifier",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitEntryFlags.UseOverrideCostModifier with exact value 16.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact five-member TransmogOutfitEntryFlags family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitEntryFlags / Enum.TransmogOutfitEntryFlagsMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "3008f832640896e0e1b05ea1f9b338e52f098f54608700da2a11623dbf108815"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs::test_patch_12_0_0_transmog_outfit_entry_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEntryFlags.UseOverrideCostModifier as Lua number with exact retail 12.0.0 value 16."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitEntryFlags.UseOverrideName",
       "symbol": "Enum.TransmogOutfitEntryFlags.UseOverrideName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitEntryFlags.UseOverrideName with exact value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact five-member TransmogOutfitEntryFlags family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitEntryFlags / Enum.TransmogOutfitEntryFlagsMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "3008f832640896e0e1b05ea1f9b338e52f098f54608700da2a11623dbf108815"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs::test_patch_12_0_0_transmog_outfit_entry_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEntryFlags.UseOverrideName as Lua number with exact retail 12.0.0 value 2."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitEntryFlagsMeta.MaxValue",
       "symbol": "Enum.TransmogOutfitEntryFlagsMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitEntryFlagsMeta.MaxValue with exact value 16.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact five-member TransmogOutfitEntryFlags family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitEntryFlags / Enum.TransmogOutfitEntryFlagsMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "3008f832640896e0e1b05ea1f9b338e52f098f54608700da2a11623dbf108815"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs::test_patch_12_0_0_transmog_outfit_entry_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEntryFlagsMeta.MaxValue as Lua number with exact retail 12.0.0 value 16."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitEntryFlagsMeta.MinValue",
       "symbol": "Enum.TransmogOutfitEntryFlagsMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitEntryFlagsMeta.MinValue with exact value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact five-member TransmogOutfitEntryFlags family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitEntryFlags / Enum.TransmogOutfitEntryFlagsMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "3008f832640896e0e1b05ea1f9b338e52f098f54608700da2a11623dbf108815"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs::test_patch_12_0_0_transmog_outfit_entry_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEntryFlagsMeta.MinValue as Lua number with exact retail 12.0.0 value 1."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitEntryFlagsMeta.NumValues",
       "symbol": "Enum.TransmogOutfitEntryFlagsMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.TransmogOutfitEntryFlagsMeta.NumValues with exact value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs publishes the exact five-member TransmogOutfitEntryFlags family and matching metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback reflects a later enum shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TransmogOutfitEntryFlags / Enum.TransmogOutfitEntryFlagsMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "3008f832640896e0e1b05ea1f9b338e52f098f54608700da2a11623dbf108815"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_entry_flags_enums.rs::test_patch_12_0_0_transmog_outfit_entry_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitEntryFlagsMeta.NumValues as Lua number with exact retail 12.0.0 value 5."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "added:Enum.TransmogOutfitEntrySource.AutomaticallyAwarded",
@@ -88051,33 +88544,91 @@
       "id": "changed:Enum.TooltipDataLineTypeMeta.MaxValue",
       "symbol": "Enum.TooltipDataLineTypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register changeds Enum.TooltipDataLineTypeMeta.MaxValue with exact value 44. The prior value was 42.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs replaces the later shared TooltipDataLineType shape and publishes the exact 12.0.0 namespace/metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback contains the later TooltipDataLineType shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_tooltip_data_line_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TooltipDataLineType / Enum.TooltipDataLineTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "37d3f15adceeb15658171852b7f4183a2578335ecd60f667f9b7f570a9171635"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_tooltip_data_line_type_enums.rs::test_patch_12_0_0_tooltip_data_line_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TooltipDataLineTypeMeta.MaxValue as Lua number with exact retail 12.0.0 value 44."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "changed:Enum.TooltipDataLineTypeMeta.NumValues",
       "symbol": "Enum.TooltipDataLineTypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register changeds Enum.TooltipDataLineTypeMeta.NumValues with exact value 45. The prior value was 43.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 epoch initialization in src/lua_api/env_init/enums.rs replaces the later shared TooltipDataLineType shape and publishes the exact 12.0.0 namespace/metadata.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The shared missing_enums.lua fallback contains the later TooltipDataLineType shape; the retail-12-0-0 override takes precedence and supplies the tested 12.0.0 family.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_tooltip_data_line_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test for Enum.TooltipDataLineType / Enum.TooltipDataLineTypeMeta asserts the exact complete member set, Lua numeric types, no extras, and exact metadata.",
+          "source_hash": "37d3f15adceeb15658171852b7f4183a2578335ecd60f667f9b7f570a9171635"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_tooltip_data_line_type_enums.rs::test_patch_12_0_0_tooltip_data_line_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TooltipDataLineTypeMeta.NumValues as Lua number with exact retail 12.0.0 value 45."
+      ],
+      "commit": "891617e4c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. shared fallback data reflected a later enum shape while the retail-12-0-0 override now publishes the exact authoritative 12.0.0 family. Enum semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 891617e4c."
     },
     {
       "id": "changed:Enum.TooltipDataTypeMeta.MaxValue",
