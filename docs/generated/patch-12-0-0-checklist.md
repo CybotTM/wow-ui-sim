@@ -1696,11 +1696,11 @@
 1696. [untriaged] `added:Enum.NeighborhoodInitiativeFlagsMeta.MaxValue` — untriaged
 1697. [untriaged] `added:Enum.NeighborhoodInitiativeFlagsMeta.MinValue` — untriaged
 1698. [untriaged] `added:Enum.NeighborhoodInitiativeFlagsMeta.NumValues` — untriaged
-1699. [untriaged] `added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypePool` — untriaged
-1700. [untriaged] `added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypeSingleton` — untriaged
-1701. [untriaged] `added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MaxValue` — untriaged
-1702. [untriaged] `added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MinValue` — untriaged
-1703. [untriaged] `added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.NumValues` — untriaged
+1699. [best-effort] `added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypePool` — behavioral
+1700. [best-effort] `added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypeSingleton` — behavioral
+1701. [best-effort] `added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MaxValue` — behavioral
+1702. [best-effort] `added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MinValue` — behavioral
+1703. [best-effort] `added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.NumValues` — behavioral
 1704. [untriaged] `added:Enum.NeighborhoodInitiativeTaskType.RepeatableFinite` — untriaged
 1705. [untriaged] `added:Enum.NeighborhoodInitiativeTaskType.RepeatableInfinite` — untriaged
 1706. [untriaged] `added:Enum.NeighborhoodInitiativeTaskType.Single` — untriaged

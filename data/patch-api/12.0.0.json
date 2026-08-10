@@ -60473,81 +60473,256 @@
       "id": "added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypePool",
       "symbol": "Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypePool",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypePool with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeNeighborhoodTypes definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2) as Lua numbers with no extras.",
+          "source_hash": "706b2de78e6ae307ffd93ee2f05dde53663bdb26444c4305606151e02d108e97"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypePool with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs::test_patch_12_0_0_neighborhood_initiative_neighborhood_types_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypePool as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact two-member family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, exact complete NeighborhoodInitiativeNeighborhoodTypes family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. Neighborhood initiative selection, assignment, behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypeSingleton",
       "symbol": "Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypeSingleton",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypeSingleton with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeNeighborhoodTypes definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2) as Lua numbers with no extras.",
+          "source_hash": "706b2de78e6ae307ffd93ee2f05dde53663bdb26444c4305606151e02d108e97"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypeSingleton with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs::test_patch_12_0_0_neighborhood_initiative_neighborhood_types_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypeSingleton as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact two-member family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact complete NeighborhoodInitiativeNeighborhoodTypes family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. Neighborhood initiative selection, assignment, behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MaxValue",
       "symbol": "Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MaxValue with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeNeighborhoodTypes definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2) as Lua numbers with no extras.",
+          "source_hash": "706b2de78e6ae307ffd93ee2f05dde53663bdb26444c4305606151e02d108e97"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MaxValue with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs::test_patch_12_0_0_neighborhood_initiative_neighborhood_types_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MaxValue as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact two-member family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, exact complete NeighborhoodInitiativeNeighborhoodTypes family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. Neighborhood initiative selection, assignment, behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MinValue",
       "symbol": "Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeNeighborhoodTypes definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2) as Lua numbers with no extras.",
+          "source_hash": "706b2de78e6ae307ffd93ee2f05dde53663bdb26444c4305606151e02d108e97"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MinValue with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs::test_patch_12_0_0_neighborhood_initiative_neighborhood_types_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact two-member family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact complete NeighborhoodInitiativeNeighborhoodTypes family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. Neighborhood initiative selection, assignment, behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.NumValues",
       "symbol": "Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.NumValues with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching guarded fallback without a retail 12.0.0 correction or competing NeighborhoodInitiativeNeighborhoodTypes definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member NeighborhoodInitiativeNeighborhoodTypes family (NiNeighborhoodTypeSingleton=0, NiNeighborhoodTypePool=1; metadata MinValue=0, MaxValue=1, NumValues=2) as Lua numbers with no extras.",
+          "source_hash": "706b2de78e6ae307ffd93ee2f05dde53663bdb26444c4305606151e02d108e97"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.NumValues with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_neighborhood_types_enums.rs::test_patch_12_0_0_neighborhood_initiative_neighborhood_types_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.NeighborhoodInitiativeNeighborhoodTypesMeta.NumValues as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact two-member family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 2, exact complete NeighborhoodInitiativeNeighborhoodTypes family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. Neighborhood initiative selection, assignment, behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: d02a9a8c94b7d2966b0f319f9f570fe4f23d2bff."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeTaskType.RepeatableFinite",
