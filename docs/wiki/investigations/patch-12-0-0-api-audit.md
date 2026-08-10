@@ -6,7 +6,8 @@ The seven retail 12.0.0 `Enum.EncounterTimelineEventState.*` rows are best-effor
 
 ## Content
 
-Current manifest totals are **1340 best-effort, 982 evidence-required, 2 exception-requested, and 1086 untriaged rows** (3410 total).
+Current manifest totals are **1349 best-effort, 982 evidence-required, 2 exception-requested, and 1077 untriaged rows** (3410 total).
+The nine retail 12.0.0 `Enum.EncounterTimelineIconSet.*` and `Enum.EncounterTimelineIconSetMeta.*` rows are best-effort/behavioral: `TankAlert=1, HealerAlert=2, DamageAlert=3, Deadly=4, Dispel=5, Enrage=6`; metadata `MinValue=1, MaxValue=6, NumValues=6`. Focused proof is at `061aabfece4c8efb103100e343f1d1b648f5b151`; it asserts the exact complete set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; icon selection, rendering, timeline behavior, consumers, persistence, and lifecycle remain unclaimed.
 
 The five retail 12.0.0 `Enum.EncounterTimelineEventSortDirection.*` rows are best-effort/behavioral: `Descending=0`, `Ascending=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`. Focused proof is at `16469db1abdc879db2d2c0617a49583d86a7b4b8`; it asserts the exact complete member set, Lua numeric types, no extras, and metadata. No runtime drift was found. Claims are bounded to startup publication and exact values/metadata; sorting behavior, order semantics, consumers, persistence, transitions, and lifecycle remain unclaimed.
 
