@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify combat-audio party-percent enums
+
+Classified the 14 `Enum.CombatAudioAlertPartyPercentValues.*` and `Enum.CombatAudioAlertPartyPercentValuesMeta.*` rows as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; combat-audio threshold behavior, triggers, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1014 best-effort, 982 evidence-required, 2 exception-requested, and 1412 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify chat-lockdown and combat-audio enums
 
 Classified the three `Enum.ChatMessagingLockdownReason.*`, three `Enum.ChatMessagingLockdownReasonMeta.*`, three `Enum.CombatAudioAlertCastState.*`, and three `Enum.CombatAudioAlertCastStateMeta.*` rows as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; chat-lockdown enforcement, secret/taint behavior, errors, and lifecycle; combat-audio triggers, configuration, sound side effects, and lifecycle remain unclaimed. Current totals are **1000 best-effort, 982 evidence-required, 2 exception-requested, and 1426 untriaged** (3410 rows).

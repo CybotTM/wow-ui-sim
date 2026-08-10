@@ -4,7 +4,7 @@
 
 ## Content
 
-Current manifest totals are **1000 best-effort, 982 evidence-required, 2 exception-requested, and 1426 untriaged rows** (3410 total).
+Current manifest totals are **1014 best-effort, 982 evidence-required, 2 exception-requested, and 1412 untriaged rows** (3410 total).
 
 `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` are evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved.
 
@@ -19,6 +19,8 @@ The four `Enum.AccountDataUpdateStatus.*`, three `Enum.AddOnRestrictionState.*`,
 The 20 `Enum.BulkPurchaseResult*` and `Enum.BulkRefundResult*` rows are best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; purchase/refund transaction state, services, side effects, errors, and lifecycle remain unclaimed.
 
 The three `Enum.ChatMessagingLockdownReason.*`, three `Enum.ChatMessagingLockdownReasonMeta.*`, three `Enum.CombatAudioAlertCastState.*`, and three `Enum.CombatAudioAlertCastStateMeta.*` rows are best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; chat-lockdown enforcement, secret/taint behavior, errors, and lifecycle; combat-audio triggers, configuration, sound side effects, and lifecycle remain unclaimed.
+
+The 14 `Enum.CombatAudioAlertPartyPercentValues.*` and `Enum.CombatAudioAlertPartyPercentValuesMeta.*` rows are best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; combat-audio threshold behavior, triggers, configuration, sound side effects, transitions, and lifecycle remain unclaimed.
 
 `C_TaskQuest.GetQuestUIWidgetSetByType` is evidence-required/unsafe: explicit implementation produces synthetic widget-set IDs from static world-quest fixtures; authoritative per-quest/type mapping, enum/nil behavior, refresh/widget/event/persistence/lifecycle remain unresolved.
 
