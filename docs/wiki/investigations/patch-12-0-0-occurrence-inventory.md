@@ -2032,12 +2032,12 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.TransmogOutfitSlotErrorMeta.MaxValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, exact numeric metadata, and complete family proof are covered by proof commit 0e81d67ea; slot-error semantics and lifecycle are not claimed. |
 | `Enum.TransmogOutfitSlotErrorMeta.MinValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, exact numeric metadata, and complete family proof are covered by proof commit 0e81d67ea; slot-error semantics and lifecycle are not claimed. |
 | `Enum.TransmogOutfitSlotErrorMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, exact numeric metadata, and complete family proof are covered by proof commit 0e81d67ea; slot-error semantics and lifecycle are not claimed. |
-| `Enum.TransmogOutfitSlotFlags.CanHaveIllusions` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitSlotFlags.CannotBeHidden` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitSlotFlags.IsSecondarySlot` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitSlotFlagsMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitSlotFlagsMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitSlotFlagsMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.TransmogOutfitSlotFlags.CanHaveIllusions` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and TransmogOutfitSlotFlags family/metadata proof are covered by proof commit 86b0e4cb2; slot-flag semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitSlotFlags.CannotBeHidden` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and TransmogOutfitSlotFlags family/metadata proof are covered by proof commit 86b0e4cb2; slot-flag semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitSlotFlags.IsSecondarySlot` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and TransmogOutfitSlotFlags family/metadata proof are covered by proof commit 86b0e4cb2; slot-flag semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitSlotFlagsMeta.MaxValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and TransmogOutfitSlotFlags family/metadata proof are covered by proof commit 86b0e4cb2; slot-flag semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitSlotFlagsMeta.MinValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and TransmogOutfitSlotFlags family/metadata proof are covered by proof commit 86b0e4cb2; slot-flag semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitSlotFlagsMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and TransmogOutfitSlotFlags family/metadata proof are covered by proof commit 86b0e4cb2; slot-flag semantics and lifecycle are not claimed. |
 | `Enum.TransmogOutfitSlotMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TransmogOutfitSlotMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TransmogOutfitSlotMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
