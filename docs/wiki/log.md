@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify DungeonEncounterFlags enums
+
+Classified exactly thirteen retail 12.0.0 `Enum.DungeonEncounterFlags.*` and `Enum.DungeonEncounterFlagsMeta.*` rows as best-effort/behavioral: `StickyNews=1`, `GuildNews=2`, `RaidLockPlayers=4`, `AutoEnd=8`, `Cosmetic=16`, `Unused=32`, `HideUntilCompleted=64`, `NoAutoStart=128`, `IgnoreSpawnLimit=256`, `DisableEncounterEvents=512`; metadata `MinValue=1`, `MaxValue=512`, and `NumValues=10`. Evidence is bounded to startup enum/metadata publication, Lua numeric type, and exact values. Focused proof is at `9084f476893fd4be8275e05ac1c5f38e185bdb44`. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle remain unclaimed. Current totals are **1211 best-effort, 982 evidence-required, 2 exception-requested, and 1215 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify DamageMeterVisibility enums
 
 Classified exactly six retail 12.0.0 `Enum.DamageMeterVisibility.*` and `Enum.DamageMeterVisibilityMeta.*` rows as best-effort/behavioral: `Always=0`, `InCombat=1`, `Hidden=2`; metadata `MinValue=0`, `MaxValue=2`, and `NumValues=3`. Evidence is bounded to startup enum/metadata publication, Lua numeric type, and exact values. Focused proof is at `7652c9bbee3fe0f41a924ec47689ae311afa34a0`. Visibility behavior, combat transitions, consumers, persistence, and lifecycle remain unclaimed. Current totals are **1198 best-effort, 982 evidence-required, 2 exception-requested, and 1228 untriaged** (3410 rows).

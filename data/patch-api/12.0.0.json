@@ -45472,209 +45472,508 @@
       "id": "added:Enum.DungeonEncounterFlags.AutoEnd",
       "symbol": "Enum.DungeonEncounterFlags.AutoEnd",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.AutoEnd with numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.AutoEnd with numeric value 8 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.AutoEnd as Lua number with exact value 8."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 8 for Enum.DungeonEncounterFlags.AutoEnd. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.Cosmetic",
       "symbol": "Enum.DungeonEncounterFlags.Cosmetic",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.Cosmetic with numeric value 16.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.Cosmetic with numeric value 16 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.Cosmetic as Lua number with exact value 16."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 16 for Enum.DungeonEncounterFlags.Cosmetic. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.DisableEncounterEvents",
       "symbol": "Enum.DungeonEncounterFlags.DisableEncounterEvents",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.DisableEncounterEvents with numeric value 512.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.DisableEncounterEvents with numeric value 512 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.DisableEncounterEvents as Lua number with exact value 512."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 512 for Enum.DungeonEncounterFlags.DisableEncounterEvents. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.GuildNews",
       "symbol": "Enum.DungeonEncounterFlags.GuildNews",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.GuildNews with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.GuildNews with numeric value 2 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.GuildNews as Lua number with exact value 2."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 2 for Enum.DungeonEncounterFlags.GuildNews. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.HideUntilCompleted",
       "symbol": "Enum.DungeonEncounterFlags.HideUntilCompleted",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.HideUntilCompleted with numeric value 64.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.HideUntilCompleted with numeric value 64 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.HideUntilCompleted as Lua number with exact value 64."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 64 for Enum.DungeonEncounterFlags.HideUntilCompleted. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.IgnoreSpawnLimit",
       "symbol": "Enum.DungeonEncounterFlags.IgnoreSpawnLimit",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.IgnoreSpawnLimit with numeric value 256.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.IgnoreSpawnLimit with numeric value 256 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.IgnoreSpawnLimit as Lua number with exact value 256."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 256 for Enum.DungeonEncounterFlags.IgnoreSpawnLimit. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.NoAutoStart",
       "symbol": "Enum.DungeonEncounterFlags.NoAutoStart",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.NoAutoStart with numeric value 128.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.NoAutoStart with numeric value 128 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.NoAutoStart as Lua number with exact value 128."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 128 for Enum.DungeonEncounterFlags.NoAutoStart. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.RaidLockPlayers",
       "symbol": "Enum.DungeonEncounterFlags.RaidLockPlayers",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.RaidLockPlayers with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.RaidLockPlayers with numeric value 4 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.RaidLockPlayers as Lua number with exact value 4."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 4 for Enum.DungeonEncounterFlags.RaidLockPlayers. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.StickyNews",
       "symbol": "Enum.DungeonEncounterFlags.StickyNews",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.StickyNews with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.StickyNews with numeric value 1 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.StickyNews as Lua number with exact value 1."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DungeonEncounterFlags.StickyNews. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlags.Unused",
       "symbol": "Enum.DungeonEncounterFlags.Unused",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlags.Unused with numeric value 32.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlags.Unused with numeric value 32 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlags.Unused as Lua number with exact value 32."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 32 for Enum.DungeonEncounterFlags.Unused. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlagsMeta.MaxValue",
       "symbol": "Enum.DungeonEncounterFlagsMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlagsMeta.MaxValue with numeric value 512.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlagsMeta.MaxValue with numeric value 512 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlagsMeta.MaxValue as Lua number with exact value 512."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 512 for Enum.DungeonEncounterFlagsMeta.MaxValue. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlagsMeta.MinValue",
       "symbol": "Enum.DungeonEncounterFlagsMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlagsMeta.MinValue with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlagsMeta.MinValue with numeric value 1 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlagsMeta.MinValue as Lua number with exact value 1."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 1 for Enum.DungeonEncounterFlagsMeta.MinValue. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterFlagsMeta.NumValues",
       "symbol": "Enum.DungeonEncounterFlagsMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds Enum.DungeonEncounterFlagsMeta.NumValues with numeric value 10.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current generated enum surface publishes Enum.DungeonEncounterFlagsMeta.NumValues with numeric value 10 when the namespace is absent.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts DungeonEncounterFlags members and metadata are Lua numbers with exact values.",
+          "source_hash": "a08f9fed7f91fbab55992d69935d4b60cc90417600f6daed447c9648c571f273"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_dungeon_encounter_flags_enums.rs::test_patch_12_0_0_dungeon_encounter_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.DungeonEncounterFlagsMeta.NumValues as Lua number with exact value 10."
+      ],
+      "commit": "9084f476893fd4be8275e05ac1c5f38e185bdb44",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup enum publication, Lua numeric type, and exact value 10 for Enum.DungeonEncounterFlagsMeta.NumValues. Dungeon-encounter flag interpretation, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 9084f476893fd4be8275e05ac1c5f38e185bdb44."
     },
     {
       "id": "added:Enum.DungeonEncounterTriggerType.Invalid",
