@@ -23752,7 +23752,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -23817,7 +23817,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -23858,7 +23858,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -23899,7 +23899,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -23940,7 +23940,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -23981,7 +23981,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24022,7 +24022,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24063,7 +24063,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24104,7 +24104,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24145,7 +24145,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24186,7 +24186,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24227,7 +24227,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24268,7 +24268,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24309,7 +24309,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24350,7 +24350,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24391,7 +24391,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
@@ -24432,7 +24432,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/ui_widget_manager_defaults.rs",
           "summary": "Temporary UI widget defaults cover unrelated power-bar behavior and provide no Prey Hunt state or fields.",
-          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab46c3e9c3b2cc617a"
+          "source_hash": "618b6fd15177f52c2262450300587d99746e64264abfab3ac4c3e9c3b2cc617a"
         },
         {
           "kind": "test",
