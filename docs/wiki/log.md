@@ -1,3 +1,7 @@
+## [2026-08-10] investigation | Classify combat-audio player-cast format enums
+
+Classified the eight `Enum.CombatAudioAlertPlayerCastFormatValues.*` and `Enum.CombatAudioAlertPlayerCastFormatValuesMeta.*` rows as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; narration, cast detection, spell-name formatting, configuration, sound side effects, and lifecycle remain unclaimed. Current totals are **1031 best-effort, 982 evidence-required, 2 exception-requested, and 1395 untriaged** (3410 rows).
+
 ## [2026-08-10] investigation | Classify combat-audio party-percent enums
 
 Classified the 14 `Enum.CombatAudioAlertPartyPercentValues.*` and `Enum.CombatAudioAlertPartyPercentValuesMeta.*` rows, plus the nine `Enum.CombatAudioAlertPercentValues.*` and `Enum.CombatAudioAlertPercentValuesMeta.*` rows, as best-effort/behavioral. Evidence is limited to exact startup enum/metadata numeric publication and values; combat-audio threshold behavior, triggers, configuration, sound side effects, transitions, and lifecycle remain unclaimed. Current totals are **1023 best-effort, 982 evidence-required, 2 exception-requested, and 1403 untriaged** (3410 rows).
