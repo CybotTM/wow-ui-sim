@@ -53760,257 +53760,817 @@
       "id": "added:Enum.ExpansionLevel.BattleForAzeroth",
       "symbol": "Enum.ExpansionLevel.BattleForAzeroth",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.BattleForAzeroth with numeric value 7.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.BattleForAzeroth with numeric value 7.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.BattleForAzeroth as a Lua number with exact retail 12.0.0 value 7; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 7, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.BurningCrusade",
       "symbol": "Enum.ExpansionLevel.BurningCrusade",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.BurningCrusade with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.BurningCrusade with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.BurningCrusade as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 1, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.Cataclysm",
       "symbol": "Enum.ExpansionLevel.Cataclysm",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.Cataclysm with numeric value 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.Cataclysm with numeric value 3.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.Cataclysm as a Lua number with exact retail 12.0.0 value 3; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 3, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.Draenor",
       "symbol": "Enum.ExpansionLevel.Draenor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.Draenor with numeric value 5.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.Draenor with numeric value 5.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.Draenor as a Lua number with exact retail 12.0.0 value 5; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 5, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.Dragonflight",
       "symbol": "Enum.ExpansionLevel.Dragonflight",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.Dragonflight with numeric value 9.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.Dragonflight with numeric value 9.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.Dragonflight as a Lua number with exact retail 12.0.0 value 9; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 9, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.LastTitan",
       "symbol": "Enum.ExpansionLevel.LastTitan",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.LastTitan with numeric value 12.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.LastTitan with numeric value 12.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.LastTitan as a Lua number with exact retail 12.0.0 value 12; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 12, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.Legion",
       "symbol": "Enum.ExpansionLevel.Legion",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.Legion with numeric value 6.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.Legion with numeric value 6.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.Legion as a Lua number with exact retail 12.0.0 value 6; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 6, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.Midnight",
       "symbol": "Enum.ExpansionLevel.Midnight",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.Midnight with numeric value 11.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.Midnight with numeric value 11.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.Midnight as a Lua number with exact retail 12.0.0 value 11; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 11, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.MistsOfPandaria",
       "symbol": "Enum.ExpansionLevel.MistsOfPandaria",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.MistsOfPandaria with numeric value 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.MistsOfPandaria with numeric value 4.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.MistsOfPandaria as a Lua number with exact retail 12.0.0 value 4; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 4, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.None",
       "symbol": "Enum.ExpansionLevel.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.None with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.None with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.None as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.Northrend",
       "symbol": "Enum.ExpansionLevel.Northrend",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.Northrend with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.Northrend with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.Northrend as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 2, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.Shadowlands",
       "symbol": "Enum.ExpansionLevel.Shadowlands",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.Shadowlands with numeric value 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.Shadowlands with numeric value 8.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.Shadowlands as a Lua number with exact retail 12.0.0 value 8; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 8, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevel.WarWithin",
       "symbol": "Enum.ExpansionLevel.WarWithin",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevel.WarWithin with numeric value 10.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevel.WarWithin with numeric value 10.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevel.WarWithin as a Lua number with exact retail 12.0.0 value 10; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 10, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevelMeta.MaxValue",
       "symbol": "Enum.ExpansionLevelMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevelMeta.MaxValue with numeric value 12.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevelMeta.MaxValue with numeric value 12.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevelMeta.MaxValue as a Lua number with exact retail 12.0.0 value 12; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 12, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevelMeta.MinValue",
       "symbol": "Enum.ExpansionLevelMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevelMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevelMeta.MinValue with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevelMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 0, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.ExpansionLevelMeta.NumValues",
       "symbol": "Enum.ExpansionLevelMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source adds added:Enum.ExpansionLevelMeta.NumValues with numeric value 13.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) and metadata MinValue=0, MaxValue=12, NumValues=13; no explicit competing ExpansionLevel publication overrides it.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the matching fallback data without a retail 12.0.0 correction or competing ExpansionLevel definition.",
+          "source_hash": "b7c214e2115a1d08143be085c226d5f998b44f58a56f632b3a4790f76e3ef7e3"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs",
+          "summary": "The focused startup test asserts the exact complete 13-member ExpansionLevel family (None=0, BurningCrusade=1, Northrend=2, Cataclysm=3, MistsOfPandaria=4, Draenor=5, Legion=6, BattleForAzeroth=7, Shadowlands=8, Dragonflight=9, WarWithin=10, Midnight=11, LastTitan=12) as Lua numbers with metadata MinValue=0, MaxValue=12, NumValues=13.",
+          "source_hash": "1c02aa5c7ef23db9ef453c191cee6c2aff2abca5496b6c14da95d1644b411418"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.ExpansionLevelMeta.NumValues with numeric value 13.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_expansion_level_enums.rs::test_patch_12_0_0_expansion_level_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.ExpansionLevelMeta.NumValues as a Lua number with exact retail 12.0.0 value 13; the focused namespace test also requires the exact 13-member family and metadata MinValue=0, MaxValue=12, NumValues=13."
+      ],
+      "commit": "fd593d5fb9dc3ad14114da7e9fff0709a345e7ea",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact value 13, exact complete ExpansionLevel family membership, and metadata MinValue=0, MaxValue=12, NumValues=13. Expansion progression, availability, gameplay behavior, consumers, persistence, transitions, and lifecycle are not claimed. No runtime drift; guarded fallback is authoritative. Proof commit: fd593d5fb9dc3ad14114da7e9fff0709a345e7ea."
     },
     {
       "id": "added:Enum.FontStringScaleAnimationMode.FontSize",
