@@ -27,6 +27,7 @@ mod patch_12_0_0_combat_audio_player_health_format_enums;
 mod patch_12_0_0_combat_audio_player_resource_format_enums;
 mod patch_12_0_0_combat_audio_say_if_targeted_enums;
 mod patch_12_0_0_combat_audio_spec_setting_enums;
+mod patch_12_0_0_combat_audio_target_cast_format_enums;
 mod patch_12_0_0_constants;
 mod patch_12_0_0_cooldown_housing_enums;
 mod patch_12_0_0_small_enums;
