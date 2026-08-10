@@ -1,6 +1,10 @@
 ## [2026-08-10] investigation | Classify Damage Meter events
 
-Classified `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` as evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved. Current totals are **939 best-effort, 972 evidence-required, 2 exception-requested, and 1497 untriaged** (3410 rows).
+Classified `DAMAGE_METER_COMBAT_SESSION_UPDATED`, `DAMAGE_METER_CURRENT_SESSION_UPDATED`, and `DAMAGE_METER_RESET` as evidence-required/unsafe: event names are registered, but no Damage Meter session/reset producer or state/timing model exists. Payload/order/duplicates, UI refresh, persistence, and lifecycle semantics remain unresolved. Current totals are **939 best-effort, 982 evidence-required, 2 exception-requested, and 1487 untriaged** (3410 rows).
+
+## [2026-08-10] investigation | Classify encounter timeline events
+
+Classified `ENCOUNTER_STATE_CHANGED`, the eight `ENCOUNTER_TIMELINE_*` events, and `ENCOUNTER_WARNING` as evidence-required/unsafe: names are registered and addons load, but no encounter timeline/warning producer or state machine exists. Payloads, synchronous/unique/delayed timing, order, post-dispatch query state, UI refresh, persistence, and lifecycle semantics remain unresolved. Current totals are **939 best-effort, 982 evidence-required, 2 exception-requested, and 1487 untriaged** (3410 rows).
 
 ## [2026-08-10] investigation | Classify criteria tracking fields
 

@@ -29465,161 +29465,351 @@
       "id": "added:ENCOUNTER_STATE_CHANGED",
       "symbol": "ENCOUNTER_STATE_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_STATE_CHANGED with boolean isInProgress.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_timeline_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_STATE_CHANGED is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_TIMELINE_EVENT_ADDED",
       "symbol": "ENCOUNTER_TIMELINE_EVENT_ADDED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_TIMELINE_EVENT_ADDED with EncounterTimelineEventInfo eventInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_timeline_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_TIMELINE_EVENT_ADDED is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_TIMELINE_EVENT_BLOCK_STATE_CHANGED",
       "symbol": "ENCOUNTER_TIMELINE_EVENT_BLOCK_STATE_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_TIMELINE_EVENT_BLOCK_STATE_CHANGED with numeric eventID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_timeline_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_TIMELINE_EVENT_BLOCK_STATE_CHANGED is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_TIMELINE_EVENT_HIGHLIGHT",
       "symbol": "ENCOUNTER_TIMELINE_EVENT_HIGHLIGHT",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_TIMELINE_EVENT_HIGHLIGHT with numeric eventID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_timeline_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_TIMELINE_EVENT_HIGHLIGHT is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_TIMELINE_EVENT_REMOVED",
       "symbol": "ENCOUNTER_TIMELINE_EVENT_REMOVED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_TIMELINE_EVENT_REMOVED with numeric eventID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_timeline_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_TIMELINE_EVENT_REMOVED is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED",
       "symbol": "ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED with numeric eventID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_timeline_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_TIMELINE_EVENT_TRACK_CHANGED",
       "symbol": "ENCOUNTER_TIMELINE_EVENT_TRACK_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_TIMELINE_EVENT_TRACK_CHANGED with numeric eventID.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_timeline_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_TIMELINE_EVENT_TRACK_CHANGED is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_TIMELINE_LAYOUT_UPDATED",
       "symbol": "ENCOUNTER_TIMELINE_LAYOUT_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_TIMELINE_LAYOUT_UPDATED with no payload arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_timeline_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_TIMELINE_LAYOUT_UPDATED is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_TIMELINE_STATE_UPDATED",
       "symbol": "ENCOUNTER_TIMELINE_STATE_UPDATED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_TIMELINE_STATE_UPDATED with no payload arguments.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_timeline_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_TIMELINE_STATE_UPDATED is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:ENCOUNTER_WARNING",
       "symbol": "ENCOUNTER_WARNING",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in source adds ENCOUNTER_WARNING with EncounterWarningInfo encounterWarningInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Event registry accepts this event name but provides no encounter timeline/warning producer, state transition, payload construction, or timing.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/blizzard_encounter_warnings_loads.rs",
+          "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
+          "source_hash": "ccb3f0762819380f219f4350da58cd9eb785d5f7366dcd081a40754c1288115e"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: ENCOUNTER_WARNING is registered but has no simulator encounter timeline/warning producer or state-machine transition. Payload fidelity, synchronous/unique/delayed timing where applicable, ordering, duplicate behavior, query state after dispatch, UI refresh, persistence, and lifecycle remain unproven."
     },
     {
       "id": "added:Enum.AccountDataUpdateStatus.Corrupt",
