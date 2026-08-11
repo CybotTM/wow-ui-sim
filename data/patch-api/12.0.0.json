@@ -66293,113 +66293,400 @@
       "id": "added:Enum.PreyHuntProgressState.Cold",
       "symbol": "Enum.PreyHuntProgressState.Cold",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete PreyHuntProgressState family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit PREY_HUNT_PROGRESS_STATE publication provides Cold=0, Warm=1, Hot=2, Final=3.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching PreyHuntProgressState metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "86819b40048e8f3a1f6a97696e36f8067c0cbc70c7b0251d373cec7491601e78"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 PreyHuntProgressState values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs::test_patch_12_0_0_prey_hunt_progress_state_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.PreyHuntProgressState family as Lua numbers with exact values Cold=0, Warm=1, Hot=2, Final=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "f4ddf6457",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.PreyHuntProgressState family, exact Lua numeric values/types, no extras, and metadata. Explicit combat-system enum data is authoritative for members; guarded fallback metadata matches. No prey-hunt progression semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: f4ddf6457."
     },
     {
       "id": "added:Enum.PreyHuntProgressState.Final",
       "symbol": "Enum.PreyHuntProgressState.Final",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete PreyHuntProgressState family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit PREY_HUNT_PROGRESS_STATE publication provides Cold=0, Warm=1, Hot=2, Final=3.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching PreyHuntProgressState metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "86819b40048e8f3a1f6a97696e36f8067c0cbc70c7b0251d373cec7491601e78"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 PreyHuntProgressState values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs::test_patch_12_0_0_prey_hunt_progress_state_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.PreyHuntProgressState family as Lua numbers with exact values Cold=0, Warm=1, Hot=2, Final=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "f4ddf6457",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.PreyHuntProgressState family, exact Lua numeric values/types, no extras, and metadata. Explicit combat-system enum data is authoritative for members; guarded fallback metadata matches. No prey-hunt progression semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: f4ddf6457."
     },
     {
       "id": "added:Enum.PreyHuntProgressState.Hot",
       "symbol": "Enum.PreyHuntProgressState.Hot",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete PreyHuntProgressState family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit PREY_HUNT_PROGRESS_STATE publication provides Cold=0, Warm=1, Hot=2, Final=3.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching PreyHuntProgressState metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "86819b40048e8f3a1f6a97696e36f8067c0cbc70c7b0251d373cec7491601e78"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 PreyHuntProgressState values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs::test_patch_12_0_0_prey_hunt_progress_state_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.PreyHuntProgressState family as Lua numbers with exact values Cold=0, Warm=1, Hot=2, Final=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "f4ddf6457",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.PreyHuntProgressState family, exact Lua numeric values/types, no extras, and metadata. Explicit combat-system enum data is authoritative for members; guarded fallback metadata matches. No prey-hunt progression semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: f4ddf6457."
     },
     {
       "id": "added:Enum.PreyHuntProgressState.Warm",
       "symbol": "Enum.PreyHuntProgressState.Warm",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete PreyHuntProgressState family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit PREY_HUNT_PROGRESS_STATE publication provides Cold=0, Warm=1, Hot=2, Final=3.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching PreyHuntProgressState metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "86819b40048e8f3a1f6a97696e36f8067c0cbc70c7b0251d373cec7491601e78"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 PreyHuntProgressState values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs::test_patch_12_0_0_prey_hunt_progress_state_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.PreyHuntProgressState family as Lua numbers with exact values Cold=0, Warm=1, Hot=2, Final=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "f4ddf6457",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.PreyHuntProgressState family, exact Lua numeric values/types, no extras, and metadata. Explicit combat-system enum data is authoritative for members; guarded fallback metadata matches. No prey-hunt progression semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: f4ddf6457."
     },
     {
       "id": "added:Enum.PreyHuntProgressStateMeta.MaxValue",
       "symbol": "Enum.PreyHuntProgressStateMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete PreyHuntProgressState family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit PREY_HUNT_PROGRESS_STATE publication provides Cold=0, Warm=1, Hot=2, Final=3.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching PreyHuntProgressState metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "86819b40048e8f3a1f6a97696e36f8067c0cbc70c7b0251d373cec7491601e78"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 PreyHuntProgressState values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs::test_patch_12_0_0_prey_hunt_progress_state_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.PreyHuntProgressState family as Lua numbers with exact values Cold=0, Warm=1, Hot=2, Final=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "f4ddf6457",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.PreyHuntProgressState family, exact Lua numeric values/types, no extras, and metadata. Explicit combat-system enum data is authoritative for members; guarded fallback metadata matches. No prey-hunt progression semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: f4ddf6457."
     },
     {
       "id": "added:Enum.PreyHuntProgressStateMeta.MinValue",
       "symbol": "Enum.PreyHuntProgressStateMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete PreyHuntProgressState family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit PREY_HUNT_PROGRESS_STATE publication provides Cold=0, Warm=1, Hot=2, Final=3.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching PreyHuntProgressState metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "86819b40048e8f3a1f6a97696e36f8067c0cbc70c7b0251d373cec7491601e78"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 PreyHuntProgressState values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs::test_patch_12_0_0_prey_hunt_progress_state_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.PreyHuntProgressState family as Lua numbers with exact values Cold=0, Warm=1, Hot=2, Final=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "f4ddf6457",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.PreyHuntProgressState family, exact Lua numeric values/types, no extras, and metadata. Explicit combat-system enum data is authoritative for members; guarded fallback metadata matches. No prey-hunt progression semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: f4ddf6457."
     },
     {
       "id": "added:Enum.PreyHuntProgressStateMeta.NumValues",
       "symbol": "Enum.PreyHuntProgressStateMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete PreyHuntProgressState family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit PREY_HUNT_PROGRESS_STATE publication provides Cold=0, Warm=1, Hot=2, Final=3.",
+          "source_hash": "ea22279e48f044b0b05e1f53ac81ec8489df2fb92987b6040621ce87326b85f3"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching PreyHuntProgressState metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "86819b40048e8f3a1f6a97696e36f8067c0cbc70c7b0251d373cec7491601e78"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 PreyHuntProgressState values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_prey_hunt_progress_state_enums.rs::test_patch_12_0_0_prey_hunt_progress_state_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.PreyHuntProgressState family as Lua numbers with exact values Cold=0, Warm=1, Hot=2, Final=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "f4ddf6457",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.PreyHuntProgressState family, exact Lua numeric values/types, no extras, and metadata. Explicit combat-system enum data is authoritative for members; guarded fallback metadata matches. No prey-hunt progression semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: f4ddf6457."
     },
     {
       "id": "added:Enum.ProceduralSpawnInteractionMode.Manipulate",
