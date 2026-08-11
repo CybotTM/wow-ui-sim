@@ -61419,113 +61419,358 @@
       "id": "added:Enum.NamePlateInfoDisplay.CurrentHealthPercent",
       "symbol": "Enum.NamePlateInfoDisplay.CurrentHealthPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateInfoDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "58b5fbfa46052064bc1f375ca93b172857aaa865178b7313648c5ac3c492e0ce"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateInfoDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs::test_patch_12_0_0_nameplate_info_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateInfoDisplay family as Lua numbers with exact values None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "295c3f811",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateInfoDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate display behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 295c3f811."
     },
     {
       "id": "added:Enum.NamePlateInfoDisplay.CurrentHealthValue",
       "symbol": "Enum.NamePlateInfoDisplay.CurrentHealthValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateInfoDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "58b5fbfa46052064bc1f375ca93b172857aaa865178b7313648c5ac3c492e0ce"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateInfoDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs::test_patch_12_0_0_nameplate_info_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateInfoDisplay family as Lua numbers with exact values None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "295c3f811",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateInfoDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate display behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 295c3f811."
     },
     {
       "id": "added:Enum.NamePlateInfoDisplay.None",
       "symbol": "Enum.NamePlateInfoDisplay.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateInfoDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "58b5fbfa46052064bc1f375ca93b172857aaa865178b7313648c5ac3c492e0ce"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateInfoDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs::test_patch_12_0_0_nameplate_info_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateInfoDisplay family as Lua numbers with exact values None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "295c3f811",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateInfoDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate display behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 295c3f811."
     },
     {
       "id": "added:Enum.NamePlateInfoDisplay.RarityIcon",
       "symbol": "Enum.NamePlateInfoDisplay.RarityIcon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateInfoDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "58b5fbfa46052064bc1f375ca93b172857aaa865178b7313648c5ac3c492e0ce"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateInfoDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs::test_patch_12_0_0_nameplate_info_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateInfoDisplay family as Lua numbers with exact values None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "295c3f811",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateInfoDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate display behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 295c3f811."
     },
     {
       "id": "added:Enum.NamePlateInfoDisplayMeta.MaxValue",
       "symbol": "Enum.NamePlateInfoDisplayMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateInfoDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "58b5fbfa46052064bc1f375ca93b172857aaa865178b7313648c5ac3c492e0ce"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateInfoDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs::test_patch_12_0_0_nameplate_info_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateInfoDisplay family as Lua numbers with exact values None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "295c3f811",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateInfoDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate display behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 295c3f811."
     },
     {
       "id": "added:Enum.NamePlateInfoDisplayMeta.MinValue",
       "symbol": "Enum.NamePlateInfoDisplayMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateInfoDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "58b5fbfa46052064bc1f375ca93b172857aaa865178b7313648c5ac3c492e0ce"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateInfoDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs::test_patch_12_0_0_nameplate_info_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateInfoDisplay family as Lua numbers with exact values None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "295c3f811",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateInfoDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate display behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 295c3f811."
     },
     {
       "id": "added:Enum.NamePlateInfoDisplayMeta.NumValues",
       "symbol": "Enum.NamePlateInfoDisplayMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateInfoDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "58b5fbfa46052064bc1f375ca93b172857aaa865178b7313648c5ac3c492e0ce"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateInfoDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_info_display_enums.rs::test_patch_12_0_0_nameplate_info_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateInfoDisplay family as Lua numbers with exact values None=0, CurrentHealthPercent=1, CurrentHealthValue=2, RarityIcon=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "295c3f811",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateInfoDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate display behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 295c3f811."
     },
     {
       "id": "added:Enum.NamePlateSimplifiedType.FriendlyNpc",
