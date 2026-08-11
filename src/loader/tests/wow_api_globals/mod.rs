@@ -72,6 +72,7 @@ mod patch_12_0_0_encounter_timeline_track_type_enums;
 mod patch_12_0_0_expansion_landing_page_type_removals;
 mod patch_12_0_0_expansion_level_enums;
 mod patch_12_0_0_font_string_scale_animation_mode_enums;
+mod patch_12_0_0_fragment_id_enums;
 mod patch_12_0_0_item_creation_context_removals;
 mod patch_12_0_0_nameplate_cast_bar_display_enums;
 mod patch_12_0_0_nameplate_enemy_npc_aura_display_enums;
