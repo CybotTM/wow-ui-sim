@@ -1575,8 +1575,8 @@
 1575. [best-effort] `added:Enum.ItemCollectionType.TransmogOutfit` — behavioral
 1576. [best-effort] `added:Enum.ItemCollectionType.TransmogSetFavorite` — behavioral
 1577. [best-effort] `added:Enum.ItemCollectionType.WarbandScene` — behavioral
-1578. [untriaged] `added:Enum.ItemCreationContext.TimewalkerLevelUp` — untriaged
-1579. [untriaged] `added:Enum.ItemCreationContext.TimewalkerMaxLevel` — untriaged
+1578. [best-effort] `added:Enum.ItemCreationContext.TimewalkerLevelUp` — behavioral
+1579. [best-effort] `added:Enum.ItemCreationContext.TimewalkerMaxLevel` — behavioral
 1580. [best-effort] `added:Enum.ItemRecraftFlags.Invalid` — behavioral
 1581. [untriaged] `added:Enum.LFGEntryGeneralPlaystyle.Expert` — untriaged
 1582. [untriaged] `added:Enum.LFGEntryGeneralPlaystyle.FunRelaxed` — untriaged
