@@ -111,6 +111,7 @@ mod patch_12_0_0_raid_dispel_display_type_enums;
 mod patch_12_0_0_rco_close_reason_enums;
 mod patch_12_0_0_renown_reward_display_type_enums;
 mod patch_12_0_0_renown_rewards_flags_enums;
+mod patch_12_0_0_secrecy_level_enums;
 mod patch_12_0_0_simple_order_status_enums;
 mod patch_12_0_0_sleeves_geo_range_enums;
 mod patch_12_0_0_small_enums;
