@@ -72,6 +72,10 @@ Enum.EditModePersonalResourceDisplaySettingMeta = {
     MaxValue = 1,
     NumValues = 2,
 }
+Enum.FrameTutorialAccount.TransmogTrialOfStyle = nil
+Enum.FrameTutorialAccount.TransmogCustomSetsMigration = nil
+Enum.FrameTutorialAccountMeta.MaxValue = 45
+Enum.FrameTutorialAccountMeta.NumValues = 45
 Enum.TooltipDataLineType = {
     None = 0,
     Blank = 1,
