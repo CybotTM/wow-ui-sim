@@ -93,6 +93,7 @@ mod patch_12_0_0_transmog_outfit_set_type_enums;
 mod patch_12_0_0_transmog_outfit_slot_error_metadata_enums;
 mod patch_12_0_0_transmog_outfit_slot_flags_enums;
 mod patch_12_0_0_transmog_outfit_slot_metadata_enums;
+mod patch_12_0_0_transmog_outfit_slot_option_flags_enums;
 mod patch_12_0_0_ui_enum_metadata;
 mod patch_12_0_0_unit_power_spell_ids;
 mod patch_12_1_service_payloads;
