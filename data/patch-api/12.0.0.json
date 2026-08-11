@@ -74260,33 +74260,115 @@
       "id": "added:Enum.TraitNodeEntryType.SpendCapstoneCircle",
       "symbol": "Enum.TraitNodeEntryType.SpendCapstoneCircle",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22c50b49a67",
+          "summary": "Checked-in retail 12.0.0 source records Enum.TraitNodeEntryType.SpendCapstoneCircle with exact value 13."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/addon_system.rs",
+          "source_hash": "9e0aa2710afa6ea4a37943e7a3135ba9f7f2d4da711bfb3d89e4558009c0f686",
+          "summary": "Explicit runtime enum data publishes the complete TraitNodeEntryType family, including SpendCapstoneCircle=13 and SpendCapstoneSquare=14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded fallback publishes matching TraitNodeEntryType metadata: MinValue=0, MaxValue=14, NumValues=15."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the explicit member data and guarded metadata fallback used at startup."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_trait_node_entry_type_enums.rs",
+          "source_hash": "0df5b39cd51480d1780fd2919c23782ac61e76bea41ac54d7c1f25b8b26f6274",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 15-member family, numeric Lua types, no extras, and metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the TraitNodeEntryType family and metadata values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_trait_node_entry_type_enums.rs::test_patch_12_0_0_trait_node_entry_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.TraitNodeEntryType family as Lua numbers with the exact 15-member set, including SpendCapstoneCircle=13 and SpendCapstoneSquare=14; metadata is MinValue=0, MaxValue=14, NumValues=15, with no extras."
+      ],
+      "commit": "5ecf52224",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact numeric values/types/metadata are behaviorally proven; trait-node entry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.TraitNodeEntryType.SpendCapstoneSquare",
       "symbol": "Enum.TraitNodeEntryType.SpendCapstoneSquare",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22c50b49a67",
+          "summary": "Checked-in retail 12.0.0 source records Enum.TraitNodeEntryType.SpendCapstoneSquare with exact value 14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/addon_system.rs",
+          "source_hash": "9e0aa2710afa6ea4a37943e7a3135ba9f7f2d4da711bfb3d89e4558009c0f686",
+          "summary": "Explicit runtime enum data publishes the complete TraitNodeEntryType family, including SpendCapstoneCircle=13 and SpendCapstoneSquare=14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded fallback publishes matching TraitNodeEntryType metadata: MinValue=0, MaxValue=14, NumValues=15."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the explicit member data and guarded metadata fallback used at startup."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_trait_node_entry_type_enums.rs",
+          "source_hash": "0df5b39cd51480d1780fd2919c23782ac61e76bea41ac54d7c1f25b8b26f6274",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 15-member family, numeric Lua types, no extras, and metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the TraitNodeEntryType family and metadata values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_trait_node_entry_type_enums.rs::test_patch_12_0_0_trait_node_entry_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.TraitNodeEntryType family as Lua numbers with the exact 15-member set, including SpendCapstoneCircle=13 and SpendCapstoneSquare=14; metadata is MinValue=0, MaxValue=14, NumValues=15, with no extras."
+      ],
+      "commit": "5ecf52224",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact numeric values/types/metadata are behaviorally proven; trait-node entry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.TraitNodeFlag.ShowTierTrack",
@@ -102573,33 +102655,115 @@
       "id": "changed:Enum.TraitNodeEntryTypeMeta.MaxValue",
       "symbol": "Enum.TraitNodeEntryTypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22c50b49a67",
+          "summary": "Checked-in retail 12.0.0 source records Enum.TraitNodeEntryTypeMeta.MaxValue with exact value 14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/addon_system.rs",
+          "source_hash": "9e0aa2710afa6ea4a37943e7a3135ba9f7f2d4da711bfb3d89e4558009c0f686",
+          "summary": "Explicit runtime enum data publishes the complete TraitNodeEntryType family, including SpendCapstoneCircle=13 and SpendCapstoneSquare=14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded fallback publishes matching TraitNodeEntryType metadata: MinValue=0, MaxValue=14, NumValues=15."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the explicit member data and guarded metadata fallback used at startup."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_trait_node_entry_type_enums.rs",
+          "source_hash": "0df5b39cd51480d1780fd2919c23782ac61e76bea41ac54d7c1f25b8b26f6274",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 15-member family, numeric Lua types, no extras, and metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the TraitNodeEntryType family and metadata values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_trait_node_entry_type_enums.rs::test_patch_12_0_0_trait_node_entry_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.TraitNodeEntryType family as Lua numbers with the exact 15-member set, including SpendCapstoneCircle=13 and SpendCapstoneSquare=14; metadata is MinValue=0, MaxValue=14, NumValues=15, with no extras."
+      ],
+      "commit": "5ecf52224",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact numeric values/types/metadata are behaviorally proven; trait-node entry semantics remain unclaimed."
     },
     {
       "id": "changed:Enum.TraitNodeEntryTypeMeta.NumValues",
       "symbol": "Enum.TraitNodeEntryTypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22c50b49a67",
+          "summary": "Checked-in retail 12.0.0 source records Enum.TraitNodeEntryTypeMeta.NumValues with exact value 15."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/addon_system.rs",
+          "source_hash": "9e0aa2710afa6ea4a37943e7a3135ba9f7f2d4da711bfb3d89e4558009c0f686",
+          "summary": "Explicit runtime enum data publishes the complete TraitNodeEntryType family, including SpendCapstoneCircle=13 and SpendCapstoneSquare=14."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded fallback publishes matching TraitNodeEntryType metadata: MinValue=0, MaxValue=14, NumValues=15."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the explicit member data and guarded metadata fallback used at startup."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_trait_node_entry_type_enums.rs",
+          "source_hash": "0df5b39cd51480d1780fd2919c23782ac61e76bea41ac54d7c1f25b8b26f6274",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 15-member family, numeric Lua types, no extras, and metadata."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the TraitNodeEntryType family and metadata values."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_trait_node_entry_type_enums.rs::test_patch_12_0_0_trait_node_entry_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.TraitNodeEntryType family as Lua numbers with the exact 15-member set, including SpendCapstoneCircle=13 and SpendCapstoneSquare=14; metadata is MinValue=0, MaxValue=14, NumValues=15, with no extras."
+      ],
+      "commit": "5ecf52224",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact numeric values/types/metadata are behaviorally proven; trait-node entry semantics remain unclaimed."
     },
     {
       "id": "changed:Enum.TraitNodeFlagMeta.MaxValue",

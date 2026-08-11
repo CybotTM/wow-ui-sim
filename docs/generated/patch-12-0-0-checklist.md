@@ -1887,8 +1887,8 @@
 1887. [best-effort] `added:Enum.TooltipDataLineType.SpellDescription` — behavioral
 1888. [best-effort] `added:Enum.TooltipDataLineType.SpellPassive` — behavioral
 1889. [best-effort] `added:Enum.TooltipDataType.Outfit` — behavioral
-1890. [untriaged] `added:Enum.TraitNodeEntryType.SpendCapstoneCircle` — untriaged
-1891. [untriaged] `added:Enum.TraitNodeEntryType.SpendCapstoneSquare` — untriaged
+1890. [best-effort] `added:Enum.TraitNodeEntryType.SpendCapstoneCircle` — behavioral
+1891. [best-effort] `added:Enum.TraitNodeEntryType.SpendCapstoneSquare` — behavioral
 1892. [best-effort] `added:Enum.TraitNodeFlag.ShowTierTrack` — behavioral
 1893. [best-effort] `added:Enum.TransmogOutfitDataFlags.IsCachedLocally` — behavioral
 1894. [best-effort] `added:Enum.TransmogOutfitDataFlagsMeta.MaxValue` — behavioral
@@ -2756,8 +2756,8 @@
 2756. [best-effort] `changed:Enum.TooltipDataLineTypeMeta.NumValues` — behavioral
 2757. [best-effort] `changed:Enum.TooltipDataTypeMeta.MaxValue` — behavioral
 2758. [best-effort] `changed:Enum.TooltipDataTypeMeta.NumValues` — behavioral
-2759. [untriaged] `changed:Enum.TraitNodeEntryTypeMeta.MaxValue` — untriaged
-2760. [untriaged] `changed:Enum.TraitNodeEntryTypeMeta.NumValues` — untriaged
+2759. [best-effort] `changed:Enum.TraitNodeEntryTypeMeta.MaxValue` — behavioral
+2760. [best-effort] `changed:Enum.TraitNodeEntryTypeMeta.NumValues` — behavioral
 2761. [best-effort] `changed:Enum.TraitNodeFlagMeta.MaxValue` — behavioral
 2762. [best-effort] `changed:Enum.TraitNodeFlagMeta.NumValues` — behavioral
 2763. [best-effort] `changed:Enum.UICursorTypeMeta.MaxValue` — behavioral
