@@ -102,6 +102,7 @@ mod patch_12_0_0_transmog_outfit_transaction_enums;
 mod patch_12_0_0_transmog_situation_enums;
 mod patch_12_0_0_ui_covenant_display_info_flags_enums;
 mod patch_12_0_0_ui_enum_metadata;
+mod patch_12_0_0_unit_aura_sort_direction_enums;
 mod patch_12_0_0_unit_power_spell_ids;
 mod patch_12_1_service_payloads;
 mod runtime_subsystems;
