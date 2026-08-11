@@ -2773,10 +2773,10 @@
 2773. [best-effort] `changed:GameTooltip.SetPadding` — behavioral
 2774. [best-effort] `changed:GameTooltip.SetText` — behavioral
 2775. [best-effort] `changed:GetRaidTargetIndex` — behavioral
-2776. [untriaged] `changed:HOUSE_LEVEL_CHANGED` — untriaged
-2777. [untriaged] `changed:HOUSING_BASIC_MODE_PLACEMENT_FLAGS_UPDATED` — untriaged
-2778. [untriaged] `changed:HOUSING_BASIC_MODE_SELECTED_TARGET_CHANGED` — untriaged
-2779. [untriaged] `changed:HOUSING_DECOR_PLACE_SUCCESS` — untriaged
+2776. [best-effort] `changed:HOUSE_LEVEL_CHANGED` — behavioral
+2777. [best-effort] `changed:HOUSING_BASIC_MODE_PLACEMENT_FLAGS_UPDATED` — behavioral
+2778. [best-effort] `changed:HOUSING_BASIC_MODE_SELECTED_TARGET_CHANGED` — behavioral
+2779. [best-effort] `changed:HOUSING_DECOR_PLACE_SUCCESS` — behavioral
 2780. [untriaged] `changed:IsRaidMarkerActive` — untriaged
 2781. [untriaged] `changed:LE_EXPANSION_LEVEL_CURRENT` — untriaged
 2782. [untriaged] `changed:LE_EXPANSION_LEVEL_PREVIOUS` — untriaged

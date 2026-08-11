@@ -103356,65 +103356,181 @@
       "id": "changed:HOUSE_LEVEL_CHANGED",
       "symbol": "HOUSE_LEVEL_CHANGED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source records the event payload change.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Runtime event registry accepts the changed event name; generic registration/dispatch is available.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_event_dispatch.rs",
+          "summary": "Focused test registers each event and proves generic dispatch argument order, arity, and Lua types for the retail after payload.",
+          "source_hash": "d31ca8371b7a01b2e68eeb8112b7448e5e7f544fbcad0119dce7d1c589056397"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "No independent matching discovery payload record was found for this event change.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_event_dispatch.rs::test_patch_12_0_0_housing_event_dispatch_payloads"
+      ],
+      "assertions": [
+        "RegisterEvent accepts HOUSE_LEVEL_CHANGED and generic dispatch delivers one representative table payload in the after-contract position; no producer or payload-field behavior is claimed."
+      ],
+      "commit": "12d231522",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the event payload structure from C_HousingDecor.HousingLevelInfo? to HouseLevelInfo?; the simulator recognizes the event and generic dispatch delivers one representative table payload. Claims are bounded to registration and generic dispatch; no housing producer, timing, lifecycle, ordering, duplicate, or consumer behavior is claimed."
     },
     {
       "id": "changed:HOUSING_BASIC_MODE_PLACEMENT_FLAGS_UPDATED",
       "symbol": "HOUSING_BASIC_MODE_PLACEMENT_FLAGS_UPDATED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source records the event payload change.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Runtime event registry accepts the changed event name; generic registration/dispatch is available.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_event_dispatch.rs",
+          "summary": "Focused test registers each event and proves generic dispatch argument order, arity, and Lua types for the retail after payload.",
+          "source_hash": "d31ca8371b7a01b2e68eeb8112b7448e5e7f544fbcad0119dce7d1c589056397"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "No independent matching discovery payload record was found for this event change.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_event_dispatch.rs::test_patch_12_0_0_housing_event_dispatch_payloads"
+      ],
+      "assertions": [
+        "RegisterEvent accepts the event and generic dispatch delivers numeric targetType followed by numeric activeFlags, matching the retail after-payload arity/order; no producer behavior is claimed."
+      ],
+      "commit": "12d231522",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the second payload from placementInfo to activeFlags; the simulator recognizes the event and generic dispatch delivers numeric targetType and activeFlags arguments. Claims are bounded to registration and generic dispatch; no housing producer, timing, lifecycle, ordering, duplicate, or consumer behavior is claimed."
     },
     {
       "id": "changed:HOUSING_BASIC_MODE_SELECTED_TARGET_CHANGED",
       "symbol": "HOUSING_BASIC_MODE_SELECTED_TARGET_CHANGED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source records the event payload change.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Runtime event registry accepts the changed event name; generic registration/dispatch is available.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_event_dispatch.rs",
+          "summary": "Focused test registers each event and proves generic dispatch argument order, arity, and Lua types for the retail after payload.",
+          "source_hash": "d31ca8371b7a01b2e68eeb8112b7448e5e7f544fbcad0119dce7d1c589056397"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "No independent matching discovery payload record was found for this event change.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_event_dispatch.rs::test_patch_12_0_0_housing_event_dispatch_payloads"
+      ],
+      "assertions": [
+        "RegisterEvent accepts the event and generic dispatch delivers boolean hasSelectedTarget, numeric targetType, and boolean isPreview in after-contract order; no producer behavior is claimed."
+      ],
+      "commit": "12d231522",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds an isPreview boolean payload argument; the simulator recognizes the event and generic dispatch delivers boolean, numeric targetType, and boolean preview arguments. Claims are bounded to registration and generic dispatch; no housing producer, timing, lifecycle, ordering, duplicate, or consumer behavior is claimed."
     },
     {
       "id": "changed:HOUSING_DECOR_PLACE_SUCCESS",
       "symbol": "HOUSING_DECOR_PLACE_SUCCESS",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source records the event payload change.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "summary": "Runtime event registry accepts the changed event name; generic registration/dispatch is available.",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_event_dispatch.rs",
+          "summary": "Focused test registers each event and proves generic dispatch argument order, arity, and Lua types for the retail after payload.",
+          "source_hash": "d31ca8371b7a01b2e68eeb8112b7448e5e7f544fbcad0119dce7d1c589056397"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "No independent matching discovery payload record was found for this event change.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_event_dispatch.rs::test_patch_12_0_0_housing_event_dispatch_payloads"
+      ],
+      "assertions": [
+        "RegisterEvent accepts the event and generic dispatch delivers string decorGUID, numeric size, boolean isNew, and boolean isPreview in after-contract order; no producer behavior is claimed."
+      ],
+      "commit": "12d231522",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds an isPreview boolean payload argument; the simulator recognizes the event and generic dispatch delivers GUID, numeric size, new boolean, and preview boolean arguments. Claims are bounded to registration and generic dispatch; no housing producer, timing, lifecycle, ordering, duplicate, or consumer behavior is claimed."
     },
     {
       "id": "changed:IsRaidMarkerActive",
