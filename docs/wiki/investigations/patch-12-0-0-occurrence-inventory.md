@@ -1890,14 +1890,14 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.SecretAspectMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `Enum.SendAddonMessageResult.AddOnMessageLockdown` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.SendAddonMessageResult.TargetOffline` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SimpleOrderStatus.Creating` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SimpleOrderStatus.Failed` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SimpleOrderStatus.InProgress` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SimpleOrderStatus.Invalid` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SimpleOrderStatus.Success` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SimpleOrderStatusMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SimpleOrderStatusMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SimpleOrderStatusMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.SimpleOrderStatus.Creating` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
+| `Enum.SimpleOrderStatus.Failed` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
+| `Enum.SimpleOrderStatus.InProgress` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
+| `Enum.SimpleOrderStatus.Invalid` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
+| `Enum.SimpleOrderStatus.Success` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
+| `Enum.SimpleOrderStatusMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
+| `Enum.SimpleOrderStatusMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
+| `Enum.SimpleOrderStatusMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
 | `Enum.SleevesGeoRange.Default` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.SleevesGeoRange.Flared` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.SleevesGeoRange.None` | untriaged | enum | added | enum added in 12.0.0. |
