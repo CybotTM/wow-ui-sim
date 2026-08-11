@@ -67974,113 +67974,358 @@
       "id": "added:Enum.RcoCloseReason.Cancel",
       "symbol": "Enum.RcoCloseReason.Cancel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the renamed Enum.RcoCloseReason family as Lua numeric values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; the old RcoClose* aliases are removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "added:Enum.RcoCloseReason.CrafterFulfill",
       "symbol": "Enum.RcoCloseReason.CrafterFulfill",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the renamed Enum.RcoCloseReason family as Lua numeric values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; the old RcoClose* aliases are removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "added:Enum.RcoCloseReason.Expire",
       "symbol": "Enum.RcoCloseReason.Expire",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the renamed Enum.RcoCloseReason family as Lua numeric values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; the old RcoClose* aliases are removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "added:Enum.RcoCloseReason.Fulfill",
       "symbol": "Enum.RcoCloseReason.Fulfill",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the renamed Enum.RcoCloseReason family as Lua numeric values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; the old RcoClose* aliases are removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "added:Enum.RcoCloseReason.GmCancel",
       "symbol": "Enum.RcoCloseReason.GmCancel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the renamed Enum.RcoCloseReason family as Lua numeric values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; the old RcoClose* aliases are removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "added:Enum.RcoCloseReason.Invalid",
       "symbol": "Enum.RcoCloseReason.Invalid",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the renamed Enum.RcoCloseReason family as Lua numeric values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; the old RcoClose* aliases are removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "added:Enum.RcoCloseReason.Reject",
       "symbol": "Enum.RcoCloseReason.Reject",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the renamed Enum.RcoCloseReason family as Lua numeric values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; the old RcoClose* aliases are removed.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.Currency",
@@ -109724,113 +109969,358 @@
       "id": "removed:Enum.RcoCloseReason.RcoCloseCancel",
       "symbol": "Enum.RcoCloseReason.RcoCloseCancel",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source removes this legacy RcoClose* alias while retaining the corresponding numeric reason under the renamed member.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "removed:Enum.RcoCloseReason.RcoCloseCrafterFulfill",
       "symbol": "Enum.RcoCloseReason.RcoCloseCrafterFulfill",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source removes this legacy RcoClose* alias while retaining the corresponding numeric reason under the renamed member.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "removed:Enum.RcoCloseReason.RcoCloseExpire",
       "symbol": "Enum.RcoCloseReason.RcoCloseExpire",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source removes this legacy RcoClose* alias while retaining the corresponding numeric reason under the renamed member.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "removed:Enum.RcoCloseReason.RcoCloseFulfill",
       "symbol": "Enum.RcoCloseReason.RcoCloseFulfill",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source removes this legacy RcoClose* alias while retaining the corresponding numeric reason under the renamed member.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "removed:Enum.RcoCloseReason.RcoCloseGmCancel",
       "symbol": "Enum.RcoCloseReason.RcoCloseGmCancel",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source removes this legacy RcoClose* alias while retaining the corresponding numeric reason under the renamed member.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "removed:Enum.RcoCloseReason.RcoCloseInvalid",
       "symbol": "Enum.RcoCloseReason.RcoCloseInvalid",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source removes this legacy RcoClose* alias while retaining the corresponding numeric reason under the renamed member.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "removed:Enum.RcoCloseReason.RcoCloseReject",
       "symbol": "Enum.RcoCloseReason.RcoCloseReject",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source removes this legacy RcoClose* alias while retaining the corresponding numeric reason under the renamed member.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the replacement Enum.RcoCloseReason family with Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; no old RcoClose* aliases are published.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication and alias absence.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete replacement family, Lua numeric types, no extras, metadata MinValue=0, MaxValue=6, NumValues=7, and absence of every old RcoClose* alias.",
+          "source_hash": "619b53c775fb9c1dbd8e519498d8d5ada7e6f644f600ca106508a3dadcf72b68"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the renamed RcoCloseReason family values and no legacy alias members.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_rco_close_reason_enums.rs::test_patch_12_0_0_rco_close_reason_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RcoCloseReason replacement family as Lua numbers with exact values Fulfill=0, Expire=1, Cancel=2, Reject=3, GmCancel=4, CrafterFulfill=5, Invalid=6; metadata is MinValue=0, MaxValue=6, NumValues=7, with no extras and every old RcoClose* alias absent."
+      ],
+      "commit": "41dc7f43e",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the exact renamed RcoCloseReason family, Lua numeric values/types, matching metadata, no extras, and absence of every old RcoClose* alias. The rename preserves the corresponding numeric values. No order-processing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 41dc7f43e."
     },
     {
       "id": "removed:Enum.ReportStorageProvider.Alibaba",
