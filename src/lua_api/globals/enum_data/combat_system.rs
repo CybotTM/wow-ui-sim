@@ -217,7 +217,7 @@ pub const SPELL_AURA_VISIBILITY_TYPE: SeqEnumDef = (
 // Lua Curve Type Enum
 // ============================================================================
 
-pub const LUA_CURVE_TYPE: SeqEnumDef = ("LuaCurveType", &["Bezier", "Linear"]);
+pub const LUA_CURVE_TYPE: SeqEnumDef = ("LuaCurveType", &["Linear", "Step", "Cosine", "Cubic"]);
 
 // ============================================================================
 // Prey / Hunt / UI Widget State Enums
