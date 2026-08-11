@@ -109,6 +109,7 @@ mod patch_12_0_0_procedural_spawn_volume_chunk_flags_enums;
 mod patch_12_0_0_raid_aura_organization_type_enums;
 mod patch_12_0_0_raid_dispel_display_type_enums;
 mod patch_12_0_0_rco_close_reason_enums;
+mod patch_12_0_0_renown_reward_display_type_enums;
 mod patch_12_0_0_small_enums;
 mod patch_12_0_0_status_bar_timer_direction_enums;
 mod patch_12_0_0_tooltip_data_line_type_enums;
