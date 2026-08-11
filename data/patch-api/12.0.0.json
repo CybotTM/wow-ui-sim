@@ -58725,7 +58725,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enum_values"
       ],
       "assertions": [
         "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
@@ -58776,7 +58776,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enum_values"
       ],
       "assertions": [
         "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
@@ -58827,7 +58827,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enum_values"
       ],
       "assertions": [
         "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
@@ -58878,7 +58878,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enum_values"
       ],
       "assertions": [
         "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
@@ -58929,7 +58929,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enum_values"
       ],
       "assertions": [
         "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
@@ -58980,7 +58980,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enum_values"
       ],
       "assertions": [
         "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
@@ -59031,7 +59031,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enum_values"
       ],
       "assertions": [
         "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
@@ -59082,7 +59082,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enum_values"
       ],
       "assertions": [
         "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
