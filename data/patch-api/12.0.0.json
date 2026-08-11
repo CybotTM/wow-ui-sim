@@ -59453,113 +59453,358 @@
       "id": "added:Enum.LuaCurveType.Cosine",
       "symbol": "Enum.LuaCurveType.Cosine",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.LuaCurveType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f0d4fffad20d1a605be64548c5470fadb4d6c91b419ed8ab6d200c9635a0d392"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LuaCurveType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs::test_patch_12_0_0_lua_curve_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LuaCurveType family as Lua numbers with exact values Linear=0, Step=1, Cosine=2, Cubic=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveType.Cubic",
       "symbol": "Enum.LuaCurveType.Cubic",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.LuaCurveType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f0d4fffad20d1a605be64548c5470fadb4d6c91b419ed8ab6d200c9635a0d392"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LuaCurveType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs::test_patch_12_0_0_lua_curve_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LuaCurveType family as Lua numbers with exact values Linear=0, Step=1, Cosine=2, Cubic=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveType.Linear",
       "symbol": "Enum.LuaCurveType.Linear",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.LuaCurveType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f0d4fffad20d1a605be64548c5470fadb4d6c91b419ed8ab6d200c9635a0d392"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LuaCurveType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs::test_patch_12_0_0_lua_curve_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LuaCurveType family as Lua numbers with exact values Linear=0, Step=1, Cosine=2, Cubic=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveType.Step",
       "symbol": "Enum.LuaCurveType.Step",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.LuaCurveType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f0d4fffad20d1a605be64548c5470fadb4d6c91b419ed8ab6d200c9635a0d392"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LuaCurveType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs::test_patch_12_0_0_lua_curve_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LuaCurveType family as Lua numbers with exact values Linear=0, Step=1, Cosine=2, Cubic=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveTypeMeta.MaxValue",
       "symbol": "Enum.LuaCurveTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.LuaCurveType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f0d4fffad20d1a605be64548c5470fadb4d6c91b419ed8ab6d200c9635a0d392"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LuaCurveType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs::test_patch_12_0_0_lua_curve_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LuaCurveType family as Lua numbers with exact values Linear=0, Step=1, Cosine=2, Cubic=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveTypeMeta.MinValue",
       "symbol": "Enum.LuaCurveTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.LuaCurveType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f0d4fffad20d1a605be64548c5470fadb4d6c91b419ed8ab6d200c9635a0d392"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LuaCurveType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs::test_patch_12_0_0_lua_curve_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LuaCurveType family as Lua numbers with exact values Linear=0, Step=1, Cosine=2, Cubic=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveTypeMeta.NumValues",
       "symbol": "Enum.LuaCurveTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.LuaCurveType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f0d4fffad20d1a605be64548c5470fadb4d6c91b419ed8ab6d200c9635a0d392"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LuaCurveType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lua_curve_type_enums.rs::test_patch_12_0_0_lua_curve_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LuaCurveType family as Lua numbers with exact values Linear=0, Step=1, Cosine=2, Cubic=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.MapIconUIWidgetSetType.AdventureMapDetails",
