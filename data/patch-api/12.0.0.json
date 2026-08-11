@@ -70889,129 +70889,409 @@
       "id": "added:Enum.SleevesGeoRange.Default",
       "symbol": "Enum.SleevesGeoRange.Default",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the SleevesGeoRange members and metadata values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete SleevesGeoRange family and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts exact members, numeric types, no extras, and metadata.",
+          "source_hash": "a793e45ffd0b4b078cc8c759696124b39bdcce5f42c31abc86c15aba7f13f1d4"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SleevesGeoRange family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SleevesGeoRange family as Lua numbers with exact values None=0, Default=1, Flared=2, Puffy=3, PandaCollar=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "1ed7b3764",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; sleeves-geometry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.SleevesGeoRange.Flared",
       "symbol": "Enum.SleevesGeoRange.Flared",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the SleevesGeoRange members and metadata values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete SleevesGeoRange family and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts exact members, numeric types, no extras, and metadata.",
+          "source_hash": "a793e45ffd0b4b078cc8c759696124b39bdcce5f42c31abc86c15aba7f13f1d4"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SleevesGeoRange family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SleevesGeoRange family as Lua numbers with exact values None=0, Default=1, Flared=2, Puffy=3, PandaCollar=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "1ed7b3764",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; sleeves-geometry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.SleevesGeoRange.None",
       "symbol": "Enum.SleevesGeoRange.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the SleevesGeoRange members and metadata values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete SleevesGeoRange family and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts exact members, numeric types, no extras, and metadata.",
+          "source_hash": "a793e45ffd0b4b078cc8c759696124b39bdcce5f42c31abc86c15aba7f13f1d4"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SleevesGeoRange family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SleevesGeoRange family as Lua numbers with exact values None=0, Default=1, Flared=2, Puffy=3, PandaCollar=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "1ed7b3764",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; sleeves-geometry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.SleevesGeoRange.PandaCollar",
       "symbol": "Enum.SleevesGeoRange.PandaCollar",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the SleevesGeoRange members and metadata values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete SleevesGeoRange family and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts exact members, numeric types, no extras, and metadata.",
+          "source_hash": "a793e45ffd0b4b078cc8c759696124b39bdcce5f42c31abc86c15aba7f13f1d4"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SleevesGeoRange family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SleevesGeoRange family as Lua numbers with exact values None=0, Default=1, Flared=2, Puffy=3, PandaCollar=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "1ed7b3764",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; sleeves-geometry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.SleevesGeoRange.Puffy",
       "symbol": "Enum.SleevesGeoRange.Puffy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the SleevesGeoRange members and metadata values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete SleevesGeoRange family and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts exact members, numeric types, no extras, and metadata.",
+          "source_hash": "a793e45ffd0b4b078cc8c759696124b39bdcce5f42c31abc86c15aba7f13f1d4"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SleevesGeoRange family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SleevesGeoRange family as Lua numbers with exact values None=0, Default=1, Flared=2, Puffy=3, PandaCollar=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "1ed7b3764",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; sleeves-geometry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.SleevesGeoRangeMeta.MaxValue",
       "symbol": "Enum.SleevesGeoRangeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the SleevesGeoRange members and metadata values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete SleevesGeoRange family and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts exact members, numeric types, no extras, and metadata.",
+          "source_hash": "a793e45ffd0b4b078cc8c759696124b39bdcce5f42c31abc86c15aba7f13f1d4"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SleevesGeoRange family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SleevesGeoRange family as Lua numbers with exact values None=0, Default=1, Flared=2, Puffy=3, PandaCollar=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "1ed7b3764",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; sleeves-geometry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.SleevesGeoRangeMeta.MinValue",
       "symbol": "Enum.SleevesGeoRangeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the SleevesGeoRange members and metadata values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete SleevesGeoRange family and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts exact members, numeric types, no extras, and metadata.",
+          "source_hash": "a793e45ffd0b4b078cc8c759696124b39bdcce5f42c31abc86c15aba7f13f1d4"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SleevesGeoRange family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SleevesGeoRange family as Lua numbers with exact values None=0, Default=1, Flared=2, Puffy=3, PandaCollar=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "1ed7b3764",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; sleeves-geometry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.SleevesGeoRangeMeta.NumValues",
       "symbol": "Enum.SleevesGeoRangeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the SleevesGeoRange members and metadata values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete SleevesGeoRange family and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts exact members, numeric types, no extras, and metadata.",
+          "source_hash": "a793e45ffd0b4b078cc8c759696124b39bdcce5f42c31abc86c15aba7f13f1d4"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SleevesGeoRange family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_sleeves_geo_range_enums.rs::test_patch_12_0_0_sleeves_geo_range_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SleevesGeoRange family as Lua numbers with exact values None=0, Default=1, Flared=2, Puffy=3, PandaCollar=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "1ed7b3764",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; sleeves-geometry semantics remain unclaimed."
     },
     {
       "id": "added:Enum.SpellAuraVisibilityType.EnemyTarget",

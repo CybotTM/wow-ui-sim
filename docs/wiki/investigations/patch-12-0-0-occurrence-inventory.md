@@ -1898,14 +1898,14 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.SimpleOrderStatusMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
 | `Enum.SimpleOrderStatusMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
 | `Enum.SimpleOrderStatusMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no order-status semantics claimed. |
-| `Enum.SleevesGeoRange.Default` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SleevesGeoRange.Flared` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SleevesGeoRange.None` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SleevesGeoRange.PandaCollar` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SleevesGeoRange.Puffy` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SleevesGeoRangeMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SleevesGeoRangeMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SleevesGeoRangeMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.SleevesGeoRange.Default` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
+| `Enum.SleevesGeoRange.Flared` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
+| `Enum.SleevesGeoRange.None` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
+| `Enum.SleevesGeoRange.PandaCollar` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
+| `Enum.SleevesGeoRange.Puffy` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
+| `Enum.SleevesGeoRangeMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
+| `Enum.SleevesGeoRangeMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
+| `Enum.SleevesGeoRangeMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
 | `Enum.SpellAuraVisibilityType.EnemyTarget` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.SpellAuraVisibilityType.RaidInCombat` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.SpellAuraVisibilityType.RaidOutOfCombat` | untriaged | enum | added | enum added in 12.0.0. |
