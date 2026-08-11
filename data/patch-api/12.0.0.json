@@ -69710,49 +69710,154 @@
       "id": "added:Enum.TransmogOutfitSlotOptionMeta.MaxValue",
       "symbol": "Enum.TransmogOutfitSlotOptionMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.TransmogOutfitSlotOptionMeta.MaxValue as exact numeric value 11.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the exact 12-member TransmogOutfitSlotOption family and metadata MinValue=0, MaxValue=11, NumValues=12.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_slot_option_metadata_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 12-member family, numeric member types, no extras, and metadata MinValue=0, MaxValue=11, NumValues=12.",
+          "source_hash": "62a44886c5593714a3a41cb784bc212c6e793007c6920dd0c91df38d979e6e62"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records TransmogOutfitSlotOption metadata including Enum.TransmogOutfitSlotOptionMeta.MaxValue=11.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_slot_option_metadata_enums.rs::test_patch_12_0_0_transmog_outfit_slot_option_metadata_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitSlotOptionMeta.MaxValue as Lua number with exact retail 12.0.0 value 11."
+      ],
+      "commit": "789800edf",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete 12-member family membership, and metadata. No slot-option semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 789800edf."
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOptionMeta.MinValue",
       "symbol": "Enum.TransmogOutfitSlotOptionMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.TransmogOutfitSlotOptionMeta.MinValue as exact numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the exact 12-member TransmogOutfitSlotOption family and metadata MinValue=0, MaxValue=11, NumValues=12.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_slot_option_metadata_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 12-member family, numeric member types, no extras, and metadata MinValue=0, MaxValue=11, NumValues=12.",
+          "source_hash": "62a44886c5593714a3a41cb784bc212c6e793007c6920dd0c91df38d979e6e62"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records TransmogOutfitSlotOption metadata including Enum.TransmogOutfitSlotOptionMeta.MinValue=0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_slot_option_metadata_enums.rs::test_patch_12_0_0_transmog_outfit_slot_option_metadata_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitSlotOptionMeta.MinValue as Lua number with exact retail 12.0.0 value 0."
+      ],
+      "commit": "789800edf",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete 12-member family membership, and metadata. No slot-option semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 789800edf."
     },
     {
       "id": "added:Enum.TransmogOutfitSlotOptionMeta.NumValues",
       "symbol": "Enum.TransmogOutfitSlotOptionMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.TransmogOutfitSlotOptionMeta.NumValues as exact numeric value 12.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the exact 12-member TransmogOutfitSlotOption family and metadata MinValue=0, MaxValue=11, NumValues=12.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "d5a4db6bfb3a4154d46bd03955a8d3608d056e7920156af6134bd9513b57b247"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_slot_option_metadata_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 12-member family, numeric member types, no extras, and metadata MinValue=0, MaxValue=11, NumValues=12.",
+          "source_hash": "62a44886c5593714a3a41cb784bc212c6e793007c6920dd0c91df38d979e6e62"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records TransmogOutfitSlotOption metadata including Enum.TransmogOutfitSlotOptionMeta.NumValues=12.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_transmog_outfit_slot_option_metadata_enums.rs::test_patch_12_0_0_transmog_outfit_slot_option_metadata_values"
+      ],
+      "assertions": [
+        "Publishes Enum.TransmogOutfitSlotOptionMeta.NumValues as Lua number with exact retail 12.0.0 value 12."
+      ],
+      "commit": "789800edf",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete 12-member family membership, and metadata. No slot-option semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 789800edf."
     },
     {
       "id": "added:Enum.TransmogOutfitSlotPosition.Bottom",

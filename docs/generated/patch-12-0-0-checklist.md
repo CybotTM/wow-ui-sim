@@ -1990,9 +1990,9 @@
 1990. [best-effort] `added:Enum.TransmogOutfitSlotOptionFlagsMeta.MaxValue` — behavioral
 1991. [best-effort] `added:Enum.TransmogOutfitSlotOptionFlagsMeta.MinValue` — behavioral
 1992. [best-effort] `added:Enum.TransmogOutfitSlotOptionFlagsMeta.NumValues` — behavioral
-1993. [untriaged] `added:Enum.TransmogOutfitSlotOptionMeta.MaxValue` — untriaged
-1994. [untriaged] `added:Enum.TransmogOutfitSlotOptionMeta.MinValue` — untriaged
-1995. [untriaged] `added:Enum.TransmogOutfitSlotOptionMeta.NumValues` — untriaged
+1993. [best-effort] `added:Enum.TransmogOutfitSlotOptionMeta.MaxValue` — behavioral
+1994. [best-effort] `added:Enum.TransmogOutfitSlotOptionMeta.MinValue` — behavioral
+1995. [best-effort] `added:Enum.TransmogOutfitSlotOptionMeta.NumValues` — behavioral
 1996. [untriaged] `added:Enum.TransmogOutfitSlotPosition.Bottom` — untriaged
 1997. [untriaged] `added:Enum.TransmogOutfitSlotPosition.Left` — untriaged
 1998. [untriaged] `added:Enum.TransmogOutfitSlotPosition.Right` — untriaged

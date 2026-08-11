@@ -2059,9 +2059,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.TransmogOutfitSlotOptionFlagsMeta.MaxValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and TransmogOutfitSlotOptionFlags family/metadata proof are covered by proof commit bcb3b459c; slot-option flag semantics and lifecycle are not claimed. |
 | `Enum.TransmogOutfitSlotOptionFlagsMeta.MinValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and TransmogOutfitSlotOptionFlags family/metadata proof are covered by proof commit bcb3b459c; slot-option flag semantics and lifecycle are not claimed. |
 | `Enum.TransmogOutfitSlotOptionFlagsMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, and TransmogOutfitSlotOptionFlags family/metadata proof are covered by proof commit bcb3b459c; slot-option flag semantics and lifecycle are not claimed. |
-| `Enum.TransmogOutfitSlotOptionMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitSlotOptionMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.TransmogOutfitSlotOptionMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.TransmogOutfitSlotOptionMeta.MaxValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric metadata, and exact TransmogOutfitSlotOption family proof are covered by proof commit 789800edf; slot-option semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitSlotOptionMeta.MinValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric metadata, and exact TransmogOutfitSlotOption family proof are covered by proof commit 789800edf; slot-option semantics and lifecycle are not claimed. |
+| `Enum.TransmogOutfitSlotOptionMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric metadata, and exact TransmogOutfitSlotOption family proof are covered by proof commit 789800edf; slot-option semantics and lifecycle are not claimed. |
 | `Enum.TransmogOutfitSlotPosition.Bottom` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TransmogOutfitSlotPosition.Left` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.TransmogOutfitSlotPosition.Right` | untriaged | enum | added | enum added in 12.0.0. |
