@@ -62037,129 +62037,457 @@
       "id": "added:Enum.NamePlateSize.ExtraLarge",
       "symbol": "Enum.NamePlateSize.ExtraLarge",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateSize family as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/widget.rs",
+          "summary": "Explicit NAME_PLATE_SIZE publication provides Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5.",
+          "source_hash": "9be90ec0c076c45beffb6c30fc15574c7487e36c4d48804ca07a2847bf6f8284"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching Enum.NamePlateSizeMeta metadata MinValue=1, MaxValue=5, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads explicit enum data and guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "fb743b408ccbf175a06a4a5a88ed5036e8c43e935399f0ea1b2120fd2a3b2f0d"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 Enum.NamePlateSize family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs::test_patch_12_0_0_nameplate_size_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateSize family as Lua numbers with exact values Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5; metadata is MinValue=1, MaxValue=5, NumValues=5, with no extras."
+      ],
+      "commit": "936135046",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateSize family, exact Lua numeric values/types, no extras, and metadata. Explicit widget enum data is authoritative for members; guarded fallback supplies matching metadata. No nameplate sizing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 936135046."
     },
     {
       "id": "added:Enum.NamePlateSize.Huge",
       "symbol": "Enum.NamePlateSize.Huge",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateSize family as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/widget.rs",
+          "summary": "Explicit NAME_PLATE_SIZE publication provides Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5.",
+          "source_hash": "9be90ec0c076c45beffb6c30fc15574c7487e36c4d48804ca07a2847bf6f8284"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching Enum.NamePlateSizeMeta metadata MinValue=1, MaxValue=5, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads explicit enum data and guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "fb743b408ccbf175a06a4a5a88ed5036e8c43e935399f0ea1b2120fd2a3b2f0d"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 Enum.NamePlateSize family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs::test_patch_12_0_0_nameplate_size_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateSize family as Lua numbers with exact values Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5; metadata is MinValue=1, MaxValue=5, NumValues=5, with no extras."
+      ],
+      "commit": "936135046",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateSize family, exact Lua numeric values/types, no extras, and metadata. Explicit widget enum data is authoritative for members; guarded fallback supplies matching metadata. No nameplate sizing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 936135046."
     },
     {
       "id": "added:Enum.NamePlateSize.Large",
       "symbol": "Enum.NamePlateSize.Large",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateSize family as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/widget.rs",
+          "summary": "Explicit NAME_PLATE_SIZE publication provides Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5.",
+          "source_hash": "9be90ec0c076c45beffb6c30fc15574c7487e36c4d48804ca07a2847bf6f8284"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching Enum.NamePlateSizeMeta metadata MinValue=1, MaxValue=5, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads explicit enum data and guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "fb743b408ccbf175a06a4a5a88ed5036e8c43e935399f0ea1b2120fd2a3b2f0d"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 Enum.NamePlateSize family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs::test_patch_12_0_0_nameplate_size_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateSize family as Lua numbers with exact values Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5; metadata is MinValue=1, MaxValue=5, NumValues=5, with no extras."
+      ],
+      "commit": "936135046",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateSize family, exact Lua numeric values/types, no extras, and metadata. Explicit widget enum data is authoritative for members; guarded fallback supplies matching metadata. No nameplate sizing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 936135046."
     },
     {
       "id": "added:Enum.NamePlateSize.Medium",
       "symbol": "Enum.NamePlateSize.Medium",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateSize family as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/widget.rs",
+          "summary": "Explicit NAME_PLATE_SIZE publication provides Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5.",
+          "source_hash": "9be90ec0c076c45beffb6c30fc15574c7487e36c4d48804ca07a2847bf6f8284"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching Enum.NamePlateSizeMeta metadata MinValue=1, MaxValue=5, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads explicit enum data and guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "fb743b408ccbf175a06a4a5a88ed5036e8c43e935399f0ea1b2120fd2a3b2f0d"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 Enum.NamePlateSize family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs::test_patch_12_0_0_nameplate_size_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateSize family as Lua numbers with exact values Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5; metadata is MinValue=1, MaxValue=5, NumValues=5, with no extras."
+      ],
+      "commit": "936135046",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateSize family, exact Lua numeric values/types, no extras, and metadata. Explicit widget enum data is authoritative for members; guarded fallback supplies matching metadata. No nameplate sizing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 936135046."
     },
     {
       "id": "added:Enum.NamePlateSize.Small",
       "symbol": "Enum.NamePlateSize.Small",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateSize family as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/widget.rs",
+          "summary": "Explicit NAME_PLATE_SIZE publication provides Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5.",
+          "source_hash": "9be90ec0c076c45beffb6c30fc15574c7487e36c4d48804ca07a2847bf6f8284"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching Enum.NamePlateSizeMeta metadata MinValue=1, MaxValue=5, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads explicit enum data and guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "fb743b408ccbf175a06a4a5a88ed5036e8c43e935399f0ea1b2120fd2a3b2f0d"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 Enum.NamePlateSize family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs::test_patch_12_0_0_nameplate_size_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateSize family as Lua numbers with exact values Small=1, Medium=2, Large=3, ExtraLarge=4, Huge=5; metadata is MinValue=1, MaxValue=5, NumValues=5, with no extras."
+      ],
+      "commit": "936135046",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateSize family, exact Lua numeric values/types, no extras, and metadata. Explicit widget enum data is authoritative for members; guarded fallback supplies matching metadata. No nameplate sizing behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 936135046."
     },
     {
       "id": "added:Enum.NamePlateSizeMeta.MaxValue",
       "symbol": "Enum.NamePlateSizeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares Enum.NamePlateSizeMeta metadata.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/widget.rs",
+          "summary": "Explicit NAME_PLATE_SIZE publication provides the complete member family used with the metadata.",
+          "source_hash": "9be90ec0c076c45beffb6c30fc15574c7487e36c4d48804ca07a2847bf6f8284"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateSizeMeta MinValue=1, MaxValue=5, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads explicit enum data and guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "fb743b408ccbf175a06a4a5a88ed5036e8c43e935399f0ea1b2120fd2a3b2f0d"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 Enum.NamePlateSize family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs::test_patch_12_0_0_nameplate_size_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateSizeMeta.MaxValue as a Lua number with exact value 5; the focused test also asserts the complete Enum.NamePlateSize family, no extras, and metadata MinValue=1, MaxValue=5, NumValues=5."
+      ],
+      "commit": "936135046",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.NamePlateSizeMeta.MaxValue as Lua numeric value 5, with the complete family and metadata asserted by proof commit 936135046. No nameplate sizing behavior, consumers, persistence, transitions, or lifecycle are claimed."
     },
     {
       "id": "added:Enum.NamePlateSizeMeta.MinValue",
       "symbol": "Enum.NamePlateSizeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares Enum.NamePlateSizeMeta metadata.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/widget.rs",
+          "summary": "Explicit NAME_PLATE_SIZE publication provides the complete member family used with the metadata.",
+          "source_hash": "9be90ec0c076c45beffb6c30fc15574c7487e36c4d48804ca07a2847bf6f8284"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateSizeMeta MinValue=1, MaxValue=5, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads explicit enum data and guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "fb743b408ccbf175a06a4a5a88ed5036e8c43e935399f0ea1b2120fd2a3b2f0d"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 Enum.NamePlateSize family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs::test_patch_12_0_0_nameplate_size_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateSizeMeta.MinValue as a Lua number with exact value 1; the focused test also asserts the complete Enum.NamePlateSize family, no extras, and metadata MinValue=1, MaxValue=5, NumValues=5."
+      ],
+      "commit": "936135046",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.NamePlateSizeMeta.MinValue as Lua numeric value 1, with the complete family and metadata asserted by proof commit 936135046. No nameplate sizing behavior, consumers, persistence, transitions, or lifecycle are claimed."
     },
     {
       "id": "added:Enum.NamePlateSizeMeta.NumValues",
       "symbol": "Enum.NamePlateSizeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares Enum.NamePlateSizeMeta metadata.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/widget.rs",
+          "summary": "Explicit NAME_PLATE_SIZE publication provides the complete member family used with the metadata.",
+          "source_hash": "9be90ec0c076c45beffb6c30fc15574c7487e36c4d48804ca07a2847bf6f8284"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes Enum.NamePlateSizeMeta MinValue=1, MaxValue=5, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads explicit enum data and guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "fb743b408ccbf175a06a4a5a88ed5036e8c43e935399f0ea1b2120fd2a3b2f0d"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 Enum.NamePlateSize family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_size_enums.rs::test_patch_12_0_0_nameplate_size_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.NamePlateSizeMeta.NumValues as a Lua number with exact value 5; the focused test also asserts the complete Enum.NamePlateSize family, no extras, and metadata MinValue=1, MaxValue=5, NumValues=5."
+      ],
+      "commit": "936135046",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.NamePlateSizeMeta.NumValues as Lua numeric value 5, with the complete family and metadata asserted by proof commit 936135046. No nameplate sizing behavior, consumers, persistence, transitions, or lifecycle are claimed."
     },
     {
       "id": "added:Enum.NamePlateStackType.Enemy",
