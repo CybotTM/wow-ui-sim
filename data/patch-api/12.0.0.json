@@ -59466,14 +59466,8 @@
         },
         {
           "kind": "source",
-          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
-          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
-          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
-        },
-        {
-          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59504,7 +59498,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveType.Cubic",
@@ -59523,14 +59517,8 @@
         },
         {
           "kind": "source",
-          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
-          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
-          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
-        },
-        {
-          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59561,7 +59549,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveType.Linear",
@@ -59580,14 +59568,8 @@
         },
         {
           "kind": "source",
-          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
-          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
-          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
-        },
-        {
-          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59618,7 +59600,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveType.Step",
@@ -59637,14 +59619,8 @@
         },
         {
           "kind": "source",
-          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
-          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
-          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
-        },
-        {
-          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59675,7 +59651,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveTypeMeta.MaxValue",
@@ -59694,14 +59670,8 @@
         },
         {
           "kind": "source",
-          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
-          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
-          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
-        },
-        {
-          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59732,7 +59702,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveTypeMeta.MinValue",
@@ -59751,14 +59721,8 @@
         },
         {
           "kind": "source",
-          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
-          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
-          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
-        },
-        {
-          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59789,7 +59753,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveTypeMeta.NumValues",
@@ -59808,14 +59772,8 @@
         },
         {
           "kind": "source",
-          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
-          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
-          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
-        },
-        {
-          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59846,7 +59804,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.MapIconUIWidgetSetType.AdventureMapDetails",
