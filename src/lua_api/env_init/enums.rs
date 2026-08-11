@@ -147,6 +147,15 @@ Enum.TransmogOutfitEntryFlagsMeta = {
     MaxValue = 16,
     NumValues = 5,
 }
+Enum.UICovenantDisplayInfoFlags = {
+    DisplayCovenantAsJourney = 1,
+    UseJourneyRewardTrack = 2,
+}
+Enum.UICovenantDisplayInfoFlagsMeta = {
+    MaxValue = 2,
+    MinValue = 1,
+    NumValues = 2,
+}
 Enum.SecretAspect.Attributes = nil
 Enum.SecretAspect.CooldownStyle = nil
 Enum.SecretAspectMeta = {
