@@ -1723,10 +1723,10 @@
 1723. [best-effort] `added:Enum.NpcCraftingOrderSetFlags.AllowDuplicate` — behavioral
 1724. [best-effort] `added:Enum.NpcCraftingOrderSetFlags.AllowMultiple` — behavioral
 1725. [best-effort] `added:Enum.PerksVendorCategoryType.RefundUnused` — behavioral
-1726. [untriaged] `added:Enum.PlayerCompanionInfoFlags.IgnoreSeasonInScenarios` — untriaged
-1727. [untriaged] `added:Enum.PlayerCompanionInfoFlagsMeta.MaxValue` — untriaged
-1728. [untriaged] `added:Enum.PlayerCompanionInfoFlagsMeta.MinValue` — untriaged
-1729. [untriaged] `added:Enum.PlayerCompanionInfoFlagsMeta.NumValues` — untriaged
+1726. [best-effort] `added:Enum.PlayerCompanionInfoFlags.IgnoreSeasonInScenarios` — behavioral
+1727. [best-effort] `added:Enum.PlayerCompanionInfoFlagsMeta.MaxValue` — behavioral
+1728. [best-effort] `added:Enum.PlayerCompanionInfoFlagsMeta.MinValue` — behavioral
+1729. [best-effort] `added:Enum.PlayerCompanionInfoFlagsMeta.NumValues` — behavioral
 1730. [best-effort] `added:Enum.PlayerInteractionType.TieredEntrance` — behavioral
 1731. [untriaged] `added:Enum.PreyHuntProgressState.Cold` — untriaged
 1732. [untriaged] `added:Enum.PreyHuntProgressState.Final` — untriaged
