@@ -1583,17 +1583,17 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.HousingDecorPlacementRestriction.ChildOutsideBounds` | best-effort | enum | added | enum added in 12.0.0. |
 | `Enum.HousingDecorPlacementRestriction.OutsidePlotBounds` | best-effort | enum | added | enum added in 12.0.0. |
 | `Enum.HousingDecorPlacementRestriction.OutsideRoomBounds` | best-effort | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSource.DecorCollection` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSource.DeferredRewards` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSource.InitiativeChest` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSource.InitiativeTask` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSource.NewHouseDecorFavor` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSource.Quest` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSource.RetroactiveDecor` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSource.Unknown` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSourceMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSourceMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingFavorUpdateSourceMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| ``Enum.HousingFavorUpdateSource.DecorCollection`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSource.DeferredRewards`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSource.InitiativeChest`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSource.InitiativeTask`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSource.NewHouseDecorFavor`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSource.Quest`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSource.RetroactiveDecor`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSource.Unknown`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSourceMeta.MaxValue`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSourceMeta.MinValue`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
+| ``Enum.HousingFavorUpdateSourceMeta.NumValues`` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication, Lua numeric type, exact value, complete HousingFavorUpdateSource family, and metadata proof are covered by proof commit e5377de7c; housing-favor semantics and lifecycle are not claimed. |
 | `Enum.HousingFavorUpdateType.Add` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.HousingFavorUpdateType.InitiativeAdd` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.HousingFavorUpdateType.Set` | untriaged | enum | added | enum added in 12.0.0. |

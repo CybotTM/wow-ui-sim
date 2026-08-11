@@ -55872,177 +55872,562 @@
       "id": "added:Enum.HousingFavorUpdateSource.DecorCollection",
       "symbol": "Enum.HousingFavorUpdateSource.DecorCollection",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSource.DecorCollection as Lua numeric value 1; the guarded fallback publishes the complete family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) and matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSource.DecorCollection as Lua number with exact retail 12.0.0 value 1."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSource.DeferredRewards",
       "symbol": "Enum.HousingFavorUpdateSource.DeferredRewards",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSource.DeferredRewards as Lua numeric value 2; the guarded fallback publishes the complete family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) and matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSource.DeferredRewards as Lua number with exact retail 12.0.0 value 2."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSource.InitiativeChest",
       "symbol": "Enum.HousingFavorUpdateSource.InitiativeChest",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSource.InitiativeChest as Lua numeric value 6; the guarded fallback publishes the complete family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) and matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSource.InitiativeChest as Lua number with exact retail 12.0.0 value 6."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSource.InitiativeTask",
       "symbol": "Enum.HousingFavorUpdateSource.InitiativeTask",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSource.InitiativeTask as Lua numeric value 5; the guarded fallback publishes the complete family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) and matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSource.InitiativeTask as Lua number with exact retail 12.0.0 value 5."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSource.NewHouseDecorFavor",
       "symbol": "Enum.HousingFavorUpdateSource.NewHouseDecorFavor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSource.NewHouseDecorFavor as Lua numeric value 4; the guarded fallback publishes the complete family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) and matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSource.NewHouseDecorFavor as Lua number with exact retail 12.0.0 value 4."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSource.Quest",
       "symbol": "Enum.HousingFavorUpdateSource.Quest",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSource.Quest as Lua numeric value 7; the guarded fallback publishes the complete family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) and matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSource.Quest as Lua number with exact retail 12.0.0 value 7."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSource.RetroactiveDecor",
       "symbol": "Enum.HousingFavorUpdateSource.RetroactiveDecor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSource.RetroactiveDecor as Lua numeric value 3; the guarded fallback publishes the complete family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) and matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSource.RetroactiveDecor as Lua number with exact retail 12.0.0 value 3."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSource.Unknown",
       "symbol": "Enum.HousingFavorUpdateSource.Unknown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSource.Unknown as Lua numeric value 0; the guarded fallback publishes the complete family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) and matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSource.Unknown as Lua number with exact retail 12.0.0 value 0."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSourceMeta.MaxValue",
       "symbol": "Enum.HousingFavorUpdateSourceMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSourceMeta.MaxValue as Lua numeric value 7; the guarded fallback publishes the matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSourceMeta.MaxValue as Lua number with exact retail 12.0.0 value 7."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSourceMeta.MinValue",
       "symbol": "Enum.HousingFavorUpdateSourceMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSourceMeta.MinValue as Lua numeric value 0; the guarded fallback publishes the matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSourceMeta.MinValue as Lua number with exact retail 12.0.0 value 0."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSourceMeta.NumValues",
       "symbol": "Enum.HousingFavorUpdateSourceMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.HousingFavorUpdateSourceMeta.NumValues as Lua numeric value 8; the guarded fallback publishes the matching metadata (MinValue=0, MaxValue=7, NumValues=8).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the HousingFavorUpdateSource family (Unknown=0, DecorCollection=1, DeferredRewards=2, RetroactiveDecor=3, NewHouseDecorFavor=4, InitiativeTask=5, InitiativeChest=6, Quest=7) with metadata (MinValue=0, MaxValue=7, NumValues=8); no competing explicit runtime definition was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact eight-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=7, NumValues=8.",
+          "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_favor_update_source_enums.rs::test_patch_12_0_0_housing_favor_update_source_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingFavorUpdateSourceMeta.NumValues as Lua number with exact retail 12.0.0 value 8."
+      ],
+      "commit": "e5377de7c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No housing-favor behavior, producers, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e5377de7c."
     },
     {
       "id": "added:Enum.HousingFavorUpdateType.Add",
