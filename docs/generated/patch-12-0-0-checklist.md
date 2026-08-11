@@ -1720,8 +1720,8 @@
 1720. [best-effort] `added:Enum.NeighborhoodInitiativesCompletionStatesMeta.MaxValue` — behavioral
 1721. [best-effort] `added:Enum.NeighborhoodInitiativesCompletionStatesMeta.MinValue` — behavioral
 1722. [best-effort] `added:Enum.NeighborhoodInitiativesCompletionStatesMeta.NumValues` — behavioral
-1723. [untriaged] `added:Enum.NpcCraftingOrderSetFlags.AllowDuplicate` — untriaged
-1724. [untriaged] `added:Enum.NpcCraftingOrderSetFlags.AllowMultiple` — untriaged
+1723. [best-effort] `added:Enum.NpcCraftingOrderSetFlags.AllowDuplicate` — behavioral
+1724. [best-effort] `added:Enum.NpcCraftingOrderSetFlags.AllowMultiple` — behavioral
 1725. [best-effort] `added:Enum.PerksVendorCategoryType.RefundUnused` — behavioral
 1726. [untriaged] `added:Enum.PlayerCompanionInfoFlags.IgnoreSeasonInScenarios` — untriaged
 1727. [untriaged] `added:Enum.PlayerCompanionInfoFlagsMeta.MaxValue` — untriaged
