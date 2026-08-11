@@ -2175,11 +2175,11 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.UICovenantDisplayInfoFlagsMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publishes the exact two-member UICovenantDisplayInfoFlags family and metadata through proof commit dcda2eea2; the shared later-shape fallback is corrected by a retail override, and covenant display semantics/lifecycle are not claimed. |
 | `Enum.UICursorType.Outfit` | best-effort | enum | added | enum added in 12.0.0. |
 | `Enum.UIWidgetVisualizationType.PreyHuntProgress` | best-effort | enum | added | enum added in 12.0.0. |
-| `Enum.UnitAuraSortDirection.Normal` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.UnitAuraSortDirection.Reverse` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.UnitAuraSortDirectionMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.UnitAuraSortDirectionMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.UnitAuraSortDirectionMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.UnitAuraSortDirection.Normal` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication and exact UnitAuraSortDirection family/metadata are covered by proof commit a3ae227f8; aura-sort semantics and lifecycle are not claimed. |
+| `Enum.UnitAuraSortDirection.Reverse` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication and exact UnitAuraSortDirection family/metadata are covered by proof commit a3ae227f8; aura-sort semantics and lifecycle are not claimed. |
+| `Enum.UnitAuraSortDirectionMeta.MaxValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication and exact UnitAuraSortDirection family/metadata are covered by proof commit a3ae227f8; aura-sort semantics and lifecycle are not claimed. |
+| `Enum.UnitAuraSortDirectionMeta.MinValue` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication and exact UnitAuraSortDirection family/metadata are covered by proof commit a3ae227f8; aura-sort semantics and lifecycle are not claimed. |
+| `Enum.UnitAuraSortDirectionMeta.NumValues` | best-effort | enum | added | Best-effort behavioral: retail 12.0.0 startup publication and exact UnitAuraSortDirection family/metadata are covered by proof commit a3ae227f8; aura-sort semantics and lifecycle are not claimed. |
 | `Enum.UnitAuraSortRule.BigDefensive` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.UnitAuraSortRule.Default` | best-effort | enum | added | Behavioral proof is limited to current 12.0.0 startup namespace/metadata publication, numeric Lua type, and exact value 1; aura sorting and consumer semantics are not claimed. |
 | `Enum.UnitAuraSortRule.Expiration` | best-effort | enum | added | Behavioral proof is limited to current 12.0.0 startup namespace/metadata publication, numeric Lua type, and exact value 3; aura sorting and consumer semantics are not claimed. |

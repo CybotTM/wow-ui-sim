@@ -2106,11 +2106,11 @@
 2106. [best-effort] `added:Enum.UICovenantDisplayInfoFlagsMeta.NumValues` — behavioral
 2107. [best-effort] `added:Enum.UICursorType.Outfit` — behavioral
 2108. [best-effort] `added:Enum.UIWidgetVisualizationType.PreyHuntProgress` — behavioral
-2109. [untriaged] `added:Enum.UnitAuraSortDirection.Normal` — untriaged
-2110. [untriaged] `added:Enum.UnitAuraSortDirection.Reverse` — untriaged
-2111. [untriaged] `added:Enum.UnitAuraSortDirectionMeta.MaxValue` — untriaged
-2112. [untriaged] `added:Enum.UnitAuraSortDirectionMeta.MinValue` — untriaged
-2113. [untriaged] `added:Enum.UnitAuraSortDirectionMeta.NumValues` — untriaged
+2109. [best-effort] `added:Enum.UnitAuraSortDirection.Normal` — behavioral
+2110. [best-effort] `added:Enum.UnitAuraSortDirection.Reverse` — behavioral
+2111. [best-effort] `added:Enum.UnitAuraSortDirectionMeta.MaxValue` — behavioral
+2112. [best-effort] `added:Enum.UnitAuraSortDirectionMeta.MinValue` — behavioral
+2113. [best-effort] `added:Enum.UnitAuraSortDirectionMeta.NumValues` — behavioral
 2114. [untriaged] `added:Enum.UnitAuraSortRule.BigDefensive` — untriaged
 2115. [best-effort] `added:Enum.UnitAuraSortRule.Default` — behavioral
 2116. [best-effort] `added:Enum.UnitAuraSortRule.Expiration` — behavioral
