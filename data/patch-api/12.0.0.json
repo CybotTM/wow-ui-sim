@@ -54992,81 +54992,321 @@
       "id": "added:Enum.FrameTutorialAccount.TransmogCustomSets",
       "symbol": "Enum.FrameTutorialAccount.TransmogCustomSets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register adds FrameTutorialAccount TransmogOutfits=41, TransmogSets=42, TransmogCustomSets=43, TransmogSituations=44, TransmogWeaponOptions=45 and changes FrameTutorialAccountMeta.MaxValue/NumValues from 40 to 45.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback carries later FrameTutorialAccount values 46/47 and metadata MaxValue/NumValues=47; the retail 12.0.0 override removes those later members and publishes the 12.0.0 five-member additions with metadata MaxValue=45, NumValues=45.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization applies the FrameTutorialAccount compatibility override after fallback resolution, removing TransmogTrialOfStyle and TransmogCustomSetsMigration and setting MaxValue/NumValues to 45.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/mod.rs",
+          "summary": "Enum registry data defines FrameTutorialAccount through HousingCleanupMode=40 but does not include FRAME_TUTORIAL_ACCOUNT in EXPLICIT_ENUMS; guarded fallback publication therefore remains authoritative for this namespace.",
+          "source_hash": "351da1e44d42d84554583bed5e6dc70e15121720f8a8226c955b00db0d22db3b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/game_system.rs",
+          "summary": "The FrameTutorialAccount Rust enum definition stops at HousingCleanupMode=40; later additions are supplied by the guarded fallback and corrected by the retail 12.0.0 override.",
+          "source_hash": "2d923e02b8d8994fea1a300cfac52c665d28e00996e3348b390564e838fc4281"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the five transmog members as Lua numbers, exactly 45 unique numeric members in range 1..45, and metadata MinValue=1, MaxValue=45, NumValues=45.",
+          "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs::test_patch_12_0_0_frame_tutorial_account_transmog_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FrameTutorialAccount.TransmogCustomSets as Lua number with exact retail 12.0.0 value 43."
+      ],
+      "commit": "6f00129a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact FrameTutorialAccount metadata, and removal of later-shape members. Tutorial behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof/fix commit: 6f00129a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FrameTutorialAccount.TransmogOutfits",
       "symbol": "Enum.FrameTutorialAccount.TransmogOutfits",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register adds FrameTutorialAccount TransmogOutfits=41, TransmogSets=42, TransmogCustomSets=43, TransmogSituations=44, TransmogWeaponOptions=45 and changes FrameTutorialAccountMeta.MaxValue/NumValues from 40 to 45.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback carries later FrameTutorialAccount values 46/47 and metadata MaxValue/NumValues=47; the retail 12.0.0 override removes those later members and publishes the 12.0.0 five-member additions with metadata MaxValue=45, NumValues=45.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization applies the FrameTutorialAccount compatibility override after fallback resolution, removing TransmogTrialOfStyle and TransmogCustomSetsMigration and setting MaxValue/NumValues to 45.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/mod.rs",
+          "summary": "Enum registry data defines FrameTutorialAccount through HousingCleanupMode=40 but does not include FRAME_TUTORIAL_ACCOUNT in EXPLICIT_ENUMS; guarded fallback publication therefore remains authoritative for this namespace.",
+          "source_hash": "351da1e44d42d84554583bed5e6dc70e15121720f8a8226c955b00db0d22db3b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/game_system.rs",
+          "summary": "The FrameTutorialAccount Rust enum definition stops at HousingCleanupMode=40; later additions are supplied by the guarded fallback and corrected by the retail 12.0.0 override.",
+          "source_hash": "2d923e02b8d8994fea1a300cfac52c665d28e00996e3348b390564e838fc4281"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the five transmog members as Lua numbers, exactly 45 unique numeric members in range 1..45, and metadata MinValue=1, MaxValue=45, NumValues=45.",
+          "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs::test_patch_12_0_0_frame_tutorial_account_transmog_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FrameTutorialAccount.TransmogOutfits as Lua number with exact retail 12.0.0 value 41."
+      ],
+      "commit": "6f00129a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact FrameTutorialAccount metadata, and removal of later-shape members. Tutorial behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof/fix commit: 6f00129a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FrameTutorialAccount.TransmogSets",
       "symbol": "Enum.FrameTutorialAccount.TransmogSets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register adds FrameTutorialAccount TransmogOutfits=41, TransmogSets=42, TransmogCustomSets=43, TransmogSituations=44, TransmogWeaponOptions=45 and changes FrameTutorialAccountMeta.MaxValue/NumValues from 40 to 45.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback carries later FrameTutorialAccount values 46/47 and metadata MaxValue/NumValues=47; the retail 12.0.0 override removes those later members and publishes the 12.0.0 five-member additions with metadata MaxValue=45, NumValues=45.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization applies the FrameTutorialAccount compatibility override after fallback resolution, removing TransmogTrialOfStyle and TransmogCustomSetsMigration and setting MaxValue/NumValues to 45.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/mod.rs",
+          "summary": "Enum registry data defines FrameTutorialAccount through HousingCleanupMode=40 but does not include FRAME_TUTORIAL_ACCOUNT in EXPLICIT_ENUMS; guarded fallback publication therefore remains authoritative for this namespace.",
+          "source_hash": "351da1e44d42d84554583bed5e6dc70e15121720f8a8226c955b00db0d22db3b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/game_system.rs",
+          "summary": "The FrameTutorialAccount Rust enum definition stops at HousingCleanupMode=40; later additions are supplied by the guarded fallback and corrected by the retail 12.0.0 override.",
+          "source_hash": "2d923e02b8d8994fea1a300cfac52c665d28e00996e3348b390564e838fc4281"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the five transmog members as Lua numbers, exactly 45 unique numeric members in range 1..45, and metadata MinValue=1, MaxValue=45, NumValues=45.",
+          "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs::test_patch_12_0_0_frame_tutorial_account_transmog_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FrameTutorialAccount.TransmogSets as Lua number with exact retail 12.0.0 value 42."
+      ],
+      "commit": "6f00129a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact FrameTutorialAccount metadata, and removal of later-shape members. Tutorial behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof/fix commit: 6f00129a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FrameTutorialAccount.TransmogSituations",
       "symbol": "Enum.FrameTutorialAccount.TransmogSituations",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register adds FrameTutorialAccount TransmogOutfits=41, TransmogSets=42, TransmogCustomSets=43, TransmogSituations=44, TransmogWeaponOptions=45 and changes FrameTutorialAccountMeta.MaxValue/NumValues from 40 to 45.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback carries later FrameTutorialAccount values 46/47 and metadata MaxValue/NumValues=47; the retail 12.0.0 override removes those later members and publishes the 12.0.0 five-member additions with metadata MaxValue=45, NumValues=45.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization applies the FrameTutorialAccount compatibility override after fallback resolution, removing TransmogTrialOfStyle and TransmogCustomSetsMigration and setting MaxValue/NumValues to 45.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/mod.rs",
+          "summary": "Enum registry data defines FrameTutorialAccount through HousingCleanupMode=40 but does not include FRAME_TUTORIAL_ACCOUNT in EXPLICIT_ENUMS; guarded fallback publication therefore remains authoritative for this namespace.",
+          "source_hash": "351da1e44d42d84554583bed5e6dc70e15121720f8a8226c955b00db0d22db3b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/game_system.rs",
+          "summary": "The FrameTutorialAccount Rust enum definition stops at HousingCleanupMode=40; later additions are supplied by the guarded fallback and corrected by the retail 12.0.0 override.",
+          "source_hash": "2d923e02b8d8994fea1a300cfac52c665d28e00996e3348b390564e838fc4281"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the five transmog members as Lua numbers, exactly 45 unique numeric members in range 1..45, and metadata MinValue=1, MaxValue=45, NumValues=45.",
+          "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs::test_patch_12_0_0_frame_tutorial_account_transmog_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FrameTutorialAccount.TransmogSituations as Lua number with exact retail 12.0.0 value 44."
+      ],
+      "commit": "6f00129a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact FrameTutorialAccount metadata, and removal of later-shape members. Tutorial behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof/fix commit: 6f00129a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FrameTutorialAccount.TransmogWeaponOptions",
       "symbol": "Enum.FrameTutorialAccount.TransmogWeaponOptions",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register adds FrameTutorialAccount TransmogOutfits=41, TransmogSets=42, TransmogCustomSets=43, TransmogSituations=44, TransmogWeaponOptions=45 and changes FrameTutorialAccountMeta.MaxValue/NumValues from 40 to 45.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback carries later FrameTutorialAccount values 46/47 and metadata MaxValue/NumValues=47; the retail 12.0.0 override removes those later members and publishes the 12.0.0 five-member additions with metadata MaxValue=45, NumValues=45.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization applies the FrameTutorialAccount compatibility override after fallback resolution, removing TransmogTrialOfStyle and TransmogCustomSetsMigration and setting MaxValue/NumValues to 45.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/mod.rs",
+          "summary": "Enum registry data defines FrameTutorialAccount through HousingCleanupMode=40 but does not include FRAME_TUTORIAL_ACCOUNT in EXPLICIT_ENUMS; guarded fallback publication therefore remains authoritative for this namespace.",
+          "source_hash": "351da1e44d42d84554583bed5e6dc70e15121720f8a8226c955b00db0d22db3b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/game_system.rs",
+          "summary": "The FrameTutorialAccount Rust enum definition stops at HousingCleanupMode=40; later additions are supplied by the guarded fallback and corrected by the retail 12.0.0 override.",
+          "source_hash": "2d923e02b8d8994fea1a300cfac52c665d28e00996e3348b390564e838fc4281"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the five transmog members as Lua numbers, exactly 45 unique numeric members in range 1..45, and metadata MinValue=1, MaxValue=45, NumValues=45.",
+          "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs::test_patch_12_0_0_frame_tutorial_account_transmog_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FrameTutorialAccount.TransmogWeaponOptions as Lua number with exact retail 12.0.0 value 45."
+      ],
+      "commit": "6f00129a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact FrameTutorialAccount metadata, and removal of later-shape members. Tutorial behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof/fix commit: 6f00129a6.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.GameRule.EjJourneysDisabled",
@@ -89989,33 +90229,129 @@
       "id": "changed:Enum.FrameTutorialAccountMeta.MaxValue",
       "symbol": "Enum.FrameTutorialAccountMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register adds FrameTutorialAccount TransmogOutfits=41, TransmogSets=42, TransmogCustomSets=43, TransmogSituations=44, TransmogWeaponOptions=45 and changes FrameTutorialAccountMeta.MaxValue/NumValues from 40 to 45.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback carries later FrameTutorialAccount values 46/47 and metadata MaxValue/NumValues=47; the retail 12.0.0 override removes those later members and publishes the 12.0.0 five-member additions with metadata MaxValue=45, NumValues=45.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization applies the FrameTutorialAccount compatibility override after fallback resolution, removing TransmogTrialOfStyle and TransmogCustomSetsMigration and setting MaxValue/NumValues to 45.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/mod.rs",
+          "summary": "Enum registry data defines FrameTutorialAccount through HousingCleanupMode=40 but does not include FRAME_TUTORIAL_ACCOUNT in EXPLICIT_ENUMS; guarded fallback publication therefore remains authoritative for this namespace.",
+          "source_hash": "351da1e44d42d84554583bed5e6dc70e15121720f8a8226c955b00db0d22db3b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/game_system.rs",
+          "summary": "The FrameTutorialAccount Rust enum definition stops at HousingCleanupMode=40; later additions are supplied by the guarded fallback and corrected by the retail 12.0.0 override.",
+          "source_hash": "2d923e02b8d8994fea1a300cfac52c665d28e00996e3348b390564e838fc4281"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the five transmog members as Lua numbers, exactly 45 unique numeric members in range 1..45, and metadata MinValue=1, MaxValue=45, NumValues=45.",
+          "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs::test_patch_12_0_0_frame_tutorial_account_transmog_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FrameTutorialAccountMeta.MaxValue as Lua number with exact retail 12.0.0 value 45."
+      ],
+      "commit": "6f00129a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact FrameTutorialAccount metadata, and removal of later-shape members. Tutorial behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof/fix commit: 6f00129a6.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.FrameTutorialAccountMeta.NumValues",
       "symbol": "Enum.FrameTutorialAccountMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register adds FrameTutorialAccount TransmogOutfits=41, TransmogSets=42, TransmogCustomSets=43, TransmogSituations=44, TransmogWeaponOptions=45 and changes FrameTutorialAccountMeta.MaxValue/NumValues from 40 to 45.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback carries later FrameTutorialAccount values 46/47 and metadata MaxValue/NumValues=47; the retail 12.0.0 override removes those later members and publishes the 12.0.0 five-member additions with metadata MaxValue=45, NumValues=45.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization applies the FrameTutorialAccount compatibility override after fallback resolution, removing TransmogTrialOfStyle and TransmogCustomSetsMigration and setting MaxValue/NumValues to 45.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/mod.rs",
+          "summary": "Enum registry data defines FrameTutorialAccount through HousingCleanupMode=40 but does not include FRAME_TUTORIAL_ACCOUNT in EXPLICIT_ENUMS; guarded fallback publication therefore remains authoritative for this namespace.",
+          "source_hash": "351da1e44d42d84554583bed5e6dc70e15121720f8a8226c955b00db0d22db3b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/game_system.rs",
+          "summary": "The FrameTutorialAccount Rust enum definition stops at HousingCleanupMode=40; later additions are supplied by the guarded fallback and corrected by the retail 12.0.0 override.",
+          "source_hash": "2d923e02b8d8994fea1a300cfac52c665d28e00996e3348b390564e838fc4281"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the five transmog members as Lua numbers, exactly 45 unique numeric members in range 1..45, and metadata MinValue=1, MaxValue=45, NumValues=45.",
+          "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_frame_tutorial_account_transmog_enums.rs::test_patch_12_0_0_frame_tutorial_account_transmog_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FrameTutorialAccountMeta.NumValues as Lua number with exact retail 12.0.0 value 45."
+      ],
+      "commit": "6f00129a6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact FrameTutorialAccount metadata, and removal of later-shape members. Tutorial behavior, consumers, persistence, transitions, and lifecycle are not claimed. Proof/fix commit: 6f00129a6.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.GameRuleMeta.MaxValue",

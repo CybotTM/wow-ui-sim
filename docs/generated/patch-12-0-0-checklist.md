@@ -1495,11 +1495,11 @@
 1495. [best-effort] `added:Enum.FragmentID.FNeighborhoodStateData` — behavioral
 1496. [best-effort] `added:Enum.FragmentID.FPlayerInitiativeInfo` — behavioral
 1497. [best-effort] `added:Enum.FragmentID.FUnitAIGroupLink` — behavioral
-1498. [untriaged] `added:Enum.FrameTutorialAccount.TransmogCustomSets` — untriaged
-1499. [untriaged] `added:Enum.FrameTutorialAccount.TransmogOutfits` — untriaged
-1500. [untriaged] `added:Enum.FrameTutorialAccount.TransmogSets` — untriaged
-1501. [untriaged] `added:Enum.FrameTutorialAccount.TransmogSituations` — untriaged
-1502. [untriaged] `added:Enum.FrameTutorialAccount.TransmogWeaponOptions` — untriaged
+1498. [best-effort] `added:Enum.FrameTutorialAccount.TransmogCustomSets` — behavioral
+1499. [best-effort] `added:Enum.FrameTutorialAccount.TransmogOutfits` — behavioral
+1500. [best-effort] `added:Enum.FrameTutorialAccount.TransmogSets` — behavioral
+1501. [best-effort] `added:Enum.FrameTutorialAccount.TransmogSituations` — behavioral
+1502. [best-effort] `added:Enum.FrameTutorialAccount.TransmogWeaponOptions` — behavioral
 1503. [best-effort] `added:Enum.GameRule.EjJourneysDisabled` — behavioral
 1504. [best-effort] `added:Enum.GameRule.PvPInitialRatingOverride` — behavioral
 1505. [best-effort] `added:Enum.GossipNpcOption.TieredEntrance` — behavioral
@@ -2654,8 +2654,8 @@
 2654. [untriaged] `changed:Enum.EditModeUnitFrameSettingMeta.MaxValue` — untriaged
 2655. [untriaged] `changed:Enum.EditModeUnitFrameSettingMeta.NumValues` — untriaged
 2656. [best-effort] `changed:Enum.FragmentIDMeta.NumValues` — behavioral
-2657. [untriaged] `changed:Enum.FrameTutorialAccountMeta.MaxValue` — untriaged
-2658. [untriaged] `changed:Enum.FrameTutorialAccountMeta.NumValues` — untriaged
+2657. [best-effort] `changed:Enum.FrameTutorialAccountMeta.MaxValue` — behavioral
+2658. [best-effort] `changed:Enum.FrameTutorialAccountMeta.NumValues` — behavioral
 2659. [best-effort] `changed:Enum.GameRuleMeta.MaxValue` — behavioral
 2660. [best-effort] `changed:Enum.GameRuleMeta.NumValues` — behavioral
 2661. [untriaged] `changed:Enum.HousingCatalogEntrySubtype.OwnedModifiedStack` — untriaged
