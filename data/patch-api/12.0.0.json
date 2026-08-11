@@ -54576,129 +54576,417 @@
       "id": "added:Enum.FontStringScaleAnimationMode.FontSize",
       "symbol": "Enum.FontStringScaleAnimationMode.FontSize",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.FontStringScaleAnimationMode family values FontSize=0 and Vertex=1 with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback publishes the matching two-member FontStringScaleAnimationMode family and metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact two-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs::test_patch_12_0_0_font_string_scale_animation_mode_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FontStringScaleAnimationMode.FontSize as Lua number with exact retail 12.0.0 value 0."
+      ],
+      "commit": "462b919fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No scaling/animation semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 462b919fe.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FontStringScaleAnimationMode.Vertex",
       "symbol": "Enum.FontStringScaleAnimationMode.Vertex",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.FontStringScaleAnimationMode family values FontSize=0 and Vertex=1 with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback publishes the matching two-member FontStringScaleAnimationMode family and metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact two-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs::test_patch_12_0_0_font_string_scale_animation_mode_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FontStringScaleAnimationMode.Vertex as Lua number with exact retail 12.0.0 value 1."
+      ],
+      "commit": "462b919fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No scaling/animation semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 462b919fe.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FontStringScaleAnimationModeMeta.MaxValue",
       "symbol": "Enum.FontStringScaleAnimationModeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.FontStringScaleAnimationMode family values FontSize=0 and Vertex=1 with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback publishes the matching two-member FontStringScaleAnimationMode family and metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact two-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs::test_patch_12_0_0_font_string_scale_animation_mode_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FontStringScaleAnimationMode.MaxValue as Lua number with exact retail 12.0.0 value 1."
+      ],
+      "commit": "462b919fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No scaling/animation semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 462b919fe.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FontStringScaleAnimationModeMeta.MinValue",
       "symbol": "Enum.FontStringScaleAnimationModeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.FontStringScaleAnimationMode family values FontSize=0 and Vertex=1 with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback publishes the matching two-member FontStringScaleAnimationMode family and metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact two-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs::test_patch_12_0_0_font_string_scale_animation_mode_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FontStringScaleAnimationMode.MinValue as Lua number with exact retail 12.0.0 value 0."
+      ],
+      "commit": "462b919fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No scaling/animation semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 462b919fe.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FontStringScaleAnimationModeMeta.NumValues",
       "symbol": "Enum.FontStringScaleAnimationModeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds Enum.FontStringScaleAnimationMode family values FontSize=0 and Vertex=1 with metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback publishes the matching two-member FontStringScaleAnimationMode family and metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact two-member family, Lua numeric types, no extras, and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_font_string_scale_animation_mode_enums.rs::test_patch_12_0_0_font_string_scale_animation_mode_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.FontStringScaleAnimationMode.NumValues as Lua number with exact retail 12.0.0 value 2."
+      ],
+      "commit": "462b919fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, and metadata. No scaling/animation semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 462b919fe.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FragmentID.FNeighborhoodStateData",
       "symbol": "Enum.FragmentID.FNeighborhoodStateData",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds FragmentID values FNeighborhoodStateData=38, FPlayerInitiativeInfo=37, FUnitAIGroupLink=39 and changes FragmentIDMeta.NumValues from 69 to 72.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback publishes the matching FragmentID members and metadata MinValue=0, MaxValue=255, NumValues=72.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_fragment_id_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three added FragmentID members as Lua numbers and exact metadata MinValue=0, MaxValue=255, NumValues=72.",
+          "source_hash": "00bf28b0a0767276a4ab3b78b17f36c06d32c607bc1db61c983a9fb91bd2a44d"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the three FragmentID values and metadata NumValues=72.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_fragment_id_enums.rs::test_patch_12_0_0_fragment_id_additions"
+      ],
+      "assertions": [
+        "Publishes Enum.FragmentID.FNeighborhoodStateData as Lua number with exact retail 12.0.0 value 38."
+      ],
+      "commit": "d42484e0a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, and matching FragmentID metadata. No fragment semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: d42484e0a.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FragmentID.FPlayerInitiativeInfo",
       "symbol": "Enum.FragmentID.FPlayerInitiativeInfo",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds FragmentID values FNeighborhoodStateData=38, FPlayerInitiativeInfo=37, FUnitAIGroupLink=39 and changes FragmentIDMeta.NumValues from 69 to 72.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback publishes the matching FragmentID members and metadata MinValue=0, MaxValue=255, NumValues=72.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_fragment_id_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three added FragmentID members as Lua numbers and exact metadata MinValue=0, MaxValue=255, NumValues=72.",
+          "source_hash": "00bf28b0a0767276a4ab3b78b17f36c06d32c607bc1db61c983a9fb91bd2a44d"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the three FragmentID values and metadata NumValues=72.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_fragment_id_enums.rs::test_patch_12_0_0_fragment_id_additions"
+      ],
+      "assertions": [
+        "Publishes Enum.FragmentID.FPlayerInitiativeInfo as Lua number with exact retail 12.0.0 value 37."
+      ],
+      "commit": "d42484e0a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, and matching FragmentID metadata. No fragment semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: d42484e0a.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FragmentID.FUnitAIGroupLink",
       "symbol": "Enum.FragmentID.FUnitAIGroupLink",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds FragmentID values FNeighborhoodStateData=38, FPlayerInitiativeInfo=37, FUnitAIGroupLink=39 and changes FragmentIDMeta.NumValues from 69 to 72.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback publishes the matching FragmentID members and metadata MinValue=0, MaxValue=255, NumValues=72.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_fragment_id_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three added FragmentID members as Lua numbers and exact metadata MinValue=0, MaxValue=255, NumValues=72.",
+          "source_hash": "00bf28b0a0767276a4ab3b78b17f36c06d32c607bc1db61c983a9fb91bd2a44d"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the three FragmentID values and metadata NumValues=72.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_fragment_id_enums.rs::test_patch_12_0_0_fragment_id_additions"
+      ],
+      "assertions": [
+        "Publishes Enum.FragmentID.FUnitAIGroupLink as Lua number with exact retail 12.0.0 value 39."
+      ],
+      "commit": "d42484e0a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, and matching FragmentID metadata. No fragment semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: d42484e0a.",
+      "provenance_only": false
     },
     {
       "id": "added:Enum.FrameTutorialAccount.TransmogCustomSets",
@@ -89649,17 +89937,53 @@
       "id": "changed:Enum.FragmentIDMeta.NumValues",
       "symbol": "Enum.FragmentIDMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in 12.0.0 source register adds FragmentID values FNeighborhoodStateData=38, FPlayerInitiativeInfo=37, FUnitAIGroupLink=39 and changes FragmentIDMeta.NumValues from 69 to 72.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded missing-enums fallback publishes the matching FragmentID members and metadata MinValue=0, MaxValue=255, NumValues=72.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_fragment_id_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the three added FragmentID members as Lua numbers and exact metadata MinValue=0, MaxValue=255, NumValues=72.",
+          "source_hash": "00bf28b0a0767276a4ab3b78b17f36c06d32c607bc1db61c983a9fb91bd2a44d"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the three FragmentID values and metadata NumValues=72.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_fragment_id_enums.rs::test_patch_12_0_0_fragment_id_additions"
+      ],
+      "assertions": [
+        "Publishes Enum.FragmentIDMeta.NumValues as Lua number with exact retail 12.0.0 value 72."
+      ],
+      "commit": "d42484e0a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, and matching FragmentID metadata. No fragment semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: d42484e0a.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.FrameTutorialAccountMeta.MaxValue",
