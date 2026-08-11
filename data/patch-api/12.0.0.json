@@ -57368,81 +57368,256 @@
       "id": "added:Enum.HousingRoomComponentFlags.HiddenInLayoutMode",
       "symbol": "Enum.HousingRoomComponentFlags.HiddenInLayoutMode",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes added:Enum.HousingRoomComponentFlags.HiddenInLayoutMode with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The guarded fallback publishes the complete HousingRoomComponentFlags family (None=0, HiddenInLayoutMode=1) and matching metadata (MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for HousingRoomComponentFlags without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member HousingRoomComponentFlags family as Lua numbers with no extras and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "3ba417b45929f058c4e462958986a989c2f5855db4875c64eca1bea1a4677918"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.HousingRoomComponentFlags.HiddenInLayoutMode with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs::test_patch_12_0_0_housing_room_component_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.HousingRoomComponentFlags.HiddenInLayoutMode as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact HousingRoomComponentFlags family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "b0fd1c338",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact values, exact complete HousingRoomComponentFlags family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. No runtime drift; guarded fallback is authoritative. Room-layout flag semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b0fd1c338."
     },
     {
       "id": "added:Enum.HousingRoomComponentFlags.None",
       "symbol": "Enum.HousingRoomComponentFlags.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes added:Enum.HousingRoomComponentFlags.None with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The guarded fallback publishes the complete HousingRoomComponentFlags family (None=0, HiddenInLayoutMode=1) and matching metadata (MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for HousingRoomComponentFlags without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member HousingRoomComponentFlags family as Lua numbers with no extras and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "3ba417b45929f058c4e462958986a989c2f5855db4875c64eca1bea1a4677918"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.HousingRoomComponentFlags.None with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs::test_patch_12_0_0_housing_room_component_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.HousingRoomComponentFlags.None as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact HousingRoomComponentFlags family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "b0fd1c338",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact values, exact complete HousingRoomComponentFlags family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. No runtime drift; guarded fallback is authoritative. Room-layout flag semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b0fd1c338."
     },
     {
       "id": "added:Enum.HousingRoomComponentFlagsMeta.MaxValue",
       "symbol": "Enum.HousingRoomComponentFlagsMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes added:Enum.HousingRoomComponentFlagsMeta.MaxValue with numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The guarded fallback publishes the complete HousingRoomComponentFlags family (None=0, HiddenInLayoutMode=1) and matching metadata (MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for HousingRoomComponentFlags without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member HousingRoomComponentFlags family as Lua numbers with no extras and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "3ba417b45929f058c4e462958986a989c2f5855db4875c64eca1bea1a4677918"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.HousingRoomComponentFlagsMeta.MaxValue with numeric value 1.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs::test_patch_12_0_0_housing_room_component_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.HousingRoomComponentFlagsMeta.MaxValue as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact HousingRoomComponentFlags family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "b0fd1c338",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact values, exact complete HousingRoomComponentFlags family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. No runtime drift; guarded fallback is authoritative. Room-layout flag semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b0fd1c338."
     },
     {
       "id": "added:Enum.HousingRoomComponentFlagsMeta.MinValue",
       "symbol": "Enum.HousingRoomComponentFlagsMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes added:Enum.HousingRoomComponentFlagsMeta.MinValue with numeric value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The guarded fallback publishes the complete HousingRoomComponentFlags family (None=0, HiddenInLayoutMode=1) and matching metadata (MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for HousingRoomComponentFlags without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member HousingRoomComponentFlags family as Lua numbers with no extras and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "3ba417b45929f058c4e462958986a989c2f5855db4875c64eca1bea1a4677918"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.HousingRoomComponentFlagsMeta.MinValue with numeric value 0.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs::test_patch_12_0_0_housing_room_component_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.HousingRoomComponentFlagsMeta.MinValue as a Lua number with exact retail 12.0.0 value 0; the focused namespace test also requires the exact HousingRoomComponentFlags family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "b0fd1c338",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact values, exact complete HousingRoomComponentFlags family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. No runtime drift; guarded fallback is authoritative. Room-layout flag semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b0fd1c338."
     },
     {
       "id": "added:Enum.HousingRoomComponentFlagsMeta.NumValues",
       "symbol": "Enum.HousingRoomComponentFlagsMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes added:Enum.HousingRoomComponentFlagsMeta.NumValues with numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "The guarded fallback publishes the complete HousingRoomComponentFlags family (None=0, HiddenInLayoutMode=1) and matching metadata (MinValue=0, MaxValue=1, NumValues=2); no competing explicit publication or drift was found.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback for HousingRoomComponentFlags without a retail 12.0.0 correction or competing definition.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs",
+          "summary": "The focused startup test asserts the exact complete two-member HousingRoomComponentFlags family as Lua numbers with no extras and metadata MinValue=0, MaxValue=1, NumValues=2.",
+          "source_hash": "3ba417b45929f058c4e462958986a989c2f5855db4875c64eca1bea1a4677918"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail discovery records added:Enum.HousingRoomComponentFlagsMeta.NumValues with numeric value 2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_room_component_flags_enums.rs::test_patch_12_0_0_housing_room_component_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes added:Enum.HousingRoomComponentFlagsMeta.NumValues as a Lua number with exact retail 12.0.0 value 2; the focused namespace test also requires the exact HousingRoomComponentFlags family and metadata MinValue=0, MaxValue=1, NumValues=2."
+      ],
+      "commit": "b0fd1c338",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua numeric type, exact values, exact complete HousingRoomComponentFlags family membership, and metadata MinValue=0, MaxValue=1, NumValues=2. No runtime drift; guarded fallback is authoritative. Room-layout flag semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: b0fd1c338."
     },
     {
       "id": "added:Enum.InitiativeMilestoneFlags.FinalMilestone",

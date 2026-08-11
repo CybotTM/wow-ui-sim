@@ -1548,11 +1548,11 @@
 1548. [best-effort] `added:Enum.HousingResult.UncollectedRoom` — behavioral
 1549. [best-effort] `added:Enum.HousingResult.UncollectedRoomMaterial` — behavioral
 1550. [best-effort] `added:Enum.HousingResult.UncollectedRoomTheme` — behavioral
-1551. [untriaged] `added:Enum.HousingRoomComponentFlags.HiddenInLayoutMode` — untriaged
-1552. [untriaged] `added:Enum.HousingRoomComponentFlags.None` — untriaged
-1553. [untriaged] `added:Enum.HousingRoomComponentFlagsMeta.MaxValue` — untriaged
-1554. [untriaged] `added:Enum.HousingRoomComponentFlagsMeta.MinValue` — untriaged
-1555. [untriaged] `added:Enum.HousingRoomComponentFlagsMeta.NumValues` — untriaged
+1551. [best-effort] `added:Enum.HousingRoomComponentFlags.HiddenInLayoutMode` — behavioral
+1552. [best-effort] `added:Enum.HousingRoomComponentFlags.None` — behavioral
+1553. [best-effort] `added:Enum.HousingRoomComponentFlagsMeta.MaxValue` — behavioral
+1554. [best-effort] `added:Enum.HousingRoomComponentFlagsMeta.MinValue` — behavioral
+1555. [best-effort] `added:Enum.HousingRoomComponentFlagsMeta.NumValues` — behavioral
 1556. [untriaged] `added:Enum.InitiativeMilestoneFlags.FinalMilestone` — untriaged
 1557. [untriaged] `added:Enum.InitiativeMilestoneFlagsMeta.MaxValue` — untriaged
 1558. [untriaged] `added:Enum.InitiativeMilestoneFlagsMeta.MinValue` — untriaged

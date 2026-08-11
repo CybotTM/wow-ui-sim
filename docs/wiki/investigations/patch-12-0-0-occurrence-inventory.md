@@ -1617,11 +1617,11 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.HousingResult.UncollectedRoom` | best-effort | enum | added | enum added in 12.0.0. |
 | `Enum.HousingResult.UncollectedRoomMaterial` | best-effort | enum | added | enum added in 12.0.0. |
 | `Enum.HousingResult.UncollectedRoomTheme` | best-effort | enum | added | enum added in 12.0.0. |
-| `Enum.HousingRoomComponentFlags.HiddenInLayoutMode` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingRoomComponentFlags.None` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingRoomComponentFlagsMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingRoomComponentFlagsMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingRoomComponentFlagsMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.HousingRoomComponentFlags.HiddenInLayoutMode` | best-effort | enum | added | enum added in 12.0.0. |
+| `Enum.HousingRoomComponentFlags.None` | best-effort | enum | added | enum added in 12.0.0. |
+| `Enum.HousingRoomComponentFlagsMeta.MaxValue` | best-effort | enum | added | enum added in 12.0.0. |
+| `Enum.HousingRoomComponentFlagsMeta.MinValue` | best-effort | enum | added | enum added in 12.0.0. |
+| `Enum.HousingRoomComponentFlagsMeta.NumValues` | best-effort | enum | added | enum added in 12.0.0. |
 | `Enum.InitiativeMilestoneFlags.FinalMilestone` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.InitiativeMilestoneFlagsMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.InitiativeMilestoneFlagsMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
