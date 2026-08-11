@@ -96,6 +96,7 @@ mod patch_12_0_0_nameplate_style_enums;
 mod patch_12_0_0_nameplate_threat_display_enums;
 mod patch_12_0_0_nameplate_type_enums;
 mod patch_12_0_0_neighborhood_initiative_chest_result_enums;
+mod patch_12_0_0_neighborhood_initiative_flags_enums;
 mod patch_12_0_0_neighborhood_initiative_neighborhood_types_enums;
 mod patch_12_0_0_small_enums;
 mod patch_12_0_0_status_bar_timer_direction_enums;
