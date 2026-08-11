@@ -2099,11 +2099,11 @@
 2099. [best-effort] `added:Enum.TransmogSituationTriggerTypeMeta.MaxValue` — behavioral
 2100. [best-effort] `added:Enum.TransmogSituationTriggerTypeMeta.MinValue` — behavioral
 2101. [best-effort] `added:Enum.TransmogSituationTriggerTypeMeta.NumValues` — behavioral
-2102. [untriaged] `added:Enum.UICovenantDisplayInfoFlags.DisplayCovenantAsJourney` — untriaged
-2103. [untriaged] `added:Enum.UICovenantDisplayInfoFlags.UseJourneyRewardTrack` — untriaged
-2104. [untriaged] `added:Enum.UICovenantDisplayInfoFlagsMeta.MaxValue` — untriaged
-2105. [untriaged] `added:Enum.UICovenantDisplayInfoFlagsMeta.MinValue` — untriaged
-2106. [untriaged] `added:Enum.UICovenantDisplayInfoFlagsMeta.NumValues` — untriaged
+2102. [best-effort] `added:Enum.UICovenantDisplayInfoFlags.DisplayCovenantAsJourney` — behavioral
+2103. [best-effort] `added:Enum.UICovenantDisplayInfoFlags.UseJourneyRewardTrack` — behavioral
+2104. [best-effort] `added:Enum.UICovenantDisplayInfoFlagsMeta.MaxValue` — behavioral
+2105. [best-effort] `added:Enum.UICovenantDisplayInfoFlagsMeta.MinValue` — behavioral
+2106. [best-effort] `added:Enum.UICovenantDisplayInfoFlagsMeta.NumValues` — behavioral
 2107. [best-effort] `added:Enum.UICursorType.Outfit` — behavioral
 2108. [best-effort] `added:Enum.UIWidgetVisualizationType.PreyHuntProgress` — behavioral
 2109. [untriaged] `added:Enum.UnitAuraSortDirection.Normal` — untriaged

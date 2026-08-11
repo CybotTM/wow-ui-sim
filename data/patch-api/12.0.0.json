@@ -74811,81 +74811,256 @@
       "id": "added:Enum.UICovenantDisplayInfoFlags.DisplayCovenantAsJourney",
       "symbol": "Enum.UICovenantDisplayInfoFlags.DisplayCovenantAsJourney",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.UICovenantDisplayInfoFlags.DisplayCovenantAsJourney as exact numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared fallback contains a later three-member UICovenantDisplayInfoFlags shape; retail 12.0.0 override removes UseJourneyUnlockToastText and publishes the authoritative two-member family with metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 initialization applies the exact UICovenantDisplayInfoFlags override after fallback publication.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact two-member family, Lua numeric types, no later extra member, and metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlags.DisplayCovenantAsJourney=1 for the retail enum register.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs::test_patch_12_0_0_ui_covenant_display_info_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.UICovenantDisplayInfoFlags.DisplayCovenantAsJourney as Lua number with exact retail 12.0.0 value 1; excludes the later UseJourneyUnlockToastText member."
+      ],
+      "commit": "dcda2eea2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact two-member family membership, and metadata. Root cause was a shared fallback family containing the later UseJourneyUnlockToastText member; the retail override corrects epoch-specific publication. No covenant display semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: dcda2eea2."
     },
     {
       "id": "added:Enum.UICovenantDisplayInfoFlags.UseJourneyRewardTrack",
       "symbol": "Enum.UICovenantDisplayInfoFlags.UseJourneyRewardTrack",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.UICovenantDisplayInfoFlags.UseJourneyRewardTrack as exact numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared fallback contains a later three-member UICovenantDisplayInfoFlags shape; retail 12.0.0 override removes UseJourneyUnlockToastText and publishes the authoritative two-member family with metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 initialization applies the exact UICovenantDisplayInfoFlags override after fallback publication.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact two-member family, Lua numeric types, no later extra member, and metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlags.UseJourneyRewardTrack=2 for the retail enum register.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs::test_patch_12_0_0_ui_covenant_display_info_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.UICovenantDisplayInfoFlags.UseJourneyRewardTrack as Lua number with exact retail 12.0.0 value 2; excludes the later UseJourneyUnlockToastText member."
+      ],
+      "commit": "dcda2eea2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact two-member family membership, and metadata. Root cause was a shared fallback family containing the later UseJourneyUnlockToastText member; the retail override corrects epoch-specific publication. No covenant display semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: dcda2eea2."
     },
     {
       "id": "added:Enum.UICovenantDisplayInfoFlagsMeta.MaxValue",
       "symbol": "Enum.UICovenantDisplayInfoFlagsMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.UICovenantDisplayInfoFlagsMeta.MaxValue as exact numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared fallback contains a later three-member UICovenantDisplayInfoFlags shape; retail 12.0.0 override removes UseJourneyUnlockToastText and publishes the authoritative two-member family with metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 initialization applies the exact UICovenantDisplayInfoFlags override after fallback publication.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact two-member family, Lua numeric types, no later extra member, and metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlagsMeta.MaxValue=2 for the retail enum register.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs::test_patch_12_0_0_ui_covenant_display_info_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.UICovenantDisplayInfoFlagsMeta.MaxValue as Lua number with exact retail 12.0.0 value 2; excludes the later UseJourneyUnlockToastText member."
+      ],
+      "commit": "dcda2eea2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact two-member family membership, and metadata. Root cause was a shared fallback family containing the later UseJourneyUnlockToastText member; the retail override corrects epoch-specific publication. No covenant display semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: dcda2eea2."
     },
     {
       "id": "added:Enum.UICovenantDisplayInfoFlagsMeta.MinValue",
       "symbol": "Enum.UICovenantDisplayInfoFlagsMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.UICovenantDisplayInfoFlagsMeta.MinValue as exact numeric value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared fallback contains a later three-member UICovenantDisplayInfoFlags shape; retail 12.0.0 override removes UseJourneyUnlockToastText and publishes the authoritative two-member family with metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 initialization applies the exact UICovenantDisplayInfoFlags override after fallback publication.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact two-member family, Lua numeric types, no later extra member, and metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlagsMeta.MinValue=1 for the retail enum register.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs::test_patch_12_0_0_ui_covenant_display_info_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.UICovenantDisplayInfoFlagsMeta.MinValue as Lua number with exact retail 12.0.0 value 1; excludes the later UseJourneyUnlockToastText member."
+      ],
+      "commit": "dcda2eea2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact two-member family membership, and metadata. Root cause was a shared fallback family containing the later UseJourneyUnlockToastText member; the retail override corrects epoch-specific publication. No covenant display semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: dcda2eea2."
     },
     {
       "id": "added:Enum.UICovenantDisplayInfoFlagsMeta.NumValues",
       "symbol": "Enum.UICovenantDisplayInfoFlagsMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.UICovenantDisplayInfoFlagsMeta.NumValues as exact numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Shared fallback contains a later three-member UICovenantDisplayInfoFlags shape; retail 12.0.0 override removes UseJourneyUnlockToastText and publishes the authoritative two-member family with metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 initialization applies the exact UICovenantDisplayInfoFlags override after fallback publication.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts exact two-member family, Lua numeric types, no later extra member, and metadata MinValue=1, MaxValue=2, NumValues=2.",
+          "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlagsMeta.NumValues=2 for the retail enum register.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_covenant_display_info_flags_enums.rs::test_patch_12_0_0_ui_covenant_display_info_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.UICovenantDisplayInfoFlagsMeta.NumValues as Lua number with exact retail 12.0.0 value 2; excludes the later UseJourneyUnlockToastText member."
+      ],
+      "commit": "dcda2eea2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, exact two-member family membership, and metadata. Root cause was a shared fallback family containing the later UseJourneyUnlockToastText member; the retail override corrects epoch-specific publication. No covenant display semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: dcda2eea2."
     },
     {
       "id": "added:Enum.UICursorType.Outfit",
