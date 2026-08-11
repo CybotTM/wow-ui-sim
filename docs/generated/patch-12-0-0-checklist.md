@@ -1643,9 +1643,9 @@
 1643. [best-effort] `added:Enum.NamePlateSimplifiedType.Minion` — behavioral
 1644. [best-effort] `added:Enum.NamePlateSimplifiedType.MinusMob` — behavioral
 1645. [best-effort] `added:Enum.NamePlateSimplifiedType.None` — behavioral
-1646. [untriaged] `added:Enum.NamePlateSimplifiedTypeMeta.MaxValue` — untriaged
-1647. [untriaged] `added:Enum.NamePlateSimplifiedTypeMeta.MinValue` — untriaged
-1648. [untriaged] `added:Enum.NamePlateSimplifiedTypeMeta.NumValues` — untriaged
+1646. [best-effort] `added:Enum.NamePlateSimplifiedTypeMeta.MaxValue` — behavioral
+1647. [best-effort] `added:Enum.NamePlateSimplifiedTypeMeta.MinValue` — behavioral
+1648. [best-effort] `added:Enum.NamePlateSimplifiedTypeMeta.NumValues` — behavioral
 1649. [best-effort] `added:Enum.NamePlateSize.ExtraLarge` — behavioral
 1650. [best-effort] `added:Enum.NamePlateSize.Huge` — behavioral
 1651. [best-effort] `added:Enum.NamePlateSize.Large` — behavioral
