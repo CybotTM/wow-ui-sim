@@ -2764,9 +2764,9 @@
 2764. [best-effort] `changed:Enum.UICursorTypeMeta.NumValues` — behavioral
 2765. [best-effort] `changed:Enum.UIWidgetVisualizationTypeMeta.MaxValue` — behavioral
 2766. [best-effort] `changed:Enum.UIWidgetVisualizationTypeMeta.NumValues` — behavioral
-2767. [untriaged] `changed:Enum.VasTransactionPurchaseResult.EndDbErrors` — untriaged
-2768. [untriaged] `changed:Enum.VasTransactionPurchaseResultMeta.MaxValue` — untriaged
-2769. [untriaged] `changed:Enum.VasTransactionPurchaseResultMeta.NumValues` — untriaged
+2767. [best-effort] `changed:Enum.VasTransactionPurchaseResult.EndDbErrors` — behavioral
+2768. [best-effort] `changed:Enum.VasTransactionPurchaseResultMeta.MaxValue` — behavioral
+2769. [best-effort] `changed:Enum.VasTransactionPurchaseResultMeta.NumValues` — behavioral
 2770. [best-effort] `changed:GameTooltip.GetMinimumWidth` — behavioral
 2771. [best-effort] `changed:GameTooltip.GetPadding` — behavioral
 2772. [best-effort] `changed:GameTooltip.SetMinimumWidth` — behavioral
