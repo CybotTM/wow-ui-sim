@@ -4,17 +4,47 @@ fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
-fn read_script(path: &str) -> String {
-    std::fs::read_to_string(repo_root().join(path)).expect("failed to read script")
+fn read_repo_file(path: &str) -> String {
+    std::fs::read_to_string(repo_root().join(path)).expect("failed to read repository file")
+}
+
+fn cargo_profile<'a>(manifest: &'a str, profile: &str) -> &'a str {
+    let header = format!("[profile.{profile}]");
+    let section_start = manifest
+        .find(&header)
+        .unwrap_or_else(|| panic!("missing {header}"))
+        + header.len();
+    let section = &manifest[section_start..];
+
+    section
+        .split_once("\n[")
+        .map_or(section, |(profile, _)| profile)
 }
 
 #[test]
-fn mists_panel_scripts_use_bounded_cargo_target_dir() {
+fn mists_panel_scripts_inherit_incremental_dev_profile() {
+    let manifest = read_repo_file("Cargo.toml");
+    let dev_profile = cargo_profile(&manifest, "dev");
+    let release_profile = cargo_profile(&manifest, "release");
+
+    assert!(
+        dev_profile
+            .lines()
+            .any(|line| line.trim() == "incremental = true"),
+        "development profile should enable incremental compilation"
+    );
+    assert!(
+        !release_profile
+            .lines()
+            .any(|line| line.trim_start().starts_with("incremental =")),
+        "release profile should preserve Cargo's incremental default"
+    );
+
     for script_path in [
         "scripts/mists-panel-parity.sh",
         "scripts/test-mists-addon-panels.sh",
     ] {
-        let script = read_script(script_path);
+        let script = read_repo_file(script_path);
 
         assert!(
             script.contains("MISTS_CARGO_TARGET_DIR"),
@@ -25,15 +55,15 @@ fn mists_panel_scripts_use_bounded_cargo_target_dir() {
             "{script_path} should default scripted Mists builds outside repo target/"
         );
         assert!(
-            script.contains("CARGO_INCREMENTAL=\"${CARGO_INCREMENTAL:-1}\""),
-            "{script_path} should enable incremental artifacts unless explicitly disabled"
+            !script.contains("CARGO_INCREMENTAL"),
+            "{script_path} should preserve Cargo profile and caller environment precedence"
         );
     }
 }
 
 #[test]
 fn installed_addon_panel_runner_separates_exit_and_interrupt_cleanup() {
-    let script = read_script("scripts/test-mists-addon-panels.sh");
+    let script = read_repo_file("scripts/test-mists-addon-panels.sh");
 
     assert!(
         script.contains("cleanup_active_addon_on_exit"),
@@ -55,7 +85,7 @@ fn installed_addon_panel_runner_separates_exit_and_interrupt_cleanup() {
 
 #[test]
 fn mists_panel_runner_fails_on_texture_manager_load_errors() {
-    let script = read_script("scripts/mists-panel-parity.sh");
+    let script = read_repo_file("scripts/mists-panel-parity.sh");
 
     assert!(
         script.contains("fail_if_runtime_log_error"),

@@ -119,6 +119,7 @@ lto = false
 debug = "line-tables-only"
 
 [profile.dev]
+incremental = true
 lto = false
 debug = "line-tables-only"
 # Hit-grid rebuilds, layout resolution, and texture decode are pure data
