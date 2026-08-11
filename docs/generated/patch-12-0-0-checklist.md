@@ -2111,7 +2111,7 @@
 2111. [best-effort] `added:Enum.UnitAuraSortDirectionMeta.MaxValue` — behavioral
 2112. [best-effort] `added:Enum.UnitAuraSortDirectionMeta.MinValue` — behavioral
 2113. [best-effort] `added:Enum.UnitAuraSortDirectionMeta.NumValues` — behavioral
-2114. [untriaged] `added:Enum.UnitAuraSortRule.BigDefensive` — untriaged
+2114. [best-effort] `added:Enum.UnitAuraSortRule.BigDefensive` — behavioral
 2115. [best-effort] `added:Enum.UnitAuraSortRule.Default` — behavioral
 2116. [best-effort] `added:Enum.UnitAuraSortRule.Expiration` — behavioral
 2117. [best-effort] `added:Enum.UnitAuraSortRule.ExpirationOnly` — behavioral

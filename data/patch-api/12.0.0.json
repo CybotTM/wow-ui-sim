@@ -75395,17 +75395,52 @@
       "id": "added:Enum.UnitAuraSortRule.BigDefensive",
       "symbol": "Enum.UnitAuraSortRule.BigDefensive",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source register publishes Enum.UnitAuraSortRule.BigDefensive as numeric value 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes BigDefensive=2 in the UnitAuraSortRule family; matching metadata is already characterized.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "5dd5b077cfe8f6639c2d19c274577a9ae8ee45b296982bb39048e1e83a01a779"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_unit_aura_sort_rule_big_defensive.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts BigDefensive is numeric and equals 2.",
+          "source_hash": "05e23ee8095e6933e771875efd1461e0fb81d0acad34ce4dc1c8608d466d3d9c"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records UnitAuraSortRule.BigDefensive=2.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_unit_aura_sort_rule_big_defensive.rs::test_patch_12_0_0_unit_aura_sort_rule_big_defensive_value"
+      ],
+      "assertions": [
+        "Publishes Enum.UnitAuraSortRule.BigDefensive as Lua number with exact retail 12.0.0 value 2."
+      ],
+      "commit": "2bc686862",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, numeric type, and exact value. Unit aura sorting semantics, consumers, persistence, transitions, and lifecycle are not claimed. Proof commit: 2bc686862."
     },
     {
       "id": "added:Enum.UnitAuraSortRule.Default",
