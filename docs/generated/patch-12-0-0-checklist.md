@@ -1638,11 +1638,11 @@
 1638. [best-effort] `added:Enum.NamePlateInfoDisplayMeta.MaxValue` — behavioral
 1639. [best-effort] `added:Enum.NamePlateInfoDisplayMeta.MinValue` — behavioral
 1640. [best-effort] `added:Enum.NamePlateInfoDisplayMeta.NumValues` — behavioral
-1641. [untriaged] `added:Enum.NamePlateSimplifiedType.FriendlyNpc` — untriaged
-1642. [untriaged] `added:Enum.NamePlateSimplifiedType.FriendlyPlayer` — untriaged
-1643. [untriaged] `added:Enum.NamePlateSimplifiedType.Minion` — untriaged
-1644. [untriaged] `added:Enum.NamePlateSimplifiedType.MinusMob` — untriaged
-1645. [untriaged] `added:Enum.NamePlateSimplifiedType.None` — untriaged
+1641. [best-effort] `added:Enum.NamePlateSimplifiedType.FriendlyNpc` — behavioral
+1642. [best-effort] `added:Enum.NamePlateSimplifiedType.FriendlyPlayer` — behavioral
+1643. [best-effort] `added:Enum.NamePlateSimplifiedType.Minion` — behavioral
+1644. [best-effort] `added:Enum.NamePlateSimplifiedType.MinusMob` — behavioral
+1645. [best-effort] `added:Enum.NamePlateSimplifiedType.None` — behavioral
 1646. [untriaged] `added:Enum.NamePlateSimplifiedTypeMeta.MaxValue` — untriaged
 1647. [untriaged] `added:Enum.NamePlateSimplifiedTypeMeta.MinValue` — untriaged
 1648. [untriaged] `added:Enum.NamePlateSimplifiedTypeMeta.NumValues` — untriaged
