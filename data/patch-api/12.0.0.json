@@ -71954,177 +71954,562 @@
       "id": "added:Enum.SpellDiminishCategory.AoEKnockback",
       "symbol": "Enum.SpellDiminishCategory.AoEKnockback",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategory.Disarm",
       "symbol": "Enum.SpellDiminishCategory.Disarm",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategory.Disorient",
       "symbol": "Enum.SpellDiminishCategory.Disorient",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategory.Incapacitate",
       "symbol": "Enum.SpellDiminishCategory.Incapacitate",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategory.Root",
       "symbol": "Enum.SpellDiminishCategory.Root",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategory.Silence",
       "symbol": "Enum.SpellDiminishCategory.Silence",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategory.Stun",
       "symbol": "Enum.SpellDiminishCategory.Stun",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategory.Taunt",
       "symbol": "Enum.SpellDiminishCategory.Taunt",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategoryMeta.MaxValue",
       "symbol": "Enum.SpellDiminishCategoryMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategoryMeta.MinValue",
       "symbol": "Enum.SpellDiminishCategoryMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishCategoryMeta.NumValues",
       "symbol": "Enum.SpellDiminishCategoryMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete SpellDiminishCategory family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735b53e22b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes the complete SpellDiminishCategory family with matching metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "e4ae0fde033f8b876a4f70cd10c44a8c00bad05dc80e405e713e6384cda8ba04"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 SpellDiminishCategory family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_spell_diminish_category_enums.rs::test_patch_12_0_0_spell_diminish_category_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SpellDiminishCategory family as Lua numbers with exact values Root=0, Taunt=1, Stun=2, AoEKnockback=3, Incapacitate=4, Disorient=5, Silence=6, Disarm=7; metadata is MinValue=0, MaxValue=7, NumValues=8, with no extras."
+      ],
+      "commit": "be42e3899",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and exact values/types/metadata are behaviorally proven; diminishing-return semantics remain unclaimed. Proof commit: be42e3899."
     },
     {
       "id": "added:Enum.SpellDiminishRuleset.None",

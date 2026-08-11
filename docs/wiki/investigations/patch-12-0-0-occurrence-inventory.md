@@ -1912,17 +1912,17 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.SpellAuraVisibilityTypeMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit members come from combat_system.rs and matching metadata from guarded fallback; no aura-visibility semantics claimed. |
 | `Enum.SpellAuraVisibilityTypeMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit members come from combat_system.rs and matching metadata from guarded fallback; no aura-visibility semantics claimed. |
 | `Enum.SpellAuraVisibilityTypeMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit members come from combat_system.rs and matching metadata from guarded fallback; no aura-visibility semantics claimed. |
-| `Enum.SpellDiminishCategory.AoEKnockback` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategory.Disarm` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategory.Disorient` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategory.Incapacitate` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategory.Root` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategory.Silence` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategory.Stun` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategory.Taunt` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategoryMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategoryMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishCategoryMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.SpellDiminishCategory.AoEKnockback` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategory.Disarm` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategory.Disorient` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategory.Incapacitate` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategory.Root` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategory.Silence` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategory.Stun` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategory.Taunt` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategoryMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategoryMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
+| `Enum.SpellDiminishCategoryMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
 | `Enum.SpellDiminishRuleset.None` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.SpellDiminishRuleset.PvE` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.SpellDiminishRuleset.PvP` | untriaged | enum | added | enum added in 12.0.0. |
