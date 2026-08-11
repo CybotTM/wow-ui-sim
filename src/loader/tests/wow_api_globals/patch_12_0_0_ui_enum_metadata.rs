@@ -188,12 +188,36 @@ fn test_patch_12_0_0_vas_transaction_purchase_result_value() {
                 if type(namespace) ~= "table" then
                     return "namespace=" .. type(namespace)
                 end
-                local value = namespace.DbHouseOwnerRestriction
-                if type(value) ~= "number" then
-                    return "type=" .. type(value)
+                local expected_values = {
+                    DbHouseOwnerRestriction = 20096,
+                    EndDbErrors = 20097,
+                }
+                for name, expected_value in pairs(expected_values) do
+                    local value = namespace[name]
+                    if type(value) ~= "number" then
+                        return name .. ":type=" .. type(value)
+                    end
+                    if value ~= expected_value then
+                        return name .. ":value=" .. tostring(value)
+                    end
                 end
-                if value ~= 20096 then
-                    return "value=" .. tostring(value)
+
+                local meta = Enum.VasTransactionPurchaseResultMeta
+                if type(meta) ~= "table" then
+                    return "meta=" .. type(meta)
+                end
+                local expected_metadata = {
+                    MaxValue = 20097,
+                    NumValues = 145,
+                }
+                for name, expected_value in pairs(expected_metadata) do
+                    local value = meta[name]
+                    if type(value) ~= "number" then
+                        return "meta." .. name .. ":type=" .. type(value)
+                    end
+                    if value ~= expected_value then
+                        return "meta." .. name .. ":value=" .. tostring(value)
+                    end
                 end
                 return "ok"
             "#,
@@ -201,7 +225,7 @@ fn test_patch_12_0_0_vas_transaction_purchase_result_value() {
         .unwrap();
     assert_eq!(
         result, "ok",
-        "retail 12.0.0 VasTransactionPurchaseResult value did not match the source register"
+        "retail 12.0.0 VasTransactionPurchaseResult values and metadata did not match the source register"
     );
 }
 
