@@ -67290,97 +67290,343 @@
       "id": "added:Enum.RaidAuraOrganizationType.BuffsRightDebuffsLeft",
       "symbol": "Enum.RaidAuraOrganizationType.BuffsRightDebuffsLeft",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete RaidAuraOrganizationType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Explicit RAID_AURA_ORGANIZATION_TYPE publication provides Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching RaidAuraOrganizationType metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "3927d395ce13de8bfd6de6a0be13ab4f52414631db04bf3a97d2276516c63dad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RaidAuraOrganizationType values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs::test_patch_12_0_0_raid_aura_organization_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RaidAuraOrganizationType family as Lua numbers with exact values Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2; metadata is MinValue=0, MaxValue=2, NumValues=3, with no extras."
+      ],
+      "commit": "769c96cd6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.RaidAuraOrganizationType family, exact Lua numeric values/types, no extras, and metadata. Explicit edit-mode enum data is authoritative for members; guarded fallback metadata matches. No raid-aura organization behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 769c96cd6."
     },
     {
       "id": "added:Enum.RaidAuraOrganizationType.BuffsTopDebuffsBottom",
       "symbol": "Enum.RaidAuraOrganizationType.BuffsTopDebuffsBottom",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete RaidAuraOrganizationType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Explicit RAID_AURA_ORGANIZATION_TYPE publication provides Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching RaidAuraOrganizationType metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "3927d395ce13de8bfd6de6a0be13ab4f52414631db04bf3a97d2276516c63dad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RaidAuraOrganizationType values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs::test_patch_12_0_0_raid_aura_organization_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RaidAuraOrganizationType family as Lua numbers with exact values Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2; metadata is MinValue=0, MaxValue=2, NumValues=3, with no extras."
+      ],
+      "commit": "769c96cd6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.RaidAuraOrganizationType family, exact Lua numeric values/types, no extras, and metadata. Explicit edit-mode enum data is authoritative for members; guarded fallback metadata matches. No raid-aura organization behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 769c96cd6."
     },
     {
       "id": "added:Enum.RaidAuraOrganizationType.Legacy",
       "symbol": "Enum.RaidAuraOrganizationType.Legacy",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete RaidAuraOrganizationType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Explicit RAID_AURA_ORGANIZATION_TYPE publication provides Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching RaidAuraOrganizationType metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "3927d395ce13de8bfd6de6a0be13ab4f52414631db04bf3a97d2276516c63dad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RaidAuraOrganizationType values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs::test_patch_12_0_0_raid_aura_organization_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RaidAuraOrganizationType family as Lua numbers with exact values Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2; metadata is MinValue=0, MaxValue=2, NumValues=3, with no extras."
+      ],
+      "commit": "769c96cd6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.RaidAuraOrganizationType family, exact Lua numeric values/types, no extras, and metadata. Explicit edit-mode enum data is authoritative for members; guarded fallback metadata matches. No raid-aura organization behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 769c96cd6."
     },
     {
       "id": "added:Enum.RaidAuraOrganizationTypeMeta.MaxValue",
       "symbol": "Enum.RaidAuraOrganizationTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete RaidAuraOrganizationType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Explicit RAID_AURA_ORGANIZATION_TYPE publication provides Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching RaidAuraOrganizationType metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "3927d395ce13de8bfd6de6a0be13ab4f52414631db04bf3a97d2276516c63dad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RaidAuraOrganizationType values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs::test_patch_12_0_0_raid_aura_organization_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RaidAuraOrganizationType family as Lua numbers with exact values Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2; metadata is MinValue=0, MaxValue=2, NumValues=3, with no extras."
+      ],
+      "commit": "769c96cd6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.RaidAuraOrganizationType family, exact Lua numeric values/types, no extras, and metadata. Explicit edit-mode enum data is authoritative for members; guarded fallback metadata matches. No raid-aura organization behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 769c96cd6."
     },
     {
       "id": "added:Enum.RaidAuraOrganizationTypeMeta.MinValue",
       "symbol": "Enum.RaidAuraOrganizationTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete RaidAuraOrganizationType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Explicit RAID_AURA_ORGANIZATION_TYPE publication provides Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching RaidAuraOrganizationType metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "3927d395ce13de8bfd6de6a0be13ab4f52414631db04bf3a97d2276516c63dad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RaidAuraOrganizationType values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs::test_patch_12_0_0_raid_aura_organization_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RaidAuraOrganizationType family as Lua numbers with exact values Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2; metadata is MinValue=0, MaxValue=2, NumValues=3, with no extras."
+      ],
+      "commit": "769c96cd6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.RaidAuraOrganizationType family, exact Lua numeric values/types, no extras, and metadata. Explicit edit-mode enum data is authoritative for members; guarded fallback metadata matches. No raid-aura organization behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 769c96cd6."
     },
     {
       "id": "added:Enum.RaidAuraOrganizationTypeMeta.NumValues",
       "symbol": "Enum.RaidAuraOrganizationTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete RaidAuraOrganizationType family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Explicit RAID_AURA_ORGANIZATION_TYPE publication provides Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes matching RaidAuraOrganizationType metadata.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization registers explicit enum data and loads guarded fallback metadata.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "3927d395ce13de8bfd6de6a0be13ab4f52414631db04bf3a97d2276516c63dad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RaidAuraOrganizationType values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_raid_aura_organization_type_enums.rs::test_patch_12_0_0_raid_aura_organization_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RaidAuraOrganizationType family as Lua numbers with exact values Legacy=0, BuffsTopDebuffsBottom=1, BuffsRightDebuffsLeft=2; metadata is MinValue=0, MaxValue=2, NumValues=3, with no extras."
+      ],
+      "commit": "769c96cd6",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.RaidAuraOrganizationType family, exact Lua numeric values/types, no extras, and metadata. Explicit edit-mode enum data is authoritative for members; guarded fallback metadata matches. No raid-aura organization behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 769c96cd6."
     },
     {
       "id": "added:Enum.RaidDispelDisplayType.Disabled",
