@@ -64383,97 +64383,307 @@
       "id": "added:Enum.NeighborhoodInitiativeFlags.Disabled",
       "symbol": "Enum.NeighborhoodInitiativeFlags.Disabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete NeighborhoodInitiativeFlags family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Disabled=1, NoAbandon=2, NoRepeat=4 with MinValue=1, MaxValue=4, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "a35ab59f6342795d306cfb0768d0b2dddb7251df4c555e5f9516bc46b11417fc"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NeighborhoodInitiativeFlags family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs::test_patch_12_0_0_neighborhood_initiative_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NeighborhoodInitiativeFlags family as Lua numbers with exact values Disabled=1, NoAbandon=2, NoRepeat=4; metadata is MinValue=1, MaxValue=4, NumValues=3, with no extras."
+      ],
+      "commit": "a3b138e77",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NeighborhoodInitiativeFlags family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative with no runtime drift. No neighborhood-initiative flag semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: a3b138e77."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeFlags.NoAbandon",
       "symbol": "Enum.NeighborhoodInitiativeFlags.NoAbandon",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete NeighborhoodInitiativeFlags family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Disabled=1, NoAbandon=2, NoRepeat=4 with MinValue=1, MaxValue=4, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "a35ab59f6342795d306cfb0768d0b2dddb7251df4c555e5f9516bc46b11417fc"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NeighborhoodInitiativeFlags family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs::test_patch_12_0_0_neighborhood_initiative_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NeighborhoodInitiativeFlags family as Lua numbers with exact values Disabled=1, NoAbandon=2, NoRepeat=4; metadata is MinValue=1, MaxValue=4, NumValues=3, with no extras."
+      ],
+      "commit": "a3b138e77",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NeighborhoodInitiativeFlags family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative with no runtime drift. No neighborhood-initiative flag semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: a3b138e77."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeFlags.NoRepeat",
       "symbol": "Enum.NeighborhoodInitiativeFlags.NoRepeat",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete NeighborhoodInitiativeFlags family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Disabled=1, NoAbandon=2, NoRepeat=4 with MinValue=1, MaxValue=4, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "a35ab59f6342795d306cfb0768d0b2dddb7251df4c555e5f9516bc46b11417fc"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NeighborhoodInitiativeFlags family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs::test_patch_12_0_0_neighborhood_initiative_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NeighborhoodInitiativeFlags family as Lua numbers with exact values Disabled=1, NoAbandon=2, NoRepeat=4; metadata is MinValue=1, MaxValue=4, NumValues=3, with no extras."
+      ],
+      "commit": "a3b138e77",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NeighborhoodInitiativeFlags family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative with no runtime drift. No neighborhood-initiative flag semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: a3b138e77."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeFlagsMeta.MaxValue",
       "symbol": "Enum.NeighborhoodInitiativeFlagsMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete NeighborhoodInitiativeFlags family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Disabled=1, NoAbandon=2, NoRepeat=4 with MinValue=1, MaxValue=4, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "a35ab59f6342795d306cfb0768d0b2dddb7251df4c555e5f9516bc46b11417fc"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NeighborhoodInitiativeFlags family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs::test_patch_12_0_0_neighborhood_initiative_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NeighborhoodInitiativeFlags family as Lua numbers with exact values Disabled=1, NoAbandon=2, NoRepeat=4; metadata is MinValue=1, MaxValue=4, NumValues=3, with no extras."
+      ],
+      "commit": "a3b138e77",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NeighborhoodInitiativeFlags family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative with no runtime drift. No neighborhood-initiative flag semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: a3b138e77."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeFlagsMeta.MinValue",
       "symbol": "Enum.NeighborhoodInitiativeFlagsMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete NeighborhoodInitiativeFlags family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Disabled=1, NoAbandon=2, NoRepeat=4 with MinValue=1, MaxValue=4, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "a35ab59f6342795d306cfb0768d0b2dddb7251df4c555e5f9516bc46b11417fc"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NeighborhoodInitiativeFlags family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs::test_patch_12_0_0_neighborhood_initiative_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NeighborhoodInitiativeFlags family as Lua numbers with exact values Disabled=1, NoAbandon=2, NoRepeat=4; metadata is MinValue=1, MaxValue=4, NumValues=3, with no extras."
+      ],
+      "commit": "a3b138e77",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NeighborhoodInitiativeFlags family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative with no runtime drift. No neighborhood-initiative flag semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: a3b138e77."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeFlagsMeta.NumValues",
       "symbol": "Enum.NeighborhoodInitiativeFlagsMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete NeighborhoodInitiativeFlags family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes Disabled=1, NoAbandon=2, NoRepeat=4 with MinValue=1, MaxValue=4, NumValues=3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "a35ab59f6342795d306cfb0768d0b2dddb7251df4c555e5f9516bc46b11417fc"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NeighborhoodInitiativeFlags family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_neighborhood_initiative_flags_enums.rs::test_patch_12_0_0_neighborhood_initiative_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NeighborhoodInitiativeFlags family as Lua numbers with exact values Disabled=1, NoAbandon=2, NoRepeat=4; metadata is MinValue=1, MaxValue=4, NumValues=3, with no extras."
+      ],
+      "commit": "a3b138e77",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NeighborhoodInitiativeFlags family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative with no runtime drift. No neighborhood-initiative flag semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: a3b138e77."
     },
     {
       "id": "added:Enum.NeighborhoodInitiativeNeighborhoodTypes.NiNeighborhoodTypePool",
