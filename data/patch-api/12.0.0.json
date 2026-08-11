@@ -59466,8 +59466,14 @@
         },
         {
           "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
+          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
+        },
+        {
+          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59498,7 +59504,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveType.Cubic",
@@ -59517,8 +59523,14 @@
         },
         {
           "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
+          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
+        },
+        {
+          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59549,7 +59561,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveType.Linear",
@@ -59568,8 +59580,14 @@
         },
         {
           "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
+          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
+        },
+        {
+          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59600,7 +59618,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveType.Step",
@@ -59619,8 +59637,14 @@
         },
         {
           "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
+          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
+        },
+        {
+          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59651,7 +59675,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveTypeMeta.MaxValue",
@@ -59670,8 +59694,14 @@
         },
         {
           "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
+          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
+        },
+        {
+          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59702,7 +59732,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveTypeMeta.MinValue",
@@ -59721,8 +59751,14 @@
         },
         {
           "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
+          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
+        },
+        {
+          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59753,7 +59789,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.LuaCurveTypeMeta.NumValues",
@@ -59772,8 +59808,14 @@
         },
         {
           "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/combat_system.rs",
+          "summary": "Explicit Rust LuaCurveType publication was corrected to Linear=0, Step=1, Cosine=2, Cubic=3; this namespace now publishes the complete retail family before matching metadata fallback.",
+          "source_hash": "73807936b108a70ab6ffae9c82303f43d92da61b2a9786581118f23cf240061b"
+        },
+        {
+          "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
-          "summary": "Guarded fallback is authoritative and publishes Linear=0, Step=1, Cosine=2, Cubic=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "summary": "Guarded fallback supplies matching LuaCurveType metadata MinValue=0, MaxValue=3, NumValues=4.",
           "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
         },
         {
@@ -59804,7 +59846,7 @@
       "commit": "e016d4eeb",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The LUA_CURVE_TYPE constant is not registered in SEQUENTIAL_ENUMS, so the guarded fallback is authoritative; no runtime drift is claimed. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LuaCurveType family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=3, NumValues=4. The explicit LuaCurveType registration was corrected in commit 45fc6eb9c after focused proof exposed an incomplete/wrong primary family; matching metadata fallback remains consistent. No runtime drift remains after the correction. No curve interpolation behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: e016d4eeb."
     },
     {
       "id": "added:Enum.MapIconUIWidgetSetType.AdventureMapDetails",
@@ -61020,113 +61062,358 @@
       "id": "added:Enum.NamePlateFriendlyPlayerAuraDisplay.Buffs",
       "symbol": "Enum.NamePlateFriendlyPlayerAuraDisplay.Buffs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateFriendlyPlayerAuraDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Buffs=1, Debuffs=2, LossOfControl=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "9b1fcbddca9c12c556f2bdb2c8ba577bd5da7ffc8cb77e95cf375552973fb5ad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateFriendlyPlayerAuraDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs::test_patch_12_0_0_nameplate_friendly_player_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateFriendlyPlayerAuraDisplay family as Lua numbers with exact values None=0, Buffs=1, Debuffs=2, LossOfControl=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "8859a6fa4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateFriendlyPlayerAuraDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate aura rendering behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 8859a6fa4."
     },
     {
       "id": "added:Enum.NamePlateFriendlyPlayerAuraDisplay.Debuffs",
       "symbol": "Enum.NamePlateFriendlyPlayerAuraDisplay.Debuffs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateFriendlyPlayerAuraDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Buffs=1, Debuffs=2, LossOfControl=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "9b1fcbddca9c12c556f2bdb2c8ba577bd5da7ffc8cb77e95cf375552973fb5ad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateFriendlyPlayerAuraDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs::test_patch_12_0_0_nameplate_friendly_player_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateFriendlyPlayerAuraDisplay family as Lua numbers with exact values None=0, Buffs=1, Debuffs=2, LossOfControl=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "8859a6fa4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateFriendlyPlayerAuraDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate aura rendering behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 8859a6fa4."
     },
     {
       "id": "added:Enum.NamePlateFriendlyPlayerAuraDisplay.LossOfControl",
       "symbol": "Enum.NamePlateFriendlyPlayerAuraDisplay.LossOfControl",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateFriendlyPlayerAuraDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Buffs=1, Debuffs=2, LossOfControl=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "9b1fcbddca9c12c556f2bdb2c8ba577bd5da7ffc8cb77e95cf375552973fb5ad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateFriendlyPlayerAuraDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs::test_patch_12_0_0_nameplate_friendly_player_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateFriendlyPlayerAuraDisplay family as Lua numbers with exact values None=0, Buffs=1, Debuffs=2, LossOfControl=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "8859a6fa4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateFriendlyPlayerAuraDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate aura rendering behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 8859a6fa4."
     },
     {
       "id": "added:Enum.NamePlateFriendlyPlayerAuraDisplay.None",
       "symbol": "Enum.NamePlateFriendlyPlayerAuraDisplay.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateFriendlyPlayerAuraDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Buffs=1, Debuffs=2, LossOfControl=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "9b1fcbddca9c12c556f2bdb2c8ba577bd5da7ffc8cb77e95cf375552973fb5ad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateFriendlyPlayerAuraDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs::test_patch_12_0_0_nameplate_friendly_player_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateFriendlyPlayerAuraDisplay family as Lua numbers with exact values None=0, Buffs=1, Debuffs=2, LossOfControl=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "8859a6fa4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateFriendlyPlayerAuraDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate aura rendering behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 8859a6fa4."
     },
     {
       "id": "added:Enum.NamePlateFriendlyPlayerAuraDisplayMeta.MaxValue",
       "symbol": "Enum.NamePlateFriendlyPlayerAuraDisplayMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateFriendlyPlayerAuraDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Buffs=1, Debuffs=2, LossOfControl=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "9b1fcbddca9c12c556f2bdb2c8ba577bd5da7ffc8cb77e95cf375552973fb5ad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateFriendlyPlayerAuraDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs::test_patch_12_0_0_nameplate_friendly_player_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateFriendlyPlayerAuraDisplay family as Lua numbers with exact values None=0, Buffs=1, Debuffs=2, LossOfControl=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "8859a6fa4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateFriendlyPlayerAuraDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate aura rendering behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 8859a6fa4."
     },
     {
       "id": "added:Enum.NamePlateFriendlyPlayerAuraDisplayMeta.MinValue",
       "symbol": "Enum.NamePlateFriendlyPlayerAuraDisplayMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateFriendlyPlayerAuraDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Buffs=1, Debuffs=2, LossOfControl=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "9b1fcbddca9c12c556f2bdb2c8ba577bd5da7ffc8cb77e95cf375552973fb5ad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateFriendlyPlayerAuraDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs::test_patch_12_0_0_nameplate_friendly_player_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateFriendlyPlayerAuraDisplay family as Lua numbers with exact values None=0, Buffs=1, Debuffs=2, LossOfControl=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "8859a6fa4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateFriendlyPlayerAuraDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate aura rendering behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 8859a6fa4."
     },
     {
       "id": "added:Enum.NamePlateFriendlyPlayerAuraDisplayMeta.NumValues",
       "symbol": "Enum.NamePlateFriendlyPlayerAuraDisplayMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the complete Enum.NamePlateFriendlyPlayerAuraDisplay family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Buffs=1, Debuffs=2, LossOfControl=3 with MinValue=0, MaxValue=3, NumValues=4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "9b1fcbddca9c12c556f2bdb2c8ba577bd5da7ffc8cb77e95cf375552973fb5ad"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 NamePlateFriendlyPlayerAuraDisplay family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_friendly_player_aura_display_enums.rs::test_patch_12_0_0_nameplate_friendly_player_aura_display_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NamePlateFriendlyPlayerAuraDisplay family as Lua numbers with exact values None=0, Buffs=1, Debuffs=2, LossOfControl=3; metadata is MinValue=0, MaxValue=3, NumValues=4, with no extras."
+      ],
+      "commit": "8859a6fa4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.NamePlateFriendlyPlayerAuraDisplay family, exact Lua numeric values/types, no extras, and metadata. The guarded fallback is authoritative; no runtime drift is claimed. No nameplate aura rendering behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 8859a6fa4."
     },
     {
       "id": "added:Enum.NamePlateInfoDisplay.CurrentHealthPercent",
