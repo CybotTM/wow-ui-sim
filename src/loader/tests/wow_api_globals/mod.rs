@@ -82,6 +82,7 @@ mod patch_12_0_0_initiative_flags_enums;
 mod patch_12_0_0_item_creation_context_additions;
 mod patch_12_0_0_item_creation_context_removals;
 mod patch_12_0_0_lfg_entry_general_playstyle_enums;
+mod patch_12_0_0_limited_input_type_enums;
 mod patch_12_0_0_nameplate_cast_bar_display_enums;
 mod patch_12_0_0_nameplate_enemy_npc_aura_display_enums;
 mod patch_12_0_0_nameplate_enemy_player_aura_display_enums;
