@@ -68331,209 +68331,664 @@
       "id": "added:Enum.RenownRewardDisplayType.Currency",
       "symbol": "Enum.RenownRewardDisplayType.Currency",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.GarrFollower",
       "symbol": "Enum.RenownRewardDisplayType.GarrFollower",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.Item",
       "symbol": "Enum.RenownRewardDisplayType.Item",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.Mount",
       "symbol": "Enum.RenownRewardDisplayType.Mount",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.None",
       "symbol": "Enum.RenownRewardDisplayType.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.Spell",
       "symbol": "Enum.RenownRewardDisplayType.Spell",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.Title",
       "symbol": "Enum.RenownRewardDisplayType.Title",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.Transmog",
       "symbol": "Enum.RenownRewardDisplayType.Transmog",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.TransmogIllusion",
       "symbol": "Enum.RenownRewardDisplayType.TransmogIllusion",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayType.TransmogSet",
       "symbol": "Enum.RenownRewardDisplayType.TransmogSet",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayTypeMeta.MaxValue",
       "symbol": "Enum.RenownRewardDisplayTypeMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayTypeMeta.MinValue",
       "symbol": "Enum.RenownRewardDisplayTypeMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardDisplayTypeMeta.NumValues",
       "symbol": "Enum.RenownRewardDisplayTypeMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source declares the exact RenownRewardDisplayType members and metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes the complete RenownRewardDisplayType family and matching metadata; no competing runtime definition exists.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "10a8ca3cd5ab8096c595cac2586d36f8e036d77e3e3501801bf1e60e507c4d36"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 RenownRewardDisplayType family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_renown_reward_display_type_enums.rs::test_patch_12_0_0_renown_reward_display_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.RenownRewardDisplayType family as Lua numbers with exact values None=0, Item=1, Spell=2, Mount=3, Transmog=4, TransmogSet=5, TransmogIllusion=6, Title=7, GarrFollower=8, Currency=9; metadata is MinValue=0, MaxValue=9, NumValues=10, with no extras."
+      ],
+      "commit": "3e113702a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "No runtime drift; guarded fallback is authoritative. Claim is bounded to startup publication and exact values/types/metadata only."
     },
     {
       "id": "added:Enum.RenownRewardsFlags.AccountUnlock",
