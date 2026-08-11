@@ -1867,11 +1867,11 @@
 1867. [best-effort] `added:Enum.StatusBarFillStyleMeta.MaxValue` — behavioral
 1868. [best-effort] `added:Enum.StatusBarFillStyleMeta.MinValue` — behavioral
 1869. [best-effort] `added:Enum.StatusBarFillStyleMeta.NumValues` — behavioral
-1870. [untriaged] `added:Enum.StatusBarInterpolation.ExponentialEaseOut` — untriaged
-1871. [untriaged] `added:Enum.StatusBarInterpolation.Immediate` — untriaged
-1872. [untriaged] `added:Enum.StatusBarInterpolationMeta.MaxValue` — untriaged
-1873. [untriaged] `added:Enum.StatusBarInterpolationMeta.MinValue` — untriaged
-1874. [untriaged] `added:Enum.StatusBarInterpolationMeta.NumValues` — untriaged
+1870. [best-effort] `added:Enum.StatusBarInterpolation.ExponentialEaseOut` — behavioral
+1871. [best-effort] `added:Enum.StatusBarInterpolation.Immediate` — behavioral
+1872. [best-effort] `added:Enum.StatusBarInterpolationMeta.MaxValue` — behavioral
+1873. [best-effort] `added:Enum.StatusBarInterpolationMeta.MinValue` — behavioral
+1874. [best-effort] `added:Enum.StatusBarInterpolationMeta.NumValues` — behavioral
 1875. [best-effort] `added:Enum.StatusBarTimerDirection.ElapsedTime` — behavioral
 1876. [best-effort] `added:Enum.StatusBarTimerDirection.RemainingTime` — behavioral
 1877. [best-effort] `added:Enum.StatusBarTimerDirectionMeta.MaxValue` — behavioral
