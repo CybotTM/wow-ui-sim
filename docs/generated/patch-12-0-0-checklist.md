@@ -1969,9 +1969,9 @@
 1969. [best-effort] `added:Enum.TransmogOutfitSlotFlagsMeta.MaxValue` — behavioral
 1970. [best-effort] `added:Enum.TransmogOutfitSlotFlagsMeta.MinValue` — behavioral
 1971. [best-effort] `added:Enum.TransmogOutfitSlotFlagsMeta.NumValues` — behavioral
-1972. [untriaged] `added:Enum.TransmogOutfitSlotMeta.MaxValue` — untriaged
-1973. [untriaged] `added:Enum.TransmogOutfitSlotMeta.MinValue` — untriaged
-1974. [untriaged] `added:Enum.TransmogOutfitSlotMeta.NumValues` — untriaged
+1972. [best-effort] `added:Enum.TransmogOutfitSlotMeta.MaxValue` — behavioral
+1973. [best-effort] `added:Enum.TransmogOutfitSlotMeta.MinValue` — behavioral
+1974. [best-effort] `added:Enum.TransmogOutfitSlotMeta.NumValues` — behavioral
 1975. [best-effort] `added:Enum.TransmogOutfitSlotOption.ArtifactSpecFour` — behavioral
 1976. [best-effort] `added:Enum.TransmogOutfitSlotOption.ArtifactSpecOne` — behavioral
 1977. [best-effort] `added:Enum.TransmogOutfitSlotOption.ArtifactSpecThree` — behavioral
