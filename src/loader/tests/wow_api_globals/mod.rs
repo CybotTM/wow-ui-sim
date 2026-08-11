@@ -116,6 +116,7 @@ mod patch_12_0_0_simple_order_status_enums;
 mod patch_12_0_0_sleeves_geo_range_enums;
 mod patch_12_0_0_small_enums;
 mod patch_12_0_0_spell_aura_visibility_type_enums;
+mod patch_12_0_0_spell_diminish_category_enums;
 mod patch_12_0_0_status_bar_timer_direction_enums;
 mod patch_12_0_0_tooltip_data_line_type_enums;
 mod patch_12_0_0_transmog_outfit_data_flags_enums;
