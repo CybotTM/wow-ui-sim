@@ -25,8 +25,8 @@ fn mists_panel_scripts_use_bounded_cargo_target_dir() {
             "{script_path} should default scripted Mists builds outside repo target/"
         );
         assert!(
-            script.contains("CARGO_INCREMENTAL=\"${CARGO_INCREMENTAL:-0}\""),
-            "{script_path} should disable incremental artifacts unless explicitly requested"
+            script.contains("CARGO_INCREMENTAL=\"${CARGO_INCREMENTAL:-1}\""),
+            "{script_path} should enable incremental artifacts unless explicitly disabled"
         );
     }
 }
