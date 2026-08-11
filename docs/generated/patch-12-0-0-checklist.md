@@ -1511,9 +1511,9 @@
 1511. [best-effort] `added:Enum.HouseExteriorWMODataFlagsMeta.MinValue` — behavioral
 1512. [best-effort] `added:Enum.HouseExteriorWMODataFlagsMeta.NumValues` — behavioral
 1513. [best-effort] `added:Enum.HousingDecorActionFlags.PreviewDecor` — behavioral
-1514. [untriaged] `added:Enum.HousingDecorPlacementRestriction.ChildOutsideBounds` — untriaged
-1515. [untriaged] `added:Enum.HousingDecorPlacementRestriction.OutsidePlotBounds` — untriaged
-1516. [untriaged] `added:Enum.HousingDecorPlacementRestriction.OutsideRoomBounds` — untriaged
+1514. [best-effort] `added:Enum.HousingDecorPlacementRestriction.ChildOutsideBounds` — behavioral
+1515. [best-effort] `added:Enum.HousingDecorPlacementRestriction.OutsidePlotBounds` — behavioral
+1516. [best-effort] `added:Enum.HousingDecorPlacementRestriction.OutsideRoomBounds` — behavioral
 1517. [untriaged] `added:Enum.HousingFavorUpdateSource.DecorCollection` — untriaged
 1518. [untriaged] `added:Enum.HousingFavorUpdateSource.DeferredRewards` — untriaged
 1519. [untriaged] `added:Enum.HousingFavorUpdateSource.InitiativeChest` — untriaged
@@ -2664,10 +2664,10 @@
 2664. [untriaged] `changed:Enum.HousingCatalogEntrySubtypeMeta.NumValues` — untriaged
 2665. [best-effort] `changed:Enum.HousingDecorActionFlagsMeta.MaxValue` — behavioral
 2666. [best-effort] `changed:Enum.HousingDecorActionFlagsMeta.NumValues` — behavioral
-2667. [untriaged] `changed:Enum.HousingDecorPlacementRestriction.InvalidCollision` — untriaged
-2668. [untriaged] `changed:Enum.HousingDecorPlacementRestriction.InvalidTarget` — untriaged
-2669. [untriaged] `changed:Enum.HousingDecorPlacementRestrictionMeta.MaxValue` — untriaged
-2670. [untriaged] `changed:Enum.HousingDecorPlacementRestrictionMeta.NumValues` — untriaged
+2667. [best-effort] `changed:Enum.HousingDecorPlacementRestriction.InvalidCollision` — behavioral
+2668. [best-effort] `changed:Enum.HousingDecorPlacementRestriction.InvalidTarget` — behavioral
+2669. [best-effort] `changed:Enum.HousingDecorPlacementRestrictionMeta.MaxValue` — behavioral
+2670. [best-effort] `changed:Enum.HousingDecorPlacementRestrictionMeta.NumValues` — behavioral
 2671. [best-effort] `changed:Enum.HousingItemToastTypeMeta.MaxValue` — behavioral
 2672. [best-effort] `changed:Enum.HousingItemToastTypeMeta.NumValues` — behavioral
 2673. [best-effort] `changed:Enum.HousingResult.CannotAfford` — behavioral
@@ -3109,7 +3109,7 @@
 3109. [best-effort] `removed:Enum.ExpansionLandingPageTypeMeta.NumValues` — behavioral
 3110. [evidence-required] `removed:Enum.GossipNpcOption.Placeholder_6` — unsafe
 3111. [untriaged] `removed:Enum.HousingCatalogEntrySubtype.MarketItem` — untriaged
-3112. [untriaged] `removed:Enum.HousingDecorPlacementRestriction.NotInsideRoom` — untriaged
+3112. [best-effort] `removed:Enum.HousingDecorPlacementRestriction.NotInsideRoom` — behavioral
 3113. [evidence-required] `removed:Enum.HousingResult.FixtureNotOwned` — unsafe
 3114. [evidence-required] `removed:Enum.HousingResult.MissingTheme` — unsafe
 3115. [evidence-required] `removed:Enum.ItemCollectionType.ItemCollectionExteriorFixture` — unsafe

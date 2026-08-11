@@ -1580,9 +1580,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.HouseExteriorWMODataFlagsMeta.MinValue` | best-effort | enum | added | Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. MaxValue is the highest declared flag, MinValue is the zero sentinel, and NumValues is the declared-entry count; bitwise composition, housing consumers, server state, lifecycle, and other semantics are not claimed. |
 | `Enum.HouseExteriorWMODataFlagsMeta.NumValues` | best-effort | enum | added | Best-effort behavioral evidence is limited to current startup metadata publication and exact 12.0.0 value. MaxValue is the highest declared flag, MinValue is the zero sentinel, and NumValues is the declared-entry count; bitwise composition, housing consumers, server state, lifecycle, and other semantics are not claimed. |
 | `Enum.HousingDecorActionFlags.PreviewDecor` | best-effort | enum | added | enum added in 12.0.0. |
-| `Enum.HousingDecorPlacementRestriction.ChildOutsideBounds` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingDecorPlacementRestriction.OutsidePlotBounds` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.HousingDecorPlacementRestriction.OutsideRoomBounds` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.HousingDecorPlacementRestriction.ChildOutsideBounds` | best-effort | enum | added | enum added in 12.0.0. |
+| `Enum.HousingDecorPlacementRestriction.OutsidePlotBounds` | best-effort | enum | added | enum added in 12.0.0. |
+| `Enum.HousingDecorPlacementRestriction.OutsideRoomBounds` | best-effort | enum | added | enum added in 12.0.0. |
 | `Enum.HousingFavorUpdateSource.DecorCollection` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.HousingFavorUpdateSource.DeferredRewards` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.HousingFavorUpdateSource.InitiativeChest` | untriaged | enum | added | enum added in 12.0.0. |
@@ -2733,10 +2733,10 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.HousingCatalogEntrySubtypeMeta.NumValues` | untriaged | enum | changed | enum changed in 12.0.0. |
 | `Enum.HousingDecorActionFlagsMeta.MaxValue` | best-effort | enum | changed | enum changed in 12.0.0. |
 | `Enum.HousingDecorActionFlagsMeta.NumValues` | best-effort | enum | changed | enum changed in 12.0.0. |
-| `Enum.HousingDecorPlacementRestriction.InvalidCollision` | untriaged | enum | changed | enum changed in 12.0.0. |
-| `Enum.HousingDecorPlacementRestriction.InvalidTarget` | untriaged | enum | changed | enum changed in 12.0.0. |
-| `Enum.HousingDecorPlacementRestrictionMeta.MaxValue` | untriaged | enum | changed | enum changed in 12.0.0. |
-| `Enum.HousingDecorPlacementRestrictionMeta.NumValues` | untriaged | enum | changed | enum changed in 12.0.0. |
+| `Enum.HousingDecorPlacementRestriction.InvalidCollision` | best-effort | enum | changed | enum changed in 12.0.0. |
+| `Enum.HousingDecorPlacementRestriction.InvalidTarget` | best-effort | enum | changed | enum changed in 12.0.0. |
+| `Enum.HousingDecorPlacementRestrictionMeta.MaxValue` | best-effort | enum | changed | enum changed in 12.0.0. |
+| `Enum.HousingDecorPlacementRestrictionMeta.NumValues` | best-effort | enum | changed | enum changed in 12.0.0. |
 | `Enum.HousingItemToastTypeMeta.MaxValue` | best-effort | enum | changed | enum changed in 12.0.0. |
 | `Enum.HousingItemToastTypeMeta.NumValues` | best-effort | enum | changed | enum changed in 12.0.0. |
 | `Enum.HousingResult.CannotAfford` | best-effort | enum | changed | enum changed in 12.0.0. |
@@ -3178,7 +3178,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.ExpansionLandingPageTypeMeta.NumValues` | best-effort | enum | removed | Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of removed member Enum.ExpansionLandingPageTypeMeta.NumValues after the post-compat epoch override. Expansion landing-page selection, UI behavior, transitions, and lifecycle are not claimed. Proof commit: 54416879b5c6305ed956f347fe0a17e9fb2ccb28. |
 | `Enum.GossipNpcOption.Placeholder_6` | evidence-required | enum | removed | Evidence-required/unsafe: the source register pairs this removed name with a same-value added name, but current bootstrap omission is insufficient to prove full runtime or dynamic publication absence, historical removal timing, alias compatibility, or semantic replacement identity. Authoritative evidence or a correct model/test is required; tests and assertions remain empty, with null commit, approval, scope exception, and provenance_only. |
 | `Enum.HousingCatalogEntrySubtype.MarketItem` | untriaged | enum | removed | enum removed in 12.0.0. |
-| `Enum.HousingDecorPlacementRestriction.NotInsideRoom` | untriaged | enum | removed | enum removed in 12.0.0. |
+| `Enum.HousingDecorPlacementRestriction.NotInsideRoom` | best-effort | enum | removed | enum removed in 12.0.0. |
 | `Enum.HousingResult.FixtureNotOwned` | evidence-required | enum | removed | enum removed in 12.0.0. |
 | `Enum.HousingResult.MissingTheme` | evidence-required | enum | removed | enum removed in 12.0.0. |
 | `Enum.ItemCollectionType.ItemCollectionExteriorFixture` | evidence-required | enum | removed | Evidence-required/unsafe: bootstrap omission does not prove full runtime/dynamic removal, historical timing, replacement semantics, or all-LoD absence. |

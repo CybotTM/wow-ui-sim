@@ -55719,49 +55719,154 @@
       "id": "added:Enum.HousingDecorPlacementRestriction.ChildOutsideBounds",
       "symbol": "Enum.HousingDecorPlacementRestriction.ChildOutsideBounds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source register publishes Enum.HousingDecorPlacementRestriction.ChildOutsideBounds as exact Lua numeric value 8; the guarded fallback publishes the current family (TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32, metadata MinValue=1, MaxValue=32, NumValues=6, and omits NotInsideRoom.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact six-member family, Lua numeric types, no extras, metadata, and removed-member absence.",
+          "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingDecorPlacementRestriction.ChildOutsideBounds as Lua number with exact retail 12.0.0 value 8."
+      ],
+      "commit": "fe3ea6de9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, metadata, and removed-member absence. No housing-placement semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: fe3ea6de9."
     },
     {
       "id": "added:Enum.HousingDecorPlacementRestriction.OutsidePlotBounds",
       "symbol": "Enum.HousingDecorPlacementRestriction.OutsidePlotBounds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source register publishes Enum.HousingDecorPlacementRestriction.OutsidePlotBounds as exact Lua numeric value 4; the guarded fallback publishes the current family (TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32, metadata MinValue=1, MaxValue=32, NumValues=6, and omits NotInsideRoom.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact six-member family, Lua numeric types, no extras, metadata, and removed-member absence.",
+          "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingDecorPlacementRestriction.OutsidePlotBounds as Lua number with exact retail 12.0.0 value 4."
+      ],
+      "commit": "fe3ea6de9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, metadata, and removed-member absence. No housing-placement semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: fe3ea6de9."
     },
     {
       "id": "added:Enum.HousingDecorPlacementRestriction.OutsideRoomBounds",
       "symbol": "Enum.HousingDecorPlacementRestriction.OutsideRoomBounds",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source register publishes Enum.HousingDecorPlacementRestriction.OutsideRoomBounds as exact Lua numeric value 2; the guarded fallback publishes the current family (TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32, metadata MinValue=1, MaxValue=32, NumValues=6, and omits NotInsideRoom.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact six-member family, Lua numeric types, no extras, metadata, and removed-member absence.",
+          "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingDecorPlacementRestriction.OutsideRoomBounds as Lua number with exact retail 12.0.0 value 2."
+      ],
+      "commit": "fe3ea6de9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, metadata, and removed-member absence. No housing-placement semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: fe3ea6de9."
     },
     {
       "id": "added:Enum.HousingFavorUpdateSource.DecorCollection",
@@ -90569,65 +90674,205 @@
       "id": "changed:Enum.HousingDecorPlacementRestriction.InvalidCollision",
       "symbol": "Enum.HousingDecorPlacementRestriction.InvalidCollision",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source register changes Enum.HousingDecorPlacementRestriction.InvalidCollision from 8 to 32; the guarded fallback publishes the corrected current family (TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32, metadata MinValue=1, MaxValue=32, NumValues=6, and omits NotInsideRoom.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact six-member family, Lua numeric types, no extras, metadata, and removed-member absence.",
+          "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingDecorPlacementRestriction.InvalidCollision as Lua number with exact retail 12.0.0 value 32."
+      ],
+      "commit": "fe3ea6de9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, metadata, and removed-member absence. No housing-placement semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: fe3ea6de9."
     },
     {
       "id": "changed:Enum.HousingDecorPlacementRestriction.InvalidTarget",
       "symbol": "Enum.HousingDecorPlacementRestriction.InvalidTarget",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source register changes Enum.HousingDecorPlacementRestriction.InvalidTarget from 4 to 16; the guarded fallback publishes the corrected current family (TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32, metadata MinValue=1, MaxValue=32, NumValues=6, and omits NotInsideRoom.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact six-member family, Lua numeric types, no extras, metadata, and removed-member absence.",
+          "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingDecorPlacementRestriction.InvalidTarget as Lua number with exact retail 12.0.0 value 16."
+      ],
+      "commit": "fe3ea6de9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, metadata, and removed-member absence. No housing-placement semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: fe3ea6de9."
     },
     {
       "id": "changed:Enum.HousingDecorPlacementRestrictionMeta.MaxValue",
       "symbol": "Enum.HousingDecorPlacementRestrictionMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source register changes Enum.HousingDecorPlacementRestrictionMeta.MaxValue from 8 to 32; the guarded fallback publishes the corrected current family (TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32, metadata MinValue=1, MaxValue=32, NumValues=6, and omits NotInsideRoom.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact six-member family, Lua numeric types, no extras, metadata, and removed-member absence.",
+          "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingDecorPlacementRestrictionMeta.MaxValue as exact numeric housing-placement metadata in the family MinValue=1, MaxValue=32, NumValues=6."
+      ],
+      "commit": "fe3ea6de9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, metadata, and removed-member absence. No housing-placement semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: fe3ea6de9."
     },
     {
       "id": "changed:Enum.HousingDecorPlacementRestrictionMeta.NumValues",
       "symbol": "Enum.HousingDecorPlacementRestrictionMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source register changes Enum.HousingDecorPlacementRestrictionMeta.NumValues from 4 to 6; the guarded fallback publishes the corrected current family (TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32, metadata MinValue=1, MaxValue=32, NumValues=6, and omits NotInsideRoom.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact six-member family, Lua numeric types, no extras, metadata, and removed-member absence.",
+          "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingDecorPlacementRestrictionMeta.NumValues as exact numeric housing-placement metadata in the family MinValue=1, MaxValue=32, NumValues=6."
+      ],
+      "commit": "fe3ea6de9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, metadata, and removed-member absence. No housing-placement semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: fe3ea6de9."
     },
     {
       "id": "changed:Enum.HousingItemToastTypeMeta.MaxValue",
@@ -103555,17 +103800,52 @@
       "id": "removed:Enum.HousingDecorPlacementRestriction.NotInsideRoom",
       "symbol": "Enum.HousingDecorPlacementRestriction.NotInsideRoom",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source register removes Enum.HousingDecorPlacementRestriction.NotInsideRoom; prior value was 2. The guarded fallback omits the member while publishing the current six-member family (TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32).",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes TooFarAway=1, OutsideRoomBounds=2, OutsidePlotBounds=4, ChildOutsideBounds=8, InvalidTarget=16, InvalidCollision=32, metadata MinValue=1, MaxValue=32, NumValues=6, and omits NotInsideRoom.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 enum initialization executes the checked-in enum surface before compatibility fallback resolution.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact six-member family, Lua numeric types, no extras, metadata, and removed-member absence.",
+          "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+      ],
+      "assertions": [
+        "Omits Enum.HousingDecorPlacementRestriction.NotInsideRoom at startup while retaining OutsideRoomBounds=2."
+      ],
+      "commit": "fe3ea6de9",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication, Lua table/member numeric types, exact values, complete family membership, metadata, and removed-member absence. No housing-placement semantics, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: fe3ea6de9."
     },
     {
       "id": "removed:Enum.HousingResult.FixtureNotOwned",
