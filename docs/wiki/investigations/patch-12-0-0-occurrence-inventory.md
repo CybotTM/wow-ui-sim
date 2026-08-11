@@ -1923,12 +1923,12 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.SpellDiminishCategoryMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
 | `Enum.SpellDiminishCategoryMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
 | `Enum.SpellDiminishCategoryMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishCategory family and matching metadata; no diminishing-return semantics claimed. |
-| `Enum.SpellDiminishRuleset.None` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishRuleset.PvE` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishRuleset.PvP` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishRulesetMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishRulesetMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellDiminishRulesetMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.SpellDiminishRuleset.None` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishRuleset family and matching metadata; no diminishing-ruleset semantics claimed. |
+| `Enum.SpellDiminishRuleset.PvE` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishRuleset family and matching metadata; no diminishing-ruleset semantics claimed. |
+| `Enum.SpellDiminishRuleset.PvP` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishRuleset family and matching metadata; no diminishing-ruleset semantics claimed. |
+| `Enum.SpellDiminishRulesetMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishRuleset family and matching metadata; no diminishing-ruleset semantics claimed. |
+| `Enum.SpellDiminishRulesetMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishRuleset family and matching metadata; no diminishing-ruleset semantics claimed. |
+| `Enum.SpellDiminishRulesetMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishRuleset family and matching metadata; no diminishing-ruleset semantics claimed. |
 | `Enum.StatusBarFillStyle.Center` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.StatusBarFillStyle.Reverse` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.StatusBarFillStyle.Standard` | untriaged | enum | added | enum added in 12.0.0. |
