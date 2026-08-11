@@ -103311,17 +103311,46 @@
       "id": "changed:GetRaidTargetIndex",
       "symbol": "GetRaidTargetIndex",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source changes GetRaidTargetIndex to a callable unit-query API.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/targeting_verbs.rs",
+          "summary": "Runtime registers GetRaidTargetIndex and returns nil while assigned raid markers are unmodeled.",
+          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/startup_api_stubs.rs",
+          "summary": "Focused startup proof calls GetRaidTargetIndex with player and asserts nil without an assigned marker.",
+          "source_hash": "49094e5eb6a2fe75e4efdb237298df2ba0163407bd7f9608bb6666e28501f6b9"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the changed GetRaidTargetIndex API.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "tests/startup_api_stubs.rs::startup_party_chat_and_targeting_globals_are_callable"
+      ],
+      "assertions": [
+        "Publishes callable GetRaidTargetIndex(unit) and returns nil for player when no raid marker is assigned."
+      ],
+      "commit": "492c4a189",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publication and nil-without-marker behavior are behaviorally proven; assigned-marker lookup and raid-target semantics remain unclaimed."
     },
     {
       "id": "changed:HOUSE_LEVEL_CHANGED",
