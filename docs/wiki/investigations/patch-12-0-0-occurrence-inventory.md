@@ -1906,12 +1906,12 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.SleevesGeoRangeMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
 | `Enum.SleevesGeoRangeMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
 | `Enum.SleevesGeoRangeMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publishes the exact numeric member or metadata value; focused proof covers the complete family and metadata, with no sleeves-geometry semantics claimed. |
-| `Enum.SpellAuraVisibilityType.EnemyTarget` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellAuraVisibilityType.RaidInCombat` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellAuraVisibilityType.RaidOutOfCombat` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellAuraVisibilityTypeMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellAuraVisibilityTypeMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.SpellAuraVisibilityTypeMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.SpellAuraVisibilityType.EnemyTarget` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit members come from combat_system.rs and matching metadata from guarded fallback; no aura-visibility semantics claimed. |
+| `Enum.SpellAuraVisibilityType.RaidInCombat` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit members come from combat_system.rs and matching metadata from guarded fallback; no aura-visibility semantics claimed. |
+| `Enum.SpellAuraVisibilityType.RaidOutOfCombat` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit members come from combat_system.rs and matching metadata from guarded fallback; no aura-visibility semantics claimed. |
+| `Enum.SpellAuraVisibilityTypeMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit members come from combat_system.rs and matching metadata from guarded fallback; no aura-visibility semantics claimed. |
+| `Enum.SpellAuraVisibilityTypeMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit members come from combat_system.rs and matching metadata from guarded fallback; no aura-visibility semantics claimed. |
+| `Enum.SpellAuraVisibilityTypeMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit members come from combat_system.rs and matching metadata from guarded fallback; no aura-visibility semantics claimed. |
 | `Enum.SpellDiminishCategory.AoEKnockback` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.SpellDiminishCategory.Disarm` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.SpellDiminishCategory.Disorient` | untriaged | enum | added | enum added in 12.0.0. |
