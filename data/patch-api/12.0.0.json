@@ -58688,129 +58688,409 @@
       "id": "added:Enum.LFGEntryGeneralPlaystyle.Expert",
       "symbol": "Enum.LFGEntryGeneralPlaystyle.Expert",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes the complete Enum.LFGEntryGeneralPlaystyle family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4 with MinValue=0, MaxValue=4, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f39702d7794d89650466ae71e8ded5a8e2ca0173820e931af5c72f7dfeca58f1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LFG general playstyle family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "3a00e22f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LFGEntryGeneralPlaystyle family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=4, NumValues=5. No playstyle behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 3a00e22f1."
     },
     {
       "id": "added:Enum.LFGEntryGeneralPlaystyle.FunRelaxed",
       "symbol": "Enum.LFGEntryGeneralPlaystyle.FunRelaxed",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes the complete Enum.LFGEntryGeneralPlaystyle family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4 with MinValue=0, MaxValue=4, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f39702d7794d89650466ae71e8ded5a8e2ca0173820e931af5c72f7dfeca58f1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LFG general playstyle family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "3a00e22f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LFGEntryGeneralPlaystyle family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=4, NumValues=5. No playstyle behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 3a00e22f1."
     },
     {
       "id": "added:Enum.LFGEntryGeneralPlaystyle.FunSerious",
       "symbol": "Enum.LFGEntryGeneralPlaystyle.FunSerious",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes the complete Enum.LFGEntryGeneralPlaystyle family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4 with MinValue=0, MaxValue=4, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f39702d7794d89650466ae71e8ded5a8e2ca0173820e931af5c72f7dfeca58f1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LFG general playstyle family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "3a00e22f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LFGEntryGeneralPlaystyle family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=4, NumValues=5. No playstyle behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 3a00e22f1."
     },
     {
       "id": "added:Enum.LFGEntryGeneralPlaystyle.Learning",
       "symbol": "Enum.LFGEntryGeneralPlaystyle.Learning",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes the complete Enum.LFGEntryGeneralPlaystyle family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4 with MinValue=0, MaxValue=4, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f39702d7794d89650466ae71e8ded5a8e2ca0173820e931af5c72f7dfeca58f1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LFG general playstyle family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "3a00e22f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LFGEntryGeneralPlaystyle family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=4, NumValues=5. No playstyle behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 3a00e22f1."
     },
     {
       "id": "added:Enum.LFGEntryGeneralPlaystyle.None",
       "symbol": "Enum.LFGEntryGeneralPlaystyle.None",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes the complete Enum.LFGEntryGeneralPlaystyle family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4 with MinValue=0, MaxValue=4, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f39702d7794d89650466ae71e8ded5a8e2ca0173820e931af5c72f7dfeca58f1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LFG general playstyle family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "3a00e22f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LFGEntryGeneralPlaystyle family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=4, NumValues=5. No playstyle behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 3a00e22f1."
     },
     {
       "id": "added:Enum.LFGEntryGeneralPlaystyleMeta.MaxValue",
       "symbol": "Enum.LFGEntryGeneralPlaystyleMeta.MaxValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes the complete Enum.LFGEntryGeneralPlaystyle family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4 with MinValue=0, MaxValue=4, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f39702d7794d89650466ae71e8ded5a8e2ca0173820e931af5c72f7dfeca58f1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LFG general playstyle family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "3a00e22f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LFGEntryGeneralPlaystyle family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=4, NumValues=5. No playstyle behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 3a00e22f1."
     },
     {
       "id": "added:Enum.LFGEntryGeneralPlaystyleMeta.MinValue",
       "symbol": "Enum.LFGEntryGeneralPlaystyleMeta.MinValue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes the complete Enum.LFGEntryGeneralPlaystyle family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4 with MinValue=0, MaxValue=4, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f39702d7794d89650466ae71e8ded5a8e2ca0173820e931af5c72f7dfeca58f1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LFG general playstyle family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "3a00e22f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LFGEntryGeneralPlaystyle family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=4, NumValues=5. No playstyle behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 3a00e22f1."
     },
     {
       "id": "added:Enum.LFGEntryGeneralPlaystyleMeta.NumValues",
       "symbol": "Enum.LFGEntryGeneralPlaystyleMeta.NumValues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source publishes the complete Enum.LFGEntryGeneralPlaystyle family and matching metadata as Lua numeric values.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback is authoritative and publishes None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4 with MinValue=0, MaxValue=4, NumValues=5.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete exact family, Lua numeric types, no extras, and metadata.",
+          "source_hash": "f39702d7794d89650466ae71e8ded5a8e2ca0173820e931af5c72f7dfeca58f1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the retail 12.0.0 LFG general playstyle family values.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_lfg_entry_general_playstyle_enums.rs::test_patch_12_0_0_lfg_entry_general_playstyle_enums"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.LFGEntryGeneralPlaystyle family as Lua numbers with exact values None=0, Learning=1, FunRelaxed=2, FunSerious=3, Expert=4; metadata is MinValue=0, MaxValue=4, NumValues=5, with no extras."
+      ],
+      "commit": "3a00e22f1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of the complete Enum.LFGEntryGeneralPlaystyle family, exact Lua numeric values/types, no extras, and metadata MinValue=0, MaxValue=4, NumValues=5. No playstyle behavior, consumers, persistence, transitions, or lifecycle are claimed. Proof commit: 3a00e22f1."
     },
     {
       "id": "added:Enum.LimitedInputType.MouseDown",
