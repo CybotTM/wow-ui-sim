@@ -1929,13 +1929,13 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `Enum.SpellDiminishRulesetMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishRuleset family and matching metadata; no diminishing-ruleset semantics claimed. |
 | `Enum.SpellDiminishRulesetMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishRuleset family and matching metadata; no diminishing-ruleset semantics claimed. |
 | `Enum.SpellDiminishRulesetMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; guarded fallback is authoritative for the complete numeric SpellDiminishRuleset family and matching metadata; no diminishing-ruleset semantics claimed. |
-| `Enum.StatusBarFillStyle.Center` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.StatusBarFillStyle.Reverse` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.StatusBarFillStyle.Standard` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.StatusBarFillStyle.StandardNoRangeFill` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.StatusBarFillStyleMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.StatusBarFillStyleMeta.MinValue` | untriaged | enum | added | enum added in 12.0.0. |
-| `Enum.StatusBarFillStyleMeta.NumValues` | untriaged | enum | added | enum added in 12.0.0. |
+| `Enum.StatusBarFillStyle.Center` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit combat-system members and guarded fallback metadata are authoritative and agree; no status-bar rendering semantics claimed. |
+| `Enum.StatusBarFillStyle.Reverse` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit combat-system members and guarded fallback metadata are authoritative and agree; no status-bar rendering semantics claimed. |
+| `Enum.StatusBarFillStyle.Standard` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit combat-system members and guarded fallback metadata are authoritative and agree; no status-bar rendering semantics claimed. |
+| `Enum.StatusBarFillStyle.StandardNoRangeFill` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit combat-system members and guarded fallback metadata are authoritative and agree; no status-bar rendering semantics claimed. |
+| `Enum.StatusBarFillStyleMeta.MaxValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit combat-system members and guarded fallback metadata are authoritative and agree; no status-bar rendering semantics claimed. |
+| `Enum.StatusBarFillStyleMeta.MinValue` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit combat-system members and guarded fallback metadata are authoritative and agree; no status-bar rendering semantics claimed. |
+| `Enum.StatusBarFillStyleMeta.NumValues` | best-effort | enum | added | Retail 12.0.0 startup publication is behaviorally proven; explicit combat-system members and guarded fallback metadata are authoritative and agree; no status-bar rendering semantics claimed. |
 | `Enum.StatusBarInterpolation.ExponentialEaseOut` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.StatusBarInterpolation.Immediate` | untriaged | enum | added | enum added in 12.0.0. |
 | `Enum.StatusBarInterpolationMeta.MaxValue` | untriaged | enum | added | enum added in 12.0.0. |
