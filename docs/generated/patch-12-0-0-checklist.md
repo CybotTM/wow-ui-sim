@@ -1741,11 +1741,11 @@
 1741. [best-effort] `added:Enum.ProceduralSpawnInteractionModeMeta.MaxValue` — behavioral
 1742. [best-effort] `added:Enum.ProceduralSpawnInteractionModeMeta.MinValue` — behavioral
 1743. [best-effort] `added:Enum.ProceduralSpawnInteractionModeMeta.NumValues` — behavioral
-1744. [untriaged] `added:Enum.ProceduralSpawnVolumeChunkFlags.AllSubChunksSet` — untriaged
-1745. [untriaged] `added:Enum.ProceduralSpawnVolumeChunkFlags.None` — untriaged
-1746. [untriaged] `added:Enum.ProceduralSpawnVolumeChunkFlagsMeta.MaxValue` — untriaged
-1747. [untriaged] `added:Enum.ProceduralSpawnVolumeChunkFlagsMeta.MinValue` — untriaged
-1748. [untriaged] `added:Enum.ProceduralSpawnVolumeChunkFlagsMeta.NumValues` — untriaged
+1744. [best-effort] `added:Enum.ProceduralSpawnVolumeChunkFlags.AllSubChunksSet` — behavioral
+1745. [best-effort] `added:Enum.ProceduralSpawnVolumeChunkFlags.None` — behavioral
+1746. [best-effort] `added:Enum.ProceduralSpawnVolumeChunkFlagsMeta.MaxValue` — behavioral
+1747. [best-effort] `added:Enum.ProceduralSpawnVolumeChunkFlagsMeta.MinValue` — behavioral
+1748. [best-effort] `added:Enum.ProceduralSpawnVolumeChunkFlagsMeta.NumValues` — behavioral
 1749. [best-effort] `added:Enum.QuestTagType.Prey` — behavioral
 1750. [untriaged] `added:Enum.RaidAuraOrganizationType.BuffsRightDebuffsLeft` — untriaged
 1751. [untriaged] `added:Enum.RaidAuraOrganizationType.BuffsTopDebuffsBottom` — untriaged
