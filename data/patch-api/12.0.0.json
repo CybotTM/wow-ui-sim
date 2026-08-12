@@ -104243,273 +104243,766 @@
       "id": "changed:Enum.CraftingOrderResult.MissingItem",
       "symbol": "Enum.CraftingOrderResult.MissingItem",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.MissingItem from numeric value 30 to 31."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.MissingItem as numeric value 31; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.MissingItem with numeric value 31."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.MissingItem) == \"number\" and Enum.CraftingOrderResult.MissingItem == 31; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingItem as Lua number 31, with source change 30→31. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.MissingNpc",
       "symbol": "Enum.CraftingOrderResult.MissingNpc",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.MissingNpc from numeric value 31 to 32."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.MissingNpc as numeric value 32; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.MissingNpc with numeric value 32."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.MissingNpc) == \"number\" and Enum.CraftingOrderResult.MissingNpc == 32; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingNpc as Lua number 32, with source change 31→32. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.MissingOrder",
       "symbol": "Enum.CraftingOrderResult.MissingOrder",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.MissingOrder from numeric value 32 to 33."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.MissingOrder as numeric value 33; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.MissingOrder with numeric value 33."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.MissingOrder) == \"number\" and Enum.CraftingOrderResult.MissingOrder == 33; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingOrder as Lua number 33, with source change 32→33. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.MissingRecraftItem",
       "symbol": "Enum.CraftingOrderResult.MissingRecraftItem",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.MissingRecraftItem from numeric value 33 to 34."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.MissingRecraftItem as numeric value 34; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.MissingRecraftItem with numeric value 34."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.MissingRecraftItem) == \"number\" and Enum.CraftingOrderResult.MissingRecraftItem == 34; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingRecraftItem as Lua number 34, with source change 33→34. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NoAccountItems",
       "symbol": "Enum.CraftingOrderResult.NoAccountItems",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.NoAccountItems from numeric value 34 to 35."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.NoAccountItems as numeric value 35; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.NoAccountItems with numeric value 35."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.NoAccountItems) == \"number\" and Enum.CraftingOrderResult.NoAccountItems == 35; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NoAccountItems as Lua number 35, with source change 34→35. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NotClaimed",
       "symbol": "Enum.CraftingOrderResult.NotClaimed",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.NotClaimed from numeric value 35 to 36."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.NotClaimed as numeric value 36; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.NotClaimed with numeric value 36."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.NotClaimed) == \"number\" and Enum.CraftingOrderResult.NotClaimed == 36; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotClaimed as Lua number 36, with source change 35→36. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NotCrafted",
       "symbol": "Enum.CraftingOrderResult.NotCrafted",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.NotCrafted from numeric value 36 to 37."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.NotCrafted as numeric value 37; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.NotCrafted with numeric value 37."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.NotCrafted) == \"number\" and Enum.CraftingOrderResult.NotCrafted == 37; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotCrafted as Lua number 37, with source change 36→37. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NotInGuild",
       "symbol": "Enum.CraftingOrderResult.NotInGuild",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.NotInGuild from numeric value 37 to 38."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.NotInGuild as numeric value 38; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.NotInGuild with numeric value 38."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.NotInGuild) == \"number\" and Enum.CraftingOrderResult.NotInGuild == 38; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotInGuild as Lua number 38, with source change 37→38. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NotYetImplemented",
       "symbol": "Enum.CraftingOrderResult.NotYetImplemented",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.NotYetImplemented from numeric value 38 to 39."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.NotYetImplemented as numeric value 39; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.NotYetImplemented with numeric value 39."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.NotYetImplemented) == \"number\" and Enum.CraftingOrderResult.NotYetImplemented == 39; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotYetImplemented as Lua number 39, with source change 38→39. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.OutOfPublicOrderCapacity",
       "symbol": "Enum.CraftingOrderResult.OutOfPublicOrderCapacity",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.OutOfPublicOrderCapacity from numeric value 39 to 40."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.OutOfPublicOrderCapacity as numeric value 40; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.OutOfPublicOrderCapacity with numeric value 40."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.OutOfPublicOrderCapacity) == \"number\" and Enum.CraftingOrderResult.OutOfPublicOrderCapacity == 40; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.OutOfPublicOrderCapacity as Lua number 40, with source change 39→40. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.ServerIsNotAvailable",
       "symbol": "Enum.CraftingOrderResult.ServerIsNotAvailable",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.ServerIsNotAvailable from numeric value 40 to 41."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.ServerIsNotAvailable as numeric value 41; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.ServerIsNotAvailable with numeric value 41."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.ServerIsNotAvailable) == \"number\" and Enum.CraftingOrderResult.ServerIsNotAvailable == 41; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.ServerIsNotAvailable as Lua number 41, with source change 40→41. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.TargetCannotCraft",
       "symbol": "Enum.CraftingOrderResult.TargetCannotCraft",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.TargetCannotCraft from numeric value 42 to 43."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.TargetCannotCraft as numeric value 43; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.TargetCannotCraft with numeric value 43."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.TargetCannotCraft) == \"number\" and Enum.CraftingOrderResult.TargetCannotCraft == 43; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.TargetCannotCraft as Lua number 43, with source change 42→43. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.TargetLocked",
       "symbol": "Enum.CraftingOrderResult.TargetLocked",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.TargetLocked from numeric value 43 to 44."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.TargetLocked as numeric value 44; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.TargetLocked with numeric value 44."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.TargetLocked) == \"number\" and Enum.CraftingOrderResult.TargetLocked == 44; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.TargetLocked as Lua number 44, with source change 43→44. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.ThrottleViolation",
       "symbol": "Enum.CraftingOrderResult.ThrottleViolation",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.ThrottleViolation from numeric value 41 to 42."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.ThrottleViolation as numeric value 42; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.ThrottleViolation with numeric value 42."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.ThrottleViolation) == \"number\" and Enum.CraftingOrderResult.ThrottleViolation == 42; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.ThrottleViolation as Lua number 42, with source change 41→42. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.Timeout",
       "symbol": "Enum.CraftingOrderResult.Timeout",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.Timeout from numeric value 44 to 45."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.Timeout as numeric value 45; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.Timeout with numeric value 45."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.Timeout) == \"number\" and Enum.CraftingOrderResult.Timeout == 45; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.Timeout as Lua number 45, with source change 44→45. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.TooManyItems",
       "symbol": "Enum.CraftingOrderResult.TooManyItems",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.TooManyItems from numeric value 45 to 47."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.TooManyItems as numeric value 47; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.TooManyItems with numeric value 47."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.TooManyItems) == \"number\" and Enum.CraftingOrderResult.TooManyItems == 47; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.TooManyItems as Lua number 47, with source change 45→47. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.WrongVersion",
       "symbol": "Enum.CraftingOrderResult.WrongVersion",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResult.WrongVersion from numeric value 46 to 48."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResult.WrongVersion as numeric value 48; no competing explicit family publication was found."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof passed: 1 test, 0 failed, 1544 filtered; exact member Lua numeric types/after-values and metadata MinValue=0, MaxValue=48, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResult.WrongVersion with numeric value 48."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResult.WrongVersion) == \"number\" and Enum.CraftingOrderResult.WrongVersion == 48; shared proof also asserts MinValue=0, MaxValue=48, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.WrongVersion as Lua number 48, with source change 46→48. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResultMeta.MaxValue",
