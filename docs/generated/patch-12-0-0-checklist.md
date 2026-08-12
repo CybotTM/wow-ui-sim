@@ -2388,13 +2388,13 @@
 2388. [evidence-required] `added:UnitThreatLeadSituation` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
 2389. [evidence-required] `added:UnregisterEventCallback` — unsafe
 2390. [evidence-required] `added:UnregisterUnitEventCallback` — unsafe
-2391. [untriaged] `added:VIEWED_TRANSMOG_OUTFIT_CHANGED` — untriaged
-2392. [untriaged] `added:VIEWED_TRANSMOG_OUTFIT_SECONDARY_SLOTS_CHANGED` — untriaged
-2393. [untriaged] `added:VIEWED_TRANSMOG_OUTFIT_SITUATIONS_CHANGED` — untriaged
-2394. [untriaged] `added:VIEWED_TRANSMOG_OUTFIT_SLOT_REFRESH` — untriaged
-2395. [untriaged] `added:VIEWED_TRANSMOG_OUTFIT_SLOT_SAVE_SUCCESS` — untriaged
-2396. [untriaged] `added:VIEWED_TRANSMOG_OUTFIT_SLOT_WEAPON_OPTION_CHANGED` — untriaged
-2397. [untriaged] `added:VOICE_CHAT_TTS_PLAYBACK_BOOKMARK` — untriaged
+2391. [evidence-required] `added:VIEWED_TRANSMOG_OUTFIT_CHANGED` — unsafe
+2392. [evidence-required] `added:VIEWED_TRANSMOG_OUTFIT_SECONDARY_SLOTS_CHANGED` — unsafe
+2393. [evidence-required] `added:VIEWED_TRANSMOG_OUTFIT_SITUATIONS_CHANGED` — unsafe
+2394. [evidence-required] `added:VIEWED_TRANSMOG_OUTFIT_SLOT_REFRESH` — unsafe
+2395. [evidence-required] `added:VIEWED_TRANSMOG_OUTFIT_SLOT_SAVE_SUCCESS` — unsafe
+2396. [evidence-required] `added:VIEWED_TRANSMOG_OUTFIT_SLOT_WEAPON_OPTION_CHANGED` — unsafe
+2397. [evidence-required] `added:VOICE_CHAT_TTS_PLAYBACK_BOOKMARK` — unsafe
 2398. [best-effort] `added:WorldTextCritScreenY_v2` — behavioral
 2399. [best-effort] `added:WorldTextGravity_v2` — behavioral
 2400. [best-effort] `added:WorldTextMinAlpha_v2` — behavioral

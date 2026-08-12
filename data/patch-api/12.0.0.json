@@ -94688,113 +94688,386 @@
       "id": "added:VIEWED_TRANSMOG_OUTFIT_CHANGED",
       "symbol": "VIEWED_TRANSMOG_OUTFIT_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 event declaration: no declared payload."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Current retail runtime accepts registration; registration does not prove producer-backed delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Event validation and callback classification were inspected; producer and payload delivery remain unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Dispatch wiring was inspected; no producer path establishes firing semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Temporary transmog state support does not establish producer-backed event delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/transmog_outfit_info.rs",
+          "source_hash": "c52553e4ca1d0bb3c2e65c8fc896272feacec88bd4a258a10127e943de03d240",
+          "summary": "Existing getter/mutation tests do not prove event delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery snapshot; no firing or consumer semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer-backed probe: register a frame, trigger the real viewed-outfit transition, assert handler delivery and exact zero payload arity."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds VIEWED_TRANSMOG_OUTFIT_CHANGED (no declared payload); runtime registration exists but producer-backed firing and exact delivery remain unmodeled or unproven. Temporary transmog getter/state tests do not prove event firing, timing, ordering, or lifecycle. Claims are bounded to declaration and current registerability; no firing, timing, ordering, lifecycle, or transmog/TTS semantics are claimed."
     },
     {
       "id": "added:VIEWED_TRANSMOG_OUTFIT_SECONDARY_SLOTS_CHANGED",
       "symbol": "VIEWED_TRANSMOG_OUTFIT_SECONDARY_SLOTS_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 event declaration: no declared payload."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Current retail runtime accepts registration; registration does not prove producer-backed delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Event validation and callback classification were inspected; producer and payload delivery remain unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Dispatch wiring was inspected; no producer path establishes firing semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery snapshot; no firing or consumer semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer-backed probe: register a frame, trigger a viewed-outfit secondary-slot transition, assert handler delivery and exact zero payload arity."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds VIEWED_TRANSMOG_OUTFIT_SECONDARY_SLOTS_CHANGED (no declared payload); runtime registration exists but producer-backed firing and exact delivery remain unmodeled or unproven. Registration and adjacent transmog state do not prove producer-backed firing or payload behavior. Claims are bounded to declaration and current registerability; no firing, timing, ordering, lifecycle, or transmog/TTS semantics are claimed."
     },
     {
       "id": "added:VIEWED_TRANSMOG_OUTFIT_SITUATIONS_CHANGED",
       "symbol": "VIEWED_TRANSMOG_OUTFIT_SITUATIONS_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 event declaration: no declared payload."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Current retail runtime accepts registration; registration does not prove producer-backed delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Event validation and callback classification were inspected; producer and payload delivery remain unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Dispatch wiring was inspected; no producer path establishes firing semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery snapshot; no firing or consumer semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer-backed probe: register a frame, trigger a viewed-outfit situation change, assert handler delivery and exact zero payload arity."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds VIEWED_TRANSMOG_OUTFIT_SITUATIONS_CHANGED (no declared payload); runtime registration exists but producer-backed firing and exact delivery remain unmodeled or unproven. Viewed-outfit getters and temporary situation state do not prove event firing or lifecycle. Claims are bounded to declaration and current registerability; no firing, timing, ordering, lifecycle, or transmog/TTS semantics are claimed."
     },
     {
       "id": "added:VIEWED_TRANSMOG_OUTFIT_SLOT_REFRESH",
       "symbol": "VIEWED_TRANSMOG_OUTFIT_SLOT_REFRESH",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 event declaration: no declared payload."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Current retail runtime accepts registration; registration does not prove producer-backed delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Event validation and callback classification were inspected; producer and payload delivery remain unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Dispatch wiring was inspected; no producer path establishes firing semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/transmog_outfit_slot_defaults.rs",
+          "source_hash": "fccb44b6bf496d41dc059baffc4dc7b5f8102057ebb7bab20bbd59e3c8103541",
+          "summary": "Temporary transmog state support does not establish producer-backed event delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/transmog_outfit_info.rs",
+          "source_hash": "c52553e4ca1d0bb3c2e65c8fc896272feacec88bd4a258a10127e943de03d240",
+          "summary": "Existing getter/mutation tests do not prove event delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery snapshot; no firing or consumer semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer-backed probe: register a frame, trigger a supported viewed-outfit slot refresh, assert handler delivery and exact zero payload arity."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds VIEWED_TRANSMOG_OUTFIT_SLOT_REFRESH (no declared payload); runtime registration exists but producer-backed firing and exact delivery remain unmodeled or unproven. Transmog method presence does not prove slot-refresh production or event delivery. Claims are bounded to declaration and current registerability; no firing, timing, ordering, lifecycle, or transmog/TTS semantics are claimed."
     },
     {
       "id": "added:VIEWED_TRANSMOG_OUTFIT_SLOT_SAVE_SUCCESS",
       "symbol": "VIEWED_TRANSMOG_OUTFIT_SLOT_SAVE_SUCCESS",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 event declaration: slot: Enum.TransmogOutfitSlot, type: Enum.TransmogType, option: Enum.TransmogOutfitSlotOption."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Current retail runtime accepts registration; registration does not prove producer-backed delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Event validation and callback classification were inspected; producer and payload delivery remain unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Dispatch wiring was inspected; no producer path establishes firing semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/transmog_outfit_info.rs",
+          "source_hash": "f70d994263fdf246b18280f992d3c9072de73636500cd4ce1e8942531083958f",
+          "summary": "Temporary transmog state support does not establish producer-backed event delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/transmog_outfit_info.rs",
+          "source_hash": "c52553e4ca1d0bb3c2e65c8fc896272feacec88bd4a258a10127e943de03d240",
+          "summary": "Existing getter/mutation tests do not prove event delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery snapshot; no firing or consumer semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer-backed probe: register a frame, trigger a slot save, assert handler delivery and numeric slot/type/option payloads."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds VIEWED_TRANSMOG_OUTFIT_SLOT_SAVE_SUCCESS (slot: Enum.TransmogOutfitSlot, type: Enum.TransmogType, option: Enum.TransmogOutfitSlotOption); runtime registration exists but producer-backed firing and exact delivery remain unmodeled or unproven. Temporary viewed-outfit APIs and getter tests do not prove slot-save firing or payload semantics. Claims are bounded to declaration and current registerability; no firing, timing, ordering, lifecycle, or transmog/TTS semantics are claimed."
     },
     {
       "id": "added:VIEWED_TRANSMOG_OUTFIT_SLOT_WEAPON_OPTION_CHANGED",
       "symbol": "VIEWED_TRANSMOG_OUTFIT_SLOT_WEAPON_OPTION_CHANGED",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 event declaration: slot: Enum.TransmogOutfitSlot, weaponOption: Enum.TransmogOutfitSlotOption."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Current retail runtime accepts registration; registration does not prove producer-backed delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Event validation and callback classification were inspected; producer and payload delivery remain unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Dispatch wiring was inspected; no producer path establishes firing semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/transmog_outfit_slot_defaults.rs",
+          "source_hash": "fccb44b6bf496d41dc059baffc4dc7b5f8102057ebb7bab20bbd59e3c8103541",
+          "summary": "Temporary transmog state support does not establish producer-backed event delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery snapshot; no firing or consumer semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer-backed probe: register a frame, trigger a weapon-option change, assert handler delivery and numeric slot/weaponOption payloads."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds VIEWED_TRANSMOG_OUTFIT_SLOT_WEAPON_OPTION_CHANGED (slot: Enum.TransmogOutfitSlot, weaponOption: Enum.TransmogOutfitSlotOption); runtime registration exists but producer-backed firing and exact delivery remain unmodeled or unproven. Registration and temporary transmog state do not prove weapon-option event production or delivery. Claims are bounded to declaration and current registerability; no firing, timing, ordering, lifecycle, or transmog/TTS semantics are claimed."
     },
     {
       "id": "added:VOICE_CHAT_TTS_PLAYBACK_BOOKMARK",
       "symbol": "VOICE_CHAT_TTS_PLAYBACK_BOOKMARK",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 event declaration: utteranceID: number, bookmarkName: string."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Current retail runtime accepts registration; registration does not prove producer-backed delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Event validation and callback classification were inspected; producer and payload delivery remain unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Dispatch wiring was inspected; no producer path establishes firing semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery snapshot; no firing or consumer semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer-backed probe: register a frame, trigger supported TTS bookmark playback, assert handler delivery with numeric utteranceID and string bookmarkName."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds VOICE_CHAT_TTS_PLAYBACK_BOOKMARK (utteranceID: number, bookmarkName: string); runtime registration exists but producer-backed firing and exact delivery remain unmodeled or unproven. Registration does not prove TTS producer, timing, ordering, or payload delivery. Claims are bounded to declaration and current registerability; no firing, timing, ordering, lifecycle, or transmog/TTS semantics are claimed."
     },
     {
       "id": "added:WorldTextCritScreenY_v2",
