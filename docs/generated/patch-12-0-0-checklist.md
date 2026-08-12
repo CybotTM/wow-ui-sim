@@ -2908,8 +2908,8 @@
 2908. [best-effort] `removed:C_NamePlate.SetNamePlateSelfPreferredClickInsets` — behavioral
 2909. [best-effort] `removed:C_NamePlate.SetNamePlateSelfSize` — behavioral
 2910. [evidence-required] `removed:C_PerksActivities.PerksActivityCriteria` — unsafe
-2911. [untriaged] `removed:C_PerksActivities.PerksActivityCriteria.criteriaID` — untriaged
-2912. [untriaged] `removed:C_PerksActivities.PerksActivityCriteria.requiredValue` — untriaged
+2911. [evidence-required] `removed:C_PerksActivities.PerksActivityCriteria.criteriaID` — unsafe
+2912. [evidence-required] `removed:C_PerksActivities.PerksActivityCriteria.requiredValue` — unsafe
 2913. [evidence-required] `removed:C_PerksActivities.PerksActivityRequirement` — unsafe
 2914. [untriaged] `removed:C_PerksActivities.PerksActivityRequirement.completed` — untriaged
 2915. [untriaged] `removed:C_PerksActivities.PerksActivityRequirement.requirementText` — untriaged

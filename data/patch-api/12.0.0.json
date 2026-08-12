@@ -106643,33 +106643,63 @@
       "id": "removed:C_PerksActivities.PerksActivityCriteria.criteriaID",
       "symbol": "C_PerksActivities.PerksActivityCriteria.criteriaID",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes C_PerksActivities.PerksActivityCriteria.criteriaID, previously a numeric structure field; source metadata does not prove live runtime absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_activities_state.rs",
+          "source_hash": "ad0b01a9de1add44930f74f97c97781cf3ad5ce8e4f258e64f807e7ecc5f4a52",
+          "summary": "Temporary C_PerksActivities state exposes activity defaults and lookups but does not model or return an observable PerksActivityCriteria structure."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: obtain an observable PerksActivityCriteria object and use namespace-safe access to establish whether criteriaID is absent and whether any replacement field/object is published; source-text absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes numeric field PerksActivityCriteria.criteriaID, but the temporary runtime workaround does not model observable criteria structures. Require a runtime object probe before behavioral closure; make no replacement or lifecycle claim."
     },
     {
       "id": "removed:C_PerksActivities.PerksActivityCriteria.requiredValue",
       "symbol": "C_PerksActivities.PerksActivityCriteria.requiredValue",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes C_PerksActivities.PerksActivityCriteria.requiredValue, previously a numeric structure field; source metadata does not prove live runtime absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_activities_state.rs",
+          "source_hash": "ad0b01a9de1add44930f74f97c97781cf3ad5ce8e4f258e64f807e7ecc5f4a52",
+          "summary": "Temporary C_PerksActivities state exposes activity defaults and lookups but does not model or return an observable PerksActivityCriteria structure."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: obtain an observable PerksActivityCriteria object and use namespace-safe access to establish whether requiredValue is absent and whether any replacement field/object is published; source-text absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes numeric field PerksActivityCriteria.requiredValue, but the temporary runtime workaround does not model observable criteria structures. Require a runtime object probe before behavioral closure; make no replacement or lifecycle claim."
     },
     {
       "id": "removed:C_PerksActivities.PerksActivityRequirement",
