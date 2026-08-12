@@ -2785,9 +2785,9 @@
 2785. [best-effort] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_NEW_SUBDIVISION` — behavioral
 2786. [best-effort] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_RENAME_S` — behavioral
 2787. [best-effort] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_SOLD_HOUSE_S` — behavioral
-2788. [untriaged] `changed:LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS` — untriaged
-2789. [untriaged] `changed:LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED` — untriaged
-2790. [untriaged] `changed:LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR` — untriaged
+2788. [best-effort] `changed:LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS` — behavioral
+2789. [best-effort] `changed:LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED` — behavioral
+2790. [best-effort] `changed:LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR` — behavioral
 2791. [best-effort] `changed:NUM_LE_EXPANSION_LEVELS` — behavioral
 2792. [best-effort] `changed:NUM_LE_FRAME_TUTORIALS` — behavioral
 2793. [best-effort] `changed:NUM_LE_PET_JOURNAL_FILTERS` — behavioral

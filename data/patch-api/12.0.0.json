@@ -111218,49 +111218,136 @@
       "id": "changed:LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS",
       "symbol": "LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS from numeric 1217 to 1218.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Corrected guarded fallback publishes numeric startup value 1218.",
+          "source_hash": "a92516cfb211c4674410ff3c7767c0421677f9a48ad31772b392df08b550deca"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_recent_ally_error_constants.rs::test_patch_12_0_0_housing_recent_ally_error_constants",
+          "summary": "Focused startup proof asserts the global is a Lua number and equals 1218; the shared test also asserts the two companion constants.",
+          "source_hash": "1f7bc4f0300c9ee4dd61085335b5b1f8018112d41843cc8ad4b6cc9353582c4c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence for the changed global.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_recent_ally_error_constants.rs::test_patch_12_0_0_housing_recent_ally_error_constants"
+      ],
+      "assertions": [
+        "type(LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS) == \"number\" and LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS == 1218; claim bounded to retail 12.0.0 startup numeric global publication only."
+      ],
+      "commit": "0df65552d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the startup global from 1217 to 1218. Commit 0df65552d corrected the guarded fallback, and the focused test asserts the corrected Lua number. Claims are bounded to startup numeric global publication; no housing, guild/neighborhood, error production/interpretation, consumer, mutation, persistence, transition, UI, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED",
       "symbol": "LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED from numeric 1218 to 1219.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Corrected guarded fallback publishes numeric startup value 1219.",
+          "source_hash": "a92516cfb211c4674410ff3c7767c0421677f9a48ad31772b392df08b550deca"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_recent_ally_error_constants.rs::test_patch_12_0_0_housing_recent_ally_error_constants",
+          "summary": "Focused startup proof asserts the global is a Lua number and equals 1219; the shared test also asserts the two companion constants.",
+          "source_hash": "1f7bc4f0300c9ee4dd61085335b5b1f8018112d41843cc8ad4b6cc9353582c4c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence for the changed global.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_recent_ally_error_constants.rs::test_patch_12_0_0_housing_recent_ally_error_constants"
+      ],
+      "assertions": [
+        "type(LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED) == \"number\" and LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED == 1219; claim bounded to retail 12.0.0 startup numeric global publication only."
+      ],
+      "commit": "0df65552d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the startup global from 1218 to 1219. Commit 0df65552d corrected the guarded fallback, and the focused test asserts the corrected Lua number. Claims are bounded to startup numeric global publication; no housing, guild/neighborhood, error production/interpretation, consumer, mutation, persistence, transition, UI, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR",
       "symbol": "LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR from numeric 1224 to 1233.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Corrected guarded fallback publishes numeric startup value 1233.",
+          "source_hash": "a92516cfb211c4674410ff3c7767c0421677f9a48ad31772b392df08b550deca"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_recent_ally_error_constants.rs::test_patch_12_0_0_housing_recent_ally_error_constants",
+          "summary": "Focused startup proof asserts the global is a Lua number and equals 1233; the shared test also asserts the two companion constants.",
+          "source_hash": "1f7bc4f0300c9ee4dd61085335b5b1f8018112d41843cc8ad4b6cc9353582c4c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence for the changed global.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_recent_ally_error_constants.rs::test_patch_12_0_0_housing_recent_ally_error_constants"
+      ],
+      "assertions": [
+        "type(LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR) == \"number\" and LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR == 1233; claim bounded to retail 12.0.0 startup numeric global publication only."
+      ],
+      "commit": "0df65552d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the startup global from 1224 to 1233. Commit 0df65552d corrected the guarded fallback, and the focused test asserts the corrected Lua number. Claims are bounded to startup numeric global publication; no housing, guild/neighborhood, error production/interpretation, consumer, mutation, persistence, transition, UI, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:NUM_LE_EXPANSION_LEVELS",
