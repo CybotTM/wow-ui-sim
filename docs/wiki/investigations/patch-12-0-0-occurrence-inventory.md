@@ -1,3 +1,5 @@
+The thirteen retail 12.0.0 removed WorldText CVars are best-effort/behavioral: focused proof commit 58aa3b8de asserts GetCVar and GetCVarDefault return nil for every old name. Distinct _v2 names are not claimed semantically equivalent; claims are bounded to old-name value/default absence. Current totals are **1919 best-effort, 1025 evidence-required, 2 exception-requested, and 464 untriaged rows** (3410 total).
+
 The five retail 12.0.0 removed CVars `ShowClassColorInFriendlyNameplate`, `ShowClassColorInNameplate`, `ShowNamePlateLoseAggroFlash`, `TerrainBlendBakeEnable`, and `TerrainUnlitShaderEnable` are **best-effort/behavioral**. Focused proof is commit `c6702c93d` via `patch_12_0_0_cvar_removals.rs`; it asserts both public `GetCVar` and `GetCVarDefault` return nil for each name. Retail profile filtering removes the Friendly nameplate CVar while preserving non-retail profiles; the other four are omitted. Claims are bounded to CVar/default absence, with no rendering, nameplate, terrain, or other CVar semantics. Current totals are **1906 best-effort, 1025 evidence-required, 2 exception-requested, and 477 untriaged rows** (3410 total).
 
 Current 12.0.0 audit totals are **1906 best-effort, 1025 evidence-required, 2 exception-requested, and 477 untriaged rows** (3410 total). The four `Enum.SendAddonMessageResult` rows `AddOnMessageLockdown=11`, `TargetOffline=12`, `Meta.MaxValue=10→12`, and `Meta.NumValues=11→13` are best-effort/behavioral with focused proof commit `ed2345d36`; the complete 13-member numeric family and metadata are asserted, with no addon-message transport semantics claimed.
@@ -3325,19 +3327,19 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `TerrainBlendBakeEnable` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 public `GetCVar` and `GetCVarDefault` both return nil; focused proof commit c6702c93d. No terrain-rendering behavior is claimed. |
 | `TerrainUnlitShaderEnable` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 public `GetCVar` and `GetCVarDefault` both return nil; focused proof commit c6702c93d. No terrain-rendering behavior is claimed. |
 | `TransmogPendingInfo` | evidence-required | structure | removed | Source metadata and current transmog method absence do not prove runtime removal, TransmogPendingInfoMixin identity, or replacement semantics; source-text alone cannot close this row. |
-| `WorldTextCritScreenY` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextGravity` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextMinAlpha` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextNonRandomZ` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextRampDuration` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextRampPow` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextRampPowCrit` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextRandomXY` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextRandomZMax` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextRandomZMin` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextScale` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextScreenY` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `WorldTextStartPosRandomness` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `WorldTextCritScreenY` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextGravity` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextMinAlpha` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextNonRandomZ` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextRampDuration` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextRampPow` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextRampPowCrit` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextRandomXY` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextRandomZMax` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextRandomZMin` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextScale` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextScreenY` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
+| `WorldTextStartPosRandomness` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
 | `activeCUFProfile` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `advancedWatchFrame` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `currencyTokensBackpack1` | untriaged | cvar | removed | cvar removed in 12.0.0. |
