@@ -2780,7 +2780,7 @@
 2780. [untriaged] `changed:IsRaidMarkerActive` — untriaged
 2781. [untriaged] `changed:LE_EXPANSION_LEVEL_CURRENT` — untriaged
 2782. [untriaged] `changed:LE_EXPANSION_LEVEL_PREVIOUS` — untriaged
-2783. [untriaged] `changed:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME` — untriaged
+2783. [best-effort] `changed:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME` — behavioral
 2784. [untriaged] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_BUILT_HOUSE_S` — untriaged
 2785. [untriaged] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_NEW_SUBDIVISION` — untriaged
 2786. [untriaged] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_RENAME_S` — untriaged

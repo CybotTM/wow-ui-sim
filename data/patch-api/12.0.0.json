@@ -87658,7 +87658,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_CHARTER_NEIGHBORHOOD_OWNERSHIP_TRANSFER_SUCCESS with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87687,7 +87687,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME_NOTIFICATION_S with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87716,7 +87716,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_CHARTER_SIGNATURE_REMOVED with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87745,7 +87745,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_ENDEAVOR_REWARD_AVAILABLE with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87774,7 +87774,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_EXTERIOR_FAILSAFE_RESET with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87803,7 +87803,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_RESULT_COSMETIC_OWNER_NOT_IN_GUILD with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87832,7 +87832,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_RESULT_MISSING_PRIVATE_NEIGHBORHOOD_INVITE with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87861,7 +87861,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_RESULT_PLOT_NOT_VACANT with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87890,7 +87890,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_HOUSING_RESULT_PLOT_RESERVED with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87919,7 +87919,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_LFG_JOINED_TRAINING_GROUNDS_QUEUE with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87948,7 +87948,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_PVP_TRAINING_GROUNDS_DISABLED with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -87977,7 +87977,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current nil-guarded fallback publishes LE_GAME_ERR_SOLO_JOIN_TRAINING_GROUND with a conflicting value; exact 12.0.0 behavior is unresolved.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         }
       ],
       "tests": [],
@@ -88006,7 +88006,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current retail 12.0.0 startup initialization publishes LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS as a Lua number with exact value 3.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         },
         {
           "kind": "test",
@@ -88043,7 +88043,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
           "summary": "Current retail 12.0.0 startup initialization publishes LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS as a Lua number with exact value 4.",
-          "source_hash": "df9fa7eb065452540c0c5d3f206050f4e534a7271cf1eca4993e436044d4887c"
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
         },
         {
           "kind": "test",
@@ -109853,17 +109853,46 @@
       "id": "changed:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME",
       "symbol": "LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME from numeric 1223 to 1224.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "summary": "Corrected guarded fallback publishes numeric startup value 1224 after the RED test observed 1225.",
+          "source_hash": "fcbd58aadd21cfe4b3a98f30b89258f7487a5a71b491b4e262a56a576b5d5fef"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_charter_neighborhood_rename_error.rs::test_patch_12_0_0_le_game_err_charter_neighborhood_rename",
+          "summary": "Focused startup proof asserts the global is a Lua number and equals 1224; RED preceded the fallback correction and GREEN passed afterward.",
+          "source_hash": "44c0381ac4770a853245961dea0a1d090502cbb07f6364c20aa0e312450552e5"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no localized error-message or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_charter_neighborhood_rename_error.rs::test_patch_12_0_0_le_game_err_charter_neighborhood_rename"
+      ],
+      "assertions": [
+        "type(LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME) == \"number\" and LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME == 1224; claim bounded to startup constant publication only."
+      ],
+      "commit": "5789c90d0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the startup global from 1223 to 1224. The previous runtime published 1225; commit 5789c90d0 corrected the guarded fallback, and the focused test observed RED before the correction then GREEN afterward. Claims are bounded to numeric startup constant publication; no localized error-message or consumer semantics are claimed."
     },
     {
       "id": "changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_BUILT_HOUSE_S",

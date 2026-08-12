@@ -2870,7 +2870,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `IsRaidMarkerActive` | untriaged | api | changed | api changed in 12.0.0. |
 | `LE_EXPANSION_LEVEL_CURRENT` | untriaged | global | changed | global changed in 12.0.0. |
 | `LE_EXPANSION_LEVEL_PREVIOUS` | untriaged | global | changed | global changed in 12.0.0. |
-| `LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME` | untriaged | global | changed | global changed in 12.0.0. |
+| `LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME` | best-effort | global | changed | Retail 12.0.0 changes numeric startup publication 1223→1224; commit 5789c90d0 corrected prior runtime 1225, and focused RED/GREEN proof asserts Lua number 1224. No localized error-message or consumer semantics are claimed. |
 | `LE_GAME_ERR_GUILD_NEIGHBORHOOD_BUILT_HOUSE_S` | untriaged | global | changed | global changed in 12.0.0. |
 | `LE_GAME_ERR_GUILD_NEIGHBORHOOD_NEW_SUBDIVISION` | untriaged | global | changed | global changed in 12.0.0. |
 | `LE_GAME_ERR_GUILD_NEIGHBORHOOD_RENAME_S` | untriaged | global | changed | global changed in 12.0.0. |
