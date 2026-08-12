@@ -2696,7 +2696,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `C_VoiceChat.SpeakText` | evidence-required | api | changed | Evidence-required/unsafe: retail replaces destination with rate and volume and adds optional boolean overlap; current permissive/no-op voice surface does not enforce the new signature or model speech/TTS state. Required full-LoD/state-backed probe must establish exact inputs, default overlap, zero returns, validation, repeats, overlap behavior, TTS state/events, and errors. Claims are bounded to the signature change and current no-op gap; no speech semantics are claimed. |
 | `CanBeRaidTarget` | untriaged | api | changed | api changed in 12.0.0. |
 | `ClearRaidMarker` | untriaged | api | changed | api changed in 12.0.0. |
-| `EmitterCombatRange` | untriaged | cvar | changed | cvar changed in 12.0.0. |
+| `EmitterCombatRange` | best-effort | cvar | changed | Best-effort behavioral: startup/current-default CVar string changes 900→900.000000; focused getter proof commit cb2c4abde. No combat-range semantics claimed. |
 | `Enum.AccountStateLoadedFlagsMeta.NumValues` | best-effort | enum | changed | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `Enum.AccountTransTypeMeta.MaxValue` | best-effort | enum | changed | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `Enum.AccountTransTypeMeta.NumValues` | best-effort | enum | changed | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
@@ -2868,8 +2868,8 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `HOUSING_BASIC_MODE_SELECTED_TARGET_CHANGED` | best-effort | event | changed | Best-effort behavioral: retail 12.0.0 adds `isPreview`; focused proof commit `12d231522` verifies registration and generic dispatch of boolean, numeric targetType, and boolean preview arguments. No producer or housing-target behavior is claimed. |
 | `HOUSING_DECOR_PLACE_SUCCESS` | best-effort | event | changed | Best-effort behavioral: retail 12.0.0 adds `isPreview`; focused proof commit `12d231522` verifies registration and generic dispatch of GUID, numeric size, new boolean, and preview boolean. No producer or housing-placement behavior is claimed. |
 | `IsRaidMarkerActive` | untriaged | api | changed | api changed in 12.0.0. |
-| `LE_EXPANSION_LEVEL_CURRENT` | untriaged | global | changed | global changed in 12.0.0. |
-| `LE_EXPANSION_LEVEL_PREVIOUS` | untriaged | global | changed | global changed in 12.0.0. |
+| `LE_EXPANSION_LEVEL_CURRENT` | best-effort | global | changed | Best-effort behavioral: startup global changes 10→11; explicit core-string publication takes precedence; focused numeric startup proof commit cb2c4abde. No expansion semantics claimed. |
+| `LE_EXPANSION_LEVEL_PREVIOUS` | best-effort | global | changed | Best-effort behavioral: startup global changes 9→10 from guarded fallback; focused numeric startup proof commit cb2c4abde. No expansion semantics claimed. |
 | `LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME` | best-effort | global | changed | Retail 12.0.0 changes numeric startup publication 1223→1224; commit 5789c90d0 corrected prior runtime 1225, and focused RED/GREEN proof asserts Lua number 1224. No localized error-message or consumer semantics are claimed. |
 | `LE_GAME_ERR_GUILD_NEIGHBORHOOD_BUILT_HOUSE_S` | untriaged | global | changed | global changed in 12.0.0. |
 | `LE_GAME_ERR_GUILD_NEIGHBORHOOD_NEW_SUBDIVISION` | untriaged | global | changed | global changed in 12.0.0. |
@@ -2878,10 +2878,10 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS` | untriaged | global | changed | global changed in 12.0.0. |
 | `LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED` | untriaged | global | changed | global changed in 12.0.0. |
 | `LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR` | untriaged | global | changed | global changed in 12.0.0. |
-| `NUM_LE_EXPANSION_LEVELS` | untriaged | global | changed | global changed in 12.0.0. |
-| `NUM_LE_FRAME_TUTORIALS` | untriaged | global | changed | global changed in 12.0.0. |
-| `NUM_LE_PET_JOURNAL_FILTERS` | untriaged | global | changed | global changed in 12.0.0. |
-| `NonEmitterCombatRange` | untriaged | cvar | changed | cvar changed in 12.0.0. |
+| `NUM_LE_EXPANSION_LEVELS` | best-effort | global | changed | Best-effort behavioral: startup global changes 10→11 from guarded fallback; focused numeric startup proof commit cb2c4abde. No expansion semantics claimed. |
+| `NUM_LE_FRAME_TUTORIALS` | best-effort | global | changed | Best-effort behavioral: startup global changes 162→163 from guarded fallback; focused numeric startup proof commit cb2c4abde. No tutorial semantics claimed. |
+| `NUM_LE_PET_JOURNAL_FILTERS` | best-effort | global | changed | Best-effort behavioral: startup global changes 2→4 from guarded fallback; focused numeric startup proof commit cb2c4abde. No Pet Journal semantics claimed. |
+| `NonEmitterCombatRange` | best-effort | cvar | changed | Best-effort behavioral: startup/current-default CVar string changes 6400→6400.000000; focused getter proof commit cb2c4abde. No combat-range semantics claimed. |
 | `PlaceRaidMarker` | untriaged | api | changed | api changed in 12.0.0. |
 | `RemoveRaidTargets` | untriaged | api | changed | api changed in 12.0.0. |
 | `SetRaidTarget` | untriaged | api | changed | api changed in 12.0.0. |

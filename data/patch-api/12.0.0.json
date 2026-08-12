@@ -103946,17 +103946,52 @@
       "id": "changed:EmitterCombatRange",
       "symbol": "EmitterCombatRange",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar EmitterCombatRange from exact string 900 to 900.000000."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c",
+          "summary": "Current CVar defaults publish the exact startup/default string."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes seeded value/default through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values",
+          "source_hash": "6487805676a6e5ce9f9cbb461a17011e1d1f34aa7f8d9959de3a502dd0c4cfd7",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default getter exact strings."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no combat-range semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values"
+      ],
+      "assertions": [
+        "GetCVar(\"EmitterCombatRange\") == \"900.000000\" and GetCVarDefault(\"EmitterCombatRange\") == \"900.000000\"; claim bounded to startup/current-default string publication only."
+      ],
+      "commit": "cb2c4abdebb32882f5f1a6d11645d2c4a11913d7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes CVar EmitterCombatRange from 900 to 900.000000. Focused proof commit cb2c4abde passed 1 test, 0 failed, 1545 filtered and asserts both public getters. Claims are bounded to exact startup/current-default strings only; no combat-range, consumer, mutation, or persistence semantics are claimed."
     },
     {
       "id": "changed:Enum.AccountStateLoadedFlagsMeta.NumValues",
@@ -110715,33 +110750,91 @@
       "id": "changed:LE_EXPANSION_LEVEL_CURRENT",
       "symbol": "LE_EXPANSION_LEVEL_CURRENT",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes LE_EXPANSION_LEVEL_CURRENT from numeric 10 to 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/strings/string_data/core_strings.rs",
+          "source_hash": "bce6290f17295e3ee4b7784a331c967f0862141083acfee760ee8638e2029f98",
+          "summary": "explicit core-string publication takes precedence over matching fallback"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values",
+          "source_hash": "6487805676a6e5ce9f9cbb461a17011e1d1f34aa7f8d9959de3a502dd0c4cfd7",
+          "summary": "Focused retail 12.0.0 startup test asserts Lua numeric type and exact value."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values"
+      ],
+      "assertions": [
+        "type(LE_EXPANSION_LEVEL_CURRENT) == \"number\" and LE_EXPANSION_LEVEL_CURRENT == 11; claim bounded to startup numeric publication only."
+      ],
+      "commit": "cb2c4abdebb32882f5f1a6d11645d2c4a11913d7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the startup global from 10 to 11. Focused proof commit cb2c4abde passed 1 test, 0 failed, 1545 filtered and asserts Lua numeric type/value. Runtime precedence: explicit core-string publication takes precedence over matching fallback Claims are bounded to numeric startup publication only; no expansion, Pet Journal, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:LE_EXPANSION_LEVEL_PREVIOUS",
       "symbol": "LE_EXPANSION_LEVEL_PREVIOUS",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes LE_EXPANSION_LEVEL_PREVIOUS from numeric 9 to 10."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "source_hash": "bb1cd651f52598fba57c63297a4a76fea4b4c46354da1c0d8304f7f4e253cce1",
+          "summary": "guarded fallback publication"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values",
+          "source_hash": "6487805676a6e5ce9f9cbb461a17011e1d1f34aa7f8d9959de3a502dd0c4cfd7",
+          "summary": "Focused retail 12.0.0 startup test asserts Lua numeric type and exact value."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values"
+      ],
+      "assertions": [
+        "type(LE_EXPANSION_LEVEL_PREVIOUS) == \"number\" and LE_EXPANSION_LEVEL_PREVIOUS == 10; claim bounded to startup numeric publication only."
+      ],
+      "commit": "cb2c4abdebb32882f5f1a6d11645d2c4a11913d7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the startup global from 9 to 10. Focused proof commit cb2c4abde passed 1 test, 0 failed, 1545 filtered and asserts Lua numeric type/value. Runtime precedence: guarded fallback publication Claims are bounded to numeric startup publication only; no expansion, Pet Journal, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME",
@@ -110933,65 +111026,187 @@
       "id": "changed:NUM_LE_EXPANSION_LEVELS",
       "symbol": "NUM_LE_EXPANSION_LEVELS",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes NUM_LE_EXPANSION_LEVELS from numeric 10 to 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "source_hash": "bb1cd651f52598fba57c63297a4a76fea4b4c46354da1c0d8304f7f4e253cce1",
+          "summary": "guarded fallback publication"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values",
+          "source_hash": "6487805676a6e5ce9f9cbb461a17011e1d1f34aa7f8d9959de3a502dd0c4cfd7",
+          "summary": "Focused retail 12.0.0 startup test asserts Lua numeric type and exact value."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values"
+      ],
+      "assertions": [
+        "type(NUM_LE_EXPANSION_LEVELS) == \"number\" and NUM_LE_EXPANSION_LEVELS == 11; claim bounded to startup numeric publication only."
+      ],
+      "commit": "cb2c4abdebb32882f5f1a6d11645d2c4a11913d7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the startup global from 10 to 11. Focused proof commit cb2c4abde passed 1 test, 0 failed, 1545 filtered and asserts Lua numeric type/value. Runtime precedence: guarded fallback publication Claims are bounded to numeric startup publication only; no expansion, Pet Journal, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:NUM_LE_FRAME_TUTORIALS",
       "symbol": "NUM_LE_FRAME_TUTORIALS",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes NUM_LE_FRAME_TUTORIALS from numeric 162 to 163."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "source_hash": "bb1cd651f52598fba57c63297a4a76fea4b4c46354da1c0d8304f7f4e253cce1",
+          "summary": "guarded fallback publication"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values",
+          "source_hash": "6487805676a6e5ce9f9cbb461a17011e1d1f34aa7f8d9959de3a502dd0c4cfd7",
+          "summary": "Focused retail 12.0.0 startup test asserts Lua numeric type and exact value."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values"
+      ],
+      "assertions": [
+        "type(NUM_LE_FRAME_TUTORIALS) == \"number\" and NUM_LE_FRAME_TUTORIALS == 163; claim bounded to startup numeric publication only."
+      ],
+      "commit": "cb2c4abdebb32882f5f1a6d11645d2c4a11913d7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the startup global from 162 to 163. Focused proof commit cb2c4abde passed 1 test, 0 failed, 1545 filtered and asserts Lua numeric type/value. Runtime precedence: guarded fallback publication Claims are bounded to numeric startup publication only; no expansion, Pet Journal, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:NUM_LE_PET_JOURNAL_FILTERS",
       "symbol": "NUM_LE_PET_JOURNAL_FILTERS",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes NUM_LE_PET_JOURNAL_FILTERS from numeric 2 to 4."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_constants.lua",
+          "source_hash": "bb1cd651f52598fba57c63297a4a76fea4b4c46354da1c0d8304f7f4e253cce1",
+          "summary": "guarded fallback publication"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values",
+          "source_hash": "6487805676a6e5ce9f9cbb461a17011e1d1f34aa7f8d9959de3a502dd0c4cfd7",
+          "summary": "Focused retail 12.0.0 startup test asserts Lua numeric type and exact value."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values"
+      ],
+      "assertions": [
+        "type(NUM_LE_PET_JOURNAL_FILTERS) == \"number\" and NUM_LE_PET_JOURNAL_FILTERS == 4; claim bounded to startup numeric publication only."
+      ],
+      "commit": "cb2c4abdebb32882f5f1a6d11645d2c4a11913d7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes the startup global from 2 to 4. Focused proof commit cb2c4abde passed 1 test, 0 failed, 1545 filtered and asserts Lua numeric type/value. Runtime precedence: guarded fallback publication Claims are bounded to numeric startup publication only; no expansion, Pet Journal, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:NonEmitterCombatRange",
       "symbol": "NonEmitterCombatRange",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar NonEmitterCombatRange from exact string 6400 to 6400.000000."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c",
+          "summary": "Current CVar defaults publish the exact startup/default string."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes seeded value/default through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values",
+          "source_hash": "6487805676a6e5ce9f9cbb461a17011e1d1f34aa7f8d9959de3a502dd0c4cfd7",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default getter exact strings."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no combat-range semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_changed_startup_values.rs::test_patch_12_0_0_changed_startup_values"
+      ],
+      "assertions": [
+        "GetCVar(\"NonEmitterCombatRange\") == \"6400.000000\" and GetCVarDefault(\"NonEmitterCombatRange\") == \"6400.000000\"; claim bounded to startup/current-default string publication only."
+      ],
+      "commit": "cb2c4abdebb32882f5f1a6d11645d2c4a11913d7",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes CVar NonEmitterCombatRange from 6400 to 6400.000000. Focused proof commit cb2c4abde passed 1 test, 0 failed, 1545 filtered and asserts both public getters. Claims are bounded to exact startup/current-default strings only; no combat-range, consumer, mutation, or persistence semantics are claimed."
     },
     {
       "id": "changed:PlaceRaidMarker",

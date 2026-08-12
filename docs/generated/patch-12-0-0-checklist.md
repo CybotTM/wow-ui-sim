@@ -2606,7 +2606,7 @@
 2606. [evidence-required] `changed:C_VoiceChat.SpeakText` — unsafe
 2607. [untriaged] `changed:CanBeRaidTarget` — untriaged
 2608. [untriaged] `changed:ClearRaidMarker` — untriaged
-2609. [untriaged] `changed:EmitterCombatRange` — untriaged
+2609. [best-effort] `changed:EmitterCombatRange` — behavioral
 2610. [best-effort] `changed:Enum.AccountStateLoadedFlagsMeta.NumValues` — behavioral
 2611. [best-effort] `changed:Enum.AccountTransTypeMeta.MaxValue` — behavioral
 2612. [best-effort] `changed:Enum.AccountTransTypeMeta.NumValues` — behavioral
@@ -2778,8 +2778,8 @@
 2778. [best-effort] `changed:HOUSING_BASIC_MODE_SELECTED_TARGET_CHANGED` — behavioral
 2779. [best-effort] `changed:HOUSING_DECOR_PLACE_SUCCESS` — behavioral
 2780. [untriaged] `changed:IsRaidMarkerActive` — untriaged
-2781. [untriaged] `changed:LE_EXPANSION_LEVEL_CURRENT` — untriaged
-2782. [untriaged] `changed:LE_EXPANSION_LEVEL_PREVIOUS` — untriaged
+2781. [best-effort] `changed:LE_EXPANSION_LEVEL_CURRENT` — behavioral
+2782. [best-effort] `changed:LE_EXPANSION_LEVEL_PREVIOUS` — behavioral
 2783. [best-effort] `changed:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME` — behavioral
 2784. [untriaged] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_BUILT_HOUSE_S` — untriaged
 2785. [untriaged] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_NEW_SUBDIVISION` — untriaged
@@ -2788,10 +2788,10 @@
 2788. [untriaged] `changed:LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS` — untriaged
 2789. [untriaged] `changed:LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED` — untriaged
 2790. [untriaged] `changed:LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR` — untriaged
-2791. [untriaged] `changed:NUM_LE_EXPANSION_LEVELS` — untriaged
-2792. [untriaged] `changed:NUM_LE_FRAME_TUTORIALS` — untriaged
-2793. [untriaged] `changed:NUM_LE_PET_JOURNAL_FILTERS` — untriaged
-2794. [untriaged] `changed:NonEmitterCombatRange` — untriaged
+2791. [best-effort] `changed:NUM_LE_EXPANSION_LEVELS` — behavioral
+2792. [best-effort] `changed:NUM_LE_FRAME_TUTORIALS` — behavioral
+2793. [best-effort] `changed:NUM_LE_PET_JOURNAL_FILTERS` — behavioral
+2794. [best-effort] `changed:NonEmitterCombatRange` — behavioral
 2795. [untriaged] `changed:PlaceRaidMarker` — untriaged
 2796. [untriaged] `changed:RemoveRaidTargets` — untriaged
 2797. [untriaged] `changed:SetRaidTarget` — untriaged
