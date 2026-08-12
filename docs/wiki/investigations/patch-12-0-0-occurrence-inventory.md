@@ -2925,27 +2925,27 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `mountJournalSourcesFilter` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims. |
 | `mountJournalTypeFilter` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims. |
 | `nameplateGameObjectMaxDistance` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '30.000000'; focused getter proof commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims. |
-| `nameplateLargerScale` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateMaxAlpha` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateMaxAlphaDistance` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateMaxDistance` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateMaxScale` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateMaxScaleDistance` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateMinAlpha` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateMinAlphaDistance` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateMinScale` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateMinScaleDistance` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateOccludedAlphaMult` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateOverlapH` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateOverlapV` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplatePlayerLargerScale` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplatePlayerMaxDistance` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateSelectedAlpha` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateSelectedScale` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateSelfAlpha` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateShowSelf` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateTargetBehindMaxDistance` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `partyBackgroundOpacity` | untriaged | cvar | changed | cvar changed in 12.0.0. |
+| `nameplateLargerScale` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '1.200000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateMaxAlpha` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '1.000000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateMaxAlphaDistance` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '40.000000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateMaxDistance` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '60.000000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateMaxScale` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '1.000000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateMaxScaleDistance` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '10.000000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateMinAlpha` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0.600000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateMinAlphaDistance` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '10.000000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateMinScale` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0.800000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateMinScaleDistance` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '10.000000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateOccludedAlphaMult` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0.400000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateOverlapH` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0.800000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateOverlapV` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '1.100000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplatePlayerLargerScale` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '1.800000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplatePlayerMaxDistance` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '60.000000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateSelectedAlpha` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '1.000000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateSelectedScale` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '1.200000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateSelfAlpha` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0.750000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateShowSelf` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `nameplateTargetBehindMaxDistance` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0.100000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
+| `partyBackgroundOpacity` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0.500000'; focused getter proof commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics. |
 | `petJournalFilters` | untriaged | cvar | changed | cvar changed in 12.0.0. |
 | `petJournalSourceFilters` | untriaged | cvar | changed | cvar changed in 12.0.0. |
 | `petJournalTypeFilters` | untriaged | cvar | changed | cvar changed in 12.0.0. |

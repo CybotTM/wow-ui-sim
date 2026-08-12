@@ -113344,337 +113344,1072 @@
       "id": "changed:nameplateLargerScale",
       "symbol": "nameplateLargerScale",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateLargerScale default from '1.2' to exact string '1.200000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateLargerScale with exact startup/default string '1.200000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '1.200000' for nameplateLargerScale; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateLargerScale\") and GetCVarDefault(\"nameplateLargerScale\") both return exact Lua string '1.200000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateMaxAlpha",
       "symbol": "nameplateMaxAlpha",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateMaxAlpha default from '1.0' to exact string '1.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateMaxAlpha with exact startup/default string '1.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '1.000000' for nameplateMaxAlpha; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateMaxAlpha\") and GetCVarDefault(\"nameplateMaxAlpha\") both return exact Lua string '1.000000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateMaxAlphaDistance",
       "symbol": "nameplateMaxAlphaDistance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateMaxAlphaDistance default from '40' to exact string '40.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateMaxAlphaDistance with exact startup/default string '40.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '40.000000' for nameplateMaxAlphaDistance; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateMaxAlphaDistance\") and GetCVarDefault(\"nameplateMaxAlphaDistance\") both return exact Lua string '40.000000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateMaxDistance",
       "symbol": "nameplateMaxDistance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateMaxDistance default from '60' to exact string '60.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateMaxDistance with exact startup/default string '60.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '60.000000' for nameplateMaxDistance; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateMaxDistance\") and GetCVarDefault(\"nameplateMaxDistance\") both return exact Lua string '60.000000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateMaxScale",
       "symbol": "nameplateMaxScale",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateMaxScale default from '1.0' to exact string '1.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateMaxScale with exact startup/default string '1.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '1.000000' for nameplateMaxScale; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateMaxScale\") and GetCVarDefault(\"nameplateMaxScale\") both return exact Lua string '1.000000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateMaxScaleDistance",
       "symbol": "nameplateMaxScaleDistance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateMaxScaleDistance default from '10' to exact string '10.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateMaxScaleDistance with exact startup/default string '10.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '10.000000' for nameplateMaxScaleDistance; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateMaxScaleDistance\") and GetCVarDefault(\"nameplateMaxScaleDistance\") both return exact Lua string '10.000000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateMinAlpha",
       "symbol": "nameplateMinAlpha",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateMinAlpha default from '0.6' to exact string '0.600000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateMinAlpha with exact startup/default string '0.600000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0.600000' for nameplateMinAlpha; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateMinAlpha\") and GetCVarDefault(\"nameplateMinAlpha\") both return exact Lua string '0.600000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateMinAlphaDistance",
       "symbol": "nameplateMinAlphaDistance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateMinAlphaDistance default from '10' to exact string '10.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateMinAlphaDistance with exact startup/default string '10.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '10.000000' for nameplateMinAlphaDistance; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateMinAlphaDistance\") and GetCVarDefault(\"nameplateMinAlphaDistance\") both return exact Lua string '10.000000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateMinScale",
       "symbol": "nameplateMinScale",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateMinScale default from '0.8' to exact string '0.800000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateMinScale with exact startup/default string '0.800000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0.800000' for nameplateMinScale; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateMinScale\") and GetCVarDefault(\"nameplateMinScale\") both return exact Lua string '0.800000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateMinScaleDistance",
       "symbol": "nameplateMinScaleDistance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateMinScaleDistance default from '10' to exact string '10.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateMinScaleDistance with exact startup/default string '10.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '10.000000' for nameplateMinScaleDistance; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateMinScaleDistance\") and GetCVarDefault(\"nameplateMinScaleDistance\") both return exact Lua string '10.000000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateOccludedAlphaMult",
       "symbol": "nameplateOccludedAlphaMult",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateOccludedAlphaMult default from '0.4' to exact string '0.400000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateOccludedAlphaMult with exact startup/default string '0.400000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0.400000' for nameplateOccludedAlphaMult; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateOccludedAlphaMult\") and GetCVarDefault(\"nameplateOccludedAlphaMult\") both return exact Lua string '0.400000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateOverlapH",
       "symbol": "nameplateOverlapH",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateOverlapH default from '0.8' to exact string '0.800000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateOverlapH with exact startup/default string '0.800000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0.800000' for nameplateOverlapH; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateOverlapH\") and GetCVarDefault(\"nameplateOverlapH\") both return exact Lua string '0.800000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateOverlapV",
       "symbol": "nameplateOverlapV",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateOverlapV default from '1.1' to exact string '1.100000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateOverlapV with exact startup/default string '1.100000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '1.100000' for nameplateOverlapV; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateOverlapV\") and GetCVarDefault(\"nameplateOverlapV\") both return exact Lua string '1.100000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplatePlayerLargerScale",
       "symbol": "nameplatePlayerLargerScale",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplatePlayerLargerScale default from '1.8' to exact string '1.800000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplatePlayerLargerScale with exact startup/default string '1.800000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '1.800000' for nameplatePlayerLargerScale; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplatePlayerLargerScale\") and GetCVarDefault(\"nameplatePlayerLargerScale\") both return exact Lua string '1.800000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplatePlayerMaxDistance",
       "symbol": "nameplatePlayerMaxDistance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplatePlayerMaxDistance default from '60' to exact string '60.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplatePlayerMaxDistance with exact startup/default string '60.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '60.000000' for nameplatePlayerMaxDistance; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplatePlayerMaxDistance\") and GetCVarDefault(\"nameplatePlayerMaxDistance\") both return exact Lua string '60.000000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateSelectedAlpha",
       "symbol": "nameplateSelectedAlpha",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateSelectedAlpha default from '1.0' to exact string '1.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateSelectedAlpha with exact startup/default string '1.000000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '1.000000' for nameplateSelectedAlpha; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateSelectedAlpha\") and GetCVarDefault(\"nameplateSelectedAlpha\") both return exact Lua string '1.000000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateSelectedScale",
       "symbol": "nameplateSelectedScale",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateSelectedScale default from '1.2' to exact string '1.200000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateSelectedScale with exact startup/default string '1.200000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '1.200000' for nameplateSelectedScale; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateSelectedScale\") and GetCVarDefault(\"nameplateSelectedScale\") both return exact Lua string '1.200000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateSelfAlpha",
       "symbol": "nameplateSelfAlpha",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateSelfAlpha default from '0.75' to exact string '0.750000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateSelfAlpha with exact startup/default string '0.750000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0.750000' for nameplateSelfAlpha; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateSelfAlpha\") and GetCVarDefault(\"nameplateSelfAlpha\") both return exact Lua string '0.750000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateShowSelf",
       "symbol": "nameplateShowSelf",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateShowSelf default from '1' to exact string '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateShowSelf with exact startup/default string '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0' for nameplateShowSelf; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateShowSelf\") and GetCVarDefault(\"nameplateShowSelf\") both return exact Lua string '0'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:nameplateTargetBehindMaxDistance",
       "symbol": "nameplateTargetBehindMaxDistance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar nameplateTargetBehindMaxDistance default from '15' to exact string '0.100000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish nameplateTargetBehindMaxDistance with exact startup/default string '0.100000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0.100000' for nameplateTargetBehindMaxDistance; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"nameplateTargetBehindMaxDistance\") and GetCVarDefault(\"nameplateTargetBehindMaxDistance\") both return exact Lua string '0.100000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:partyBackgroundOpacity",
       "symbol": "partyBackgroundOpacity",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar partyBackgroundOpacity default from '0.5' to exact string '0.500000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish partyBackgroundOpacity with exact startup/default string '0.500000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values",
+          "source_hash": "59ce30f69a07bfe3429a590599ac8485ebbdf3d110e83612f117badaf7beed00",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0.500000' for partyBackgroundOpacity; proof commit 17e13eb216."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no nameplate/party behavior or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_nameplate_cvar_changed_values.rs::test_patch_12_0_0_nameplate_cvar_changed_values"
+      ],
+      "assertions": [
+        "GetCVar(\"partyBackgroundOpacity\") and GetCVarDefault(\"partyBackgroundOpacity\") both return exact Lua string '0.500000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "17e13eb2162c0093432813bb9b203b8d046c601c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes the exact CVar value/default string through GetCVar and GetCVarDefault. Eighteen defaults already matched the current runtime; proof added only nameplateLargerScale=1.200000, nameplatePlayerLargerScale=1.800000, and nameplateSelfAlpha=0.750000. Claims are bounded to startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:petJournalFilters",
