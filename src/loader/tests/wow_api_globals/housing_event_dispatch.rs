@@ -121,3 +121,27 @@ fn test_patch_12_0_0_housing_event_dispatch_payloads() {
         "housing event dispatch payload mismatch: {result}"
     );
 }
+
+#[test]
+fn test_patch_12_0_0_removed_housing_catalog_searcher_event_rejected() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local frame = CreateFrame("Frame")
+                local removed_ok = pcall(function()
+                    frame:RegisterEvent("HOUSING_CATALOG_SEARCHER_RELEASED")
+                end)
+                local valid_ok = pcall(function()
+                    frame:RegisterEvent("HOUSE_LEVEL_CHANGED")
+                end)
+                return tostring(removed_ok) .. ":" .. tostring(valid_ok)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "false:true",
+        "removed housing event registration result mismatch: {result}"
+    );
+}
