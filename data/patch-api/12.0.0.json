@@ -114415,49 +114415,154 @@
       "id": "changed:petJournalFilters",
       "symbol": "petJournalFilters",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar petJournalFilters default from the registered pre-patch value to exact string '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish petJournalFilters with exact startup/default string '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values",
+          "source_hash": "574e00c3a21158f3aea52e7bb4778cb0f28c94a70bb4d27329b986bdbc1f4526",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0' for petJournalFilters; proof commit 8b64275a8a5e30769067808f72762a4eb2df681f."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no CVar consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(\"petJournalFilters\") and GetCVarDefault(\"petJournalFilters\") both return exact Lua string '0'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "8b64275a8a5e30769067808f72762a4eb2df681f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics. Runtime defaults already matched; only focused public getter proof was missing."
     },
     {
       "id": "changed:petJournalSourceFilters",
       "symbol": "petJournalSourceFilters",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar petJournalSourceFilters default from the registered pre-patch value to exact string '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish petJournalSourceFilters with exact startup/default string '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values",
+          "source_hash": "574e00c3a21158f3aea52e7bb4778cb0f28c94a70bb4d27329b986bdbc1f4526",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0' for petJournalSourceFilters; proof commit 8b64275a8a5e30769067808f72762a4eb2df681f."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no CVar consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(\"petJournalSourceFilters\") and GetCVarDefault(\"petJournalSourceFilters\") both return exact Lua string '0'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "8b64275a8a5e30769067808f72762a4eb2df681f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics. Runtime defaults already matched; only focused public getter proof was missing."
     },
     {
       "id": "changed:petJournalTypeFilters",
       "symbol": "petJournalTypeFilters",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar petJournalTypeFilters default from the registered pre-patch value to exact string '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish petJournalTypeFilters with exact startup/default string '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values",
+          "source_hash": "574e00c3a21158f3aea52e7bb4778cb0f28c94a70bb4d27329b986bdbc1f4526",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0' for petJournalTypeFilters; proof commit 8b64275a8a5e30769067808f72762a4eb2df681f."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no CVar consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(\"petJournalTypeFilters\") and GetCVarDefault(\"petJournalTypeFilters\") both return exact Lua string '0'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "8b64275a8a5e30769067808f72762a4eb2df681f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics. Runtime defaults already matched; only focused public getter proof was missing."
     },
     {
       "id": "changed:scrub",
@@ -114479,17 +114584,52 @@
       "id": "changed:spellActivationOverlayOpacity",
       "symbol": "spellActivationOverlayOpacity",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar spellActivationOverlayOpacity default from the registered pre-patch value to exact string '0.650000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish spellActivationOverlayOpacity with exact startup/default string '0.650000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values",
+          "source_hash": "574e00c3a21158f3aea52e7bb4778cb0f28c94a70bb4d27329b986bdbc1f4526",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0.650000' for spellActivationOverlayOpacity; proof commit 8b64275a8a5e30769067808f72762a4eb2df681f."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no CVar consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(\"spellActivationOverlayOpacity\") and GetCVarDefault(\"spellActivationOverlayOpacity\") both return exact Lua string '0.650000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "8b64275a8a5e30769067808f72762a4eb2df681f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 publishes exact CVar/default string '0.650000' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics. Runtime defaults already matched; only focused public getter proof was missing."
     },
     {
       "id": "changed:string.trim",
@@ -114511,17 +114651,52 @@
       "id": "changed:superTrackerDist",
       "symbol": "superTrackerDist",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CVar superTrackerDist default from the registered pre-patch value to exact string '0.750000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults publish superTrackerDist with exact startup/default string '0.750000'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values",
+          "source_hash": "574e00c3a21158f3aea52e7bb4778cb0f28c94a70bb4d27329b986bdbc1f4526",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '0.750000' for superTrackerDist; proof commit 8b64275a8a5e30769067808f72762a4eb2df681f."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no CVar consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_pet_journal_overlay_tracker_cvar_values.rs::test_patch_12_0_0_pet_journal_overlay_tracker_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(\"superTrackerDist\") and GetCVarDefault(\"superTrackerDist\") both return exact Lua string '0.750000'; claims are bounded to startup getter/default publication only."
+      ],
+      "commit": "8b64275a8a5e30769067808f72762a4eb2df681f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 publishes exact CVar/default string '0.750000' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics. Runtime defaults already matched; only focused public getter proof was missing."
     },
     {
       "id": "changed:typedef.TickerCallback",

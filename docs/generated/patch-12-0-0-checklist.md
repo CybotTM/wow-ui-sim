@@ -2856,13 +2856,13 @@
 2856. [best-effort] `changed:nameplateShowSelf` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
 2857. [best-effort] `changed:nameplateTargetBehindMaxDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.100000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
 2858. [best-effort] `changed:partyBackgroundOpacity` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.500000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2859. [untriaged] `changed:petJournalFilters` — untriaged
-2860. [untriaged] `changed:petJournalSourceFilters` — untriaged
-2861. [untriaged] `changed:petJournalTypeFilters` — untriaged
+2859. [best-effort] `changed:petJournalFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
+2860. [best-effort] `changed:petJournalSourceFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
+2861. [best-effort] `changed:petJournalTypeFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
 2862. [untriaged] `changed:scrub` — untriaged
-2863. [untriaged] `changed:spellActivationOverlayOpacity` — untriaged
+2863. [best-effort] `changed:spellActivationOverlayOpacity` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.650000' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
 2864. [untriaged] `changed:string.trim` — untriaged
-2865. [untriaged] `changed:superTrackerDist` — untriaged
+2865. [best-effort] `changed:superTrackerDist` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.750000' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
 2866. [best-effort] `changed:typedef.TickerCallback` — provenance-only
 2867. [best-effort] `changed:typedef.TimerCallback` — provenance-only
 2868. [best-effort] `removed:ActionHasRange` — vendor-present
