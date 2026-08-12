@@ -127319,81 +127319,226 @@
       "id": "removed:LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT",
       "symbol": "LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT."
+          ,"source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/strings/mod.rs",
+          "summary": "Retail 12.0.0 filters LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT after shared compatibility constants are loaded, while excluded profiles retain shared definitions.",
+          "source_hash": "fc76324e0c8229a9babb00557203233ad017bedeacf68406b9287980a43993f5"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants",
+          "summary": "Focused retail 12.0.0 startup proof asserts rawget(_G, LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT) is nil.",
+          "source_hash": "732e28443c7eab0988c851132bfb33c4fe47c07085161e8596dff3e63b1ba2b1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence for the retail global contract.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants"
+      ],
+      "assertions": [
+        "rawget(_G, LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT) == nil"
+      ],
+      "commit": "e385636fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT. No replacement, tutorial, UI, producer, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN",
       "symbol": "LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/strings/string_data/game_enums.rs",
+          "summary": "The simulator's shared integer global definitions do not publish LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN.",
+          "source_hash": "e6f55764165ac1dab7d635ef3cc6126ad11db8e6dc635649132175538ae7f266"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants",
+          "summary": "Focused retail 12.0.0 startup proof asserts rawget(_G, LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN) is nil.",
+          "source_hash": "732e28443c7eab0988c851132bfb33c4fe47c07085161e8596dff3e63b1ba2b1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence for the retail global contract.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants"
+      ],
+      "assertions": [
+        "rawget(_G, LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN) == nil"
+      ],
+      "commit": "e385636fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN. No replacement, tutorial, UI, producer, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE",
       "symbol": "LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 applies post-compat nil overrides for the removed elapsed-timer globals while excluded profiles retain shared definitions.",
+          "source_hash": "c317baab6b4998e10f7d6409a70eaad0dd2b2380bdd32698be5e917b3266bbfc"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants",
+          "summary": "Focused retail 12.0.0 startup proof asserts rawget(_G, LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE) is nil.",
+          "source_hash": "732e28443c7eab0988c851132bfb33c4fe47c07085161e8596dff3e63b1ba2b1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence for the retail global contract.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants"
+      ],
+      "assertions": [
+        "rawget(_G, LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE) == nil"
+      ],
+      "commit": "e385636fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE. No replacement, elapsed-timer, challenge/proving-ground, UI, producer, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:LE_WORLD_ELAPSED_TIMER_TYPE_NONE",
       "symbol": "LE_WORLD_ELAPSED_TIMER_TYPE_NONE",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes LE_WORLD_ELAPSED_TIMER_TYPE_NONE.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 applies post-compat nil overrides for the removed elapsed-timer globals while excluded profiles retain shared definitions.",
+          "source_hash": "c317baab6b4998e10f7d6409a70eaad0dd2b2380bdd32698be5e917b3266bbfc"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants",
+          "summary": "Focused retail 12.0.0 startup proof asserts rawget(_G, LE_WORLD_ELAPSED_TIMER_TYPE_NONE) is nil.",
+          "source_hash": "732e28443c7eab0988c851132bfb33c4fe47c07085161e8596dff3e63b1ba2b1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence for the retail global contract.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants"
+      ],
+      "assertions": [
+        "rawget(_G, LE_WORLD_ELAPSED_TIMER_TYPE_NONE) == nil"
+      ],
+      "commit": "e385636fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of LE_WORLD_ELAPSED_TIMER_TYPE_NONE. No replacement, elapsed-timer, challenge/proving-ground, UI, producer, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND",
       "symbol": "LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "global",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Retail 12.0.0 applies post-compat nil overrides for the removed elapsed-timer globals while excluded profiles retain shared definitions.",
+          "source_hash": "c317baab6b4998e10f7d6409a70eaad0dd2b2380bdd32698be5e917b3266bbfc"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants",
+          "summary": "Focused retail 12.0.0 startup proof asserts rawget(_G, LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND) is nil.",
+          "source_hash": "732e28443c7eab0988c851132bfb33c4fe47c07085161e8596dff3e63b1ba2b1"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence for the retail global contract.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_removed_global_constants.rs::test_patch_12_0_0_removed_global_constants"
+      ],
+      "assertions": [
+        "rawget(_G, LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND) == nil"
+      ],
+      "commit": "e385636fe",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup absence of LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND. No replacement, elapsed-timer, challenge/proving-ground, UI, producer, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:NamePlateClassificationScale",

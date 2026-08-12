@@ -3307,11 +3307,11 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `IsStackableAction` | best-effort | api | removed | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `IsUsableAction` | best-effort | api | removed | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `LEARNED_SPELL_IN_TAB` | untriaged | event | removed | event removed in 12.0.0. |
-| `LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT` | untriaged | global | removed | global removed in 12.0.0. |
-| `LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN` | untriaged | global | removed | global removed in 12.0.0. |
-| `LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE` | untriaged | global | removed | global removed in 12.0.0. |
-| `LE_WORLD_ELAPSED_TIMER_TYPE_NONE` | untriaged | global | removed | global removed in 12.0.0. |
-| `LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND` | untriaged | global | removed | global removed in 12.0.0. |
+| `LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT` | best-effort | global | removed | behavioral; retail 12.0.0 startup global absence proven by `e385636fe`. |
+| `LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN` | best-effort | global | removed | behavioral; retail 12.0.0 startup global absence proven by `e385636fe`. |
+| `LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE` | best-effort | global | removed | behavioral; retail 12.0.0 startup global absence proven by `e385636fe`. |
+| `LE_WORLD_ELAPSED_TIMER_TYPE_NONE` | best-effort | global | removed | behavioral; retail 12.0.0 startup global absence proven by `e385636fe`. |
+| `LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND` | best-effort | global | removed | behavioral; retail 12.0.0 startup global absence proven by `e385636fe`. |
 | `NamePlateClassificationScale` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 1.0; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
 | `NamePlateHorizontalScale` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 1.0; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
 | `NamePlateMaximumClassificationScale` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 1.25; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |

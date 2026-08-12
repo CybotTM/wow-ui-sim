@@ -3213,11 +3213,11 @@
 3213. [best-effort] `removed:IsStackableAction` — vendor-present
 3214. [best-effort] `removed:IsUsableAction` — vendor-present
 3215. [untriaged] `removed:LEARNED_SPELL_IN_TAB` — untriaged
-3216. [untriaged] `removed:LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT` — untriaged
-3217. [untriaged] `removed:LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN` — untriaged
-3218. [untriaged] `removed:LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE` — untriaged
-3219. [untriaged] `removed:LE_WORLD_ELAPSED_TIMER_TYPE_NONE` — untriaged
-3220. [untriaged] `removed:LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND` — untriaged
+3216. [best-effort] `removed:LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT` — behavioral
+3217. [best-effort] `removed:LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN` — behavioral
+3218. [best-effort] `removed:LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE` — behavioral
+3219. [best-effort] `removed:LE_WORLD_ELAPSED_TIMER_TYPE_NONE` — behavioral
+3220. [best-effort] `removed:LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND` — behavioral
 3221. [best-effort] `removed:NamePlateClassificationScale` — behavioral
 3222. [best-effort] `removed:NamePlateHorizontalScale` — behavioral
 3223. [best-effort] `removed:NamePlateMaximumClassificationScale` — behavioral
