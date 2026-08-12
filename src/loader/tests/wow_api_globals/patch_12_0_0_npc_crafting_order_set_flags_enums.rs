@@ -39,6 +39,16 @@ fn test_patch_12_0_0_npc_crafting_order_set_flags_enum_values() {
                     end
                 end
 
+                local removed_aliases = {
+                    "CraftingOrderFlagAllowMultiple",
+                    "CraftingOrderFlagAllowDuplicate",
+                }
+                for _, name in ipairs(removed_aliases) do
+                    if flags[name] ~= nil then
+                        return name .. ": removed alias still present"
+                    end
+                end
+
                 local meta = Enum.NpcCraftingOrderSetFlagsMeta
                 if type(meta) ~= "table" then
                     return "NpcCraftingOrderSetFlagsMeta: expected table"
