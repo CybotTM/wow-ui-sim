@@ -1,3 +1,5 @@
+The two retail 12.0.0 removed CVars `floatingCombatTextEnergyGains` and `floatingCombatTextPeriodicEnergyGains` are **best-effort/behavioral**. Focused proof is commit `15a7936e6` via `src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars`; it asserts `GetCVar` and `GetCVarDefault` return nil for each old name. No drift: both old names are absent from `src/cvars.yaml`; distinct `_v2` replacements exist, but semantic equivalence is not claimed. Evidence hashes: register `6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863`, defaults `1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09`, runtime `e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d`, focused test `1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e`, discovery `4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6`. Claims are bounded to public getter absence; no floating-combat-text behavior or replacement semantics are claimed. Current totals are **1921 best-effort, 1029 evidence-required, 2 exception-requested, and 458 untriaged rows** (3410 total).
+
 The four retail 12.0.0 removed docs-extra API rows `docs.extra_apis.ShowCloak`, `docs.extra_apis.ShowHelm`, `docs.extra_apis.ShowingCloak`, and `docs.extra_apis.ShowingHelm` are **evidence-required/unsafe**. Source removal and absent checked-in registrations do not prove full-LoD runtime absence or replacement semantics; required probes must distinguish removed docs-extra entries from separate same-name added APIs. Claims are bounded to source removal only. Current totals are **1919 best-effort, 1029 evidence-required, 2 exception-requested, and 460 untriaged rows** (3410 total).
 
 The thirteen retail 12.0.0 removed WorldText CVars are best-effort/behavioral: focused proof commit 58aa3b8de asserts GetCVar and GetCVarDefault return nil for every old name. Distinct _v2 names are not claimed semantically equivalent; claims are bounded to old-name value/default absence. Current totals are **1919 best-effort, 1025 evidence-required, 2 exception-requested, and 464 untriaged rows** (3410 total).
@@ -3373,12 +3375,12 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `floatingCombatTextComboPoints` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `floatingCombatTextDamageReduction` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `floatingCombatTextDodgeParryMiss` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextEnergyGains` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `floatingCombatTextEnergyGains` | best-effort | cvar | removed | Best-effort behavioral: public `GetCVar` and `GetCVarDefault` return nil under focused proof commit `15a7936e6`; old name is absent from `src/cvars.yaml`, and distinct `_v2` semantic equivalence is unclaimed. |
 | `floatingCombatTextFloatMode` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `floatingCombatTextFriendlyHealers` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `floatingCombatTextHonorGains` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `floatingCombatTextLowManaHealth` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextPeriodicEnergyGains` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `floatingCombatTextPeriodicEnergyGains` | best-effort | cvar | removed | Best-effort behavioral: public `GetCVar` and `GetCVarDefault` return nil under focused proof commit `15a7936e6`; old name is absent from `src/cvars.yaml`, and distinct `_v2` semantic equivalence is unclaimed. |
 | `floatingCombatTextPetMeleeDamage` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `floatingCombatTextPetSpellDamage` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `floatingCombatTextReactives` | untriaged | cvar | removed | cvar removed in 12.0.0. |

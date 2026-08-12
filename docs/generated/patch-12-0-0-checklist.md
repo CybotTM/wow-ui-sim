@@ -3290,12 +3290,12 @@
 3290. [untriaged] `removed:floatingCombatTextComboPoints` — untriaged
 3291. [untriaged] `removed:floatingCombatTextDamageReduction` — untriaged
 3292. [untriaged] `removed:floatingCombatTextDodgeParryMiss` — untriaged
-3293. [untriaged] `removed:floatingCombatTextEnergyGains` — untriaged
+3293. [best-effort] `removed:floatingCombatTextEnergyGains` — behavioral
 3294. [untriaged] `removed:floatingCombatTextFloatMode` — untriaged
 3295. [untriaged] `removed:floatingCombatTextFriendlyHealers` — untriaged
 3296. [untriaged] `removed:floatingCombatTextHonorGains` — untriaged
 3297. [untriaged] `removed:floatingCombatTextLowManaHealth` — untriaged
-3298. [untriaged] `removed:floatingCombatTextPeriodicEnergyGains` — untriaged
+3298. [best-effort] `removed:floatingCombatTextPeriodicEnergyGains` — behavioral
 3299. [untriaged] `removed:floatingCombatTextPetMeleeDamage` — untriaged
 3300. [untriaged] `removed:floatingCombatTextPetSpellDamage` — untriaged
 3301. [untriaged] `removed:floatingCombatTextReactives` — untriaged
