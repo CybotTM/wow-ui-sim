@@ -3049,9 +3049,9 @@
 3049. [evidence-required] `removed:Enum.AccountStateLoadedFlags.AccountStateWarbandScenesLoaded` — unsafe
 3050. [evidence-required] `removed:Enum.AccountStateLoadedFlags.AccountStateWarbandsLoaded` — unsafe
 3051. [evidence-required] `removed:Enum.AccountStateLoadedFlags.None` — unsafe
-3052. [untriaged] `removed:Enum.CharCustomizationType.Facepaint` — untriaged
-3053. [untriaged] `removed:Enum.CharCustomizationType.FacepaintColor` — untriaged
-3054. [untriaged] `removed:Enum.CharCustomizationType.Outfit` — untriaged
+3052. [best-effort] `removed:Enum.CharCustomizationType.Facepaint` — behavioral
+3053. [best-effort] `removed:Enum.CharCustomizationType.FacepaintColor` — behavioral
+3054. [best-effort] `removed:Enum.CharCustomizationType.Outfit` — behavioral
 3055. [best-effort] `removed:Enum.CraftingOrderItemType.NpcProvided` — behavioral
 3056. [best-effort] `removed:Enum.CraftingOrderItemType.Reagent` — behavioral
 3057. [evidence-required] `removed:Enum.CreateAllAccountData.CreateAllAccountCurrenciesDone` — unsafe
