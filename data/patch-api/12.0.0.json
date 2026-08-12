@@ -103672,33 +103672,93 @@
       "id": "changed:Enum.CharCustomizationTypeMeta.MaxValue",
       "symbol": "Enum.CharCustomizationTypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.CharCustomizationTypeMeta.MaxValue from numeric value 11 to 8.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail startup publishes Enum.CharCustomizationTypeMeta.MaxValue with exact numeric value 8.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_char_customization_type_enums.rs::test_patch_12_0_0_char_customization_type_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.CharCustomizationTypeMeta.MaxValue=8.",
+          "source_hash": "583d220defe45b920981bf7cf3dcabbbf5b3460e2d4c6646a864a8b2b623929b"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.CharCustomizationTypeMeta.MaxValue value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_char_customization_type_enums.rs::test_patch_12_0_0_char_customization_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CharCustomizationTypeMeta.MaxValue as a Lua number with exact retail 12.0.0 value 8."
+      ],
+      "commit": "e08b83b6a6752c7938819b32545005b95a697917",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit e08b83b6a. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.CharCustomizationTypeMeta.NumValues",
       "symbol": "Enum.CharCustomizationTypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.CharCustomizationTypeMeta.NumValues from numeric value 12 to 9.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail startup publishes Enum.CharCustomizationTypeMeta.NumValues with exact numeric value 9.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_char_customization_type_enums.rs::test_patch_12_0_0_char_customization_type_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.CharCustomizationTypeMeta.NumValues=9.",
+          "source_hash": "583d220defe45b920981bf7cf3dcabbbf5b3460e2d4c6646a864a8b2b623929b"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.CharCustomizationTypeMeta.NumValues value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_char_customization_type_enums.rs::test_patch_12_0_0_char_customization_type_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.CharCustomizationTypeMeta.NumValues as a Lua number with exact retail 12.0.0 value 9."
+      ],
+      "commit": "e08b83b6a6752c7938819b32545005b95a697917",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit e08b83b6a. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.CraftingOrderItemTypeMeta.MaxValue",
@@ -104664,65 +104724,185 @@
       "id": "changed:Enum.EditModeSystemMeta.MaxValue",
       "symbol": "Enum.EditModeSystemMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.EditModeSystemMeta.MaxValue from numeric value 20 to 23.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current retail startup publishes Enum.EditModeSystemMeta.MaxValue with exact numeric value 23.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_system_enums.rs::test_patch_12_0_0_edit_mode_system_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.EditModeSystemMeta.MaxValue=23.",
+          "source_hash": "02bd7ddfc6345ef9a772051ae7ba445ca746357ca8c74a00b9893293839312f5"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.EditModeSystemMeta.MaxValue value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_system_enums.rs::test_patch_12_0_0_edit_mode_system_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeSystemMeta.MaxValue as a Lua number with exact retail 12.0.0 value 23."
+      ],
+      "commit": "4d883c9647cf972d6b12b7b4982b9de634d293c5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit 4d883c964. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.EditModeSystemMeta.NumValues",
       "symbol": "Enum.EditModeSystemMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.EditModeSystemMeta.NumValues from numeric value 21 to 24.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current retail startup publishes Enum.EditModeSystemMeta.NumValues with exact numeric value 24.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_system_enums.rs::test_patch_12_0_0_edit_mode_system_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.EditModeSystemMeta.NumValues=24.",
+          "source_hash": "02bd7ddfc6345ef9a772051ae7ba445ca746357ca8c74a00b9893293839312f5"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.EditModeSystemMeta.NumValues value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_system_enums.rs::test_patch_12_0_0_edit_mode_system_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeSystemMeta.NumValues as a Lua number with exact retail 12.0.0 value 24."
+      ],
+      "commit": "4d883c9647cf972d6b12b7b4982b9de634d293c5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit 4d883c964. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.EditModeUnitFrameSettingMeta.MaxValue",
       "symbol": "Enum.EditModeUnitFrameSettingMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.EditModeUnitFrameSettingMeta.MaxValue from numeric value 17 to 20.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current retail startup publishes Enum.EditModeUnitFrameSettingMeta.MaxValue with exact numeric value 20.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs::test_patch_12_0_0_edit_mode_unit_frame_setting_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.EditModeUnitFrameSettingMeta.MaxValue=20.",
+          "source_hash": "030ac112264dfea9dad5c363d61e890a635408ee68d1bfa9490269ff7cf8ae58"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.EditModeUnitFrameSettingMeta.MaxValue value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs::test_patch_12_0_0_edit_mode_unit_frame_setting_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeUnitFrameSettingMeta.MaxValue as a Lua number with exact retail 12.0.0 value 20."
+      ],
+      "commit": "509daf308b3e76d5f9768f8e694c887902190ca1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit 509daf308. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.EditModeUnitFrameSettingMeta.NumValues",
       "symbol": "Enum.EditModeUnitFrameSettingMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.EditModeUnitFrameSettingMeta.NumValues from numeric value 18 to 21.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "summary": "Current retail startup publishes Enum.EditModeUnitFrameSettingMeta.NumValues with exact numeric value 21.",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs::test_patch_12_0_0_edit_mode_unit_frame_setting_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.EditModeUnitFrameSettingMeta.NumValues=21.",
+          "source_hash": "030ac112264dfea9dad5c363d61e890a635408ee68d1bfa9490269ff7cf8ae58"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.EditModeUnitFrameSettingMeta.NumValues value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_unit_frame_settings_enums.rs::test_patch_12_0_0_edit_mode_unit_frame_setting_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.EditModeUnitFrameSettingMeta.NumValues as a Lua number with exact retail 12.0.0 value 21."
+      ],
+      "commit": "509daf308b3e76d5f9768f8e694c887902190ca1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit 509daf308. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.FragmentIDMeta.NumValues",
@@ -104982,65 +105162,185 @@
       "id": "changed:Enum.HousingCatalogEntrySubtype.OwnedModifiedStack",
       "symbol": "Enum.HousingCatalogEntrySubtype.OwnedModifiedStack",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.HousingCatalogEntrySubtype.OwnedModifiedStack from numeric value 3 to 2.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail startup publishes Enum.HousingCatalogEntrySubtype.OwnedModifiedStack with exact numeric value 2.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs::test_patch_12_0_0_housing_catalog_entry_subtype_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.HousingCatalogEntrySubtype.OwnedModifiedStack=2.",
+          "source_hash": "a91ea2067e97fc3ea814413318d811f8bc9da47a9c535a98393b7bcd9bf4eaba"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.HousingCatalogEntrySubtype.OwnedModifiedStack value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs::test_patch_12_0_0_housing_catalog_entry_subtype_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingCatalogEntrySubtype.OwnedModifiedStack as a Lua number with exact retail 12.0.0 value 2; the housing test also asserts the complete current family and removed MarketItem absence."
+      ],
+      "commit": "c400d31be514faddfabfca0ffe2f35bf73720804",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit c400d31be. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.HousingCatalogEntrySubtype.OwnedUnmodifiedStack",
       "symbol": "Enum.HousingCatalogEntrySubtype.OwnedUnmodifiedStack",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.HousingCatalogEntrySubtype.OwnedUnmodifiedStack from numeric value 4 to 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail startup publishes Enum.HousingCatalogEntrySubtype.OwnedUnmodifiedStack with exact numeric value 3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs::test_patch_12_0_0_housing_catalog_entry_subtype_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.HousingCatalogEntrySubtype.OwnedUnmodifiedStack=3.",
+          "source_hash": "a91ea2067e97fc3ea814413318d811f8bc9da47a9c535a98393b7bcd9bf4eaba"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.HousingCatalogEntrySubtype.OwnedUnmodifiedStack value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs::test_patch_12_0_0_housing_catalog_entry_subtype_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingCatalogEntrySubtype.OwnedUnmodifiedStack as a Lua number with exact retail 12.0.0 value 3; the housing test also asserts the complete current family and removed MarketItem absence."
+      ],
+      "commit": "c400d31be514faddfabfca0ffe2f35bf73720804",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit c400d31be. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.HousingCatalogEntrySubtypeMeta.MaxValue",
       "symbol": "Enum.HousingCatalogEntrySubtypeMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.HousingCatalogEntrySubtypeMeta.MaxValue from numeric value 4 to 3.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail startup publishes Enum.HousingCatalogEntrySubtypeMeta.MaxValue with exact numeric value 3.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs::test_patch_12_0_0_housing_catalog_entry_subtype_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.HousingCatalogEntrySubtypeMeta.MaxValue=3.",
+          "source_hash": "a91ea2067e97fc3ea814413318d811f8bc9da47a9c535a98393b7bcd9bf4eaba"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.HousingCatalogEntrySubtypeMeta.MaxValue value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs::test_patch_12_0_0_housing_catalog_entry_subtype_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingCatalogEntrySubtypeMeta.MaxValue as a Lua number with exact retail 12.0.0 value 3; the housing test also asserts the complete current family and removed MarketItem absence."
+      ],
+      "commit": "c400d31be514faddfabfca0ffe2f35bf73720804",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit c400d31be. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.HousingCatalogEntrySubtypeMeta.NumValues",
       "symbol": "Enum.HousingCatalogEntrySubtypeMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes Enum.HousingCatalogEntrySubtypeMeta.NumValues from numeric value 5 to 4.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Current retail startup publishes Enum.HousingCatalogEntrySubtypeMeta.NumValues with exact numeric value 4.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs::test_patch_12_0_0_housing_catalog_entry_subtype_enum_values",
+          "summary": "Focused retail 12.0.0 startup test asserts the complete enum family and matching metadata, including Enum.HousingCatalogEntrySubtypeMeta.NumValues=4.",
+          "source_hash": "a91ea2067e97fc3ea814413318d811f8bc9da47a9c535a98393b7bcd9bf4eaba"
+        },
+        {
+          "kind": "discovery",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the post-12.0.0 Enum.HousingCatalogEntrySubtypeMeta.NumValues value.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs::test_patch_12_0_0_housing_catalog_entry_subtype_enum_values"
+      ],
+      "assertions": [
+        "Publishes Enum.HousingCatalogEntrySubtypeMeta.NumValues as a Lua number with exact retail 12.0.0 value 4; the housing test also asserts the complete current family and removed MarketItem absence."
+      ],
+      "commit": "c400d31be514faddfabfca0ffe2f35bf73720804",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is bounded to retail 12.0.0 startup enum/metadata publication, Lua numeric type, exact before-to-after value change, and focused proof commit c400d31be. No customization, Edit Mode, housing behavior, replacement semantics, consumers, mutation, persistence, lifecycle, or later-epoch claims are made.",
+      "provenance_only": false
     },
     {
       "id": "changed:Enum.HousingDecorActionFlagsMeta.MaxValue",
