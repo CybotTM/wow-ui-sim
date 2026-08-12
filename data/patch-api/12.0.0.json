@@ -110299,17 +110299,56 @@
       "id": "changed:TRANSMOG_OUTFITS_CHANGED",
       "symbol": "TRANSMOG_OUTFITS_CHANGED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event and handler, perform real outfit create/update/delete transitions, and assert the callback receives exactly zero or one payload with `newOutfitID == nil or type(newOutfitID) == \"number\"`; cover invalid IDs, repeated changes, timing, unrelated changes, and manual-vs-producer dispatch."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = nil; after payload = `(newOutfitID: number?)`; runtime registers the event but has no outfit-change producer or payload construction. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:TextureBase.GetTexCoord",
@@ -110395,225 +110434,795 @@
       "id": "changed:UNIT_SPELLCAST_CHANNEL_START",
       "symbol": "UNIT_SPELLCAST_CHANNEL_START",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 4`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, and `args[4] == nil or type(args[4]) == \"number\"`; repeat valid transitions, test invalid units/spells and exact cast GUID/timing, and compare producer delivery with manual `fire_event_with_args`."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_CHANNEL_STOP",
       "symbol": "UNIT_SPELLCAST_CHANNEL_STOP",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 5`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, `type(args[4]) == \"string\"`, and `args[5] == nil or type(args[5]) == \"number\"`; cover completed/interrupted and repeated transitions, invalid units/spells, exact cast GUID/timing, and manual-vs-producer dispatch."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after payload = `(unitTarget, castGUID, spellID, interruptedBy: string, castBarID: number?)`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_CHANNEL_UPDATE",
       "symbol": "UNIT_SPELLCAST_CHANNEL_UPDATE",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 4`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, and `args[4] == nil or type(args[4]) == \"number\"`; repeat valid transitions, test invalid units/spells and exact cast GUID/timing, and compare producer delivery with manual `fire_event_with_args`."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_DELAYED",
       "symbol": "UNIT_SPELLCAST_DELAYED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 4`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, and `args[4] == nil or type(args[4]) == \"number\"`; repeat valid transitions, test invalid units/spells and exact cast GUID/timing, and compare producer delivery with manual `fire_event_with_args`."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_EMPOWER_START",
       "symbol": "UNIT_SPELLCAST_EMPOWER_START",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 4`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, and `args[4] == nil or type(args[4]) == \"number\"`; repeat valid transitions, test invalid units/spells and exact cast GUID/timing, and compare producer delivery with manual `fire_event_with_args`."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_EMPOWER_STOP",
       "symbol": "UNIT_SPELLCAST_EMPOWER_STOP",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real empower-stop transition, and assert `#args == 6`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, `type(args[4]) == \"boolean\"`, `type(args[5]) == \"string\"`, and `args[6] == nil or type(args[6]) == \"number\"`; cover completed/interrupted and repeated transitions, invalid units/spells, exact cast GUID/timing, and manual-vs-producer dispatch."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number, complete: boolean)`; after payload = `(unitTarget, castGUID, spellID, complete, interruptedBy: string, castBarID: number?)`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_EMPOWER_UPDATE",
       "symbol": "UNIT_SPELLCAST_EMPOWER_UPDATE",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 4`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, and `args[4] == nil or type(args[4]) == \"number\"`; repeat valid transitions, test invalid units/spells and exact cast GUID/timing, and compare producer delivery with manual `fire_event_with_args`."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_FAILED",
       "symbol": "UNIT_SPELLCAST_FAILED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 4`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, and `args[4] == nil or type(args[4]) == \"number\"`; repeat valid transitions, test invalid units/spells and exact cast GUID/timing, and compare producer delivery with manual `fire_event_with_args`."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_FAILED_QUIET",
       "symbol": "UNIT_SPELLCAST_FAILED_QUIET",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 4`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, and `args[4] == nil or type(args[4]) == \"number\"`; repeat valid transitions, test invalid units/spells and exact cast GUID/timing, and compare producer delivery with manual `fire_event_with_args`."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_INTERRUPTED",
       "symbol": "UNIT_SPELLCAST_INTERRUPTED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 5`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, `type(args[4]) == \"string\"`, and `args[5] == nil or type(args[5]) == \"number\"`; cover completed/interrupted and repeated transitions, invalid units/spells, exact cast GUID/timing, and manual-vs-producer dispatch."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after payload = `(unitTarget, castGUID, spellID, interruptedBy: string, castBarID: number?)`; runtime only registers the event and lacks a dedicated producer/payload path. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_SENT",
       "symbol": "UNIT_SPELLCAST_SENT",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event and handler, trigger a real spell-send transition, and assert exactly four arguments in order: a valid unit token string, target string, castGUID string, and spellID number; cover invalid units/spells, repeated sends, exact GUID/timing, and manual-vs-producer dispatch."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unit: string, target: string, castGUID: string, spellID: number)`; after payload = `(unitTarget: unit, target: string, castGUID: string, spellID: number)`; no dedicated producer/payload path exists. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_START",
       "symbol": "UNIT_SPELLCAST_START",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/combat_verbs.rs",
+          "source_hash": "a966f7fce5f5842d04c90aedb08a28533114ac9de39d830eba0253bab775d756",
+          "summary": "Current spell-start producer emits only player and spellID."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/profession_crafting.rs",
+          "source_hash": "ed77a6f48dd8e0f5a6660b0f31d4c21063238d7e07813fdef9f5a76b7b5f04c0",
+          "summary": "Current profession-crafting spell-start producer emits only player and spellID."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event and handler, trigger a real spell-start transition, and assert exactly four arguments with string unitTarget, string castGUID, numeric spellID, and nil-or-number castBarID; cover invalid units/spells, repeated starts, exact GUID/timing, and manual-vs-producer dispatch, explicitly comparing the current producer path that emits only player/spellID."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; current producers emit only `player, spellID`, omitting castGUID and castBarID. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_STOP",
       "symbol": "UNIT_SPELLCAST_STOP",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        },
+        {
+          "kind": "source",
+          "reference": "src/iced_app/casting.rs",
+          "source_hash": "a1fd34f807c24e547254764e6eb63242ba59cd57aa7b968c94cfe76266e353e3",
+          "summary": "Current casting completion producer emits only three arguments for UNIT_SPELLCAST_STOP."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 4`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, and `args[4] == nil or type(args[4]) == \"number\"`; repeat valid transitions, test invalid units/spells and exact cast GUID/timing, and compare the current three-argument producer delivery with manual `fire_event_with_args`."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; the current casting producer emits only the legacy three arguments. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UNIT_SPELLCAST_SUCCEEDED",
       "symbol": "UNIT_SPELLCAST_SUCCEEDED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 before/after event payload contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Runtime registers the event as valid; registration does not prove producer delivery or payload semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124",
+          "summary": "Runtime event registration and dispatch plumbing."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_events.rs",
+          "source_hash": "fcff948e55733b91f2db7cb6986e2ca96e8f37b2f2b07c7fd16e3ee87f3eee7a",
+          "summary": "Generic/manual dispatch forwards only explicitly supplied arguments."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no producer semantics are inferred."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
+          "summary": "Manifest hash captured before this docs-only classification update."
+        },
+        {
+          "kind": "source",
+          "reference": "src/iced_app/casting.rs",
+          "source_hash": "a1fd34f807c24e547254764e6eb63242ba59cd57aa7b968c94cfe76266e353e3",
+          "summary": "Current casting completion producer emits only three arguments for UNIT_SPELLCAST_SUCCEEDED."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Register the event with a frame OnEvent handler, trigger a real transition, and assert `#args == 4`, `type(args[1]) == \"string\"`, `type(args[2]) == \"string\"`, `type(args[3]) == \"number\"`, and `args[4] == nil or type(args[4]) == \"number\"`; repeat valid transitions, test invalid units/spells and exact cast GUID/timing, and compare the current three-argument producer delivery with manual `fire_event_with_args`."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; the current casting producer emits only the legacy three arguments. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
     {
       "id": "changed:UnitCastingInfo",
