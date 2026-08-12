@@ -2921,10 +2921,10 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `advFlyKeyboardMinPitchFactor` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '2.500000'; focused getter proof commit 71086bb79; startup getter/default publication only. |
 | `advFlyKeyboardMinTurnFactor` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '5.000000'; focused getter proof commit 71086bb79; startup getter/default publication only. |
 | `advFlyPitchControlCameraChase` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '20.000000'; focused getter proof commit 71086bb79; startup getter/default publication only. |
-| `mountJournalGeneralFilters` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `mountJournalSourcesFilter` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `mountJournalTypeFilter` | untriaged | cvar | changed | cvar changed in 12.0.0. |
-| `nameplateGameObjectMaxDistance` | untriaged | cvar | changed | cvar changed in 12.0.0. |
+| `mountJournalGeneralFilters` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims. |
+| `mountJournalSourcesFilter` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims. |
+| `mountJournalTypeFilter` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims. |
+| `nameplateGameObjectMaxDistance` | best-effort | cvar | changed | Retail 12.0.0 publishes exact CVar/default string '30.000000'; focused getter proof commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims. |
 | `nameplateLargerScale` | untriaged | cvar | changed | cvar changed in 12.0.0. |
 | `nameplateMaxAlpha` | untriaged | cvar | changed | cvar changed in 12.0.0. |
 | `nameplateMaxAlphaDistance` | untriaged | cvar | changed | cvar changed in 12.0.0. |

@@ -2831,10 +2831,10 @@
 2831. [best-effort] `changed:advFlyKeyboardMinPitchFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '2.500000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
 2832. [best-effort] `changed:advFlyKeyboardMinTurnFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '5.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
 2833. [best-effort] `changed:advFlyPitchControlCameraChase` — behavioral: Retail 12.0.0 publishes exact CVar/default string '20.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
-2834. [untriaged] `changed:mountJournalGeneralFilters` — untriaged
-2835. [untriaged] `changed:mountJournalSourcesFilter` — untriaged
-2836. [untriaged] `changed:mountJournalTypeFilter` — untriaged
-2837. [untriaged] `changed:nameplateGameObjectMaxDistance` — untriaged
+2834. [best-effort] `changed:mountJournalGeneralFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof is commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims.
+2835. [best-effort] `changed:mountJournalSourcesFilter` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof is commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims.
+2836. [best-effort] `changed:mountJournalTypeFilter` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof is commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims.
+2837. [best-effort] `changed:nameplateGameObjectMaxDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '30.000000'; focused getter proof is commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims.
 2838. [untriaged] `changed:nameplateLargerScale` — untriaged
 2839. [untriaged] `changed:nameplateMaxAlpha` — untriaged
 2840. [untriaged] `changed:nameplateMaxAlphaDistance` — untriaged
