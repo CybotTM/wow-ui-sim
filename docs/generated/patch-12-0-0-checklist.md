@@ -2482,7 +2482,7 @@
 2482. [untriaged] `added:nameplateAuraScale` — untriaged
 2483. [untriaged] `added:nameplateCastBarDisplay` — untriaged
 2484. [untriaged] `added:nameplateDebuffPadding` — untriaged
-2485. [untriaged] `added:nameplateEnemyNpcAuraDisplay` — untriaged
+2485. [best-effort] `added:nameplateEnemyNpcAuraDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0x02,C under focused proof commit 16687bd2a; no rendering semantics are claimed.
 2486. [untriaged] `added:nameplateEnemyPlayerAuraDisplay` — untriaged
 2487. [untriaged] `added:nameplateFriendlyPlayerAuraDisplay` — untriaged
 2488. [untriaged] `added:nameplateInfoDisplay` — untriaged

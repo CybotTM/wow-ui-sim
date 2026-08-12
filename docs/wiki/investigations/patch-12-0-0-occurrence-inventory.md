@@ -2572,7 +2572,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `nameplateAuraScale` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `nameplateCastBarDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `nameplateDebuffPadding` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateEnemyNpcAuraDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `nameplateEnemyNpcAuraDisplay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0x02,C under focused proof commit 16687bd2a; no rendering semantics are claimed. |
 | `nameplateEnemyPlayerAuraDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `nameplateFriendlyPlayerAuraDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `nameplateInfoDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
