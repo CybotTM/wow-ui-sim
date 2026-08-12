@@ -100737,17 +100737,48 @@
       "id": "added:scrubsecretvalues",
       "symbol": "scrubsecretvalues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds variadic scrubsecretvalues(values...) with variadic scrubbed outputs; source metadata has no stronger behavior contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "summary": "Current simulator publication is a local pass-through compatibility helper; retail secret scrubbing is not modeled.",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433"
+        },
+        {
+          "kind": "source",
+          "reference": "data/lua/taint_stubs.lua",
+          "summary": "Lua compatibility fallback also exposes pass-through behavior, not retail secret removal.",
+          "source_hash": "0283b03648a8a8cd0f6e18b32f924ce480063785eac8d2291402f9ce6b222c8e"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/security_api.rs",
+          "summary": "Existing security coverage proves only local passthrough behavior and does not establish retail scrubbing, taint, nested, protected, or variadic semantics.",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: local pass-through helpers do not prove retail secret scrubbing. Full-LoD/state-backed proof must establish publication and exact retail behavior, including zero arguments, nil/primitives/multiple values, direct and nested secret values, tainted/protected values, output count/order/types, and errors; no pass-through or alias behavior is accepted as proof."
     },
     {
       "id": "added:secretChallengeModeRestrictionsForced",
@@ -101008,49 +101039,130 @@
       "id": "added:secretunwrap",
       "symbol": "secretunwrap",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds variadic secretunwrap(values...) with variadic unwrapped outputs.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "summary": "Current simulator publication is a guarded pass-through helper; complete retail unwrapping semantics are unmodeled.",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/security_api.rs",
+          "summary": "Existing coverage proves callable publication and local identity behavior only; it does not establish retail unwrapping, taint, nested, protected, or variadic semantics.",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: pass-through identity is not proof of retail secret unwrapping. Full-LoD/state-backed proof must establish publication and exact retail behavior, including zero arguments, nil/primitives/multiple values, direct and nested secret values, tainted/protected values, output count/order/types, and errors; no pass-through or alias behavior is accepted as proof. Also probe secure-environment/global precedence."
     },
     {
       "id": "added:secretwrap",
       "symbol": "secretwrap",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds variadic secretwrap(values...) with variadic wrapped outputs.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/debug_environment_defaults.rs",
+          "summary": "Current simulator publication is a temporary identity/pass-through fallback; secret wrapping and taint semantics are unmodeled.",
+          "source_hash": "8ec4e2676102a632858c31bd1ecdd3369083d78803033e6b3be38980ca195afe"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/runtime_bootstrap_boundaries.rs",
+          "summary": "Existing bootstrap-boundary coverage proves only local callable identity behavior.",
+          "source_hash": "213303ba1feb2694d93359b0baec9685887067a6a932be302f0f5073146f08da"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: identity fallback does not prove retail secret wrapping. Full-LoD/state-backed proof must establish publication and exact retail behavior, including zero arguments, nil/primitives/multiple values, direct and nested secret values, tainted/protected values, output count/order/types, and errors; no pass-through or alias behavior is accepted as proof. Probe wrapped functions, multiple values, and whether secrecy/taint changes."
     },
     {
       "id": "added:securecallmethod",
       "symbol": "securecallmethod",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds securecallmethod(object, method, arguments...) with variadic results.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/securecallmethod.rs",
+          "summary": "Current simulator publishes a permissive local method dispatcher; secure boundary and complete edge semantics are unproven.",
+          "source_hash": "8d25ffe4a2f4f94261c8b22ffc867564e387ad9c7c69a5f34c7179a99a934562"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/mod.rs",
+          "summary": "Security module registration publishes the local helper, subject to guarded precedence.",
+          "source_hash": "2217e3889f93fcb9095e7f8414c81a2c379a2fac18e0154abb06d2a02ecdd047"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/security_api.rs",
+          "summary": "Existing security coverage does not establish complete securecallmethod method lookup, errors, result packing, or taint behavior.",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: local permissive dispatch is not proof of retail securecallmethod. Probe valid self/argument order, multiple/zero returns, missing/non-function methods, invalid receiver/name types, errors, direct and __index lookup, and tainted secure-boundary behavior."
     },
     {
       "id": "added:showAllItemsInTransmog",
@@ -101260,17 +101372,36 @@
       "id": "added:string.concat",
       "symbol": "string.concat",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 records string.concat as an added namespaced API with no complete source behavior contract.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface.rs",
+          "summary": "Current simulator does not publish string.concat; legacy global strconcat is unrelated and is not an established alias.",
+          "source_hash": "5712d009242342c436117da3e7a5e4cc1c899b9fa58cbc015c67819ce5aad977"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: string.concat is absent and legacy strconcat is not proof of equivalence. Full-LoD/state-backed probe must establish publication, callable type, zero/multiple arguments, nil/non-string coercion, unsupported values, result count/type, and error behavior."
     },
     {
       "id": "added:trackedInitiativeTasks",
