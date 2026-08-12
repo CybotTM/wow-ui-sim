@@ -429,6 +429,16 @@ fn test_patch_12_0_0_cvar_defaults() {
                     nameplateShowClassColor = "1",
                     nameplateShowFriendlyClassColor = "1",
                     nameplateShowFriendlyNpcs = "0",
+                    raidFramesCenterBigDefensive = "1",
+                    raidFramesDispelIndicatorOverlay = "1",
+                    raidFramesDispelIndicatorType = "2",
+                    raidFramesDisplayLargerRoleSpecificDebuffs = "1",
+                    raidFramesHealthBarColor = "FF2B9305",
+                    scriptWarnings = "0",
+                    spellDiminishPVPEnemiesEnabled = "1",
+                    spellDiminishPVPOnlyTriggerableByMe = "0",
+                    transmogHideIgnoredSlots = "0",
+                    transmogrifySetsFilters = "0",
                 }
                 for name, expected_value in pairs(expected) do
                     local value = GetCVar(name)
