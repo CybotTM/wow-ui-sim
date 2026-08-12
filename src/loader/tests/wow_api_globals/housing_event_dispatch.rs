@@ -145,3 +145,27 @@ fn test_patch_12_0_0_removed_housing_catalog_searcher_event_rejected() {
         "removed housing event registration result mismatch: {result}"
     );
 }
+
+#[test]
+fn test_patch_12_0_0_removed_show_delves_display_event_rejected() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local frame = CreateFrame("Frame")
+                local removed_ok = pcall(function()
+                    frame:RegisterEvent("SHOW_DELVES_DISPLAY_UI")
+                end)
+                local valid_ok = pcall(function()
+                    frame:RegisterEvent("HOUSE_LEVEL_CHANGED")
+                end)
+                return tostring(removed_ok) .. ":" .. tostring(valid_ok)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "false:true",
+        "removed SHOW_DELVES_DISPLAY_UI registration result mismatch: {result}"
+    );
+}
