@@ -2442,7 +2442,7 @@
 2442. [untriaged] `added:endeavorInitiativesLastPoints` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
 2443. [untriaged] `added:equipmentManager` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
 2444. [best-effort] `added:externalDefensivesEnabled` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
-2445. [untriaged] `added:floatingCombatTextAuraFade` — untriaged
+2445. [best-effort] `added:floatingCombatTextAuraFade` — provenance-only: transient intermediate-snapshot CVar, absent at both patch endpoints; no runtime behavior or `_v2` equivalence claimed.
 2446. [best-effort] `added:floatingCombatTextAuraFade_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
 2447. [best-effort] `added:floatingCombatTextAuras_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
 2448. [best-effort] `added:floatingCombatTextCombatDamageAllAutos_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.

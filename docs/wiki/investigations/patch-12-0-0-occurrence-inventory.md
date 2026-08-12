@@ -2532,7 +2532,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `endeavorInitiativesLastPoints` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '0'; no CVar behavior or consumer semantics claimed. |
 | `equipmentManager` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '1'; no CVar behavior or consumer semantics claimed. |
 | `externalDefensivesEnabled` | best-effort | cvar | added | Behavioral: public `GetCVar`/`GetCVarDefault` return exact string `0` under focused proof `a5a1a343a`; no CVar consumer or old-name equivalence claim. |
-| `floatingCombatTextAuraFade` | untriaged | cvar | added | Transient cvar existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
+| `floatingCombatTextAuraFade` | best-effort | cvar | added | Provenance-only: transient intermediate-snapshot CVar value `0`, absent at both patch endpoints; old runtime name is not published and `_v2` equivalence is not claimed. |
 | `floatingCombatTextAuraFade_v2` | best-effort | cvar | added | Behavioral: public `GetCVar`/`GetCVarDefault` return exact string `0` under focused proof `a5a1a343a`; no CVar consumer or old-name equivalence claim. |
 | `floatingCombatTextAuras_v2` | best-effort | cvar | added | Behavioral: public `GetCVar`/`GetCVarDefault` return exact string `0` under focused proof `a5a1a343a`; no CVar consumer or old-name equivalence claim. |
 | `floatingCombatTextCombatDamageAllAutos_v2` | best-effort | cvar | added | Behavioral: public `GetCVar`/`GetCVarDefault` return exact string `1` under focused proof `a5a1a343a`; no CVar consumer or old-name equivalence claim. |

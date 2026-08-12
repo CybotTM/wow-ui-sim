@@ -97079,17 +97079,43 @@
       "id": "added:floatingCombatTextAuraFade",
       "symbol": "floatingCombatTextAuraFade",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source records transient floatingCombatTextAuraFade value '0' in an intermediate snapshot, but the CVar is absent at both patch endpoints.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current runtime defaults do not publish the old floatingCombatTextAuraFade name; the distinct floatingCombatTextAuraFade_v2 entry is not treated as equivalent.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic CVar storage publishes only seeded runtime defaults; no old-name entry is introduced by the storage layer.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence is retained; no runtime behavior or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: transient intermediate-snapshot CVar record; absent at both patch endpoints and not published by the current runtime. No runtime behavior or equivalence to floatingCombatTextAuraFade_v2 is claimed.",
+      "provenance_only": true
     },
     {
       "id": "added:floatingCombatTextAuraFade_v2",
