@@ -117385,161 +117385,451 @@
       "id": "removed:NamePlateClassificationScale",
       "symbol": "NamePlateClassificationScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 1.0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NamePlateHorizontalScale",
       "symbol": "NamePlateHorizontalScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 1.0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NamePlateMaximumClassificationScale",
       "symbol": "NamePlateMaximumClassificationScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 1.25.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NamePlateVerticalScale",
       "symbol": "NamePlateVerticalScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 1.0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NameplatePersonalClickThrough",
       "symbol": "NameplatePersonalClickThrough",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NameplatePersonalHideDelayAlpha",
       "symbol": "NameplatePersonalHideDelayAlpha",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 0.45.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NameplatePersonalHideDelaySeconds",
       "symbol": "NameplatePersonalHideDelaySeconds",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 3.0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NameplatePersonalShowAlways",
       "symbol": "NameplatePersonalShowAlways",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NameplatePersonalShowInCombat",
       "symbol": "NameplatePersonalShowInCombat",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NameplatePersonalShowWithTarget",
       "symbol": "NameplatePersonalShowWithTarget",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for all ten removed nameplate CVars.",
+          "source_hash": "d4f666e5c5d2c3a998e888ad24558d3015bc967665fcf35e2ade3c267c30ca51"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed nameplate CVar."
+      ],
+      "commit": "64a811ad0",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no nameplate behavior or graphics semantics are claimed."
     },
     {
       "id": "removed:NewCraftingOrderInfo.reagentItems",

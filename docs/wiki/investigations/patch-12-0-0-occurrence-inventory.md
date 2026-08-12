@@ -1,4 +1,4 @@
-The removed retail 12.0.0 CVar `ForceAllowAero` is **best-effort/behavioral**. Focused proof is commit `9431abb53` via `patch_12_0_0_cvar_removals.rs`; both `GetCVar("ForceAllowAero")` and `GetCVarDefault("ForceAllowAero")` return nil. The CVar defaults omit the removed name. Claims are bounded to CVar/default absence, with no graphics semantics. Current totals are **1885 best-effort, 1025 evidence-required, 2 exception-requested, and 498 untriaged rows** (3410 total).
+The removed retail 12.0.0 CVar `ForceAllowAero` is **best-effort/behavioral**. Focused proof is commit `9431abb53` via `patch_12_0_0_cvar_removals.rs`; both `GetCVar("ForceAllowAero")` and `GetCVarDefault("ForceAllowAero")` return nil. The CVar defaults omit the removed name. Claims are bounded to CVar/default absence, with no graphics semantics. Current totals are **1896 best-effort, 1025 evidence-required, 2 exception-requested, and 487 untriaged rows** (3410 total).
 
 The five retail 12.0.0 removed `Enum.NeighbordhoodInitiativeCategory.Current`, `Legacy`, and `Enum.NeighbordhoodInitiativeCategoryMeta.MaxValue`, `MinValue`, `NumValues` are **evidence-required/unsafe**. The source register removes the misspelled namespace rows, while runtime enum data and discovery provide no full-LoD absence or corrected replacement proof. Required proof is a namespace-safe Lua probe for the old and any corrected `NeighborhoodInitiativeCategory`/`Meta` namespaces; claims are bounded to source removal only. Current totals are **1886 best-effort, 1025 evidence-required, 2 exception-requested, and 497 untriaged rows** (3410 total).
 
@@ -3293,16 +3293,16 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE` | untriaged | global | removed | global removed in 12.0.0. |
 | `LE_WORLD_ELAPSED_TIMER_TYPE_NONE` | untriaged | global | removed | global removed in 12.0.0. |
 | `LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND` | untriaged | global | removed | global removed in 12.0.0. |
-| `NamePlateClassificationScale` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `NamePlateHorizontalScale` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `NamePlateMaximumClassificationScale` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `NamePlateVerticalScale` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `NameplatePersonalClickThrough` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `NameplatePersonalHideDelayAlpha` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `NameplatePersonalHideDelaySeconds` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `NameplatePersonalShowAlways` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `NameplatePersonalShowInCombat` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `NameplatePersonalShowWithTarget` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `NamePlateClassificationScale` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 1.0; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
+| `NamePlateHorizontalScale` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 1.0; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
+| `NamePlateMaximumClassificationScale` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 1.25; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
+| `NamePlateVerticalScale` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 1.0; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
+| `NameplatePersonalClickThrough` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 1; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
+| `NameplatePersonalHideDelayAlpha` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 0.45; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
+| `NameplatePersonalHideDelaySeconds` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 3.0; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
+| `NameplatePersonalShowAlways` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 0; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
+| `NameplatePersonalShowInCombat` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 1; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
+| `NameplatePersonalShowWithTarget` | best-effort | cvar | removed | Best-effort behavioral: retail 12.0.0 removes the CVar with prior default string 0; focused proof commit 64a811ad0 asserts GetCVar and GetCVarDefault both return nil. No nameplate behavior is claimed. |
 | `NewCraftingOrderInfo.reagentItems` | untriaged | structure-field | removed | structure-field removed in 12.0.0. |
 | `PlaySound` | best-effort | api | removed | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `RegularReagentInfo.itemID` | untriaged | structure-field | removed | structure-field removed in 12.0.0. |
