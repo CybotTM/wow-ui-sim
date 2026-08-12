@@ -2880,7 +2880,7 @@
 2880. [evidence-required] `removed:C_HousingBasicMode.InvalidPlacementInfo.tooFar` — unsafe
 2881. [best-effort] `removed:C_HousingBasicMode.IsNudgeEnabled` — behavioral
 2882. [best-effort] `removed:C_HousingBasicMode.SetNudgeEnabled` — behavioral
-2883. [untriaged] `removed:C_HousingCatalog.HousingCatalogEntryInfo.numStored` — untriaged
+2883. [best-effort] `removed:C_HousingCatalog.HousingCatalogEntryInfo.numStored` — behavioral
 2884. [best-effort] `removed:C_HousingDecor.GetMaxDecorPlaced` — behavioral
 2885. [evidence-required] `removed:C_HousingDecor.HousingLevelInfo` — unsafe
 2886. [untriaged] `removed:C_HousingDecor.HousingLevelInfo.exteriorDecorPlacementBudget` — untriaged

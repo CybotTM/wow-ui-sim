@@ -105609,17 +105609,46 @@
       "id": "removed:C_HousingCatalog.HousingCatalogEntryInfo.numStored",
       "symbol": "C_HousingCatalog.HousingCatalogEntryInfo.numStored",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Checked-in retail 12.0.0 source removes numStored from HousingCatalogEntryInfo.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.rs",
+          "summary": "Seeded catalog entry tables publish replacement numeric totals without numStored.",
+          "source_hash": "e7bd273dc7dd200b76e9f0b4c035f3d9395e04b87f5bb6b622aa9135350b9b50"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_info.rs",
+          "summary": "Focused test proves numStored is nil and replacement totals are numeric on a seeded catalog entry.",
+          "source_hash": "ec46d38a41fdf1c4dc45d2413c70d98f4f96a556629c1c64ca9dd096f65c78f6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization used by the retail startup test environment.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_info.rs::test_patch_12_0_0_housing_catalog_entry_info_num_stored_removed"
+      ],
+      "assertions": [
+        "Seeded catalog entry is a table with numStored == nil and numeric totalNumStored, totalNumPlaced, and destroyableInstanceCount fields."
+      ],
+      "commit": "1e31a40dd",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes numStored from HousingCatalogEntryInfo; focused runtime proof establishes the removed field is nil on a seeded entry and replacement totals retain numeric types. No storage semantics are claimed."
     },
     {
       "id": "removed:C_HousingDecor.GetMaxDecorPlaced",
