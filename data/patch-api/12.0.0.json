@@ -101570,33 +101570,95 @@
       "id": "changed:COMBAT_LOG_EVENT",
       "symbol": "COMBAT_LOG_EVENT",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes COMBAT_LOG_EVENT to callback=true and restricted=true while retaining null payload metadata.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "summary": "Runtime recognizes COMBAT_LOG_EVENT as valid/restricted event.",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Runtime marks COMBAT_LOG_EVENT callback-capable.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/mod.rs",
+          "summary": "Runtime event constants and registration tables.",
+          "source_hash": "a1bed8efd193aa2911b122ab82c091282dd5144ec4dfde2e2dc105bf3cb63124"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery contains no matching occurrence; no producer semantics are inferred.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: declaration metadata is modeled, but producer-backed payload, restricted delivery, ordinary registration behavior, callback delivery, and precedence remain unproven. Required full-LoD probe covers registration rejection, callback registration/delivery, producer transitions, exact payload count/types/order, restricted context, callback versus OnEvent precedence, and manual/generic dispatch."
     },
     {
       "id": "changed:COMBAT_LOG_EVENT_UNFILTERED",
       "symbol": "COMBAT_LOG_EVENT_UNFILTERED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes COMBAT_LOG_EVENT_UNFILTERED to callback=true and restricted=true while retaining null payload metadata.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "summary": "Runtime recognizes COMBAT_LOG_EVENT_UNFILTERED as valid/restricted event.",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e"
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_a.rs",
+          "summary": "Runtime marks COMBAT_LOG_EVENT_UNFILTERED callback-capable.",
+          "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/loader_env.rs",
+          "summary": "Generic event dispatch forwards supplied arguments but does not prove combat-log producer behavior.",
+          "source_hash": "22f237f041874ce547ab0f8639df24ae6b22ddc9eb9225217162bf18c900c653"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery contains no matching occurrence; no producer semantics are inferred.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: runtime classification exists and generic dispatch forwards supplied arguments, but producer-backed payload, restricted delivery, ordinary registration behavior, callback delivery, and precedence remain unproven. Required full-LoD probe covers registration rejection, callback registration/delivery, producer transitions, exact payload count/types/order, restricted context, callback versus OnEvent precedence, and manual/generic dispatch."
     },
     {
       "id": "changed:C_FunctionContainers.CreateCallback",
@@ -101643,17 +101705,36 @@
       "id": "changed:C_Housing.RequestHouseFinderNeighborhoodData",
       "symbol": "C_Housing.RequestHouseFinderNeighborhoodData",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds neighborhoodName as a required string input after neighborhoodGuid; outputs remain null.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_dashboard_preload.rs",
+          "summary": "Temporary runtime workaround accepts two arguments but ignores GUID/name validation and always dispatches seeded plot data asynchronously.",
+          "source_hash": "07757645c52cfa558b5719af55dda8ac8a271637101fd2812384802c01826c52"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery contains no matching occurrence; no housing producer semantics are inferred.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: current two-argument temporary workaround ignores selection and validation and always schedules seeded data. Required full-LoD/state-backed probe covers valid and unknown GUID/name pairs, nil/wrong types, return count, exact event spelling/payload/timing, repeated requests, cancellation, and lifecycle."
     },
     {
       "id": "changed:C_Item.CanItemTransmogAppearance",

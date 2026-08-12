@@ -2552,8 +2552,8 @@
 2552. [best-effort] `added:typedef.UISoundSubType` — provenance-only
 2553. [best-effort] `added:typedef.UnitHealPredictionCalculator` — provenance-only
 2554. [best-effort] `added:typedef.UnitTokenVariant` — provenance-only
-2555. [untriaged] `changed:COMBAT_LOG_EVENT` — untriaged
-2556. [untriaged] `changed:COMBAT_LOG_EVENT_UNFILTERED` — untriaged
+2555. [evidence-required] `changed:COMBAT_LOG_EVENT` — unsafe
+2556. [evidence-required] `changed:COMBAT_LOG_EVENT_UNFILTERED` — unsafe
 2557. [best-effort] `changed:C_FunctionContainers.CreateCallback` — behavioral
 2558. [untriaged] `changed:C_Housing.RequestHouseFinderNeighborhoodData` — untriaged
 2559. [untriaged] `changed:C_Item.CanItemTransmogAppearance` — untriaged
