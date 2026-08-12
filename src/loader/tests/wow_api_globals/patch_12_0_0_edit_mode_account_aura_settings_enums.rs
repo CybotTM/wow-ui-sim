@@ -51,6 +51,17 @@ fn test_patch_12_0_0_edit_mode_account_aura_settings_enum_values() {
                     return "Enum.EditModeAccountSettingMeta: metadata mismatch"
                 end
 
+                local aura_meta = Enum.EditModeAuraFrameSettingMeta
+                if type(aura_meta) ~= "table" then
+                    return "Enum.EditModeAuraFrameSettingMeta: expected table"
+                end
+                if aura_meta.MinValue ~= 0
+                    or aura_meta.MaxValue ~= 10
+                    or aura_meta.NumValues ~= 11
+                then
+                    return "Enum.EditModeAuraFrameSettingMeta: metadata mismatch"
+                end
+
                 return "ok"
             "#,
         )
