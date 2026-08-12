@@ -105720,81 +105720,186 @@
       "id": "removed:C_HousingDecor.HousingLevelInfo.exteriorDecorPlacementBudget",
       "symbol": "C_HousingDecor.HousingLevelInfo.exteriorDecorPlacementBudget",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the numeric HousingLevelInfo.exteriorDecorPlacementBudget field and adds the same-named numeric HouseLevelInfo field; source metadata does not prove runtime structure identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_housing.rs",
+          "source_hash": "211566972d653075b177290db9a91d8ee1ef6700320549c5e42b8cec620e80f2",
+          "summary": "Current C_Housing registration does not model the old or replacement housing-level object shape for this field."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.rs",
+          "source_hash": "e7bd273dc7dd200b76e9f0b4c035f3d9395e04b87f5bb6b622aa9135350b9b50",
+          "summary": "Temporary housing state provides no authoritative publication of either housing-level structure field."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: rawget the observable old C_HousingDecor.HousingLevelInfo field and replacement HouseLevelInfo field, proving old absence and numeric replacement publication; source absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source removal and separate HouseLevelInfo addition are known, but runtime structure identity and field publication are unmodeled."
     },
     {
       "id": "removed:C_HousingDecor.HousingLevelInfo.exteriorFixtureBudget",
       "symbol": "C_HousingDecor.HousingLevelInfo.exteriorFixtureBudget",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the numeric HousingLevelInfo.exteriorFixtureBudget field and adds the same-named numeric HouseLevelInfo field; source metadata does not prove runtime structure identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_housing.rs",
+          "source_hash": "211566972d653075b177290db9a91d8ee1ef6700320549c5e42b8cec620e80f2",
+          "summary": "Current C_Housing registration does not model the old or replacement housing-level object shape for this field."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.rs",
+          "source_hash": "e7bd273dc7dd200b76e9f0b4c035f3d9395e04b87f5bb6b622aa9135350b9b50",
+          "summary": "Temporary housing state provides no authoritative publication of either housing-level structure field."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: rawget the observable old C_HousingDecor.HousingLevelInfo field and replacement HouseLevelInfo field, proving old absence and numeric replacement publication; source absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source removal and separate HouseLevelInfo addition are known, but runtime structure identity and field publication are unmodeled."
     },
     {
       "id": "removed:C_HousingDecor.HousingLevelInfo.interiorDecorPlacementBudget",
       "symbol": "C_HousingDecor.HousingLevelInfo.interiorDecorPlacementBudget",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the numeric HousingLevelInfo.interiorDecorPlacementBudget field and adds the same-named numeric HouseLevelInfo field; source metadata does not prove runtime structure identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_housing.rs",
+          "source_hash": "211566972d653075b177290db9a91d8ee1ef6700320549c5e42b8cec620e80f2",
+          "summary": "Current C_Housing registration does not model the old or replacement housing-level object shape for this field."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.rs",
+          "source_hash": "e7bd273dc7dd200b76e9f0b4c035f3d9395e04b87f5bb6b622aa9135350b9b50",
+          "summary": "Temporary housing state provides no authoritative publication of either housing-level structure field."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: rawget the observable old C_HousingDecor.HousingLevelInfo field and replacement HouseLevelInfo field, proving old absence and numeric replacement publication; source absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source removal and separate HouseLevelInfo addition are known, but runtime structure identity and field publication are unmodeled."
     },
     {
       "id": "removed:C_HousingDecor.HousingLevelInfo.level",
       "symbol": "C_HousingDecor.HousingLevelInfo.level",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the numeric HousingLevelInfo.level field and adds the same-named numeric HouseLevelInfo field; source metadata does not prove runtime structure identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_housing.rs",
+          "source_hash": "211566972d653075b177290db9a91d8ee1ef6700320549c5e42b8cec620e80f2",
+          "summary": "Current C_Housing registration does not model the old or replacement housing-level object shape for this field."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.rs",
+          "source_hash": "e7bd273dc7dd200b76e9f0b4c035f3d9395e04b87f5bb6b622aa9135350b9b50",
+          "summary": "Temporary housing state provides no authoritative publication of either housing-level structure field."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: rawget the observable old C_HousingDecor.HousingLevelInfo field and replacement HouseLevelInfo field, proving old absence and numeric replacement publication; source absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source removal and separate HouseLevelInfo addition are known, but runtime structure identity and field publication are unmodeled."
     },
     {
       "id": "removed:C_HousingDecor.HousingLevelInfo.roomPlacementBudget",
       "symbol": "C_HousingDecor.HousingLevelInfo.roomPlacementBudget",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the numeric HousingLevelInfo.roomPlacementBudget field and adds the same-named numeric HouseLevelInfo field; source metadata does not prove runtime structure identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/c_api/c_housing.rs",
+          "source_hash": "211566972d653075b177290db9a91d8ee1ef6700320549c5e42b8cec620e80f2",
+          "summary": "Current C_Housing registration does not model the old or replacement housing-level object shape for this field."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.rs",
+          "source_hash": "e7bd273dc7dd200b76e9f0b4c035f3d9395e04b87f5bb6b622aa9135350b9b50",
+          "summary": "Temporary housing state provides no authoritative publication of either housing-level structure field."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: rawget the observable old C_HousingDecor.HousingLevelInfo field and replacement HouseLevelInfo field, proving old absence and numeric replacement publication; source absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source removal and separate HouseLevelInfo addition are known, but runtime structure identity and field publication are unmodeled."
     },
     {
       "id": "removed:C_NamePlate.GetNamePlateEnemyClickThrough",

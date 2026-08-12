@@ -2883,11 +2883,11 @@
 2883. [best-effort] `removed:C_HousingCatalog.HousingCatalogEntryInfo.numStored` — behavioral
 2884. [best-effort] `removed:C_HousingDecor.GetMaxDecorPlaced` — behavioral
 2885. [evidence-required] `removed:C_HousingDecor.HousingLevelInfo` — unsafe
-2886. [untriaged] `removed:C_HousingDecor.HousingLevelInfo.exteriorDecorPlacementBudget` — untriaged
-2887. [untriaged] `removed:C_HousingDecor.HousingLevelInfo.exteriorFixtureBudget` — untriaged
-2888. [untriaged] `removed:C_HousingDecor.HousingLevelInfo.interiorDecorPlacementBudget` — untriaged
-2889. [untriaged] `removed:C_HousingDecor.HousingLevelInfo.level` — untriaged
-2890. [untriaged] `removed:C_HousingDecor.HousingLevelInfo.roomPlacementBudget` — untriaged
+2886. [evidence-required] `removed:C_HousingDecor.HousingLevelInfo.exteriorDecorPlacementBudget` — unsafe
+2887. [evidence-required] `removed:C_HousingDecor.HousingLevelInfo.exteriorFixtureBudget` — unsafe
+2888. [evidence-required] `removed:C_HousingDecor.HousingLevelInfo.interiorDecorPlacementBudget` — unsafe
+2889. [evidence-required] `removed:C_HousingDecor.HousingLevelInfo.level` — unsafe
+2890. [evidence-required] `removed:C_HousingDecor.HousingLevelInfo.roomPlacementBudget` — unsafe
 2891. [best-effort] `removed:C_NamePlate.GetNamePlateEnemyClickThrough` — behavioral
 2892. [best-effort] `removed:C_NamePlate.GetNamePlateEnemyPreferredClickInsets` — behavioral
 2893. [best-effort] `removed:C_NamePlate.GetNamePlateEnemySize` — behavioral
