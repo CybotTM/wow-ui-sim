@@ -2911,8 +2911,8 @@
 2911. [evidence-required] `removed:C_PerksActivities.PerksActivityCriteria.criteriaID` — unsafe
 2912. [evidence-required] `removed:C_PerksActivities.PerksActivityCriteria.requiredValue` — unsafe
 2913. [evidence-required] `removed:C_PerksActivities.PerksActivityRequirement` — unsafe
-2914. [untriaged] `removed:C_PerksActivities.PerksActivityRequirement.completed` — untriaged
-2915. [untriaged] `removed:C_PerksActivities.PerksActivityRequirement.requirementText` — untriaged
+2914. [evidence-required] `removed:C_PerksActivities.PerksActivityRequirement.completed` — unsafe
+2915. [evidence-required] `removed:C_PerksActivities.PerksActivityRequirement.requirementText` — unsafe
 2916. [best-effort] `removed:C_PingSecure.GetCooldownInfo` — behavioral
 2917. [best-effort] `removed:C_PingSecure.GetDefaultPingOptions` — behavioral
 2918. [best-effort] `removed:C_PingSecure.GetTextureKitForType` — behavioral
@@ -3191,7 +3191,7 @@
 3191. [best-effort] `removed:GetTempShapeshiftBarIndex` — vendor-present
 3192. [best-effort] `removed:GetVehicleBarIndex` — vendor-present
 3193. [best-effort] `removed:HOUSING_CATALOG_SEARCHER_RELEASED` — behavioral
-3194. [untriaged] `removed:HOUSING_DECOR_NUDGE_STATUS_CHANGED` — untriaged
+3194. [evidence-required] `removed:HOUSING_DECOR_NUDGE_STATUS_CHANGED` — unsafe
 3195. [best-effort] `removed:HasAction` — vendor-present
 3196. [best-effort] `removed:HasBonusActionBar` — vendor-present
 3197. [best-effort] `removed:HasExtraActionBar` — vendor-present
@@ -3212,7 +3212,7 @@
 3212. [best-effort] `removed:IsPossessBarVisible` — vendor-present
 3213. [best-effort] `removed:IsStackableAction` — vendor-present
 3214. [best-effort] `removed:IsUsableAction` — vendor-present
-3215. [untriaged] `removed:LEARNED_SPELL_IN_TAB` — untriaged
+3215. [evidence-required] `removed:LEARNED_SPELL_IN_TAB` — unsafe
 3216. [best-effort] `removed:LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT` — behavioral
 3217. [best-effort] `removed:LE_FRAME_TUTORIAL_TRANSMOG_OUTFIT_DROPDOWN` — behavioral
 3218. [best-effort] `removed:LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE` — behavioral
@@ -3228,9 +3228,9 @@
 3228. [best-effort] `removed:NameplatePersonalShowAlways` — behavioral
 3229. [best-effort] `removed:NameplatePersonalShowInCombat` — behavioral
 3230. [best-effort] `removed:NameplatePersonalShowWithTarget` — behavioral
-3231. [untriaged] `removed:NewCraftingOrderInfo.reagentItems` — untriaged
+3231. [evidence-required] `removed:NewCraftingOrderInfo.reagentItems` — unsafe
 3232. [best-effort] `removed:PlaySound` — compat
-3233. [untriaged] `removed:RegularReagentInfo.itemID` — untriaged
+3233. [evidence-required] `removed:RegularReagentInfo.itemID` — unsafe
 3234. [best-effort] `removed:SHOW_DELVES_DISPLAY_UI` — behavioral
 3235. [best-effort] `removed:SetActionUIButton` — vendor-present
 3236. [best-effort] `removed:SetPortraitToTexture` — compat
@@ -3270,9 +3270,9 @@
 3270. [evidence-required] `removed:docs.extra_apis.ShowHelm` — unsafe
 3271. [evidence-required] `removed:docs.extra_apis.ShowingCloak` — unsafe
 3272. [evidence-required] `removed:docs.extra_apis.ShowingHelm` — unsafe
-3273. [untriaged] `removed:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` — untriaged
-3274. [untriaged] `removed:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — untriaged
-3275. [untriaged] `removed:docs.extra_script_objects.FrameAPITooltip` — untriaged
+3273. [best-effort] `removed:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` — provenance-only
+3274. [best-effort] `removed:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — provenance-only
+3275. [best-effort] `removed:docs.extra_script_objects.FrameAPITooltip` — provenance-only
 3276. [best-effort] `removed:enablePetBattleFloatingCombatText` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
 3277. [best-effort] `removed:floatingCombatTextAllSpellMechanics` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
 3278. [best-effort] `removed:floatingCombatTextAuraFade` — provenance-only: transient intermediate CVar snapshot absent at both patch endpoints; no endpoint publication, behavior, or replacement-equivalence claim.
@@ -3367,8 +3367,8 @@
 3367. [best-effort] `removed:mapAnimDuration` — behavioral
 3368. [best-effort] `removed:mapAnimMinAlpha` — behavioral
 3369. [best-effort] `removed:mapAnimStartDelay` — behavioral
-3370. [untriaged] `removed:math.huge` — untriaged
-3371. [untriaged] `removed:math.pi` — untriaged
+3370. [evidence-required] `removed:math.huge` — unsafe
+3371. [evidence-required] `removed:math.pi` — unsafe
 3372. [best-effort] `removed:minimapAltitudeHintMode` — behavioral
 3373. [best-effort] `removed:minimapShowArchBlobs` — behavioral
 3374. [best-effort] `removed:minimapShowQuestBlobs` — behavioral

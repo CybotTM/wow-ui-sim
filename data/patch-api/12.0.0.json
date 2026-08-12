@@ -116754,33 +116754,87 @@
       "id": "removed:C_PerksActivities.PerksActivityRequirement.completed",
       "symbol": "C_PerksActivities.PerksActivityRequirement.completed",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the boolean completed field from PerksActivityRequirement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_activities_state.rs",
+          "source_hash": "ad0b01a9de1add44930f74f97c97781cf3ad5ce8e4f258e64f807e7ecc5f4a52",
+          "summary": "Temporary C_PerksActivities state returns seeded activity tables but does not model populated requirement producers."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_program_defaults.rs",
+          "source_hash": "fe5355f10a09cc564ffba1ce50c20ca02b7a280b77e572f135923e763f226217",
+          "summary": "Temporary perks defaults do not establish populated requirement-field absence."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery contains no populated requirement-field contract."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "local info = C_PerksActivities.GetPerksActivityInfo(KNOWN_ACTIVITY_ID); assert(info == nil or type(info) == \"table\"); inspect each populated requirement and assert rawget(requirement, \"completed\") == nil; verify sibling fields, types, nullability, invalid IDs, and errors."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail removes the boolean field; no populated producer or replacement semantics are proven. Claims exclude requirement production, consumers, mutation, persistence, UI, and lifecycle."
     },
     {
       "id": "removed:C_PerksActivities.PerksActivityRequirement.requirementText",
       "symbol": "C_PerksActivities.PerksActivityRequirement.requirementText",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes requirementText from PerksActivityRequirement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_activities_state.rs",
+          "source_hash": "ad0b01a9de1add44930f74f97c97781cf3ad5ce8e4f258e64f807e7ecc5f4a52",
+          "summary": "Temporary C_PerksActivities state has no modeled populated requirement producer."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/perks_program_defaults.rs",
+          "source_hash": "fe5355f10a09cc564ffba1ce50c20ca02b7a280b77e572f135923e763f226217",
+          "summary": "Temporary perks defaults do not prove returned requirement fields."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery contains no populated requirement-field contract."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "populate a realistic activity through the actual producer; locate a returned requirement and assert requirement.requirementText == nil; verify sibling fields, types, nullability, invalid IDs, and errors."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail removes the field; no producer population or replacement field semantics are proven. Claims exclude requirement-text rendering, consumers, mutation, persistence, UI, and lifecycle."
     },
     {
       "id": "removed:C_PingSecure.GetCooldownInfo",
@@ -126534,17 +126588,38 @@
       "id": "removed:HOUSING_DECOR_NUDGE_STATUS_CHANGED",
       "symbol": "HOUSING_DECOR_NUDGE_STATUS_CHANGED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the event and its prior boolean isNudgeEnabled payload."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863",
+          "summary": "Current event table does not publish this removed event."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery contains no endpoint event behavior proof."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "create a frame; assert pcall(frame.RegisterEvent, frame, \"HOUSING_DECOR_NUDGE_STATUS_CHANGED\") fails; exercise real housing nudge enable/disable transitions and assert no legacy event fires across repeats and unrelated housing changes."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail removes the event and former payload; live rejection, producer delivery, replacement events, and nudge lifecycle remain unproven."
     },
     {
       "id": "removed:HasAction",
@@ -127303,17 +127378,44 @@
       "id": "removed:LEARNED_SPELL_IN_TAB",
       "symbol": "LEARNED_SPELL_IN_TAB",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the three-argument spell-learning event."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Retail event validation does not list LEARNED_SPELL_IN_TAB."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863",
+          "summary": "Generated event tables contain no current publication for the removed event."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery contains no endpoint event delivery proof."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "create a frame; assert pcall(frame.RegisterEvent, frame, \"LEARNED_SPELL_IN_TAB\") fails; trigger a real spell-learning transition and assert no legacy event delivery; probe repeated registration, C_EventUtils.IsEventValid, manual dispatch, and related transitions."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail removes the event and former payload; producer lifecycle, delivery timing, replacement events, and spell-learning semantics remain unproven."
     },
     {
       "id": "removed:LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT",
@@ -127327,8 +127429,8 @@
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "summary": "Retail 12.0.0 removes LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT."
-          ,"source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+          "summary": "Retail 12.0.0 removes LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
@@ -127994,17 +128096,32 @@
       "id": "removed:NewCraftingOrderInfo.reagentItems",
       "symbol": "NewCraftingOrderInfo.reagentItems",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the RegularReagentInfo[] reagentItems field."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery contains no populated crafting-order structure proof."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "exercise a real populated NewCraftingOrderInfo producer and assert the structure exists with reagentItems == nil; verify remaining fields, types, nullability, empty/populated orders, invalid inputs, and errors."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail removes the field; no simulator-backed populated producer or replacement semantics are proven. Claims exclude crafting production, reagent contents, consumers, mutation, persistence, UI, and lifecycle."
     },
     {
       "id": "removed:PlaySound",
@@ -128054,17 +128171,32 @@
       "id": "removed:RegularReagentInfo.itemID",
       "symbol": "RegularReagentInfo.itemID",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the numeric itemID field."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery contains no populated reagent structure proof."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "obtain a real populated RegularReagentInfo and assert info.itemID == nil; verify replacement sibling fields, repeated entries, missing/invalid data, field types, nullability, and producer errors."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail removes the numeric field; no simulator-backed populated producer or replacement semantics are proven. Claims exclude item identity, crafting behavior, consumers, mutation, persistence, UI, and lifecycle."
     },
     {
       "id": "removed:SHOW_DELVES_DISPLAY_UI",
@@ -129888,49 +130020,100 @@
       "id": "removed:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS",
       "symbol": "docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "docs-extra-event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Transient docs-extra event entry is absent at both retail 12.0.0 endpoints."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Separately registered callback event name does not establish docs-extra publication or delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent endpoint provenance for the docs-extra row."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Endpoint provenance only: the docs-extra entry is absent at both patch endpoints; no callback registration, payload, producer, delivery, ordering, UI, mutation, persistence, or lifecycle claim."
     },
     {
       "id": "removed:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES",
       "symbol": "docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "docs-extra-event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Transient docs-extra event entry is absent at both retail 12.0.0 endpoints."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Separately registered callback event name does not establish docs-extra publication or delivery."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent endpoint provenance for the docs-extra row."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Endpoint provenance only: the docs-extra entry is absent at both patch endpoints; no callback registration, payload, producer, delivery, ordering, UI, mutation, persistence, or lifecycle claim."
     },
     {
       "id": "removed:docs.extra_script_objects.FrameAPITooltip",
       "symbol": "docs.extra_script_objects.FrameAPITooltip",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "docs-extra-script-object",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Transient docs-extra script-object entry is absent at both retail 12.0.0 endpoints."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent endpoint provenance for the docs-extra row."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Endpoint provenance only: the docs-extra entry is absent at both patch endpoints; no runtime script-object, GameTooltip, replacement, registration, lifecycle, or consumer claim."
     },
     {
       "id": "removed:enablePetBattleFloatingCombatText",
@@ -134634,33 +134817,105 @@
       "id": "removed:math.huge",
       "symbol": "math.huge",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 metadata marks math.huge removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/mod.rs",
+          "source_hash": "5d8153800520075faa6e320ae75dd50ff8a65ecced640e7c07fce46e94a65b65",
+          "summary": "Current Lua environment initializes rilua math compatibility."
+        },
+        {
+          "kind": "source",
+          "reference": "Cargo.lock",
+          "source_hash": "4f34ad3727be273c8c24d28c52abddbd88f7335d1a2036d2a633e07b35e30039",
+          "summary": "The simulator locks rilua commit e9125785bc12e681eb467ad68b4724170e45e9d2 as its Lua runtime dependency."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/Repos/rilua/src/stdlib/mod.rs",
+          "source_hash": "7e682dac189b9b692411ad0f98dd29908f06420a1b395a73201ec7ad97b737c8",
+          "summary": "rilua publishes math.huge as the Lua 5.1 positive-infinity constant."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/Repos/rilua/tests/integration.rs",
+          "source_hash": "63947710a7b4db2fbd75b557ed540240028329cc829e059252523b7d46652c53",
+          "summary": "rilua integration tests cover math.huge and comparisons."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery provides patch provenance only."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "assert(type(math.huge) == \"number\"); assert(math.huge > 10e30); assert(-math.huge < -10e30); verify the locked rilua runtime exposes the same behavior inside WowLuaEnv."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Simulator retains Lua 5.1 math.huge through the locked rilua runtime; exact retail 12.0.0 removal semantics are unproven. Do not remove it from metadata alone; exclude replacement, precision, mutation, persistence, lifecycle, UI, and consumer claims."
     },
     {
       "id": "removed:math.pi",
       "symbol": "math.pi",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 metadata marks math.pi removed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/mod.rs",
+          "source_hash": "5d8153800520075faa6e320ae75dd50ff8a65ecced640e7c07fce46e94a65b65",
+          "summary": "Current Lua environment initializes rilua math compatibility."
+        },
+        {
+          "kind": "source",
+          "reference": "src/loader/tests/frame_interaction.rs",
+          "source_hash": "810f6e35120faf85b7c547b9e02200ca5369bf48297d4087d3acedb8c44e5a74",
+          "summary": "Existing simulator tests use math.pi."
+        },
+        {
+          "kind": "source",
+          "reference": "/home/osso/Repos/rilua/src/stdlib/mod.rs",
+          "source_hash": "7e682dac189b9b692411ad0f98dd29908f06420a1b395a73201ec7ad97b737c8",
+          "summary": "rilua publishes math.pi as the Lua 5.1 numeric constant."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery provides patch provenance only."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "assert(type(math.pi) == \"number\"); assert(math.pi ~= nil); assert(math.pi > 3.14 and math.pi < 3.15); execute representative simulator code that uses math.pi and verify it still runs."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Simulator intentionally retains Lua 5.1 math.pi and current consumers use it; exact retail 12.0.0 removal semantics are unproven. Do not remove it from metadata alone; exclude precision, replacement, mutation, persistence, lifecycle, UI, and consumer equivalence claims."
     },
     {
       "id": "removed:minimapAltitudeHintMode",
