@@ -2781,10 +2781,10 @@
 2781. [best-effort] `changed:LE_EXPANSION_LEVEL_CURRENT` — behavioral
 2782. [best-effort] `changed:LE_EXPANSION_LEVEL_PREVIOUS` — behavioral
 2783. [best-effort] `changed:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME` — behavioral
-2784. [untriaged] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_BUILT_HOUSE_S` — untriaged
-2785. [untriaged] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_NEW_SUBDIVISION` — untriaged
+2784. [best-effort] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_BUILT_HOUSE_S` — behavioral
+2785. [best-effort] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_NEW_SUBDIVISION` — behavioral
 2786. [best-effort] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_RENAME_S` — behavioral
-2787. [untriaged] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_SOLD_HOUSE_S` — untriaged
+2787. [best-effort] `changed:LE_GAME_ERR_GUILD_NEIGHBORHOOD_SOLD_HOUSE_S` — behavioral
 2788. [untriaged] `changed:LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPANSION_ACCESS` — untriaged
 2789. [untriaged] `changed:LE_GAME_ERR_HOUSING_RESULT_PERMISSION_DENIED` — untriaged
 2790. [untriaged] `changed:LE_GAME_ERR_RECENT_ALLY_PIN_SERVER_ERROR` — untriaged
