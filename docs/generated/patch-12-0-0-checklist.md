@@ -2420,13 +2420,13 @@
 2420. [best-effort] `added:combatWarningsEnabled` — behavioral
 2421. [best-effort] `added:damageMeterEnabled` — behavioral
 2422. [best-effort] `added:disableSuggestedLevelActivityFilter` — behavioral
-2423. [untriaged] `added:docs.extra_apis.C_CombatLogInternal.GetCurrentEventInfo` — untriaged
-2424. [untriaged] `added:docs.extra_enums.CharCreateAnimTurnType` — untriaged
-2425. [untriaged] `added:docs.extra_enums.CharSectionCondition` — untriaged
-2426. [untriaged] `added:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` — untriaged
-2427. [untriaged] `added:docs.extra_events.COMBAT_LOG_EVENT_INTERNAL_UNFILTERED` — untriaged
-2428. [untriaged] `added:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — untriaged
-2429. [untriaged] `added:docs.extra_script_objects.FrameAPITooltip` — untriaged
+2423. [evidence-required] `added:docs.extra_apis.C_CombatLogInternal.GetCurrentEventInfo` — Evidence required: docs-extra provenance and checked-in registration do not prove full-LoD runtime behavior; exact probe required.
+2424. [best-effort] `added:docs.extra_enums.CharCreateAnimTurnType` — Provenance-only: source records this docs-extra entry; no runtime behavior is claimed.
+2425. [best-effort] `added:docs.extra_enums.CharSectionCondition` — Provenance-only: source records this docs-extra entry; no runtime behavior is claimed.
+2426. [evidence-required] `added:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` — Evidence required: docs-extra provenance and checked-in registration do not prove full-LoD runtime behavior; exact probe required.
+2427. [best-effort] `added:docs.extra_events.COMBAT_LOG_EVENT_INTERNAL_UNFILTERED` — Provenance-only: source records this docs-extra entry; no runtime behavior is claimed.
+2428. [evidence-required] `added:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — Evidence required: docs-extra provenance and checked-in registration do not prove full-LoD runtime behavior; exact probe required.
+2429. [best-effort] `added:docs.extra_script_objects.FrameAPITooltip` — Provenance-only: source records this docs-extra entry; no runtime behavior is claimed.
 2430. [evidence-required] `added:dropsecretaccess` — unsafe
 2431. [untriaged] `added:enablePetBattleFloatingCombatText_v2` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
 2432. [untriaged] `added:encounterTimelineEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
