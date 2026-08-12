@@ -3353,13 +3353,13 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `WorldTextScale` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
 | `WorldTextScreenY` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
 | `WorldTextStartPosRandomness` | best-effort | cvar | removed | CVar removed-name value/default absence is behaviorally proven by focused retail startup test; distinct _v2 names are not asserted semantically equivalent. |
-| `activeCUFProfile` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `advancedWatchFrame` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `currencyTokensBackpack1` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `currencyTokensBackpack2` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `currencyTokensUnused1` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `currencyTokensUnused2` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `displayedRAFFriendInfo` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `activeCUFProfile` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 15a7936e6; no replacement or domain semantics are claimed. |
+| `advancedWatchFrame` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `currencyTokensBackpack1` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `currencyTokensBackpack2` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 15a7936e6; no replacement or domain semantics are claimed. |
+| `currencyTokensUnused1` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `currencyTokensUnused2` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `displayedRAFFriendInfo` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
 | `docs.extra_apis.ShowCloak` | evidence-required | docs-extra-api | removed | Evidence-required/unsafe: source removes the docs-extra entry; separately added ShowCloak global API rows do not prove docs-extra runtime absence or replacement. Require full-LoD docs-extra and global probes; claims remain bounded to docs-entry removal. |
 | `docs.extra_apis.ShowHelm` | evidence-required | docs-extra-api | removed | Evidence-required/unsafe: source removes the docs-extra entry; separately added ShowHelm global API rows do not prove docs-extra runtime absence or replacement. Require full-LoD docs-extra and global probes; claims remain bounded to docs-entry removal. |
 | `docs.extra_apis.ShowingCloak` | evidence-required | docs-extra-api | removed | Evidence-required/unsafe: source removes the docs-extra entry; separately added ShowingCloak global API rows do not prove docs-extra runtime absence or replacement. Require full-LoD docs-extra and global probes; claims remain bounded to docs-entry removal. |
@@ -3396,9 +3396,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `floatingCombatTextRepChanges` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
 | `floatingCombatTextSpellMechanics` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
 | `floatingCombatTextSpellMechanicsOther` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
-| `friendsSmallView` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `friendsViewButtons` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `guildRosterView` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `friendsSmallView` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `friendsViewButtons` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `guildRosterView` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
 | `housingExpertGizmos_Rotation_BaseOrbScale` | evidence-required | cvar | removed | Retail 12.0.0 removes this CVar; checked-in defaults omit it, but full-LoD GetCVar/GetCVarDefault nil proof remains required. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed. |
 | `housingExpertGizmos_Rotation_BaseRingScale` | evidence-required | cvar | removed | Retail 12.0.0 removes this CVar; checked-in defaults omit it, but full-LoD GetCVar/GetCVarDefault nil proof remains required. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed. |
 | `housingExpertGizmos_Rotation_DistScaleMax` | evidence-required | cvar | removed | Retail 12.0.0 removes this CVar; checked-in defaults omit it, but full-LoD GetCVar/GetCVarDefault nil proof remains required. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed. |
@@ -3433,75 +3433,75 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `housingExpertGizmos_Translation_XRayCheckerSize` | evidence-required | cvar | removed | Retail 12.0.0 removes this CVar; checked-in defaults omit it, but full-LoD GetCVar/GetCVarDefault nil proof remains required. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed. |
 | `housingExpertGizmos_Translation_XRayDarkAlpha` | evidence-required | cvar | removed | Retail 12.0.0 removes this CVar; checked-in defaults omit it, but full-LoD GetCVar/GetCVarDefault nil proof remains required. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed. |
 | `housingExpertGizmos_Translation_XRayLightAlpha` | evidence-required | cvar | removed | Retail 12.0.0 removes this CVar; checked-in defaults omit it, but full-LoD GetCVar/GetCVarDefault nil proof remains required. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed. |
-| `lastRenownForMajorFaction2503` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2507` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2510` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2511` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2564` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2570` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2574` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2590` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2593` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2594` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2600` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2653` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2658` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2685` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2688` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastRenownForMajorFaction2736` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastTransmogOutfitIDSpec1` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastTransmogOutfitIDSpec2` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastTransmogOutfitIDSpec3` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastTransmogOutfitIDSpec4` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lastVoidStorageTutorial` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lfGuildComment` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lfGuildSettings` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lfgAutoFill` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `lfgAutoJoin` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `mapAnimDuration` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `mapAnimMinAlpha` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `mapAnimStartDelay` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `lastRenownForMajorFaction2503` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2507` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2510` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2511` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2564` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2570` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2574` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2590` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2593` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2594` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2600` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2653` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2658` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2685` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2688` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastRenownForMajorFaction2736` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastTransmogOutfitIDSpec1` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastTransmogOutfitIDSpec2` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastTransmogOutfitIDSpec3` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastTransmogOutfitIDSpec4` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lastVoidStorageTutorial` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lfGuildComment` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lfGuildSettings` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lfgAutoFill` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `lfgAutoJoin` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `mapAnimDuration` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `mapAnimMinAlpha` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `mapAnimStartDelay` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
 | `math.huge` | untriaged | api | removed | api removed in 12.0.0. |
 | `math.pi` | untriaged | api | removed | api removed in 12.0.0. |
-| `minimapAltitudeHintMode` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `minimapShowArchBlobs` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `minimapShowQuestBlobs` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateClassResourceTopInset` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateGlobalScale` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateHideHealthAndPower` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateLargeBottomInset` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateLargeTopInset` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateMotion` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateMotionSpeed` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateOtherBottomInset` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateOtherTopInset` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateResourceOnTarget` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateSelfBottomInset` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateSelfScale` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateSelfTopInset` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateShowFriendlyBuffs` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateShowFriendlyGuardians` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateShowFriendlyMinions` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateShowFriendlyNPCs` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateShowFriendlyPets` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateShowFriendlyTotems` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateShowFriends` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateShowOnlyNames` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `nameplateShowPersonalCooldowns` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `playerStatLeftDropdown` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `playerStatRightDropdown` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `removeChatDelay` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `showQuestObjectivesOnMap` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `showTokenFrameHonor` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `splashScreenBoost` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `splashScreenNormal` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `splashScreenSeason` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `minimapAltitudeHintMode` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `minimapShowArchBlobs` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `minimapShowQuestBlobs` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateClassResourceTopInset` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateGlobalScale` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateHideHealthAndPower` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateLargeBottomInset` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateLargeTopInset` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateMotion` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateMotionSpeed` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateOtherBottomInset` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateOtherTopInset` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateResourceOnTarget` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateSelfBottomInset` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateSelfScale` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateSelfTopInset` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateShowFriendlyBuffs` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateShowFriendlyGuardians` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateShowFriendlyMinions` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateShowFriendlyNPCs` | evidence-required | cvar | removed | Evidence-required/unsafe: source removes uppercase NPCs and adds lowercase Npcs default 0; simulator lookup currently resolves the old spelling to the new entry. Required proof must establish lowercase value/default, uppercase absence, and retail case sensitivity; no nameplate semantics are claimed. |
+| `nameplateShowFriendlyPets` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateShowFriendlyTotems` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateShowFriends` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateShowOnlyNames` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `nameplateShowPersonalCooldowns` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `playerStatLeftDropdown` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `playerStatRightDropdown` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `removeChatDelay` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `showQuestObjectivesOnMap` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `showTokenFrameHonor` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `splashScreenBoost` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `splashScreenNormal` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `splashScreenSeason` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
 | `strtrim` | best-effort | api | removed | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
-| `trackQuestSorting` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `unlockedExpansionLandingPages` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `watchFrameBaseAlpha` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `watchFrameIgnoreCursor` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `watchFrameState` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `trackQuestSorting` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `unlockedExpansionLandingPages` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `watchFrameBaseAlpha` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `watchFrameIgnoreCursor` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
+| `watchFrameState` | best-effort | cvar | removed | Best-effort behavioral: old-name GetCVar and GetCVarDefault absence proven by 16f4b6956; no replacement or domain semantics are claimed. |
 ## Category counts
 
 | Category | Occurrences |
