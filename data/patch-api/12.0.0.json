@@ -113129,17 +113129,52 @@
       "id": "removed:Enum.HousingCatalogEntrySubtype.MarketItem",
       "symbol": "Enum.HousingCatalogEntrySubtype.MarketItem",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes MarketItem=2 from Enum.HousingCatalogEntrySubtype."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded fallback publishes the current four-member family without MarketItem; it is authoritative at startup."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs",
+          "source_hash": "a91ea2067e97fc3ea814413318d811f8bc9da47a9c535a98393b7bcd9bf4eaba",
+          "summary": "Focused startup test asserts Invalid=0, Unowned=1, OwnedModifiedStack=2, OwnedUnmodifiedStack=3, metadata MinValue=0, MaxValue=3, NumValues=4, no extras, and MarketItem absence."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery agrees with the current family and omitted MarketItem member."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_subtype_enums.rs::test_patch_12_0_0_housing_catalog_entry_subtype_enum_values"
+      ],
+      "assertions": [
+        "Publishes the exact current four-member Enum.HousingCatalogEntrySubtype family as Lua numbers with metadata MinValue=0, MaxValue=3, NumValues=4; MarketItem is absent and no semantic replacement is claimed."
+      ],
+      "commit": "c400d31be",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup omission and exact current family are behaviorally proven; OwnedModifiedStack shares numeric value 2 but is not claimed as a semantic replacement."
     },
     {
       "id": "removed:Enum.HousingDecorPlacementRestriction.NotInsideRoom",

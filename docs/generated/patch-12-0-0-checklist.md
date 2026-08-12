@@ -3108,7 +3108,7 @@
 3108. [best-effort] `removed:Enum.ExpansionLandingPageTypeMeta.MinValue` — behavioral
 3109. [best-effort] `removed:Enum.ExpansionLandingPageTypeMeta.NumValues` — behavioral
 3110. [evidence-required] `removed:Enum.GossipNpcOption.Placeholder_6` — unsafe
-3111. [untriaged] `removed:Enum.HousingCatalogEntrySubtype.MarketItem` — untriaged
+3111. [best-effort] `removed:Enum.HousingCatalogEntrySubtype.MarketItem` — behavioral
 3112. [best-effort] `removed:Enum.HousingDecorPlacementRestriction.NotInsideRoom` — behavioral
 3113. [evidence-required] `removed:Enum.HousingResult.FixtureNotOwned` — unsafe
 3114. [evidence-required] `removed:Enum.HousingResult.MissingTheme` — unsafe
