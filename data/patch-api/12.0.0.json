@@ -114882,161 +114882,431 @@
       "id": "removed:Enum.VoiceTtsDestination.LocalPlayback",
       "symbol": "Enum.VoiceTtsDestination.LocalPlayback",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.VoiceTtsDestination.QueuedLocalPlayback",
       "symbol": "Enum.VoiceTtsDestination.QueuedLocalPlayback",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.VoiceTtsDestination.QueuedRemoteTransmission",
       "symbol": "Enum.VoiceTtsDestination.QueuedRemoteTransmission",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.VoiceTtsDestination.QueuedRemoteTransmissionWithLocalPlayback",
       "symbol": "Enum.VoiceTtsDestination.QueuedRemoteTransmissionWithLocalPlayback",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.VoiceTtsDestination.RemoteTransmission",
       "symbol": "Enum.VoiceTtsDestination.RemoteTransmission",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.VoiceTtsDestination.RemoteTransmissionWithLocalPlayback",
       "symbol": "Enum.VoiceTtsDestination.RemoteTransmissionWithLocalPlayback",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.VoiceTtsDestination.ScreenReader",
       "symbol": "Enum.VoiceTtsDestination.ScreenReader",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.VoiceTtsDestinationMeta.MaxValue",
       "symbol": "Enum.VoiceTtsDestinationMeta.MaxValue",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.VoiceTtsDestinationMeta.MinValue",
       "symbol": "Enum.VoiceTtsDestinationMeta.MinValue",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.VoiceTtsDestinationMeta.NumValues",
       "symbol": "Enum.VoiceTtsDestinationMeta.NumValues",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes this VoiceTtsDestination member or metadata row; source removal does not prove full-LoD runtime absence or replacement."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in fallback publishes no VoiceTtsDestination namespace or replacement family; text absence is insufficient for live API closure."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; no competing explicit runtime publication was found."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching VoiceTtsDestination member or metadata replacement."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe must establish the removed namespace/member or metadata row is absent after loading and check any replacement namespace before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this VoiceTtsDestination row, but no full-LoD runtime absence or replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.WMOExteriorID.DefaultAlliance",
