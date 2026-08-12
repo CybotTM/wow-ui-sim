@@ -20,6 +20,7 @@ mod housing_event_dispatch;
 mod housing_result;
 mod item_collection_secret_aspects;
 mod patch_12_0_0_audit_enums;
+mod patch_12_0_0_changed_startup_values;
 mod patch_12_0_0_char_customization_type_enums;
 mod patch_12_0_0_charter_neighborhood_rename_error;
 mod patch_12_0_0_chat_combat_audio_enums;
