@@ -317,7 +317,11 @@ fn is_profile_removed_cvar_key(_key: &str) -> bool {
 }
 
 #[cfg(feature = "retail-12-0-0")]
-const PATCH_12_0_0_REMOVED_CVARS: &[&str] = &["NamePlateHorizontalScale", "NamePlateVerticalScale"];
+const PATCH_12_0_0_REMOVED_CVARS: &[&str] = &[
+    "NamePlateHorizontalScale",
+    "NamePlateVerticalScale",
+    "ShowClassColorInFriendlyNameplate",
+];
 
 #[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
 const PATCH_12_0_7_REMOVED_CVARS: &[&str] = &[

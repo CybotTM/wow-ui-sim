@@ -40,6 +40,11 @@ fn test_patch_12_0_0_removed_nameplate_cvars() {
                     "NameplatePersonalShowAlways",
                     "NameplatePersonalShowInCombat",
                     "NameplatePersonalShowWithTarget",
+                    "ShowClassColorInFriendlyNameplate",
+                    "ShowClassColorInNameplate",
+                    "ShowNamePlateLoseAggroFlash",
+                    "TerrainBlendBakeEnable",
+                    "TerrainUnlitShaderEnable",
                 }
                 for _, name in ipairs(names) do
                     local value = GetCVar(name)
