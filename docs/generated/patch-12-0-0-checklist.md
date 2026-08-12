@@ -2643,8 +2643,8 @@
 2643. [best-effort] `changed:Enum.CurrencySourceMeta.NumValues` — behavioral
 2644. [best-effort] `changed:Enum.EditModeAccountSettingMeta.MaxValue` — behavioral
 2645. [best-effort] `changed:Enum.EditModeAccountSettingMeta.NumValues` — behavioral
-2646. [untriaged] `changed:Enum.EditModeAuraFrameSettingMeta.MaxValue` — untriaged
-2647. [untriaged] `changed:Enum.EditModeAuraFrameSettingMeta.NumValues` — untriaged
+2646. [best-effort] `changed:Enum.EditModeAuraFrameSettingMeta.MaxValue` — behavioral
+2647. [best-effort] `changed:Enum.EditModeAuraFrameSettingMeta.NumValues` — behavioral
 2648. [best-effort] `changed:Enum.EditModeAuraFrameSystemIndicesMeta.MaxValue` — behavioral
 2649. [best-effort] `changed:Enum.EditModeAuraFrameSystemIndicesMeta.NumValues` — behavioral
 2650. [best-effort] `changed:Enum.EditModeCooldownViewerSettingMeta.MaxValue` — behavioral

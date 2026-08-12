@@ -104317,7 +104317,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingItem as Lua number 31, with source change 30→31. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingItem as Lua number 31, with source change 30\u219231. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.MissingNpc",
@@ -104362,7 +104362,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingNpc as Lua number 32, with source change 31→32. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingNpc as Lua number 32, with source change 31\u219232. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.MissingOrder",
@@ -104407,7 +104407,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingOrder as Lua number 33, with source change 32→33. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingOrder as Lua number 33, with source change 32\u219233. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.MissingRecraftItem",
@@ -104452,7 +104452,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingRecraftItem as Lua number 34, with source change 33→34. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.MissingRecraftItem as Lua number 34, with source change 33\u219234. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NoAccountItems",
@@ -104497,7 +104497,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NoAccountItems as Lua number 35, with source change 34→35. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NoAccountItems as Lua number 35, with source change 34\u219235. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NotClaimed",
@@ -104542,7 +104542,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotClaimed as Lua number 36, with source change 35→36. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotClaimed as Lua number 36, with source change 35\u219236. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NotCrafted",
@@ -104587,7 +104587,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotCrafted as Lua number 37, with source change 36→37. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotCrafted as Lua number 37, with source change 36\u219237. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NotInGuild",
@@ -104632,7 +104632,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotInGuild as Lua number 38, with source change 37→38. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotInGuild as Lua number 38, with source change 37\u219238. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.NotYetImplemented",
@@ -104677,7 +104677,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotYetImplemented as Lua number 39, with source change 38→39. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.NotYetImplemented as Lua number 39, with source change 38\u219239. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.OutOfPublicOrderCapacity",
@@ -104722,7 +104722,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.OutOfPublicOrderCapacity as Lua number 40, with source change 39→40. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.OutOfPublicOrderCapacity as Lua number 40, with source change 39\u219240. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.ServerIsNotAvailable",
@@ -104767,7 +104767,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.ServerIsNotAvailable as Lua number 41, with source change 40→41. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.ServerIsNotAvailable as Lua number 41, with source change 40\u219241. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.TargetCannotCraft",
@@ -104812,7 +104812,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.TargetCannotCraft as Lua number 43, with source change 42→43. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.TargetCannotCraft as Lua number 43, with source change 42\u219243. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.TargetLocked",
@@ -104857,7 +104857,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.TargetLocked as Lua number 44, with source change 43→44. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.TargetLocked as Lua number 44, with source change 43\u219244. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.ThrottleViolation",
@@ -104902,7 +104902,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.ThrottleViolation as Lua number 42, with source change 41→42. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.ThrottleViolation as Lua number 42, with source change 41\u219242. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.Timeout",
@@ -104947,7 +104947,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.Timeout as Lua number 45, with source change 44→45. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.Timeout as Lua number 45, with source change 44\u219245. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.TooManyItems",
@@ -104992,7 +104992,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.TooManyItems as Lua number 47, with source change 45→47. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.TooManyItems as Lua number 47, with source change 45\u219247. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResult.WrongVersion",
@@ -105037,7 +105037,7 @@
       "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.WrongVersion as Lua number 48, with source change 46→48. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResult.WrongVersion as Lua number 48, with source change 46\u219248. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order production, interpretation, consumer, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResultMeta.MaxValue",
@@ -105473,33 +105473,127 @@
       "id": "changed:Enum.EditModeAuraFrameSettingMeta.MaxValue",
       "symbol": "Enum.EditModeAuraFrameSettingMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes Enum.EditModeAuraFrameSettingMeta.MaxValue from numeric 7 to 10."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
+          "summary": "Explicit EditModeAuraFrameSetting members publish through edit_mode.rs; the family ends at ShowDispelType=10."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded fallback publishes matching EditModeAuraFrameSettingMeta metadata with MaxValue=10."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the explicit family and guarded metadata surface."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_account_aura_settings_enums.rs::test_patch_12_0_0_edit_mode_account_aura_settings_enum_values",
+          "source_hash": "0570ea55f089fe46ececea333b2c9ce86a7862e7519c4e8d5254f80819a86eb4",
+          "summary": "Focused startup proof asserts the aura metadata table and MinValue=0, MaxValue=10, NumValues=11; test passed 1/0/1545 filtered."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records EditModeAuraFrameSettingMeta NumValues=11 and MinValue=0."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "14f6b3801be540aae48ec7d9384b3d1b66b1005fd6cef3e1f8839c9f63b8adfd",
+          "summary": "Manifest hash captured before this two-row docs-only classification update."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_account_aura_settings_enums.rs::test_patch_12_0_0_edit_mode_account_aura_settings_enum_values"
+      ],
+      "assertions": [
+        "type(Enum.EditModeAuraFrameSettingMeta.MaxValue) == \"number\" and Enum.EditModeAuraFrameSettingMeta.MaxValue == 10; focused proof also asserts MinValue == 0 and NumValues == 11. Claim bounded to startup metadata publication only."
+      ],
+      "commit": "234d1163b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral: retail 12.0.0 startup publishes Enum.EditModeAuraFrameSettingMeta.MaxValue as numeric 10. Focused proof commit 234d1163b asserts the complete aura metadata MinValue=0, MaxValue=10, NumValues=11. Claims are bounded to startup metadata publication; no Edit Mode aura behavior or consumer semantics are claimed."
     },
     {
       "id": "changed:Enum.EditModeAuraFrameSettingMeta.NumValues",
       "symbol": "Enum.EditModeAuraFrameSettingMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes Enum.EditModeAuraFrameSettingMeta.NumValues from numeric 8 to 11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/edit_mode.rs",
+          "source_hash": "7c70a3bc11e5c8b2ed9cb376c69770a658343ec4d8d2841d757021fc68c33205",
+          "summary": "Explicit EditModeAuraFrameSetting members publish through edit_mode.rs; the family contains 11 members."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded fallback publishes matching EditModeAuraFrameSettingMeta metadata with NumValues=11."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the explicit family and guarded metadata surface."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_account_aura_settings_enums.rs::test_patch_12_0_0_edit_mode_account_aura_settings_enum_values",
+          "source_hash": "0570ea55f089fe46ececea333b2c9ce86a7862e7519c4e8d5254f80819a86eb4",
+          "summary": "Focused startup proof asserts the aura metadata table and MinValue=0, MaxValue=10, NumValues=11; test passed 1/0/1545 filtered."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records EditModeAuraFrameSettingMeta NumValues=11 and MinValue=0."
+        },
+        {
+          "kind": "source",
+          "reference": "data/patch-api/12.0.0.json",
+          "source_hash": "14f6b3801be540aae48ec7d9384b3d1b66b1005fd6cef3e1f8839c9f63b8adfd",
+          "summary": "Manifest hash captured before this two-row docs-only classification update."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_edit_mode_account_aura_settings_enums.rs::test_patch_12_0_0_edit_mode_account_aura_settings_enum_values"
+      ],
+      "assertions": [
+        "type(Enum.EditModeAuraFrameSettingMeta.NumValues) == \"number\" and Enum.EditModeAuraFrameSettingMeta.NumValues == 11; focused proof also asserts MinValue == 0 and MaxValue == 10. Claim bounded to startup metadata publication only."
+      ],
+      "commit": "234d1163b",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral: retail 12.0.0 startup publishes Enum.EditModeAuraFrameSettingMeta.NumValues as numeric 11. Focused proof commit 234d1163b asserts the complete aura metadata MinValue=0, MaxValue=10, NumValues=11. Claims are bounded to startup metadata publication; no Edit Mode aura behavior or consumer semantics are claimed."
     },
     {
       "id": "changed:Enum.EditModeAuraFrameSystemIndicesMeta.MaxValue",
