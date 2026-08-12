@@ -113863,81 +113863,216 @@
       "id": "removed:Enum.NeighbordhoodInitiativeCategory.Current",
       "symbol": "Enum.NeighbordhoodInitiativeCategory.Current",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source removes Enum.NeighbordhoodInitiativeCategory.Current (old numeric value 0), but source metadata does not prove live runtime absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in guarded fallback publishes neighboring initiative enum families but no NeighbordhoodInitiativeCategory namespace; text absence does not prove full-LoD runtime absence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; it does not establish live absence or a corrected replacement namespace."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching misspelled category occurrence or replacement contract."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe: establish whether Enum.NeighbordhoodInitiativeCategory.Current is absent and whether a corrected NeighborhoodInitiativeCategory/Meta replacement is published; source-text absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this misspelled NeighbordhoodInitiativeCategory row, but no full-LoD runtime absence or corrected replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.NeighbordhoodInitiativeCategory.Legacy",
       "symbol": "Enum.NeighbordhoodInitiativeCategory.Legacy",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source removes Enum.NeighbordhoodInitiativeCategory.Legacy (old numeric value 1), but source metadata does not prove live runtime absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in guarded fallback publishes neighboring initiative enum families but no NeighbordhoodInitiativeCategory namespace; text absence does not prove full-LoD runtime absence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; it does not establish live absence or a corrected replacement namespace."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching misspelled category occurrence or replacement contract."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe: establish whether Enum.NeighbordhoodInitiativeCategory.Legacy is absent and whether a corrected NeighborhoodInitiativeCategory/Meta replacement is published; source-text absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this misspelled NeighbordhoodInitiativeCategory row, but no full-LoD runtime absence or corrected replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.NeighbordhoodInitiativeCategoryMeta.MaxValue",
       "symbol": "Enum.NeighbordhoodInitiativeCategoryMeta.MaxValue",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source removes Enum.NeighbordhoodInitiativeCategoryMeta.MaxValue (old numeric value 1), but source metadata does not prove live runtime absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in guarded fallback publishes neighboring initiative enum families but no NeighbordhoodInitiativeCategory namespace; text absence does not prove full-LoD runtime absence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; it does not establish live absence or a corrected replacement namespace."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching misspelled category occurrence or replacement contract."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe: establish whether Enum.NeighbordhoodInitiativeCategoryMeta.MaxValue is absent and whether a corrected NeighborhoodInitiativeCategory/Meta replacement is published; source-text absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this misspelled NeighbordhoodInitiativeCategory row, but no full-LoD runtime absence or corrected replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.NeighbordhoodInitiativeCategoryMeta.MinValue",
       "symbol": "Enum.NeighbordhoodInitiativeCategoryMeta.MinValue",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source removes Enum.NeighbordhoodInitiativeCategoryMeta.MinValue (old numeric value 0), but source metadata does not prove live runtime absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in guarded fallback publishes neighboring initiative enum families but no NeighbordhoodInitiativeCategory namespace; text absence does not prove full-LoD runtime absence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; it does not establish live absence or a corrected replacement namespace."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching misspelled category occurrence or replacement contract."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe: establish whether Enum.NeighbordhoodInitiativeCategoryMeta.MinValue is absent and whether a corrected NeighborhoodInitiativeCategory/Meta replacement is published; source-text absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this misspelled NeighbordhoodInitiativeCategory row, but no full-LoD runtime absence or corrected replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.NeighbordhoodInitiativeCategoryMeta.NumValues",
       "symbol": "Enum.NeighbordhoodInitiativeCategoryMeta.NumValues",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in retail 12.0.0 source removes Enum.NeighbordhoodInitiativeCategoryMeta.NumValues (old numeric value 2), but source metadata does not prove live runtime absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Checked-in guarded fallback publishes neighboring initiative enum families but no NeighbordhoodInitiativeCategory namespace; text absence does not prove full-LoD runtime absence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback; it does not establish live absence or a corrected replacement namespace."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery has no matching misspelled category occurrence or replacement contract."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD namespace-safe Lua probe: establish whether Enum.NeighbordhoodInitiativeCategoryMeta.NumValues is absent and whether a corrected NeighborhoodInitiativeCategory/Meta replacement is published; source-text absence alone is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: retail 12.0.0 source removes this misspelled NeighbordhoodInitiativeCategory row, but no full-LoD runtime absence or corrected replacement proof exists. Require namespace-safe probes before behavioral closure; claims remain bounded to source removal only."
     },
     {
       "id": "removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowDuplicate",

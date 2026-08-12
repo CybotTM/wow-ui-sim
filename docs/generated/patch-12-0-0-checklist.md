@@ -3128,11 +3128,11 @@
 3128. [best-effort] `removed:Enum.ItemCreationContext.Placeholder_12_0_0` — behavioral
 3129. [best-effort] `removed:Enum.ItemCreationContext.Timewalker` — behavioral
 3130. [evidence-required] `removed:Enum.ItemRecraftFlags.ItemRecraftFlagInvalid` — unsafe
-3131. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategory.Current` — untriaged
-3132. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategory.Legacy` — untriaged
-3133. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.MaxValue` — untriaged
-3134. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.MinValue` — untriaged
-3135. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.NumValues` — untriaged
+3131. [evidence-required] `removed:Enum.NeighbordhoodInitiativeCategory.Current` — unsafe
+3132. [evidence-required] `removed:Enum.NeighbordhoodInitiativeCategory.Legacy` — unsafe
+3133. [evidence-required] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.MaxValue` — unsafe
+3134. [evidence-required] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.MinValue` — unsafe
+3135. [evidence-required] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.NumValues` — unsafe
 3136. [best-effort] `removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowDuplicate` — behavioral
 3137. [best-effort] `removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowMultiple` — behavioral
 3138. [evidence-required] `removed:Enum.PerksVendorCategoryType.UnusedPerksVendorCategoryRefundUnused` — unsafe
