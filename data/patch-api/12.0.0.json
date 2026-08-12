@@ -129164,273 +129164,858 @@
       "id": "removed:enablePetBattleFloatingCombatText",
       "symbol": "enablePetBattleFloatingCombatText",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar enablePetBattleFloatingCombatText, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name enablePetBattleFloatingCombatText; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('enablePetBattleFloatingCombatText') and GetCVarDefault('enablePetBattleFloatingCombatText') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"enablePetBattleFloatingCombatText\") and GetCVarDefault(\"enablePetBattleFloatingCombatText\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextAllSpellMechanics",
       "symbol": "floatingCombatTextAllSpellMechanics",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextAllSpellMechanics, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextAllSpellMechanics; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextAllSpellMechanics') and GetCVarDefault('floatingCombatTextAllSpellMechanics') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextAllSpellMechanics\") and GetCVarDefault(\"floatingCombatTextAllSpellMechanics\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextAuraFade",
       "symbol": "floatingCombatTextAuraFade",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 records transient CVar floatingCombatTextAuraFade='0' in an intermediate snapshot; it is absent at both patch endpoints."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current runtime CVar defaults do not publish the transient old name floatingCombatTextAuraFade."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default storage is the runtime publication path; no endpoint behavior is claimed."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "No independent discovery occurrence is used to claim endpoint publication or replacement equivalence."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Transient intermediate CVar snapshot only: old name floatingCombatTextAuraFade='0' is absent at both endpoints; provenance-only, with no endpoint publication, behavior, or replacement-equivalence claim."
     },
     {
       "id": "removed:floatingCombatTextAuras",
       "symbol": "floatingCombatTextAuras",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextAuras, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextAuras; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextAuras') and GetCVarDefault('floatingCombatTextAuras') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextAuras\") and GetCVarDefault(\"floatingCombatTextAuras\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatDamage",
       "symbol": "floatingCombatTextCombatDamage",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatDamage, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatDamage; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatDamage') and GetCVarDefault('floatingCombatTextCombatDamage') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatDamage\") and GetCVarDefault(\"floatingCombatTextCombatDamage\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatDamageAllAutos",
       "symbol": "floatingCombatTextCombatDamageAllAutos",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatDamageAllAutos, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatDamageAllAutos; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatDamageAllAutos') and GetCVarDefault('floatingCombatTextCombatDamageAllAutos') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatDamageAllAutos\") and GetCVarDefault(\"floatingCombatTextCombatDamageAllAutos\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatDamageDirectionalOffset",
       "symbol": "floatingCombatTextCombatDamageDirectionalOffset",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatDamageDirectionalOffset, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatDamageDirectionalOffset; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatDamageDirectionalOffset') and GetCVarDefault('floatingCombatTextCombatDamageDirectionalOffset') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatDamageDirectionalOffset\") and GetCVarDefault(\"floatingCombatTextCombatDamageDirectionalOffset\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatDamageDirectionalScale",
       "symbol": "floatingCombatTextCombatDamageDirectionalScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatDamageDirectionalScale, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatDamageDirectionalScale; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatDamageDirectionalScale') and GetCVarDefault('floatingCombatTextCombatDamageDirectionalScale') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatDamageDirectionalScale\") and GetCVarDefault(\"floatingCombatTextCombatDamageDirectionalScale\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatDamageStyle",
       "symbol": "floatingCombatTextCombatDamageStyle",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatDamageStyle, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatDamageStyle; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatDamageStyle') and GetCVarDefault('floatingCombatTextCombatDamageStyle') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatDamageStyle\") and GetCVarDefault(\"floatingCombatTextCombatDamageStyle\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatHealing",
       "symbol": "floatingCombatTextCombatHealing",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatHealing, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatHealing; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatHealing') and GetCVarDefault('floatingCombatTextCombatHealing') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatHealing\") and GetCVarDefault(\"floatingCombatTextCombatHealing\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatHealingAbsorbSelf",
       "symbol": "floatingCombatTextCombatHealingAbsorbSelf",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatHealingAbsorbSelf, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatHealingAbsorbSelf; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatHealingAbsorbSelf') and GetCVarDefault('floatingCombatTextCombatHealingAbsorbSelf') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatHealingAbsorbSelf\") and GetCVarDefault(\"floatingCombatTextCombatHealingAbsorbSelf\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatHealingAbsorbTarget",
       "symbol": "floatingCombatTextCombatHealingAbsorbTarget",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatHealingAbsorbTarget, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatHealingAbsorbTarget; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatHealingAbsorbTarget') and GetCVarDefault('floatingCombatTextCombatHealingAbsorbTarget') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatHealingAbsorbTarget\") and GetCVarDefault(\"floatingCombatTextCombatHealingAbsorbTarget\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatLogPeriodicSpells",
       "symbol": "floatingCombatTextCombatLogPeriodicSpells",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatLogPeriodicSpells, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatLogPeriodicSpells; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatLogPeriodicSpells') and GetCVarDefault('floatingCombatTextCombatLogPeriodicSpells') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatLogPeriodicSpells\") and GetCVarDefault(\"floatingCombatTextCombatLogPeriodicSpells\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextCombatState",
       "symbol": "floatingCombatTextCombatState",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextCombatState, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextCombatState; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextCombatState') and GetCVarDefault('floatingCombatTextCombatState') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextCombatState\") and GetCVarDefault(\"floatingCombatTextCombatState\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextComboPoints",
       "symbol": "floatingCombatTextComboPoints",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextComboPoints, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextComboPoints; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextComboPoints') and GetCVarDefault('floatingCombatTextComboPoints') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextComboPoints\") and GetCVarDefault(\"floatingCombatTextComboPoints\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextDamageReduction",
       "symbol": "floatingCombatTextDamageReduction",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextDamageReduction, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextDamageReduction; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextDamageReduction') and GetCVarDefault('floatingCombatTextDamageReduction') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextDamageReduction\") and GetCVarDefault(\"floatingCombatTextDamageReduction\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextDodgeParryMiss",
       "symbol": "floatingCombatTextDodgeParryMiss",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextDodgeParryMiss, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextDodgeParryMiss; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextDodgeParryMiss') and GetCVarDefault('floatingCombatTextDodgeParryMiss') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextDodgeParryMiss\") and GetCVarDefault(\"floatingCombatTextDodgeParryMiss\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextEnergyGains",
@@ -129487,65 +130072,205 @@
       "id": "removed:floatingCombatTextFloatMode",
       "symbol": "floatingCombatTextFloatMode",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextFloatMode, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextFloatMode; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextFloatMode') and GetCVarDefault('floatingCombatTextFloatMode') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextFloatMode\") and GetCVarDefault(\"floatingCombatTextFloatMode\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextFriendlyHealers",
       "symbol": "floatingCombatTextFriendlyHealers",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextFriendlyHealers, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextFriendlyHealers; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextFriendlyHealers') and GetCVarDefault('floatingCombatTextFriendlyHealers') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextFriendlyHealers\") and GetCVarDefault(\"floatingCombatTextFriendlyHealers\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextHonorGains",
       "symbol": "floatingCombatTextHonorGains",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextHonorGains, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextHonorGains; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextHonorGains') and GetCVarDefault('floatingCombatTextHonorGains') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextHonorGains\") and GetCVarDefault(\"floatingCombatTextHonorGains\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextLowManaHealth",
       "symbol": "floatingCombatTextLowManaHealth",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextLowManaHealth, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextLowManaHealth; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextLowManaHealth') and GetCVarDefault('floatingCombatTextLowManaHealth') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextLowManaHealth\") and GetCVarDefault(\"floatingCombatTextLowManaHealth\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextPeriodicEnergyGains",
@@ -129602,97 +130327,307 @@
       "id": "removed:floatingCombatTextPetMeleeDamage",
       "symbol": "floatingCombatTextPetMeleeDamage",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextPetMeleeDamage, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextPetMeleeDamage; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextPetMeleeDamage') and GetCVarDefault('floatingCombatTextPetMeleeDamage') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextPetMeleeDamage\") and GetCVarDefault(\"floatingCombatTextPetMeleeDamage\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextPetSpellDamage",
       "symbol": "floatingCombatTextPetSpellDamage",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextPetSpellDamage, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextPetSpellDamage; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextPetSpellDamage') and GetCVarDefault('floatingCombatTextPetSpellDamage') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextPetSpellDamage\") and GetCVarDefault(\"floatingCombatTextPetSpellDamage\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextReactives",
       "symbol": "floatingCombatTextReactives",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextReactives, formerly published with Lua string default '1'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextReactives; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextReactives') and GetCVarDefault('floatingCombatTextReactives') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextReactives\") and GetCVarDefault(\"floatingCombatTextReactives\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextRepChanges",
       "symbol": "floatingCombatTextRepChanges",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextRepChanges, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextRepChanges; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextRepChanges') and GetCVarDefault('floatingCombatTextRepChanges') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextRepChanges\") and GetCVarDefault(\"floatingCombatTextRepChanges\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextSpellMechanics",
       "symbol": "floatingCombatTextSpellMechanics",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextSpellMechanics, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextSpellMechanics; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextSpellMechanics') and GetCVarDefault('floatingCombatTextSpellMechanics') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextSpellMechanics\") and GetCVarDefault(\"floatingCombatTextSpellMechanics\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:floatingCombatTextSpellMechanicsOther",
       "symbol": "floatingCombatTextSpellMechanicsOther",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar floatingCombatTextSpellMechanicsOther, formerly published with Lua string default '0'."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current retail CVar defaults omit removed old name floatingCombatTextSpellMechanicsOther; any distinct replacement name is not claimed equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar storage exposes public current/default getters used by the focused absence proof."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars",
+          "source_hash": "1fb711dd4a77849a44d52f2f8f6850aeb3ae496a089ec2b936b7afb2c204598e",
+          "summary": "Focused retail 12.0.0 removal test asserts GetCVar('floatingCombatTextSpellMechanicsOther') and GetCVarDefault('floatingCombatTextSpellMechanicsOther') both return nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no replacement or consumer semantics are claimed."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar(\"floatingCombatTextSpellMechanicsOther\") and GetCVarDefault(\"floatingCombatTextSpellMechanicsOther\") both return nil; claims are bounded to old-name getter/default absence only."
+      ],
+      "commit": "15a7936e69e00d3efd297a056e92218f717ed7a8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 old-name getter/default absence is proven by 15a7936e69; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:friendsSmallView",

@@ -3273,35 +3273,35 @@
 3273. [untriaged] `removed:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` — untriaged
 3274. [untriaged] `removed:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — untriaged
 3275. [untriaged] `removed:docs.extra_script_objects.FrameAPITooltip` — untriaged
-3276. [untriaged] `removed:enablePetBattleFloatingCombatText` — untriaged
-3277. [untriaged] `removed:floatingCombatTextAllSpellMechanics` — untriaged
-3278. [untriaged] `removed:floatingCombatTextAuraFade` — untriaged
-3279. [untriaged] `removed:floatingCombatTextAuras` — untriaged
-3280. [untriaged] `removed:floatingCombatTextCombatDamage` — untriaged
-3281. [untriaged] `removed:floatingCombatTextCombatDamageAllAutos` — untriaged
-3282. [untriaged] `removed:floatingCombatTextCombatDamageDirectionalOffset` — untriaged
-3283. [untriaged] `removed:floatingCombatTextCombatDamageDirectionalScale` — untriaged
-3284. [untriaged] `removed:floatingCombatTextCombatDamageStyle` — untriaged
-3285. [untriaged] `removed:floatingCombatTextCombatHealing` — untriaged
-3286. [untriaged] `removed:floatingCombatTextCombatHealingAbsorbSelf` — untriaged
-3287. [untriaged] `removed:floatingCombatTextCombatHealingAbsorbTarget` — untriaged
-3288. [untriaged] `removed:floatingCombatTextCombatLogPeriodicSpells` — untriaged
-3289. [untriaged] `removed:floatingCombatTextCombatState` — untriaged
-3290. [untriaged] `removed:floatingCombatTextComboPoints` — untriaged
-3291. [untriaged] `removed:floatingCombatTextDamageReduction` — untriaged
-3292. [untriaged] `removed:floatingCombatTextDodgeParryMiss` — untriaged
+3276. [best-effort] `removed:enablePetBattleFloatingCombatText` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3277. [best-effort] `removed:floatingCombatTextAllSpellMechanics` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3278. [best-effort] `removed:floatingCombatTextAuraFade` — provenance-only: transient intermediate CVar snapshot absent at both patch endpoints; no endpoint publication, behavior, or replacement-equivalence claim.
+3279. [best-effort] `removed:floatingCombatTextAuras` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3280. [best-effort] `removed:floatingCombatTextCombatDamage` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3281. [best-effort] `removed:floatingCombatTextCombatDamageAllAutos` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3282. [best-effort] `removed:floatingCombatTextCombatDamageDirectionalOffset` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3283. [best-effort] `removed:floatingCombatTextCombatDamageDirectionalScale` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3284. [best-effort] `removed:floatingCombatTextCombatDamageStyle` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3285. [best-effort] `removed:floatingCombatTextCombatHealing` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3286. [best-effort] `removed:floatingCombatTextCombatHealingAbsorbSelf` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3287. [best-effort] `removed:floatingCombatTextCombatHealingAbsorbTarget` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3288. [best-effort] `removed:floatingCombatTextCombatLogPeriodicSpells` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3289. [best-effort] `removed:floatingCombatTextCombatState` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3290. [best-effort] `removed:floatingCombatTextComboPoints` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3291. [best-effort] `removed:floatingCombatTextDamageReduction` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3292. [best-effort] `removed:floatingCombatTextDodgeParryMiss` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
 3293. [best-effort] `removed:floatingCombatTextEnergyGains` — behavioral
-3294. [untriaged] `removed:floatingCombatTextFloatMode` — untriaged
-3295. [untriaged] `removed:floatingCombatTextFriendlyHealers` — untriaged
-3296. [untriaged] `removed:floatingCombatTextHonorGains` — untriaged
-3297. [untriaged] `removed:floatingCombatTextLowManaHealth` — untriaged
+3294. [best-effort] `removed:floatingCombatTextFloatMode` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3295. [best-effort] `removed:floatingCombatTextFriendlyHealers` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3296. [best-effort] `removed:floatingCombatTextHonorGains` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3297. [best-effort] `removed:floatingCombatTextLowManaHealth` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
 3298. [best-effort] `removed:floatingCombatTextPeriodicEnergyGains` — behavioral
-3299. [untriaged] `removed:floatingCombatTextPetMeleeDamage` — untriaged
-3300. [untriaged] `removed:floatingCombatTextPetSpellDamage` — untriaged
-3301. [untriaged] `removed:floatingCombatTextReactives` — untriaged
-3302. [untriaged] `removed:floatingCombatTextRepChanges` — untriaged
-3303. [untriaged] `removed:floatingCombatTextSpellMechanics` — untriaged
-3304. [untriaged] `removed:floatingCombatTextSpellMechanicsOther` — untriaged
+3299. [best-effort] `removed:floatingCombatTextPetMeleeDamage` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3300. [best-effort] `removed:floatingCombatTextPetSpellDamage` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3301. [best-effort] `removed:floatingCombatTextReactives` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3302. [best-effort] `removed:floatingCombatTextRepChanges` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3303. [best-effort] `removed:floatingCombatTextSpellMechanics` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3304. [best-effort] `removed:floatingCombatTextSpellMechanicsOther` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
 3305. [untriaged] `removed:friendsSmallView` — untriaged
 3306. [untriaged] `removed:friendsViewButtons` — untriaged
 3307. [untriaged] `removed:guildRosterView` — untriaged

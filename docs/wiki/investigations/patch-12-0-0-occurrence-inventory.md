@@ -3363,35 +3363,35 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` | untriaged | docs-extra-event | removed | Transient docs-extra-event existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
 | `docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` | untriaged | docs-extra-event | removed | Transient docs-extra-event existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
 | `docs.extra_script_objects.FrameAPITooltip` | untriaged | docs-extra-script-object | removed | Transient docs-extra-script-object existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
-| `enablePetBattleFloatingCombatText` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextAllSpellMechanics` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextAuraFade` | untriaged | cvar | removed | Transient cvar existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
-| `floatingCombatTextAuras` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatDamage` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatDamageAllAutos` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatDamageDirectionalOffset` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatDamageDirectionalScale` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatDamageStyle` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatHealing` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatHealingAbsorbSelf` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatHealingAbsorbTarget` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatLogPeriodicSpells` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextCombatState` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextComboPoints` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextDamageReduction` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextDodgeParryMiss` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `enablePetBattleFloatingCombatText` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextAllSpellMechanics` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextAuraFade` | best-effort | cvar | removed | provenance-only: transient intermediate CVar snapshot absent at both patch endpoints; no endpoint publication, behavior, or replacement-equivalence claim. |
+| `floatingCombatTextAuras` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatDamage` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatDamageAllAutos` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatDamageDirectionalOffset` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatDamageDirectionalScale` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatDamageStyle` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatHealing` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatHealingAbsorbSelf` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatHealingAbsorbTarget` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatLogPeriodicSpells` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextCombatState` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextComboPoints` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextDamageReduction` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextDodgeParryMiss` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
 | `floatingCombatTextEnergyGains` | best-effort | cvar | removed | Best-effort behavioral: public `GetCVar` and `GetCVarDefault` return nil under focused proof commit `15a7936e6`; old name is absent from `src/cvars.yaml`, and distinct `_v2` semantic equivalence is unclaimed. |
-| `floatingCombatTextFloatMode` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextFriendlyHealers` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextHonorGains` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextLowManaHealth` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `floatingCombatTextFloatMode` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextFriendlyHealers` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextHonorGains` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextLowManaHealth` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
 | `floatingCombatTextPeriodicEnergyGains` | best-effort | cvar | removed | Best-effort behavioral: public `GetCVar` and `GetCVarDefault` return nil under focused proof commit `15a7936e6`; old name is absent from `src/cvars.yaml`, and distinct `_v2` semantic equivalence is unclaimed. |
-| `floatingCombatTextPetMeleeDamage` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextPetSpellDamage` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextReactives` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextRepChanges` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextSpellMechanics` | untriaged | cvar | removed | cvar removed in 12.0.0. |
-| `floatingCombatTextSpellMechanicsOther` | untriaged | cvar | removed | cvar removed in 12.0.0. |
+| `floatingCombatTextPetMeleeDamage` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextPetSpellDamage` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextReactives` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextRepChanges` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextSpellMechanics` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
+| `floatingCombatTextSpellMechanicsOther` | best-effort | cvar | removed | behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed. |
 | `friendsSmallView` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `friendsViewButtons` | untriaged | cvar | removed | cvar removed in 12.0.0. |
 | `guildRosterView` | untriaged | cvar | removed | cvar removed in 12.0.0. |
