@@ -380,6 +380,19 @@ fn test_patch_12_0_0_cvar_defaults() {
                     combatWarningsEnabled = "1",
                     damageMeterEnabled = "0",
                     disableSuggestedLevelActivityFilter = "0",
+                    enablePetBattleFloatingCombatText_v2 = "1",
+                    encounterTimelineEnabled = "1",
+                    encounterTimelineHideForOtherRoles = "0",
+                    encounterTimelineHideLongCountdowns = "0",
+                    encounterTimelineHideQueuedCountdowns = "0",
+                    encounterTimelineIconographyEnabled = "1",
+                    encounterTimelineIconographyHiddenMask = string.char(1),
+                    encounterWarningsDefaultMessageDuration = "3500",
+                    encounterWarningsEnabled = "1",
+                    encounterWarningsHideIfNotTargetingPlayer = "0",
+                    encounterWarningsLevel = "0",
+                    endeavorInitiativesLastPoints = "0",
+                    equipmentManager = "1",
                 }
                 for name, expected_value in pairs(expected) do
                     local value = GetCVar(name)
