@@ -112885,81 +112885,256 @@
       "id": "changed:advFlyKeyboardMaxPitchFactor",
       "symbol": "advFlyKeyboardMaxPitchFactor",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes CVar advFlyKeyboardMaxPitchFactor default from '5.0' to exact string '5.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish advFlyKeyboardMaxPitchFactor with exact startup/default string '5.000000'.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '5.000000' for advFlyKeyboardMaxPitchFactor.",
+          "source_hash": "2ab513bfeb4f4902a4748278a8bab0932e11e6dd6aca8dc45efe6553e0d4a122"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no flight-control, camera, mutation, persistence, or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(advFlyKeyboardMaxPitchFactor) and GetCVarDefault(advFlyKeyboardMaxPitchFactor) both return exact Lua string '5.000000'; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "71086bb79",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes advFlyKeyboardMaxPitchFactor through public value/default getters as exact string '5.000000'. Claims are limited to getter/default publication; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "changed:advFlyKeyboardMaxTurnFactor",
       "symbol": "advFlyKeyboardMaxTurnFactor",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes CVar advFlyKeyboardMaxTurnFactor default from '8.0' to exact string '8.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish advFlyKeyboardMaxTurnFactor with exact startup/default string '8.000000'.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '8.000000' for advFlyKeyboardMaxTurnFactor.",
+          "source_hash": "2ab513bfeb4f4902a4748278a8bab0932e11e6dd6aca8dc45efe6553e0d4a122"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no flight-control, camera, mutation, persistence, or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(advFlyKeyboardMaxTurnFactor) and GetCVarDefault(advFlyKeyboardMaxTurnFactor) both return exact Lua string '8.000000'; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "71086bb79",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes advFlyKeyboardMaxTurnFactor through public value/default getters as exact string '8.000000'. Claims are limited to getter/default publication; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "changed:advFlyKeyboardMinPitchFactor",
       "symbol": "advFlyKeyboardMinPitchFactor",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes CVar advFlyKeyboardMinPitchFactor default from '2.5' to exact string '2.500000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish advFlyKeyboardMinPitchFactor with exact startup/default string '2.500000'.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '2.500000' for advFlyKeyboardMinPitchFactor.",
+          "source_hash": "2ab513bfeb4f4902a4748278a8bab0932e11e6dd6aca8dc45efe6553e0d4a122"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no flight-control, camera, mutation, persistence, or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(advFlyKeyboardMinPitchFactor) and GetCVarDefault(advFlyKeyboardMinPitchFactor) both return exact Lua string '2.500000'; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "71086bb79",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes advFlyKeyboardMinPitchFactor through public value/default getters as exact string '2.500000'. Claims are limited to getter/default publication; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "changed:advFlyKeyboardMinTurnFactor",
       "symbol": "advFlyKeyboardMinTurnFactor",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes CVar advFlyKeyboardMinTurnFactor default from '5.0' to exact string '5.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish advFlyKeyboardMinTurnFactor with exact startup/default string '5.000000'.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '5.000000' for advFlyKeyboardMinTurnFactor.",
+          "source_hash": "2ab513bfeb4f4902a4748278a8bab0932e11e6dd6aca8dc45efe6553e0d4a122"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no flight-control, camera, mutation, persistence, or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(advFlyKeyboardMinTurnFactor) and GetCVarDefault(advFlyKeyboardMinTurnFactor) both return exact Lua string '5.000000'; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "71086bb79",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes advFlyKeyboardMinTurnFactor through public value/default getters as exact string '5.000000'. Claims are limited to getter/default publication; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "changed:advFlyPitchControlCameraChase",
       "symbol": "advFlyPitchControlCameraChase",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 changes CVar advFlyPitchControlCameraChase default from '20.0' to exact string '20.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish advFlyPitchControlCameraChase with exact startup/default string '20.000000'.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault both return exact string '20.000000' for advFlyPitchControlCameraChase.",
+          "source_hash": "2ab513bfeb4f4902a4748278a8bab0932e11e6dd6aca8dc45efe6553e0d4a122"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no flight-control, camera, mutation, persistence, or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_adv_fly_cvar_values.rs::test_patch_12_0_0_adv_fly_cvar_values"
+      ],
+      "assertions": [
+        "GetCVar(advFlyPitchControlCameraChase) and GetCVarDefault(advFlyPitchControlCameraChase) both return exact Lua string '20.000000'; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "71086bb79",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes advFlyPitchControlCameraChase through public value/default getters as exact string '20.000000'. Claims are limited to getter/default publication; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "changed:mountJournalGeneralFilters",

@@ -2826,11 +2826,11 @@
 2826. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_FAILED` — unsafe: Evidence-required/unsafe: 12.0.0 changes exactly three args `(status, utteranceID, destination)` to exactly two `(utteranceID, status)`, removing destination with no nullable third slot; runtime only registers the event and has no producer. Full-LoD proof must trigger real TTS failure and verify exact args/no third slot, repeats, invalid requests, timing, registration, producer delivery, and errors; no TTS lifecycle semantics claimed.
 2827. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_FINISHED` — unsafe: Evidence-required/unsafe: retail 12.0.0 reduces the event to exactly one numeric utteranceID and removes legacy payload fields; runtime only registers the event and has no TTS producer. Full-LoD proof must trigger real playback and verify exact arity, removed-field absence, identity, timing, repeats, invalid requests, completion/failure, and producer delivery; no TTS lifecycle semantics claimed.
 2828. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_STARTED` — unsafe: Evidence-required/unsafe: retail 12.0.0 reduces the event to exactly one numeric utteranceID and removes legacy payload fields; runtime only registers the event and has no TTS producer. Full-LoD proof must trigger real playback and verify exact arity, removed-field absence, identity, timing, repeats, invalid requests, completion/failure, and producer delivery; no TTS lifecycle semantics claimed.
-2829. [untriaged] `changed:advFlyKeyboardMaxPitchFactor` — untriaged
-2830. [untriaged] `changed:advFlyKeyboardMaxTurnFactor` — untriaged
-2831. [untriaged] `changed:advFlyKeyboardMinPitchFactor` — untriaged
-2832. [untriaged] `changed:advFlyKeyboardMinTurnFactor` — untriaged
-2833. [untriaged] `changed:advFlyPitchControlCameraChase` — untriaged
+2829. [best-effort] `changed:advFlyKeyboardMaxPitchFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '5.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
+2830. [best-effort] `changed:advFlyKeyboardMaxTurnFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '8.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
+2831. [best-effort] `changed:advFlyKeyboardMinPitchFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '2.500000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
+2832. [best-effort] `changed:advFlyKeyboardMinTurnFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '5.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
+2833. [best-effort] `changed:advFlyPitchControlCameraChase` — behavioral: Retail 12.0.0 publishes exact CVar/default string '20.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
 2834. [untriaged] `changed:mountJournalGeneralFilters` — untriaged
 2835. [untriaged] `changed:mountJournalSourcesFilter` — untriaged
 2836. [untriaged] `changed:mountJournalTypeFilter` — untriaged
