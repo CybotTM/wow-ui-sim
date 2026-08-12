@@ -55739,7 +55739,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_values"
       ],
       "assertions": [
         "Publishes Enum.HousingDecorPlacementRestriction.ChildOutsideBounds as Lua number with exact retail 12.0.0 value 8."
@@ -55790,7 +55790,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_values"
       ],
       "assertions": [
         "Publishes Enum.HousingDecorPlacementRestriction.OutsidePlotBounds as Lua number with exact retail 12.0.0 value 4."
@@ -55841,7 +55841,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_values"
       ],
       "assertions": [
         "Publishes Enum.HousingDecorPlacementRestriction.OutsideRoomBounds as Lua number with exact retail 12.0.0 value 2."
@@ -57643,7 +57643,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_flags_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_milestone_flags_enum_values"
       ],
       "assertions": [
         "Publishes added:Enum.InitiativeMilestoneFlags.FinalMilestone as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact Enum.InitiativeMilestoneFlags family and metadata MinValue=1, MaxValue=1, NumValues=1."
@@ -57694,7 +57694,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_flags_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_milestone_flags_enum_values"
       ],
       "assertions": [
         "Publishes added:Enum.InitiativeMilestoneFlagsMeta.MaxValue as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact Enum.InitiativeMilestoneFlags family and metadata MinValue=1, MaxValue=1, NumValues=1."
@@ -57745,7 +57745,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_flags_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_milestone_flags_enum_values"
       ],
       "assertions": [
         "Publishes added:Enum.InitiativeMilestoneFlagsMeta.MinValue as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact Enum.InitiativeMilestoneFlags family and metadata MinValue=1, MaxValue=1, NumValues=1."
@@ -57796,7 +57796,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_flags_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_milestone_flags_enum_values"
       ],
       "assertions": [
         "Publishes added:Enum.InitiativeMilestoneFlagsMeta.NumValues as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact Enum.InitiativeMilestoneFlags family and metadata MinValue=1, MaxValue=1, NumValues=1."
@@ -57847,7 +57847,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_flags_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_reward_flags_enum_values"
       ],
       "assertions": [
         "Publishes added:Enum.InitiativeRewardFlags.PermanentWorldState as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact Enum.InitiativeRewardFlags family and metadata MinValue=1, MaxValue=1, NumValues=1."
@@ -57898,7 +57898,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_flags_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_reward_flags_enum_values"
       ],
       "assertions": [
         "Publishes added:Enum.InitiativeRewardFlagsMeta.MaxValue as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact Enum.InitiativeRewardFlags family and metadata MinValue=1, MaxValue=1, NumValues=1."
@@ -57949,7 +57949,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_flags_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_reward_flags_enum_values"
       ],
       "assertions": [
         "Publishes added:Enum.InitiativeRewardFlagsMeta.MinValue as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact Enum.InitiativeRewardFlags family and metadata MinValue=1, MaxValue=1, NumValues=1."
@@ -58000,7 +58000,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_flags_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_initiative_flags_enums.rs::test_patch_12_0_0_initiative_reward_flags_enum_values"
       ],
       "assertions": [
         "Publishes added:Enum.InitiativeRewardFlagsMeta.NumValues as a Lua number with exact retail 12.0.0 value 1; the focused namespace test also requires the exact Enum.InitiativeRewardFlags family and metadata MinValue=1, MaxValue=1, NumValues=1."
@@ -106582,7 +106582,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_values"
       ],
       "assertions": [
         "Publishes Enum.HousingDecorPlacementRestriction.InvalidCollision as Lua number with exact retail 12.0.0 value 32."
@@ -106633,7 +106633,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_values"
       ],
       "assertions": [
         "Publishes Enum.HousingDecorPlacementRestriction.InvalidTarget as Lua number with exact retail 12.0.0 value 16."
@@ -106684,7 +106684,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_values"
       ],
       "assertions": [
         "Publishes Enum.HousingDecorPlacementRestrictionMeta.MaxValue as exact numeric housing-placement metadata in the family MinValue=1, MaxValue=32, NumValues=6."
@@ -106735,7 +106735,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_values"
       ],
       "assertions": [
         "Publishes Enum.HousingDecorPlacementRestrictionMeta.NumValues as exact numeric housing-placement metadata in the family MinValue=1, MaxValue=32, NumValues=6."
@@ -115654,7 +115654,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_info.rs::test_patch_12_0_0_housing_catalog_entry_info_num_stored_removed"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_catalog_entry_info.rs::test_patch_12_0_0_housing_catalog_entry_info_removes_num_stored"
       ],
       "assertions": [
         "Seeded catalog entry is a table with numStored == nil and numeric totalNumStored, totalNumPlaced, and destroyableInstanceCount fields."
@@ -123375,7 +123375,7 @@
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_enum_values"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_housing_decor_placement_restriction_enums.rs::test_patch_12_0_0_housing_decor_placement_restriction_values"
       ],
       "assertions": [
         "Omits Enum.HousingDecorPlacementRestriction.NotInsideRoom at startup while retaining OutsideRoomBounds=2."
@@ -125797,11 +125797,11 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
           "summary": "Focused startup proof asserts both public getters return nil for ForceAllowAero.",
-          "source_hash": "5336a625c7e51ace3db6bdcb932a79f42d4355ffd50daa059ea30789ee6f1d41"
+          "source_hash": "b39e972d1cd9eb8401d9c9f7138804f6819ebd091b5f17b53cb7357cd5761292"
         }
       ],
       "tests": [
-        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_force_allow_aero_removed"
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_force_allow_aero_cvar_removed"
       ],
       "assertions": [
         "GetCVar(ForceAllowAero) and GetCVarDefault(ForceAllowAero) both return nil."
