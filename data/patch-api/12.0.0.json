@@ -98511,49 +98511,154 @@
       "id": "added:nameplateAuraScale",
       "symbol": "nameplateAuraScale",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateAuraScale with exact string default 1.000000.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateAuraScale with exact startup/default string 1.000000.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateAuraScale) and GetCVarDefault(nameplateAuraScale) both return the exact startup/default string 1.000000; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateAuraScale through public value/default getters as exact string 1.000000. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateCastBarDisplay",
       "symbol": "nameplateCastBarDisplay",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateCastBarDisplay with exact string default 0x02,[.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateCastBarDisplay with exact startup/default string 0x02,[.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateCastBarDisplay) and GetCVarDefault(nameplateCastBarDisplay) both return the exact startup/default string 0x02,[; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateCastBarDisplay through public value/default getters as exact string 0x02,[. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateDebuffPadding",
       "symbol": "nameplateDebuffPadding",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateDebuffPadding with exact string default 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateDebuffPadding with exact startup/default string 0.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateDebuffPadding) and GetCVarDefault(nameplateDebuffPadding) both return the exact startup/default string 0; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateDebuffPadding through public value/default getters as exact string 0. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateEnemyNpcAuraDisplay",
@@ -98610,113 +98715,358 @@
       "id": "added:nameplateEnemyPlayerAuraDisplay",
       "symbol": "nameplateEnemyPlayerAuraDisplay",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateEnemyPlayerAuraDisplay with exact string default 0x02,C.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateEnemyPlayerAuraDisplay with exact startup/default string 0x02,C.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateEnemyPlayerAuraDisplay) and GetCVarDefault(nameplateEnemyPlayerAuraDisplay) both return the exact startup/default string 0x02,C; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateEnemyPlayerAuraDisplay through public value/default getters as exact string 0x02,C. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateFriendlyPlayerAuraDisplay",
       "symbol": "nameplateFriendlyPlayerAuraDisplay",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateFriendlyPlayerAuraDisplay with exact string default 0x02,C.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateFriendlyPlayerAuraDisplay with exact startup/default string 0x02,C.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateFriendlyPlayerAuraDisplay) and GetCVarDefault(nameplateFriendlyPlayerAuraDisplay) both return the exact startup/default string 0x02,C; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateFriendlyPlayerAuraDisplay through public value/default getters as exact string 0x02,C. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateInfoDisplay",
       "symbol": "nameplateInfoDisplay",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateInfoDisplay with exact string default 0x02,D.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateInfoDisplay with exact startup/default string 0x02,D.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateInfoDisplay) and GetCVarDefault(nameplateInfoDisplay) both return the exact startup/default string 0x02,D; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateInfoDisplay through public value/default getters as exact string 0x02,D. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateShowCastBars",
       "symbol": "nameplateShowCastBars",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateShowCastBars with exact string default 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateShowCastBars with exact startup/default string 1.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateShowCastBars) and GetCVarDefault(nameplateShowCastBars) both return the exact startup/default string 1; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateShowCastBars through public value/default getters as exact string 1. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateShowClassColor",
       "symbol": "nameplateShowClassColor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateShowClassColor with exact string default 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateShowClassColor with exact startup/default string 1.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateShowClassColor) and GetCVarDefault(nameplateShowClassColor) both return the exact startup/default string 1; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateShowClassColor through public value/default getters as exact string 1. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateShowFriendlyClassColor",
       "symbol": "nameplateShowFriendlyClassColor",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateShowFriendlyClassColor with exact string default 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateShowFriendlyClassColor with exact startup/default string 1.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateShowFriendlyClassColor) and GetCVarDefault(nameplateShowFriendlyClassColor) both return the exact startup/default string 1; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateShowFriendlyClassColor through public value/default getters as exact string 1. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateShowFriendlyNpcs",
       "symbol": "nameplateShowFriendlyNpcs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds nameplateShowFriendlyNpcs with exact string default 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish nameplateShowFriendlyNpcs with exact startup/default string 0.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "805b02092044cbb588976e64fcf12919c2495b31016f71f06c6863732f695367"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no rendering or consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(nameplateShowFriendlyNpcs) and GetCVarDefault(nameplateShowFriendlyNpcs) both return the exact startup/default string 0; no nameplate rendering or consumer semantics are claimed."
+      ],
+      "commit": "bd8ce82d2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes nameplateShowFriendlyNpcs through public value/default getters as exact string 0. Claims are bounded to getter/default publication only; no nameplate rendering, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:nameplateShowFriendlyPlayerGuardians",

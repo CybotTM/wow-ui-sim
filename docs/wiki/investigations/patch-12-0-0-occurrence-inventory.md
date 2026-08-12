@@ -2569,17 +2569,17 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `lfgListAdvancedFiltersVersion` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `majorFactionRenownMap` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `mapvalues` | untriaged | api | added | api added in 12.0.0. |
-| `nameplateAuraScale` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateCastBarDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateDebuffPadding` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `nameplateAuraScale` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1.000000 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
+| `nameplateCastBarDisplay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,[ under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
+| `nameplateDebuffPadding` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
 | `nameplateEnemyNpcAuraDisplay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0x02,C under focused proof commit 16687bd2a; no rendering semantics are claimed. |
-| `nameplateEnemyPlayerAuraDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateFriendlyPlayerAuraDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateInfoDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowCastBars` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowClassColor` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowFriendlyClassColor` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowFriendlyNpcs` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `nameplateEnemyPlayerAuraDisplay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,C under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
+| `nameplateFriendlyPlayerAuraDisplay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,C under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
+| `nameplateInfoDisplay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,D under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
+| `nameplateShowCastBars` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
+| `nameplateShowClassColor` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
+| `nameplateShowFriendlyClassColor` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
+| `nameplateShowFriendlyNpcs` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
 | `nameplateShowFriendlyPlayerGuardians` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `nameplateShowFriendlyPlayerMinions` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `nameplateShowFriendlyPlayerPets` | untriaged | cvar | added | cvar added in 12.0.0. |

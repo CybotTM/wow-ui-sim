@@ -2479,17 +2479,17 @@
 2479. [untriaged] `added:lfgListAdvancedFiltersVersion` — untriaged
 2480. [untriaged] `added:majorFactionRenownMap` — untriaged
 2481. [untriaged] `added:mapvalues` — untriaged
-2482. [untriaged] `added:nameplateAuraScale` — untriaged
-2483. [untriaged] `added:nameplateCastBarDisplay` — untriaged
-2484. [untriaged] `added:nameplateDebuffPadding` — untriaged
+2482. [best-effort] `added:nameplateAuraScale` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1.000000 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
+2483. [best-effort] `added:nameplateCastBarDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,[ under focused proof commit bd8ce82d2; no rendering semantics are claimed.
+2484. [best-effort] `added:nameplateDebuffPadding` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
 2485. [best-effort] `added:nameplateEnemyNpcAuraDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0x02,C under focused proof commit 16687bd2a; no rendering semantics are claimed.
-2486. [untriaged] `added:nameplateEnemyPlayerAuraDisplay` — untriaged
-2487. [untriaged] `added:nameplateFriendlyPlayerAuraDisplay` — untriaged
-2488. [untriaged] `added:nameplateInfoDisplay` — untriaged
-2489. [untriaged] `added:nameplateShowCastBars` — untriaged
-2490. [untriaged] `added:nameplateShowClassColor` — untriaged
-2491. [untriaged] `added:nameplateShowFriendlyClassColor` — untriaged
-2492. [untriaged] `added:nameplateShowFriendlyNpcs` — untriaged
+2486. [best-effort] `added:nameplateEnemyPlayerAuraDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,C under focused proof commit bd8ce82d2; no rendering semantics are claimed.
+2487. [best-effort] `added:nameplateFriendlyPlayerAuraDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,C under focused proof commit bd8ce82d2; no rendering semantics are claimed.
+2488. [best-effort] `added:nameplateInfoDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,D under focused proof commit bd8ce82d2; no rendering semantics are claimed.
+2489. [best-effort] `added:nameplateShowCastBars` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
+2490. [best-effort] `added:nameplateShowClassColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
+2491. [best-effort] `added:nameplateShowFriendlyClassColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
+2492. [best-effort] `added:nameplateShowFriendlyNpcs` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
 2493. [untriaged] `added:nameplateShowFriendlyPlayerGuardians` — untriaged
 2494. [untriaged] `added:nameplateShowFriendlyPlayerMinions` — untriaged
 2495. [untriaged] `added:nameplateShowFriendlyPlayerPets` — untriaged
