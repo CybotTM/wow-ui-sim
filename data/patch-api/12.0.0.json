@@ -118209,49 +118209,136 @@
       "id": "removed:ShowClassColorInFriendlyNameplate",
       "symbol": "ShowClassColorInFriendlyNameplate",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The base CVar defaults do not publish a retail 12.0.0 value after profile filtering.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering removes this CVar in retail 12.0.0 while preserving non-retail profile defaults where applicable.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
+          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed CVar."
+      ],
+      "commit": "c6702c93d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no rendering, nameplate, terrain, or other CVar semantics are claimed."
     },
     {
       "id": "removed:ShowClassColorInNameplate",
       "symbol": "ShowClassColorInNameplate",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The base CVar defaults do not publish a retail 12.0.0 value after profile filtering.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering removes this CVar in retail 12.0.0 while preserving non-retail profile defaults where applicable.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
+          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed CVar."
+      ],
+      "commit": "c6702c93d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no rendering, nameplate, terrain, or other CVar semantics are claimed."
     },
     {
       "id": "removed:ShowNamePlateLoseAggroFlash",
       "symbol": "ShowNamePlateLoseAggroFlash",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 1.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The base CVar defaults do not publish a retail 12.0.0 value after profile filtering.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering removes this CVar in retail 12.0.0 while preserving non-retail profile defaults where applicable.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
+          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed CVar."
+      ],
+      "commit": "c6702c93d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no rendering, nameplate, terrain, or other CVar semantics are claimed."
     },
     {
       "id": "removed:SpellGetVisibilityInfo",
@@ -118433,33 +118520,91 @@
       "id": "removed:TerrainBlendBakeEnable",
       "symbol": "TerrainBlendBakeEnable",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The base CVar defaults do not publish a retail 12.0.0 value after profile filtering.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering removes this CVar in retail 12.0.0 while preserving non-retail profile defaults where applicable.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
+          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed CVar."
+      ],
+      "commit": "c6702c93d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no rendering, nameplate, terrain, or other CVar semantics are claimed."
     },
     {
       "id": "removed:TerrainUnlitShaderEnable",
       "symbol": "TerrainUnlitShaderEnable",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The base CVar defaults do not publish a retail 12.0.0 value after profile filtering.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Retail profile CVar filtering removes this CVar in retail 12.0.0 while preserving non-retail profile defaults where applicable.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
+          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_removed_nameplate_cvars"
+      ],
+      "assertions": [
+        "GetCVar and GetCVarDefault both return nil for the removed CVar."
+      ],
+      "commit": "c6702c93d",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no rendering, nameplate, terrain, or other CVar semantics are claimed."
     },
     {
       "id": "removed:TransmogPendingInfo",
