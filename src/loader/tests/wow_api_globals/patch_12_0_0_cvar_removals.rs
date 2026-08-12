@@ -45,6 +45,19 @@ fn test_patch_12_0_0_removed_nameplate_cvars() {
                     "ShowNamePlateLoseAggroFlash",
                     "TerrainBlendBakeEnable",
                     "TerrainUnlitShaderEnable",
+                    "WorldTextCritScreenY",
+                    "WorldTextGravity",
+                    "WorldTextMinAlpha",
+                    "WorldTextNonRandomZ",
+                    "WorldTextRampDuration",
+                    "WorldTextRampPow",
+                    "WorldTextRampPowCrit",
+                    "WorldTextRandomXY",
+                    "WorldTextRandomZMax",
+                    "WorldTextRandomZMin",
+                    "WorldTextScale",
+                    "WorldTextScreenY",
+                    "WorldTextStartPosRandomness",
                 }
                 for _, name in ipairs(names) do
                     local value = GetCVar(name)
