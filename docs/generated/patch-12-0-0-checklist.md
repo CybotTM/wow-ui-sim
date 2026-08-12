@@ -2873,11 +2873,11 @@
 2873. [best-effort] `removed:C_EventUtils.NotifySettingsLoaded` — behavioral
 2874. [best-effort] `removed:C_HouseExterior.GetCurrentHouseExteriorTypeName` — behavioral
 2875. [evidence-required] `removed:C_HousingBasicMode.InvalidPlacementInfo` — unsafe
-2876. [untriaged] `removed:C_HousingBasicMode.InvalidPlacementInfo.anyRestrictions` — untriaged
-2877. [untriaged] `removed:C_HousingBasicMode.InvalidPlacementInfo.invalidCollision` — untriaged
-2878. [untriaged] `removed:C_HousingBasicMode.InvalidPlacementInfo.invalidTarget` — untriaged
-2879. [untriaged] `removed:C_HousingBasicMode.InvalidPlacementInfo.notInRoom` — untriaged
-2880. [untriaged] `removed:C_HousingBasicMode.InvalidPlacementInfo.tooFar` — untriaged
+2876. [evidence-required] `removed:C_HousingBasicMode.InvalidPlacementInfo.anyRestrictions` — unsafe
+2877. [evidence-required] `removed:C_HousingBasicMode.InvalidPlacementInfo.invalidCollision` — unsafe
+2878. [evidence-required] `removed:C_HousingBasicMode.InvalidPlacementInfo.invalidTarget` — unsafe
+2879. [evidence-required] `removed:C_HousingBasicMode.InvalidPlacementInfo.notInRoom` — unsafe
+2880. [evidence-required] `removed:C_HousingBasicMode.InvalidPlacementInfo.tooFar` — unsafe
 2881. [best-effort] `removed:C_HousingBasicMode.IsNudgeEnabled` — behavioral
 2882. [best-effort] `removed:C_HousingBasicMode.SetNudgeEnabled` — behavioral
 2883. [untriaged] `removed:C_HousingCatalog.HousingCatalogEntryInfo.numStored` — untriaged
