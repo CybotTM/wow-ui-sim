@@ -98486,129 +98486,409 @@
       "id": "added:lastTransmogCustomSetIDNoSpec",
       "symbol": "lastTransmogCustomSetIDNoSpec",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds lastTransmogCustomSetIDNoSpec with exact string default .",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish lastTransmogCustomSetIDNoSpec with exact startup/default string .",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "200df0db45014daeaaea7d1c98994115c474b957582fff2da1f28caf51224ef0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(lastTransmogCustomSetIDNoSpec) and GetCVarDefault(lastTransmogCustomSetIDNoSpec) both return exact startup/default string ; no transmog, LFG, or faction-renown consumer semantics are claimed."
+      ],
+      "commit": "e2ac401f5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes lastTransmogCustomSetIDNoSpec through public value/default getters as exact string . Claims are bounded to getter/default publication only; no UI, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:lastTransmogCustomSetIDSpec1",
       "symbol": "lastTransmogCustomSetIDSpec1",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds lastTransmogCustomSetIDSpec1 with exact string default .",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish lastTransmogCustomSetIDSpec1 with exact startup/default string .",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "200df0db45014daeaaea7d1c98994115c474b957582fff2da1f28caf51224ef0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(lastTransmogCustomSetIDSpec1) and GetCVarDefault(lastTransmogCustomSetIDSpec1) both return exact startup/default string ; no transmog, LFG, or faction-renown consumer semantics are claimed."
+      ],
+      "commit": "e2ac401f5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes lastTransmogCustomSetIDSpec1 through public value/default getters as exact string . Claims are bounded to getter/default publication only; no UI, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:lastTransmogCustomSetIDSpec2",
       "symbol": "lastTransmogCustomSetIDSpec2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds lastTransmogCustomSetIDSpec2 with exact string default .",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish lastTransmogCustomSetIDSpec2 with exact startup/default string .",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "200df0db45014daeaaea7d1c98994115c474b957582fff2da1f28caf51224ef0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(lastTransmogCustomSetIDSpec2) and GetCVarDefault(lastTransmogCustomSetIDSpec2) both return exact startup/default string ; no transmog, LFG, or faction-renown consumer semantics are claimed."
+      ],
+      "commit": "e2ac401f5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes lastTransmogCustomSetIDSpec2 through public value/default getters as exact string . Claims are bounded to getter/default publication only; no UI, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:lastTransmogCustomSetIDSpec3",
       "symbol": "lastTransmogCustomSetIDSpec3",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds lastTransmogCustomSetIDSpec3 with exact string default .",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish lastTransmogCustomSetIDSpec3 with exact startup/default string .",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "200df0db45014daeaaea7d1c98994115c474b957582fff2da1f28caf51224ef0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(lastTransmogCustomSetIDSpec3) and GetCVarDefault(lastTransmogCustomSetIDSpec3) both return exact startup/default string ; no transmog, LFG, or faction-renown consumer semantics are claimed."
+      ],
+      "commit": "e2ac401f5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes lastTransmogCustomSetIDSpec3 through public value/default getters as exact string . Claims are bounded to getter/default publication only; no UI, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:lastTransmogCustomSetIDSpec4",
       "symbol": "lastTransmogCustomSetIDSpec4",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds lastTransmogCustomSetIDSpec4 with exact string default .",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish lastTransmogCustomSetIDSpec4 with exact startup/default string .",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "200df0db45014daeaaea7d1c98994115c474b957582fff2da1f28caf51224ef0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(lastTransmogCustomSetIDSpec4) and GetCVarDefault(lastTransmogCustomSetIDSpec4) both return exact startup/default string ; no transmog, LFG, or faction-renown consumer semantics are claimed."
+      ],
+      "commit": "e2ac401f5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes lastTransmogCustomSetIDSpec4 through public value/default getters as exact string . Claims are bounded to getter/default publication only; no UI, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:lastTransmogOutfitIDNoSpec",
       "symbol": "lastTransmogOutfitIDNoSpec",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds lastTransmogOutfitIDNoSpec with exact string default .",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish lastTransmogOutfitIDNoSpec with exact startup/default string .",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "200df0db45014daeaaea7d1c98994115c474b957582fff2da1f28caf51224ef0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(lastTransmogOutfitIDNoSpec) and GetCVarDefault(lastTransmogOutfitIDNoSpec) both return exact startup/default string ; no transmog, LFG, or faction-renown consumer semantics are claimed."
+      ],
+      "commit": "e2ac401f5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes lastTransmogOutfitIDNoSpec through public value/default getters as exact string . Claims are bounded to getter/default publication only; no UI, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:lfgListAdvancedFiltersVersion",
       "symbol": "lfgListAdvancedFiltersVersion",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds lfgListAdvancedFiltersVersion with exact string default 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish lfgListAdvancedFiltersVersion with exact startup/default string 0.",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "200df0db45014daeaaea7d1c98994115c474b957582fff2da1f28caf51224ef0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(lfgListAdvancedFiltersVersion) and GetCVarDefault(lfgListAdvancedFiltersVersion) both return exact startup/default string 0; no transmog, LFG, or faction-renown consumer semantics are claimed."
+      ],
+      "commit": "e2ac401f5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes lfgListAdvancedFiltersVersion through public value/default getters as exact string 0. Claims are bounded to getter/default publication only; no UI, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:majorFactionRenownMap",
       "symbol": "majorFactionRenownMap",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds majorFactionRenownMap with exact string default .",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish majorFactionRenownMap with exact startup/default string .",
+          "source_hash": "e3241b1accf60051739f786962739dd7362d6f69f48ae5e134b5c4115280275c"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded value/default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused startup test asserts exact public getter/default value.",
+          "source_hash": "200df0db45014daeaaea7d1c98994115c474b957582fff2da1f28caf51224ef0"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery evidence; no consumer semantics are claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(majorFactionRenownMap) and GetCVarDefault(majorFactionRenownMap) both return exact startup/default string ; no transmog, LFG, or faction-renown consumer semantics are claimed."
+      ],
+      "commit": "e2ac401f5",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes majorFactionRenownMap through public value/default getters as exact string . Claims are bounded to getter/default publication only; no UI, mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:mapvalues",

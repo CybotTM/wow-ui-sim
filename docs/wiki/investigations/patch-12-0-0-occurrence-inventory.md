@@ -2560,14 +2560,14 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `hasanysecretvalues` | evidence-required | api | added | Evidence-required/unsafe: not published; full-LoD/state-backed secret-query probes required. |
 | `issecrettable` | evidence-required | api | added | Evidence-required/unsafe: not published; full-LoD/state-backed table-secret probes required. |
 | `issecretvalue` | evidence-required | api | added | Evidence-required/unsafe: guarded shallow local logic exists; full retail secret semantics remain unproven. |
-| `lastTransmogCustomSetIDNoSpec` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `lastTransmogCustomSetIDSpec1` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `lastTransmogCustomSetIDSpec2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `lastTransmogCustomSetIDSpec3` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `lastTransmogCustomSetIDSpec4` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `lastTransmogOutfitIDNoSpec` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `lfgListAdvancedFiltersVersion` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `majorFactionRenownMap` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `lastTransmogCustomSetIDNoSpec` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed. |
+| `lastTransmogCustomSetIDSpec1` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed. |
+| `lastTransmogCustomSetIDSpec2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed. |
+| `lastTransmogCustomSetIDSpec3` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed. |
+| `lastTransmogCustomSetIDSpec4` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed. |
+| `lastTransmogOutfitIDNoSpec` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed. |
+| `lfgListAdvancedFiltersVersion` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit e2ac401f5; no consumer semantics are claimed. |
+| `majorFactionRenownMap` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed. |
 | `mapvalues` | evidence-required | api | added | Evidence-required/unsafe: guarded basic mapping fallback exists; packing/count/error semantics remain unproven. |
 | `nameplateAuraScale` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1.000000 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
 | `nameplateCastBarDisplay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,[ under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
