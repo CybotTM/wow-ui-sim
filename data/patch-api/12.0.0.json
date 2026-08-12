@@ -86254,17 +86254,38 @@
       "id": "added:GetCollapsingStarCost",
       "symbol": "GetCollapsingStarCost",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the bounded probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/mod.rs",
+          "source_hash": "5d8153800520075faa6e320ae75dd50ff8a65ecced640e7c07fce46e94a65b65",
+          "summary": "No Retail registration or implementation is present; current global publication is unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no producer, ordering, lifecycle, or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(GetCollapsingStarCost) == \"function\"); local cost = GetCollapsingStarCost(); assert(type(cost) == \"number\")."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declares a zero-argument numeric global, but the simulator has no Retail publication or backing implementation; the required probe must establish callable publication and numeric return without guessing a value."
     },
     {
       "id": "added:HOUSE_EXTERIOR_TYPE_UNLOCKED",
@@ -86907,17 +86928,38 @@
       "id": "added:HouseExteriorTypeOption.houseExteriorTypeID",
       "symbol": "HouseExteriorTypeOption.houseExteriorTypeID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the bounded probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/housing_catalog_state.lua",
+          "source_hash": "961fece2838bee33bad828a406052d1daae422f28f167b892855c0e0890ca9fa",
+          "summary": "Temporary fixture publication exposes numeric IDs, but it is not an authoritative retail producer."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no producer, ordering, lifecycle, or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer-backed probe: obtain C_HouseExterior.GetHouseExteriorTypeOptions(), assert each returned option is a table and type(option.houseExteriorTypeID) == \"number\"; do not treat the temporary fixture as retail contract proof."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds a numeric structure field, but the simulator only has temporary fixture data; the required probe must use an authoritative producer-backed returned object."
     },
     {
       "id": "added:HouseExteriorTypeOption.isLocked",
@@ -87435,17 +87477,44 @@
       "id": "added:IsRaidMarkerSystemEnabled",
       "symbol": "IsRaidMarkerSystemEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the bounded probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/mod.rs",
+          "source_hash": "5d8153800520075faa6e320ae75dd50ff8a65ecced640e7c07fce46e94a65b65",
+          "summary": "Retail global registration is absent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/mists/compat_bootstrap.lua",
+          "source_hash": "efda9f00251c455f45425bf3399388041e56e46b785ed7fde473879c87e6065a",
+          "summary": "Mists-only compatibility shim returns false and does not establish Retail behavior."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no producer, ordering, lifecycle, or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Retail full-LoD probe: assert(type(IsRaidMarkerSystemEnabled) == \"function\"); local enabled = IsRaidMarkerSystemEnabled(); assert(type(enabled) == \"boolean\"); establish and assert the backing raid-marker enablement state."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declares a zero-argument boolean global, but only a Mists-only false shim exists; the required Retail probe must establish callable publication, boolean result, and backing state."
     },
     {
       "id": "added:LEGACY_LOOT_RULES_CHANGED",
@@ -89906,17 +89975,38 @@
       "id": "added:NewCraftingOrderInfo.reagentInfos",
       "symbol": "NewCraftingOrderInfo.reagentInfos",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the bounded probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd",
+          "summary": "Crafting-order APIs are placeholders and publish no observable NewCraftingOrderInfo producer."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no producer, ordering, lifecycle, or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer probe: obtain a NewCraftingOrderInfo table; assert type(order.reagentInfos) == \"table\"; for each info assert type(info) == \"table\" and type(info.reagent) == \"table\"."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds an array of RegularReagentInfo, but no simulator producer or typed structure is observable; the required probe must obtain a real returned order object and nested typed entries."
     },
     {
       "id": "added:NumberAbbrevData",
@@ -90422,17 +90512,38 @@
       "id": "added:RegularReagentInfo.reagent",
       "symbol": "RegularReagentInfo.reagent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the bounded probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/missing_surface/professions.rs",
+          "source_hash": "5bfee5857fbb18a65c5744cdeb7f0891f0d7fa4285b5d8a3fed81423228b1bdd",
+          "summary": "Crafting-order APIs are placeholders and publish no observable RegularReagentInfo producer."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no producer, ordering, lifecycle, or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD producer probe: obtain a RegularReagentInfo table; assert type(info.reagent) == \"table\" for its typed CraftingReagent field."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 adds a CraftingReagent-typed field, but no simulator producer or structure publication is observable; the required probe must obtain a real returned object."
     },
     {
       "id": "added:SECURE_TRANSFER_CONFIRM_HOUSING_PURCHASE",
