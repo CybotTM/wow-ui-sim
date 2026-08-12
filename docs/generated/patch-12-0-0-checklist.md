@@ -2817,13 +2817,13 @@
 2817. [evidence-required] `changed:UNIT_SPELLCAST_START` — unsafe
 2818. [evidence-required] `changed:UNIT_SPELLCAST_STOP` — unsafe
 2819. [evidence-required] `changed:UNIT_SPELLCAST_SUCCEEDED` — unsafe
-2820. [untriaged] `changed:UnitCastingInfo` — untriaged
-2821. [untriaged] `changed:UnitChannelInfo` — untriaged
-2822. [untriaged] `changed:UnitFullName` — untriaged
-2823. [untriaged] `changed:UnitIsUnit` — untriaged
-2824. [untriaged] `changed:UnitName` — untriaged
-2825. [untriaged] `changed:UnitNameUnmodified` — untriaged
-2826. [untriaged] `changed:VOICE_CHAT_TTS_PLAYBACK_FAILED` — untriaged
+2820. [evidence-required] `changed:UnitCastingInfo` — unsafe: Evidence-required/unsafe: 12.0.0 adds nullable numeric `castBarID` and makes `notInterruptible` nullable; runtime retains the older 9-result shape, exposes numeric `castID`, and has no `castBarID`. Full-LoD/state-backed proof must trigger casting and verify exactly 10 ordered results, declared types/nullability, no-cast/unknown/invalid units, repeats, errors, and exact cast state; no casting lifecycle semantics claimed.
+2821. [evidence-required] `changed:UnitChannelInfo` — unsafe: Evidence-required/unsafe: 12.0.0 changes `unitToken:string` to `unit:unit`, makes `notInterruptible` nullable, and adds nullable numeric `castBarID` as result 11; runtime supports the older player-only 10-result shape. Full-LoD/state-backed proof must verify exact 11-result order/types/nullability across valid/non-player/no-channel/invalid/repeated states and errors; no channel lifecycle semantics claimed.
+2822. [evidence-required] `changed:UnitFullName` — unsafe: Evidence-required/unsafe: 12.0.0 changes string input to unit while retaining two string outputs; runtime string-resolves names with constant `SimRealm` and lacks full validation/state semantics. Full-LoD proof must verify exact two results, server name, unknown/invalid units, wrong types, counts, and errors; no server-name or unit identity semantics claimed.
+2823. [best-effort] `changed:UnitIsUnit` — provenance-only: Provenance-only: 12.0.0 only renames parameters `unitName1/unitName2` to `unit1/unit2`; both remain unit inputs and the boolean result remains unchanged. No behavior claim or current unit-identity gap requirement.
+2824. [evidence-required] `changed:UnitName` — unsafe: Evidence-required/unsafe: 12.0.0 declares two nullable outputs `(unitName:string?, unitServer:string?)`; runtime returns one string and does not establish server-name or unknown-unit behavior. Full-LoD/state-backed proof must verify exact two ordered nullable results, valid/unknown/invalid units, wrong types, counts, and errors; no naming semantics claimed.
+2825. [evidence-required] `changed:UnitNameUnmodified` — unsafe: Evidence-required/unsafe: 12.0.0 changes string input to unit and declares two string outputs; runtime is a one-string alias without server/unmodified distinction. Full-LoD proof must verify exact two results, unmodified/server behavior, valid/unknown/invalid units, wrong types, counts, and errors; no normalization semantics claimed.
+2826. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_FAILED` — unsafe: Evidence-required/unsafe: 12.0.0 changes exactly three args `(status, utteranceID, destination)` to exactly two `(utteranceID, status)`, removing destination with no nullable third slot; runtime only registers the event and has no producer. Full-LoD proof must trigger real TTS failure and verify exact args/no third slot, repeats, invalid requests, timing, registration, producer delivery, and errors; no TTS lifecycle semantics claimed.
 2827. [untriaged] `changed:VOICE_CHAT_TTS_PLAYBACK_FINISHED` — untriaged
 2828. [untriaged] `changed:VOICE_CHAT_TTS_PLAYBACK_STARTED` — untriaged
 2829. [untriaged] `changed:advFlyKeyboardMaxPitchFactor` — untriaged

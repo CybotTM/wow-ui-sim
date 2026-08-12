@@ -111224,117 +111224,262 @@
       "scope_exception": null,
       "notes": "Evidence-required/unsafe: before payload = `(unitTarget: unit, castGUID: string, spellID: number)`; after adds `castBarID: number?`; the current casting producer emits only the legacy three arguments. Required full-LoD/state-backed proof must establish real producer delivery, exact payload count/order/types/nullability, invalid and repeated transitions, GUID/timing, and manual-vs-producer dispatch; registration and generic/manual dispatch alone are not behavior proof. Claims are bounded to the source contract change and current simulator gap; no spellcast/outfit lifecycle semantics are claimed."
     },
-    {
+        {
       "id": "changed:UnitCastingInfo",
       "symbol": "UnitCastingInfo",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source contract for UnitCastingInfo."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "Current simulator runtime implementation/publication for UnitCastingInfo."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence for UnitCastingInfo; it does not prove full behavior."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD/state-backed probe: trigger casting on a valid unit and assert `select(\"#\", UnitCastingInfo(unit)) == 10`, output order/types match `(string,string,number,number,number,boolean,string,boolean?,number,number?)`, `notInterruptible` and `castBarID` accept nil only where declared, then cover no-cast, unknown/invalid units, repeated casts, errors, and exact castID/castBarID state."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: 12.0.0 adds nullable numeric `castBarID` and makes `notInterruptible` nullable while retaining the 10-result contract. Current runtime exposes the older 9-result shape, uses a numeric castID rather than the declared string, and has no castBarID. Full-LoD/state-backed probe: trigger casting on a valid unit and assert `select(\"#\", UnitCastingInfo(unit)) == 10`, output order/types match `(string,string,number,number,number,boolean,string,boolean?,number,number?)`, `notInterruptible` and `castBarID` accept nil only where declared, then cover no-cast, unknown/invalid units, repeated casts, errors, and exact castID/castBarID state. Claims are bounded to output contract/state proof; no casting lifecycle semantics are claimed."
     },
-    {
+        {
       "id": "changed:UnitChannelInfo",
       "symbol": "UnitChannelInfo",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source contract for UnitChannelInfo."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "Current simulator runtime implementation/publication for UnitChannelInfo."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence for UnitChannelInfo; it does not prove full behavior."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD/state-backed probe: trigger channeling on a valid unit and assert `select(\"#\", UnitChannelInfo(unit)) == 11`, output order/types match `(string,string,number,number,number,boolean,boolean?,number,boolean,number,number?)`, then cover player and non-player units, no-channel, unknown/invalid units, repeated transitions, errors, and exact empowerment/castBarID state."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: 12.0.0 changes input `unitToken:string` to `unit:unit`, makes `notInterruptible` nullable, and adds nullable numeric `castBarID` as the 11th result. Current runtime supports the older player-only 10-result shape. Full-LoD/state-backed probe: trigger channeling on a valid unit and assert `select(\"#\", UnitChannelInfo(unit)) == 11`, output order/types match `(string,string,number,number,number,boolean,boolean?,number,boolean,number,number?)`, then cover player and non-player units, no-channel, unknown/invalid units, repeated transitions, errors, and exact empowerment/castBarID state. Claims are bounded to output contract/state proof; no channel lifecycle semantics are claimed."
     },
-    {
+        {
       "id": "changed:UnitFullName",
       "symbol": "UnitFullName",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source contract for UnitFullName."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_misc.rs",
+          "source_hash": "7fd14c7c58ac6278058a90499b71c76543311554247473fc234d56ecf86f860c",
+          "summary": "Current simulator runtime implementation/publication for UnitFullName."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence for UnitFullName; it does not prove full behavior."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: call with valid unit, unknown unit, invalid unit values, and wrong argument types; assert exactly two string-or-nil results in order, exact server-name behavior, unknown-unit results, return counts, and errors."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: 12.0.0 changes the input from string to unit while retaining two string outputs. Current runtime string-resolves names, uses constant `SimRealm`, and lacks full unit validation/state semantics. Full-LoD probe: call with valid unit, unknown unit, invalid unit values, and wrong argument types; assert exactly two string-or-nil results in order, exact server-name behavior, unknown-unit results, return counts, and errors. Claims are bounded to input/output publication and state proof; no server-name or unit identity semantics are claimed."
     },
-    {
+        {
       "id": "changed:UnitIsUnit",
       "symbol": "UnitIsUnit",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source contract for UnitIsUnit."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_misc.rs",
+          "source_hash": "7fd14c7c58ac6278058a90499b71c76543311554247473fc234d56ecf86f860c",
+          "summary": "Current simulator runtime implementation/publication for UnitIsUnit."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence for UnitIsUnit; it does not prove full behavior."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: 12.0.0 renames parameters `unitName1/unitName2` to `unit1/unit2`; both remain unit inputs and the boolean result is unchanged. No behavioral claim or unit-identity gap requirement is made."
     },
-    {
+        {
       "id": "changed:UnitName",
       "symbol": "UnitName",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source contract for UnitName."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/group_queries.rs",
+          "source_hash": "73e79ffc305c4a75b02047a238d54ff8086bfeb522b9a3b68189b5854143e5fa",
+          "summary": "Current simulator runtime implementation/publication for UnitName."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence for UnitName; it does not prove full behavior."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD/state-backed probe: call valid, unknown, and invalid units and wrong argument types; assert exactly two results in order, each string-or-nil, server-name publication, unknown-unit behavior, return counts, and errors."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: 12.0.0 keeps unit input and declares two nullable outputs `(unitName:string?, unitServer:string?)`. Current runtime returns one string and does not establish server-name or unknown-unit behavior. Full-LoD/state-backed probe: call valid, unknown, and invalid units and wrong argument types; assert exactly two results in order, each string-or-nil, server-name publication, unknown-unit behavior, return counts, and errors. Claims are bounded to declared output contract and required state proof; no naming semantics are claimed."
     },
-    {
+        {
       "id": "changed:UnitNameUnmodified",
       "symbol": "UnitNameUnmodified",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source contract for UnitNameUnmodified."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/group_queries.rs",
+          "source_hash": "73e79ffc305c4a75b02047a238d54ff8086bfeb522b9a3b68189b5854143e5fa",
+          "summary": "Current simulator runtime implementation/publication for UnitNameUnmodified."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence for UnitNameUnmodified; it does not prove full behavior."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD/state-backed probe: call valid, unknown, and invalid units and wrong argument types; assert exactly two string results in order, unmodified-name/server behavior, return counts, and errors, distinguishing it from UnitName."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: 12.0.0 changes the input from string to unit and declares two string outputs. Current runtime is a one-string alias without server/unmodified distinction. Full-LoD/state-backed probe: call valid, unknown, and invalid units and wrong argument types; assert exactly two string results in order, unmodified-name/server behavior, return counts, and errors, distinguishing it from UnitName. Claims are bounded to declared output contract and required state proof; no name normalization semantics are claimed."
     },
-    {
+        {
       "id": "changed:VOICE_CHAT_TTS_PLAYBACK_FAILED",
       "symbol": "VOICE_CHAT_TTS_PLAYBACK_FAILED",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source contract for VOICE_CHAT_TTS_PLAYBACK_FAILED."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_c.rs",
+          "source_hash": "d9371adb78a2ccd3decc2bb5cbb775ce668e9f412bd0db0f6a7ebe2011a5fe5c",
+          "summary": "Current simulator runtime implementation/publication for VOICE_CHAT_TTS_PLAYBACK_FAILED."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence for VOICE_CHAT_TTS_PLAYBACK_FAILED; it does not prove full behavior."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD/state-backed probe: trigger a real TTS failure through the producer and assert exactly two event arguments `(utteranceID:number, status:VoiceTtsStatusCode)` with no third/destination slot; cover repeated/invalid requests, timing, registration, producer delivery, and errors."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: 12.0.0 changes the event from exactly three arguments `(status, utteranceID, destination)` to exactly two `(utteranceID, status)`, removing destination with no nullable third slot. Current runtime only registers the event and has no producer. Full-LoD/state-backed probe: trigger a real TTS failure through the producer and assert exactly two event arguments `(utteranceID:number, status:VoiceTtsStatusCode)` with no third/destination slot; cover repeated/invalid requests, timing, registration, producer delivery, and errors. Claims are bounded to event declaration and required producer proof; no TTS lifecycle semantics are claimed."
     },
     {
       "id": "changed:VOICE_CHAT_TTS_PLAYBACK_FINISHED",
