@@ -103914,33 +103914,77 @@
       "id": "changed:CanBeRaidTarget",
       "symbol": "CanBeRaidTarget",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes CanBeRaidTarget to accept target: unit and return result: boolean."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/targeting_verbs.rs",
+          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "summary": "Current runtime registers CanBeRaidTarget and returns a boolean from simulator unit-token resolution; this does not prove retail eligibility semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the changed CanBeRaidTarget contract."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: focused state-backed/full-LoD proof must cover valid live units, invalid and missing tokens, dead or unavailable units, argument types, boolean return type, repeated calls, and whether eligibility depends on raid-marker state or only token resolution. No exact retail eligibility, raid-marker assignment, group/permission/combat/dead-unit, UI, mutation, persistence, producer, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:ClearRaidMarker",
       "symbol": "ClearRaidMarker",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes ClearRaidMarker to accept raidMarkerIndex: number and return no values."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/targeting_verbs.rs",
+          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "summary": "Current runtime does not register or implement ClearRaidMarker; related targeting functions have no shared raid-marker state."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Current global registration has no ClearRaidMarker publication."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the changed ClearRaidMarker contract."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: shared state/full-LoD proof must cover PlaceRaidMarker, SetRaidTarget, GetRaidTargetIndex, IsRaidMarkerActive, ClearRaidMarker, and RemoveRaidTargets, including valid/invalid inputs, replacement, clearing, event delivery, return values, and errors. Registration or event dispatch alone is not behavior proof; no marker lifecycle, permission, UI, persistence, producer, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:EmitterCombatRange",
@@ -105129,7 +105173,6 @@
       "scope_exception": null,
       "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResultMeta.NumValues as Lua number 49, with source change 47→49. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order producer, interpretation, consumer, mutation, persistence, transition, or lifecycle semantics are claimed."
     },
-
     {
       "id": "changed:Enum.CraftingReagentItemFlag.TooltipShowsAsStatModifications",
       "symbol": "Enum.CraftingReagentItemFlag.TooltipShowsAsStatModifications",
@@ -110887,17 +110930,42 @@
       "id": "changed:IsRaidMarkerActive",
       "symbol": "IsRaidMarkerActive",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes IsRaidMarkerActive to a raid-marker activity query contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/mists/compat_bootstrap.lua",
+          "source_hash": "efda9f00251c455f45425bf3399388041e56e46b785ed7fde473879c87e6065a",
+          "summary": "Current non-retail compatibility code supplies a constant-false IsRaidMarkerActive fallback; no retail shared raid-marker state or producer is modeled."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/targeting_verbs.rs",
+          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "summary": "Current targeting runtime lacks shared raid-marker state needed to establish IsRaidMarkerActive semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the changed IsRaidMarkerActive contract."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: retail full-LoD/state-backed proof must establish publication, valid and invalid marker indices, state transitions through PlaceRaidMarker/SetRaidTarget/ClearRaidMarker/RemoveRaidTargets, repeated calls, event behavior, return type, and errors. The Mists constant-false fallback and registration do not prove retail behavior; no marker, permission, UI, persistence, producer, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:LE_EXPANSION_LEVEL_CURRENT",
@@ -111539,65 +111607,153 @@
       "id": "changed:PlaceRaidMarker",
       "symbol": "PlaceRaidMarker",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes PlaceRaidMarker to a raid-marker placement API contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/targeting_verbs.rs",
+          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "summary": "Current runtime does not register or implement PlaceRaidMarker and has no shared raid-marker backing state."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Current global registration has no PlaceRaidMarker publication."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the changed PlaceRaidMarker contract."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: shared state/full-LoD proof must cover PlaceRaidMarker, SetRaidTarget, GetRaidTargetIndex, IsRaidMarkerActive, ClearRaidMarker, and RemoveRaidTargets, including valid/invalid inputs, replacement, clearing, event delivery, return values, and errors. No marker lifecycle, permission, UI, persistence, producer, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:RemoveRaidTargets",
       "symbol": "RemoveRaidTargets",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes RemoveRaidTargets from null signature metadata to explicitly empty inputs and outputs."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/targeting_verbs.rs",
+          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "summary": "Current runtime does not register or implement RemoveRaidTargets; related raid-target functions have no shared marker state."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/register.rs",
+          "source_hash": "5985ad8311334b63dafa8745ff88541b2ff0af185517a92c1c4f660cc50b2713",
+          "summary": "Current global registration has no RemoveRaidTargets publication."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the changed RemoveRaidTargets contract."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: full-LoD/state-backed proof must establish callable publication, return count/types, removal of assigned markers, and interaction with SetRaidTarget, GetRaidTargetIndex, ClearRaidMarker, IsRaidMarkerActive, and RAID_TARGET_UPDATE. No exact retail return, error, event-ordering, marker lifecycle, UI, persistence, mutation, producer, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:SetRaidTarget",
       "symbol": "SetRaidTarget",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes SetRaidTarget to the current raid-marker target/index contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/targeting_verbs.rs",
+          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "summary": "Current SetRaidTarget validates a token and fires RAID_TARGET_UPDATE but stores no raid-marker state; GetRaidTargetIndex remains nil."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the changed SetRaidTarget contract."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: shared state/full-LoD proof must cover valid and invalid units and indices, replacement, GetRaidTargetIndex, IsRaidMarkerActive, ClearRaidMarker, RemoveRaidTargets, return values, event delivery/order, and errors. Current event firing without state is not behavior proof; no marker lifecycle, permission, UI, persistence, producer, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:StatusBar",
       "symbol": "StatusBar",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "uiobject",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes StatusBar fillStyle from stringenum to numeric enum and removes reverseFill and rotatesTexture fields."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/widgets/statusbar.rs",
+          "source_hash": "f24c8850d33b949e610b3dc124253990c8083c91a745d36d0a073b24c17c9b5c",
+          "summary": "Current StatusBar stores fill style as a string, returns constant STANDARD from GetFillStyle, retains reverseFill storage, and exposes rotatesTexture as false; changed state semantics are unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the changed StatusBar UIObject contract."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: focused StatusBar proof must create a widget, verify numeric Enum.StatusBarFillStyle round-trip through SetFillStyle/GetFillStyle, removed reverseFill/rotatesTexture behavior, initial state, invalid inputs, types, errors, and observable state. No rendering, interpolation, timer, or consumer semantics are claimed."
     },
     {
       "id": "changed:StatusBar.GetFillStyle",
@@ -114714,17 +114870,36 @@
       "id": "changed:scrub",
       "symbol": "scrub",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "provenance-only",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes inaccurate scrub metadata from the source contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433",
+          "summary": "Current runtime contains a scrub fallback, but this row makes no behavioral claim about secret scrubbing."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery supplies endpoint provenance for the scrub row."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Provenance-only: the 12.0.0 metadata removes inaccurate scrub information. No behavior, argument, return, secret-value, taint, producer, consumer, mutation, persistence, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:spellActivationOverlayOpacity",
@@ -114781,17 +114956,36 @@
       "id": "changed:string.trim",
       "symbol": "string.trim",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 changes the string.trim API contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/shared_bootstrap.lua",
+          "source_hash": "4fe659c57d6e7f049414c6927a6d64c329a9ea85249c759a5970a00d5b286e80",
+          "summary": "Current bootstrap aliases string.trim to strtrim when absent; this compatibility alias does not prove the changed retail contract."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the changed string.trim contract."
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence required: focused/full-LoD proof must cover custom characters, default trimming, wrong-type inputs, return type/value, errors, and publication. The bootstrap alias is not behavior proof; no string, consumer, mutation, persistence, producer, UI, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:superTrackerDist",

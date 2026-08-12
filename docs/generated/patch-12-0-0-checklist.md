@@ -2604,8 +2604,8 @@
 2604. [evidence-required] `changed:C_UnitAurasPrivate.SetPrivateRaidBossMessageCallback` — unsafe
 2605. [evidence-required] `changed:C_UnitAurasPrivate.SetPrivateWarningTextFrame` — unsafe
 2606. [evidence-required] `changed:C_VoiceChat.SpeakText` — unsafe
-2607. [untriaged] `changed:CanBeRaidTarget` — untriaged
-2608. [untriaged] `changed:ClearRaidMarker` — untriaged
+2607. [evidence-required] `changed:CanBeRaidTarget` — unsafe
+2608. [evidence-required] `changed:ClearRaidMarker` — unsafe
 2609. [best-effort] `changed:EmitterCombatRange` — behavioral
 2610. [best-effort] `changed:Enum.AccountStateLoadedFlagsMeta.NumValues` — behavioral
 2611. [best-effort] `changed:Enum.AccountTransTypeMeta.MaxValue` — behavioral
@@ -2777,7 +2777,7 @@
 2777. [best-effort] `changed:HOUSING_BASIC_MODE_PLACEMENT_FLAGS_UPDATED` — behavioral
 2778. [best-effort] `changed:HOUSING_BASIC_MODE_SELECTED_TARGET_CHANGED` — behavioral
 2779. [best-effort] `changed:HOUSING_DECOR_PLACE_SUCCESS` — behavioral
-2780. [untriaged] `changed:IsRaidMarkerActive` — untriaged
+2780. [evidence-required] `changed:IsRaidMarkerActive` — unsafe
 2781. [best-effort] `changed:LE_EXPANSION_LEVEL_CURRENT` — behavioral
 2782. [best-effort] `changed:LE_EXPANSION_LEVEL_PREVIOUS` — behavioral
 2783. [best-effort] `changed:LE_GAME_ERR_CHARTER_NEIGHBORHOOD_RENAME` — behavioral
@@ -2792,10 +2792,10 @@
 2792. [best-effort] `changed:NUM_LE_FRAME_TUTORIALS` — behavioral
 2793. [best-effort] `changed:NUM_LE_PET_JOURNAL_FILTERS` — behavioral
 2794. [best-effort] `changed:NonEmitterCombatRange` — behavioral
-2795. [untriaged] `changed:PlaceRaidMarker` — untriaged
-2796. [untriaged] `changed:RemoveRaidTargets` — untriaged
-2797. [untriaged] `changed:SetRaidTarget` — untriaged
-2798. [untriaged] `changed:StatusBar` — untriaged
+2795. [evidence-required] `changed:PlaceRaidMarker` — unsafe
+2796. [evidence-required] `changed:RemoveRaidTargets` — unsafe
+2797. [evidence-required] `changed:SetRaidTarget` — unsafe
+2798. [evidence-required] `changed:StatusBar` — unsafe
 2799. [evidence-required] `changed:StatusBar.GetFillStyle` — unsafe
 2800. [evidence-required] `changed:StatusBar.SetFillStyle` — unsafe
 2801. [best-effort] `changed:StatusBar.SetMinMaxValues` — behavioral
@@ -2859,9 +2859,9 @@
 2859. [best-effort] `changed:petJournalFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
 2860. [best-effort] `changed:petJournalSourceFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
 2861. [best-effort] `changed:petJournalTypeFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
-2862. [untriaged] `changed:scrub` — untriaged
+2862. [best-effort] `changed:scrub` — provenance-only
 2863. [best-effort] `changed:spellActivationOverlayOpacity` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.650000' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
-2864. [untriaged] `changed:string.trim` — untriaged
+2864. [evidence-required] `changed:string.trim` — unsafe
 2865. [best-effort] `changed:superTrackerDist` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.750000' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
 2866. [best-effort] `changed:typedef.TickerCallback` — provenance-only
 2867. [best-effort] `changed:typedef.TimerCallback` — provenance-only
