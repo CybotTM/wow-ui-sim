@@ -2593,12 +2593,12 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `nameplateStyle` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `nameplateThreatDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `petJournalFilterVersion` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `raidFramesCenterBigDefensive` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `raidFramesDispelIndicatorOverlay` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `raidFramesDispelIndicatorType` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `raidFramesDisplayLargerRoleSpecificDebuffs` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `raidFramesHealthBarColor` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `scriptWarnings` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `raidFramesCenterBigDefensive` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
+| `raidFramesDispelIndicatorOverlay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
+| `raidFramesDispelIndicatorType` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 2 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
+| `raidFramesDisplayLargerRoleSpecificDebuffs` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
+| `raidFramesHealthBarColor` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string FF2B9305 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
+| `scriptWarnings` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `script_object.AbbreviateConfigAPI` | best-effort | script-object | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `script_object.FrameAPITooltip` | evidence-required | script-object | added | No examined simulator construction, registration, method surface, lifecycle, or focused behavioral test; generated documentation presence is provenance only, not runtime behavior. |
 | `script_object.LuaColorCurveObjectAPI` | best-effort | script-object | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
@@ -2617,12 +2617,12 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `securecallmethod` | untriaged | api | added | api added in 12.0.0. |
 | `showAllItemsInTransmog` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `showCustomSetDetails` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `spellDiminishPVPEnemiesEnabled` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `spellDiminishPVPOnlyTriggerableByMe` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `spellDiminishPVPEnemiesEnabled` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
+| `spellDiminishPVPOnlyTriggerableByMe` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `string.concat` | untriaged | api | added | api added in 12.0.0. |
 | `trackedInitiativeTasks` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `transmogHideIgnoredSlots` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `transmogrifySetsFilters` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `transmogHideIgnoredSlots` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
+| `transmogrifySetsFilters` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `typedef.AbbreviateConfig` | best-effort | typedef | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `typedef.CooldownFrame` | best-effort | typedef | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `typedef.DurationSeconds` | best-effort | typedef | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |

@@ -2503,12 +2503,12 @@
 2503. [untriaged] `added:nameplateStyle` — untriaged
 2504. [untriaged] `added:nameplateThreatDisplay` — untriaged
 2505. [untriaged] `added:petJournalFilterVersion` — untriaged
-2506. [untriaged] `added:raidFramesCenterBigDefensive` — untriaged
-2507. [untriaged] `added:raidFramesDispelIndicatorOverlay` — untriaged
-2508. [untriaged] `added:raidFramesDispelIndicatorType` — untriaged
-2509. [untriaged] `added:raidFramesDisplayLargerRoleSpecificDebuffs` — untriaged
-2510. [untriaged] `added:raidFramesHealthBarColor` — untriaged
-2511. [untriaged] `added:scriptWarnings` — untriaged
+2506. [best-effort] `added:raidFramesCenterBigDefensive` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
+2507. [best-effort] `added:raidFramesDispelIndicatorOverlay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
+2508. [best-effort] `added:raidFramesDispelIndicatorType` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 2 under focused proof commit f3ba9786d; no consumer semantics are claimed.
+2509. [best-effort] `added:raidFramesDisplayLargerRoleSpecificDebuffs` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
+2510. [best-effort] `added:raidFramesHealthBarColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string FF2B9305 under focused proof commit f3ba9786d; no consumer semantics are claimed.
+2511. [best-effort] `added:scriptWarnings` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2512. [best-effort] `added:script_object.AbbreviateConfigAPI` — behavioral
 2513. [evidence-required] `added:script_object.FrameAPITooltip` — unsafe
 2514. [best-effort] `added:script_object.LuaColorCurveObjectAPI` — behavioral
@@ -2527,12 +2527,12 @@
 2527. [untriaged] `added:securecallmethod` — untriaged
 2528. [untriaged] `added:showAllItemsInTransmog` — untriaged
 2529. [untriaged] `added:showCustomSetDetails` — untriaged
-2530. [untriaged] `added:spellDiminishPVPEnemiesEnabled` — untriaged
-2531. [untriaged] `added:spellDiminishPVPOnlyTriggerableByMe` — untriaged
+2530. [best-effort] `added:spellDiminishPVPEnemiesEnabled` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
+2531. [best-effort] `added:spellDiminishPVPOnlyTriggerableByMe` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2532. [untriaged] `added:string.concat` — untriaged
 2533. [untriaged] `added:trackedInitiativeTasks` — untriaged
-2534. [untriaged] `added:transmogHideIgnoredSlots` — untriaged
-2535. [untriaged] `added:transmogrifySetsFilters` — untriaged
+2534. [best-effort] `added:transmogHideIgnoredSlots` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
+2535. [best-effort] `added:transmogrifySetsFilters` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2536. [best-effort] `added:typedef.AbbreviateConfig` — provenance-only
 2537. [best-effort] `added:typedef.CooldownFrame` — provenance-only
 2538. [best-effort] `added:typedef.DurationSeconds` — provenance-only
