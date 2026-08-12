@@ -2592,7 +2592,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `nameplateStackingTypes` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
 | `nameplateStyle` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
 | `nameplateThreatDisplay` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
-| `petJournalFilterVersion` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `petJournalFilterVersion` | best-effort | cvar | added | startup getter/default publication proven; exact string 0 under focused proof 417521854; no consumer semantics claimed. |
 | `raidFramesCenterBigDefensive` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `raidFramesDispelIndicatorOverlay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `raidFramesDispelIndicatorType` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 2 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
@@ -2607,20 +2607,20 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `script_object.LuaDurationObjectAPI` | best-effort | script-object | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `script_object.UnitHealPredictionCalculatorAPI` | best-effort | script-object | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `scrubsecretvalues` | untriaged | api | added | api added in 12.0.0. |
-| `secretChallengeModeRestrictionsForced` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `secretCombatRestrictionsForced` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `secretEncounterRestrictionsForced` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `secretMapRestrictionsForced` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `secretPvPMatchRestrictionsForced` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `secretChallengeModeRestrictionsForced` | best-effort | cvar | added | startup getter/default publication proven; exact string 0 under focused proof 417521854; no consumer semantics claimed. |
+| `secretCombatRestrictionsForced` | best-effort | cvar | added | startup getter/default publication proven; exact string 0 under focused proof 417521854; no consumer semantics claimed. |
+| `secretEncounterRestrictionsForced` | best-effort | cvar | added | startup getter/default publication proven; exact string 0 under focused proof 417521854; no consumer semantics claimed. |
+| `secretMapRestrictionsForced` | best-effort | cvar | added | startup getter/default publication proven; exact string 0 under focused proof 417521854; no consumer semantics claimed. |
+| `secretPvPMatchRestrictionsForced` | best-effort | cvar | added | startup getter/default publication proven; exact string 0 under focused proof 417521854; no consumer semantics claimed. |
 | `secretunwrap` | untriaged | api | added | api added in 12.0.0. |
 | `secretwrap` | untriaged | api | added | api added in 12.0.0. |
 | `securecallmethod` | untriaged | api | added | api added in 12.0.0. |
-| `showAllItemsInTransmog` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `showCustomSetDetails` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `showAllItemsInTransmog` | best-effort | cvar | added | startup getter/default publication proven; exact string 0 under focused proof 417521854; no consumer semantics claimed. |
+| `showCustomSetDetails` | best-effort | cvar | added | startup getter/default publication proven; exact string 1 under focused proof 417521854; no consumer semantics claimed. |
 | `spellDiminishPVPEnemiesEnabled` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `spellDiminishPVPOnlyTriggerableByMe` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `string.concat` | untriaged | api | added | api added in 12.0.0. |
-| `trackedInitiativeTasks` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `trackedInitiativeTasks` | best-effort | cvar | added | startup getter/default publication proven; exact empty-string under focused proof 417521854; no consumer semantics claimed. |
 | `transmogHideIgnoredSlots` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `transmogrifySetsFilters` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `typedef.AbbreviateConfig` | best-effort | typedef | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |

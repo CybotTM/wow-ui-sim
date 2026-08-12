@@ -2502,7 +2502,7 @@
 2502. [untriaged] `added:nameplateStackingTypes` — best-effort / behavioral
 2503. [untriaged] `added:nameplateStyle` — best-effort / behavioral
 2504. [untriaged] `added:nameplateThreatDisplay` — best-effort / behavioral
-2505. [untriaged] `added:petJournalFilterVersion` — untriaged
+2505. [best-effort] `added:petJournalFilterVersion` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
 2506. [best-effort] `added:raidFramesCenterBigDefensive` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2507. [best-effort] `added:raidFramesDispelIndicatorOverlay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2508. [best-effort] `added:raidFramesDispelIndicatorType` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 2 under focused proof commit f3ba9786d; no consumer semantics are claimed.
@@ -2517,20 +2517,20 @@
 2517. [best-effort] `added:script_object.LuaDurationObjectAPI` — behavioral
 2518. [best-effort] `added:script_object.UnitHealPredictionCalculatorAPI` — behavioral
 2519. [untriaged] `added:scrubsecretvalues` — untriaged
-2520. [untriaged] `added:secretChallengeModeRestrictionsForced` — untriaged
-2521. [untriaged] `added:secretCombatRestrictionsForced` — untriaged
-2522. [untriaged] `added:secretEncounterRestrictionsForced` — untriaged
-2523. [untriaged] `added:secretMapRestrictionsForced` — untriaged
-2524. [untriaged] `added:secretPvPMatchRestrictionsForced` — untriaged
+2520. [best-effort] `added:secretChallengeModeRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
+2521. [best-effort] `added:secretCombatRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
+2522. [best-effort] `added:secretEncounterRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
+2523. [best-effort] `added:secretMapRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
+2524. [best-effort] `added:secretPvPMatchRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
 2525. [untriaged] `added:secretunwrap` — untriaged
 2526. [untriaged] `added:secretwrap` — untriaged
 2527. [untriaged] `added:securecallmethod` — untriaged
-2528. [untriaged] `added:showAllItemsInTransmog` — untriaged
-2529. [untriaged] `added:showCustomSetDetails` — untriaged
+2528. [best-effort] `added:showAllItemsInTransmog` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
+2529. [best-effort] `added:showCustomSetDetails` — best-effort behavioral: both public getters return exact string 1 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
 2530. [best-effort] `added:spellDiminishPVPEnemiesEnabled` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2531. [best-effort] `added:spellDiminishPVPOnlyTriggerableByMe` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2532. [untriaged] `added:string.concat` — untriaged
-2533. [untriaged] `added:trackedInitiativeTasks` — untriaged
+2533. [best-effort] `added:trackedInitiativeTasks` — best-effort behavioral: both public getters return exact empty-string under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
 2534. [best-effort] `added:transmogHideIgnoredSlots` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2535. [best-effort] `added:transmogrifySetsFilters` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2536. [best-effort] `added:typedef.AbbreviateConfig` — provenance-only
