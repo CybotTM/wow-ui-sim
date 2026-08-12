@@ -1,23 +1,6 @@
 {
   "schema": "framexml-patch-audit/v2",
   "patch": "12.0.0",
-  "target": {
-    "flavor": "retail",
-    "build": "12.0.0",
-    "cache_manifest": "data/blizzard-ui-files/retail.txt",
-    "cache_hash": "42abf0ff8118e6be4d41ed321f6a0e7daeb83234928e451f33851d14a488b5ef"
-  },
-  "source": {
-    "path": "data/patch-api/sources/12.0.0-register.json",
-    "hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-    "added_count": 2554,
-    "changed_count": 313,
-    "removed_count": 543
-  },
-  "output": {
-    "checklist": "docs/generated/patch-12-0-0-checklist.md",
-    "inventory": "docs/wiki/investigations/patch-12-0-0-occurrence-inventory.md"
-  },
   "rows": [
     {
       "id": "added:ADDON_RESTRICTION_STATE_CHANGED",
@@ -95702,65 +95685,221 @@
       "id": "added:canaccessallvalues",
       "symbol": "canaccessallvalues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 adds this security API; claims remain bounded to the declared signature."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/value_access.rs",
+          "source_hash": "4c419e9d65a7e1dd8fc0efba907f3a8ca16b97ff1e1ee622363e0279dd57f176",
+          "summary": "Current simulator value-access helpers use local shallow/deep secret checks; these are not asserted to match complete retail access-control semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433",
+          "summary": "Current simulator secret-value model and passthrough helpers expose local taint/secret behavior only."
+        },
+        {
+          "kind": "source",
+          "reference": "data/lua/taint_stubs.lua",
+          "source_hash": "0283b03648a8a8cd0f6e18b32f924ce480063785eac8d2291402f9ce6b222c8e",
+          "summary": "Permissive compatibility fallbacks are not treated as retail security proof."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/security_api.rs",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034",
+          "summary": "Existing local security tests cover simulator behavior but do not establish complete retail edge semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no complete security semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(canaccessallvalues) == 'function'); cover zero arguments, clean primitives, direct taint, mixed values, nested tables, and propagated/protected values; assert each result against authoritative retail behavior."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current simulator behavior is local, missing, or permissive and does not establish complete retail secret, taint, protected-value, propagation, or access-control semantics."
     },
     {
       "id": "added:canaccesssecrets",
       "symbol": "canaccesssecrets",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 adds this security API; claims remain bounded to the declared signature."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/value_access.rs",
+          "source_hash": "4c419e9d65a7e1dd8fc0efba907f3a8ca16b97ff1e1ee622363e0279dd57f176",
+          "summary": "Current simulator value-access helpers use local shallow/deep secret checks; these are not asserted to match complete retail access-control semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433",
+          "summary": "Current simulator secret-value model and passthrough helpers expose local taint/secret behavior only."
+        },
+        {
+          "kind": "source",
+          "reference": "data/lua/taint_stubs.lua",
+          "source_hash": "0283b03648a8a8cd0f6e18b32f924ce480063785eac8d2291402f9ce6b222c8e",
+          "summary": "Permissive compatibility fallbacks are not treated as retail security proof."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/security_api.rs",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034",
+          "summary": "Existing local security tests cover simulator behavior but do not establish complete retail edge semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no complete security semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(canaccesssecrets) == 'function'); assert(type(canaccesssecrets()) == 'boolean'); exercise every supported access-policy state and assert the returned capability flag."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current simulator behavior is local, missing, or permissive and does not establish complete retail secret, taint, protected-value, propagation, or access-control semantics."
     },
     {
       "id": "added:canaccesstable",
       "symbol": "canaccesstable",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 adds this security API; claims remain bounded to the declared signature."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/value_access.rs",
+          "source_hash": "4c419e9d65a7e1dd8fc0efba907f3a8ca16b97ff1e1ee622363e0279dd57f176",
+          "summary": "Current simulator value-access helpers use local shallow/deep secret checks; these are not asserted to match complete retail access-control semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433",
+          "summary": "Current simulator secret-value model and passthrough helpers expose local taint/secret behavior only."
+        },
+        {
+          "kind": "source",
+          "reference": "data/lua/taint_stubs.lua",
+          "source_hash": "0283b03648a8a8cd0f6e18b32f924ce480063785eac8d2291402f9ce6b222c8e",
+          "summary": "Permissive compatibility fallbacks are not treated as retail security proof."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/security_api.rs",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034",
+          "summary": "Existing local security tests cover simulator behavior but do not establish complete retail edge semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no complete security semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(canaccesstable) == 'function'); cover clean tables, direct and nested secret values, mixed contents, non-table inputs, and precedence against any permissive fallback."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current simulator behavior is local, missing, or permissive and does not establish complete retail secret, taint, protected-value, propagation, or access-control semantics."
     },
     {
       "id": "added:canaccessvalue",
       "symbol": "canaccessvalue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 adds this security API; claims remain bounded to the declared signature."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/value_access.rs",
+          "source_hash": "4c419e9d65a7e1dd8fc0efba907f3a8ca16b97ff1e1ee622363e0279dd57f176",
+          "summary": "Current simulator value-access helpers use local shallow/deep secret checks; these are not asserted to match complete retail access-control semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433",
+          "summary": "Current simulator secret-value model and passthrough helpers expose local taint/secret behavior only."
+        },
+        {
+          "kind": "source",
+          "reference": "data/lua/taint_stubs.lua",
+          "source_hash": "0283b03648a8a8cd0f6e18b32f924ce480063785eac8d2291402f9ce6b222c8e",
+          "summary": "Permissive compatibility fallbacks are not treated as retail security proof."
+        },
+        {
+          "kind": "source",
+          "reference": "tests/security_api.rs",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034",
+          "summary": "Existing local security tests cover simulator behavior but do not establish complete retail edge semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no complete security semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(canaccessvalue) == 'function'); cover primitives, direct taint, propagated/nested values, protected values, and edge arguments against authoritative retail behavior."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current simulator behavior is local, missing, or permissive and does not establish complete retail secret, taint, protected-value, propagation, or access-control semantics."
     },
     {
       "id": "added:chatBubblesRaid",
@@ -96026,17 +96165,44 @@
       "id": "added:dropsecretaccess",
       "symbol": "dropsecretaccess",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 adds this security API; claims remain bounded to the declared signature."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/value_access.rs",
+          "source_hash": "4c419e9d65a7e1dd8fc0efba907f3a8ca16b97ff1e1ee622363e0279dd57f176",
+          "summary": "Current simulator value-access helpers use local shallow/deep secret checks; these are not asserted to match complete retail access-control semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "data/lua/taint_stubs.lua",
+          "source_hash": "0283b03648a8a8cd0f6e18b32f924ce480063785eac8d2291402f9ce6b222c8e",
+          "summary": "Permissive compatibility fallbacks are not treated as retail security proof."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery evidence; no complete security semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(dropsecretaccess) == 'function'); establish a secret-access state, call dropsecretaccess(), and prove an observable access-policy state mutation with the supported API."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Current simulator behavior is local, missing, or permissive and does not establish complete retail secret, taint, protected-value, propagation, or access-control semantics."
     },
     {
       "id": "added:enablePetBattleFloatingCombatText_v2",
@@ -97486,161 +97652,511 @@
       "id": "added:floatingCombatTextEnergyGains_v2",
       "symbol": "floatingCombatTextEnergyGains_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextEnergyGains_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextEnergyGains_v2 with exact startup/default string '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextEnergyGains_v2) and GetCVarDefault(floatingCombatTextEnergyGains_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextEnergyGains_v2 through public value/default getters as the exact string '0'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:floatingCombatTextFloatMode_v2",
       "symbol": "floatingCombatTextFloatMode_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextFloatMode_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextFloatMode_v2 with exact startup/default string '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextFloatMode_v2) and GetCVarDefault(floatingCombatTextFloatMode_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextFloatMode_v2 through public value/default getters as the exact string '1'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:floatingCombatTextFriendlyHealers_v2",
       "symbol": "floatingCombatTextFriendlyHealers_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextFriendlyHealers_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextFriendlyHealers_v2 with exact startup/default string '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextFriendlyHealers_v2) and GetCVarDefault(floatingCombatTextFriendlyHealers_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextFriendlyHealers_v2 through public value/default getters as the exact string '0'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:floatingCombatTextHonorGains_v2",
       "symbol": "floatingCombatTextHonorGains_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextHonorGains_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextHonorGains_v2 with exact startup/default string '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextHonorGains_v2) and GetCVarDefault(floatingCombatTextHonorGains_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextHonorGains_v2 through public value/default getters as the exact string '0'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:floatingCombatTextLowManaHealth_v2",
       "symbol": "floatingCombatTextLowManaHealth_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextLowManaHealth_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextLowManaHealth_v2 with exact startup/default string '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextLowManaHealth_v2) and GetCVarDefault(floatingCombatTextLowManaHealth_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextLowManaHealth_v2 through public value/default getters as the exact string '1'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:floatingCombatTextPeriodicEnergyGains_v2",
       "symbol": "floatingCombatTextPeriodicEnergyGains_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextPeriodicEnergyGains_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextPeriodicEnergyGains_v2 with exact startup/default string '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextPeriodicEnergyGains_v2) and GetCVarDefault(floatingCombatTextPeriodicEnergyGains_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextPeriodicEnergyGains_v2 through public value/default getters as the exact string '0'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:floatingCombatTextPetMeleeDamage_v2",
       "symbol": "floatingCombatTextPetMeleeDamage_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextPetMeleeDamage_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextPetMeleeDamage_v2 with exact startup/default string '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextPetMeleeDamage_v2) and GetCVarDefault(floatingCombatTextPetMeleeDamage_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextPetMeleeDamage_v2 through public value/default getters as the exact string '1'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:floatingCombatTextPetSpellDamage_v2",
       "symbol": "floatingCombatTextPetSpellDamage_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextPetSpellDamage_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextPetSpellDamage_v2 with exact startup/default string '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextPetSpellDamage_v2) and GetCVarDefault(floatingCombatTextPetSpellDamage_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextPetSpellDamage_v2 through public value/default getters as the exact string '1'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:floatingCombatTextReactives_v2",
       "symbol": "floatingCombatTextReactives_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextReactives_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextReactives_v2 with exact startup/default string '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextReactives_v2) and GetCVarDefault(floatingCombatTextReactives_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextReactives_v2 through public value/default getters as the exact string '1'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:floatingCombatTextRepChanges_v2",
       "symbol": "floatingCombatTextRepChanges_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextRepChanges_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextRepChanges_v2 with exact startup/default string '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts both public getter and default exact values.",
+          "source_hash": "f9819aa38d74531a357c20313caa68444ddd6610ce3384444281794e6d1cae0f"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextRepChanges_v2) and GetCVarDefault(floatingCombatTextRepChanges_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claim is made."
+      ],
+      "commit": "abee2e56bbf659f83bde05665579243d17a12314",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextRepChanges_v2 through public value/default getters as the exact string '0'. Claims are bounded to getter/default publication only; no rendering, mutation, persistence, consumer, later-epoch, or semantic-equivalence behavior is claimed."
     },
     {
       "id": "added:hasanysecretvalues",

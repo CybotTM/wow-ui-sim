@@ -2502,10 +2502,10 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `alwaysShowRuneIcons` | best-effort | cvar | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `auctionSortByBuyoutPrice` | best-effort | cvar | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `auctionSortByUnitPrice` | best-effort | cvar | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
-| `canaccessallvalues` | untriaged | api | added | api added in 12.0.0. |
-| `canaccesssecrets` | untriaged | api | added | api added in 12.0.0. |
-| `canaccesstable` | untriaged | api | added | api added in 12.0.0. |
-| `canaccessvalue` | untriaged | api | added | api added in 12.0.0. |
+| `canaccessallvalues` | evidence-required | api | added | Evidence required: local shallow bulk-access behavior does not establish complete retail mixed/direct/nested/tainted/zero-argument semantics. |
+| `canaccesssecrets` | evidence-required | api | added | Evidence required: the global is missing; supported access-policy capability behavior is unmodeled. |
+| `canaccesstable` | evidence-required | api | added | Evidence required: local deep table checks and permissive fallbacks do not establish complete retail table-access semantics. |
+| `canaccessvalue` | evidence-required | api | added | Evidence required: local shallow value checks do not establish complete retail propagation, protected-value, or nested semantics. |
 | `chatBubblesRaid` | best-effort | cvar | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `combatWarningsEnabled` | best-effort | cvar | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `damageMeterEnabled` | best-effort | cvar | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
@@ -2517,7 +2517,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `docs.extra_events.COMBAT_LOG_EVENT_INTERNAL_UNFILTERED` | untriaged | docs-extra-event | added | docs-extra-event added in 12.0.0. |
 | `docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` | untriaged | docs-extra-event | added | Transient docs-extra-event existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
 | `docs.extra_script_objects.FrameAPITooltip` | untriaged | docs-extra-script-object | added | Transient docs-extra-script-object existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
-| `dropsecretaccess` | untriaged | api | added | api added in 12.0.0. |
+| `dropsecretaccess` | evidence-required | api | added | Evidence required: the global is missing and no observable secret-access state mutation is modeled. |
 | `enablePetBattleFloatingCombatText_v2` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '1'; no CVar behavior or consumer semantics claimed. |
 | `encounterTimelineEnabled` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '1'; no CVar behavior or consumer semantics claimed. |
 | `encounterTimelineHideForOtherRoles` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '0'; no CVar behavior or consumer semantics claimed. |
@@ -2547,16 +2547,16 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `floatingCombatTextComboPoints_v2` | best-effort | cvar | added | Behavioral: public `GetCVar`/`GetCVarDefault` return exact string `0` under focused proof `a5a1a343a`; no CVar consumer or old-name equivalence claim. |
 | `floatingCombatTextDamageReduction_v2` | best-effort | cvar | added | Behavioral: public `GetCVar`/`GetCVarDefault` return exact string `0` under focused proof `a5a1a343a`; no CVar consumer or old-name equivalence claim. |
 | `floatingCombatTextDodgeParryMiss_v2` | best-effort | cvar | added | Behavioral: public `GetCVar`/`GetCVarDefault` return exact string `0` under focused proof `a5a1a343a`; no CVar consumer or old-name equivalence claim. |
-| `floatingCombatTextEnergyGains_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `floatingCombatTextFloatMode_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `floatingCombatTextFriendlyHealers_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `floatingCombatTextHonorGains_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `floatingCombatTextLowManaHealth_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `floatingCombatTextPeriodicEnergyGains_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `floatingCombatTextPetMeleeDamage_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `floatingCombatTextPetSpellDamage_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `floatingCombatTextReactives_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `floatingCombatTextRepChanges_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `floatingCombatTextEnergyGains_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
+| `floatingCombatTextFloatMode_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
+| `floatingCombatTextFriendlyHealers_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
+| `floatingCombatTextHonorGains_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
+| `floatingCombatTextLowManaHealth_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
+| `floatingCombatTextPeriodicEnergyGains_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
+| `floatingCombatTextPetMeleeDamage_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
+| `floatingCombatTextPetSpellDamage_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
+| `floatingCombatTextReactives_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
+| `floatingCombatTextRepChanges_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
 | `hasanysecretvalues` | untriaged | api | added | api added in 12.0.0. |
 | `issecrettable` | untriaged | api | added | api added in 12.0.0. |
 | `issecretvalue` | untriaged | api | added | api added in 12.0.0. |

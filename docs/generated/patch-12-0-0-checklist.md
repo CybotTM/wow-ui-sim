@@ -2412,10 +2412,10 @@
 2412. [best-effort] `added:alwaysShowRuneIcons` — behavioral
 2413. [best-effort] `added:auctionSortByBuyoutPrice` — behavioral
 2414. [best-effort] `added:auctionSortByUnitPrice` — behavioral
-2415. [untriaged] `added:canaccessallvalues` — untriaged
-2416. [untriaged] `added:canaccesssecrets` — untriaged
-2417. [untriaged] `added:canaccesstable` — untriaged
-2418. [untriaged] `added:canaccessvalue` — untriaged
+2415. [evidence-required] `added:canaccessallvalues` — unsafe
+2416. [evidence-required] `added:canaccesssecrets` — unsafe
+2417. [evidence-required] `added:canaccesstable` — unsafe
+2418. [evidence-required] `added:canaccessvalue` — unsafe
 2419. [best-effort] `added:chatBubblesRaid` — behavioral
 2420. [best-effort] `added:combatWarningsEnabled` — behavioral
 2421. [best-effort] `added:damageMeterEnabled` — behavioral
@@ -2427,7 +2427,7 @@
 2427. [untriaged] `added:docs.extra_events.COMBAT_LOG_EVENT_INTERNAL_UNFILTERED` — untriaged
 2428. [untriaged] `added:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — untriaged
 2429. [untriaged] `added:docs.extra_script_objects.FrameAPITooltip` — untriaged
-2430. [untriaged] `added:dropsecretaccess` — untriaged
+2430. [evidence-required] `added:dropsecretaccess` — unsafe
 2431. [untriaged] `added:enablePetBattleFloatingCombatText_v2` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
 2432. [untriaged] `added:encounterTimelineEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
 2433. [untriaged] `added:encounterTimelineHideForOtherRoles` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
@@ -2457,16 +2457,16 @@
 2457. [best-effort] `added:floatingCombatTextComboPoints_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
 2458. [best-effort] `added:floatingCombatTextDamageReduction_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
 2459. [best-effort] `added:floatingCombatTextDodgeParryMiss_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
-2460. [untriaged] `added:floatingCombatTextEnergyGains_v2` — untriaged
-2461. [untriaged] `added:floatingCombatTextFloatMode_v2` — untriaged
-2462. [untriaged] `added:floatingCombatTextFriendlyHealers_v2` — untriaged
-2463. [untriaged] `added:floatingCombatTextHonorGains_v2` — untriaged
-2464. [untriaged] `added:floatingCombatTextLowManaHealth_v2` — untriaged
-2465. [untriaged] `added:floatingCombatTextPeriodicEnergyGains_v2` — untriaged
-2466. [untriaged] `added:floatingCombatTextPetMeleeDamage_v2` — untriaged
-2467. [untriaged] `added:floatingCombatTextPetSpellDamage_v2` — untriaged
-2468. [untriaged] `added:floatingCombatTextReactives_v2` — untriaged
-2469. [untriaged] `added:floatingCombatTextRepChanges_v2` — untriaged
+2460. [best-effort] `added:floatingCombatTextEnergyGains_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
+2461. [best-effort] `added:floatingCombatTextFloatMode_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
+2462. [best-effort] `added:floatingCombatTextFriendlyHealers_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
+2463. [best-effort] `added:floatingCombatTextHonorGains_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
+2464. [best-effort] `added:floatingCombatTextLowManaHealth_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
+2465. [best-effort] `added:floatingCombatTextPeriodicEnergyGains_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
+2466. [best-effort] `added:floatingCombatTextPetMeleeDamage_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
+2467. [best-effort] `added:floatingCombatTextPetSpellDamage_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
+2468. [best-effort] `added:floatingCombatTextReactives_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
+2469. [best-effort] `added:floatingCombatTextRepChanges_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
 2470. [untriaged] `added:hasanysecretvalues` — untriaged
 2471. [untriaged] `added:issecrettable` — untriaged
 2472. [untriaged] `added:issecretvalue` — untriaged
