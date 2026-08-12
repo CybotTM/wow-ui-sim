@@ -118051,17 +118051,46 @@
       "id": "removed:SHOW_DELVES_DISPLAY_UI",
       "symbol": "SHOW_DELVES_DISPLAY_UI",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes SHOW_DELVES_DISPLAY_UI; no replacement event or payload is claimed."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/event/valid_events_b.rs",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863",
+          "summary": "Current valid-event registration rejects SHOW_DELVES_DISPLAY_UI while retaining the HOUSE_LEVEL_CHANGED control event."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_event_dispatch.rs",
+          "source_hash": "ec7a5798d9df1970b29ef7106a55760885820212f70f698e7e23092d4ca00bf9",
+          "summary": "Focused retail 12.0.0 test asserts removed-event registration fails and the valid control event registers."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery source checked for the removed event."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_event_dispatch.rs::test_patch_12_0_0_removed_show_delves_display_event_rejected"
+      ],
+      "assertions": [
+        "RegisterEvent(\"SHOW_DELVES_DISPLAY_UI\") is rejected while RegisterEvent(\"HOUSE_LEVEL_CHANGED\") succeeds."
+      ],
+      "commit": "df6f8a5a3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral claim is limited to event-name rejection and the valid-event control; no producer, payload, replacement, or Delves behavior is claimed."
     },
     {
       "id": "removed:SetActionUIButton",

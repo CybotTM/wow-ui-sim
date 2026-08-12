@@ -3231,7 +3231,7 @@
 3231. [untriaged] `removed:NewCraftingOrderInfo.reagentItems` — untriaged
 3232. [best-effort] `removed:PlaySound` — compat
 3233. [untriaged] `removed:RegularReagentInfo.itemID` — untriaged
-3234. [untriaged] `removed:SHOW_DELVES_DISPLAY_UI` — untriaged
+3234. [best-effort] `removed:SHOW_DELVES_DISPLAY_UI` — behavioral
 3235. [best-effort] `removed:SetActionUIButton` — vendor-present
 3236. [best-effort] `removed:SetPortraitToTexture` — compat
 3237. [best-effort] `removed:SetRaidTargetProtected` — behavioral
