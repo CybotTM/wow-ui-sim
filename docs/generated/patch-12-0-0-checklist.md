@@ -2467,9 +2467,9 @@
 2467. [best-effort] `added:floatingCombatTextPetSpellDamage_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
 2468. [best-effort] `added:floatingCombatTextReactives_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
 2469. [best-effort] `added:floatingCombatTextRepChanges_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2470. [untriaged] `added:hasanysecretvalues` — untriaged
-2471. [untriaged] `added:issecrettable` — untriaged
-2472. [untriaged] `added:issecretvalue` — untriaged
+2470. [evidence-required] `added:hasanysecretvalues` — Evidence-required/unsafe: full-LoD/state-backed secret or mapping probes remain required; current publication is missing or incomplete.
+2471. [evidence-required] `added:issecrettable` — Evidence-required/unsafe: full-LoD/state-backed secret or mapping probes remain required; current publication is missing or incomplete.
+2472. [evidence-required] `added:issecretvalue` — Evidence-required/unsafe: full-LoD/state-backed secret or mapping probes remain required; current publication is missing or incomplete.
 2473. [untriaged] `added:lastTransmogCustomSetIDNoSpec` — untriaged
 2474. [untriaged] `added:lastTransmogCustomSetIDSpec1` — untriaged
 2475. [untriaged] `added:lastTransmogCustomSetIDSpec2` — untriaged
@@ -2478,7 +2478,7 @@
 2478. [untriaged] `added:lastTransmogOutfitIDNoSpec` — untriaged
 2479. [untriaged] `added:lfgListAdvancedFiltersVersion` — untriaged
 2480. [untriaged] `added:majorFactionRenownMap` — untriaged
-2481. [untriaged] `added:mapvalues` — untriaged
+2481. [evidence-required] `added:mapvalues` — Evidence-required/unsafe: full-LoD/state-backed secret or mapping probes remain required; current publication is missing or incomplete.
 2482. [best-effort] `added:nameplateAuraScale` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1.000000 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
 2483. [best-effort] `added:nameplateCastBarDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,[ under focused proof commit bd8ce82d2; no rendering semantics are claimed.
 2484. [best-effort] `added:nameplateDebuffPadding` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed.

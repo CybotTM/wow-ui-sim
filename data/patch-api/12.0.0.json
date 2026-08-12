@@ -98345,49 +98345,142 @@
       "id": "added:hasanysecretvalues",
       "symbol": "hasanysecretvalues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 declares hasanysecretvalues(values...) with a boolean isAnyValueSecret result; full behavior is not specified by the register.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/value_access.rs",
+          "summary": "Current runtime does not register hasanysecretvalues; related value-access fallbacks are not an alias or retail semantic proof.",
+          "source_hash": "4c419e9d65a7e1dd8fc0efba907f3a8ca16b97ff1e1ee622363e0279dd57f176"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "summary": "Simulator secret-value model is local and incomplete for full variadic secret queries.",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/security_api.rs",
+          "summary": "Existing security tests cover related access APIs, not hasanysecretvalues or its full edge cases.",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Discovery evidence for the declared API; no complete runtime behavior is inferred.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Unsafe: hasanysecretvalues is not published by the current runtime. Required full-LoD/state-backed probes must establish publication and boolean behavior for zero arguments, nil/primitives, direct and nested secret values, mixed values, tainted/propagated/protected values, and return type. No alias or permissive fallback is claimed."
     },
     {
       "id": "added:issecrettable",
       "symbol": "issecrettable",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 declares issecrettable(table) with a boolean isSecretOrContentsSecret result; full behavior is not specified by the register.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/value_access.rs",
+          "summary": "Current runtime does not register issecrettable; canaccesstable is a distinct local access check and is not an alias or retail semantic proof.",
+          "source_hash": "4c419e9d65a7e1dd8fc0efba907f3a8ca16b97ff1e1ee622363e0279dd57f176"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "summary": "Simulator secret traversal model does not establish the complete secret-table contract.",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/security_api.rs",
+          "summary": "Existing security tests cover related access APIs, not issecrettable or its full edge cases.",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Discovery evidence for the declared API; no complete runtime behavior is inferred.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Unsafe: issecrettable is not published by the current runtime. Required full-LoD/state-backed probes must establish callable boolean publication for non-table inputs, empty tables, direct secret values, nested secret values, mixed tables, propagated/tainted/protected values, and return type. Do not alias canaccesstable or claim equivalence."
     },
     {
       "id": "added:issecretvalue",
       "symbol": "issecretvalue",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 declares issecretvalue(value?) with a boolean isSecret result.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/value_access.rs",
+          "summary": "Current runtime publishes issecretvalue through a guarded local fallback.",
+          "source_hash": "4c419e9d65a7e1dd8fc0efba907f3a8ca16b97ff1e1ee622363e0279dd57f176"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/security/secret_values.rs",
+          "summary": "Current implementation uses a shallow local secret model; nested, propagated, protected, and other full retail semantics remain unproven.",
+          "source_hash": "edf147574df2461f6e71212c1993e4bb5d046fc789f0adecf8b774851965c433"
+        },
+        {
+          "kind": "source",
+          "reference": "tests/security_api.rs",
+          "summary": "Existing tests cover selected untainted, tainted-closure, identity, and combined cases, not the complete retail contract.",
+          "source_hash": "27a79e6d77acd3592e58136e4fd359d2a86ae32a26108a4348ecc06dae8f8034"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Discovery evidence for the declared API; no complete runtime behavior is inferred.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Unsafe: issecretvalue is published by guarded local shallow-secret logic, but full retail semantics are unproven. Required state-backed/full-LoD probes must cover nil, primitives, direct and nested secret values, mixed values, taint propagation, tainted closures, protected values, and boolean return type. Do not claim the local shallow behavior is retail-equivalent."
     },
     {
       "id": "added:lastTransmogCustomSetIDNoSpec",
@@ -98521,17 +98614,42 @@
       "id": "added:mapvalues",
       "symbol": "mapvalues",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 declares mapvalues(func, values...) with variadic mapped outputs.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/shared_bootstrap.lua",
+          "summary": "Current runtime publishes mapvalues through a guarded Lua fallback that maps variadic inputs.",
+          "source_hash": "4fe659c57d6e7f049414c6927a6d64c329a9ea85249c759a5970a00d5b286e80"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/formatting_utility_defaults.rs",
+          "summary": "A duplicate temporary fallback/test covers only basic doubling behavior.",
+          "source_hash": "ef91cc6927098cb33bb2b14928da6dacaf1617a0f083e5ba05fea3da2a0687d4"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Discovery evidence for the declared API; no complete runtime behavior is inferred.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Unsafe: mapvalues is published by guarded shared and temporary fallbacks with only basic mapping behavior covered. Required state-backed/full-LoD probes must establish zero values, nil inputs, callback arity, multiple returns, callback errors, result order/count, and Lua packing semantics. No fallback equivalence is claimed."
     },
     {
       "id": "added:nameplateAuraScale",

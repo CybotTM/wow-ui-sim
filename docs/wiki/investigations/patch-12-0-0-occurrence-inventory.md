@@ -2557,9 +2557,9 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `floatingCombatTextPetSpellDamage_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
 | `floatingCombatTextReactives_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
 | `floatingCombatTextRepChanges_v2` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed. |
-| `hasanysecretvalues` | untriaged | api | added | api added in 12.0.0. |
-| `issecrettable` | untriaged | api | added | api added in 12.0.0. |
-| `issecretvalue` | untriaged | api | added | api added in 12.0.0. |
+| `hasanysecretvalues` | evidence-required | api | added | Evidence-required/unsafe: not published; full-LoD/state-backed secret-query probes required. |
+| `issecrettable` | evidence-required | api | added | Evidence-required/unsafe: not published; full-LoD/state-backed table-secret probes required. |
+| `issecretvalue` | evidence-required | api | added | Evidence-required/unsafe: guarded shallow local logic exists; full retail secret semantics remain unproven. |
 | `lastTransmogCustomSetIDNoSpec` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `lastTransmogCustomSetIDSpec1` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `lastTransmogCustomSetIDSpec2` | untriaged | cvar | added | cvar added in 12.0.0. |
@@ -2568,7 +2568,7 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `lastTransmogOutfitIDNoSpec` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `lfgListAdvancedFiltersVersion` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `majorFactionRenownMap` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `mapvalues` | untriaged | api | added | api added in 12.0.0. |
+| `mapvalues` | evidence-required | api | added | Evidence-required/unsafe: guarded basic mapping fallback exists; packing/count/error semantics remain unproven. |
 | `nameplateAuraScale` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1.000000 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
 | `nameplateCastBarDisplay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,[ under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
 | `nameplateDebuffPadding` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
