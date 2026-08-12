@@ -964,7 +964,7 @@ MSAAQuality: '0'
 nameplateAuraScale: '1.000000'
 nameplateCastBarDisplay: "\x02["
 nameplateDebuffPadding: '0'
-nameplateEnemyNpcAuraDisplay: "\x02G"
+nameplateEnemyNpcAuraDisplay: "\x02C"
 nameplateEnemyPlayerAuraDisplay: "\x02C"
 nameplateFriendlyPlayerAuraDisplay: "\x02C"
 nameplateGameObjectMaxDistance: '30.000000'

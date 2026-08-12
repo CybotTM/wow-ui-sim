@@ -418,6 +418,7 @@ fn test_patch_12_0_0_cvar_defaults() {
                     encounterWarningsLevel = "0",
                     endeavorInitiativesLastPoints = "0",
                     equipmentManager = "1",
+                    nameplateEnemyNpcAuraDisplay = string.char(2) .. "C",
                 }
                 for name, expected_value in pairs(expected) do
                     local value = GetCVar(name)
