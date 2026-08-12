@@ -2428,19 +2428,19 @@
 2428. [evidence-required] `added:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — Evidence required: docs-extra provenance and checked-in registration do not prove full-LoD runtime behavior; exact probe required.
 2429. [best-effort] `added:docs.extra_script_objects.FrameAPITooltip` — Provenance-only: source records this docs-extra entry; no runtime behavior is claimed.
 2430. [evidence-required] `added:dropsecretaccess` — unsafe
-2431. [untriaged] `added:enablePetBattleFloatingCombatText_v2` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2432. [untriaged] `added:encounterTimelineEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2433. [untriaged] `added:encounterTimelineHideForOtherRoles` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2434. [untriaged] `added:encounterTimelineHideLongCountdowns` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2435. [untriaged] `added:encounterTimelineHideQueuedCountdowns` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2436. [untriaged] `added:encounterTimelineIconographyEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2437. [untriaged] `added:encounterTimelineIconographyHiddenMask` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2438. [untriaged] `added:encounterWarningsDefaultMessageDuration` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2439. [untriaged] `added:encounterWarningsEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2440. [untriaged] `added:encounterWarningsHideIfNotTargetingPlayer` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2441. [untriaged] `added:encounterWarningsLevel` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2442. [untriaged] `added:endeavorInitiativesLastPoints` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2443. [untriaged] `added:equipmentManager` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2431. [best-effort] `added:enablePetBattleFloatingCombatText_v2` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2432. [best-effort] `added:encounterTimelineEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2433. [best-effort] `added:encounterTimelineHideForOtherRoles` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2434. [best-effort] `added:encounterTimelineHideLongCountdowns` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2435. [best-effort] `added:encounterTimelineHideQueuedCountdowns` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2436. [best-effort] `added:encounterTimelineIconographyEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2437. [best-effort] `added:encounterTimelineIconographyHiddenMask` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2438. [best-effort] `added:encounterWarningsDefaultMessageDuration` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2439. [best-effort] `added:encounterWarningsEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2440. [best-effort] `added:encounterWarningsHideIfNotTargetingPlayer` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2441. [best-effort] `added:encounterWarningsLevel` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2442. [best-effort] `added:endeavorInitiativesLastPoints` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2443. [best-effort] `added:equipmentManager` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
 2444. [best-effort] `added:externalDefensivesEnabled` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
 2445. [best-effort] `added:floatingCombatTextAuraFade` — provenance-only: transient intermediate-snapshot CVar, absent at both patch endpoints; no runtime behavior or `_v2` equivalence claimed.
 2446. [best-effort] `added:floatingCombatTextAuraFade_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
@@ -2490,18 +2490,18 @@
 2490. [best-effort] `added:nameplateShowClassColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
 2491. [best-effort] `added:nameplateShowFriendlyClassColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
 2492. [best-effort] `added:nameplateShowFriendlyNpcs` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2493. [untriaged] `added:nameplateShowFriendlyPlayerGuardians` — best-effort / behavioral
-2494. [untriaged] `added:nameplateShowFriendlyPlayerMinions` — best-effort / behavioral
-2495. [untriaged] `added:nameplateShowFriendlyPlayerPets` — best-effort / behavioral
-2496. [untriaged] `added:nameplateShowFriendlyPlayerTotems` — best-effort / behavioral
-2497. [untriaged] `added:nameplateShowFriendlyPlayers` — best-effort / behavioral
-2498. [untriaged] `added:nameplateShowOffscreen` — best-effort / behavioral
-2499. [untriaged] `added:nameplateShowOnlyNameForFriendlyPlayerUnits` — best-effort / behavioral
-2500. [untriaged] `added:nameplateSimplifiedTypes` — best-effort / behavioral
-2501. [untriaged] `added:nameplateSize` — best-effort / behavioral
-2502. [untriaged] `added:nameplateStackingTypes` — best-effort / behavioral
-2503. [untriaged] `added:nameplateStyle` — best-effort / behavioral
-2504. [untriaged] `added:nameplateThreatDisplay` — best-effort / behavioral
+2493. [best-effort] `added:nameplateShowFriendlyPlayerGuardians` — best-effort / behavioral
+2494. [best-effort] `added:nameplateShowFriendlyPlayerMinions` — best-effort / behavioral
+2495. [best-effort] `added:nameplateShowFriendlyPlayerPets` — best-effort / behavioral
+2496. [best-effort] `added:nameplateShowFriendlyPlayerTotems` — best-effort / behavioral
+2497. [best-effort] `added:nameplateShowFriendlyPlayers` — best-effort / behavioral
+2498. [best-effort] `added:nameplateShowOffscreen` — best-effort / behavioral
+2499. [best-effort] `added:nameplateShowOnlyNameForFriendlyPlayerUnits` — best-effort / behavioral
+2500. [best-effort] `added:nameplateSimplifiedTypes` — best-effort / behavioral
+2501. [best-effort] `added:nameplateSize` — best-effort / behavioral
+2502. [best-effort] `added:nameplateStackingTypes` — best-effort / behavioral
+2503. [best-effort] `added:nameplateStyle` — best-effort / behavioral
+2504. [best-effort] `added:nameplateThreatDisplay` — best-effort / behavioral
 2505. [best-effort] `added:petJournalFilterVersion` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
 2506. [best-effort] `added:raidFramesCenterBigDefensive` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2507. [best-effort] `added:raidFramesDispelIndicatorOverlay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
@@ -2555,7 +2555,7 @@
 2555. [evidence-required] `changed:COMBAT_LOG_EVENT` — unsafe
 2556. [evidence-required] `changed:COMBAT_LOG_EVENT_UNFILTERED` — unsafe
 2557. [best-effort] `changed:C_FunctionContainers.CreateCallback` — behavioral
-2558. [untriaged] `changed:C_Housing.RequestHouseFinderNeighborhoodData` — untriaged
+2558. [evidence-required] `changed:C_Housing.RequestHouseFinderNeighborhoodData` — unsafe
 2559. [evidence-required] `changed:C_Item.CanItemTransmogAppearance` — unsafe
 2560. [evidence-required] `changed:C_Item.GetItemInfo` — unsafe
 2561. [evidence-required] `changed:C_ItemInteraction.ItemInteractionFrameInfo.flags` — unsafe
