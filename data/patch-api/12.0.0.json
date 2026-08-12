@@ -96432,17 +96432,52 @@
       "id": "added:externalDefensivesEnabled",
       "symbol": "externalDefensivesEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar externalDefensivesEnabled with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish externalDefensivesEnabled with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(externalDefensivesEnabled) and GetCVarDefault(externalDefensivesEnabled) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes externalDefensivesEnabled through public value/default getters as the exact string '0'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextAuraFade",
@@ -96464,225 +96499,715 @@
       "id": "added:floatingCombatTextAuraFade_v2",
       "symbol": "floatingCombatTextAuraFade_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextAuraFade_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextAuraFade_v2 with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextAuraFade_v2) and GetCVarDefault(floatingCombatTextAuraFade_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextAuraFade_v2 through public value/default getters as the exact string '0'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextAuras_v2",
       "symbol": "floatingCombatTextAuras_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextAuras_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextAuras_v2 with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextAuras_v2) and GetCVarDefault(floatingCombatTextAuras_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextAuras_v2 through public value/default getters as the exact string '0'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextCombatDamageAllAutos_v2",
       "symbol": "floatingCombatTextCombatDamageAllAutos_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextCombatDamageAllAutos_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextCombatDamageAllAutos_v2 with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextCombatDamageAllAutos_v2) and GetCVarDefault(floatingCombatTextCombatDamageAllAutos_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextCombatDamageAllAutos_v2 through public value/default getters as the exact string '1'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextCombatDamageDirectionalOffset_v2",
       "symbol": "floatingCombatTextCombatDamageDirectionalOffset_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextCombatDamageDirectionalOffset_v2 with exact string default '1.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextCombatDamageDirectionalOffset_v2 with exact startup/default string value '1.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextCombatDamageDirectionalOffset_v2) and GetCVarDefault(floatingCombatTextCombatDamageDirectionalOffset_v2) both return the exact Lua string value '1.000000'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextCombatDamageDirectionalOffset_v2 through public value/default getters as the exact string '1.000000'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextCombatDamageDirectionalScale_v2",
       "symbol": "floatingCombatTextCombatDamageDirectionalScale_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextCombatDamageDirectionalScale_v2 with exact string default '1.000000'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextCombatDamageDirectionalScale_v2 with exact startup/default string value '1.000000'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextCombatDamageDirectionalScale_v2) and GetCVarDefault(floatingCombatTextCombatDamageDirectionalScale_v2) both return the exact Lua string value '1.000000'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextCombatDamageDirectionalScale_v2 through public value/default getters as the exact string '1.000000'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextCombatDamage_v2",
       "symbol": "floatingCombatTextCombatDamage_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextCombatDamage_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextCombatDamage_v2 with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextCombatDamage_v2) and GetCVarDefault(floatingCombatTextCombatDamage_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextCombatDamage_v2 through public value/default getters as the exact string '1'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextCombatHealingAbsorbSelf_v2",
       "symbol": "floatingCombatTextCombatHealingAbsorbSelf_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextCombatHealingAbsorbSelf_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextCombatHealingAbsorbSelf_v2 with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextCombatHealingAbsorbSelf_v2) and GetCVarDefault(floatingCombatTextCombatHealingAbsorbSelf_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextCombatHealingAbsorbSelf_v2 through public value/default getters as the exact string '1'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextCombatHealingAbsorbTarget_v2",
       "symbol": "floatingCombatTextCombatHealingAbsorbTarget_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextCombatHealingAbsorbTarget_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextCombatHealingAbsorbTarget_v2 with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextCombatHealingAbsorbTarget_v2) and GetCVarDefault(floatingCombatTextCombatHealingAbsorbTarget_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextCombatHealingAbsorbTarget_v2 through public value/default getters as the exact string '1'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextCombatHealing_v2",
       "symbol": "floatingCombatTextCombatHealing_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextCombatHealing_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextCombatHealing_v2 with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextCombatHealing_v2) and GetCVarDefault(floatingCombatTextCombatHealing_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextCombatHealing_v2 through public value/default getters as the exact string '1'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextCombatLogPeriodicSpells_v2",
       "symbol": "floatingCombatTextCombatLogPeriodicSpells_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextCombatLogPeriodicSpells_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextCombatLogPeriodicSpells_v2 with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextCombatLogPeriodicSpells_v2) and GetCVarDefault(floatingCombatTextCombatLogPeriodicSpells_v2) both return the exact Lua string value '1'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextCombatLogPeriodicSpells_v2 through public value/default getters as the exact string '1'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextCombatState_v2",
       "symbol": "floatingCombatTextCombatState_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextCombatState_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextCombatState_v2 with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextCombatState_v2) and GetCVarDefault(floatingCombatTextCombatState_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextCombatState_v2 through public value/default getters as the exact string '0'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextComboPoints_v2",
       "symbol": "floatingCombatTextComboPoints_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextComboPoints_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextComboPoints_v2 with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextComboPoints_v2) and GetCVarDefault(floatingCombatTextComboPoints_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextComboPoints_v2 through public value/default getters as the exact string '0'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextDamageReduction_v2",
       "symbol": "floatingCombatTextDamageReduction_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextDamageReduction_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextDamageReduction_v2 with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextDamageReduction_v2) and GetCVarDefault(floatingCombatTextDamageReduction_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextDamageReduction_v2 through public value/default getters as the exact string '0'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextDodgeParryMiss_v2",
       "symbol": "floatingCombatTextDodgeParryMiss_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar floatingCombatTextDodgeParryMiss_v2 with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish floatingCombatTextDodgeParryMiss_v2 with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes seeded values and defaults through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "29629826d9d85da2a15959b1001ee7ba9ab6f5f516b507c2d9fc5e4f691530cd"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(floatingCombatTextDodgeParryMiss_v2) and GetCVarDefault(floatingCombatTextDodgeParryMiss_v2) both return the exact Lua string value '0'; no rendering, mutation, persistence, consumer, or semantic-equivalence claims are made."
+      ],
+      "commit": "a5a1a343a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes floatingCombatTextDodgeParryMiss_v2 through public value/default getters as the exact string '0'. Claims are limited to getter/default publication; no rendering, mutation, persistence, consumer, or semantic equivalence to old/removed names is claimed."
     },
     {
       "id": "added:floatingCombatTextEnergyGains_v2",

@@ -2441,22 +2441,22 @@
 2441. [untriaged] `added:encounterWarningsLevel` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
 2442. [untriaged] `added:endeavorInitiativesLastPoints` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
 2443. [untriaged] `added:equipmentManager` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2444. [untriaged] `added:externalDefensivesEnabled` — untriaged
+2444. [best-effort] `added:externalDefensivesEnabled` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
 2445. [untriaged] `added:floatingCombatTextAuraFade` — untriaged
-2446. [untriaged] `added:floatingCombatTextAuraFade_v2` — untriaged
-2447. [untriaged] `added:floatingCombatTextAuras_v2` — untriaged
-2448. [untriaged] `added:floatingCombatTextCombatDamageAllAutos_v2` — untriaged
-2449. [untriaged] `added:floatingCombatTextCombatDamageDirectionalOffset_v2` — untriaged
-2450. [untriaged] `added:floatingCombatTextCombatDamageDirectionalScale_v2` — untriaged
-2451. [untriaged] `added:floatingCombatTextCombatDamage_v2` — untriaged
-2452. [untriaged] `added:floatingCombatTextCombatHealingAbsorbSelf_v2` — untriaged
-2453. [untriaged] `added:floatingCombatTextCombatHealingAbsorbTarget_v2` — untriaged
-2454. [untriaged] `added:floatingCombatTextCombatHealing_v2` — untriaged
-2455. [untriaged] `added:floatingCombatTextCombatLogPeriodicSpells_v2` — untriaged
-2456. [untriaged] `added:floatingCombatTextCombatState_v2` — untriaged
-2457. [untriaged] `added:floatingCombatTextComboPoints_v2` — untriaged
-2458. [untriaged] `added:floatingCombatTextDamageReduction_v2` — untriaged
-2459. [untriaged] `added:floatingCombatTextDodgeParryMiss_v2` — untriaged
+2446. [best-effort] `added:floatingCombatTextAuraFade_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
+2447. [best-effort] `added:floatingCombatTextAuras_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
+2448. [best-effort] `added:floatingCombatTextCombatDamageAllAutos_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
+2449. [best-effort] `added:floatingCombatTextCombatDamageDirectionalOffset_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1.000000`; getter/default publication only.
+2450. [best-effort] `added:floatingCombatTextCombatDamageDirectionalScale_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1.000000`; getter/default publication only.
+2451. [best-effort] `added:floatingCombatTextCombatDamage_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
+2452. [best-effort] `added:floatingCombatTextCombatHealingAbsorbSelf_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
+2453. [best-effort] `added:floatingCombatTextCombatHealingAbsorbTarget_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
+2454. [best-effort] `added:floatingCombatTextCombatHealing_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
+2455. [best-effort] `added:floatingCombatTextCombatLogPeriodicSpells_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
+2456. [best-effort] `added:floatingCombatTextCombatState_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
+2457. [best-effort] `added:floatingCombatTextComboPoints_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
+2458. [best-effort] `added:floatingCombatTextDamageReduction_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
+2459. [best-effort] `added:floatingCombatTextDodgeParryMiss_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
 2460. [untriaged] `added:floatingCombatTextEnergyGains_v2` — untriaged
 2461. [untriaged] `added:floatingCombatTextFloatMode_v2` — untriaged
 2462. [untriaged] `added:floatingCombatTextFriendlyHealers_v2` — untriaged
