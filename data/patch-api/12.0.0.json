@@ -90581,49 +90581,160 @@
       "id": "added:Region.SetVertexColorFromBoolean",
       "symbol": "Region.SetVertexColorFromBoolean",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "docs-method-metadata",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail declares the LayeredRegion method through docs metadata; checked-in Texture color support does not establish boolean branch selection, resulting vertex state, propagation, rendering, or edge semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/uiobjects.yaml",
+          "source_hash": "4e175343a65ebe184063e28a572043c2f4eeef0a26afbf8ef6703bef5fe2f391",
+          "summary": "Retail declares the LayeredRegion method through docs metadata; checked-in Texture color support does not establish boolean branch selection, resulting vertex state, propagation, rendering, or edge semantics."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/frame/methods/widgets/texture/color.rs",
+          "source_hash": "d186feb96ddb9f97e257602fbc3fa48a1611162e480010060c653a464eecea4d",
+          "summary": "Retail declares the LayeredRegion method through docs metadata; checked-in Texture color support does not establish boolean branch selection, resulting vertex state, propagation, rendering, or edge semantics."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/frame/methods/widgets/texture/mod.rs",
+          "source_hash": "f21fb855f99e31b02b4b4662674c265c2c65feb8c894c85638d4b3528f7f6c41",
+          "summary": "Retail declares the LayeredRegion method through docs metadata; checked-in Texture color support does not establish boolean branch selection, resulting vertex state, propagation, rendering, or edge semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail declares the LayeredRegion method through docs metadata; checked-in Texture color support does not establish boolean branch selection, resulting vertex state, propagation, rendering, or edge semantics."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD method probe: call SetVertexColorFromBoolean(true, colorIfTrue, colorIfFalse) and false, then observe GetVertexColor() selects the corresponding RGBA branch on applicable LayeredRegion objects."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail declares the LayeredRegion method through docs metadata; checked-in Texture color support does not establish boolean branch selection, resulting vertex state, propagation, rendering, or edge semantics."
     },
     {
       "id": "added:RegisterEventCallback",
       "symbol": "RegisterEventCallback",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail declares a global callback API, while the simulator fallback is inert and returns nil. Frame:RegisterEventCallback is separate and does not prove the free global registry or invocation semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
+          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "summary": "Retail declares a global callback API, while the simulator fallback is inert and returns nil. Frame:RegisterEventCallback is separate and does not prove the free global registry or invocation semantics."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/workarounds/temporary/dispatcher_callback_defaults.rs",
+          "source_hash": "ae8b85140e7a6f29d9988c3725d184f0b715e4a28aa34634586d9509ae7bfbde",
+          "summary": "Retail declares a global callback API, while the simulator fallback is inert and returns nil. Frame:RegisterEventCallback is separate and does not prove the free global registry or invocation semantics."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/events.rs",
+          "source_hash": "096a106c441cb9c299248c427187a828edb0e46cb48749f435fe7a64fff5071b",
+          "summary": "Retail declares a global callback API, while the simulator fallback is inert and returns nil. Frame:RegisterEventCallback is separate and does not prove the free global registry or invocation semantics."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Retail declares a global callback API, while the simulator fallback is inert and returns nil. Frame:RegisterEventCallback is separate and does not prove the free global registry or invocation semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail declares a global callback API, while the simulator fallback is inert and returns nil. Frame:RegisterEventCallback is separate and does not prove the free global registry or invocation semantics."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD global callback probe: register a callback for an event, inject/produce the event, assert boolean registration and callback delivery, then unregister through the matching global API and assert no later invocation; do not substitute Frame methods."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail declares a global callback API, while the simulator fallback is inert and returns nil. Frame:RegisterEventCallback is separate and does not prove the free global registry or invocation semantics."
     },
     {
       "id": "added:RegisterUnitEventCallback",
       "symbol": "RegisterUnitEventCallback",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail declares a global unit-filtered callback API, while the simulator fallback is inert and does not register, filter, or invoke callbacks. Frame:RegisterUnitEventCallback is separate."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
+          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "summary": "Retail declares a global unit-filtered callback API, while the simulator fallback is inert and does not register, filter, or invoke callbacks. Frame:RegisterUnitEventCallback is separate."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/workarounds/temporary/dispatcher_callback_defaults.rs",
+          "source_hash": "ae8b85140e7a6f29d9988c3725d184f0b715e4a28aa34634586d9509ae7bfbde",
+          "summary": "Retail declares a global unit-filtered callback API, while the simulator fallback is inert and does not register, filter, or invoke callbacks. Frame:RegisterUnitEventCallback is separate."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/events.rs",
+          "source_hash": "096a106c441cb9c299248c427187a828edb0e46cb48749f435fe7a64fff5071b",
+          "summary": "Retail declares a global unit-filtered callback API, while the simulator fallback is inert and does not register, filter, or invoke callbacks. Frame:RegisterUnitEventCallback is separate."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Retail declares a global unit-filtered callback API, while the simulator fallback is inert and does not register, filter, or invoke callbacks. Frame:RegisterUnitEventCallback is separate."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail declares a global unit-filtered callback API, while the simulator fallback is inert and does not register, filter, or invoke callbacks. Frame:RegisterUnitEventCallback is separate."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD global unit-callback probe: register a callback, inject matching and nonmatching unit events, assert only matching delivery and callback arguments, then unregister and assert no later invocation; do not substitute Frame methods."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail declares a global unit-filtered callback API, while the simulator fallback is inert and does not register, filter, or invoke callbacks. Frame:RegisterUnitEventCallback is separate."
     },
     {
       "id": "added:RegularReagentInfo.reagent",
@@ -90996,177 +91107,504 @@
       "id": "added:SetCursorPosition",
       "symbol": "SetCursorPosition",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a public two-number cursor setter. The simulator has GetCursorPosition and an admin-only state setter, but no public setter or proven coordinate mutation contract."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/globals/real/mouse_probes.rs",
+          "source_hash": "8affc56f843e015fbe998ad39e70f65a3b5c39bd5bc3d484e6085fe1fca722c9",
+          "summary": "Retail adds a public two-number cursor setter. The simulator has GetCursorPosition and an admin-only state setter, but no public setter or proven coordinate mutation contract."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/globals/admin_zone_economy.rs",
+          "source_hash": "642fc035555c8922dd9c1018919704a6e971d1c9ac7441f96bd2ff96f3fdde4b",
+          "summary": "Retail adds a public two-number cursor setter. The simulator has GetCursorPosition and an admin-only state setter, but no public setter or proven coordinate mutation contract."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/mouse_probes.rs",
+          "source_hash": "473a5da657a7d7d58039f31ff3acfa963e1453ca5dea23d4d8e6c2f27bf9aba5",
+          "summary": "Retail adds a public two-number cursor setter. The simulator has GetCursorPosition and an admin-only state setter, but no public setter or proven coordinate mutation contract."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a public two-number cursor setter. The simulator has GetCursorPosition and an admin-only state setter, but no public setter or proven coordinate mutation contract."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD cursor probe: call SetCursorPosition(x, y), then observe the public GetCursorPosition() result and coordinate conversion; assert the supported mutation rather than only symbol existence."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a public two-number cursor setter. The simulator has GetCursorPosition and an admin-only state setter, but no public setter or proven coordinate mutation contract."
     },
     {
       "id": "added:SetTableSecurityOption",
       "symbol": "SetTableSecurityOption",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a table-security mutation API. The simulator publishes neither the function nor the TableSecurityOption enum/backing table-security state; no guessed no-op is justified."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a table-security mutation API. The simulator publishes neither the function nor the TableSecurityOption enum/backing table-security state; no guessed no-op is justified."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Retail adds a table-security mutation API. The simulator publishes neither the function nor the TableSecurityOption enum/backing table-security state; no guessed no-op is justified."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Retail adds a table-security mutation API. The simulator publishes neither the function nor the TableSecurityOption enum/backing table-security state; no guessed no-op is justified."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD table-security probe: call SetTableSecurityOption(table, Enum.TableSecurityOption value) and observe the supported security/taint API proving the selected state; symbol existence or a no-op is insufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a table-security mutation API. The simulator publishes neither the function nor the TableSecurityOption enum/backing table-security state; no guessed no-op is justified."
     },
     {
       "id": "added:ShowCloak",
       "symbol": "ShowCloak",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a boolean no-return cloak setter. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
+          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "summary": "Retail adds a boolean no-return cloak setter. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/env_init/mod.rs",
+          "source_hash": "5d8153800520075faa6e320ae75dd50ff8a65ecced640e7c07fce46e94a65b65",
+          "summary": "Retail adds a boolean no-return cloak setter. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a boolean no-return cloak setter. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD state probe: call ShowCloak(true) and false, then observe a supported cloak-visibility query/state and assert each setter changes that state; no inert setter is sufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a boolean no-return cloak setter. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
     },
     {
       "id": "added:ShowHelm",
       "symbol": "ShowHelm",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a boolean no-return helm setter. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
+          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "summary": "Retail adds a boolean no-return helm setter. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/env_init/mod.rs",
+          "source_hash": "5d8153800520075faa6e320ae75dd50ff8a65ecced640e7c07fce46e94a65b65",
+          "summary": "Retail adds a boolean no-return helm setter. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a boolean no-return helm setter. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD state probe: call ShowHelm(true) and false, then observe a supported helm-visibility query/state and assert each setter changes that state; no inert setter is sufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a boolean no-return helm setter. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
     },
     {
       "id": "added:ShowingCloak",
       "symbol": "ShowingCloak",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a zero-argument boolean cloak query. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
+          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "summary": "Retail adds a zero-argument boolean cloak query. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/env_init/mod.rs",
+          "source_hash": "5d8153800520075faa6e320ae75dd50ff8a65ecced640e7c07fce46e94a65b65",
+          "summary": "Retail adds a zero-argument boolean cloak query. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a zero-argument boolean cloak query. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD state probe: assert ShowingCloak() returns a boolean and changes consistently after supported ShowCloak(true/false) transitions; no guessed constant is sufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a zero-argument boolean cloak query. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
     },
     {
       "id": "added:ShowingHelm",
       "symbol": "ShowingHelm",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a zero-argument boolean helm query. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
+          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "summary": "Retail adds a zero-argument boolean helm query. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/env_init/mod.rs",
+          "source_hash": "5d8153800520075faa6e320ae75dd50ff8a65ecced640e7c07fce46e94a65b65",
+          "summary": "Retail adds a zero-argument boolean helm query. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a zero-argument boolean helm query. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD state probe: assert ShowingHelm() returns a boolean and changes consistently after supported ShowHelm(true/false) transitions; no guessed constant is sufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a zero-argument boolean helm query. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
     },
     {
       "id": "added:SimpleScriptRegionAPI.IsAnchoringSecret",
       "symbol": "SimpleScriptRegionAPI.IsAnchoringSecret",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "docs-method-metadata",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "The simulator publishes this method but currently maps it to local secret-value state. Retail anchoring relationships, propagation, taint, and edge semantics remain unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/uiobjects.yaml",
+          "source_hash": "4e175343a65ebe184063e28a572043c2f4eeef0a26afbf8ef6703bef5fe2f391",
+          "summary": "The simulator publishes this method but currently maps it to local secret-value state. Retail anchoring relationships, propagation, taint, and edge semantics remain unproven."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/frame/methods/misc/secret.rs",
+          "source_hash": "1446b48ea786a3f13384bc61d1ffec835c53e56d020858f048bdb10640896597",
+          "summary": "The simulator publishes this method but currently maps it to local secret-value state. Retail anchoring relationships, propagation, taint, and edge semantics remain unproven."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/frame_state.rs",
+          "source_hash": "a8615ee76c68351107ab69ec5e9f31a647f3798b03d44be530dc845a9b5f5c49",
+          "summary": "The simulator publishes this method but currently maps it to local secret-value state. Retail anchoring relationships, propagation, taint, and edge semantics remain unproven."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "The simulator publishes this method but currently maps it to local secret-value state. Retail anchoring relationships, propagation, taint, and edge semantics remain unproven."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD anchoring-secret probe: establish anchored and unanchored regions with secret/non-secret values, then assert IsAnchoringSecret() against observed retail anchor-chain behavior; the current secret-value shortcut is not sufficient."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "The simulator publishes this method but currently maps it to local secret-value state. Retail anchoring relationships, propagation, taint, and edge semantics remain unproven."
     },
     {
       "id": "added:SimulateMouseClick",
       "symbol": "SimulateMouseClick",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a one-string no-return mouse-click injector. The simulator has external mouse-click paths but no public Lua global or proven button-specific script dispatch."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
+          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "summary": "Retail adds a one-string no-return mouse-click injector. The simulator has external mouse-click paths but no public Lua global or proven button-specific script dispatch."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/iced_app/update_servers.rs",
+          "source_hash": "bfccd4829c2d9e806c4f3578f4572ae3ec12558ac87e9230c9f99652e496a2eb",
+          "summary": "Retail adds a one-string no-return mouse-click injector. The simulator has external mouse-click paths but no public Lua global or proven button-specific script dispatch."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_server.rs",
+          "source_hash": "1e576908aab7a9e24a07c51d25eacdb4c6fbc091cda07e227264e49307778f27",
+          "summary": "Retail adds a one-string no-return mouse-click injector. The simulator has external mouse-click paths but no public Lua global or proven button-specific script dispatch."
+        },
+        {
+          "kind": "test",
+          "reference": "src/iced_app/mouse_tests.rs",
+          "source_hash": "846046d4f1a9fae6389530eab92fed1a333b4296b80012e889b350581686ae2b",
+          "summary": "Retail adds a one-string no-return mouse-click injector. The simulator has external mouse-click paths but no public Lua global or proven button-specific script dispatch."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a one-string no-return mouse-click injector. The simulator has external mouse-click paths but no public Lua global or proven button-specific script dispatch."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD input probe: SimulateMouseClick(button) must update button/input state and dispatch the correct target-frame mouse/click handlers through the supported input path; external CLI/GUI click helpers are not equivalent."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a one-string no-return mouse-click injector. The simulator has external mouse-click paths but no public Lua global or proven button-specific script dispatch."
     },
     {
       "id": "added:SimulateMouseDown",
       "symbol": "SimulateMouseDown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a one-string no-return mouse-down injector. The simulator has internal physical mouse handling but no public Lua global or proven simulated button/script dispatch."
+        },
+        {
+          "kind": "source",
+          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
+          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "summary": "Retail adds a one-string no-return mouse-down injector. The simulator has internal physical mouse handling but no public Lua global or proven simulated button/script dispatch."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/globals/real/mouse_probes.rs",
+          "source_hash": "8affc56f843e015fbe998ad39e70f65a3b5c39bd5bc3d484e6085fe1fca722c9",
+          "summary": "Retail adds a one-string no-return mouse-down injector. The simulator has internal physical mouse handling but no public Lua global or proven simulated button/script dispatch."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a one-string no-return mouse-down injector. The simulator has internal physical mouse handling but no public Lua global or proven simulated button/script dispatch."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD input probe: SimulateMouseDown(button) must update IsMouseButtonDown and dispatch the matching target-frame OnMouseDown behavior; internal physical input handling is not equivalent."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a one-string no-return mouse-down injector. The simulator has internal physical mouse handling but no public Lua global or proven simulated button/script dispatch."
     },
     {
       "id": "added:SimulateMouseUp",
       "symbol": "SimulateMouseUp",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a one-string no-return mouse-up injector. The simulator lacks the public release operation and resulting button/script dispatch; admin cursor state is not equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a one-string no-return mouse-up injector. The simulator lacks the public release operation and resulting button/script dispatch; admin cursor state is not equivalent."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/globals/real/mouse_probes.rs",
+          "source_hash": "8affc56f843e015fbe998ad39e70f65a3b5c39bd5bc3d484e6085fe1fca722c9",
+          "summary": "Retail adds a one-string no-return mouse-up injector. The simulator lacks the public release operation and resulting button/script dispatch; admin cursor state is not equivalent."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/globals/admin_zone_economy.rs",
+          "source_hash": "642fc035555c8922dd9c1018919704a6e971d1c9ac7441f96bd2ff96f3fdde4b",
+          "summary": "Retail adds a one-string no-return mouse-up injector. The simulator lacks the public release operation and resulting button/script dispatch; admin cursor state is not equivalent."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD input probe: establish a pressed button, call SimulateMouseUp(button), assert IsMouseButtonDown is false, and verify target-frame OnMouseUp/click dispatch; no public release path currently proves this."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a one-string no-return mouse-up injector. The simulator lacks the public release operation and resulting button/script dispatch; admin cursor state is not equivalent."
     },
     {
       "id": "added:SimulateMouseWheel",
       "symbol": "SimulateMouseWheel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a numeric no-return wheel injector. Physical wheel dispatch exists internally, but the simulator lacks the public Lua global and proven injection path."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a numeric no-return wheel injector. Physical wheel dispatch exists internally, but the simulator lacks the public Lua global and proven injection path."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/globals/real/mouse_probes.rs",
+          "source_hash": "8affc56f843e015fbe998ad39e70f65a3b5c39bd5bc3d484e6085fe1fca722c9",
+          "summary": "Retail adds a numeric no-return wheel injector. Physical wheel dispatch exists internally, but the simulator lacks the public Lua global and proven injection path."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/iced_app/mouse.rs",
+          "source_hash": "cf8c2f01e025c3d76ddfc404c28ea7f16de550c80e8a62c072dab978a7ac6b1f",
+          "summary": "Retail adds a numeric no-return wheel injector. Physical wheel dispatch exists internally, but the simulator lacks the public Lua global and proven injection path."
+        },
+        {
+          "kind": "test",
+          "reference": "src/iced_app/mouse_tests.rs",
+          "source_hash": "846046d4f1a9fae6389530eab92fed1a333b4296b80012e889b350581686ae2b",
+          "summary": "Retail adds a numeric no-return wheel injector. Physical wheel dispatch exists internally, but the simulator lacks the public Lua global and proven injection path."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD input probe: enable mouse-wheel handling, call SimulateMouseWheel(delta), and assert the target frame receives OnMouseWheel with the numeric delta through the public path."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a numeric no-return wheel injector. Physical wheel dispatch exists internally, but the simulator lacks the public Lua global and proven injection path."
     },
     {
       "id": "added:Sound_EnableEncounterWarningsSounds",
@@ -93672,33 +94110,99 @@
       "id": "added:UnregisterEventCallback",
       "symbol": "UnregisterEventCallback",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a two-argument global callback removal API. The simulator exposes only an inert fallback returning nil; Frame:UnregisterEventCallback does not prove the free global registry."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/workarounds/temporary/dispatcher_callback_defaults.rs",
+          "source_hash": "ae8b85140e7a6f29d9988c3725d184f0b715e4a28aa34634586d9509ae7bfbde",
+          "summary": "Retail adds a two-argument global callback removal API. The simulator exposes only an inert fallback returning nil; Frame:UnregisterEventCallback does not prove the free global registry."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/events.rs",
+          "source_hash": "096a106c441cb9c299248c427187a828edb0e46cb48749f435fe7a64fff5071b",
+          "summary": "Retail adds a two-argument global callback removal API. The simulator exposes only an inert fallback returning nil; Frame:UnregisterEventCallback does not prove the free global registry."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Retail adds a two-argument global callback removal API. The simulator exposes only an inert fallback returning nil; Frame:UnregisterEventCallback does not prove the free global registry."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a two-argument global callback removal API. The simulator exposes only an inert fallback returning nil; Frame:UnregisterEventCallback does not prove the free global registry."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD callback probe: register a global callback, prove one invocation, unregister the same callback, inject the event again, and assert post-unregister non-invocation; Frame methods are not interchangeable."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a two-argument global callback removal API. The simulator exposes only an inert fallback returning nil; Frame:UnregisterEventCallback does not prove the free global registry."
     },
     {
       "id": "added:UnregisterUnitEventCallback",
       "symbol": "UnregisterUnitEventCallback",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail adds a three-argument global unit-callback removal API. The simulator exposes only an inert fallback with no global registry, unit filtering, or invocation semantics."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/workarounds/temporary/dispatcher_callback_defaults.rs",
+          "source_hash": "ae8b85140e7a6f29d9988c3725d184f0b715e4a28aa34634586d9509ae7bfbde",
+          "summary": "Retail adds a three-argument global unit-callback removal API. The simulator exposes only an inert fallback with no global registry, unit filtering, or invocation semantics."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/events.rs",
+          "source_hash": "096a106c441cb9c299248c427187a828edb0e46cb48749f435fe7a64fff5071b",
+          "summary": "Retail adds a three-argument global unit-callback removal API. The simulator exposes only an inert fallback with no global registry, unit filtering, or invocation semantics."
+        },
+        {
+          "kind": "runtime",
+          "reference": "src/event/valid_events.rs",
+          "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e",
+          "summary": "Retail adds a three-argument global unit-callback removal API. The simulator exposes only an inert fallback with no global registry, unit filtering, or invocation semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Retail adds a three-argument global unit-callback removal API. The simulator exposes only an inert fallback with no global registry, unit filtering, or invocation semantics."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD callback probe: register a unit callback, prove matching-unit invocation, unregister it, inject matching and nonmatching unit events, and assert no callback after removal; Frame methods are not interchangeable."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail adds a three-argument global unit-callback removal API. The simulator exposes only an inert fallback with no global registry, unit filtering, or invocation semantics."
     },
     {
       "id": "added:VIEWED_TRANSMOG_OUTFIT_CHANGED",
