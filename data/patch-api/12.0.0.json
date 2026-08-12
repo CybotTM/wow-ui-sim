@@ -115702,17 +115702,46 @@
       "id": "removed:ForceAllowAero",
       "symbol": "ForceAllowAero",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the CVar whose prior default was the string value 0.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "The removed CVar is absent from the simulator CVar defaults.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/set_cvar_verb.rs",
+          "summary": "Public CVar getters return nil for unknown names without a registered default.",
+          "source_hash": "ebb90936547292d97a8dda4ba0a84efdde268603396c3b677e55d60f87d0a22e"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
+          "summary": "Focused startup proof asserts both public getters return nil for ForceAllowAero.",
+          "source_hash": "5336a625c7e51ace3db6bdcb932a79f42d4355ffd50daa059ea30789ee6f1d41"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs::test_patch_12_0_0_force_allow_aero_removed"
+      ],
+      "assertions": [
+        "GetCVar(ForceAllowAero) and GetCVarDefault(ForceAllowAero) both return nil."
+      ],
+      "commit": "9431abb53",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 CVar/default absence is behaviorally proven; no graphics or CVar semantics are claimed."
     },
     {
       "id": "removed:GetActionAutocast",

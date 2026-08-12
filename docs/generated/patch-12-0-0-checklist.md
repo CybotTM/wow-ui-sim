@@ -3170,7 +3170,7 @@
 3170. [best-effort] `removed:FindBaseSpellByID` — compat
 3171. [best-effort] `removed:FindFlyoutSlotBySpellID` — compat
 3172. [best-effort] `removed:FindSpellOverrideByID` — compat
-3173. [untriaged] `removed:ForceAllowAero` — untriaged
+3173. [best-effort] `removed:ForceAllowAero` — behavioral
 3174. [best-effort] `removed:GetActionAutocast` — vendor-present
 3175. [best-effort] `removed:GetActionBarPage` — vendor-present
 3176. [best-effort] `removed:GetActionCharges` — vendor-present
