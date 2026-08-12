@@ -109521,65 +109521,125 @@
       "id": "removed:CraftingItemSlotModification.itemID",
       "symbol": "CraftingItemSlotModification.itemID",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes numeric CraftingItemSlotModification.itemID; source metadata does not prove runtime object-shape absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/crafting.rs",
+          "source_hash": "1e980cb90ee2b826842db0ff52ba05e021dcacba6758e67f1b4c743877358381",
+          "summary": "Current crafting state models dynamic state but does not publish CraftingItemSlotModification objects or this field."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: obtain an observable CraftingItemSlotModification object, assert itemID is absent, and characterize any replacement field or structure before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source records removal of the numeric field, but current runtime structure and replacement publication are unmodeled. Claims remain bounded to source removal."
     },
     {
       "id": "removed:CraftingOrderReagentInfo.reagent",
       "symbol": "CraftingOrderReagentInfo.reagent",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes CraftingOrderReagentInfo.reagent, previously a CraftingReagentInfo structure field; replacement identity is not established by source metadata alone."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/crafting.rs",
+          "source_hash": "1e980cb90ee2b826842db0ff52ba05e021dcacba6758e67f1b4c743877358381",
+          "summary": "Current crafting state does not publish CraftingOrderReagentInfo or nested reagent structures."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: obtain an observable CraftingOrderReagentInfo object, assert reagent is absent, and characterize any reagentInfo/replacement structure separately."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source records structure-field removal, but runtime object shape and replacement publication are unmodeled. Claims remain bounded to source removal."
     },
     {
       "id": "removed:CraftingReagentInfo.itemID",
       "symbol": "CraftingReagentInfo.itemID",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes numeric CraftingReagentInfo.itemID; source metadata does not prove runtime object-shape absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/crafting.rs",
+          "source_hash": "1e980cb90ee2b826842db0ff52ba05e021dcacba6758e67f1b4c743877358381",
+          "summary": "Current crafting state does not publish CraftingReagentInfo objects or this field."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: obtain an observable CraftingReagentInfo object, assert itemID is absent, and characterize any replacement field or structure before behavioral closure."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source records removal of the numeric field, but current runtime structure and replacement publication are unmodeled. Claims remain bounded to source removal."
     },
     {
       "id": "removed:CraftingResourceReturnInfo.itemID",
       "symbol": "CraftingResourceReturnInfo.itemID",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 source removes numeric CraftingResourceReturnInfo.itemID; source metadata does not prove runtime object-shape absence or replacement identity."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/state_types/crafting.rs",
+          "source_hash": "1e980cb90ee2b826842db0ff52ba05e021dcacba6758e67f1b4c743877358381",
+          "summary": "Current crafting state does not publish CraftingResourceReturnInfo objects or this field."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required runtime probe: obtain an observable CraftingResourceReturnInfo object, assert itemID is absent, and characterize any reagent/replacement field or structure separately."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Evidence-required/unsafe: source records removal of the numeric field, but current runtime structure and replacement publication are unmodeled. Claims remain bounded to source removal."
     },
     {
       "id": "removed:DeathRecap_GetEvents",

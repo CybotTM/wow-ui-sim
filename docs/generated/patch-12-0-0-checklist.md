@@ -2991,10 +2991,10 @@
 2991. [evidence-required] `removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_SUBCATEGORIES_EXPECTED` — unsafe
 2992. [evidence-required] `removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_SUBCATEGORIES_PER_CATEGORY_EXPECTED` — unsafe
 2993. [evidence-required] `removed:Constants.HousingCatalogConsts.HOUSING_CATALOG_TAG_GROUP_TAGS_EXPECTED` — unsafe
-2994. [untriaged] `removed:CraftingItemSlotModification.itemID` — untriaged
-2995. [untriaged] `removed:CraftingOrderReagentInfo.reagent` — untriaged
-2996. [untriaged] `removed:CraftingReagentInfo.itemID` — untriaged
-2997. [untriaged] `removed:CraftingResourceReturnInfo.itemID` — untriaged
+2994. [evidence-required] `removed:CraftingItemSlotModification.itemID` — unsafe
+2995. [evidence-required] `removed:CraftingOrderReagentInfo.reagent` — unsafe
+2996. [evidence-required] `removed:CraftingReagentInfo.itemID` — unsafe
+2997. [evidence-required] `removed:CraftingResourceReturnInfo.itemID` — unsafe
 2998. [best-effort] `removed:DeathRecap_GetEvents` — vendor-present
 2999. [best-effort] `removed:DeathRecap_HasEvents` — vendor-present
 3000. [best-effort] `removed:DoEmote` — vendor-present
