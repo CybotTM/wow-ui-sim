@@ -1819,8 +1819,8 @@
 1819. [best-effort] `added:Enum.SecretAspectMeta.MaxValue` — behavioral
 1820. [best-effort] `added:Enum.SecretAspectMeta.MinValue` — behavioral
 1821. [best-effort] `added:Enum.SecretAspectMeta.NumValues` — behavioral
-1822. [evidence-required] `added:Enum.SendAddonMessageResult.AddOnMessageLockdown` — unsafe
-1823. [evidence-required] `added:Enum.SendAddonMessageResult.TargetOffline` — unsafe
+1822. [best-effort] `added:Enum.SendAddonMessageResult.AddOnMessageLockdown` — behavioral
+1823. [best-effort] `added:Enum.SendAddonMessageResult.TargetOffline` — behavioral
 1824. [best-effort] `added:Enum.SimpleOrderStatus.Creating` — behavioral
 1825. [best-effort] `added:Enum.SimpleOrderStatus.Failed` — behavioral
 1826. [best-effort] `added:Enum.SimpleOrderStatus.InProgress` — behavioral
@@ -2155,7 +2155,7 @@
 2155. [best-effort] `added:Frame.SetIgnoringChildrenForBounds` — behavioral
 2156. [best-effort] `added:GameTooltip.GetLeftLine` — behavioral
 2157. [best-effort] `added:GameTooltip.GetRightLine` — behavioral
-2158. [evidence-required] `added:GetCollapsingStarCost` — unsafe
+2158. [untriaged] `added:GetCollapsingStarCost` — untriaged
 2159. [evidence-required] `added:HOUSE_EXTERIOR_TYPE_UNLOCKED` — unsafe
 2160. [evidence-required] `added:HOUSING_DECOR_ADD_TO_PREVIEW_LIST` — unsafe
 2161. [evidence-required] `added:HOUSING_DECOR_FREE_PLACE_STATUS_CHANGED` — unsafe
@@ -2176,7 +2176,7 @@
 2176. [evidence-required] `added:HouseExteriorSizeOptionsInfo.options` — unsafe
 2177. [evidence-required] `added:HouseExteriorSizeOptionsInfo.selectedSize` — unsafe
 2178. [best-effort] `added:HouseExteriorTypeOption` — provenance-only
-2179. [evidence-required] `added:HouseExteriorTypeOption.houseExteriorTypeID` — unsafe
+2179. [untriaged] `added:HouseExteriorTypeOption.houseExteriorTypeID` — untriaged
 2180. [evidence-required] `added:HouseExteriorTypeOption.isLocked` — unsafe
 2181. [evidence-required] `added:HouseExteriorTypeOption.lockReasonString` — unsafe
 2182. [evidence-required] `added:HouseExteriorTypeOption.name` — unsafe
@@ -2195,7 +2195,7 @@
 2195. [evidence-required] `added:INITIATIVE_TASKS_TRACKED_LIST_CHANGED` — unsafe
 2196. [evidence-required] `added:INITIATIVE_TASKS_TRACKED_UPDATED` — unsafe
 2197. [evidence-required] `added:INITIATIVE_TASK_COMPLETED` — unsafe
-2198. [evidence-required] `added:IsRaidMarkerSystemEnabled` — unsafe
+2198. [untriaged] `added:IsRaidMarkerSystemEnabled` — untriaged
 2199. [evidence-required] `added:LEGACY_LOOT_RULES_CHANGED` — unsafe
 2200. [best-effort] `added:LE_FRAME_TUTORIAL_JOURNEYS_TAB` — behavioral
 2201. [best-effort] `added:LE_FRAME_TUTORIAL_LINK_TRANSMOG_CUSTOM_SET` — behavioral
@@ -2274,7 +2274,7 @@
 2274. [exception-requested] `added:Model.SetUseGBuffer` — impossible
 2275. [evidence-required] `added:NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED` — unsafe
 2276. [evidence-required] `added:NEIGHBORHOOD_INITIATIVE_UPDATED` — unsafe
-2277. [evidence-required] `added:NewCraftingOrderInfo.reagentInfos` — unsafe
+2277. [untriaged] `added:NewCraftingOrderInfo.reagentInfos` — untriaged
 2278. [evidence-required] `added:NumberAbbrevData` — unsafe
 2279. [evidence-required] `added:NumberAbbrevData.abbreviation` — unsafe
 2280. [evidence-required] `added:NumberAbbrevData.abbreviationIsGlobal` — unsafe
@@ -2285,13 +2285,13 @@
 2285. [evidence-required] `added:NumberAbbrevOptions.breakpointData` — unsafe
 2286. [evidence-required] `added:NumberAbbrevOptions.config` — unsafe
 2287. [evidence-required] `added:NumberAbbrevOptions.locale` — unsafe
-2288. [evidence-required] `added:PARTY_KILL` — unsafe
-2289. [evidence-required] `added:PLAYER_TARGET_DIED` — unsafe
+2288. [untriaged] `added:PARTY_KILL` — untriaged
+2289. [untriaged] `added:PLAYER_TARGET_DIED` — untriaged
 2290. [evidence-required] `added:PrivateAuraIconInfo.borderScale` — unsafe
-2291. [evidence-required] `added:REMOVE_NEIGHBORHOOD_CHARTER_SIGNATURE` — unsafe
+2291. [untriaged] `added:REMOVE_NEIGHBORHOOD_CHARTER_SIGNATURE` — untriaged
 2292. [evidence-required] `added:Region.IsAnchoringSecret` — unsafe
 2293. [best-effort] `added:Region.SetAlphaFromBoolean` — behavioral
-2294. [evidence-required] `added:Region.SetVertexColorFromBoolean` — unsafe
+2294. [untriaged] `added:Region.SetVertexColorFromBoolean` — untriaged
 2295. [untriaged] `added:RegisterEventCallback` — untriaged
 2296. [untriaged] `added:RegisterUnitEventCallback` — untriaged
 2297. [untriaged] `added:RegularReagentInfo.reagent` — untriaged
@@ -2748,8 +2748,8 @@
 2748. [best-effort] `changed:Enum.ItemCollectionTypeMeta.NumValues` — behavioral
 2749. [best-effort] `changed:Enum.MapIconUIWidgetSetTypeMeta.MaxValue` — behavioral
 2750. [best-effort] `changed:Enum.MapIconUIWidgetSetTypeMeta.NumValues` — behavioral
-2751. [untriaged] `changed:Enum.SendAddonMessageResultMeta.MaxValue` — untriaged
-2752. [untriaged] `changed:Enum.SendAddonMessageResultMeta.NumValues` — untriaged
+2751. [best-effort] `changed:Enum.SendAddonMessageResultMeta.MaxValue` — behavioral
+2752. [best-effort] `changed:Enum.SendAddonMessageResultMeta.NumValues` — behavioral
 2753. [best-effort] `changed:Enum.SurveyDeliveryMomentMeta.MaxValue` — behavioral
 2754. [best-effort] `changed:Enum.SurveyDeliveryMomentMeta.NumValues` — behavioral
 2755. [best-effort] `changed:Enum.TooltipDataLineTypeMeta.MaxValue` — behavioral

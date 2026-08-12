@@ -70764,33 +70764,103 @@
       "id": "added:Enum.SendAddonMessageResult.AddOnMessageLockdown",
       "symbol": "Enum.SendAddonMessageResult.AddOnMessageLockdown",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source defines the complete SendAddonMessageResult family and the metadata changes.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes all 13 numeric members and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_send_addon_message_result_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 13-member family, numeric types, no extras, and metadata.",
+          "source_hash": "d06289bbc78b4fc028eb2912670a4f12a3ebc48899bff714fcced37e6f69e9ef"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SendAddonMessageResult family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_send_addon_message_result_enums.rs::test_patch_12_0_0_send_addon_message_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SendAddonMessageResult family as Lua numbers with exact values Success=0, InvalidPrefix=1, InvalidMessage=2, AddonMessageThrottle=3, InvalidChatType=4, NotInGroup=5, TargetRequired=6, InvalidChannel=7, ChannelThrottle=8, GeneralError=9, NotInGuild=10, AddOnMessageLockdown=11, TargetOffline=12; metadata is MinValue=0, MaxValue=12, NumValues=13, with no extras."
+      ],
+      "commit": "ed2345d36",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes AddOnMessageLockdown=11; the complete family and metadata are behaviorally proven. No addon-message transport or consumer semantics are claimed."
     },
     {
       "id": "added:Enum.SendAddonMessageResult.TargetOffline",
       "symbol": "Enum.SendAddonMessageResult.TargetOffline",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source defines the complete SendAddonMessageResult family and the metadata changes.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes all 13 numeric members and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_send_addon_message_result_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 13-member family, numeric types, no extras, and metadata.",
+          "source_hash": "d06289bbc78b4fc028eb2912670a4f12a3ebc48899bff714fcced37e6f69e9ef"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SendAddonMessageResult family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_send_addon_message_result_enums.rs::test_patch_12_0_0_send_addon_message_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SendAddonMessageResult family as Lua numbers with exact values Success=0, InvalidPrefix=1, InvalidMessage=2, AddonMessageThrottle=3, InvalidChatType=4, NotInGroup=5, TargetRequired=6, InvalidChannel=7, ChannelThrottle=8, GeneralError=9, NotInGuild=10, AddOnMessageLockdown=11, TargetOffline=12; metadata is MinValue=0, MaxValue=12, NumValues=13, with no extras."
+      ],
+      "commit": "ed2345d36",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes TargetOffline=12; the complete family and metadata are behaviorally proven. No addon-message transport or consumer semantics are claimed."
     },
     {
       "id": "added:Enum.SimpleOrderStatus.Creating",
@@ -102385,33 +102455,103 @@
       "id": "changed:Enum.SendAddonMessageResultMeta.MaxValue",
       "symbol": "Enum.SendAddonMessageResultMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source defines the complete SendAddonMessageResult family and the metadata changes.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes all 13 numeric members and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_send_addon_message_result_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 13-member family, numeric types, no extras, and metadata.",
+          "source_hash": "d06289bbc78b4fc028eb2912670a4f12a3ebc48899bff714fcced37e6f69e9ef"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SendAddonMessageResult family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_send_addon_message_result_enums.rs::test_patch_12_0_0_send_addon_message_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SendAddonMessageResult family as Lua numbers with exact values Success=0, InvalidPrefix=1, InvalidMessage=2, AddonMessageThrottle=3, InvalidChatType=4, NotInGroup=5, TargetRequired=6, InvalidChannel=7, ChannelThrottle=8, GeneralError=9, NotInGuild=10, AddOnMessageLockdown=11, TargetOffline=12; metadata is MinValue=0, MaxValue=12, NumValues=13, with no extras."
+      ],
+      "commit": "ed2345d36",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes MaxValue from 10 to 12; the complete family and metadata are behaviorally proven. No addon-message transport or consumer semantics are claimed."
     },
     {
       "id": "changed:Enum.SendAddonMessageResultMeta.NumValues",
       "symbol": "Enum.SendAddonMessageResultMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 source defines the complete SendAddonMessageResult family and the metadata changes.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "summary": "Guarded fallback publishes all 13 numeric members and matching metadata; it is authoritative at startup.",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_send_addon_message_result_enums.rs",
+          "summary": "Focused retail 12.0.0 startup test asserts the exact 13-member family, numeric types, no extras, and metadata.",
+          "source_hash": "d06289bbc78b4fc028eb2912670a4f12a3ebc48899bff714fcced37e6f69e9ef"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent discovery records the SendAddonMessageResult family and metadata.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_send_addon_message_result_enums.rs::test_patch_12_0_0_send_addon_message_result_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.SendAddonMessageResult family as Lua numbers with exact values Success=0, InvalidPrefix=1, InvalidMessage=2, AddonMessageThrottle=3, InvalidChatType=4, NotInGroup=5, TargetRequired=6, InvalidChannel=7, ChannelThrottle=8, GeneralError=9, NotInGuild=10, AddOnMessageLockdown=11, TargetOffline=12; metadata is MinValue=0, MaxValue=12, NumValues=13, with no extras."
+      ],
+      "commit": "ed2345d36",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 changes NumValues from 11 to 13; the complete family and metadata are behaviorally proven. No addon-message transport or consumer semantics are claimed."
     },
     {
       "id": "changed:Enum.SurveyDeliveryMomentMeta.MaxValue",
