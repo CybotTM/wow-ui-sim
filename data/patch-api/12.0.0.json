@@ -117444,13 +117444,13 @@
         {
           "kind": "source",
           "reference": "src/cvars.yaml",
-          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "summary": "The base YAML retains this CVar for profiles that still expose it; retail profile filtering removes it in 12.0.0.",
           "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
         },
         {
           "kind": "source",
           "reference": "src/cvars.rs",
-          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "summary": "Retail profile CVar filtering removes this scale CVar for 12.0.0 while preserving the base/Mists default.",
           "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
         },
         {
@@ -117534,13 +117534,13 @@
         {
           "kind": "source",
           "reference": "src/cvars.yaml",
-          "summary": "The removed nameplate CVar is absent from the checked-in default table.",
+          "summary": "The base YAML retains this CVar for profiles that still expose it; retail profile filtering removes it in 12.0.0.",
           "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
         },
         {
           "kind": "source",
           "reference": "src/cvars.rs",
-          "summary": "Retail profile CVar filtering omits the removed nameplate CVar; the 12.0.0 scale removals are applied without changing Mists defaults.",
+          "summary": "Retail profile CVar filtering removes this scale CVar for 12.0.0 while preserving the base/Mists default.",
           "source_hash": "88d9e9ae2b2b6b34eff371fc7b02385b3b9177be9cc286cf895dac459acce924"
         },
         {
