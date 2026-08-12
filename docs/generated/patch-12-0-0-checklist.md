@@ -2337,13 +2337,13 @@
 2337. [evidence-required] `added:UNIT_LOOT` — unsafe
 2338. [evidence-required] `added:UNIT_SPELL_DIMINISH_CATEGORY_STATE_UPDATED` — unsafe
 2339. [evidence-required] `added:UPDATE_BULLETIN_BOARD_MEMBER_TYPE` — unsafe
-2340. [untriaged] `added:UnitCastingDuration` — untriaged
-2341. [untriaged] `added:UnitChannelDuration` — untriaged
-2342. [untriaged] `added:UnitClassFromGUID` — untriaged
+2340. [evidence-required] `added:UnitCastingDuration` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2341. [evidence-required] `added:UnitChannelDuration` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2342. [evidence-required] `added:UnitClassFromGUID` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
 2343. [best-effort] `added:UnitCreatureID` — behavioral
-2344. [untriaged] `added:UnitEmpoweredChannelDuration` — untriaged
-2345. [untriaged] `added:UnitEmpoweredStageDurations` — untriaged
-2346. [untriaged] `added:UnitEmpoweredStagePercentages` — untriaged
+2344. [evidence-required] `added:UnitEmpoweredChannelDuration` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2345. [evidence-required] `added:UnitEmpoweredStageDurations` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2346. [evidence-required] `added:UnitEmpoweredStagePercentages` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
 2347. [best-effort] `added:UnitGetDetailedHealPrediction` — behavioral
 2348. [best-effort] `added:UnitHealPredictionCalculator` — behavioral
 2349. [best-effort] `added:UnitHealPredictionCalculator.GetDamageAbsorbClampMode` — behavioral
@@ -2368,24 +2368,24 @@
 2368. [best-effort] `added:UnitHealPredictionValues.health` — behavioral
 2369. [best-effort] `added:UnitHealPredictionValues.healthMax` — behavioral
 2370. [best-effort] `added:UnitHealPredictionValues.totalDamageAbsorbs` — behavioral
-2371. [untriaged] `added:UnitHealPredictionValues.totalHealAbsorbs` — untriaged
+2371. [evidence-required] `added:UnitHealPredictionValues.totalHealAbsorbs` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
 2372. [best-effort] `added:UnitHealPredictionValues.totalIncomingHeals` — behavioral
 2373. [best-effort] `added:UnitHealPredictionValues.totalIncomingHealsFromHealer` — behavioral
-2374. [untriaged] `added:UnitHealthMissing` — untriaged
-2375. [untriaged] `added:UnitHealthPercent` — untriaged
+2374. [evidence-required] `added:UnitHealthMissing` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2375. [evidence-required] `added:UnitHealthPercent` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
 2376. [best-effort] `added:UnitIsHumanPlayer` — behavioral
-2377. [untriaged] `added:UnitIsLieutenant` — untriaged
-2378. [untriaged] `added:UnitIsMinion` — untriaged
-2379. [untriaged] `added:UnitIsNPCAsPlayer` — untriaged
+2377. [evidence-required] `added:UnitIsLieutenant` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2378. [evidence-required] `added:UnitIsMinion` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2379. [evidence-required] `added:UnitIsNPCAsPlayer` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
 2380. [best-effort] `added:UnitIsSpellTarget` — behavioral
-2381. [untriaged] `added:UnitNameFromGUID` — untriaged
-2382. [untriaged] `added:UnitPowerMissing` — untriaged
-2383. [untriaged] `added:UnitPowerPercent` — untriaged
-2384. [untriaged] `added:UnitSexBase` — untriaged
-2385. [untriaged] `added:UnitShouldDisplaySpellTargetName` — untriaged
-2386. [untriaged] `added:UnitSpellTargetClass` — untriaged
-2387. [untriaged] `added:UnitSpellTargetName` — untriaged
-2388. [untriaged] `added:UnitThreatLeadSituation` — untriaged
+2381. [evidence-required] `added:UnitNameFromGUID` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2382. [evidence-required] `added:UnitPowerMissing` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2383. [evidence-required] `added:UnitPowerPercent` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2384. [evidence-required] `added:UnitSexBase` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2385. [evidence-required] `added:UnitShouldDisplaySpellTargetName` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2386. [evidence-required] `added:UnitSpellTargetClass` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2387. [evidence-required] `added:UnitSpellTargetName` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2388. [evidence-required] `added:UnitThreatLeadSituation` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
 2389. [evidence-required] `added:UnregisterEventCallback` — unsafe
 2390. [evidence-required] `added:UnregisterUnitEventCallback` — unsafe
 2391. [untriaged] `added:VIEWED_TRANSMOG_OUTFIT_CHANGED` — untriaged

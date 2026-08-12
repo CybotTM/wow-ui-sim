@@ -2424,13 +2424,13 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `UNIT_LOOT` | evidence-required | event | added | Evidence required: registration/list presence is not producer-backed firing proof; require a full-LoD transition, exact handler delivery and declared payload arity/types. |
 | `UNIT_SPELL_DIMINISH_CATEGORY_STATE_UPDATED` | evidence-required | event | added | Evidence required: registration/list presence is not producer-backed firing proof; require a full-LoD transition, exact handler delivery and declared payload arity/types. |
 | `UPDATE_BULLETIN_BOARD_MEMBER_TYPE` | evidence-required | event | added | Evidence required: registration/list presence is not producer-backed firing proof; require a full-LoD transition, exact handler delivery and declared payload arity/types. |
-| `UnitCastingDuration` | untriaged | api | added | api added in 12.0.0. |
-| `UnitChannelDuration` | untriaged | api | added | api added in 12.0.0. |
-| `UnitClassFromGUID` | untriaged | api | added | api added in 12.0.0. |
+| `UnitCastingDuration` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitChannelDuration` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitClassFromGUID` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
 | `UnitCreatureID` | best-effort | api | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
-| `UnitEmpoweredChannelDuration` | untriaged | api | added | api added in 12.0.0. |
-| `UnitEmpoweredStageDurations` | untriaged | api | added | api added in 12.0.0. |
-| `UnitEmpoweredStagePercentages` | untriaged | api | added | api added in 12.0.0. |
+| `UnitEmpoweredChannelDuration` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitEmpoweredStageDurations` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitEmpoweredStagePercentages` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
 | `UnitGetDetailedHealPrediction` | best-effort | api | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `UnitHealPredictionCalculator` | best-effort | luaobject | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `UnitHealPredictionCalculator.GetDamageAbsorbClampMode` | best-effort | luaobject-method | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
@@ -2455,24 +2455,24 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `UnitHealPredictionValues.health` | best-effort | structure-field | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `UnitHealPredictionValues.healthMax` | best-effort | structure-field | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `UnitHealPredictionValues.totalDamageAbsorbs` | best-effort | structure-field | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
-| `UnitHealPredictionValues.totalHealAbsorbs` | untriaged | structure-field | added | structure-field added in 12.0.0. |
+| `UnitHealPredictionValues.totalHealAbsorbs` | evidence-required | structure-field | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
 | `UnitHealPredictionValues.totalIncomingHeals` | best-effort | structure-field | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
 | `UnitHealPredictionValues.totalIncomingHealsFromHealer` | best-effort | structure-field | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
-| `UnitHealthMissing` | untriaged | api | added | api added in 12.0.0. |
-| `UnitHealthPercent` | untriaged | api | added | api added in 12.0.0. |
+| `UnitHealthMissing` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitHealthPercent` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
 | `UnitIsHumanPlayer` | best-effort | api | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
-| `UnitIsLieutenant` | untriaged | api | added | api added in 12.0.0. |
-| `UnitIsMinion` | untriaged | api | added | api added in 12.0.0. |
-| `UnitIsNPCAsPlayer` | untriaged | api | added | api added in 12.0.0. |
+| `UnitIsLieutenant` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitIsMinion` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitIsNPCAsPlayer` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
 | `UnitIsSpellTarget` | best-effort | api | added | Best-effort behavioral: retail 12.0.0 startup publishes numeric value None; focused proof commit ffb49321e asserts the complete Enum.InitiativeRewardFlags family, Lua numeric types, no extras, and metadata MinValue=1, MaxValue=1, NumValues=1. No milestone/reward flag semantics or lifecycle are claimed. |
-| `UnitNameFromGUID` | untriaged | api | added | api added in 12.0.0. |
-| `UnitPowerMissing` | untriaged | api | added | api added in 12.0.0. |
-| `UnitPowerPercent` | untriaged | api | added | api added in 12.0.0. |
-| `UnitSexBase` | untriaged | api | added | api added in 12.0.0. |
-| `UnitShouldDisplaySpellTargetName` | untriaged | api | added | api added in 12.0.0. |
-| `UnitSpellTargetClass` | untriaged | api | added | api added in 12.0.0. |
-| `UnitSpellTargetName` | untriaged | api | added | api added in 12.0.0. |
-| `UnitThreatLeadSituation` | untriaged | api | added | api added in 12.0.0. |
+| `UnitNameFromGUID` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitPowerMissing` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitPowerPercent` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitSexBase` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitShouldDisplaySpellTargetName` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitSpellTargetClass` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitSpellTargetName` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
+| `UnitThreatLeadSituation` | evidence-required | api | added | Evidence required: current runtime publication or semantics are absent, divergent, or temporary; full-LoD/state-backed probe required. |
 | `UnregisterEventCallback` | evidence-required | api | added | Retail adds a two-argument global callback removal API. The simulator exposes only an inert fallback returning nil; Frame:UnregisterEventCallback does not prove the free global registry. Required probe: Full-LoD callback probe: register a global callback, prove one invocation, unregister the same callback, inject the event again, and assert post-unregister non-invocation; Frame methods are not interchangeable.
 | `UnregisterUnitEventCallback` | evidence-required | api | added | Retail adds a three-argument global unit-callback removal API. The simulator exposes only an inert fallback with no global registry, unit filtering, or invocation semantics. Required probe: Full-LoD callback probe: register a unit callback, prove matching-unit invocation, unregister it, inject matching and nonmatching unit events, and assert no callback after removal; Frame methods are not interchangeable.
 | `VIEWED_TRANSMOG_OUTFIT_CHANGED` | untriaged | event | added | event added in 12.0.0. |

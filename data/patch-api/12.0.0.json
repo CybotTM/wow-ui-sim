@@ -92651,49 +92651,124 @@
       "id": "added:UnitCastingDuration",
       "symbol": "UnitCastingDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "No UnitCastingDuration global is published; related UnitCastingInfo timing does not establish the optional LuaDurationObject contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "Related cast timing is present but no duration-object producer is registered."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitCastingDuration) == \"function\"); local duration = UnitCastingDuration(\"player\"); assert(duration == nil or type(duration) == \"table\"); exercise an active cast and verify duration-object timing methods."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No UnitCastingDuration global is published; related UnitCastingInfo timing does not establish the optional LuaDurationObject contract."
     },
     {
       "id": "added:UnitChannelDuration",
       "symbol": "UnitChannelDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "No UnitChannelDuration global or channel-duration producer is published; UnitChannelInfo does not establish the duration-object contract."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45",
+          "summary": "Duration objects exist, but no channel-duration producer is registered."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitChannelDuration) == \"function\"); assert(UnitChannelDuration(\"player\") == nil); establish channel state, then assert(type(UnitChannelDuration(\"player\")) == \"table\") and verify duration timing."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No UnitChannelDuration global or channel-duration producer is published; UnitChannelInfo does not establish the duration-object contract."
     },
     {
       "id": "added:UnitClassFromGUID",
       "symbol": "UnitClassFromGUID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_misc.rs",
+          "source_hash": "7fd14c7c58ac6278058a90499b71c76543311554247473fc234d56ecf86f860c",
+          "summary": "UnitClass and GUID helpers exist, but no GUID-to-class lookup or UnitClassFromGUID publication exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitClassFromGUID) == \"function\"); obtain a supported GUID and assert three return types string/string/number; assert an unknown GUID returns no values."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. UnitClass and GUID helpers exist, but no GUID-to-class lookup or UnitClassFromGUID publication exists."
     },
     {
       "id": "added:UnitCreatureID",
@@ -92736,49 +92811,130 @@
       "id": "added:UnitEmpoweredChannelDuration",
       "symbol": "UnitEmpoweredChannelDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "No empowered-channel duration producer or UnitEmpoweredChannelDuration publication exists; LuaDurationObject support alone is insufficient."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/lua_duration_object.rs",
+          "source_hash": "f20fe5f9637bc087a79e58ed417246efa74d5bbfced7527b4fde070f1dfb4c45",
+          "summary": "Duration objects exist, but no empowered-channel producer is registered."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitEmpoweredChannelDuration) == \"function\"); assert inactive result is nil or a table; exercise an empowered channel and verify duration-object methods plus includeHoldAtMaxTime behavior."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No empowered-channel duration producer or UnitEmpoweredChannelDuration publication exists; LuaDurationObject support alone is insufficient."
     },
     {
       "id": "added:UnitEmpoweredStageDurations",
       "symbol": "UnitEmpoweredStageDurations",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_stats.rs",
+          "source_hash": "1354b30263824345deb4639d6ae1a12e7f452c662c08b1a6c3f86da55afd8f41",
+          "summary": "No empowered-cast stage model or UnitEmpoweredStageDurations publication exists; placeholder arrays are not evidence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_stats.rs",
+          "source_hash": "1354b30263824345deb4639d6ae1a12e7f452c662c08b1a6c3f86da55afd8f41",
+          "summary": "No empowered-stage producer is registered."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitEmpoweredStageDurations) == \"function\"); assert inactive result is nil or a table; with an empowered cast assert every returned element is a duration object."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No empowered-cast stage model or UnitEmpoweredStageDurations publication exists; placeholder arrays are not evidence."
     },
     {
       "id": "added:UnitEmpoweredStagePercentages",
       "symbol": "UnitEmpoweredStagePercentages",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_stats.rs",
+          "source_hash": "1354b30263824345deb4639d6ae1a12e7f452c662c08b1a6c3f86da55afd8f41",
+          "summary": "No empowered-cast stage model or UnitEmpoweredStagePercentages publication exists; placeholder arrays are not evidence."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_stats.rs",
+          "source_hash": "1354b30263824345deb4639d6ae1a12e7f452c662c08b1a6c3f86da55afd8f41",
+          "summary": "No empowered-stage producer is registered."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitEmpoweredStagePercentages) == \"function\"); assert inactive result is nil or a table; with an empowered cast assert numeric stage percentages and includeHoldAtMaxTime behavior."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No empowered-cast stage model or UnitEmpoweredStagePercentages publication exists; placeholder arrays are not evidence."
     },
     {
       "id": "added:UnitGetDetailedHealPrediction",
@@ -93712,17 +93868,44 @@
       "id": "added:UnitHealPredictionValues.totalHealAbsorbs",
       "symbol": "UnitHealPredictionValues.totalHealAbsorbs",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "structure-field",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "Temporary prediction structures publish totalHealAbsorbs as numeric zero; adjacent synthetic tests do not establish retail heal-absorb state, updates, secrets, or lifecycle."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_health_power_api.rs",
+          "source_hash": "802108038745dcc1dcb4433c820374fc002a819aaa1c0887e85e43e0eea70dee",
+          "summary": "Existing proof observes only the simulator synthetic zero field and does not establish retail semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD returned-object probe: obtain UnitHealPredictionValues; assert type(totalHealAbsorbs) == \"number\" and default semantics, then exercise heal-absorb transitions independently from totalDamageAbsorbs."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. Temporary prediction structures publish totalHealAbsorbs as numeric zero; adjacent synthetic tests do not establish retail heal-absorb state, updates, secrets, or lifecycle."
     },
     {
       "id": "added:UnitHealPredictionValues.totalIncomingHeals",
@@ -93834,33 +94017,81 @@
       "id": "added:UnitHealthMissing",
       "symbol": "UnitHealthMissing",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "UnitHealthMissing is not published; existing health lookup falls back to player vitals and does not establish predicted-health or unknown-unit semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitHealthMissing) == \"function\"); compare usePredicted true/false for player, target, party1, and unknown units using controlled health/prediction state."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. UnitHealthMissing is not published; existing health lookup falls back to player vitals and does not establish predicted-health or unknown-unit semantics."
     },
     {
       "id": "added:UnitHealthPercent",
       "symbol": "UnitHealthPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "Current runtime returns a legacy numeric percentage, while retail 12.0.0 declares a table result and optional predicted/curve behavior; existing numeric tests do not prove the declared contract."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_health_power_api.rs",
+          "source_hash": "802108038745dcc1dcb4433c820374fc002a819aaa1c0887e85e43e0eea70dee",
+          "summary": "Existing tests observe numeric legacy percentages, not the declared table contract."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitHealthPercent) == \"function\"); assert the declared table result, predicted/curve handling, and supported/unknown-unit behavior with controlled state."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. Current runtime returns a legacy numeric percentage, while retail 12.0.0 declares a table result and optional predicted/curve behavior; existing numeric tests do not prove the declared contract."
     },
     {
       "id": "added:UnitIsHumanPlayer",
@@ -93903,49 +94134,118 @@
       "id": "added:UnitIsLieutenant",
       "symbol": "UnitIsLieutenant",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_misc.rs",
+          "source_hash": "7fd14c7c58ac6278058a90499b71c76543311554247473fc234d56ecf86f860c",
+          "summary": "No UnitIsLieutenant publication or lieutenant-state model exists; related unit classification APIs are not equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitIsLieutenant) == \"function\"); assert boolean results for known lieutenant/non-lieutenant units and unknown-unit behavior from producer-backed state."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No UnitIsLieutenant publication or lieutenant-state model exists; related unit classification APIs are not equivalent."
     },
     {
       "id": "added:UnitIsMinion",
       "symbol": "UnitIsMinion",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_misc.rs",
+          "source_hash": "7fd14c7c58ac6278058a90499b71c76543311554247473fc234d56ecf86f860c",
+          "summary": "No UnitIsMinion publication or minion-state model exists; UnitClassification does not establish minion semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitIsMinion) == \"function\"); assert boolean results for known minion/non-minion and unknown units from producer-backed state."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No UnitIsMinion publication or minion-state model exists; UnitClassification does not establish minion semantics."
     },
     {
       "id": "added:UnitIsNPCAsPlayer",
       "symbol": "UnitIsNPCAsPlayer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_probes.rs",
+          "source_hash": "7c6918670c333a3230f9b02559a37a5a27ae07fdb1934d90242871b2f3f3952d",
+          "summary": "No UnitIsNPCAsPlayer publication or NPC-as-player classification model exists; UnitIsPlayer is not equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
+          "source_hash": "249b9b2e7c457b522cb21ed96b8c6a550449754c9007863fef9d444814c1cca6",
+          "summary": "Runtime bootstrap has no NPC-as-player classification implementation."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitIsNPCAsPlayer) == \"function\"); cover player, NPC, unknown, and nil unit inputs with authoritative boolean results."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No UnitIsNPCAsPlayer publication or NPC-as-player classification model exists; UnitIsPlayer is not equivalent."
     },
     {
       "id": "added:UnitIsSpellTarget",
@@ -93982,129 +94282,309 @@
       "id": "added:UnitNameFromGUID",
       "symbol": "UnitNameFromGUID",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_misc.rs",
+          "source_hash": "7fd14c7c58ac6278058a90499b71c76543311554247473fc234d56ecf86f860c",
+          "summary": "GUID helpers exist, but no GUID-to-name mapping or UnitNameFromGUID publication exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitNameFromGUID) == \"function\"); supported GUID returns string/string, while an unknown GUID returns no values."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. GUID helpers exist, but no GUID-to-name mapping or UnitNameFromGUID publication exists."
     },
     {
       "id": "added:UnitPowerMissing",
       "symbol": "UnitPowerMissing",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "UnitPowerMissing is not published; existing power lookup falls back to player power and does not establish power type, prediction, unmodified, or unknown-unit semantics."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitPowerMissing) == \"function\"); compare power types and unmodified values for supported and unknown units with controlled prediction state."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. UnitPowerMissing is not published; existing power lookup falls back to player power and does not establish power type, prediction, unmodified, or unknown-unit semantics."
     },
     {
       "id": "added:UnitPowerPercent",
       "symbol": "UnitPowerPercent",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "Current runtime returns a legacy numeric percentage, while retail 12.0.0 declares a table result and power-type/unmodified/curve behavior; existing tests do not prove the declared contract."
+        },
+        {
+          "kind": "test",
+          "reference": "tests/admin_health_power_api.rs",
+          "source_hash": "802108038745dcc1dcb4433c820374fc002a819aaa1c0887e85e43e0eea70dee",
+          "summary": "Existing tests observe numeric legacy percentages, not the declared table contract."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitPowerPercent) == \"function\"); establish table result, power-type selection, denominator, unmodified/curve handling, and unknown-unit behavior."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. Current runtime returns a legacy numeric percentage, while retail 12.0.0 declares a table result and power-type/unmodified/curve behavior; existing tests do not prove the declared contract."
     },
     {
       "id": "added:UnitSexBase",
       "symbol": "UnitSexBase",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_probes.rs",
+          "source_hash": "7c6918670c333a3230f9b02559a37a5a27ae07fdb1934d90242871b2f3f3952d",
+          "summary": "Only UnitSex is published and it returns the player numeric state for arbitrary arguments; UnitSexBase and unit-specific base-sex semantics are absent."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitSexBase) == \"function\"); assert nil or numeric Enum.UnitSex results for supported and unknown units, including the complete enum family."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. Only UnitSex is published and it returns the player numeric state for arbitrary arguments; UnitSexBase and unit-specific base-sex semantics are absent."
     },
     {
       "id": "added:UnitShouldDisplaySpellTargetName",
       "symbol": "UnitShouldDisplaySpellTargetName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "No UnitShouldDisplaySpellTargetName publication or display-policy state exists; pending cast target APIs are not equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitShouldDisplaySpellTargetName) == \"function\"); assert boolean results for units with and without active spell targets."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No UnitShouldDisplaySpellTargetName publication or display-policy state exists; pending cast target APIs are not equivalent."
     },
     {
       "id": "added:UnitSpellTargetClass",
       "symbol": "UnitSpellTargetClass",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/combat_verbs.rs",
+          "source_hash": "a966f7fce5f5842d04c90aedb08a28533114ac9de39d830eba0253bab775d756",
+          "summary": "SpellTargetUnit exposes an optional pending target but no target-class mapping or UnitSpellTargetClass publication exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitSpellTargetClass) == \"function\"); establish a supported spell target and assert nil or string, covering no-cast and unknown-unit behavior."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. SpellTargetUnit exposes an optional pending target but no target-class mapping or UnitSpellTargetClass publication exists."
     },
     {
       "id": "added:UnitSpellTargetName",
       "symbol": "UnitSpellTargetName",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/utility_system_spell/spell_api.rs",
+          "source_hash": "99afa5353c26d2b2d3ed3cc89636dbfad81d1255181d524781f78f071878b3de",
+          "summary": "No UnitSpellTargetName publication or cast-target/name model exists; UnitCastingInfo does not establish this lookup."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/workarounds/temporary/spell_target_defaults.rs",
+          "source_hash": "f1d1356c1cd8fc49b331699ed1fe0ed94f8deee48b0888f94998ec26f3f8a576",
+          "summary": "Temporary spell-target fallbacks do not implement this global."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitSpellTargetName) == \"function\"); cover active target, no cast, and unknown unit, asserting nil or string according to authoritative behavior."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No UnitSpellTargetName publication or cast-target/name model exists; UnitCastingInfo does not establish this lookup."
     },
     {
       "id": "added:UnitThreatLeadSituation",
       "symbol": "UnitThreatLeadSituation",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 authoritative declaration; runtime semantics beyond the required probe remain unclaimed."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/unit_misc.rs",
+          "source_hash": "7fd14c7c58ac6278058a90499b71c76543311554247473fc234d56ecf86f860c",
+          "summary": "No UnitThreatLeadSituation publication or threat-lead state exists; temporary threat helpers return inert defaults and are not equivalent."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent retail API-surface discovery; no complete unit, prediction, cast, security, or lifecycle semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Full-LoD probe: assert(type(UnitThreatLeadSituation) == \"function\"); cover controlled lead/non-lead threat states and unknown mob GUIDs, asserting nil or number."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 declaration requires full-LoD/state-backed proof; current simulator behavior is absent, divergent, or temporary. No UnitThreatLeadSituation publication or threat-lead state exists; temporary threat helpers return inert defaults and are not equivalent."
     },
     {
       "id": "added:UnregisterEventCallback",
