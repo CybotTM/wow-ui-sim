@@ -75,6 +75,7 @@ mod patch_12_0_0_expansion_level_enums;
 mod patch_12_0_0_font_string_scale_animation_mode_enums;
 mod patch_12_0_0_fragment_id_enums;
 mod patch_12_0_0_frame_tutorial_account_transmog_enums;
+mod patch_12_0_0_housing_catalog_entry_info;
 mod patch_12_0_0_housing_decor_placement_restriction_enums;
 mod patch_12_0_0_housing_favor_update_source_enums;
 mod patch_12_0_0_housing_favor_update_type_enums;
