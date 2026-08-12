@@ -119414,65 +119414,169 @@
       "id": "removed:docs.extra_apis.ShowCloak",
       "symbol": "docs.extra_apis.ShowCloak",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "docs-extra-api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the docs-extra API entry; the separate added ShowCloak API row is not treated as evidence for this removed documentation entry.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "No runtime registration evidence for the removed docs-extra entry was found in the checked-in initialization surface.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Discovery records the API name but does not prove current runtime publication or docs-extra identity.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-api-functions.txt",
+          "summary": "The generated API inventory contains same-name documentation/API entries but does not establish full-LoD runtime absence or replacement semantics.",
+          "source_hash": "e9488c2c07c5fc6cbd028679a55fedd3ed79e72d223cd5d51da359f4662706a0"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-only removal evidence is bounded to the docs-extra entry; full-LoD proof is required before claiming runtime absence or replacement behavior."
     },
     {
       "id": "removed:docs.extra_apis.ShowHelm",
       "symbol": "docs.extra_apis.ShowHelm",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "docs-extra-api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the docs-extra API entry; the separate added ShowHelm(show: boolean) API row is not treated as evidence for this removed documentation entry.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "No runtime registration evidence for the removed docs-extra entry was found in the checked-in initialization surface.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Discovery records the API name but does not prove current runtime publication or docs-extra identity.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-api-functions.txt",
+          "summary": "The generated API inventory contains same-name documentation/API entries but does not establish full-LoD runtime absence or replacement semantics.",
+          "source_hash": "e9488c2c07c5fc6cbd028679a55fedd3ed79e72d223cd5d51da359f4662706a0"
+        }
+      ],
       "tests": [],
       "assertions": [],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-only removal evidence is bounded to the docs-extra entry; full-LoD proof is required before claiming runtime absence or replacement behavior."
     },
     {
       "id": "removed:docs.extra_apis.ShowingCloak",
       "symbol": "docs.extra_apis.ShowingCloak",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "docs-extra-api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the docs-extra API entry; the separate added ShowingCloak API row is not treated as evidence for this removed documentation entry.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "No runtime registration evidence for the removed docs-extra entry was found in the checked-in initialization surface.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Discovery records the API name but does not prove current runtime publication or docs-extra identity.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-api-functions.txt",
+          "summary": "The generated API inventory contains same-name documentation/API entries but does not establish full-LoD runtime absence or replacement semantics.",
+          "source_hash": "e9488c2c07c5fc6cbd028679a55fedd3ed79e72d223cd5d51da359f4662706a0"
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD probe: establish whether the removed docs.extra_apis.ShowingCloak entry is observable; probe the separate added ShowingCloak global independently and do not infer one contract from the other."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-only removal evidence is bounded to the docs-extra entry; full-LoD proof is required before claiming runtime absence or replacement behavior."
     },
     {
       "id": "removed:docs.extra_apis.ShowingHelm",
       "symbol": "docs.extra_apis.ShowingHelm",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "docs-extra-api",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 removes the docs-extra API entry; the separate added ShowingHelm API row is not treated as evidence for this removed documentation entry.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "summary": "No runtime registration evidence for the removed docs-extra entry was found in the checked-in initialization surface.",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Discovery records the API name but does not prove current runtime publication or docs-extra identity.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-api-functions.txt",
+          "summary": "The generated API inventory contains same-name documentation/API entries but does not establish full-LoD runtime absence or replacement semantics.",
+          "source_hash": "e9488c2c07c5fc6cbd028679a55fedd3ed79e72d223cd5d51da359f4662706a0"
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "Required full-LoD probe: establish whether the removed docs.extra_apis.ShowingHelm entry is observable; probe the separate added ShowingHelm global independently and do not infer one contract from the other."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Source-only removal evidence is bounded to the docs-extra entry; full-LoD proof is required before claiming runtime absence or replacement behavior."
     },
     {
       "id": "removed:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS",

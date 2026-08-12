@@ -3266,10 +3266,10 @@
 3266. [untriaged] `removed:currencyTokensUnused1` — untriaged
 3267. [untriaged] `removed:currencyTokensUnused2` — untriaged
 3268. [untriaged] `removed:displayedRAFFriendInfo` — untriaged
-3269. [untriaged] `removed:docs.extra_apis.ShowCloak` — untriaged
-3270. [untriaged] `removed:docs.extra_apis.ShowHelm` — untriaged
-3271. [untriaged] `removed:docs.extra_apis.ShowingCloak` — untriaged
-3272. [untriaged] `removed:docs.extra_apis.ShowingHelm` — untriaged
+3269. [evidence-required] `removed:docs.extra_apis.ShowCloak` — unsafe
+3270. [evidence-required] `removed:docs.extra_apis.ShowHelm` — unsafe
+3271. [evidence-required] `removed:docs.extra_apis.ShowingCloak` — unsafe
+3272. [evidence-required] `removed:docs.extra_apis.ShowingHelm` — unsafe
 3273. [untriaged] `removed:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` — untriaged
 3274. [untriaged] `removed:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — untriaged
 3275. [untriaged] `removed:docs.extra_script_objects.FrameAPITooltip` — untriaged
