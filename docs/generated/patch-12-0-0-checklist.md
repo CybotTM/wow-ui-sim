@@ -2998,10 +2998,10 @@
 2998. [best-effort] `removed:DeathRecap_GetEvents` — vendor-present
 2999. [best-effort] `removed:DeathRecap_HasEvents` — vendor-present
 3000. [best-effort] `removed:DoEmote` — vendor-present
-3001. [untriaged] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateCorrupt` — untriaged
-3002. [untriaged] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateFailed` — untriaged
-3003. [untriaged] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateSuccess` — untriaged
-3004. [untriaged] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateToobig` — untriaged
+3001. [best-effort] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateCorrupt` — behavioral
+3002. [best-effort] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateFailed` — behavioral
+3003. [best-effort] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateSuccess` — behavioral
+3004. [best-effort] `removed:Enum.AccountDataUpdateStatus.AccountDataUpdateToobig` — behavioral
 3005. [evidence-required] `removed:Enum.AccountStateLoadedFlags.AccountStateAccountCurrenciesLoaded` — unsafe
 3006. [evidence-required] `removed:Enum.AccountStateLoadedFlags.AccountStateAccountFactionsLoaded` — unsafe
 3007. [evidence-required] `removed:Enum.AccountStateLoadedFlags.AccountStateAccountItemsLoaded` — unsafe
