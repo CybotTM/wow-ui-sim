@@ -95769,209 +95769,664 @@
       "id": "added:enablePetBattleFloatingCombatText_v2",
       "symbol": "enablePetBattleFloatingCombatText_v2",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar enablePetBattleFloatingCombatText_v2 with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish enablePetBattleFloatingCombatText_v2 with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(enablePetBattleFloatingCombatText_v2) and GetCVarDefault(enablePetBattleFloatingCombatText_v2) both return the exact Lua string value '1'; Distinct removed name enablePetBattleFloatingCombatText is not asserted equivalent."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes enablePetBattleFloatingCombatText_v2 through public value/default getters as the exact string '1'. Distinct removed name enablePetBattleFloatingCombatText is not asserted equivalent. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterTimelineEnabled",
       "symbol": "encounterTimelineEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterTimelineEnabled with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterTimelineEnabled with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterTimelineEnabled) and GetCVarDefault(encounterTimelineEnabled) both return the exact Lua string value '1'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterTimelineEnabled through public value/default getters as the exact string '1'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterTimelineHideForOtherRoles",
       "symbol": "encounterTimelineHideForOtherRoles",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterTimelineHideForOtherRoles with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterTimelineHideForOtherRoles with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterTimelineHideForOtherRoles) and GetCVarDefault(encounterTimelineHideForOtherRoles) both return the exact Lua string value '0'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterTimelineHideForOtherRoles through public value/default getters as the exact string '0'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterTimelineHideLongCountdowns",
       "symbol": "encounterTimelineHideLongCountdowns",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterTimelineHideLongCountdowns with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterTimelineHideLongCountdowns with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterTimelineHideLongCountdowns) and GetCVarDefault(encounterTimelineHideLongCountdowns) both return the exact Lua string value '0'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterTimelineHideLongCountdowns through public value/default getters as the exact string '0'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterTimelineHideQueuedCountdowns",
       "symbol": "encounterTimelineHideQueuedCountdowns",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterTimelineHideQueuedCountdowns with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterTimelineHideQueuedCountdowns with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterTimelineHideQueuedCountdowns) and GetCVarDefault(encounterTimelineHideQueuedCountdowns) both return the exact Lua string value '0'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterTimelineHideQueuedCountdowns through public value/default getters as the exact string '0'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterTimelineIconographyEnabled",
       "symbol": "encounterTimelineIconographyEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterTimelineIconographyEnabled with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterTimelineIconographyEnabled with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterTimelineIconographyEnabled) and GetCVarDefault(encounterTimelineIconographyEnabled) both return the exact Lua string value '1'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterTimelineIconographyEnabled through public value/default getters as the exact string '1'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterTimelineIconographyHiddenMask",
       "symbol": "encounterTimelineIconographyHiddenMask",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterTimelineIconographyHiddenMask with exact string default '\\\\x01'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterTimelineIconographyHiddenMask with exact startup/default string value '\\\\x01'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterTimelineIconographyHiddenMask) and GetCVarDefault(encounterTimelineIconographyHiddenMask) both return the exact Lua string value '\\\\x01'; The one-byte value is asserted as a string only; mask interpretation is not claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterTimelineIconographyHiddenMask through public value/default getters as the exact string '\\\\x01'. The one-byte value is asserted as a string only; mask interpretation is not claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterWarningsDefaultMessageDuration",
       "symbol": "encounterWarningsDefaultMessageDuration",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterWarningsDefaultMessageDuration with exact string default '3500'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterWarningsDefaultMessageDuration with exact startup/default string value '3500'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterWarningsDefaultMessageDuration) and GetCVarDefault(encounterWarningsDefaultMessageDuration) both return the exact Lua string value '3500'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterWarningsDefaultMessageDuration through public value/default getters as the exact string '3500'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterWarningsEnabled",
       "symbol": "encounterWarningsEnabled",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterWarningsEnabled with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterWarningsEnabled with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterWarningsEnabled) and GetCVarDefault(encounterWarningsEnabled) both return the exact Lua string value '1'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterWarningsEnabled through public value/default getters as the exact string '1'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterWarningsHideIfNotTargetingPlayer",
       "symbol": "encounterWarningsHideIfNotTargetingPlayer",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterWarningsHideIfNotTargetingPlayer with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterWarningsHideIfNotTargetingPlayer with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterWarningsHideIfNotTargetingPlayer) and GetCVarDefault(encounterWarningsHideIfNotTargetingPlayer) both return the exact Lua string value '0'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterWarningsHideIfNotTargetingPlayer through public value/default getters as the exact string '0'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:encounterWarningsLevel",
       "symbol": "encounterWarningsLevel",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar encounterWarningsLevel with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish encounterWarningsLevel with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(encounterWarningsLevel) and GetCVarDefault(encounterWarningsLevel) both return the exact Lua string value '0'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes encounterWarningsLevel through public value/default getters as the exact string '0'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:endeavorInitiativesLastPoints",
       "symbol": "endeavorInitiativesLastPoints",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar endeavorInitiativesLastPoints with exact string default '0'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish endeavorInitiativesLastPoints with exact startup/default string value '0'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(endeavorInitiativesLastPoints) and GetCVarDefault(endeavorInitiativesLastPoints) both return the exact Lua string value '0'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes endeavorInitiativesLastPoints through public value/default getters as the exact string '0'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:equipmentManager",
       "symbol": "equipmentManager",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "summary": "Retail 12.0.0 adds CVar equipmentManager with exact string default '1'.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "summary": "Current retail CVar defaults publish equipmentManager with exact startup/default string value '1'.",
+          "source_hash": "1c7fb4c234fd828231b95cc2cce5ec88ddc9858b6a04558ed6a78bc55177ae09"
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "summary": "Generic retail CVar storage exposes the seeded value and default through public getters.",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d"
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults",
+          "summary": "Focused retail 12.0.0 startup test asserts GetCVar and GetCVarDefault exact values for this CVar.",
+          "source_hash": "c15ff01eb5f6beb08eeaed2a8417aef16a5255d549423adab003aa8c76c4aa8c"
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "summary": "Independent retail API-surface discovery evidence; no consumer or semantic equivalence is claimed.",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_ui_enum_metadata.rs::test_patch_12_0_0_cvar_defaults"
+      ],
+      "assertions": [
+        "GetCVar(equipmentManager) and GetCVarDefault(equipmentManager) both return the exact Lua string value '1'; Only public startup value/default publication is claimed."
+      ],
+      "commit": "575893319db28688e962209580e88689e8ea89a1",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 startup publishes equipmentManager through public value/default getters as the exact string '1'. Only public startup value/default publication is claimed. No mutation, persistence, consumer, or later-epoch semantics are claimed."
     },
     {
       "id": "added:externalDefensivesEnabled",

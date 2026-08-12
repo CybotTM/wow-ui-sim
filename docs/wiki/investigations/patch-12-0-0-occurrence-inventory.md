@@ -2515,19 +2515,19 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` | untriaged | docs-extra-event | added | Transient docs-extra-event existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
 | `docs.extra_script_objects.FrameAPITooltip` | untriaged | docs-extra-script-object | added | Transient docs-extra-script-object existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
 | `dropsecretaccess` | untriaged | api | added | api added in 12.0.0. |
-| `enablePetBattleFloatingCombatText_v2` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterTimelineEnabled` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterTimelineHideForOtherRoles` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterTimelineHideLongCountdowns` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterTimelineHideQueuedCountdowns` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterTimelineIconographyEnabled` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterTimelineIconographyHiddenMask` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterWarningsDefaultMessageDuration` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterWarningsEnabled` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterWarningsHideIfNotTargetingPlayer` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `encounterWarningsLevel` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `endeavorInitiativesLastPoints` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `equipmentManager` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `enablePetBattleFloatingCombatText_v2` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '1'; no CVar behavior or consumer semantics claimed. |
+| `encounterTimelineEnabled` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '1'; no CVar behavior or consumer semantics claimed. |
+| `encounterTimelineHideForOtherRoles` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '0'; no CVar behavior or consumer semantics claimed. |
+| `encounterTimelineHideLongCountdowns` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '0'; no CVar behavior or consumer semantics claimed. |
+| `encounterTimelineHideQueuedCountdowns` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '0'; no CVar behavior or consumer semantics claimed. |
+| `encounterTimelineIconographyEnabled` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '1'; no CVar behavior or consumer semantics claimed. |
+| `encounterTimelineIconographyHiddenMask` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '\\x01'; no CVar behavior or consumer semantics claimed. |
+| `encounterWarningsDefaultMessageDuration` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '3500'; no CVar behavior or consumer semantics claimed. |
+| `encounterWarningsEnabled` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '1'; no CVar behavior or consumer semantics claimed. |
+| `encounterWarningsHideIfNotTargetingPlayer` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '0'; no CVar behavior or consumer semantics claimed. |
+| `encounterWarningsLevel` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '0'; no CVar behavior or consumer semantics claimed. |
+| `endeavorInitiativesLastPoints` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '0'; no CVar behavior or consumer semantics claimed. |
+| `equipmentManager` | best-effort | cvar | added | Behavioral startup proof commit `575893319`: GetCVar and GetCVarDefault return exact string '1'; no CVar behavior or consumer semantics claimed. |
 | `externalDefensivesEnabled` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `floatingCombatTextAuraFade` | untriaged | cvar | added | Transient cvar existed in an intermediate 12.0.0 snapshot but was absent at both patch endpoints. |
 | `floatingCombatTextAuraFade_v2` | untriaged | cvar | added | cvar added in 12.0.0. |

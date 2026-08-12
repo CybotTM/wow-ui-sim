@@ -2428,19 +2428,19 @@
 2428. [untriaged] `added:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — untriaged
 2429. [untriaged] `added:docs.extra_script_objects.FrameAPITooltip` — untriaged
 2430. [untriaged] `added:dropsecretaccess` — untriaged
-2431. [untriaged] `added:enablePetBattleFloatingCombatText_v2` — untriaged
-2432. [untriaged] `added:encounterTimelineEnabled` — untriaged
-2433. [untriaged] `added:encounterTimelineHideForOtherRoles` — untriaged
-2434. [untriaged] `added:encounterTimelineHideLongCountdowns` — untriaged
-2435. [untriaged] `added:encounterTimelineHideQueuedCountdowns` — untriaged
-2436. [untriaged] `added:encounterTimelineIconographyEnabled` — untriaged
-2437. [untriaged] `added:encounterTimelineIconographyHiddenMask` — untriaged
-2438. [untriaged] `added:encounterWarningsDefaultMessageDuration` — untriaged
-2439. [untriaged] `added:encounterWarningsEnabled` — untriaged
-2440. [untriaged] `added:encounterWarningsHideIfNotTargetingPlayer` — untriaged
-2441. [untriaged] `added:encounterWarningsLevel` — untriaged
-2442. [untriaged] `added:endeavorInitiativesLastPoints` — untriaged
-2443. [untriaged] `added:equipmentManager` — untriaged
+2431. [untriaged] `added:enablePetBattleFloatingCombatText_v2` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2432. [untriaged] `added:encounterTimelineEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2433. [untriaged] `added:encounterTimelineHideForOtherRoles` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2434. [untriaged] `added:encounterTimelineHideLongCountdowns` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2435. [untriaged] `added:encounterTimelineHideQueuedCountdowns` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2436. [untriaged] `added:encounterTimelineIconographyEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2437. [untriaged] `added:encounterTimelineIconographyHiddenMask` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2438. [untriaged] `added:encounterWarningsDefaultMessageDuration` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2439. [untriaged] `added:encounterWarningsEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2440. [untriaged] `added:encounterWarningsHideIfNotTargetingPlayer` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2441. [untriaged] `added:encounterWarningsLevel` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2442. [untriaged] `added:endeavorInitiativesLastPoints` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
+2443. [untriaged] `added:equipmentManager` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
 2444. [untriaged] `added:externalDefensivesEnabled` — untriaged
 2445. [untriaged] `added:floatingCombatTextAuraFade` — untriaged
 2446. [untriaged] `added:floatingCombatTextAuraFade_v2` — untriaged
