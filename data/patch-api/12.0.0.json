@@ -116475,17 +116475,46 @@
       "id": "removed:HOUSING_CATALOG_SEARCHER_RELEASED",
       "symbol": "HOUSING_CATALOG_SEARCHER_RELEASED",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes HOUSING_CATALOG_SEARCHER_RELEASED, whose prior payload was one string searcher argument."
+        },
+        {
+          "kind": "source",
+          "reference": "src/event/valid_events_b.rs",
+          "source_hash": "725fd76a81cd559a42845011955b9febb1cd4385495ab19846ac89fd0c3ee863",
+          "summary": "The runtime event registry omits the removed event while retaining the nearby HOUSE_LEVEL_CHANGED control event."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/housing_event_dispatch.rs",
+          "source_hash": "b4999f1a27a7b9add184c2a7c97c08b5cc6f3fd01ae6a94956dd60185c5b99b1",
+          "summary": "Focused retail startup proof rejects RegisterEvent for the removed event and accepts HOUSE_LEVEL_CHANGED."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence is retained for the patch audit."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/housing_event_dispatch.rs::test_patch_12_0_0_removed_housing_catalog_searcher_event_rejected"
+      ],
+      "assertions": [
+        "RegisterEvent rejects HOUSING_CATALOG_SEARCHER_RELEASED while accepting HOUSE_LEVEL_CHANGED; no producer or replacement-event behavior is claimed."
+      ],
+      "commit": "41a4eeef8",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 event-name rejection is behaviorally proven; claims are bounded to registration and generic event-surface recognition, with no housing producer or replacement semantics."
     },
     {
       "id": "removed:HOUSING_DECOR_NUDGE_STATUS_CHANGED",

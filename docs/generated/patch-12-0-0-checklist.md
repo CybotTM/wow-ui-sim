@@ -3190,7 +3190,7 @@
 3190. [best-effort] `removed:GetOverrideBarSkin` — vendor-present
 3191. [best-effort] `removed:GetTempShapeshiftBarIndex` — vendor-present
 3192. [best-effort] `removed:GetVehicleBarIndex` — vendor-present
-3193. [untriaged] `removed:HOUSING_CATALOG_SEARCHER_RELEASED` — untriaged
+3193. [best-effort] `removed:HOUSING_CATALOG_SEARCHER_RELEASED` — behavioral
 3194. [untriaged] `removed:HOUSING_DECOR_NUDGE_STATUS_CHANGED` — untriaged
 3195. [best-effort] `removed:HasAction` — vendor-present
 3196. [best-effort] `removed:HasBonusActionBar` — vendor-present
