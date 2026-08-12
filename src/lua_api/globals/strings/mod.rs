@@ -2,6 +2,7 @@
 
 pub mod string_data;
 
+use crate::client_profile::{ACTIVE_RETAIL_API_EPOCH, RetailApiEpoch};
 use crate::loader::helpers::resolve_lua_escapes;
 use crate::lua_api::methods::{create_string, table_set};
 use rilua::LuaApiMut;
@@ -17,7 +18,9 @@ pub fn register_all_ui_strings(lua: &mut rilua::Lua) -> crate::Result<()> {
     }
     for defs in INT_DEFS {
         for &(name, value) in defs.iter() {
-            table_set(state, global, name, Val::Num(value as f64));
+            if should_register_int_constant(name, ACTIVE_RETAIL_API_EPOCH) {
+                table_set(state, global, name, Val::Num(value as f64));
+            }
         }
     }
     for defs in FLOAT_DEFS {
@@ -56,3 +59,7 @@ const FLOAT_DEFS: &[&[crate::lua_api::globals::strings::string_data::FloatDef]] 
 
 const STRING_DEFS: &[&[crate::lua_api::globals::strings::string_data::StringDef]] =
     &[string_data::FONT_COLOR_CODE_STRINGS];
+
+fn should_register_int_constant(name: &str, epoch: RetailApiEpoch) -> bool {
+    !(epoch == RetailApiEpoch::Retail12_0_0 && name == "LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT")
+}

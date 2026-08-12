@@ -183,6 +183,11 @@ end
 const MISSING_CONSTANTS_LUA: &str = include_str!("../globals/enum_data/missing_constants.lua");
 const CONSTANTS_VALUES_LUA: &str = include_str!("../globals/enum_data/constants_values.lua");
 const COMPAT_CONSTANTS_LUA: &str = include_str!("../globals/enum_data/compat_constants.lua");
+const RETAIL_12_0_0_POST_COMPAT_CONSTANT_OVERRIDES_LUA: &str = r#"
+LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE = nil
+LE_WORLD_ELAPSED_TIMER_TYPE_NONE = nil
+LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND = nil
+"#;
 
 pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     {
@@ -232,6 +237,9 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(MISSING_CONSTANTS_LUA)?;
     lua.exec(CONSTANTS_VALUES_LUA)?;
     lua.exec(COMPAT_CONSTANTS_LUA)?;
+    if ACTIVE_RETAIL_API_EPOCH == RetailApiEpoch::Retail12_0_0 {
+        lua.exec(RETAIL_12_0_0_POST_COMPAT_CONSTANT_OVERRIDES_LUA)?;
+    }
     Ok(())
 }
 
