@@ -2631,8 +2631,8 @@
 2631. [best-effort] `changed:Enum.CraftingOrderResult.Timeout` — behavioral
 2632. [best-effort] `changed:Enum.CraftingOrderResult.TooManyItems` — behavioral
 2633. [best-effort] `changed:Enum.CraftingOrderResult.WrongVersion` — behavioral
-2634. [untriaged] `changed:Enum.CraftingOrderResultMeta.MaxValue` — untriaged
-2635. [untriaged] `changed:Enum.CraftingOrderResultMeta.NumValues` — untriaged
+2634. [best-effort] `changed:Enum.CraftingOrderResultMeta.MaxValue` — behavioral
+2635. [best-effort] `changed:Enum.CraftingOrderResultMeta.NumValues` — behavioral
 2636. [best-effort] `changed:Enum.CraftingReagentItemFlag.TooltipShowsAsStatModifications` — behavioral
 2637. [best-effort] `changed:Enum.CraftingReagentItemFlagMeta.MaxValue` — behavioral
 2638. [best-effort] `changed:Enum.CraftingReagentItemFlagMeta.MinValue` — behavioral

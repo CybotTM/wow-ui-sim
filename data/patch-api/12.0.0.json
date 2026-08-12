@@ -105043,34 +105043,93 @@
       "id": "changed:Enum.CraftingOrderResultMeta.MaxValue",
       "symbol": "Enum.CraftingOrderResultMeta.MaxValue",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResultMeta.MaxValue from numeric value 46 to 48."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResultMeta.MaxValue as numeric value 48."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof asserts Enum.CraftingOrderResultMeta.MaxValue is Lua number 48 and the complete changed family metadata MinValue=0, NumValues=49."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResultMeta.MaxValue with numeric value 48."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResultMeta.MaxValue) == \"number\" and Enum.CraftingOrderResultMeta.MaxValue == 48; shared proof also asserts MinValue=0, NumValues=49 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResultMeta.MaxValue as Lua number 48, with source change 46→48. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order producer, interpretation, consumer, mutation, persistence, transition, or lifecycle semantics are claimed."
     },
     {
       "id": "changed:Enum.CraftingOrderResultMeta.NumValues",
       "symbol": "Enum.CraftingOrderResultMeta.NumValues",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Authoritative retail 12.0.0 source changes Enum.CraftingOrderResultMeta.NumValues from numeric value 47 to 49."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded missing-enum fallback publishes Enum.CraftingOrderResultMeta.NumValues as numeric value 49."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values",
+          "source_hash": "b5f52fb3534a7f508f8731261e7c79b3efe972b1636178ca5d1d8606c49c2f7b",
+          "summary": "Focused retail 12.0.0 startup proof asserts Enum.CraftingOrderResultMeta.NumValues is Lua number 49 and the complete changed family metadata MinValue=0, MaxValue=48."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records Enum.CraftingOrderResultMeta.NumValues with numeric value 49."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_crafting_order_result_changed_enums.rs::test_patch_12_0_0_crafting_order_result_enum_changed_values"
+      ],
+      "assertions": [
+        "type(Enum.CraftingOrderResultMeta.NumValues) == \"number\" and Enum.CraftingOrderResultMeta.NumValues == 49; shared proof also asserts MinValue=0, MaxValue=48 and all 17 changed members."
+      ],
+      "commit": "f6db33a61",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Best-effort behavioral evidence is limited to retail 12.0.0 startup publication of Enum.CraftingOrderResultMeta.NumValues as Lua number 49, with source change 47→49. Guarded runtime publication matches and the focused proof covers the complete changed family plus metadata MinValue=0, MaxValue=48, NumValues=49. No crafting-order producer, interpretation, consumer, mutation, persistence, transition, or lifecycle semantics are claimed."
     },
+
     {
       "id": "changed:Enum.CraftingReagentItemFlag.TooltipShowsAsStatModifications",
       "symbol": "Enum.CraftingReagentItemFlag.TooltipShowsAsStatModifications",
