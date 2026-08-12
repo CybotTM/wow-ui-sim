@@ -42,6 +42,7 @@ mod patch_12_0_0_cooldown_viewer_alert_type_enums;
 mod patch_12_0_0_crafting_order_item_flags_enums;
 mod patch_12_0_0_crafting_order_item_type_enums;
 mod patch_12_0_0_crafting_order_result_enums;
+mod patch_12_0_0_cvar_removals;
 mod patch_12_0_0_damage_meter_numbers_enums;
 mod patch_12_0_0_damage_meter_override_type_enums;
 mod patch_12_0_0_damage_meter_session_type_enums;
