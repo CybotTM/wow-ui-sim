@@ -418,7 +418,17 @@ fn test_patch_12_0_0_cvar_defaults() {
                     encounterWarningsLevel = "0",
                     endeavorInitiativesLastPoints = "0",
                     equipmentManager = "1",
+                    nameplateAuraScale = "1.000000",
+                    nameplateCastBarDisplay = string.char(2) .. "[",
+                    nameplateDebuffPadding = "0",
                     nameplateEnemyNpcAuraDisplay = string.char(2) .. "C",
+                    nameplateEnemyPlayerAuraDisplay = string.char(2) .. "C",
+                    nameplateFriendlyPlayerAuraDisplay = string.char(2) .. "C",
+                    nameplateInfoDisplay = string.char(2) .. "D",
+                    nameplateShowCastBars = "1",
+                    nameplateShowClassColor = "1",
+                    nameplateShowFriendlyClassColor = "1",
+                    nameplateShowFriendlyNpcs = "0",
                 }
                 for name, expected_value in pairs(expected) do
                     local value = GetCVar(name)
