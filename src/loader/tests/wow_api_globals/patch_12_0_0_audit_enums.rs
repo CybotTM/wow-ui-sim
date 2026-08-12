@@ -62,6 +62,19 @@ fn test_patch_12_0_0_audit_enum_values() {
                     end
                 end
 
+                local function check_absent(namespace_name, value_name)
+                    local namespace_error = check_namespace(namespace_name)
+                    if namespace_error then
+                        return namespace_error
+                    end
+
+                    local value = Enum[namespace_name][value_name]
+                    if value ~= nil then
+                        return namespace_name .. "." .. value_name
+                            .. ": expected absent, got " .. tostring(value)
+                    end
+                end
+
                 local checks = {
                     {"AccountDataUpdateStatus", "Corrupt", 2},
                     {"AccountDataUpdateStatus", "Failed", 1},
@@ -99,7 +112,15 @@ fn test_patch_12_0_0_audit_enum_values() {
                     {"BulkRefundResult", "ResultTimeout", 5},
                 }
 
+                local absent_checks = {
+                    {"AccountDataUpdateStatus", "AccountDataUpdateSuccess"},
+                    {"AccountDataUpdateStatus", "AccountDataUpdateFailed"},
+                    {"AccountDataUpdateStatus", "AccountDataUpdateCorrupt"},
+                    {"AccountDataUpdateStatus", "AccountDataUpdateToobig"},
+                }
+
                 local meta_checks = {
+                    {"AccountDataUpdateStatus", 0, 3, 4},
                     {"AddOnRestrictionState", 0, 2, 3},
                     {"AddOnRestrictionType", 0, 4, 5},
                     {"AuraFrameVisibleSetting", 0, 2, 3},
@@ -118,6 +139,14 @@ fn test_patch_12_0_0_audit_enum_values() {
                 for index = 1, #meta_checks do
                     local check = meta_checks[index]
                     local error_message = check_meta(check[1], check[2], check[3], check[4])
+                    if error_message then
+                        return error_message
+                    end
+                end
+
+                for index = 1, #absent_checks do
+                    local check = absent_checks[index]
+                    local error_message = check_absent(check[1], check[2])
                     if error_message then
                         return error_message
                     end
