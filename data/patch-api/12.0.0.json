@@ -118236,7 +118236,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
           "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
-          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+          "source_hash": "7d093235588540523ddf4d34801ed9933bcc2d70a580d734ba105249ff93a03b"
         }
       ],
       "tests": [
@@ -118281,7 +118281,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
           "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
-          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+          "source_hash": "7d093235588540523ddf4d34801ed9933bcc2d70a580d734ba105249ff93a03b"
         }
       ],
       "tests": [
@@ -118326,7 +118326,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
           "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
-          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+          "source_hash": "7d093235588540523ddf4d34801ed9933bcc2d70a580d734ba105249ff93a03b"
         }
       ],
       "tests": [
@@ -118547,7 +118547,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
           "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
-          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+          "source_hash": "7d093235588540523ddf4d34801ed9933bcc2d70a580d734ba105249ff93a03b"
         }
       ],
       "tests": [
@@ -118592,7 +118592,7 @@
           "kind": "test",
           "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_cvar_removals.rs",
           "summary": "Focused retail 12.0.0 startup proof asserts both public CVar getters return nil for this removed CVar.",
-          "source_hash": "e11ffb6c240c90cccded15aea0fa8caa80903db89b25f9797aafbbb5faaf67d3"
+          "source_hash": "7d093235588540523ddf4d34801ed9933bcc2d70a580d734ba105249ff93a03b"
         }
       ],
       "tests": [
