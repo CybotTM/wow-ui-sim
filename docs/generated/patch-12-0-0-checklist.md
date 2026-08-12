@@ -3133,8 +3133,8 @@
 3133. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.MaxValue` — untriaged
 3134. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.MinValue` — untriaged
 3135. [untriaged] `removed:Enum.NeighbordhoodInitiativeCategoryMeta.NumValues` — untriaged
-3136. [untriaged] `removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowDuplicate` — untriaged
-3137. [untriaged] `removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowMultiple` — untriaged
+3136. [best-effort] `removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowDuplicate` — behavioral
+3137. [best-effort] `removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowMultiple` — behavioral
 3138. [evidence-required] `removed:Enum.PerksVendorCategoryType.UnusedPerksVendorCategoryRefundUnused` — unsafe
 3139. [evidence-required] `removed:Enum.PlayerInteractionType.PlaceholderType79` — unsafe
 3140. [evidence-required] `removed:Enum.QuestTagType.Placeholder_1` — unsafe

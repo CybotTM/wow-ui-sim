@@ -113818,33 +113818,103 @@
       "id": "removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowDuplicate",
       "symbol": "Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowDuplicate",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the prefixed NpcCraftingOrderSetFlags alias while the shortened member preserves the numeric value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded fallback publishes the shortened AllowMultiple=1 and AllowDuplicate=2 family with matching metadata; it is authoritative at startup."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_npc_crafting_order_set_flags_enums.rs",
+          "source_hash": "2034332fe486281e34b3cb4521847e77b961f3efed598ec9cdfaa7aaab799832",
+          "summary": "Focused retail 12.0.0 startup test asserts the shortened family, exact numeric values, metadata, no extras, and both removed prefixed aliases absent."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the shortened NpcCraftingOrderSetFlags family."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_npc_crafting_order_set_flags_enums.rs::test_patch_12_0_0_npc_crafting_order_set_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NpcCraftingOrderSetFlags family as Lua numbers with exact values AllowMultiple=1 and AllowDuplicate=2, metadata MinValue=1, MaxValue=2, NumValues=2, no extras, and omits both removed prefixed aliases."
+      ],
+      "commit": "3de997642",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes the prefixed alias while publishing the shortened member with the same numeric value; the focused startup test proves bounded rename/removal publication only, not crafting-order flag semantics."
     },
     {
       "id": "removed:Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowMultiple",
       "symbol": "Enum.NpcCraftingOrderSetFlags.CraftingOrderFlagAllowMultiple",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "enum",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes the prefixed NpcCraftingOrderSetFlags alias while the shortened member preserves the numeric value."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/globals/enum_data/missing_enums.lua",
+          "source_hash": "60a333e293bcc26af280e487e3b546231330e3cd9feb51c77aecb258dab3f3a6",
+          "summary": "Guarded fallback publishes the shortened AllowMultiple=1 and AllowDuplicate=2 family with matching metadata; it is authoritative at startup."
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/env_init/enums.rs",
+          "source_hash": "77ab8e96586251c6e5fd1bce72aa0c1ff7a16750d7c8db3d4279bdb089e80bae",
+          "summary": "Enum initialization loads the guarded fallback used for startup publication."
+        },
+        {
+          "kind": "test",
+          "reference": "src/loader/tests/wow_api_globals/patch_12_0_0_npc_crafting_order_set_flags_enums.rs",
+          "source_hash": "2034332fe486281e34b3cb4521847e77b961f3efed598ec9cdfaa7aaab799832",
+          "summary": "Focused retail 12.0.0 startup test asserts the shortened family, exact numeric values, metadata, no extras, and both removed prefixed aliases absent."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery records the shortened NpcCraftingOrderSetFlags family."
+        }
+      ],
+      "tests": [
+        "src/loader/tests/wow_api_globals/patch_12_0_0_npc_crafting_order_set_flags_enums.rs::test_patch_12_0_0_npc_crafting_order_set_flags_enum_values"
+      ],
+      "assertions": [
+        "Publishes the complete Enum.NpcCraftingOrderSetFlags family as Lua numbers with exact values AllowMultiple=1 and AllowDuplicate=2, metadata MinValue=1, MaxValue=2, NumValues=2, no extras, and omits both removed prefixed aliases."
+      ],
+      "commit": "3de997642",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes the prefixed alias while publishing the shortened member with the same numeric value; the focused startup test proves bounded rename/removal publication only, not crafting-order flag semantics."
     },
     {
       "id": "removed:Enum.PerksVendorCategoryType.UnusedPerksVendorCategoryRefundUnused",
