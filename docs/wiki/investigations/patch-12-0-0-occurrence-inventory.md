@@ -2580,18 +2580,18 @@ Source occurrence objects preserve optional typed `before`/`after` JSON payloads
 | `nameplateShowClassColor` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
 | `nameplateShowFriendlyClassColor` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
 | `nameplateShowFriendlyNpcs` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed. |
-| `nameplateShowFriendlyPlayerGuardians` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowFriendlyPlayerMinions` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowFriendlyPlayerPets` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowFriendlyPlayerTotems` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowFriendlyPlayers` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowOffscreen` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateShowOnlyNameForFriendlyPlayerUnits` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateSimplifiedTypes` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateSize` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateStackingTypes` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateStyle` | untriaged | cvar | added | cvar added in 12.0.0. |
-| `nameplateThreatDisplay` | untriaged | cvar | added | cvar added in 12.0.0. |
+| `nameplateShowFriendlyPlayerGuardians` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateShowFriendlyPlayerMinions` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateShowFriendlyPlayerPets` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateShowFriendlyPlayerTotems` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateShowFriendlyPlayers` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateShowOffscreen` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateShowOnlyNameForFriendlyPlayerUnits` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateSimplifiedTypes` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateSize` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateStackingTypes` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateStyle` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
+| `nameplateThreatDisplay` | best-effort | cvar | added | startup getter/default publication proven; no rendering/UI/consumer semantics claimed. |
 | `petJournalFilterVersion` | untriaged | cvar | added | cvar added in 12.0.0. |
 | `raidFramesCenterBigDefensive` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed. |
 | `raidFramesDispelIndicatorOverlay` | best-effort | cvar | added | Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed. |

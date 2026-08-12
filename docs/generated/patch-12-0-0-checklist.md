@@ -2490,18 +2490,18 @@
 2490. [best-effort] `added:nameplateShowClassColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
 2491. [best-effort] `added:nameplateShowFriendlyClassColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
 2492. [best-effort] `added:nameplateShowFriendlyNpcs` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2493. [untriaged] `added:nameplateShowFriendlyPlayerGuardians` — untriaged
-2494. [untriaged] `added:nameplateShowFriendlyPlayerMinions` — untriaged
-2495. [untriaged] `added:nameplateShowFriendlyPlayerPets` — untriaged
-2496. [untriaged] `added:nameplateShowFriendlyPlayerTotems` — untriaged
-2497. [untriaged] `added:nameplateShowFriendlyPlayers` — untriaged
-2498. [untriaged] `added:nameplateShowOffscreen` — untriaged
-2499. [untriaged] `added:nameplateShowOnlyNameForFriendlyPlayerUnits` — untriaged
-2500. [untriaged] `added:nameplateSimplifiedTypes` — untriaged
-2501. [untriaged] `added:nameplateSize` — untriaged
-2502. [untriaged] `added:nameplateStackingTypes` — untriaged
-2503. [untriaged] `added:nameplateStyle` — untriaged
-2504. [untriaged] `added:nameplateThreatDisplay` — untriaged
+2493. [untriaged] `added:nameplateShowFriendlyPlayerGuardians` — best-effort / behavioral
+2494. [untriaged] `added:nameplateShowFriendlyPlayerMinions` — best-effort / behavioral
+2495. [untriaged] `added:nameplateShowFriendlyPlayerPets` — best-effort / behavioral
+2496. [untriaged] `added:nameplateShowFriendlyPlayerTotems` — best-effort / behavioral
+2497. [untriaged] `added:nameplateShowFriendlyPlayers` — best-effort / behavioral
+2498. [untriaged] `added:nameplateShowOffscreen` — best-effort / behavioral
+2499. [untriaged] `added:nameplateShowOnlyNameForFriendlyPlayerUnits` — best-effort / behavioral
+2500. [untriaged] `added:nameplateSimplifiedTypes` — best-effort / behavioral
+2501. [untriaged] `added:nameplateSize` — best-effort / behavioral
+2502. [untriaged] `added:nameplateStackingTypes` — best-effort / behavioral
+2503. [untriaged] `added:nameplateStyle` — best-effort / behavioral
+2504. [untriaged] `added:nameplateThreatDisplay` — best-effort / behavioral
 2505. [untriaged] `added:petJournalFilterVersion` — untriaged
 2506. [best-effort] `added:raidFramesCenterBigDefensive` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
 2507. [best-effort] `added:raidFramesDispelIndicatorOverlay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
