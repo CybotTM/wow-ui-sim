@@ -3305,40 +3305,40 @@
 3305. [untriaged] `removed:friendsSmallView` — untriaged
 3306. [untriaged] `removed:friendsViewButtons` — untriaged
 3307. [untriaged] `removed:guildRosterView` — untriaged
-3308. [untriaged] `removed:housingExpertGizmos_Rotation_BaseOrbScale` — untriaged
-3309. [untriaged] `removed:housingExpertGizmos_Rotation_BaseRingScale` — untriaged
-3310. [untriaged] `removed:housingExpertGizmos_Rotation_DistScaleMax` — untriaged
-3311. [untriaged] `removed:housingExpertGizmos_Rotation_DistScaleMin` — untriaged
-3312. [untriaged] `removed:housingExpertGizmos_Rotation_HighlightDefault` — untriaged
-3313. [untriaged] `removed:housingExpertGizmos_Rotation_HighlightDragging` — untriaged
-3314. [untriaged] `removed:housingExpertGizmos_Rotation_HighlightHovered` — untriaged
-3315. [untriaged] `removed:housingExpertGizmos_Rotation_HighlightKeybind` — untriaged
-3316. [untriaged] `removed:housingExpertGizmos_Rotation_HighlightSelected` — untriaged
-3317. [untriaged] `removed:housingExpertGizmos_Rotation_OrbPosOffset` — untriaged
-3318. [untriaged] `removed:housingExpertGizmos_Rotation_ScaleDistanceMax` — untriaged
-3319. [untriaged] `removed:housingExpertGizmos_Rotation_ScaleDistanceMin` — untriaged
-3320. [untriaged] `removed:housingExpertGizmos_Rotation_SnapDegrees` — untriaged
-3321. [untriaged] `removed:housingExpertGizmos_Rotation_TextMode` — untriaged
-3322. [untriaged] `removed:housingExpertGizmos_Rotation_XRayCheckerSize` — untriaged
-3323. [untriaged] `removed:housingExpertGizmos_Rotation_XRayDarkAlpha` — untriaged
-3324. [untriaged] `removed:housingExpertGizmos_Rotation_XRayLightAlpha` — untriaged
-3325. [untriaged] `removed:housingExpertGizmos_Translation_BaseArrowHeadScale` — untriaged
-3326. [untriaged] `removed:housingExpertGizmos_Translation_BaseArrowStemScale` — untriaged
-3327. [untriaged] `removed:housingExpertGizmos_Translation_BaseCubeScale` — untriaged
-3328. [untriaged] `removed:housingExpertGizmos_Translation_DistScaleMax` — untriaged
-3329. [untriaged] `removed:housingExpertGizmos_Translation_DistScaleMin` — untriaged
-3330. [untriaged] `removed:housingExpertGizmos_Translation_HighlightDefault` — untriaged
-3331. [untriaged] `removed:housingExpertGizmos_Translation_HighlightDragging` — untriaged
-3332. [untriaged] `removed:housingExpertGizmos_Translation_HighlightHovered` — untriaged
-3333. [untriaged] `removed:housingExpertGizmos_Translation_HighlightKeybind` — untriaged
-3334. [untriaged] `removed:housingExpertGizmos_Translation_HighlightSelected` — untriaged
-3335. [untriaged] `removed:housingExpertGizmos_Translation_MaxDistanceFromCamera` — untriaged
-3336. [untriaged] `removed:housingExpertGizmos_Translation_Padding` — untriaged
-3337. [untriaged] `removed:housingExpertGizmos_Translation_ScaleDistanceMax` — untriaged
-3338. [untriaged] `removed:housingExpertGizmos_Translation_ScaleDistanceMin` — untriaged
-3339. [untriaged] `removed:housingExpertGizmos_Translation_XRayCheckerSize` — untriaged
-3340. [untriaged] `removed:housingExpertGizmos_Translation_XRayDarkAlpha` — untriaged
-3341. [untriaged] `removed:housingExpertGizmos_Translation_XRayLightAlpha` — untriaged
+3308. [evidence-required] `removed:housingExpertGizmos_Rotation_BaseOrbScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3309. [evidence-required] `removed:housingExpertGizmos_Rotation_BaseRingScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3310. [evidence-required] `removed:housingExpertGizmos_Rotation_DistScaleMax` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3311. [evidence-required] `removed:housingExpertGizmos_Rotation_DistScaleMin` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3312. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightDefault` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3313. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightDragging` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3314. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightHovered` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3315. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightKeybind` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3316. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightSelected` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3317. [evidence-required] `removed:housingExpertGizmos_Rotation_OrbPosOffset` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3318. [evidence-required] `removed:housingExpertGizmos_Rotation_ScaleDistanceMax` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3319. [evidence-required] `removed:housingExpertGizmos_Rotation_ScaleDistanceMin` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3320. [evidence-required] `removed:housingExpertGizmos_Rotation_SnapDegrees` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3321. [evidence-required] `removed:housingExpertGizmos_Rotation_TextMode` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3322. [evidence-required] `removed:housingExpertGizmos_Rotation_XRayCheckerSize` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3323. [evidence-required] `removed:housingExpertGizmos_Rotation_XRayDarkAlpha` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3324. [evidence-required] `removed:housingExpertGizmos_Rotation_XRayLightAlpha` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3325. [evidence-required] `removed:housingExpertGizmos_Translation_BaseArrowHeadScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3326. [evidence-required] `removed:housingExpertGizmos_Translation_BaseArrowStemScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3327. [evidence-required] `removed:housingExpertGizmos_Translation_BaseCubeScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3328. [evidence-required] `removed:housingExpertGizmos_Translation_DistScaleMax` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3329. [evidence-required] `removed:housingExpertGizmos_Translation_DistScaleMin` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3330. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightDefault` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3331. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightDragging` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3332. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightHovered` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3333. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightKeybind` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3334. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightSelected` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3335. [evidence-required] `removed:housingExpertGizmos_Translation_MaxDistanceFromCamera` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3336. [evidence-required] `removed:housingExpertGizmos_Translation_Padding` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3337. [evidence-required] `removed:housingExpertGizmos_Translation_ScaleDistanceMax` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3338. [evidence-required] `removed:housingExpertGizmos_Translation_ScaleDistanceMin` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3339. [evidence-required] `removed:housingExpertGizmos_Translation_XRayCheckerSize` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3340. [evidence-required] `removed:housingExpertGizmos_Translation_XRayDarkAlpha` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3341. [evidence-required] `removed:housingExpertGizmos_Translation_XRayLightAlpha` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
 3342. [untriaged] `removed:lastRenownForMajorFaction2503` — untriaged
 3343. [untriaged] `removed:lastRenownForMajorFaction2507` — untriaged
 3344. [untriaged] `removed:lastRenownForMajorFaction2510` — untriaged

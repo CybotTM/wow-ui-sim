@@ -130681,545 +130681,1463 @@
       "id": "removed:housingExpertGizmos_Rotation_BaseOrbScale",
       "symbol": "housingExpertGizmos_Rotation_BaseOrbScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_BaseOrbScale."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_BaseOrbScale; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_BaseOrbScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_BaseOrbScale\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_BaseOrbScale. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_BaseOrbScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_BaseOrbScale\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_BaseRingScale",
       "symbol": "housingExpertGizmos_Rotation_BaseRingScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_BaseRingScale."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_BaseRingScale; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_BaseRingScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_BaseRingScale\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_BaseRingScale. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_BaseRingScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_BaseRingScale\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_DistScaleMax",
       "symbol": "housingExpertGizmos_Rotation_DistScaleMax",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_DistScaleMax."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_DistScaleMax; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_DistScaleMax\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_DistScaleMax\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_DistScaleMax. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_DistScaleMax\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_DistScaleMax\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_DistScaleMin",
       "symbol": "housingExpertGizmos_Rotation_DistScaleMin",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_DistScaleMin."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_DistScaleMin; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_DistScaleMin\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_DistScaleMin\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_DistScaleMin. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_DistScaleMin\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_DistScaleMin\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_HighlightDefault",
       "symbol": "housingExpertGizmos_Rotation_HighlightDefault",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_HighlightDefault."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_HighlightDefault; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_HighlightDefault\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightDefault\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_HighlightDefault. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_HighlightDefault\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightDefault\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_HighlightDragging",
       "symbol": "housingExpertGizmos_Rotation_HighlightDragging",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_HighlightDragging."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_HighlightDragging; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_HighlightDragging\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightDragging\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_HighlightDragging. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_HighlightDragging\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightDragging\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_HighlightHovered",
       "symbol": "housingExpertGizmos_Rotation_HighlightHovered",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_HighlightHovered."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_HighlightHovered; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_HighlightHovered\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightHovered\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_HighlightHovered. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_HighlightHovered\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightHovered\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_HighlightKeybind",
       "symbol": "housingExpertGizmos_Rotation_HighlightKeybind",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_HighlightKeybind."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_HighlightKeybind; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_HighlightKeybind\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightKeybind\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_HighlightKeybind. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_HighlightKeybind\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightKeybind\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_HighlightSelected",
       "symbol": "housingExpertGizmos_Rotation_HighlightSelected",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_HighlightSelected."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_HighlightSelected; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_HighlightSelected\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightSelected\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_HighlightSelected. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_HighlightSelected\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_HighlightSelected\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_OrbPosOffset",
       "symbol": "housingExpertGizmos_Rotation_OrbPosOffset",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_OrbPosOffset."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_OrbPosOffset; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_OrbPosOffset\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_OrbPosOffset\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_OrbPosOffset. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_OrbPosOffset\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_OrbPosOffset\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_ScaleDistanceMax",
       "symbol": "housingExpertGizmos_Rotation_ScaleDistanceMax",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_ScaleDistanceMax."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_ScaleDistanceMax; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_ScaleDistanceMax\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_ScaleDistanceMax\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_ScaleDistanceMax. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_ScaleDistanceMax\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_ScaleDistanceMax\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_ScaleDistanceMin",
       "symbol": "housingExpertGizmos_Rotation_ScaleDistanceMin",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_ScaleDistanceMin."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_ScaleDistanceMin; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_ScaleDistanceMin\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_ScaleDistanceMin\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_ScaleDistanceMin. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_ScaleDistanceMin\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_ScaleDistanceMin\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_SnapDegrees",
       "symbol": "housingExpertGizmos_Rotation_SnapDegrees",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_SnapDegrees."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_SnapDegrees; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_SnapDegrees\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_SnapDegrees\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_SnapDegrees. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_SnapDegrees\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_SnapDegrees\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_TextMode",
       "symbol": "housingExpertGizmos_Rotation_TextMode",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_TextMode."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_TextMode; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_TextMode\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_TextMode\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_TextMode. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_TextMode\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_TextMode\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_XRayCheckerSize",
       "symbol": "housingExpertGizmos_Rotation_XRayCheckerSize",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_XRayCheckerSize."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_XRayCheckerSize; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_XRayCheckerSize\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_XRayCheckerSize\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_XRayCheckerSize. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_XRayCheckerSize\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_XRayCheckerSize\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_XRayDarkAlpha",
       "symbol": "housingExpertGizmos_Rotation_XRayDarkAlpha",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_XRayDarkAlpha."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_XRayDarkAlpha; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_XRayDarkAlpha\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_XRayDarkAlpha\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_XRayDarkAlpha. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_XRayDarkAlpha\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_XRayDarkAlpha\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Rotation_XRayLightAlpha",
       "symbol": "housingExpertGizmos_Rotation_XRayLightAlpha",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Rotation_XRayLightAlpha."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Rotation_XRayLightAlpha; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Rotation_XRayLightAlpha\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_XRayLightAlpha\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Rotation_XRayLightAlpha. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Rotation_XRayLightAlpha\") == nil and GetCVarDefault(\"housingExpertGizmos_Rotation_XRayLightAlpha\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_BaseArrowHeadScale",
       "symbol": "housingExpertGizmos_Translation_BaseArrowHeadScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_BaseArrowHeadScale."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_BaseArrowHeadScale; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_BaseArrowHeadScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_BaseArrowHeadScale\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_BaseArrowHeadScale. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_BaseArrowHeadScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_BaseArrowHeadScale\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_BaseArrowStemScale",
       "symbol": "housingExpertGizmos_Translation_BaseArrowStemScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_BaseArrowStemScale."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_BaseArrowStemScale; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_BaseArrowStemScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_BaseArrowStemScale\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_BaseArrowStemScale. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_BaseArrowStemScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_BaseArrowStemScale\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_BaseCubeScale",
       "symbol": "housingExpertGizmos_Translation_BaseCubeScale",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_BaseCubeScale."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_BaseCubeScale; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_BaseCubeScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_BaseCubeScale\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_BaseCubeScale. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_BaseCubeScale\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_BaseCubeScale\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_DistScaleMax",
       "symbol": "housingExpertGizmos_Translation_DistScaleMax",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_DistScaleMax."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_DistScaleMax; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_DistScaleMax\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_DistScaleMax\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_DistScaleMax. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_DistScaleMax\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_DistScaleMax\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_DistScaleMin",
       "symbol": "housingExpertGizmos_Translation_DistScaleMin",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_DistScaleMin."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_DistScaleMin; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_DistScaleMin\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_DistScaleMin\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_DistScaleMin. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_DistScaleMin\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_DistScaleMin\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_HighlightDefault",
       "symbol": "housingExpertGizmos_Translation_HighlightDefault",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_HighlightDefault."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_HighlightDefault; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_HighlightDefault\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightDefault\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_HighlightDefault. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_HighlightDefault\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightDefault\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_HighlightDragging",
       "symbol": "housingExpertGizmos_Translation_HighlightDragging",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_HighlightDragging."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_HighlightDragging; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_HighlightDragging\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightDragging\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_HighlightDragging. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_HighlightDragging\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightDragging\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_HighlightHovered",
       "symbol": "housingExpertGizmos_Translation_HighlightHovered",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_HighlightHovered."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_HighlightHovered; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_HighlightHovered\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightHovered\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_HighlightHovered. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_HighlightHovered\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightHovered\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_HighlightKeybind",
       "symbol": "housingExpertGizmos_Translation_HighlightKeybind",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_HighlightKeybind."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_HighlightKeybind; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_HighlightKeybind\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightKeybind\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_HighlightKeybind. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_HighlightKeybind\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightKeybind\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_HighlightSelected",
       "symbol": "housingExpertGizmos_Translation_HighlightSelected",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_HighlightSelected."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_HighlightSelected; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_HighlightSelected\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightSelected\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_HighlightSelected. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_HighlightSelected\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_HighlightSelected\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_MaxDistanceFromCamera",
       "symbol": "housingExpertGizmos_Translation_MaxDistanceFromCamera",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_MaxDistanceFromCamera."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_MaxDistanceFromCamera; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_MaxDistanceFromCamera\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_MaxDistanceFromCamera\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_MaxDistanceFromCamera. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_MaxDistanceFromCamera\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_MaxDistanceFromCamera\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_Padding",
       "symbol": "housingExpertGizmos_Translation_Padding",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_Padding."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_Padding; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_Padding\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_Padding\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_Padding. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_Padding\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_Padding\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_ScaleDistanceMax",
       "symbol": "housingExpertGizmos_Translation_ScaleDistanceMax",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_ScaleDistanceMax."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_ScaleDistanceMax; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_ScaleDistanceMax\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_ScaleDistanceMax\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_ScaleDistanceMax. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_ScaleDistanceMax\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_ScaleDistanceMax\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_ScaleDistanceMin",
       "symbol": "housingExpertGizmos_Translation_ScaleDistanceMin",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_ScaleDistanceMin."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_ScaleDistanceMin; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_ScaleDistanceMin\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_ScaleDistanceMin\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_ScaleDistanceMin. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_ScaleDistanceMin\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_ScaleDistanceMin\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_XRayCheckerSize",
       "symbol": "housingExpertGizmos_Translation_XRayCheckerSize",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_XRayCheckerSize."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_XRayCheckerSize; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_XRayCheckerSize\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_XRayCheckerSize\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_XRayCheckerSize. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_XRayCheckerSize\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_XRayCheckerSize\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_XRayDarkAlpha",
       "symbol": "housingExpertGizmos_Translation_XRayDarkAlpha",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_XRayDarkAlpha."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_XRayDarkAlpha; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_XRayDarkAlpha\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_XRayDarkAlpha\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_XRayDarkAlpha. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_XRayDarkAlpha\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_XRayDarkAlpha\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:housingExpertGizmos_Translation_XRayLightAlpha",
       "symbol": "housingExpertGizmos_Translation_XRayLightAlpha",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "evidence-required",
+      "resolution": "unsafe",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Retail 12.0.0 removes CVar housingExpertGizmos_Translation_XRayLightAlpha."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.yaml",
+          "source_hash": "21dba80cc85568849bd9512b1c29b6007665fcf539e0ebb6622d2384490ddf10",
+          "summary": "Current checked-in CVar defaults omit removed name housingExpertGizmos_Translation_XRayLightAlpha; live getter absence is not proven."
+        },
+        {
+          "kind": "source",
+          "reference": "src/cvars.rs",
+          "source_hash": "e4a1e46a35988dd137b95c4afeab0c95f6e65516ef8401f25397f3f2a1a13e6d",
+          "summary": "Generic CVar getter/default implementation is the runtime publication boundary; no row-specific absence proof exists."
+        },
+        {
+          "kind": "source",
+          "reference": "docs/wow-client-diff/WowDiscovery.lua",
+          "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
+          "summary": "Independent discovery evidence; no CVar behavior or replacement semantics are claimed."
+        }
+      ],
       "tests": [],
-      "assertions": [],
+      "assertions": [
+        "GetCVar(\"housingExpertGizmos_Translation_XRayLightAlpha\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_XRayLightAlpha\") == nil; full-LoD getter-absence proof required."
+      ],
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Pending evidence-backed 12.0.0 classification."
+      "notes": "Retail 12.0.0 removes housingExpertGizmos_Translation_XRayLightAlpha. Checked-in defaults omit the name, but public getter absence is unproven. Required full-LoD assertion: GetCVar(\"housingExpertGizmos_Translation_XRayLightAlpha\") == nil and GetCVarDefault(\"housingExpertGizmos_Translation_XRayLightAlpha\") == nil. No housing-gizmo, rendering, replacement, mutation, persistence, consumer, or lifecycle semantics are claimed."
     },
     {
       "id": "removed:lastRenownForMajorFaction2503",
