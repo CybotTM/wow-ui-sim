@@ -141,12 +141,12 @@
 141. [evidence-required] `added:C_ChatInfo.CancelEmote` — unsafe
 142. [evidence-required] `added:C_ChatInfo.InChatMessagingLockdown` — unsafe
 143. [evidence-required] `added:C_ChatInfo.PerformEmote` — unsafe
-144. [evidence-required] `added:C_ColorUtil.ConvertHSLToHSV` — unsafe
-145. [evidence-required] `added:C_ColorUtil.ConvertHSVToHSL` — unsafe
-146. [evidence-required] `added:C_ColorUtil.ConvertHSVToRGB` — unsafe
-147. [evidence-required] `added:C_ColorUtil.ConvertRGBToHSV` — unsafe
+144. [best-effort] `added:C_ColorUtil.ConvertHSLToHSV` — behavioral
+145. [best-effort] `added:C_ColorUtil.ConvertHSVToHSL` — behavioral
+146. [best-effort] `added:C_ColorUtil.ConvertHSVToRGB` — behavioral
+147. [best-effort] `added:C_ColorUtil.ConvertRGBToHSV` — behavioral
 148. [best-effort] `added:C_ColorUtil.GenerateTextColorCode` — behavioral
-149. [evidence-required] `added:C_ColorUtil.WrapTextInColor` — unsafe
+149. [best-effort] `added:C_ColorUtil.WrapTextInColor` — behavioral
 150. [best-effort] `added:C_ColorUtil.WrapTextInColorCode` — behavioral
 151. [evidence-required] `added:C_CombatAudioAlert.GetFormatSetting` — unsafe
 152. [evidence-required] `added:C_CombatAudioAlert.GetSpeakerSpeed` — unsafe

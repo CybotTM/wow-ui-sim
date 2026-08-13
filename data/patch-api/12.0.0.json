@@ -5049,117 +5049,149 @@
       "id": "added:C_ColorUtil.ConvertHSLToHSV",
       "symbol": "C_ColorUtil.ConvertHSLToHSV",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.ConvertHSLToHSV as an added api with three number inputs and three number outputs.",
+          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.ConvertHSLToHSV as an added api with the documented color inputs and outputs.",
           "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
-          "summary": "Current C_ColorUtil defaults do not publish ConvertHSLToHSV; no modeled conversion is present.",
-          "source_hash": "0c0291bc0dc5bb2dc6db3b0c40d28a5fa5a8b0b9c3cbdfa4ad5440407373fd72"
+          "summary": "Current C_ColorUtil defaults implement the standard normalized color conversion with three numeric outputs.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
+          "summary": "Focused internal test covers normalized conversion vectors, primary/fractional/achromatic/boundary behavior, exact three-number returns, and the tested missing-argument clamping convention.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/color_defaults.rs::patch_12_0_0_color_util_conversions_and_wrapping"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d79c8510cbb8cd4b4d8c6f52159743e47115d23f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Current C_ColorUtil conversion behavior is absent or placeholder/identity/max-channel only; authoritative semantics or a correct modeled implementation/test are required, and no approval can close the row."
+      "notes": "Best-effort behavioral evidence is limited to normalized conversion vectors, primary/fractional/achromatic/boundary behavior, exact three-number returns, and the tested missing-argument clamping convention. No localization, untested out-of-range input contract, consumers, rendering, persistence, or broader color-system semantics are claimed."
     },
     {
       "id": "added:C_ColorUtil.ConvertHSVToHSL",
       "symbol": "C_ColorUtil.ConvertHSVToHSL",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.ConvertHSVToHSL as an added api with three number inputs and three number outputs.",
+          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.ConvertHSVToHSL as an added api with the documented color inputs and outputs.",
           "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
-          "summary": "Current C_ColorUtil defaults implement ConvertHSVToHSL as identity/placeholder behavior.",
-          "source_hash": "0c0291bc0dc5bb2dc6db3b0c40d28a5fa5a8b0b9c3cbdfa4ad5440407373fd72"
+          "summary": "Current C_ColorUtil defaults implement the standard normalized color conversion with three numeric outputs.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
+          "summary": "Focused internal test covers normalized conversion vectors, primary/fractional/achromatic/boundary behavior, exact three-number returns, and the tested missing-argument clamping convention.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/color_defaults.rs::patch_12_0_0_color_util_conversions_and_wrapping"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d79c8510cbb8cd4b4d8c6f52159743e47115d23f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Current C_ColorUtil conversion behavior is absent or placeholder/identity/max-channel only; authoritative semantics or a correct modeled implementation/test are required, and no approval can close the row."
+      "notes": "Best-effort behavioral evidence is limited to normalized conversion vectors, primary/fractional/achromatic/boundary behavior, exact three-number returns, and the tested missing-argument clamping convention. No localization, untested out-of-range input contract, consumers, rendering, persistence, or broader color-system semantics are claimed."
     },
     {
       "id": "added:C_ColorUtil.ConvertHSVToRGB",
       "symbol": "C_ColorUtil.ConvertHSVToRGB",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.ConvertHSVToRGB as an added api with three number inputs and three number outputs.",
+          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.ConvertHSVToRGB as an added api with the documented color inputs and outputs.",
           "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
-          "summary": "Current C_ColorUtil defaults do not publish ConvertHSVToRGB; no modeled conversion is present.",
-          "source_hash": "0c0291bc0dc5bb2dc6db3b0c40d28a5fa5a8b0b9c3cbdfa4ad5440407373fd72"
+          "summary": "Current C_ColorUtil defaults implement the standard normalized color conversion with three numeric outputs.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
+          "summary": "Focused internal test covers normalized conversion vectors, primary/fractional/achromatic/boundary behavior, exact three-number returns, and the tested missing-argument clamping convention.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/color_defaults.rs::patch_12_0_0_color_util_conversions_and_wrapping"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d79c8510cbb8cd4b4d8c6f52159743e47115d23f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Current C_ColorUtil conversion behavior is absent or placeholder/identity/max-channel only; authoritative semantics or a correct modeled implementation/test are required, and no approval can close the row."
+      "notes": "Best-effort behavioral evidence is limited to normalized conversion vectors, primary/fractional/achromatic/boundary behavior, exact three-number returns, and the tested missing-argument clamping convention. No localization, untested out-of-range input contract, consumers, rendering, persistence, or broader color-system semantics are claimed."
     },
     {
       "id": "added:C_ColorUtil.ConvertRGBToHSV",
       "symbol": "C_ColorUtil.ConvertRGBToHSV",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.ConvertRGBToHSV as an added api with three number inputs and three number outputs.",
+          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.ConvertRGBToHSV as an added api with the documented color inputs and outputs.",
           "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
-          "summary": "Current C_ColorUtil defaults implement ConvertRGBToHSV with fixed hue/saturation and max-channel output, not a full conversion.",
-          "source_hash": "0c0291bc0dc5bb2dc6db3b0c40d28a5fa5a8b0b9c3cbdfa4ad5440407373fd72"
+          "summary": "Current C_ColorUtil defaults implement the standard normalized color conversion with three numeric outputs.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
+          "summary": "Focused internal test covers normalized conversion vectors, primary/fractional/achromatic/boundary behavior, exact three-number returns, and the tested missing-argument clamping convention.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/color_defaults.rs::patch_12_0_0_color_util_conversions_and_wrapping"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d79c8510cbb8cd4b4d8c6f52159743e47115d23f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Current C_ColorUtil conversion behavior is absent or placeholder/identity/max-channel only; authoritative semantics or a correct modeled implementation/test are required, and no approval can close the row."
+      "notes": "Best-effort behavioral evidence is limited to normalized conversion vectors, primary/fractional/achromatic/boundary behavior, exact three-number returns, and the tested missing-argument clamping convention. No localization, untested out-of-range input contract, consumers, rendering, persistence, or broader color-system semantics are claimed."
     },
     {
       "id": "added:C_ColorUtil.GenerateTextColorCode",
@@ -5202,30 +5234,38 @@
       "id": "added:C_ColorUtil.WrapTextInColor",
       "symbol": "C_ColorUtil.WrapTextInColor",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.WrapTextInColor as an added api with text and colorRGB inputs and a string output.",
+          "summary": "Checked-in 12.0.0 source register records C_ColorUtil.WrapTextInColor as an added api with the documented color inputs and outputs.",
           "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
-          "summary": "Current C_ColorUtil defaults publish WrapTextInColor through GenerateTextColorCode, but no focused executable test covers this wrapper.",
-          "source_hash": "0c0291bc0dc5bb2dc6db3b0c40d28a5fa5a8b0b9c3cbdfa4ad5440407373fd72"
+          "summary": "Current C_ColorUtil defaults publish WrapTextInColor through GenerateTextColorCode and the committed focused test verifies the direct RGB-table wrapper.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/color_defaults.rs",
+          "summary": "Focused internal test asserts the exact RGB-table escape string and empty-text wrapping result.",
+          "source_hash": "52410dca483d3dbcee8dab178fc76d3591eee110d96f64f6a1f5735821b27f86"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/color_defaults.rs::patch_12_0_0_color_util_conversions_and_wrapping"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "d79c8510cbb8cd4b4d8c6f52159743e47115d23f",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "WrapTextInColor lacks focused executable proof; authoritative semantics or a correct modeled implementation/test are required, and no approval can close the row."
+      "notes": "Best-effort behavioral evidence is limited to the tested direct RGB-table escape string and empty-text result. No localization, untested color coercion, consumers, rendering, persistence, or broader color-system semantics are claimed."
     },
     {
       "id": "added:C_ColorUtil.WrapTextInColorCode",
