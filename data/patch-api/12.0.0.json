@@ -6693,30 +6693,38 @@
       "id": "added:C_DamageMeter.DamageMeterAvailableCombatSession.name",
       "symbol": "C_DamageMeter.DamageMeterAvailableCombatSession.name",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterAvailableCombatSession.name as an added structure-field with published value metadata {\"type\":\"string\"}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.DamageMeterAvailableCombatSession.name as an added structure-field occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the source register publishes a string name field, but the current seeded available-session fixture omits name and no focused test asserts it. Authoritative semantics or a correct model/test are required; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterAvailableCombatSession.sessionID",
@@ -7007,59 +7015,75 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSource.amountPerSecond",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.amountPerSecond",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.amountPerSecond as an added structure-field with published value metadata {\"type\":\"number\"}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.amountPerSecond as an added structure-field occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the current seeded fixture includes amountPerSecond, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.classFilename",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.classFilename",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.classFilename as an added structure-field with published value metadata {\"type\":\"string\"}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.classFilename as an added structure-field occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the current seeded fixture includes classFilename, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.isLocalPlayer",
@@ -7183,30 +7207,38 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSource.specIconID",
       "symbol": "C_DamageMeter.DamageMeterCombatSource.specIconID",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.specIconID as an added structure-field with published value metadata {\"type\":\"number\"}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.DamageMeterCombatSource.specIconID as an added structure-field occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the current seeded fixture includes specIconID, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.totalAmount",
@@ -7280,30 +7312,38 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.amountPerSecond",
       "symbol": "C_DamageMeter.DamageMeterCombatSpell.amountPerSecond",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell.amountPerSecond as an added structure-field with published value metadata {\"type\":\"number\"}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell.amountPerSecond as an added structure-field occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the current seeded fixture includes spell amountPerSecond, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.combatSpellDetails",
@@ -7420,30 +7460,38 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.totalAmount",
       "symbol": "C_DamageMeter.DamageMeterCombatSpell.totalAmount",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell.totalAmount as an added structure-field with published value metadata {\"type\":\"number\"}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpell.totalAmount as an added structure-field occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the current seeded fixture includes spell totalAmount, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails",
@@ -7473,88 +7521,112 @@
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.amount",
       "symbol": "C_DamageMeter.DamageMeterCombatSpellUnitDetails.amount",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.amount as an added structure-field with published value metadata {\"type\":\"number\"}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.amount as an added structure-field occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the current seeded fixture includes unit-detail amount, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.classification",
       "symbol": "C_DamageMeter.DamageMeterCombatSpellUnitDetails.classification",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.classification as an added structure-field with published value metadata {\"type\":\"string\"}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.classification as an added structure-field occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the current seeded fixture includes unit-detail classification, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitClassFilename",
       "symbol": "C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitClassFilename",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitClassFilename as an added structure-field with published value metadata {\"type\":\"string\"}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitClassFilename as an added structure-field occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state publishes a seeded session/source/spell fixture and empty known-type results; it is not a complete retail aggregation, lifecycle, or secret-fidelity model."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the current seeded fixture includes unitClassFilename, but the named tests do not assert its value or semantics. Authoritative semantics or a correct model/test are required; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitName",
@@ -7868,30 +7940,38 @@
       "id": "added:C_DamageMeter.ResetAllCombatSessions",
       "symbol": "C_DamageMeter.ResetAllCombatSessions",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
         {
           "kind": "source",
           "reference": "data/patch-api/sources/12.0.0-register.json",
-          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
-          "summary": "Checked-in 12.0.0 source register records C_DamageMeter.ResetAllCombatSessions as an added api with published value metadata {\"inputs\":null,\"outputs\":null}."
+          "summary": "Checked-in retail 12.0.0 source register records C_DamageMeter.ResetAllCombatSessions as an added api occurrence.",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "source_hash": "ff84f6e1f94f645f4953dd60de8c21f9974013a17a6fa296e819e400616f917e",
-          "summary": "Current temporary damage-meter state installs seeded startup data and lookup helpers but does not define ResetAllCombatSessions; the reset lifecycle is unimplemented."
+          "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
+          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence-required unsafe: the source register adds ResetAllCombatSessions, but the current damage-meter implementation has no reset operation and the focused test set is empty. The reset lifecycle requires authoritative semantics or a correct model/test; no approval can close this row."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DeathRecap.DeathRecapEventInfo",
