@@ -341,6 +341,11 @@ mod tests {
                     Enum.DamageMeterType.DamageDone,
                     "Player-1-00000001",
                     1
+                ) ~= nil or C_DamageMeter.GetCombatSessionSourceFromType(
+                    Enum.DamageMeterSessionType.Current,
+                    Enum.DamageMeterType.DamageDone,
+                    "Player-1-00000001",
+                    1
                 ) ~= nil then
                     return "reset_source"
                 end
