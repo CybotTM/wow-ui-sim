@@ -112,7 +112,7 @@ local function IsKnownDamageMeterType(damageType)
 end
 
 local function IsDamageMeterReset()
-    return C_DamageMeter._state and C_DamageMeter._state.reset == true
+    return type(__wow_damage_meter_state) == "table" and __wow_damage_meter_state.reset == true
 end
 
 local function IsSeededDamageMeterSessionID(sessionID)
@@ -126,7 +126,7 @@ local function HasSeededDamageMeterSessionType(sessionType)
     )
 end
 
-C_DamageMeter._state = C_DamageMeter._state or { reset = false }
+__wow_damage_meter_state = __wow_damage_meter_state or { reset = false }
 
 if rawget(C_DamageMeter, "IsDamageMeterAvailable") == nil then
     function C_DamageMeter.IsDamageMeterAvailable()
@@ -238,7 +238,7 @@ end
 
 if rawget(C_DamageMeter, "ResetAllCombatSessions") == nil then
     function C_DamageMeter.ResetAllCombatSessions()
-        C_DamageMeter._state.reset = true
+        __wow_damage_meter_state.reset = true
     end
 end
 "#;
