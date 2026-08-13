@@ -10476,8 +10476,8 @@
       "id": "added:C_EventScheduler.EventDisplayInfo.hideDescription",
       "symbol": "C_EventScheduler.EventDisplayInfo.hideDescription",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
@@ -10490,23 +10490,31 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
-          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.EventDisplayInfo.hideDescription authoritative semantics.",
-          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+          "summary": "Current retail scheduler seed publishes ongoing/scheduled displayInfo tables and stable scheduled event IDs.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Focused retail EventScheduler test asserts seeded ongoing/scheduled displayInfo fields, numeric scheduled event IDs 2001/2002, stable IDs after RequestEvents, and displayInfo preservation after refresh.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/event_scheduler_state.rs::installs_seeded_events_reminders_and_namespace_fallback"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2d4a320cb50140d0fdf8065e81ffbaa8ac68e402",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: empty displayInfo tables do not publish required boolean hideDescription/default false or establish description visibility, producer, or consumer semantics."
+      "notes": "Best-effort behavioral, retail only: seeded ongoing/scheduled displayInfo publishes boolean hideDescription=false. Claims exclude real scheduling/timing, persistence, filtering, UI/rendering, localization, producers outside seeded state, and broader lifecycle semantics."
     },
     {
       "id": "added:C_EventScheduler.EventDisplayInfo.hideTimeLeft",
       "symbol": "C_EventScheduler.EventDisplayInfo.hideTimeLeft",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
@@ -10519,23 +10527,31 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
-          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.EventDisplayInfo.hideTimeLeft authoritative semantics.",
-          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+          "summary": "Current retail scheduler seed publishes ongoing/scheduled displayInfo tables and stable scheduled event IDs.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Focused retail EventScheduler test asserts seeded ongoing/scheduled displayInfo fields, numeric scheduled event IDs 2001/2002, stable IDs after RequestEvents, and displayInfo preservation after refresh.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/event_scheduler_state.rs::installs_seeded_events_reminders_and_namespace_fallback"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2d4a320cb50140d0fdf8065e81ffbaa8ac68e402",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: empty displayInfo tables do not publish required boolean hideTimeLeft/default false or establish time-left visibility, producer, or consumer semantics."
+      "notes": "Best-effort behavioral, retail only: seeded ongoing/scheduled displayInfo publishes boolean hideTimeLeft=false. Claims exclude real scheduling/timing, persistence, filtering, UI/rendering, localization, producers outside seeded state, and broader lifecycle semantics."
     },
     {
       "id": "added:C_EventScheduler.EventDisplayInfo.overrideAtlas",
       "symbol": "C_EventScheduler.EventDisplayInfo.overrideAtlas",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
@@ -10548,23 +10564,31 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
-          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.EventDisplayInfo.overrideAtlas authoritative semantics.",
-          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+          "summary": "Current retail scheduler seed publishes ongoing/scheduled displayInfo tables and stable scheduled event IDs.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Focused retail EventScheduler test asserts seeded ongoing/scheduled displayInfo fields, numeric scheduled event IDs 2001/2002, stable IDs after RequestEvents, and displayInfo preservation after refresh.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/event_scheduler_state.rs::installs_seeded_events_reminders_and_namespace_fallback"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2d4a320cb50140d0fdf8065e81ffbaa8ac68e402",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: absent nullable overrideAtlas does not establish populated atlas values, producer behavior, validation, or UI override/fallback semantics."
+      "notes": "Best-effort behavioral, retail only: seeded ongoing/scheduled displayInfo publishes nullable overrideAtlas=nil. Claims exclude real scheduling/timing, persistence, filtering, UI/rendering, localization, producers outside seeded state, and broader lifecycle semantics."
     },
     {
       "id": "added:C_EventScheduler.EventDisplayInfo.overrideTooltipWidgetSetID",
       "symbol": "C_EventScheduler.EventDisplayInfo.overrideTooltipWidgetSetID",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
@@ -10577,23 +10601,31 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
-          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.EventDisplayInfo.overrideTooltipWidgetSetID authoritative semantics.",
-          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+          "summary": "Current retail scheduler seed publishes ongoing/scheduled displayInfo tables and stable scheduled event IDs.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Focused retail EventScheduler test asserts seeded ongoing/scheduled displayInfo fields, numeric scheduled event IDs 2001/2002, stable IDs after RequestEvents, and displayInfo preservation after refresh.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/event_scheduler_state.rs::installs_seeded_events_reminders_and_namespace_fallback"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2d4a320cb50140d0fdf8065e81ffbaa8ac68e402",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: absent nullable overrideTooltipWidgetSetID does not establish numeric values, producer behavior, validation, or tooltip override/fallback semantics."
+      "notes": "Best-effort behavioral, retail only: seeded ongoing/scheduled displayInfo publishes nullable overrideTooltipWidgetSetID=nil. Claims exclude real scheduling/timing, persistence, filtering, UI/rendering, localization, producers outside seeded state, and broader lifecycle semantics."
     },
     {
       "id": "added:C_EventScheduler.OngoingEventInfo.displayInfo",
       "symbol": "C_EventScheduler.OngoingEventInfo.displayInfo",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
@@ -10606,23 +10638,31 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
-          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.OngoingEventInfo.displayInfo authoritative semantics.",
-          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+          "summary": "Current retail scheduler seed publishes ongoing/scheduled displayInfo tables and stable scheduled event IDs.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Focused retail EventScheduler test asserts seeded ongoing/scheduled displayInfo fields, numeric scheduled event IDs 2001/2002, stable IDs after RequestEvents, and displayInfo preservation after refresh.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/event_scheduler_state.rs::installs_seeded_events_reminders_and_namespace_fallback"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2d4a320cb50140d0fdf8065e81ffbaa8ac68e402",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: empty-table publication does not establish required typed EventDisplayInfo shape, documented fields, producer behavior, refresh lifecycle, or consumers."
+      "notes": "Best-effort behavioral, retail only: ongoing events publish a displayInfo table with hideDescription=false, hideTimeLeft=false, and nil optional overrides. Claims exclude real scheduling/timing, persistence, filtering, UI/rendering, localization, producers outside seeded state, and broader lifecycle semantics."
     },
     {
       "id": "added:C_EventScheduler.ScheduledEventInfo.displayInfo",
       "symbol": "C_EventScheduler.ScheduledEventInfo.displayInfo",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
@@ -10635,23 +10675,31 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
-          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.ScheduledEventInfo.displayInfo authoritative semantics.",
-          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+          "summary": "Current retail scheduler seed publishes ongoing/scheduled displayInfo tables and stable scheduled event IDs.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Focused retail EventScheduler test asserts seeded ongoing/scheduled displayInfo fields, numeric scheduled event IDs 2001/2002, stable IDs after RequestEvents, and displayInfo preservation after refresh.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/event_scheduler_state.rs::installs_seeded_events_reminders_and_namespace_fallback"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2d4a320cb50140d0fdf8065e81ffbaa8ac68e402",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: empty-table publication does not establish required typed EventDisplayInfo shape, documented fields, producer behavior, refresh lifecycle, or consumers."
+      "notes": "Best-effort behavioral, retail only: scheduled events publish a displayInfo table with hideDescription=false, hideTimeLeft=false, and nil optional overrides; the table remains populated after RequestEvents refresh. Claims exclude real scheduling/timing, persistence, filtering, UI/rendering, localization, producers outside seeded state, and broader lifecycle semantics."
     },
     {
       "id": "added:C_EventScheduler.ScheduledEventInfo.eventID",
       "symbol": "C_EventScheduler.ScheduledEventInfo.eventID",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "structure-field",
       "load_addon": null,
       "evidence": [
@@ -10664,16 +10712,24 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
-          "summary": "Current temporary scheduler state uses empty/seeded compatibility payloads and does not establish C_EventScheduler.ScheduledEventInfo.eventID authoritative semantics.",
-          "source_hash": "b7ef49aab9b0f411b891aa92e26e6900b8ea00da5eb3bd174b86bf2baf0b6a6d"
+          "summary": "Current retail scheduler seed publishes ongoing/scheduled displayInfo tables and stable scheduled event IDs.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/event_scheduler_state.rs",
+          "summary": "Focused retail EventScheduler test asserts seeded ongoing/scheduled displayInfo fields, numeric scheduled event IDs 2001/2002, stable IDs after RequestEvents, and displayInfo preservation after refresh.",
+          "source_hash": "657720512980428bb72e3241ac5861618507919ece665a4acfed9a595d726f59"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/event_scheduler_state.rs::installs_seeded_events_reminders_and_namespace_fallback"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "2d4a320cb50140d0fdf8065e81ffbaa8ac68e402",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: temporary seeded numeric event IDs lack focused field/type/value/reset proof and do not establish authoritative scheduler identity or lifecycle semantics."
+      "notes": "Best-effort behavioral, retail only: seeded scheduled events publish numeric eventID values 2001 and 2002, stable after RequestEvents refresh. Claims exclude real scheduling/timing, persistence, filtering, UI/rendering, localization, producers outside seeded state, and broader lifecycle semantics."
     },
     {
       "id": "added:C_EventUtils.IsCallbackEvent",
