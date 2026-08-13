@@ -1649,8 +1649,8 @@
       "id": "added:COMBAT_LOG_APPLY_FILTER_SETTINGS",
       "symbol": "COMBAT_LOG_APPLY_FILTER_SETTINGS",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
       "evidence": [
@@ -1663,29 +1663,43 @@
         {
           "kind": "source",
           "reference": "src/event/valid_events.rs",
-          "summary": "Current event metadata recognizes restricted/callback behavior, but ordinary registration and callback semantics do not establish production.",
+          "summary": "Current event metadata accepts the event as registered/callback-classified; registration metadata alone is not treated as producer proof.",
           "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "summary": "Current temporary combat-log ApplyFilterSettings behavior is a no-op and does not produce the event or model filter state.",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+          "summary": "Restricted callback producer: C_CombatLog.ApplyFilterSettings(settings) stores the supplied table and synchronously dispatches COMBAT_LOG_APPLY_FILTER_SETTINGS with exactly that one table argument; every explicit call dispatches once. Filtering schema/matching, consumer effects, and broader lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/callbacks.rs",
+          "summary": "Event callback registration retains the supplied function for callback dispatch.",
+          "source_hash": "2b2c36966fe5fc1b554dcf781081606e60a441d2b7b73cba04fbffcda1125ba8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real producer path and asserts synchronous delivery, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: no modeled filter-settings producer or focused proof establishes restricted callback registration, exact table payload, state mutation, dispatch timing, ordering, lifecycle, or consumer effects."
+      "notes": "Restricted callback producer: C_CombatLog.ApplyFilterSettings(settings) stores the supplied table and synchronously dispatches COMBAT_LOG_APPLY_FILTER_SETTINGS with exactly that one table argument; every explicit call dispatches once. Filtering schema/matching, consumer effects, and broader lifecycle are not claimed."
     },
     {
       "id": "added:COMBAT_LOG_ENTRIES_CLEARED",
       "symbol": "COMBAT_LOG_ENTRIES_CLEARED",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
       "evidence": [
@@ -1698,29 +1712,37 @@
         {
           "kind": "source",
           "reference": "src/event/valid_events_a.rs",
-          "summary": "Current retail event registry accepts COMBAT_LOG_ENTRIES_CLEARED, but registration does not establish production.",
+          "summary": "Current event metadata accepts the event as registered/callback-classified; registration metadata alone is not treated as producer proof.",
           "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "summary": "Current temporary combat-log ClearEntries mutates fixture state but does not dispatch COMBAT_LOG_ENTRIES_CLEARED.",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+          "summary": "Synchronous producer: C_CombatLog.ClearEntries() clears the temporary entry state and dispatches COMBAT_LOG_ENTRIES_CLEARED with zero arguments; repeated explicit calls each dispatch once. Retention, filtering, and broader lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real producer path and asserts synchronous delivery, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: no modeled clear-event producer or focused proof establishes zero-payload dispatch, timing, ordering, repeated clears, empty-state behavior, or lifecycle."
+      "notes": "Synchronous producer: C_CombatLog.ClearEntries() clears the temporary entry state and dispatches COMBAT_LOG_ENTRIES_CLEARED with zero arguments; repeated explicit calls each dispatch once. Retention, filtering, and broader lifecycle are not claimed."
     },
     {
       "id": "added:COMBAT_LOG_MESSAGE",
       "symbol": "COMBAT_LOG_MESSAGE",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
       "evidence": [
@@ -1733,29 +1755,37 @@
         {
           "kind": "source",
           "reference": "src/event/valid_events_a.rs",
-          "summary": "Current retail event registry accepts COMBAT_LOG_MESSAGE, but registration does not establish production or payload behavior.",
+          "summary": "Current event metadata accepts the event as registered/callback-classified; registration metadata alone is not treated as producer proof.",
           "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "summary": "Current temporary combat-log message helpers do not produce or dispatch COMBAT_LOG_MESSAGE with the required payload.",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+          "summary": "Synchronous producer: C_CombatLogSecure.CreateCombatLogMessage(message, colorR, colorG, colorB, order) stores the message and dispatches COMBAT_LOG_MESSAGE with exactly five arguments preserving the string, three numeric colors, and order; repeated explicit calls each dispatch once. Secure/taint, filtering, navigation, and lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real producer path and asserts synchronous delivery, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: no modeled combat-message producer or focused proof establishes exact message/RGB/order payloads, synchronous dispatch, callback rules, ordering, or lifecycle."
+      "notes": "Synchronous producer: C_CombatLogSecure.CreateCombatLogMessage(message, colorR, colorG, colorB, order) stores the message and dispatches COMBAT_LOG_MESSAGE with exactly five arguments preserving the string, three numeric colors, and order; repeated explicit calls each dispatch once. Secure/taint, filtering, navigation, and lifecycle are not claimed."
     },
     {
       "id": "added:COMBAT_LOG_MESSAGE_LIMIT_CHANGED",
       "symbol": "COMBAT_LOG_MESSAGE_LIMIT_CHANGED",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
       "evidence": [
@@ -1768,29 +1798,37 @@
         {
           "kind": "source",
           "reference": "src/event/valid_events_a.rs",
-          "summary": "Current retail event registry accepts COMBAT_LOG_MESSAGE_LIMIT_CHANGED, but registration does not establish production.",
+          "summary": "Current event metadata accepts the event as registered/callback-classified; registration metadata alone is not treated as producer proof.",
           "source_hash": "a3c4acf8bf96423f3781a2615675c3fd16fa8d7eb597dadc78ca77b306f0028b"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "summary": "Current temporary SetMessageLimit mutates fixture state but does not dispatch COMBAT_LOG_MESSAGE_LIMIT_CHANGED.",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+          "summary": "Synchronous producer: C_CombatLog.SetMessageLimit(limit) stores the numeric limit and dispatches COMBAT_LOG_MESSAGE_LIMIT_CHANGED with exactly one numeric argument equal to the stored value; repeated explicit calls each dispatch once. Bounds, enforcement, and broader lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real producer path and asserts synchronous delivery, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: no modeled message-limit event producer or focused proof establishes exact numeric payload, timing, repeated/invalid updates, ordering, lifecycle, or consumers."
+      "notes": "Synchronous producer: C_CombatLog.SetMessageLimit(limit) stores the numeric limit and dispatches COMBAT_LOG_MESSAGE_LIMIT_CHANGED with exactly one numeric argument equal to the stored value; repeated explicit calls each dispatch once. Bounds, enforcement, and broader lifecycle are not claimed."
     },
     {
       "id": "added:COMBAT_LOG_REFILTER_ENTRIES",
       "symbol": "COMBAT_LOG_REFILTER_ENTRIES",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "event",
       "load_addon": null,
       "evidence": [
@@ -1803,22 +1841,36 @@
         {
           "kind": "source",
           "reference": "src/event/valid_events.rs",
-          "summary": "Current event metadata recognizes restricted/callback behavior, but no focused proof establishes exact registration results or dispatch semantics.",
+          "summary": "Current event metadata accepts the event as registered/callback-classified; registration metadata alone is not treated as producer proof.",
           "source_hash": "5c8daa7a3be7550d53b14733588aa0687f5bb23b2c608a3f13d1360595dac88e"
         },
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "summary": "Current temporary combat-log state has no refilter-event producer or modeled refilter lifecycle.",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9"
+          "summary": "Restricted callback producer: C_CombatLog.RefilterEntries() synchronously dispatches COMBAT_LOG_REFILTER_ENTRIES with zero arguments; every explicit call dispatches once. Actual filtering effects, ordering, and broader lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "source",
+          "reference": "src/lua_api/frame/methods/text_attribute_event/callbacks.rs",
+          "summary": "Event callback registration retains the supplied function for callback dispatch.",
+          "source_hash": "2b2c36966fe5fc1b554dcf781081606e60a441d2b7b73cba04fbffcda1125ba8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real producer path and asserts synchronous delivery, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Evidence required: no modeled refilter producer or focused proof establishes restricted callback registration, zero-payload dispatch, callback ordering, duplicate behavior, lifecycle, or actual refilter effects."
+      "notes": "Restricted callback producer: C_CombatLog.RefilterEntries() synchronously dispatches COMBAT_LOG_REFILTER_ENTRIES with zero arguments; every explicit call dispatches once. Actual filtering effects, ordering, and broader lifecycle are not claimed."
     },
     {
       "id": "added:COMMENTATOR_COMBAT_EVENT",
@@ -5564,8 +5616,8 @@
       "id": "added:C_CombatLog.ApplyFilterSettings",
       "symbol": "C_CombatLog.ApplyFilterSettings",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
@@ -5578,16 +5630,24 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
-          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+          "summary": "Best-effort behavioral proof is limited to storing the supplied settings table and synchronously dispatching the restricted callback with the same table on each explicit call. Filter schema/matching, restriction enforcement, consumers, and broader lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real API producer and asserts synchronous notification, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
+      "notes": "Best-effort behavioral proof is limited to storing the supplied settings table and synchronously dispatching the restricted callback with the same table on each explicit call. Filter schema/matching, restriction enforcement, consumers, and broader lifecycle are not claimed."
     },
     {
       "id": "added:C_CombatLog.AreFilteredEventsEnabled",
@@ -5622,8 +5682,8 @@
       "id": "added:C_CombatLog.ClearEntries",
       "symbol": "C_CombatLog.ClearEntries",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
@@ -5636,16 +5696,24 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
-          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+          "summary": "Best-effort behavioral proof is limited to clearing the temporary entry state and synchronously dispatching the zero-argument event on each explicit call. Retention, filtering, and broader lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real API producer and asserts synchronous notification, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
+      "notes": "Best-effort behavioral proof is limited to clearing the temporary entry state and synchronously dispatching the zero-argument event on each explicit call. Retention, filtering, and broader lifecycle are not claimed."
     },
     {
       "id": "added:C_CombatLog.DoesObjectMatchFilter",
@@ -5767,8 +5835,8 @@
       "id": "added:C_CombatLog.RefilterEntries",
       "symbol": "C_CombatLog.RefilterEntries",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
@@ -5781,16 +5849,24 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
-          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+          "summary": "Best-effort behavioral proof is limited to synchronously dispatching the restricted zero-argument callback once per explicit call. Actual filtering effects, ordering, and broader lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real API producer and asserts synchronous notification, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
+      "notes": "Best-effort behavioral proof is limited to synchronously dispatching the restricted zero-argument callback once per explicit call. Actual filtering effects, ordering, and broader lifecycle are not claimed."
     },
     {
       "id": "added:C_CombatLog.SetEntryRetentionTime",
@@ -5854,8 +5930,8 @@
       "id": "added:C_CombatLog.SetMessageLimit",
       "symbol": "C_CombatLog.SetMessageLimit",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
@@ -5868,16 +5944,24 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
-          "summary": "Current temporary combat-log state is shared with C_CombatLogSecure and fixture-backed/permissive: ApplyFilterSettings and RefilterEntries are no-ops, while filter matching, restriction, retention/message-limit bounds, clearing, and entry lifecycle are not modeled authoritatively."
+          "summary": "Best-effort behavioral proof is limited to storing the numeric limit and synchronously dispatching the one-number event once per explicit call. Bounds, message-limit enforcement, and broader lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real API producer and asserts synchronous notification, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Current C_CombatLog behavior is a shared permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The source establishes signatures only; filter schema/matching, restriction state, retention and message-limit bounds, clear/refilter lifecycle, and entry semantics remain unproven. Existing tests prove simulator fixture behavior and are intentionally not attached; no approval can close this row."
+      "notes": "Best-effort behavioral proof is limited to storing the numeric limit and synchronously dispatching the one-number event once per explicit call. Bounds, message-limit enforcement, and broader lifecycle are not claimed."
     },
     {
       "id": "added:C_CombatLogSecure.AddEventFilter",
@@ -5941,8 +6025,8 @@
       "id": "added:C_CombatLogSecure.CreateCombatLogMessage",
       "symbol": "C_CombatLogSecure.CreateCombatLogMessage",
       "change": "added",
-      "status": "evidence-required",
-      "resolution": "unsafe",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "api",
       "load_addon": null,
       "evidence": [
@@ -5955,16 +6039,24 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
-          "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
-          "summary": "Current src/lua_api/workarounds/temporary/combat_log_state.rs shares permissive fixture state with C_CombatLog and does not enforce secure callers or authoritative filter, payload, navigation, or lifecycle behavior."
+          "summary": "Best-effort behavioral proof is limited to storing each created message and synchronously dispatching the five-argument event with preserved string/color/order values once per explicit call. Secure/taint enforcement, filtering, navigation, and broader lifecycle are not claimed.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
+        },
+        {
+          "kind": "test",
+          "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
+          "summary": "Focused retail 12.0.0 test invokes the real API producer and asserts synchronous notification, exact payload arity/types/values, corresponding temporary-state mutation where applicable, and repeated explicit calls.",
+          "source_hash": "da7f5ecf1118b268dce86327d639c76cfc2e389385dfa8bc1d8ea848f8e463d8"
         }
       ],
-      "tests": [],
+      "tests": [
+        "src/lua_api/workarounds/temporary/combat_log_state.rs::patch_12_0_0_combat_log_producers_dispatch_exact_notifications"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "6bcd6ded2ada37c5f78ba4b98387549f2430369c",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Current C_CombatLogSecure behavior is a permissive/fixture-backed temporary model, not authoritative 12.0.0 behavior. The secure-only contract, secure/taint enforcement, filtering rules, payload shape, navigation semantics, and entry lifecycle remain unproven. Existing tests prove simulator fixture behavior only and are intentionally not attached; no approval can close this row."
+      "notes": "Best-effort behavioral proof is limited to storing each created message and synchronously dispatching the five-argument event with preserved string/color/order values once per explicit call. Secure/taint enforcement, filtering, navigation, and broader lifecycle are not claimed."
     },
     {
       "id": "added:C_CombatLogSecure.GetCurrentEntryInfo",
