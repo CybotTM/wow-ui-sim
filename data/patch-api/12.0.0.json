@@ -6708,23 +6708,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterAvailableCombatSession.sessionID",
@@ -7030,23 +7030,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.classFilename",
@@ -7067,23 +7067,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.isLocalPlayer",
@@ -7222,23 +7222,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSource.totalAmount",
@@ -7327,23 +7327,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpell.combatSpellDetails",
@@ -7475,23 +7475,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails",
@@ -7536,23 +7536,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.classification",
@@ -7573,23 +7573,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitClassFilename",
@@ -7610,23 +7610,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DamageMeter.DamageMeterCombatSpellUnitDetails.unitName",
@@ -7955,23 +7955,23 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
           "summary": "Current temporary damage-meter state publishes the seeded session/source/spell/detail fixture and implements reset state/query behavior.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         },
         {
           "kind": "test",
           "reference": "src/lua_api/workarounds/temporary/damage_meter_state.rs",
-          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior, and harmless repeated reset.",
-          "source_hash": "b53239266a51168abe7c99756270cc1b4ef8d58123c2985c720a98d12f592849"
+          "summary": "Focused retail test asserts seeded field values/types and relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset.",
+          "source_hash": "e261d39cd3f752e67eb6fb001a015703e3b2a03beb84b76970678e3835b4460f"
         }
       ],
       "tests": [
         "src/lua_api/workarounds/temporary/damage_meter_state.rs::patch_12_0_0_damage_meter_fields_and_reset"
       ],
       "assertions": [],
-      "commit": "451b69e725df4be8d3ffe7ee8c8f131f57a55ae3",
+      "commit": "89fdfe290823a03215cfd2a26795fd5d60b1daae",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c and 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3 via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
+      "notes": "Best-effort behavioral: focused proof commits 2be7293ba4bcb2d9121bff725b2238a76823431c, 451b69e725df4be8d3ffe7ee8c8f131f57a55ae3, and 89fdfe290823a03215cfd2a26795fd5d60b1daae via the damage-meter field/reset test assert seeded populated values and types, source/spell/detail relationships, exact reset state/query behavior including both source lookup APIs, and harmless repeated reset. Claims exclude real combat aggregation, persistence, events, UI, multi-session lifecycle, and production data ingestion."
     },
     {
       "id": "added:C_DeathRecap.DeathRecapEventInfo",
