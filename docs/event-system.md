@@ -392,37 +392,13 @@ Fired at the end of frame creation from XML or template application. The handler
 
 Both are wrapped in `pcall()` to match WoW behavior.
 
-### OnShow
+### OnShow / OnHide
 
-**File:** `src/lua_api/frame/methods/methods_core.rs:264-289` and `src/loader/xml_frame.rs:610-631`
+**File:** `src/lua_api/frame/methods/core_state/visibility.rs`
 
-Fired when a frame transitions from hidden to visible. The `Show()` method checks `was_hidden` before firing:
+Visibility dispatch is child-first and reentrant. `Show()` or `Hide()` changes the frame state immediately, so a handler observes its own mutation. A `Hide()` called from `OnShow` defers `OnHide` until `OnShow` returns, then dispatches `OnHide` and leaves the frame hidden; cleanup only resets dispatch-depth bookkeeping and does not restore the outer request.
 
-```rust
-methods.add_method("Show", |lua, this, ()| {
-    let was_hidden = /* check frame.visible == false */;
-    /* set frame.visible = true */
-    if was_hidden {
-        fire_on_show_recursive(lua, &this.state, this.id)?;
-    }
-    Ok(())
-});
-```
-
-### fire_on_show_recursive
-
-**File:** `src/lua_api/frame/methods/methods_core.rs:223-262`
-
-Fires OnShow on a frame, then recursively on all visible children. This ensures child frames that were already visible get their OnShow handlers called when a parent becomes visible.
-
-1. Look up `__scripts["{id}_OnShow"]`
-2. Call with `(self)` if found
-3. Collect visible children IDs
-4. Recurse on each child
-
-### OnHide
-
-Currently fires only the `Hide()` method which sets `frame.visible = false`. The OnHide handler dispatch is simpler than OnShow -- no recursive propagation to children.
+Mutual `OnShow`/`OnHide` changes are drained iteratively for at most 12 handler invocations. Nested cross-frame dispatch is capped at depth 40. These limits prevent recursion overflow while preserving the final state selected by the handlers.
 
 ## OnUpdate Tick Mechanism
 
