@@ -29,7 +29,6 @@ paths.
 | 3 | `C_WeeklyRewards.GetActivityEncounterInfo`, `GetSortedProgressForActivity`, `HasInteraction` | Empty tables, `false` | `Blizzard_WeeklyRewards/Blizzard_WeeklyRewards.lua` | Great Vault already has partial handwritten state, but the panel still falls back to read-only and loses encounter/progress detail because these panel-facing methods remain generated. |
 | 4 | `C_LFGList.GetPremadeGroupFinderStyle`, `GetApplicationInfo`, `CanCreateScenarioGroup` | `0`, `()`, `false` | `Blizzard_UIParent/Shared/UIParent.lua`, `Blizzard_UIParent/Mainline/UIParent.lua`, `Blizzard_ObjectiveTracker/Blizzard_ScenarioObjectiveTracker.lua` | Startup LFG style selection and scenario “Find Group” affordances are still pinned to stub values. `GetApplications()` is handwritten, but the paired per-application lookup is still generated. |
 | 5 | `C_Garrison.GetMissionEncounterIconInfo`, `GetFollowerLink`, `GetBasicMissionInfo`, `GetCompleteTalent`, `GetTalentInfo`, `HasGarrison`, `IsOnGarrisonMap` | Empty tables or no values | `Blizzard_FrameXML/Mainline/AlertFrameSystems.lua`, `Blizzard_FrameXML/Mainline/AlertFrames.lua`, `Blizzard_UIParent/Mainline/UIParent.lua` | Garrison alerts and landing-page/minimap decisions are loaded into the baseline UI, but they remain data-starved because several mission/follower helpers still come from generated stubs. |
-| 6 | `C_LootHistory.GetAllEncounterInfos`, `GetInfoForEncounter`, `GetSortedDropsForEncounter`, `GetSortedInfoForDrop`, `GetLootHistoryTime` | Empty tables or `0` | `Blizzard_FrameXML/Mainline/LootHistory.lua` | Not a startup blocker, but it is still a common panel-load hole: the Blizzard loot-history UI can load but has no seeded encounter/drop model at all. |
 
 ## Notes By Area
 
@@ -85,13 +84,16 @@ sites that can surface as obviously empty toasts or disabled branches.
 - [`src/lua_api/globals/generated_stubs.rs`](../src/lua_api/globals/generated_stubs.rs) still provides mission/follower/talent helpers as empty returns.
 - [`Interface/BlizzardUI/Blizzard_FrameXML/Mainline/AlertFrameSystems.lua`](../Interface/BlizzardUI/Blizzard_FrameXML/Mainline/AlertFrameSystems.lua) and [`Interface/BlizzardUI/Blizzard_FrameXML/Mainline/AlertFrames.lua`](../Interface/BlizzardUI/Blizzard_FrameXML/Mainline/AlertFrames.lua) read those helpers to populate alerts and tooltips.
 
-### 6. Loot history
+### Resolved empty-state slice: loot history
 
-This one is lower priority than the items above, but it is still a clean
-generated-only hole in a Blizzard panel.
+[`src/c_api/c_loot_history.rs`](../src/c_api/c_loot_history.rs) now owns the
+retail/PTR `C_LootHistory` read surface. Empty state returns fresh empty
+encounter/drop tables, explicit nil lookup results, and the modeled history time
+(default `0.0`). This is bounded to loading and showing Blizzard's empty loot
+history panel without Lua errors.
 
-- [`src/lua_api/globals/generated_stubs.rs`](../src/lua_api/globals/generated_stubs.rs) still provides the whole `C_LootHistory` read surface.
-- [`Interface/BlizzardUI/Blizzard_FrameXML/Mainline/LootHistory.lua`](../Interface/BlizzardUI/Blizzard_FrameXML/Mainline/LootHistory.lua) assumes encounter and drop collections exist.
+Populated encounters, drops, rolls, event producers, persistence, and timer
+progression remain unmodeled.
 
 ## Recommended Order
 
@@ -101,7 +103,6 @@ generated-only hole in a Blizzard panel.
 3. Finish the missing `C_WeeklyRewards` panel-facing methods.
 4. Replace the remaining startup-visible `C_LFGList` generated methods.
 5. Seed the garrison alert helper methods that baseline UI already touches.
-6. Implement `C_LootHistory` when the above startup-sensitive branches are done.
 
 ## Out of Scope For This Note
 

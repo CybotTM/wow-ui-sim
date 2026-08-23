@@ -226,6 +226,7 @@ pub struct SimState {
     pub last_loot_roll_choice: Option<i32>,
     pub auction_browse_items: Vec<u32>,
     pub loot_method: LootMethodState,
+    pub loot_history: LootHistoryState,
     pub gossip: GossipState,
     pub torghast: TorghastState,
     pub titles: Vec<String>,

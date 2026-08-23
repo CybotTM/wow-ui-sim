@@ -344,7 +344,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[explicit-xml-parent-anchors]] | Nested XML frames with `parent="..."` must use that explicit parent for implicit anchors; fixed PaperDoll sidebar tabs anchoring to `PaperDollFrame` instead of `CharacterFrameInsetRight` |
 | [[fontstring-default-anchors]] | Unanchored XML `FontString` layer children and `ButtonText` pick their implicit anchor from `justifyH`; explicit anchors suppress the default, while EditBox backing FontStrings stay unanchored |
 | [[frame-surrogate-identity-slot]] | Frame method dispatch now seeds `frame[0]` with a backed identity token so Restricted Environment-style surrogates resolve through `[0]`; `[1]`-only surrogates no longer dispatch |
-| [[generated-stubs-audit]] | 6 priority findings in generated_stubs.rs affecting startup/panel-load paths |
+| [[generated-stubs-audit]] | 5 unresolved priority findings in generated_stubs.rs; retail/PTR C_LootHistory empty state is resolved |
 | [[chatframe-scrollbar-anchor-reapply]] | Inherited child anchor reapply used the child name for `$parent...` substitution, pushing `ChatFrame1` scrollbar descendants off-screen |
 | [[crafting-cast-bar]] | `C_TradeSkillUI.CraftRecipe` updated inventory but did not start player casting or fire `UNIT_SPELLCAST_START`, so Blizzard's professions overlay cast bar had no backing spellbar state |
 | [[display-size-ui-scale-events]] | Live probe proved retail fires `DISPLAY_SIZE_CHANGED` → `UI_SCALE_CHANGED` as an ordered pair on every display/scale change (resize, slider, maximize, resolution) — never one alone; sim resize path and inverted test fixed |

@@ -27,6 +27,7 @@ pub mod c_housing;
 pub mod c_instance_encounter;
 pub mod c_lfg_info;
 pub mod c_login;
+pub mod c_loot_history;
 pub mod c_major_factions;
 pub mod c_map;
 pub mod c_map_exploration_info;
@@ -75,6 +76,7 @@ use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
 pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResult<()> {
+    c_loot_history::register_c_loot_history(state)?;
     register_specialization_and_model_tables(state)?;
     register_glue_and_display_tables(state)?;
     register_auxiliary_utility_tables(state)

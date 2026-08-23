@@ -6,6 +6,7 @@ pub mod barber_shop;
 pub mod character_world;
 pub mod collections;
 pub mod crafting;
+pub mod loot_history;
 pub mod mythic_plus_scenario;
 pub mod player_choice;
 pub mod pvp;
@@ -22,6 +23,7 @@ pub use barber_shop::{
 pub use character_world::*;
 pub use collections::*;
 pub use crafting::*;
+pub use loot_history::LootHistoryState;
 pub use mythic_plus_scenario::{
     DeathRecapEntry, KillingBlowInfo, MythicPlusAffix, MythicPlusRun, MythicPlusState,
     MythicPlusWeeklyBest, ScenarioState, ScenarioStep,
