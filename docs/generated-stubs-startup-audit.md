@@ -2,9 +2,8 @@
 
 Date: 2026-04-09
 
-This note narrows the remaining `generated_stubs.rs` risk surface to the
-functions that still sit on startup-sensitive or panel-load-sensitive Blizzard
-paths.
+This note narrows the remaining generated-stub risk surface to the functions
+that still sit on startup-sensitive or panel-load-sensitive Blizzard paths.
 
 ## Method
 
@@ -36,7 +35,7 @@ paths.
 
 The risk here is shape, not just truthiness.
 
-- [`src/lua_api/globals/generated_stubs.rs`](../src/lua_api/globals/generated_stubs.rs) still gives `C_EncounterWarnings.GetEditModeWarningInfo` an empty table and `IsFeatureAvailable` / `IsFeatureEnabled` hardcoded `false`.
+- The current generated/stub registration surfaces still give `C_EncounterWarnings.GetEditModeWarningInfo` an empty table and `IsFeatureAvailable` / `IsFeatureEnabled` hardcoded `false`.
 - [`Interface/BlizzardUI/Blizzard_EncounterWarnings/EncounterWarnings.lua`](../Interface/BlizzardUI/Blizzard_EncounterWarnings/EncounterWarnings.lua) feeds `GetEditModeWarningInfo(...)` directly into `ShowWarning(...)`, which expects fields like `severity`, `shouldShowWarning`, and formatted text inputs.
 - [`Interface/BlizzardUI/Blizzard_SettingsDefinitions_Frame/AdvancedOptions.lua`](../Interface/BlizzardUI/Blizzard_SettingsDefinitions_Frame/AdvancedOptions.lua) uses `C_EncounterWarnings.IsFeatureAvailable()` and `IsFeatureEnabled()` when registering the boss-warning settings.
 
@@ -46,7 +45,7 @@ This is still one of the most direct generated-stub paths into visible UI state.
 
 These methods are pure gating flags today.
 
-- [`src/lua_api/globals/generated_stubs.rs`](../src/lua_api/globals/generated_stubs.rs) hardcodes all four `C_InstanceEncounter` methods to `false`.
+- The current generated/stub registration surfaces hardcode all four `C_InstanceEncounter` methods to `false`.
 - [`Interface/BlizzardUI/Blizzard_EncounterTimeline/EncounterTimeline.lua`](../Interface/BlizzardUI/Blizzard_EncounterTimeline/EncounterTimeline.lua) uses `IsEncounterInProgress()` and `ShouldShowTimelineForEncounter()` to decide whether to show the live timeline path.
 - [`Interface/BlizzardUI/Blizzard_StaticPopup_Game/GameDialogDefsUtil.lua`](../Interface/BlizzardUI/Blizzard_StaticPopup_Game/GameDialogDefsUtil.lua) and [`Interface/BlizzardUI/Blizzard_StaticPopup_Game/Mainline/GameDialogDefs.lua`](../Interface/BlizzardUI/Blizzard_StaticPopup_Game/Mainline/GameDialogDefs.lua) use the suppress-release and limited-resurrection checks in gameplay dialogs.
 
@@ -58,7 +57,7 @@ branch everywhere.
 `C_WeeklyRewards` is only partially promoted today.
 
 - [`src/lua_api/globals/c_misc_api_ui.rs`](../src/lua_api/globals/c_misc_api_ui.rs) already supplies `GetActivities`, `HasAvailableRewards`, and `CanClaimRewards`.
-- [`src/lua_api/globals/generated_stubs.rs`](../src/lua_api/globals/generated_stubs.rs) still supplies `GetActivityEncounterInfo`, `GetSortedProgressForActivity`, and `HasInteraction`.
+- The current generated/stub registration surfaces still supply `GetActivityEncounterInfo`, `GetSortedProgressForActivity`, and `HasInteraction`.
 - [`Interface/BlizzardUI/Blizzard_WeeklyRewards/Blizzard_WeeklyRewards.lua`](../Interface/BlizzardUI/Blizzard_WeeklyRewards/Blizzard_WeeklyRewards.lua) uses those generated methods for read-only mode, encounter grouping, and world-tier progress rendering.
 
 This is the clearest remaining “partially implemented namespace still broken on
@@ -70,7 +69,7 @@ panel load” case.
 consumers still fall through to generated results.
 
 - [`src/lua_api/globals/c_stubs_api.rs`](../src/lua_api/globals/c_stubs_api.rs) provides `GetApplications()` and the search-result APIs.
-- [`src/lua_api/globals/generated_stubs.rs`](../src/lua_api/globals/generated_stubs.rs) still provides `GetApplicationInfo`, `GetPremadeGroupFinderStyle`, and `CanCreateScenarioGroup`.
+- The current generated/stub registration surfaces still provide `GetApplicationInfo`, `GetPremadeGroupFinderStyle`, and `CanCreateScenarioGroup`.
 - [`Interface/BlizzardUI/Blizzard_UIParent/Mainline/UIParent.lua`](../Interface/BlizzardUI/Blizzard_UIParent/Mainline/UIParent.lua) iterates applications and calls `GetApplicationInfo(...)`.
 - [`Interface/BlizzardUI/Blizzard_UIParent/Shared/UIParent.lua`](../Interface/BlizzardUI/Blizzard_UIParent/Shared/UIParent.lua) checks `GetPremadeGroupFinderStyle()`.
 - [`Interface/BlizzardUI/Blizzard_ObjectiveTracker/Blizzard_ScenarioObjectiveTracker.lua`](../Interface/BlizzardUI/Blizzard_ObjectiveTracker/Blizzard_ScenarioObjectiveTracker.lua) gates the “Find Group” button on `CanCreateScenarioGroup(...)`.
@@ -81,23 +80,29 @@ These are not the entire garrison subsystem, but they are baseline UI call
 sites that can surface as obviously empty toasts or disabled branches.
 
 - [`src/lua_api/globals/c_misc_api_game.rs`](../src/lua_api/globals/c_misc_api_game.rs) only handwrites a small `C_Garrison` subset such as `GetLandingPageGarrisonType`.
-- [`src/lua_api/globals/generated_stubs.rs`](../src/lua_api/globals/generated_stubs.rs) still provides mission/follower/talent helpers as empty returns.
+- The current generated/stub registration surfaces still provide mission/follower/talent helpers as empty returns.
 - [`Interface/BlizzardUI/Blizzard_FrameXML/Mainline/AlertFrameSystems.lua`](../Interface/BlizzardUI/Blizzard_FrameXML/Mainline/AlertFrameSystems.lua) and [`Interface/BlizzardUI/Blizzard_FrameXML/Mainline/AlertFrames.lua`](../Interface/BlizzardUI/Blizzard_FrameXML/Mainline/AlertFrames.lua) read those helpers to populate alerts and tooltips.
 
 ### Resolved empty-state slice: loot history
 
 [`src/c_api/c_loot_history.rs`](../src/c_api/c_loot_history.rs) now owns the
-retail/PTR `C_LootHistory` read surface. Empty state returns fresh empty
-encounter/drop tables, explicit nil lookup results, and the modeled history time
-(default `0.0`). This is bounded to loading and showing Blizzard's empty loot
-history panel without Lua errors.
+retail/PTR `C_LootHistory` read surface. Empty state returns:
+
+- `GetAllEncounterInfos()` → `{}`
+- `GetInfoForEncounter(...)` → `nil`
+- `GetSortedDropsForEncounter(...)` → `{}`
+- `GetSortedInfoForDrop(...)` → `nil`
+- `GetLootHistoryTime()` → `0.0`
+
+This is bounded to loading and showing the real `GroupLootHistoryFrame` empty
+state with zero new Lua errors during `Show()`.
 
 Populated encounters, drops, rolls, event producers, persistence, and timer
 progression remain unmodeled.
 
 ## Recommended Order
 
-1. Promote `C_EncounterWarnings` out of `generated_stubs.rs`.
+1. Promote `C_EncounterWarnings` out of the generated stub surfaces.
 2. Seed `C_InstanceEncounter` state in tandem so warning/timeline features can
    actually become active.
 3. Finish the missing `C_WeeklyRewards` panel-facing methods.
@@ -108,4 +113,4 @@ progression remain unmodeled.
 
 - Large generated namespaces that are already under separate diff-sweep work.
 - Tooltip getters that were already promoted out of generated stubs.
-- Readability-only refactors inside `generated_stubs.rs`.
+- Readability-only refactors inside generated stub surfaces.

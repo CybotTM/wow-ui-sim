@@ -1,6 +1,6 @@
 # Generated Stubs Audit
 
-Audit of `generated_stubs.rs` functions that still sit on startup-sensitive or panel-load-sensitive Blizzard paths. Date: 2026-04-09. Updated: 2026-08-23.
+Audit of generated-stub functions that still sit on startup-sensitive or panel-load-sensitive Blizzard paths. Date: 2026-04-09. Updated: 2026-08-23.
 
 ## Priority Findings
 
@@ -24,13 +24,13 @@ A generated stub is high-risk when it returns `false`, `0`, `()`, or an empty ta
 
 ## Resolved Empty-State Slice
 
-`C_LootHistory` is no longer an unresolved generated-only priority on retail/PTR. The state-backed surface returns fresh empty encounter/drop tables, explicit nil lookup results, and a modeled history time that defaults to `0.0`, allowing Blizzard's empty loot-history panel to load and show without Lua errors.
+`C_LootHistory` is no longer an unresolved generated-only priority on retail/PTR. The state-backed surface returns `GetAllEncounterInfos()` and `GetSortedDropsForEncounter(...)` as empty tables, keyed lookups as `nil`, and `GetLootHistoryTime()` as `0.0`. The real `GroupLootHistoryFrame` loads and shows its empty state with zero new Lua errors during `Show()`.
 
 Populated encounters, drops, rolls, event producers, persistence, and timer progression remain unmodeled.
 
 ## Recommended Order
 
-1. Promote `C_EncounterWarnings` out of generated stubs
+1. Promote `C_EncounterWarnings` out of the generated stub surfaces
 2. Seed `C_InstanceEncounter` state so warning/timeline features can activate
 3. Finish missing `C_WeeklyRewards` panel-facing methods
 4. Replace remaining startup-visible `C_LFGList` generated methods

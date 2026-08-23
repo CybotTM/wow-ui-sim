@@ -396,7 +396,7 @@ Both are wrapped in `pcall()` to match WoW behavior.
 
 **File:** `src/lua_api/frame/methods/core_state/visibility.rs`
 
-Visibility dispatch is child-first and reentrant. `Show()` or `Hide()` changes the frame state immediately, so a handler observes its own mutation. A `Hide()` called from `OnShow` defers `OnHide` until `OnShow` returns, then dispatches `OnHide` and leaves the frame hidden; cleanup only resets dispatch-depth bookkeeping and does not restore the outer request.
+Visibility dispatch is reentrant and child-first for currently visible children. `Show()` or `Hide()` changes the frame state immediately, so a handler observes its own mutation. A `Hide()` called from `OnShow` defers `OnHide` until `OnShow` returns, then dispatches `OnHide` and leaves the frame hidden; cleanup only resets dispatch-depth bookkeeping and does not restore the outer request.
 
 Mutual `OnShow`/`OnHide` changes are drained iteratively for at most 12 handler invocations. Nested cross-frame dispatch is capped at depth 40. These limits prevent recursion overflow while preserving the final state selected by the handlers.
 

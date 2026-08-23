@@ -3008,4 +3008,4 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 
 ## [2026-08-23] investigation | Resolve C_LootHistory empty-state slice
 
-Promoted the retail/PTR `C_LootHistory` read surface from generated fallback behavior to a bounded state-backed model. Empty state returns fresh encounter/drop tables, explicit nil lookup results, and `GetLootHistoryTime() == 0.0`; Blizzard's loot-history frame can show its empty state without Lua errors. Populated encounters, drops, rolls, event producers, persistence, and timer progression remain unmodeled. The generated-stubs audit now tracks five unresolved priorities.
+Promoted the retail/PTR `C_LootHistory` read surface from generated fallback behavior to a bounded state-backed model. Empty state returns fresh encounter/drop tables, explicit nil lookup results, and `GetLootHistoryTime() == 0.0`; the real `GroupLootHistoryFrame` can load and show its empty state with zero new Lua errors during `Show()`. Populated encounters, drops, rolls, event producers, persistence, and timer progression remain unmodeled. The generated-stubs audit now tracks five unresolved priorities.
