@@ -72,7 +72,10 @@ fn test_cross_frame_show_recursion_stops_at_dispatch_depth_limit() {
         .unwrap();
 
     assert_eq!(fired, 40, "cross-frame dispatch must stop at depth 40");
-    assert!(last_shown, "the depth-limited frame still receives its requested state");
+    assert!(
+        last_shown,
+        "the depth-limited frame still receives its requested state"
+    );
 }
 
 #[test]
