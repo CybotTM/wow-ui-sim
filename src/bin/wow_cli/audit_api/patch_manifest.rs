@@ -1907,6 +1907,36 @@ mod tests {
     }
 
     #[test]
+    fn checked_in_evidence_references_are_git_tracked() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+        for path in checked_in_patch_manifest_paths(root) {
+            let json = std::fs::read_to_string(&path).expect("manifest should read");
+            let manifest = parse_manifest(&json).expect("manifest should parse");
+            for row in manifest.rows {
+                for evidence in row.evidence {
+                    let reference = reference_path(&evidence.reference);
+                    let output = std::process::Command::new("git")
+                        .args([
+                            "-C",
+                            root.to_str().expect("repository path should be UTF-8"),
+                        ])
+                        .args(["ls-files", "--error-unmatch", "--", reference])
+                        .output()
+                        .expect("git ls-files should run");
+                    assert!(
+                        output.status.success(),
+                        "{} row {} evidence reference {} is not Git-tracked: {}",
+                        path.display(),
+                        row.id,
+                        evidence.reference,
+                        String::from_utf8_lossy(&output.stderr).trim()
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
     fn checked_in_patch_manifests_parse() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR"));
         for path in checked_in_patch_manifest_paths(root) {

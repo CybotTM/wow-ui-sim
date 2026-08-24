@@ -8007,12 +8007,6 @@
         },
         {
           "kind": "source",
-          "reference": "vendor/wow-ui-source-mists/Interface/AddOns/Blizzard_APIDocumentationGenerated/DeathRecapDocumentation.lua",
-          "source_hash": "469ddc539f9950e6c95fed308333313bf3f89047b83f43891c465681ab7982dc",
-          "summary": "Pinned API documentation publishes DeathRecapEventInfo with an empty field list; vendor consumers reveal only partial event-field usage and do not establish the complete retail 12.0.0 structure."
-        },
-        {
-          "kind": "source",
           "reference": "src/c_api/c_death_recap.rs",
           "source_hash": "743bd33ef4e445c39c79d777f5f697bdd3efba4a084cf523f0f3a907ccd74c3e",
           "summary": "Current simulator models only killing-blow recap queries and has no DeathRecapEventInfo event-record implementation."
@@ -8045,12 +8039,6 @@
           "reference": "data/patch-api/sources/12.0.0-register.json",
           "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Checked-in 12.0.0 source register records this added API signature but does not establish event payload, recap-ID selection, default-ID, or unknown-ID semantics."
-        },
-        {
-          "kind": "source",
-          "reference": "vendor/wow-ui-source-mists/Interface/AddOns/Blizzard_APIDocumentationGenerated/DeathRecapDocumentation.lua",
-          "source_hash": "469ddc539f9950e6c95fed308333313bf3f89047b83f43891c465681ab7982dc",
-          "summary": "Pinned API documentation establishes an optional numeric recap ID and a non-nil table return, while the empty DeathRecapEventInfo definition leaves event fields and runtime behavior unresolved."
         },
         {
           "kind": "source",
@@ -8089,18 +8077,6 @@
         },
         {
           "kind": "source",
-          "reference": "vendor/wow-ui-source-mists/Interface/AddOns/Blizzard_APIDocumentationGenerated/DeathRecapDocumentation.lua",
-          "source_hash": "469ddc539f9950e6c95fed308333313bf3f89047b83f43891c465681ab7982dc",
-          "summary": "Pinned API documentation establishes only an optional numeric recap ID and string return; it does not specify link serialization or failure behavior."
-        },
-        {
-          "kind": "source",
-          "reference": "vendor/wow-ui-source-mists/Interface/AddOns/Blizzard_CombatLogProcessor/Blizzard_CombatLogProcessor.lua",
-          "source_hash": "93b4d1b5ff0d12c68a48cd3a62b9a530d0c6f6b79fc9ed11edf766b7e5a30752",
-          "summary": "Vendor UI consumes GetRecapLink for display text, proving a displayable link is expected but not its exact format or invalid-recap result."
-        },
-        {
-          "kind": "source",
           "reference": "src/c_api/c_death_recap.rs",
           "source_hash": "743bd33ef4e445c39c79d777f5f697bdd3efba4a084cf523f0f3a907ccd74c3e",
           "summary": "Current simulator has no recap-link generation or link-backed state."
@@ -8127,12 +8103,6 @@
           "reference": "data/patch-api/sources/12.0.0-register.json",
           "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Checked-in 12.0.0 source register records this added API signature but does not establish whether the query uses the default recap, a supplied ID, or which records count as events."
-        },
-        {
-          "kind": "source",
-          "reference": "vendor/wow-ui-source-mists/Interface/AddOns/Blizzard_APIDocumentationGenerated/DeathRecapDocumentation.lua",
-          "source_hash": "469ddc539f9950e6c95fed308333313bf3f89047b83f43891c465681ab7982dc",
-          "summary": "Pinned API documentation establishes an optional numeric recap ID and boolean return only; it does not define event-presence or unknown-ID semantics."
         },
         {
           "kind": "source",

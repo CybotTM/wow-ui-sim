@@ -657,7 +657,7 @@
       "evidence": [
         {
           "kind": "manual",
-          "reference": "docs/local/probe-savedvariables-backup/ProtectedRetailProbe.lua",
+          "reference": "data/patch-api/evidence/12.0.5/ProtectedRetailProbe.lua",
           "source_hash": "4a2a3b8cd061e243306caeb5a5f28fe65216d7dc6675ebcc0b53b8573043918d",
           "summary": "Retained Store frames are forbidden, legacy setters are absent, and IsProtected errors; the current simulator returns normally, so exact forbidden/secret-return enforcement is unsafe to guess. Await separate informed approval or new live evidence."
         }
@@ -703,12 +703,6 @@
       "owner": "scale events",
       "load_addon": null,
       "evidence": [
-        {
-          "kind": "manual",
-          "reference": "docs/local/probe-savedvariables-backup/ScaleEventProbe.lua",
-          "source_hash": "e250867b86166f8b182f57ce965deda05b1608ed311f99d22f05252802c7b2b3",
-          "summary": "Duplicate ordered DISPLAY_SIZE_CHANGED/UI_SCALE_CHANGED pairs occur on same-size maximize/restore window-state transitions."
-        },
         {
           "kind": "source",
           "reference": "docs/wiki/investigations/display-size-ui-scale-events.md",
@@ -919,7 +913,7 @@
       "evidence": [
         {
           "kind": "manual",
-          "reference": "docs/local/probe-savedvariables-backup/StoreForbiddenProbe.lua",
+          "reference": "data/patch-api/evidence/12.0.5/StoreForbiddenProbe.lua",
           "source_hash": "adeb170d869d0bb1bd3727623d90abd48e702dd484042e315f5b52bd0f475682",
           "summary": "The retained capture has StoreDropdown_SetDropdown == nil, so dropdown population, button reuse, text/check state, callbacks, and protection behavior were never observed. Await separate informed approval or new live evidence."
         }
@@ -941,7 +935,7 @@
       "evidence": [
         {
           "kind": "manual",
-          "reference": "docs/local/probe-savedvariables-backup/StoreForbiddenProbe.lua",
+          "reference": "data/patch-api/evidence/12.0.5/StoreForbiddenProbe.lua",
           "source_hash": "adeb170d869d0bb1bd3727623d90abd48e702dd484042e315f5b52bd0f475682",
           "summary": "The retained file lacks the /sfp manual descendant scan, so Store descendant forbidden/protected state is unknown. Await separate informed approval or new live evidence."
         }
