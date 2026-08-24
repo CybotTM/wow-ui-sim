@@ -341,7 +341,7 @@ pub const EDIT_MODE_ENCOUNTER_EVENTS_SETTING: SeqEnumDef = (
         "BackgroundTransparency",
         "Transparency",
         "Visibility",
-        "ShowTooltips",
+        "TooltipAnchor",
         "ShowTimer",
         "ViewType",
         "FlipHorizontally",
@@ -398,8 +398,15 @@ pub const DAMAGE_METER_STYLE: SeqEnumDef = (
 pub const DAMAGE_METER_NUMBERS: SeqEnumDef =
     ("DamageMeterNumbers", &["Minimal", "Compact", "Complete"]);
 
-pub const DAMAGE_METER_VISIBILITY: SeqEnumDef =
-    ("DamageMeterVisibility", &["Always", "InCombat", "Hidden"]);
+pub const DAMAGE_METER_VISIBILITY: SeqEnumDef = (
+    "DamageMeterVisibility",
+    &["Always", "InCombat", "Hidden", "InGroup"],
+);
+
+pub const DAMAGE_METER_VISIBILITY_META: EnumDef = (
+    "DamageMeterVisibilityMeta",
+    &[("MinValue", 0), ("MaxValue", 3), ("NumValues", 4)],
+);
 
 pub const DAMAGE_METER_SOURCE_DISPLAY_TYPE: SeqEnumDef =
     ("DamageMeterSourceDisplayType", &["None", "Ally", "Enemy"]);

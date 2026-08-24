@@ -162,6 +162,7 @@ mod patch_12_0_0_ui_enum_metadata;
 mod patch_12_0_0_unit_aura_sort_direction_enums;
 mod patch_12_0_0_unit_aura_sort_rule_big_defensive;
 mod patch_12_0_0_unit_power_spell_ids;
+mod patch_12_0_7_edit_mode_enum_values;
 mod patch_12_1_service_payloads;
 mod runtime_subsystems;
 mod startup_globals;
