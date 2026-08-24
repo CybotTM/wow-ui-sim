@@ -1,3 +1,7 @@
+## [2026-08-24] fix | Run AuthChallenge export patch publicly
+
+Commit `b3324ad06` adds `LoaderEnv::exec_public()` for narrow loader code that must run in the public environment without weakening the loading addon's secure file execution. The addon-specific AuthChallenge workaround uses it to restore five callbacks to `_G`; this is not generic secure-to-public mirroring. Updated `[[lua-api]]`.
+
 ## [2026-08-24] fix | Model Chromie Time empty state
 
 Commit `3fcfa7d31` adds the retail/PTR `C_ChromieTime` surface. Expansion-option queries return nil or fresh empty tables, while `CloseUI()` and `SelectChromieTimeOption()` are no-ops. Broader Chromie Time state, selection, and UI behavior remain unmodeled. Updated the Lua API architecture references.

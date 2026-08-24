@@ -12,7 +12,11 @@ pub struct WowLuaEnv {
 }
 ```
 
-Initializes with full Lua stdlib, creates UIParent/WorldFrame via `create_builtin_frames`, then calls `register_globals`. Execution entry points: `exec()`, `exec_named()`, `exec_with_varargs()` (addon loading with `addonName, addonTable` varargs), `eval()`.
+Initializes with full Lua stdlib, creates UIParent/WorldFrame via `create_builtin_frames`, then calls `register_globals`. Execution entry points: `exec()`, `exec_public()`, `exec_named()`, `exec_with_varargs()` (addon loading with `addonName, addonTable` varargs), `eval()`.
+
+### Loader Environment Boundaries
+
+`LoaderEnv::exec()` runs dynamic loader code in the currently loading addon's environment, including secure-environment and loading-scoped fenv state. `LoaderEnv::exec_public()` deliberately skips that loading fenv state while preserving the addon's secure file execution. Use it only for an addon-specific bridge that must publish a narrow compatibility surface to `_G`; it is not a generic secure-to-public mirroring mechanism. The AuthChallenge workaround uses this boundary to restore five exported callbacks publicly while the `Blizzard_AuthChallengeUI` addon remains secure (`src/lua_api/loader_env.rs`, `src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs`).
 
 ## FrameHandle Userdata (`src/lua_api/frame/handle.rs`)
 
@@ -82,6 +86,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [container_portrait_texture.rs](../../../src/lua_api/workarounds/temporary/container_portrait_texture.rs) — retail texture fileDataID proof
 - [item_button_helper_defaults.rs](../../../src/lua_api/workarounds/temporary/item_button_helper_defaults.rs) — item-button texture fileDataID proof
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
+- [loader_env.rs](../../../src/lua_api/loader_env.rs) — secure versus public dynamic loader execution
+- [auth_challenge_frame_parent.rs](../../../src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs) — addon-specific AuthChallenge public export bridge
 - `/home/osso/Repos/simc/SpellDataDump/allspells.txt` — coefficient and variable formulas used for AP/health-scaled spell text
 
 ## See Also
