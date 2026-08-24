@@ -12,10 +12,6 @@ fn blizzard_ui_dir() -> PathBuf {
     )))
 }
 
-fn catalog_shop_toc() -> PathBuf {
-    blizzard_ui_dir().join("Blizzard_CatalogShop/Blizzard_CatalogShop.toc")
-}
-
 fn load_full_game_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
@@ -40,24 +36,23 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+fn assert_catalog_shop_loaded(env: &WowLuaEnv) {
+    let (loaded, finished): (bool, bool) = env
+        .eval("return C_AddOns.IsAddOnLoaded('Blizzard_CatalogShop')")
+        .expect("Catalog Shop load state query should succeed");
+    assert!(loaded, "Blizzard_CatalogShop should load during startup");
+    assert!(finished, "Blizzard_CatalogShop startup load should finish");
+}
+
 #[test]
 fn blizzard_catalog_shop_loads_without_errors() {
     let env = load_full_game_ui();
-
-    {
-        let mut state = env.state().borrow_mut();
-        state.lua_errors.clear();
-        state.lua_error_records.clear();
-        state.lua_error_counts.clear();
-    }
-
-    load_addon(&env.loader_env(), &catalog_shop_toc())
-        .expect("Blizzard_CatalogShop should load via Rust loader");
+    assert_catalog_shop_loaded(&env);
 
     let load_errors: Vec<String> = env.state().borrow().lua_errors.clone();
     assert!(
         load_errors.is_empty(),
-        "Blizzard_CatalogShop emitted Lua errors during load:\n  {}",
+        "Blizzard_CatalogShop emitted Lua errors during startup:\n  {}",
         load_errors.join("\n  ")
     );
 
@@ -89,8 +84,7 @@ fn blizzard_catalog_shop_loads_without_errors() {
 #[test]
 fn catalog_shop_show_and_hide_run_without_errors() {
     let env = load_full_game_ui();
-
-    load_addon(&env.loader_env(), &catalog_shop_toc()).expect("Blizzard_CatalogShop should load");
+    assert_catalog_shop_loaded(&env);
 
     {
         let mut state = env.state().borrow_mut();
@@ -102,9 +96,30 @@ fn catalog_shop_show_and_hide_run_without_errors() {
     env.exec(
         "local frame = _G.CatalogShopFrame \
          or (__secureenv and rawget(__secureenv, 'CatalogShopFrame')); \
-         frame:Show(); frame:Hide()",
+         frame:Show()",
     )
-    .expect("CatalogShopFrame Show/Hide should run");
+    .expect("CatalogShopFrame Show should run");
+
+    let (view_present, provider_type): (bool, String) = env
+        .eval(
+            "local frame = _G.CatalogShopFrame \
+             or (__secureenv and rawget(__secureenv, 'CatalogShopFrame')); \
+             local scrollBox = frame.ProductContainerFrame.ProductsScrollBoxContainer.ScrollBox; \
+             return scrollBox:GetView() ~= nil, type(scrollBox:GetDataProvider())",
+        )
+        .expect("Catalog Shop product ScrollBox should be queryable");
+    assert!(view_present, "product ScrollBox should have a view");
+    assert_eq!(
+        provider_type, "table",
+        "product ScrollBox should have a provider"
+    );
+
+    env.exec(
+        "local frame = _G.CatalogShopFrame \
+         or (__secureenv and rawget(__secureenv, 'CatalogShopFrame')); \
+         frame:Hide()",
+    )
+    .expect("CatalogShopFrame Hide should run");
 
     let known_numeric_layout_error = "expected number, got nil at argument 1";
     let unexpected_errors: Vec<String> = env
