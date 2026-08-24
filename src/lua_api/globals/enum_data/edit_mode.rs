@@ -341,7 +341,7 @@ pub const EDIT_MODE_ENCOUNTER_EVENTS_SETTING: SeqEnumDef = (
         "BackgroundTransparency",
         "Transparency",
         "Visibility",
-        "TooltipAnchor",
+        "ShowTooltips",
         "ShowTimer",
         "ViewType",
         "FlipHorizontally",
@@ -349,6 +349,9 @@ pub const EDIT_MODE_ENCOUNTER_EVENTS_SETTING: SeqEnumDef = (
         "Padding",
     ],
 );
+
+pub const EDIT_MODE_ENCOUNTER_EVENTS_SETTING_ADDITIONS: EnumDef =
+    ("EditModeEncounterEventsSetting", &[("TooltipAnchor", 8)]);
 
 pub const ENCOUNTER_EVENTS_VIEW_TYPE: SeqEnumDef =
     ("EncounterEventsViewType", &["Timeline", "Bars"]);

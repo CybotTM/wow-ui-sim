@@ -21,6 +21,9 @@ pub type EnumDef = (&'static str, &'static [(&'static str, i32)]);
 /// Sequential enum: (enum_name, &[variant_names]) - values are 0, 1, 2, ...
 pub type SeqEnumDef = (&'static str, &'static [&'static str]);
 
+/// Values added to an enum after its base table is registered.
+pub const ENUM_VALUE_ADDITIONS: &[EnumDef] = &[EDIT_MODE_ENCOUNTER_EVENTS_SETTING_ADDITIONS];
+
 // ============================================================================
 // All sequential enums (for batch registration)
 // ============================================================================

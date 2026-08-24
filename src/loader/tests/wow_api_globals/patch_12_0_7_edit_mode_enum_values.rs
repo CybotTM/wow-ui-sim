@@ -17,8 +17,8 @@ fn test_patch_12_0_7_edit_mode_enum_values() {
                 if encounter.TooltipAnchor ~= 8 then
                     return "TooltipAnchor: expected 8, got " .. tostring(encounter.TooltipAnchor)
                 end
-                if encounter.ShowTooltips ~= nil then
-                    return "ShowTooltips: expected nil, got " .. tostring(encounter.ShowTooltips)
+                if encounter.ShowTooltips ~= 8 then
+                    return "ShowTooltips: expected preserved value 8, got " .. tostring(encounter.ShowTooltips)
                 end
 
                 local encounterMeta = Enum.EditModeEncounterEventsSettingMeta
