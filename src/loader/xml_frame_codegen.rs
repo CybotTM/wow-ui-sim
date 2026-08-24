@@ -6,7 +6,9 @@
 
 use rustc_hash::FxHashSet;
 
-use super::helpers::{escape_lua_string, generate_scripts_code, lua_table_field_ref};
+use super::helpers::{
+    escape_lua_string, generate_scripts_code, lua_global_ref, lua_table_field_ref,
+};
 
 /// Build the complete Lua code string for creating a frame from XML.
 pub(super) fn build_frame_lua_code(
@@ -54,15 +56,13 @@ fn build_create_frame_code(
     } else {
         format!("\"{}\"", inherits)
     };
-    // Engine-root frames (e.g. UIParent) are pre-created without a parent.
-    // When XML defines them, name == default parent, which would self-parent.
-    // Reuse the existing engine frame instead.
-    if let Some(p) = parent
-        && name == p
-    {
+    // Engine-root frames are pre-created without a parent. Their XML definitions
+    // configure those existing objects even when the parent attribute is omitted.
+    if matches!(name, "UIParent" | "WorldFrame") {
+        let root_ref = lua_global_ref(name);
         return format!(
             r#"
-        local frame = {parent_ref_expr}
+        local frame = {root_ref}
         "#,
         );
     }
