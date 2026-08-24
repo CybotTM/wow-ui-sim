@@ -1,3 +1,7 @@
+## [2026-08-24] fix | Replay selected Blizzard libraries into secure environment
+
+Commit `7dfc33c3d` expands the evidence-backed secure replay allowlist with `Blizzard_CombatLogBase` and `Blizzard_CatalogShopSharedUtil`. Their `CombatLogUtil` and `CatalogShopUtil` globals are now re-executed into `__secureenv`; the loader does not mirror `_G` generically. Focused tests verify both public and secure bindings. Updated `[[addon-loading]]` and `[[taint-system]]`.
+
 ## [2026-08-24] fix | Reuse engine roots for XML definitions
 
 Commit `e5089fbeb2` makes XML definitions for pre-created `UIParent` and `WorldFrame` configure the existing root objects instead of creating replacements. XML mixins, scripts, event registrations, and lifecycle configuration therefore attach to the same objects later observed through `_G.UIParent` and `_G.WorldFrame`. The duplicate path stranded startup scripts and event registrations on the original UIParent and prevented CombatLog runtime loading. Implementation: `src/loader/xml_frame_codegen.rs`.

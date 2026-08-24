@@ -53,6 +53,12 @@ During startup, addon discovery includes non-LoadOnDemand addons only. LoadOnDem
 
 `LoadResult` includes per-addon timing breakdown: `io_time`, `xml_parse_time`, `lua_exec_time`, `saved_vars_time`.
 
+## Secure Replay Allowlist
+
+The secure Lua environment is separate from `_G`; it has no generic `_G` fallback. After normal loading, the loader explicitly replays only selected Blizzard library addons into `__secureenv` through `is_secure_replay_library_addon()` (`src/loader/addon.rs`). The current allowlist includes `Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_CombatLogBase`, `Blizzard_CatalogShopSharedTemplates`, `Blizzard_CatalogShopSharedUtil`, `Blizzard_AsyncRequest`, and `Blizzard_GameTooltip`.
+
+The `Blizzard_CombatLogBase` and `Blizzard_CatalogShopSharedUtil` entries are required because secure consumers resolve `CombatLogUtil` and `CatalogShopUtil` in `__secureenv`. This is an evidence-backed library list, not generic mirroring of `_G`; additions require a secure consumer and focused replay proof. Coverage: `tests/blizzard_combat_log_processor_loads.rs::blizzard_combat_log_base_replays_util_into_secure_environment` and `tests/blizzard_catalog_shop_shared_util_loads.rs::blizzard_catalog_shop_shared_util_replays_helpers_into_secure_environment`.
+
 ## Blizzard Addon Load Order
 
 Retail and PTR Blizzard addons are discovered from the active profile cache, filtered by screen/profile metadata, and topologically sorted from TOC dependencies plus simulator implicit startup dependencies. Foundational SharedXML addons are promoted to `LoadFirst` so templates exist before other Blizzard addons instantiate frames. Older docs referred to a 27-addon hardcoded retail list; current runtime loading is discovery-based.
@@ -111,9 +117,10 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 - [addon-loading-pipeline.md](../../addon-loading-pipeline.md) — TOC parsing, load flow, XML handlers, SavedVariables, load order
 - [addon_loading.rs](../../../src/bin/wow_sim/addon_loading.rs) — Blizzard eager load, third-party addon discovery, metadata pre-registration, enable-state application, and load loop
 - [toc/mod.rs](../../../src/toc/mod.rs) — TOC metadata, normal file list, `[Bootstrap]` parsing, path resolution
-- [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution; `[Bootstrap]` entries remain inline
+- [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution, inline `[Bootstrap]` entries, and the secure replay allowlist
 - [blizzard-ui-files](../../../data/blizzard-ui-files) — committed per-profile Blizzard UI cache manifests, including bootstrap files needed by each active profile cache
 - [blizzard_ui_sync.rs](../../../src/blizzard_ui_sync.rs) and [profile_cache.rs](../../../src/blizzard_ui_sync/profile_cache.rs) — active-profile cache sync and profile-specific cache usability checks
+- [secure replay tests](../../../tests/blizzard_combat_log_processor_loads.rs) and [CatalogShop replay tests](../../../tests/blizzard_catalog_shop_shared_util_loads.rs) — proof that selected Blizzard library globals are available in `__secureenv`
 
 ## See Also
 

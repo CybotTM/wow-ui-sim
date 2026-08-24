@@ -43,6 +43,8 @@ Retail probe result, 2026-06-20: wrapping `_G.CooldownFrame_Set` and `_G.Cooldow
 
 Blizzard source also matches this: outbound bridge files explicitly capture `local secureEnv = GetCurrentEnvironment()`, call `SwapToGlobalEnvironment()`, then assign bridge tables back into `secureEnv` (for example `secureEnv.WowTokenOutbound = WowTokenOutbound`). Those manual exports are necessary only when secureenv does not fall through to `_G`.
 
+For shared Blizzard libraries, publication into secureenv is an explicit loader allowlist, not generic global mirroring. The allowlist replays `Blizzard_CombatLogBase` and `Blizzard_CatalogShopSharedUtil` so secure consumers receive `CombatLogUtil` and `CatalogShopUtil`; focused tests verify both `_G` and `__secureenv` bindings. See [[addon-loading]] for the complete allowlist and replay lifecycle.
+
 `set_in_both_envs_rilua(key, value)` registers named frames in both environments so frame globals are visible from both.
 
 ## Elune Runtime Functions
@@ -142,6 +144,7 @@ Removed/stale paths that older docs may mention:
 ## See Also
 
 - [[lua-api]] — issecure, securecall, hooksecurefunc globals
+- [[addon-loading]] — explicit secure replay allowlist and addon load lifecycle
 - [[event-system]] — ADDON_ACTION_BLOCKED event firing
 - [[frame-data-flow]] — frame is_protected field and Protect() method
 - [[protected-frames]] — focused protected-frame enforcement notes
