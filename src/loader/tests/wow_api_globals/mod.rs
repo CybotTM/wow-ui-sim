@@ -19,6 +19,17 @@ mod global_functions;
 mod housing_event_dispatch;
 mod housing_result;
 mod item_collection_secret_aspects;
+
+macro_rules! active_retail_12_0_0_test_modules {
+    ($($module:item)*) => {
+        $(
+            #[cfg(all(feature = "retail-12-0-0", not(feature = "retail-12-0-5")))]
+            $module
+        )*
+    };
+}
+
+active_retail_12_0_0_test_modules! {
 mod patch_12_0_0_adv_fly_cvar_values;
 mod patch_12_0_0_audit_enums;
 mod patch_12_0_0_changed_startup_values;
@@ -162,6 +173,8 @@ mod patch_12_0_0_ui_enum_metadata;
 mod patch_12_0_0_unit_aura_sort_direction_enums;
 mod patch_12_0_0_unit_aura_sort_rule_big_defensive;
 mod patch_12_0_0_unit_power_spell_ids;
+}
+
 mod patch_12_0_7_edit_mode_enum_values;
 mod patch_12_1_service_payloads;
 mod runtime_subsystems;
