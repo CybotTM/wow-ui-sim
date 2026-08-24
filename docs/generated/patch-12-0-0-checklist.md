@@ -2155,7 +2155,7 @@
 2155. [best-effort] `added:Frame.SetIgnoringChildrenForBounds` — behavioral
 2156. [best-effort] `added:GameTooltip.GetLeftLine` — behavioral
 2157. [best-effort] `added:GameTooltip.GetRightLine` — behavioral
-2158. [evidence-required] `added:GetCollapsingStarCost` — evidence-required / unsafe: Full-LoD probe: assert(type(GetCollapsingStarCost) == "function"); local cost = GetCollapsingStarCost(); assert(type(cost) == "number").
+2158. [evidence-required] `added:GetCollapsingStarCost` — unsafe
 2159. [evidence-required] `added:HOUSE_EXTERIOR_TYPE_UNLOCKED` — unsafe
 2160. [evidence-required] `added:HOUSING_DECOR_ADD_TO_PREVIEW_LIST` — unsafe
 2161. [evidence-required] `added:HOUSING_DECOR_FREE_PLACE_STATUS_CHANGED` — unsafe
@@ -2176,7 +2176,7 @@
 2176. [evidence-required] `added:HouseExteriorSizeOptionsInfo.options` — unsafe
 2177. [evidence-required] `added:HouseExteriorSizeOptionsInfo.selectedSize` — unsafe
 2178. [best-effort] `added:HouseExteriorTypeOption` — provenance-only
-2179. [evidence-required] `added:HouseExteriorTypeOption.houseExteriorTypeID` — evidence-required / unsafe: Full-LoD producer-backed probe: obtain C_HouseExterior.GetHouseExteriorTypeOptions(), assert each returned option is a table and type(option.houseExteriorTypeID) == "number"; do not treat the temporary fixture as retail contract proof.
+2179. [evidence-required] `added:HouseExteriorTypeOption.houseExteriorTypeID` — unsafe
 2180. [evidence-required] `added:HouseExteriorTypeOption.isLocked` — unsafe
 2181. [evidence-required] `added:HouseExteriorTypeOption.lockReasonString` — unsafe
 2182. [evidence-required] `added:HouseExteriorTypeOption.name` — unsafe
@@ -2195,7 +2195,7 @@
 2195. [evidence-required] `added:INITIATIVE_TASKS_TRACKED_LIST_CHANGED` — unsafe
 2196. [evidence-required] `added:INITIATIVE_TASKS_TRACKED_UPDATED` — unsafe
 2197. [evidence-required] `added:INITIATIVE_TASK_COMPLETED` — unsafe
-2198. [evidence-required] `added:IsRaidMarkerSystemEnabled` — evidence-required / unsafe: Retail full-LoD probe: assert(type(IsRaidMarkerSystemEnabled) == "function"); local enabled = IsRaidMarkerSystemEnabled(); assert(type(enabled) == "boolean"); establish and assert the backing raid-marker enablement state.
+2198. [evidence-required] `added:IsRaidMarkerSystemEnabled` — unsafe
 2199. [evidence-required] `added:LEGACY_LOOT_RULES_CHANGED` — unsafe
 2200. [best-effort] `added:LE_FRAME_TUTORIAL_JOURNEYS_TAB` — behavioral
 2201. [best-effort] `added:LE_FRAME_TUTORIAL_LINK_TRANSMOG_CUSTOM_SET` — behavioral
@@ -2274,7 +2274,7 @@
 2274. [exception-requested] `added:Model.SetUseGBuffer` — impossible
 2275. [evidence-required] `added:NAME_PLATE_UNIT_BEHIND_CAMERA_CHANGED` — unsafe
 2276. [evidence-required] `added:NEIGHBORHOOD_INITIATIVE_UPDATED` — unsafe
-2277. [evidence-required] `added:NewCraftingOrderInfo.reagentInfos` — evidence-required / unsafe: Full-LoD producer probe: obtain a NewCraftingOrderInfo table; assert type(order.reagentInfos) == "table"; for each info assert type(info) == "table" and type(info.reagent) == "table".
+2277. [evidence-required] `added:NewCraftingOrderInfo.reagentInfos` — unsafe
 2278. [evidence-required] `added:NumberAbbrevData` — unsafe
 2279. [evidence-required] `added:NumberAbbrevData.abbreviation` — unsafe
 2280. [evidence-required] `added:NumberAbbrevData.abbreviationIsGlobal` — unsafe
@@ -2294,7 +2294,7 @@
 2294. [evidence-required] `added:Region.SetVertexColorFromBoolean` — unsafe
 2295. [evidence-required] `added:RegisterEventCallback` — unsafe
 2296. [evidence-required] `added:RegisterUnitEventCallback` — unsafe
-2297. [evidence-required] `added:RegularReagentInfo.reagent` — evidence-required / unsafe: Full-LoD producer probe: obtain a RegularReagentInfo table; assert type(info.reagent) == "table" for its typed CraftingReagent field.
+2297. [evidence-required] `added:RegularReagentInfo.reagent` — unsafe
 2298. [evidence-required] `added:SECURE_TRANSFER_CONFIRM_HOUSING_PURCHASE` — unsafe
 2299. [evidence-required] `added:SECURE_TRANSFER_HOUSING_CURRENCY_PURCHASE_CONFIRMATION` — unsafe
 2300. [evidence-required] `added:SETTINGS_PANEL_OPEN` — unsafe
@@ -2337,13 +2337,13 @@
 2337. [evidence-required] `added:UNIT_LOOT` — unsafe
 2338. [evidence-required] `added:UNIT_SPELL_DIMINISH_CATEGORY_STATE_UPDATED` — unsafe
 2339. [evidence-required] `added:UPDATE_BULLETIN_BOARD_MEMBER_TYPE` — unsafe
-2340. [evidence-required] `added:UnitCastingDuration` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2341. [evidence-required] `added:UnitChannelDuration` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2342. [evidence-required] `added:UnitClassFromGUID` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2340. [evidence-required] `added:UnitCastingDuration` — unsafe
+2341. [evidence-required] `added:UnitChannelDuration` — unsafe
+2342. [evidence-required] `added:UnitClassFromGUID` — unsafe
 2343. [best-effort] `added:UnitCreatureID` — behavioral
-2344. [evidence-required] `added:UnitEmpoweredChannelDuration` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2345. [evidence-required] `added:UnitEmpoweredStageDurations` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2346. [evidence-required] `added:UnitEmpoweredStagePercentages` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2344. [evidence-required] `added:UnitEmpoweredChannelDuration` — unsafe
+2345. [evidence-required] `added:UnitEmpoweredStageDurations` — unsafe
+2346. [evidence-required] `added:UnitEmpoweredStagePercentages` — unsafe
 2347. [best-effort] `added:UnitGetDetailedHealPrediction` — behavioral
 2348. [best-effort] `added:UnitHealPredictionCalculator` — behavioral
 2349. [best-effort] `added:UnitHealPredictionCalculator.GetDamageAbsorbClampMode` — behavioral
@@ -2368,24 +2368,24 @@
 2368. [best-effort] `added:UnitHealPredictionValues.health` — behavioral
 2369. [best-effort] `added:UnitHealPredictionValues.healthMax` — behavioral
 2370. [best-effort] `added:UnitHealPredictionValues.totalDamageAbsorbs` — behavioral
-2371. [evidence-required] `added:UnitHealPredictionValues.totalHealAbsorbs` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2371. [evidence-required] `added:UnitHealPredictionValues.totalHealAbsorbs` — unsafe
 2372. [best-effort] `added:UnitHealPredictionValues.totalIncomingHeals` — behavioral
 2373. [best-effort] `added:UnitHealPredictionValues.totalIncomingHealsFromHealer` — behavioral
-2374. [evidence-required] `added:UnitHealthMissing` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2375. [evidence-required] `added:UnitHealthPercent` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2374. [evidence-required] `added:UnitHealthMissing` — unsafe
+2375. [evidence-required] `added:UnitHealthPercent` — unsafe
 2376. [best-effort] `added:UnitIsHumanPlayer` — behavioral
-2377. [evidence-required] `added:UnitIsLieutenant` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2378. [evidence-required] `added:UnitIsMinion` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2379. [evidence-required] `added:UnitIsNPCAsPlayer` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2377. [evidence-required] `added:UnitIsLieutenant` — unsafe
+2378. [evidence-required] `added:UnitIsMinion` — unsafe
+2379. [evidence-required] `added:UnitIsNPCAsPlayer` — unsafe
 2380. [best-effort] `added:UnitIsSpellTarget` — behavioral
-2381. [evidence-required] `added:UnitNameFromGUID` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2382. [evidence-required] `added:UnitPowerMissing` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2383. [evidence-required] `added:UnitPowerPercent` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2384. [evidence-required] `added:UnitSexBase` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2385. [evidence-required] `added:UnitShouldDisplaySpellTargetName` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2386. [evidence-required] `added:UnitSpellTargetClass` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2387. [evidence-required] `added:UnitSpellTargetName` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
-2388. [evidence-required] `added:UnitThreatLeadSituation` — unsafe: full-LoD/state-backed proof required; current publication is absent, divergent, or temporary.
+2381. [evidence-required] `added:UnitNameFromGUID` — unsafe
+2382. [evidence-required] `added:UnitPowerMissing` — unsafe
+2383. [evidence-required] `added:UnitPowerPercent` — unsafe
+2384. [evidence-required] `added:UnitSexBase` — unsafe
+2385. [evidence-required] `added:UnitShouldDisplaySpellTargetName` — unsafe
+2386. [evidence-required] `added:UnitSpellTargetClass` — unsafe
+2387. [evidence-required] `added:UnitSpellTargetName` — unsafe
+2388. [evidence-required] `added:UnitThreatLeadSituation` — unsafe
 2389. [evidence-required] `added:UnregisterEventCallback` — unsafe
 2390. [evidence-required] `added:UnregisterUnitEventCallback` — unsafe
 2391. [evidence-required] `added:VIEWED_TRANSMOG_OUTFIT_CHANGED` — unsafe
@@ -2420,95 +2420,95 @@
 2420. [best-effort] `added:combatWarningsEnabled` — behavioral
 2421. [best-effort] `added:damageMeterEnabled` — behavioral
 2422. [best-effort] `added:disableSuggestedLevelActivityFilter` — behavioral
-2423. [evidence-required] `added:docs.extra_apis.C_CombatLogInternal.GetCurrentEventInfo` — Evidence required: docs-extra provenance and checked-in registration do not prove full-LoD runtime behavior; exact probe required.
-2424. [best-effort] `added:docs.extra_enums.CharCreateAnimTurnType` — Provenance-only: source records this docs-extra entry; no runtime behavior is claimed.
-2425. [best-effort] `added:docs.extra_enums.CharSectionCondition` — Provenance-only: source records this docs-extra entry; no runtime behavior is claimed.
-2426. [evidence-required] `added:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` — Evidence required: docs-extra provenance and checked-in registration do not prove full-LoD runtime behavior; exact probe required.
-2427. [best-effort] `added:docs.extra_events.COMBAT_LOG_EVENT_INTERNAL_UNFILTERED` — Provenance-only: source records this docs-extra entry; no runtime behavior is claimed.
-2428. [evidence-required] `added:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — Evidence required: docs-extra provenance and checked-in registration do not prove full-LoD runtime behavior; exact probe required.
-2429. [best-effort] `added:docs.extra_script_objects.FrameAPITooltip` — Provenance-only: source records this docs-extra entry; no runtime behavior is claimed.
+2423. [evidence-required] `added:docs.extra_apis.C_CombatLogInternal.GetCurrentEventInfo` — unsafe
+2424. [best-effort] `added:docs.extra_enums.CharCreateAnimTurnType` — provenance-only
+2425. [best-effort] `added:docs.extra_enums.CharSectionCondition` — provenance-only
+2426. [evidence-required] `added:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` — unsafe
+2427. [best-effort] `added:docs.extra_events.COMBAT_LOG_EVENT_INTERNAL_UNFILTERED` — provenance-only
+2428. [evidence-required] `added:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — unsafe
+2429. [best-effort] `added:docs.extra_script_objects.FrameAPITooltip` — provenance-only
 2430. [evidence-required] `added:dropsecretaccess` — unsafe
-2431. [best-effort] `added:enablePetBattleFloatingCombatText_v2` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2432. [best-effort] `added:encounterTimelineEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2433. [best-effort] `added:encounterTimelineHideForOtherRoles` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2434. [best-effort] `added:encounterTimelineHideLongCountdowns` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2435. [best-effort] `added:encounterTimelineHideQueuedCountdowns` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2436. [best-effort] `added:encounterTimelineIconographyEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2437. [best-effort] `added:encounterTimelineIconographyHiddenMask` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2438. [best-effort] `added:encounterWarningsDefaultMessageDuration` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2439. [best-effort] `added:encounterWarningsEnabled` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2440. [best-effort] `added:encounterWarningsHideIfNotTargetingPlayer` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2441. [best-effort] `added:encounterWarningsLevel` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2442. [best-effort] `added:endeavorInitiativesLastPoints` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2443. [best-effort] `added:equipmentManager` — behavioral: startup GetCVar/GetCVarDefault exact string proof commit `575893319`
-2444. [best-effort] `added:externalDefensivesEnabled` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
-2445. [best-effort] `added:floatingCombatTextAuraFade` — provenance-only: transient intermediate-snapshot CVar, absent at both patch endpoints; no runtime behavior or `_v2` equivalence claimed.
-2446. [best-effort] `added:floatingCombatTextAuraFade_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
-2447. [best-effort] `added:floatingCombatTextAuras_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
-2448. [best-effort] `added:floatingCombatTextCombatDamageAllAutos_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
-2449. [best-effort] `added:floatingCombatTextCombatDamageDirectionalOffset_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1.000000`; getter/default publication only.
-2450. [best-effort] `added:floatingCombatTextCombatDamageDirectionalScale_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1.000000`; getter/default publication only.
-2451. [best-effort] `added:floatingCombatTextCombatDamage_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
-2452. [best-effort] `added:floatingCombatTextCombatHealingAbsorbSelf_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
-2453. [best-effort] `added:floatingCombatTextCombatHealingAbsorbTarget_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
-2454. [best-effort] `added:floatingCombatTextCombatHealing_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
-2455. [best-effort] `added:floatingCombatTextCombatLogPeriodicSpells_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `1`; getter/default publication only.
-2456. [best-effort] `added:floatingCombatTextCombatState_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
-2457. [best-effort] `added:floatingCombatTextComboPoints_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
-2458. [best-effort] `added:floatingCombatTextDamageReduction_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
-2459. [best-effort] `added:floatingCombatTextDodgeParryMiss_v2` — behavioral: focused proof `a5a1a343a` asserts both public getters return `0`; getter/default publication only.
-2460. [best-effort] `added:floatingCombatTextEnergyGains_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2461. [best-effort] `added:floatingCombatTextFloatMode_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2462. [best-effort] `added:floatingCombatTextFriendlyHealers_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2463. [best-effort] `added:floatingCombatTextHonorGains_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2464. [best-effort] `added:floatingCombatTextLowManaHealth_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2465. [best-effort] `added:floatingCombatTextPeriodicEnergyGains_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2466. [best-effort] `added:floatingCombatTextPetMeleeDamage_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2467. [best-effort] `added:floatingCombatTextPetSpellDamage_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2468. [best-effort] `added:floatingCombatTextReactives_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 1 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2469. [best-effort] `added:floatingCombatTextRepChanges_v2` — Best-effort behavioral: public GetCVar and GetCVarDefault return the exact startup/default string 0 under focused proof commit abee2e56bb; no rendering or replacement semantics are claimed.
-2470. [evidence-required] `added:hasanysecretvalues` — Evidence-required/unsafe: full-LoD/state-backed secret or mapping probes remain required; current publication is missing or incomplete.
-2471. [evidence-required] `added:issecrettable` — Evidence-required/unsafe: full-LoD/state-backed secret or mapping probes remain required; current publication is missing or incomplete.
-2472. [evidence-required] `added:issecretvalue` — Evidence-required/unsafe: full-LoD/state-backed secret or mapping probes remain required; current publication is missing or incomplete.
-2473. [best-effort] `added:lastTransmogCustomSetIDNoSpec` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed.
-2474. [best-effort] `added:lastTransmogCustomSetIDSpec1` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed.
-2475. [best-effort] `added:lastTransmogCustomSetIDSpec2` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed.
-2476. [best-effort] `added:lastTransmogCustomSetIDSpec3` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed.
-2477. [best-effort] `added:lastTransmogCustomSetIDSpec4` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed.
-2478. [best-effort] `added:lastTransmogOutfitIDNoSpec` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed.
-2479. [best-effort] `added:lfgListAdvancedFiltersVersion` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit e2ac401f5; no consumer semantics are claimed.
-2480. [best-effort] `added:majorFactionRenownMap` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string  under focused proof commit e2ac401f5; no consumer semantics are claimed.
-2481. [evidence-required] `added:mapvalues` — Evidence-required/unsafe: full-LoD/state-backed secret or mapping probes remain required; current publication is missing or incomplete.
-2482. [best-effort] `added:nameplateAuraScale` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1.000000 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2483. [best-effort] `added:nameplateCastBarDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,[ under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2484. [best-effort] `added:nameplateDebuffPadding` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2485. [best-effort] `added:nameplateEnemyNpcAuraDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact string 0x02,C under focused proof commit 16687bd2a; no rendering semantics are claimed.
-2486. [best-effort] `added:nameplateEnemyPlayerAuraDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,C under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2487. [best-effort] `added:nameplateFriendlyPlayerAuraDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,C under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2488. [best-effort] `added:nameplateInfoDisplay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0x02,D under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2489. [best-effort] `added:nameplateShowCastBars` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2490. [best-effort] `added:nameplateShowClassColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2491. [best-effort] `added:nameplateShowFriendlyClassColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2492. [best-effort] `added:nameplateShowFriendlyNpcs` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit bd8ce82d2; no rendering semantics are claimed.
-2493. [best-effort] `added:nameplateShowFriendlyPlayerGuardians` — best-effort / behavioral
-2494. [best-effort] `added:nameplateShowFriendlyPlayerMinions` — best-effort / behavioral
-2495. [best-effort] `added:nameplateShowFriendlyPlayerPets` — best-effort / behavioral
-2496. [best-effort] `added:nameplateShowFriendlyPlayerTotems` — best-effort / behavioral
-2497. [best-effort] `added:nameplateShowFriendlyPlayers` — best-effort / behavioral
-2498. [best-effort] `added:nameplateShowOffscreen` — best-effort / behavioral
-2499. [best-effort] `added:nameplateShowOnlyNameForFriendlyPlayerUnits` — best-effort / behavioral
-2500. [best-effort] `added:nameplateSimplifiedTypes` — best-effort / behavioral
-2501. [best-effort] `added:nameplateSize` — best-effort / behavioral
-2502. [best-effort] `added:nameplateStackingTypes` — best-effort / behavioral
-2503. [best-effort] `added:nameplateStyle` — best-effort / behavioral
-2504. [best-effort] `added:nameplateThreatDisplay` — best-effort / behavioral
-2505. [best-effort] `added:petJournalFilterVersion` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
-2506. [best-effort] `added:raidFramesCenterBigDefensive` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
-2507. [best-effort] `added:raidFramesDispelIndicatorOverlay` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
-2508. [best-effort] `added:raidFramesDispelIndicatorType` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 2 under focused proof commit f3ba9786d; no consumer semantics are claimed.
-2509. [best-effort] `added:raidFramesDisplayLargerRoleSpecificDebuffs` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
-2510. [best-effort] `added:raidFramesHealthBarColor` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string FF2B9305 under focused proof commit f3ba9786d; no consumer semantics are claimed.
-2511. [best-effort] `added:scriptWarnings` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
+2431. [best-effort] `added:enablePetBattleFloatingCombatText_v2` — behavioral
+2432. [best-effort] `added:encounterTimelineEnabled` — behavioral
+2433. [best-effort] `added:encounterTimelineHideForOtherRoles` — behavioral
+2434. [best-effort] `added:encounterTimelineHideLongCountdowns` — behavioral
+2435. [best-effort] `added:encounterTimelineHideQueuedCountdowns` — behavioral
+2436. [best-effort] `added:encounterTimelineIconographyEnabled` — behavioral
+2437. [best-effort] `added:encounterTimelineIconographyHiddenMask` — behavioral
+2438. [best-effort] `added:encounterWarningsDefaultMessageDuration` — behavioral
+2439. [best-effort] `added:encounterWarningsEnabled` — behavioral
+2440. [best-effort] `added:encounterWarningsHideIfNotTargetingPlayer` — behavioral
+2441. [best-effort] `added:encounterWarningsLevel` — behavioral
+2442. [best-effort] `added:endeavorInitiativesLastPoints` — behavioral
+2443. [best-effort] `added:equipmentManager` — behavioral
+2444. [best-effort] `added:externalDefensivesEnabled` — behavioral
+2445. [best-effort] `added:floatingCombatTextAuraFade` — provenance-only
+2446. [best-effort] `added:floatingCombatTextAuraFade_v2` — behavioral
+2447. [best-effort] `added:floatingCombatTextAuras_v2` — behavioral
+2448. [best-effort] `added:floatingCombatTextCombatDamageAllAutos_v2` — behavioral
+2449. [best-effort] `added:floatingCombatTextCombatDamageDirectionalOffset_v2` — behavioral
+2450. [best-effort] `added:floatingCombatTextCombatDamageDirectionalScale_v2` — behavioral
+2451. [best-effort] `added:floatingCombatTextCombatDamage_v2` — behavioral
+2452. [best-effort] `added:floatingCombatTextCombatHealingAbsorbSelf_v2` — behavioral
+2453. [best-effort] `added:floatingCombatTextCombatHealingAbsorbTarget_v2` — behavioral
+2454. [best-effort] `added:floatingCombatTextCombatHealing_v2` — behavioral
+2455. [best-effort] `added:floatingCombatTextCombatLogPeriodicSpells_v2` — behavioral
+2456. [best-effort] `added:floatingCombatTextCombatState_v2` — behavioral
+2457. [best-effort] `added:floatingCombatTextComboPoints_v2` — behavioral
+2458. [best-effort] `added:floatingCombatTextDamageReduction_v2` — behavioral
+2459. [best-effort] `added:floatingCombatTextDodgeParryMiss_v2` — behavioral
+2460. [best-effort] `added:floatingCombatTextEnergyGains_v2` — behavioral
+2461. [best-effort] `added:floatingCombatTextFloatMode_v2` — behavioral
+2462. [best-effort] `added:floatingCombatTextFriendlyHealers_v2` — behavioral
+2463. [best-effort] `added:floatingCombatTextHonorGains_v2` — behavioral
+2464. [best-effort] `added:floatingCombatTextLowManaHealth_v2` — behavioral
+2465. [best-effort] `added:floatingCombatTextPeriodicEnergyGains_v2` — behavioral
+2466. [best-effort] `added:floatingCombatTextPetMeleeDamage_v2` — behavioral
+2467. [best-effort] `added:floatingCombatTextPetSpellDamage_v2` — behavioral
+2468. [best-effort] `added:floatingCombatTextReactives_v2` — behavioral
+2469. [best-effort] `added:floatingCombatTextRepChanges_v2` — behavioral
+2470. [evidence-required] `added:hasanysecretvalues` — unsafe
+2471. [evidence-required] `added:issecrettable` — unsafe
+2472. [evidence-required] `added:issecretvalue` — unsafe
+2473. [best-effort] `added:lastTransmogCustomSetIDNoSpec` — behavioral
+2474. [best-effort] `added:lastTransmogCustomSetIDSpec1` — behavioral
+2475. [best-effort] `added:lastTransmogCustomSetIDSpec2` — behavioral
+2476. [best-effort] `added:lastTransmogCustomSetIDSpec3` — behavioral
+2477. [best-effort] `added:lastTransmogCustomSetIDSpec4` — behavioral
+2478. [best-effort] `added:lastTransmogOutfitIDNoSpec` — behavioral
+2479. [best-effort] `added:lfgListAdvancedFiltersVersion` — behavioral
+2480. [best-effort] `added:majorFactionRenownMap` — behavioral
+2481. [evidence-required] `added:mapvalues` — unsafe
+2482. [best-effort] `added:nameplateAuraScale` — behavioral
+2483. [best-effort] `added:nameplateCastBarDisplay` — behavioral
+2484. [best-effort] `added:nameplateDebuffPadding` — behavioral
+2485. [best-effort] `added:nameplateEnemyNpcAuraDisplay` — behavioral
+2486. [best-effort] `added:nameplateEnemyPlayerAuraDisplay` — behavioral
+2487. [best-effort] `added:nameplateFriendlyPlayerAuraDisplay` — behavioral
+2488. [best-effort] `added:nameplateInfoDisplay` — behavioral
+2489. [best-effort] `added:nameplateShowCastBars` — behavioral
+2490. [best-effort] `added:nameplateShowClassColor` — behavioral
+2491. [best-effort] `added:nameplateShowFriendlyClassColor` — behavioral
+2492. [best-effort] `added:nameplateShowFriendlyNpcs` — behavioral
+2493. [best-effort] `added:nameplateShowFriendlyPlayerGuardians` — behavioral
+2494. [best-effort] `added:nameplateShowFriendlyPlayerMinions` — behavioral
+2495. [best-effort] `added:nameplateShowFriendlyPlayerPets` — behavioral
+2496. [best-effort] `added:nameplateShowFriendlyPlayerTotems` — behavioral
+2497. [best-effort] `added:nameplateShowFriendlyPlayers` — behavioral
+2498. [best-effort] `added:nameplateShowOffscreen` — behavioral
+2499. [best-effort] `added:nameplateShowOnlyNameForFriendlyPlayerUnits` — behavioral
+2500. [best-effort] `added:nameplateSimplifiedTypes` — behavioral
+2501. [best-effort] `added:nameplateSize` — behavioral
+2502. [best-effort] `added:nameplateStackingTypes` — behavioral
+2503. [best-effort] `added:nameplateStyle` — behavioral
+2504. [best-effort] `added:nameplateThreatDisplay` — behavioral
+2505. [best-effort] `added:petJournalFilterVersion` — behavioral
+2506. [best-effort] `added:raidFramesCenterBigDefensive` — behavioral
+2507. [best-effort] `added:raidFramesDispelIndicatorOverlay` — behavioral
+2508. [best-effort] `added:raidFramesDispelIndicatorType` — behavioral
+2509. [best-effort] `added:raidFramesDisplayLargerRoleSpecificDebuffs` — behavioral
+2510. [best-effort] `added:raidFramesHealthBarColor` — behavioral
+2511. [best-effort] `added:scriptWarnings` — behavioral
 2512. [best-effort] `added:script_object.AbbreviateConfigAPI` — behavioral
 2513. [evidence-required] `added:script_object.FrameAPITooltip` — unsafe
 2514. [best-effort] `added:script_object.LuaColorCurveObjectAPI` — behavioral
@@ -2516,23 +2516,23 @@
 2516. [evidence-required] `added:script_object.LuaCurveObjectBaseAPI` — unsafe
 2517. [best-effort] `added:script_object.LuaDurationObjectAPI` — behavioral
 2518. [best-effort] `added:script_object.UnitHealPredictionCalculatorAPI` — behavioral
-2519. [evidence-required] `added:scrubsecretvalues` — evidence-required unsafe: Evidence-required/unsafe: local pass-through helpers do not prove retail secret scrubbing. Full-LoD/state-backed proof must establish publication and exact retail behavior, including zero arguments, nil/primitives/multiple values, direct and nested secret values, tainted/protected values, output count/order/types, and errors; no pass-through or alias behavior is accepted as proof.
-2520. [best-effort] `added:secretChallengeModeRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
-2521. [best-effort] `added:secretCombatRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
-2522. [best-effort] `added:secretEncounterRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
-2523. [best-effort] `added:secretMapRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
-2524. [best-effort] `added:secretPvPMatchRestrictionsForced` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
-2525. [evidence-required] `added:secretunwrap` — evidence-required unsafe: Evidence-required/unsafe: pass-through identity is not proof of retail secret unwrapping. Full-LoD/state-backed proof must establish publication and exact retail behavior, including zero arguments, nil/primitives/multiple values, direct and nested secret values, tainted/protected values, output count/order/types, and errors; no pass-through or alias behavior is accepted as proof. Also probe secure-environment/global precedence.
-2526. [evidence-required] `added:secretwrap` — evidence-required unsafe: Evidence-required/unsafe: identity fallback does not prove retail secret wrapping. Full-LoD/state-backed proof must establish publication and exact retail behavior, including zero arguments, nil/primitives/multiple values, direct and nested secret values, tainted/protected values, output count/order/types, and errors; no pass-through or alias behavior is accepted as proof. Probe wrapped functions, multiple values, and whether secrecy/taint changes.
-2527. [evidence-required] `added:securecallmethod` — evidence-required unsafe: Evidence-required/unsafe: local permissive dispatch is not proof of retail securecallmethod. Probe valid self/argument order, multiple/zero returns, missing/non-function methods, invalid receiver/name types, errors, direct and __index lookup, and tainted secure-boundary behavior.
-2528. [best-effort] `added:showAllItemsInTransmog` — best-effort behavioral: both public getters return exact string 0 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
-2529. [best-effort] `added:showCustomSetDetails` — best-effort behavioral: both public getters return exact string 1 under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
-2530. [best-effort] `added:spellDiminishPVPEnemiesEnabled` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 1 under focused proof commit f3ba9786d; no consumer semantics are claimed.
-2531. [best-effort] `added:spellDiminishPVPOnlyTriggerableByMe` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
-2532. [evidence-required] `added:string.concat` — evidence-required unsafe: Evidence-required/unsafe: string.concat is absent and legacy strconcat is not proof of equivalence. Full-LoD/state-backed probe must establish publication, callable type, zero/multiple arguments, nil/non-string coercion, unsupported values, result count/type, and error behavior.
-2533. [best-effort] `added:trackedInitiativeTasks` — best-effort behavioral: both public getters return exact empty-string under focused proof commit 417521854; claims are bounded to startup getter/default publication only.
-2534. [best-effort] `added:transmogHideIgnoredSlots` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
-2535. [best-effort] `added:transmogrifySetsFilters` — Best-effort behavioral: public GetCVar and GetCVarDefault return exact startup/default string 0 under focused proof commit f3ba9786d; no consumer semantics are claimed.
+2519. [evidence-required] `added:scrubsecretvalues` — unsafe
+2520. [best-effort] `added:secretChallengeModeRestrictionsForced` — behavioral
+2521. [best-effort] `added:secretCombatRestrictionsForced` — behavioral
+2522. [best-effort] `added:secretEncounterRestrictionsForced` — behavioral
+2523. [best-effort] `added:secretMapRestrictionsForced` — behavioral
+2524. [best-effort] `added:secretPvPMatchRestrictionsForced` — behavioral
+2525. [evidence-required] `added:secretunwrap` — unsafe
+2526. [evidence-required] `added:secretwrap` — unsafe
+2527. [evidence-required] `added:securecallmethod` — unsafe
+2528. [best-effort] `added:showAllItemsInTransmog` — behavioral
+2529. [best-effort] `added:showCustomSetDetails` — behavioral
+2530. [best-effort] `added:spellDiminishPVPEnemiesEnabled` — behavioral
+2531. [best-effort] `added:spellDiminishPVPOnlyTriggerableByMe` — behavioral
+2532. [evidence-required] `added:string.concat` — unsafe
+2533. [best-effort] `added:trackedInitiativeTasks` — behavioral
+2534. [best-effort] `added:transmogHideIgnoredSlots` — behavioral
+2535. [best-effort] `added:transmogrifySetsFilters` — behavioral
 2536. [best-effort] `added:typedef.AbbreviateConfig` — provenance-only
 2537. [best-effort] `added:typedef.CooldownFrame` — provenance-only
 2538. [best-effort] `added:typedef.DurationSeconds` — provenance-only
@@ -2817,52 +2817,52 @@
 2817. [evidence-required] `changed:UNIT_SPELLCAST_START` — unsafe
 2818. [evidence-required] `changed:UNIT_SPELLCAST_STOP` — unsafe
 2819. [evidence-required] `changed:UNIT_SPELLCAST_SUCCEEDED` — unsafe
-2820. [evidence-required] `changed:UnitCastingInfo` — unsafe: Evidence-required/unsafe: 12.0.0 adds nullable numeric `castBarID` and makes `notInterruptible` nullable; runtime retains the older 9-result shape, exposes numeric `castID`, and has no `castBarID`. Full-LoD/state-backed proof must trigger casting and verify exactly 10 ordered results, declared types/nullability, no-cast/unknown/invalid units, repeats, errors, and exact cast state; no casting lifecycle semantics claimed.
-2821. [evidence-required] `changed:UnitChannelInfo` — unsafe: Evidence-required/unsafe: 12.0.0 changes `unitToken:string` to `unit:unit`, makes `notInterruptible` nullable, and adds nullable numeric `castBarID` as result 11; runtime supports the older player-only 10-result shape. Full-LoD/state-backed proof must verify exact 11-result order/types/nullability across valid/non-player/no-channel/invalid/repeated states and errors; no channel lifecycle semantics claimed.
-2822. [evidence-required] `changed:UnitFullName` — unsafe: Evidence-required/unsafe: 12.0.0 changes string input to unit while retaining two string outputs; runtime string-resolves names with constant `SimRealm` and lacks full validation/state semantics. Full-LoD proof must verify exact two results, server name, unknown/invalid units, wrong types, counts, and errors; no server-name or unit identity semantics claimed.
-2823. [best-effort] `changed:UnitIsUnit` — provenance-only: Provenance-only: 12.0.0 only renames parameters `unitName1/unitName2` to `unit1/unit2`; both remain unit inputs and the boolean result remains unchanged. No behavior claim or current unit-identity gap requirement.
-2824. [evidence-required] `changed:UnitName` — unsafe: Evidence-required/unsafe: 12.0.0 declares two nullable outputs `(unitName:string?, unitServer:string?)`; runtime returns one string and does not establish server-name or unknown-unit behavior. Full-LoD/state-backed proof must verify exact two ordered nullable results, valid/unknown/invalid units, wrong types, counts, and errors; no naming semantics claimed.
-2825. [evidence-required] `changed:UnitNameUnmodified` — unsafe: Evidence-required/unsafe: 12.0.0 changes string input to unit and declares two string outputs; runtime is a one-string alias without server/unmodified distinction. Full-LoD proof must verify exact two results, unmodified/server behavior, valid/unknown/invalid units, wrong types, counts, and errors; no normalization semantics claimed.
-2826. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_FAILED` — unsafe: Evidence-required/unsafe: 12.0.0 changes exactly three args `(status, utteranceID, destination)` to exactly two `(utteranceID, status)`, removing destination with no nullable third slot; runtime only registers the event and has no producer. Full-LoD proof must trigger real TTS failure and verify exact args/no third slot, repeats, invalid requests, timing, registration, producer delivery, and errors; no TTS lifecycle semantics claimed.
-2827. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_FINISHED` — unsafe: Evidence-required/unsafe: retail 12.0.0 reduces the event to exactly one numeric utteranceID and removes legacy payload fields; runtime only registers the event and has no TTS producer. Full-LoD proof must trigger real playback and verify exact arity, removed-field absence, identity, timing, repeats, invalid requests, completion/failure, and producer delivery; no TTS lifecycle semantics claimed.
-2828. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_STARTED` — unsafe: Evidence-required/unsafe: retail 12.0.0 reduces the event to exactly one numeric utteranceID and removes legacy payload fields; runtime only registers the event and has no TTS producer. Full-LoD proof must trigger real playback and verify exact arity, removed-field absence, identity, timing, repeats, invalid requests, completion/failure, and producer delivery; no TTS lifecycle semantics claimed.
-2829. [best-effort] `changed:advFlyKeyboardMaxPitchFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '5.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
-2830. [best-effort] `changed:advFlyKeyboardMaxTurnFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '8.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
-2831. [best-effort] `changed:advFlyKeyboardMinPitchFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '2.500000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
-2832. [best-effort] `changed:advFlyKeyboardMinTurnFactor` — behavioral: Retail 12.0.0 publishes exact CVar/default string '5.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
-2833. [best-effort] `changed:advFlyPitchControlCameraChase` — behavioral: Retail 12.0.0 publishes exact CVar/default string '20.000000'; focused getter proof is commit 71086bb79; no flight-control, camera, mutation, persistence, consumer, or semantic-equivalence claims.
-2834. [best-effort] `changed:mountJournalGeneralFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof is commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims.
-2835. [best-effort] `changed:mountJournalSourcesFilter` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof is commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims.
-2836. [best-effort] `changed:mountJournalTypeFilter` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof is commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims.
-2837. [best-effort] `changed:nameplateGameObjectMaxDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '30.000000'; focused getter proof is commit 896289b75; startup getter/default publication only; no Mount Journal/nameplate behavior, mutation, persistence, consumer, or semantic-equivalence claims.
-2838. [best-effort] `changed:nameplateLargerScale` — behavioral: Retail 12.0.0 publishes exact CVar/default string '1.200000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2839. [best-effort] `changed:nameplateMaxAlpha` — behavioral: Retail 12.0.0 publishes exact CVar/default string '1.000000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2840. [best-effort] `changed:nameplateMaxAlphaDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '40.000000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2841. [best-effort] `changed:nameplateMaxDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '60.000000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2842. [best-effort] `changed:nameplateMaxScale` — behavioral: Retail 12.0.0 publishes exact CVar/default string '1.000000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2843. [best-effort] `changed:nameplateMaxScaleDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '10.000000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2844. [best-effort] `changed:nameplateMinAlpha` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.600000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2845. [best-effort] `changed:nameplateMinAlphaDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '10.000000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2846. [best-effort] `changed:nameplateMinScale` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.800000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2847. [best-effort] `changed:nameplateMinScaleDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '10.000000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2848. [best-effort] `changed:nameplateOccludedAlphaMult` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.400000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2849. [best-effort] `changed:nameplateOverlapH` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.800000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2850. [best-effort] `changed:nameplateOverlapV` — behavioral: Retail 12.0.0 publishes exact CVar/default string '1.100000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2851. [best-effort] `changed:nameplatePlayerLargerScale` — behavioral: Retail 12.0.0 publishes exact CVar/default string '1.800000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2852. [best-effort] `changed:nameplatePlayerMaxDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '60.000000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2853. [best-effort] `changed:nameplateSelectedAlpha` — behavioral: Retail 12.0.0 publishes exact CVar/default string '1.000000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2854. [best-effort] `changed:nameplateSelectedScale` — behavioral: Retail 12.0.0 publishes exact CVar/default string '1.200000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2855. [best-effort] `changed:nameplateSelfAlpha` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.750000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2856. [best-effort] `changed:nameplateShowSelf` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2857. [best-effort] `changed:nameplateTargetBehindMaxDistance` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.100000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2858. [best-effort] `changed:partyBackgroundOpacity` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.500000'; focused getter proof is commit 17e13eb21; startup getter/default publication only; no nameplate/party rendering, scale, alpha, overlap, mutation, persistence, consumer, or lifecycle semantics.
-2859. [best-effort] `changed:petJournalFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
-2860. [best-effort] `changed:petJournalSourceFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
-2861. [best-effort] `changed:petJournalTypeFilters` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
+2820. [evidence-required] `changed:UnitCastingInfo` — unsafe
+2821. [evidence-required] `changed:UnitChannelInfo` — unsafe
+2822. [evidence-required] `changed:UnitFullName` — unsafe
+2823. [best-effort] `changed:UnitIsUnit` — provenance-only
+2824. [evidence-required] `changed:UnitName` — unsafe
+2825. [evidence-required] `changed:UnitNameUnmodified` — unsafe
+2826. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_FAILED` — unsafe
+2827. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_FINISHED` — unsafe
+2828. [evidence-required] `changed:VOICE_CHAT_TTS_PLAYBACK_STARTED` — unsafe
+2829. [best-effort] `changed:advFlyKeyboardMaxPitchFactor` — behavioral
+2830. [best-effort] `changed:advFlyKeyboardMaxTurnFactor` — behavioral
+2831. [best-effort] `changed:advFlyKeyboardMinPitchFactor` — behavioral
+2832. [best-effort] `changed:advFlyKeyboardMinTurnFactor` — behavioral
+2833. [best-effort] `changed:advFlyPitchControlCameraChase` — behavioral
+2834. [best-effort] `changed:mountJournalGeneralFilters` — behavioral
+2835. [best-effort] `changed:mountJournalSourcesFilter` — behavioral
+2836. [best-effort] `changed:mountJournalTypeFilter` — behavioral
+2837. [best-effort] `changed:nameplateGameObjectMaxDistance` — behavioral
+2838. [best-effort] `changed:nameplateLargerScale` — behavioral
+2839. [best-effort] `changed:nameplateMaxAlpha` — behavioral
+2840. [best-effort] `changed:nameplateMaxAlphaDistance` — behavioral
+2841. [best-effort] `changed:nameplateMaxDistance` — behavioral
+2842. [best-effort] `changed:nameplateMaxScale` — behavioral
+2843. [best-effort] `changed:nameplateMaxScaleDistance` — behavioral
+2844. [best-effort] `changed:nameplateMinAlpha` — behavioral
+2845. [best-effort] `changed:nameplateMinAlphaDistance` — behavioral
+2846. [best-effort] `changed:nameplateMinScale` — behavioral
+2847. [best-effort] `changed:nameplateMinScaleDistance` — behavioral
+2848. [best-effort] `changed:nameplateOccludedAlphaMult` — behavioral
+2849. [best-effort] `changed:nameplateOverlapH` — behavioral
+2850. [best-effort] `changed:nameplateOverlapV` — behavioral
+2851. [best-effort] `changed:nameplatePlayerLargerScale` — behavioral
+2852. [best-effort] `changed:nameplatePlayerMaxDistance` — behavioral
+2853. [best-effort] `changed:nameplateSelectedAlpha` — behavioral
+2854. [best-effort] `changed:nameplateSelectedScale` — behavioral
+2855. [best-effort] `changed:nameplateSelfAlpha` — behavioral
+2856. [best-effort] `changed:nameplateShowSelf` — behavioral
+2857. [best-effort] `changed:nameplateTargetBehindMaxDistance` — behavioral
+2858. [best-effort] `changed:partyBackgroundOpacity` — behavioral
+2859. [best-effort] `changed:petJournalFilters` — behavioral
+2860. [best-effort] `changed:petJournalSourceFilters` — behavioral
+2861. [best-effort] `changed:petJournalTypeFilters` — behavioral
 2862. [best-effort] `changed:scrub` — provenance-only
-2863. [best-effort] `changed:spellActivationOverlayOpacity` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.650000' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
+2863. [best-effort] `changed:spellActivationOverlayOpacity` — behavioral
 2864. [evidence-required] `changed:string.trim` — unsafe
-2865. [best-effort] `changed:superTrackerDist` — behavioral: Retail 12.0.0 publishes exact CVar/default string '0.750000' through both public getters; focused proof is commit 8b64275a8; startup getter/default publication only; no Pet Journal/filter, spell-overlay, tracker/rendering, mutation, persistence, consumer, or lifecycle semantics.
+2865. [best-effort] `changed:superTrackerDist` — behavioral
 2866. [best-effort] `changed:typedef.TickerCallback` — provenance-only
 2867. [best-effort] `changed:typedef.TimerCallback` — provenance-only
 2868. [best-effort] `removed:ActionHasRange` — vendor-present
@@ -3273,72 +3273,72 @@
 3273. [best-effort] `removed:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS` — provenance-only
 3274. [best-effort] `removed:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES` — provenance-only
 3275. [best-effort] `removed:docs.extra_script_objects.FrameAPITooltip` — provenance-only
-3276. [best-effort] `removed:enablePetBattleFloatingCombatText` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3277. [best-effort] `removed:floatingCombatTextAllSpellMechanics` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3278. [best-effort] `removed:floatingCombatTextAuraFade` — provenance-only: transient intermediate CVar snapshot absent at both patch endpoints; no endpoint publication, behavior, or replacement-equivalence claim.
-3279. [best-effort] `removed:floatingCombatTextAuras` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3280. [best-effort] `removed:floatingCombatTextCombatDamage` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3281. [best-effort] `removed:floatingCombatTextCombatDamageAllAutos` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3282. [best-effort] `removed:floatingCombatTextCombatDamageDirectionalOffset` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3283. [best-effort] `removed:floatingCombatTextCombatDamageDirectionalScale` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3284. [best-effort] `removed:floatingCombatTextCombatDamageStyle` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3285. [best-effort] `removed:floatingCombatTextCombatHealing` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3286. [best-effort] `removed:floatingCombatTextCombatHealingAbsorbSelf` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3287. [best-effort] `removed:floatingCombatTextCombatHealingAbsorbTarget` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3288. [best-effort] `removed:floatingCombatTextCombatLogPeriodicSpells` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3289. [best-effort] `removed:floatingCombatTextCombatState` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3290. [best-effort] `removed:floatingCombatTextComboPoints` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3291. [best-effort] `removed:floatingCombatTextDamageReduction` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3292. [best-effort] `removed:floatingCombatTextDodgeParryMiss` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3276. [best-effort] `removed:enablePetBattleFloatingCombatText` — behavioral
+3277. [best-effort] `removed:floatingCombatTextAllSpellMechanics` — behavioral
+3278. [best-effort] `removed:floatingCombatTextAuraFade` — provenance-only
+3279. [best-effort] `removed:floatingCombatTextAuras` — behavioral
+3280. [best-effort] `removed:floatingCombatTextCombatDamage` — behavioral
+3281. [best-effort] `removed:floatingCombatTextCombatDamageAllAutos` — behavioral
+3282. [best-effort] `removed:floatingCombatTextCombatDamageDirectionalOffset` — behavioral
+3283. [best-effort] `removed:floatingCombatTextCombatDamageDirectionalScale` — behavioral
+3284. [best-effort] `removed:floatingCombatTextCombatDamageStyle` — behavioral
+3285. [best-effort] `removed:floatingCombatTextCombatHealing` — behavioral
+3286. [best-effort] `removed:floatingCombatTextCombatHealingAbsorbSelf` — behavioral
+3287. [best-effort] `removed:floatingCombatTextCombatHealingAbsorbTarget` — behavioral
+3288. [best-effort] `removed:floatingCombatTextCombatLogPeriodicSpells` — behavioral
+3289. [best-effort] `removed:floatingCombatTextCombatState` — behavioral
+3290. [best-effort] `removed:floatingCombatTextComboPoints` — behavioral
+3291. [best-effort] `removed:floatingCombatTextDamageReduction` — behavioral
+3292. [best-effort] `removed:floatingCombatTextDodgeParryMiss` — behavioral
 3293. [best-effort] `removed:floatingCombatTextEnergyGains` — behavioral
-3294. [best-effort] `removed:floatingCombatTextFloatMode` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3295. [best-effort] `removed:floatingCombatTextFriendlyHealers` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3296. [best-effort] `removed:floatingCombatTextHonorGains` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3297. [best-effort] `removed:floatingCombatTextLowManaHealth` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3294. [best-effort] `removed:floatingCombatTextFloatMode` — behavioral
+3295. [best-effort] `removed:floatingCombatTextFriendlyHealers` — behavioral
+3296. [best-effort] `removed:floatingCombatTextHonorGains` — behavioral
+3297. [best-effort] `removed:floatingCombatTextLowManaHealth` — behavioral
 3298. [best-effort] `removed:floatingCombatTextPeriodicEnergyGains` — behavioral
-3299. [best-effort] `removed:floatingCombatTextPetMeleeDamage` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3300. [best-effort] `removed:floatingCombatTextPetSpellDamage` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3301. [best-effort] `removed:floatingCombatTextReactives` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3302. [best-effort] `removed:floatingCombatTextRepChanges` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3303. [best-effort] `removed:floatingCombatTextSpellMechanics` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
-3304. [best-effort] `removed:floatingCombatTextSpellMechanicsOther` — behavioral: old-name GetCVar and GetCVarDefault absence proven by commit 15a7936e6; no replacement equivalence, rendering, mutation, persistence, consumer, or lifecycle semantics claimed.
+3299. [best-effort] `removed:floatingCombatTextPetMeleeDamage` — behavioral
+3300. [best-effort] `removed:floatingCombatTextPetSpellDamage` — behavioral
+3301. [best-effort] `removed:floatingCombatTextReactives` — behavioral
+3302. [best-effort] `removed:floatingCombatTextRepChanges` — behavioral
+3303. [best-effort] `removed:floatingCombatTextSpellMechanics` — behavioral
+3304. [best-effort] `removed:floatingCombatTextSpellMechanicsOther` — behavioral
 3305. [best-effort] `removed:friendsSmallView` — behavioral
 3306. [best-effort] `removed:friendsViewButtons` — behavioral
 3307. [best-effort] `removed:guildRosterView` — behavioral
-3308. [evidence-required] `removed:housingExpertGizmos_Rotation_BaseOrbScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3309. [evidence-required] `removed:housingExpertGizmos_Rotation_BaseRingScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3310. [evidence-required] `removed:housingExpertGizmos_Rotation_DistScaleMax` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3311. [evidence-required] `removed:housingExpertGizmos_Rotation_DistScaleMin` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3312. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightDefault` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3313. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightDragging` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3314. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightHovered` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3315. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightKeybind` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3316. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightSelected` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3317. [evidence-required] `removed:housingExpertGizmos_Rotation_OrbPosOffset` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3318. [evidence-required] `removed:housingExpertGizmos_Rotation_ScaleDistanceMax` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3319. [evidence-required] `removed:housingExpertGizmos_Rotation_ScaleDistanceMin` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3320. [evidence-required] `removed:housingExpertGizmos_Rotation_SnapDegrees` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3321. [evidence-required] `removed:housingExpertGizmos_Rotation_TextMode` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3322. [evidence-required] `removed:housingExpertGizmos_Rotation_XRayCheckerSize` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3323. [evidence-required] `removed:housingExpertGizmos_Rotation_XRayDarkAlpha` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3324. [evidence-required] `removed:housingExpertGizmos_Rotation_XRayLightAlpha` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3325. [evidence-required] `removed:housingExpertGizmos_Translation_BaseArrowHeadScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3326. [evidence-required] `removed:housingExpertGizmos_Translation_BaseArrowStemScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3327. [evidence-required] `removed:housingExpertGizmos_Translation_BaseCubeScale` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3328. [evidence-required] `removed:housingExpertGizmos_Translation_DistScaleMax` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3329. [evidence-required] `removed:housingExpertGizmos_Translation_DistScaleMin` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3330. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightDefault` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3331. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightDragging` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3332. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightHovered` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3333. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightKeybind` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3334. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightSelected` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3335. [evidence-required] `removed:housingExpertGizmos_Translation_MaxDistanceFromCamera` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3336. [evidence-required] `removed:housingExpertGizmos_Translation_Padding` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3337. [evidence-required] `removed:housingExpertGizmos_Translation_ScaleDistanceMax` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3338. [evidence-required] `removed:housingExpertGizmos_Translation_ScaleDistanceMin` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3339. [evidence-required] `removed:housingExpertGizmos_Translation_XRayCheckerSize` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3340. [evidence-required] `removed:housingExpertGizmos_Translation_XRayDarkAlpha` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
-3341. [evidence-required] `removed:housingExpertGizmos_Translation_XRayLightAlpha` — unsafe: Retail 12.0.0 removes the CVar; checked-in defaults omit it, but both public getter-absence assertions remain unproven.
+3308. [evidence-required] `removed:housingExpertGizmos_Rotation_BaseOrbScale` — unsafe
+3309. [evidence-required] `removed:housingExpertGizmos_Rotation_BaseRingScale` — unsafe
+3310. [evidence-required] `removed:housingExpertGizmos_Rotation_DistScaleMax` — unsafe
+3311. [evidence-required] `removed:housingExpertGizmos_Rotation_DistScaleMin` — unsafe
+3312. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightDefault` — unsafe
+3313. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightDragging` — unsafe
+3314. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightHovered` — unsafe
+3315. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightKeybind` — unsafe
+3316. [evidence-required] `removed:housingExpertGizmos_Rotation_HighlightSelected` — unsafe
+3317. [evidence-required] `removed:housingExpertGizmos_Rotation_OrbPosOffset` — unsafe
+3318. [evidence-required] `removed:housingExpertGizmos_Rotation_ScaleDistanceMax` — unsafe
+3319. [evidence-required] `removed:housingExpertGizmos_Rotation_ScaleDistanceMin` — unsafe
+3320. [evidence-required] `removed:housingExpertGizmos_Rotation_SnapDegrees` — unsafe
+3321. [evidence-required] `removed:housingExpertGizmos_Rotation_TextMode` — unsafe
+3322. [evidence-required] `removed:housingExpertGizmos_Rotation_XRayCheckerSize` — unsafe
+3323. [evidence-required] `removed:housingExpertGizmos_Rotation_XRayDarkAlpha` — unsafe
+3324. [evidence-required] `removed:housingExpertGizmos_Rotation_XRayLightAlpha` — unsafe
+3325. [evidence-required] `removed:housingExpertGizmos_Translation_BaseArrowHeadScale` — unsafe
+3326. [evidence-required] `removed:housingExpertGizmos_Translation_BaseArrowStemScale` — unsafe
+3327. [evidence-required] `removed:housingExpertGizmos_Translation_BaseCubeScale` — unsafe
+3328. [evidence-required] `removed:housingExpertGizmos_Translation_DistScaleMax` — unsafe
+3329. [evidence-required] `removed:housingExpertGizmos_Translation_DistScaleMin` — unsafe
+3330. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightDefault` — unsafe
+3331. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightDragging` — unsafe
+3332. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightHovered` — unsafe
+3333. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightKeybind` — unsafe
+3334. [evidence-required] `removed:housingExpertGizmos_Translation_HighlightSelected` — unsafe
+3335. [evidence-required] `removed:housingExpertGizmos_Translation_MaxDistanceFromCamera` — unsafe
+3336. [evidence-required] `removed:housingExpertGizmos_Translation_Padding` — unsafe
+3337. [evidence-required] `removed:housingExpertGizmos_Translation_ScaleDistanceMax` — unsafe
+3338. [evidence-required] `removed:housingExpertGizmos_Translation_ScaleDistanceMin` — unsafe
+3339. [evidence-required] `removed:housingExpertGizmos_Translation_XRayCheckerSize` — unsafe
+3340. [evidence-required] `removed:housingExpertGizmos_Translation_XRayDarkAlpha` — unsafe
+3341. [evidence-required] `removed:housingExpertGizmos_Translation_XRayLightAlpha` — unsafe
 3342. [best-effort] `removed:lastRenownForMajorFaction2503` — behavioral
 3343. [best-effort] `removed:lastRenownForMajorFaction2507` — behavioral
 3344. [best-effort] `removed:lastRenownForMajorFaction2510` — behavioral

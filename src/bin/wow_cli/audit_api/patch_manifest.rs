@@ -1946,6 +1946,17 @@ mod tests {
     }
 
     #[test]
+    fn checked_in_patch_manifest_checklists_match_rendered_output() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+        for path in checked_in_patch_manifest_paths(root) {
+            let json = std::fs::read_to_string(&path).expect("manifest should read");
+            let manifest = parse_manifest(&json).expect("manifest should parse");
+            validate_checklist(&manifest, root)
+                .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
+        }
+    }
+
+    #[test]
     fn checked_in_provenance_only_flags_match_resolutions() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR"));
         for path in checked_in_patch_manifest_paths(root) {
