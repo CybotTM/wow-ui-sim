@@ -1868,25 +1868,11 @@ mod tests {
     }
 
     #[test]
-    fn checked_in_patch_manifest_assertions_are_structured() {
+    fn checked_in_patch_manifests_parse() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR"));
         for path in checked_in_patch_manifest_paths(root) {
             let json = std::fs::read_to_string(&path).expect("manifest should read");
-            let manifest: serde_json::Value = serde_json::from_str(&json)
-                .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
-            let rows = manifest["rows"]
-                .as_array()
-                .unwrap_or_else(|| panic!("{}: rows must be an array", path.display()));
-            for row in rows {
-                let row_id = row["id"].as_str().unwrap_or("<missing row id>");
-                let assertions = row["assertions"].as_array().unwrap_or_else(|| {
-                    panic!("{}: {row_id}: assertions must be an array", path.display())
-                });
-                for assertion in assertions {
-                    serde_json::from_value::<AuditAssertion>(assertion.clone())
-                        .unwrap_or_else(|error| panic!("{}: {row_id}: {error}", path.display()));
-                }
-            }
+            parse_manifest(&json).unwrap_or_else(|error| panic!("{}: {error}", path.display()));
         }
     }
 

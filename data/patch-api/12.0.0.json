@@ -1,6 +1,23 @@
 {
   "schema": "framexml-patch-audit/v2",
   "patch": "12.0.0",
+  "target": {
+    "flavor": "retail",
+    "build": "12.0.0",
+    "cache_manifest": "data/blizzard-ui-files/retail.txt",
+    "cache_hash": "42abf0ff8118e6be4d41ed321f6a0e7daeb83234928e451f33851d14a488b5ef"
+  },
+  "source": {
+    "path": "data/patch-api/sources/12.0.0-register.json",
+    "hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+    "added_count": 2554,
+    "changed_count": 313,
+    "removed_count": 543
+  },
+  "output": {
+    "checklist": "docs/generated/patch-12-0-0-checklist.md",
+    "inventory": "docs/wiki/investigations/patch-12-0-0-occurrence-inventory.md"
+  },
   "rows": [
     {
       "id": "added:ADDON_RESTRICTION_STATE_CHANGED",
@@ -53911,7 +53928,7 @@
           "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -53961,7 +53978,7 @@
           "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54011,7 +54028,7 @@
           "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54061,7 +54078,7 @@
           "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54111,7 +54128,7 @@
           "source_hash": "e5a3fc4f9d7c5472b6de8e26081e41ee9ef8b9b7b1bb10a10fba52220fae5951"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records FontSize=0, Vertex=1 and metadata MinValue=0, MaxValue=1, NumValues=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54161,7 +54178,7 @@
           "source_hash": "00bf28b0a0767276a4ab3b78b17f36c06d32c607bc1db61c983a9fb91bd2a44d"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the three FragmentID values and metadata NumValues=72.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54211,7 +54228,7 @@
           "source_hash": "00bf28b0a0767276a4ab3b78b17f36c06d32c607bc1db61c983a9fb91bd2a44d"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the three FragmentID values and metadata NumValues=72.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54261,7 +54278,7 @@
           "source_hash": "00bf28b0a0767276a4ab3b78b17f36c06d32c607bc1db61c983a9fb91bd2a44d"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the three FragmentID values and metadata NumValues=72.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54323,7 +54340,7 @@
           "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54385,7 +54402,7 @@
           "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54447,7 +54464,7 @@
           "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54509,7 +54526,7 @@
           "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -54571,7 +54588,7 @@
           "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55028,7 +55045,7 @@
           "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55077,7 +55094,7 @@
           "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55126,7 +55143,7 @@
           "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55175,7 +55192,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55224,7 +55241,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55273,7 +55290,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55322,7 +55339,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55371,7 +55388,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55420,7 +55437,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55469,7 +55486,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55518,7 +55535,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55567,7 +55584,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55616,7 +55633,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55665,7 +55682,7 @@
           "source_hash": "1f869626fc348e6b57ccf10bcaa0c1ee9164a7a14a6a3c295b9179d018df0476"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateSource family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55714,7 +55731,7 @@
           "source_hash": "17d1d84588a7a47e6c6a3c60b7f1e03cad30571492f5142a4ff8fd98ba49fae4"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateType family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55763,7 +55780,7 @@
           "source_hash": "17d1d84588a7a47e6c6a3c60b7f1e03cad30571492f5142a4ff8fd98ba49fae4"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateType family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55812,7 +55829,7 @@
           "source_hash": "17d1d84588a7a47e6c6a3c60b7f1e03cad30571492f5142a4ff8fd98ba49fae4"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateType family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55861,7 +55878,7 @@
           "source_hash": "17d1d84588a7a47e6c6a3c60b7f1e03cad30571492f5142a4ff8fd98ba49fae4"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateType family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55910,7 +55927,7 @@
           "source_hash": "17d1d84588a7a47e6c6a3c60b7f1e03cad30571492f5142a4ff8fd98ba49fae4"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateType family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -55959,7 +55976,7 @@
           "source_hash": "17d1d84588a7a47e6c6a3c60b7f1e03cad30571492f5142a4ff8fd98ba49fae4"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the HousingFavorUpdateType family and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -73164,7 +73181,7 @@
           "source_hash": "c3916b10ebb5d7350861772abf800d12e6fbead575c9c0d07413b3ebac89f69e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records IsCachedLocally=1 and metadata MinValue=1, MaxValue=1, NumValues=1.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -73213,7 +73230,7 @@
           "source_hash": "c3916b10ebb5d7350861772abf800d12e6fbead575c9c0d07413b3ebac89f69e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records IsCachedLocally=1 and metadata MinValue=1, MaxValue=1, NumValues=1.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -73262,7 +73279,7 @@
           "source_hash": "c3916b10ebb5d7350861772abf800d12e6fbead575c9c0d07413b3ebac89f69e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records IsCachedLocally=1 and metadata MinValue=1, MaxValue=1, NumValues=1.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -73311,7 +73328,7 @@
           "source_hash": "c3916b10ebb5d7350861772abf800d12e6fbead575c9c0d07413b3ebac89f69e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records IsCachedLocally=1 and metadata MinValue=1, MaxValue=1, NumValues=1.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76189,7 +76206,7 @@
           "source_hash": "c02769ef6e42ed2dbfcb101d4a915b96d0772b33b43c69aa460d25fe4dd79f9c"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the matching TransmogOutfitSlotError metadata values.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76238,7 +76255,7 @@
           "source_hash": "c02769ef6e42ed2dbfcb101d4a915b96d0772b33b43c69aa460d25fe4dd79f9c"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the matching TransmogOutfitSlotError metadata values.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76287,7 +76304,7 @@
           "source_hash": "c02769ef6e42ed2dbfcb101d4a915b96d0772b33b43c69aa460d25fe4dd79f9c"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the matching TransmogOutfitSlotError metadata values.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76336,7 +76353,7 @@
           "source_hash": "f84ab3a526bd2d637837b22ff4a41debfbf0ee3bb11cadefb28ef4cdf94c4f57"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotFlags family and metadata, including Enum.TransmogOutfitSlotFlags.CanHaveIllusions=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76385,7 +76402,7 @@
           "source_hash": "f84ab3a526bd2d637837b22ff4a41debfbf0ee3bb11cadefb28ef4cdf94c4f57"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotFlags family and metadata, including Enum.TransmogOutfitSlotFlags.CannotBeHidden=1.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76434,7 +76451,7 @@
           "source_hash": "f84ab3a526bd2d637837b22ff4a41debfbf0ee3bb11cadefb28ef4cdf94c4f57"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotFlags family and metadata, including Enum.TransmogOutfitSlotFlags.IsSecondarySlot=4.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76483,7 +76500,7 @@
           "source_hash": "f84ab3a526bd2d637837b22ff4a41debfbf0ee3bb11cadefb28ef4cdf94c4f57"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotFlags family and metadata, including Enum.TransmogOutfitSlotFlagsMeta.MaxValue=4.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76532,7 +76549,7 @@
           "source_hash": "f84ab3a526bd2d637837b22ff4a41debfbf0ee3bb11cadefb28ef4cdf94c4f57"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotFlags family and metadata, including Enum.TransmogOutfitSlotFlagsMeta.MinValue=1.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76581,7 +76598,7 @@
           "source_hash": "f84ab3a526bd2d637837b22ff4a41debfbf0ee3bb11cadefb28ef4cdf94c4f57"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotFlags family and metadata, including Enum.TransmogOutfitSlotFlagsMeta.NumValues=3.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76630,7 +76647,7 @@
           "source_hash": "53ef2e5fd7f8805082d9cdc61169aed05dcd293be45dbabbe4c0432378b613a6"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records TransmogOutfitSlot metadata including Enum.TransmogOutfitSlotMeta.MaxValue=14.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76679,7 +76696,7 @@
           "source_hash": "53ef2e5fd7f8805082d9cdc61169aed05dcd293be45dbabbe4c0432378b613a6"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records TransmogOutfitSlot metadata including Enum.TransmogOutfitSlotMeta.MinValue=0.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -76728,7 +76745,7 @@
           "source_hash": "53ef2e5fd7f8805082d9cdc61169aed05dcd293be45dbabbe4c0432378b613a6"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records TransmogOutfitSlot metadata including Enum.TransmogOutfitSlotMeta.NumValues=15.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77233,7 +77250,7 @@
           "source_hash": "a6a7daf5b60c125e2c972126330336f1eb52db68606b3ce638dbd2c78ff42ce2"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotOptionFlags family and metadata, including Enum.TransmogOutfitSlotOptionFlags.DisablesOffhandSlot=4.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77282,7 +77299,7 @@
           "source_hash": "a6a7daf5b60c125e2c972126330336f1eb52db68606b3ce638dbd2c78ff42ce2"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotOptionFlags family and metadata, including Enum.TransmogOutfitSlotOptionFlags.DynamicOptionName=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77331,7 +77348,7 @@
           "source_hash": "a6a7daf5b60c125e2c972126330336f1eb52db68606b3ce638dbd2c78ff42ce2"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotOptionFlags family and metadata, including Enum.TransmogOutfitSlotOptionFlags.IllusionNotAllowed=1.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77380,7 +77397,7 @@
           "source_hash": "a6a7daf5b60c125e2c972126330336f1eb52db68606b3ce638dbd2c78ff42ce2"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotOptionFlags family and metadata, including Enum.TransmogOutfitSlotOptionFlagsMeta.MaxValue=4.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77429,7 +77446,7 @@
           "source_hash": "a6a7daf5b60c125e2c972126330336f1eb52db68606b3ce638dbd2c78ff42ce2"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotOptionFlags family and metadata, including Enum.TransmogOutfitSlotOptionFlagsMeta.MinValue=1.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77478,7 +77495,7 @@
           "source_hash": "a6a7daf5b60c125e2c972126330336f1eb52db68606b3ce638dbd2c78ff42ce2"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotOptionFlags family and metadata, including Enum.TransmogOutfitSlotOptionFlagsMeta.NumValues=3.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77527,7 +77544,7 @@
           "source_hash": "62a44886c5593714a3a41cb784bc212c6e793007c6920dd0c91df38d979e6e62"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records TransmogOutfitSlotOption metadata including Enum.TransmogOutfitSlotOptionMeta.MaxValue=11.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77576,7 +77593,7 @@
           "source_hash": "62a44886c5593714a3a41cb784bc212c6e793007c6920dd0c91df38d979e6e62"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records TransmogOutfitSlotOption metadata including Enum.TransmogOutfitSlotOptionMeta.MinValue=0.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77625,7 +77642,7 @@
           "source_hash": "62a44886c5593714a3a41cb784bc212c6e793007c6920dd0c91df38d979e6e62"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records TransmogOutfitSlotOption metadata including Enum.TransmogOutfitSlotOptionMeta.NumValues=12.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77674,7 +77691,7 @@
           "source_hash": "3297f5c9f70e8d739c030e0fa852bbee7c4156c71ab6d255e8e08f893ff4f4f5"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotPosition family and metadata, including Enum.TransmogOutfitSlotPosition.Bottom=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77723,7 +77740,7 @@
           "source_hash": "3297f5c9f70e8d739c030e0fa852bbee7c4156c71ab6d255e8e08f893ff4f4f5"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotPosition family and metadata, including Enum.TransmogOutfitSlotPosition.Left=0.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77772,7 +77789,7 @@
           "source_hash": "3297f5c9f70e8d739c030e0fa852bbee7c4156c71ab6d255e8e08f893ff4f4f5"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotPosition family and metadata, including Enum.TransmogOutfitSlotPosition.Right=1.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77821,7 +77838,7 @@
           "source_hash": "3297f5c9f70e8d739c030e0fa852bbee7c4156c71ab6d255e8e08f893ff4f4f5"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotPosition family and metadata, including Enum.TransmogOutfitSlotPositionMeta.MaxValue=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77870,7 +77887,7 @@
           "source_hash": "3297f5c9f70e8d739c030e0fa852bbee7c4156c71ab6d255e8e08f893ff4f4f5"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotPosition family and metadata, including Enum.TransmogOutfitSlotPositionMeta.MinValue=0.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77919,7 +77936,7 @@
           "source_hash": "3297f5c9f70e8d739c030e0fa852bbee7c4156c71ab6d255e8e08f893ff4f4f5"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the TransmogOutfitSlotPosition family and metadata, including Enum.TransmogOutfitSlotPositionMeta.NumValues=3.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -77968,7 +77985,7 @@
           "source_hash": "4a9f82c2b5b30764a1e26a7945d4feef5a35f2771f1ed329ebf034485ab435a7"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotSaveFlags.AppearanceIsNotValid=1 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78017,7 +78034,7 @@
           "source_hash": "4a9f82c2b5b30764a1e26a7945d4feef5a35f2771f1ed329ebf034485ab435a7"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotSaveFlagsMeta.MaxValue=1 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78066,7 +78083,7 @@
           "source_hash": "4a9f82c2b5b30764a1e26a7945d4feef5a35f2771f1ed329ebf034485ab435a7"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotSaveFlagsMeta.MinValue=1 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78115,7 +78132,7 @@
           "source_hash": "4a9f82c2b5b30764a1e26a7945d4feef5a35f2771f1ed329ebf034485ab435a7"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotSaveFlagsMeta.NumValues=1 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78164,7 +78181,7 @@
           "source_hash": "0c05eea58dabddb4b399eaec440487bc1e843a8ffc6585ba3245bdf1139fb560"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotWarning.InvalidEquippedDestinationItem=1 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78213,7 +78230,7 @@
           "source_hash": "0c05eea58dabddb4b399eaec440487bc1e843a8ffc6585ba3245bdf1139fb560"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotWarning.NothingEquipped=5 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78262,7 +78279,7 @@
           "source_hash": "0c05eea58dabddb4b399eaec440487bc1e843a8ffc6585ba3245bdf1139fb560"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotWarning.Ok=0 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78311,7 +78328,7 @@
           "source_hash": "0c05eea58dabddb4b399eaec440487bc1e843a8ffc6585ba3245bdf1139fb560"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotWarning.PendingWeaponChanges=3 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78360,7 +78377,7 @@
           "source_hash": "0c05eea58dabddb4b399eaec440487bc1e843a8ffc6585ba3245bdf1139fb560"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotWarning.WeaponDoesNotSupportIllusions=4 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78409,7 +78426,7 @@
           "source_hash": "0c05eea58dabddb4b399eaec440487bc1e843a8ffc6585ba3245bdf1139fb560"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotWarning.WrongWeaponCategoryEquipped=2 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78458,7 +78475,7 @@
           "source_hash": "0c05eea58dabddb4b399eaec440487bc1e843a8ffc6585ba3245bdf1139fb560"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotWarningMeta.MaxValue=5 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78507,7 +78524,7 @@
           "source_hash": "0c05eea58dabddb4b399eaec440487bc1e843a8ffc6585ba3245bdf1139fb560"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotWarningMeta.MinValue=0 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78556,7 +78573,7 @@
           "source_hash": "0c05eea58dabddb4b399eaec440487bc1e843a8ffc6585ba3245bdf1139fb560"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitSlotWarningMeta.NumValues=6 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -78985,7 +79002,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionFlagsMeta.MaxValue=28 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79034,7 +79051,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionFlagsMeta.MinValue=1 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79083,7 +79100,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionFlagsMeta.NumValues=10 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79132,7 +79149,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionType.CreateOutfitInfo=2 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79181,7 +79198,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionType.UpdateMetadata=0 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79230,7 +79247,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionType.UpdateOutfitInfo=1 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79279,7 +79296,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionType.UpdateSituations=4 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79328,7 +79345,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionType.UpdateSlots=3 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79377,7 +79394,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionTypeMeta.MaxValue=4 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79426,7 +79443,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionTypeMeta.MinValue=0 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -79475,7 +79492,7 @@
           "source_hash": "e3e9f0da390fb7efdf36975a419bafc95e87b2bbb2adac37d158af2f1c7b74de"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogOutfitTransactionTypeMeta.NumValues=5 and the matching family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80360,7 +80377,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlags.AllSituation=4 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80409,7 +80426,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlags.DefaultsToOn=8 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80458,7 +80475,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlags.DisabledSituation=64 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80507,7 +80524,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlags.DynamicallyNamed=16 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80556,7 +80573,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlags.IsPlayerFacing=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80605,7 +80622,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlags.NoneSituation=32 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80654,7 +80671,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlags.SpecUseTalentLoadout=2 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80703,7 +80720,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlagsMeta.MaxValue=64 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80752,7 +80769,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlagsMeta.MinValue=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80801,7 +80818,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationFlagsMeta.NumValues=7 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80850,7 +80867,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationGroupFlags.DynamicallyCreatesGroups=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80899,7 +80916,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationGroupFlagsMeta.MaxValue=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80948,7 +80965,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationGroupFlagsMeta.MinValue=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -80997,7 +81014,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationGroupFlagsMeta.NumValues=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81157,7 +81174,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTrigger.EquipmentSet=6 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81206,7 +81223,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTrigger.EventOutfit=8 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81255,7 +81272,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTrigger.Forms=7 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81304,7 +81321,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTrigger.Location=3 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81353,7 +81370,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTrigger.Manual=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81402,7 +81419,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTrigger.Movement=4 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81451,7 +81468,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTrigger.None=0 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81500,7 +81517,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTrigger.Specialization=5 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81549,7 +81566,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTrigger.TransmogUpdate=2 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81598,7 +81615,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerFlags.CanChangeLockedOutfit=2 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81647,7 +81664,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerFlags.CanLockOutfit=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81696,7 +81713,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerFlags.DisabledTrigger=16 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81745,7 +81762,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerFlags.IsPlayerFacing=4 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81794,7 +81811,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerFlags.SituationsAreExclusive=8 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81843,7 +81860,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerFlagsMeta.MaxValue=16 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81892,7 +81909,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerFlagsMeta.MinValue=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81941,7 +81958,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerFlagsMeta.NumValues=5 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -81990,7 +82007,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerMeta.MaxValue=8 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82039,7 +82056,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerMeta.MinValue=0 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82088,7 +82105,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerMeta.NumValues=9 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82137,7 +82154,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerType.Automatic=2 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82186,7 +82203,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerType.Manual=1 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82235,7 +82252,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerType.None=0 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82284,7 +82301,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerType.TransmogUpdate=3 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82333,7 +82350,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerTypeMeta.MaxValue=3 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82382,7 +82399,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerTypeMeta.MinValue=0 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82431,7 +82448,7 @@
           "source_hash": "28496320fbe584e9d7176cd1c178d6bf4d26ea9427aec348c18bc21bbd933741"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.TransmogSituationTriggerTypeMeta.NumValues=4 and matching situation-family metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82480,7 +82497,7 @@
           "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlags.DisplayCovenantAsJourney=1 for the retail enum register.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82529,7 +82546,7 @@
           "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlags.UseJourneyRewardTrack=2 for the retail enum register.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82578,7 +82595,7 @@
           "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlagsMeta.MaxValue=2 for the retail enum register.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82627,7 +82644,7 @@
           "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlagsMeta.MinValue=1 for the retail enum register.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82676,7 +82693,7 @@
           "source_hash": "a090fbd9eb654628699f6b344088fd543f7e107292ecb9895c905fabf9892995"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UICovenantDisplayInfoFlagsMeta.NumValues=2 for the retail enum register.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82799,7 +82816,7 @@
           "source_hash": "7bbc2915655ee244dc27509838566207b3abaa7c3fc9fddead7c69a5001dbfa9"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UnitAuraSortDirection.Normal=0 and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82848,7 +82865,7 @@
           "source_hash": "7bbc2915655ee244dc27509838566207b3abaa7c3fc9fddead7c69a5001dbfa9"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UnitAuraSortDirection.Reverse=1 and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82897,7 +82914,7 @@
           "source_hash": "7bbc2915655ee244dc27509838566207b3abaa7c3fc9fddead7c69a5001dbfa9"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UnitAuraSortDirectionMeta.MaxValue=1 and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82946,7 +82963,7 @@
           "source_hash": "7bbc2915655ee244dc27509838566207b3abaa7c3fc9fddead7c69a5001dbfa9"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UnitAuraSortDirectionMeta.MinValue=0 and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -82995,7 +83012,7 @@
           "source_hash": "7bbc2915655ee244dc27509838566207b3abaa7c3fc9fddead7c69a5001dbfa9"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records Enum.UnitAuraSortDirectionMeta.NumValues=2 and matching metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -83044,7 +83061,7 @@
           "source_hash": "05e23ee8095e6933e771875efd1461e0fb81d0acad34ce4dc1c8608d466d3d9c"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records UnitAuraSortRule.BigDefensive=2.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -102212,7 +102229,7 @@
           "source_hash": "583d220defe45b920981bf7cf3dcabbbf5b3460e2d4c6646a864a8b2b623929b"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.CharCustomizationTypeMeta.MaxValue value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -102256,7 +102273,7 @@
           "source_hash": "583d220defe45b920981bf7cf3dcabbbf5b3460e2d4c6646a864a8b2b623929b"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.CharCustomizationTypeMeta.NumValues value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -103855,7 +103872,7 @@
           "source_hash": "02bd7ddfc6345ef9a772051ae7ba445ca746357ca8c74a00b9893293839312f5"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.EditModeSystemMeta.MaxValue value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -103899,7 +103916,7 @@
           "source_hash": "02bd7ddfc6345ef9a772051ae7ba445ca746357ca8c74a00b9893293839312f5"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.EditModeSystemMeta.NumValues value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -103943,7 +103960,7 @@
           "source_hash": "030ac112264dfea9dad5c363d61e890a635408ee68d1bfa9490269ff7cf8ae58"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.EditModeUnitFrameSettingMeta.MaxValue value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -103987,7 +104004,7 @@
           "source_hash": "030ac112264dfea9dad5c363d61e890a635408ee68d1bfa9490269ff7cf8ae58"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.EditModeUnitFrameSettingMeta.NumValues value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104037,7 +104054,7 @@
           "source_hash": "00bf28b0a0767276a4ab3b78b17f36c06d32c607bc1db61c983a9fb91bd2a44d"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the three FragmentID values and metadata NumValues=72.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104099,7 +104116,7 @@
           "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104161,7 +104178,7 @@
           "source_hash": "7f56f68818e245a7abbe1230a4850236010ad72e48f96bcbc62624be4d6db38e"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the five transmog member values and the changed metadata MaxValue/NumValues=45.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104279,7 +104296,7 @@
           "source_hash": "a91ea2067e97fc3ea814413318d811f8bc9da47a9c535a98393b7bcd9bf4eaba"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.HousingCatalogEntrySubtype.OwnedModifiedStack value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104323,7 +104340,7 @@
           "source_hash": "a91ea2067e97fc3ea814413318d811f8bc9da47a9c535a98393b7bcd9bf4eaba"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.HousingCatalogEntrySubtype.OwnedUnmodifiedStack value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104367,7 +104384,7 @@
           "source_hash": "a91ea2067e97fc3ea814413318d811f8bc9da47a9c535a98393b7bcd9bf4eaba"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.HousingCatalogEntrySubtypeMeta.MaxValue value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104411,7 +104428,7 @@
           "source_hash": "a91ea2067e97fc3ea814413318d811f8bc9da47a9c535a98393b7bcd9bf4eaba"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the post-12.0.0 Enum.HousingCatalogEntrySubtypeMeta.NumValues value.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104535,7 +104552,7 @@
           "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104584,7 +104601,7 @@
           "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104633,7 +104650,7 @@
           "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -104682,7 +104699,7 @@
           "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
@@ -121078,7 +121095,7 @@
           "source_hash": "d5fff22daba783a26710cc3e0d9bf0e086878af32630530952cf74a0dccf098a"
         },
         {
-          "kind": "discovery",
+          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "summary": "Independent discovery records the housing decor placement restriction family and metadata.",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6"
