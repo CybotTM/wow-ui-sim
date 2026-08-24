@@ -57,15 +57,23 @@ fire_event("PLAYER_LOGIN")
                  └─ frame.OnEvent  ← from Mixin
 ```
 
+## Addon Loading Context
+
+Direct and runtime addon loading share one loading transaction owned by `SimState`. Runtime `C_AddOns.LoadAddOn()` enters that transaction before foundation and TOC dependency traversal, then loads Lua/XML files and applies post-load workarounds. The owner commits `loaded` only after those steps complete; `ADDON_LOADED` is dispatched after that commit.
+
+Nested re-entry sees the active transaction: `C_AddOns.LoadAddOn()` returns success without re-entering the addon, while `C_AddOns.IsAddOnLoaded()` reports `(true, false)` until the owner commits, then `(true, true)`. RAII cleanup removes the transaction and restores the previous loading owner context on success or failure.
+
 ## Frame Creation Order (xml_frame.rs)
 
 ```
-1. CreateFrame(type, name, parent, inherits)
-   ├─ register_new_frame() → assigns frame_id
-   ├─ create_widget_type_defaults() → button textures etc.
-   ├─ set _G["name"] and cache frame ref in __frame_refs
-   └─ apply_templates_from_registry()
-       └─ for each template: mixin → size → anchors → keyValues → layers → children → scripts
+1. Create or reuse the frame
+   ├─ ordinary names call CreateFrame(type, name, parent, inherits)
+   │  ├─ register_new_frame() → assigns frame_id
+   │  ├─ create_widget_type_defaults() → button textures etc.
+   │  ├─ set _G["name"] and cache frame ref in __frame_refs
+   │  └─ apply_templates_from_registry()
+   │      └─ for each template: mixin → size → anchors → keyValues → layers → children → scripts
+   └─ engine roots UIParent and WorldFrame reuse their pre-created frame refs; XML mixins, scripts, event registrations, and lifecycle configuration target those same refs
 
 2. append_parent_key_code() → parent.Key = frame
 3. append_mixins_code() → Mixin(frame, ...) again
@@ -82,6 +90,8 @@ fire_event("PLAYER_LOGIN")
 
 **`__frame_{id}` namespace**: anonymous template children must use `__tpl_` prefix (not `__frame_`), since `__frame_{id}` is reserved for event dispatch. Historical collision caused wrong frame to be dispatched for events.
 
+**Engine-created roots**: `UIParent` and `WorldFrame` exist before Blizzard XML loads. Their XML definitions configure those existing objects; they must not call `CreateFrame` again. XML mixins, scripts, event registrations, and lifecycle configuration therefore remain attached to the object later observed through the global. A duplicate replacement leaves those behaviors on the original root while later code observes another object. This broke UIParent startup handlers and prevented CombatLog runtime state from loading. The XML code generator now special-cases both names (`src/loader/xml_frame_codegen.rs`, commit `e5089fbeb2`).
+
 **Script chaining order**: `inherit="prepend"` runs new handler before old. If new handler depends on state the old handler sets up, it will fail on first call.
 
 ## Sources
@@ -89,6 +99,10 @@ fire_event("PLAYER_LOGIN")
 - [frame-data-flow.md](../../frame-data-flow.md) — parallel systems, __index order, Mixin flow, event dispatch, creation sequence, pitfalls
 - [methods.rs](../../../src/lua_api/methods.rs) — frame ref cache and frame-field compatibility behavior
 - [shared_bootstrap.lua](../../../src/lua_api/env_init/shared_bootstrap.lua) — `debug.getfenv(frame)` compatibility view
+- [xml_frame_codegen.rs](../../../src/loader/xml_frame_codegen.rs) — reuses pre-created UIParent/WorldFrame objects for their XML definitions
+- [c_addons_runtime.rs](../../../src/c_api/c_addons_runtime.rs) — enters runtime dependency loads through the shared loading transaction
+- [addon.rs](../../../src/loader/addon.rs) — owns loading transaction commit and RAII cleanup
+- [state.rs](../../../src/lua_api/state.rs) — reports whether an addon is currently loading
 
 ## See Also
 

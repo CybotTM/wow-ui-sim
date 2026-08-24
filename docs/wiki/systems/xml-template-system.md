@@ -36,13 +36,13 @@ Property resolution per template walk:
 `create_frame_from_xml()` pipeline for each non-virtual frame:
 1. Virtual/intrinsic check — register template and return early
 2. Name resolution — `$parent` substitution, `__anon_{id}` for anonymous children
-3. Build Lua string: `CreateFrame(type, name, parent, inherits)` + `Mixin()`, `SetSize()`, `SetPoint()`, `Hide()`, `EnableMouse()`, `SetScript()`, etc.
+3. Build Lua code. Ordinary frames use `CreateFrame(type, name, parent, inherits)`; XML definitions for engine-created roots `UIParent` and `WorldFrame` reuse the existing global frame instead of creating a replacement. Both paths then append `Mixin()`, `SetSize()`, `SetPoint()`, `Hide()`, `EnableMouse()`, `SetScript()`, and event-registration configuration against that frame object.
 4. Execute single `env.exec()` call
 5. Recurse into `<Frames>` children, then `<Layers>` (textures/fontstrings)
 6. Apply animation groups, button textures, button text
 7. Fire lifecycle scripts: OnLoad, then OnShow if visible
 
-The `inherits` parameter in `CreateFrame()` triggers `apply_templates_from_registry()` at runtime, so template children are created before the XML loader recurses into direct children.
+The `inherits` parameter in `CreateFrame()` triggers `apply_templates_from_registry()` at runtime, so template children are created before the XML loader recurses into direct children. The root reuse branch is required because UIParent and WorldFrame are created before Blizzard XML loads; their XML scripts, event registrations, mixins, and lifecycle configuration must target the pre-created objects later observed through `_G.UIParent` and `_G.WorldFrame`. A duplicate object strands those behaviors on the original root while later code observes another object, removing UIParent startup handlers and blocking CombatLog runtime loading. The behavior is implemented in `src/loader/xml_frame_codegen.rs` (commit `e5089fbeb2`).
 
 ## Lua-Side Template Application (`src/lua_api/globals/template/mod.rs`)
 
@@ -81,7 +81,8 @@ For `method="X"`, live PTR 12.1 probing showed two separate stores: the object f
 
 - [xml-template-system.md](../../xml-template-system.md) — XML types, registry, inheritance, conversion pipeline, inline scripts
 - `src/lua_api/env_init/shared_bootstrap.lua` — `GetForbiddenObjectTable` and XML partition helper functions
-- `src/loader/xml_frame_codegen.rs` — XML codegen for partition-aware Mixins and KeyValues
+- `src/loader/xml_frame_codegen.rs` — XML codegen for partition-aware Mixins, KeyValues, and engine-root reuse
+- `src/loader/addon.rs` — shared addon loading transaction used while XML files execute
 - `src/loader/tests/runtime_template_misc.rs` — regression coverage for forbidden object tables, secure delegates, and XML `method=` binding timing
 
 ## See Also

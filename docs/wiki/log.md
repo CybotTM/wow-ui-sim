@@ -1,3 +1,11 @@
+## [2026-08-24] fix | Reuse engine roots for XML definitions
+
+Commit `e5089fbeb2` makes XML definitions for pre-created `UIParent` and `WorldFrame` configure the existing root objects instead of creating replacements. XML mixins, scripts, event registrations, and lifecycle configuration therefore attach to the same objects later observed through `_G.UIParent` and `_G.WorldFrame`. The duplicate path stranded startup scripts and event registrations on the original UIParent and prevented CombatLog runtime loading. Implementation: `src/loader/xml_frame_codegen.rs`.
+
+## [2026-08-24] fix | Guard runtime addon load transactions
+
+Commit `ce67dc961` uses one `SimState`-owned RAII loading transaction for direct and runtime addon loads. Runtime dependency traversal enters the transaction before loading foundations or TOC dependencies; nested re-entry reports the addon as loading but not loaded until file loading and post-load workarounds complete and the owning transaction commits. Guard cleanup restores the previous loading owner after success or failure. Implementation: `src/c_api/c_addons_runtime.rs`, `src/loader/addon.rs`, and `src/lua_api/state.rs`.
+
 ## [2026-08-24] correction | Retail manifest family inventory and texture identity
 
 Commits `f8a34a362` and `34a7f7d19` corrected stale tests and establish the current retail source/runtime boundary. The retail Blizzard manifest mirrors the complete Gethe `live` AddOns tree, including `Classic/` and `Mainline/` family variants; this is source completeness, not a second retail load path. Runtime TOC `[Family]` substitution selects `Mainline` for retail. Known resolved texture paths expose numeric fileDataIDs through `Texture:GetTexture()`: class circles `237669` and the question mark `134400`. This supersedes the 2026-07-13 note describing a filtered retail manifest.
