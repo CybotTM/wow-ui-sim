@@ -94345,6 +94345,7 @@
       "change": "added",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "docs-extra-enum",
       "load_addon": null,
       "evidence": [
@@ -94386,6 +94387,7 @@
       "change": "added",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "docs-extra-enum",
       "load_addon": null,
       "evidence": [
@@ -94462,6 +94464,7 @@
       "change": "added",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "docs-extra-event",
       "load_addon": null,
       "evidence": [
@@ -94544,6 +94547,7 @@
       "change": "added",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "docs-extra-script-object",
       "load_addon": null,
       "evidence": [
@@ -110810,6 +110814,7 @@
       "change": "changed",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "api",
       "load_addon": null,
       "evidence": [
@@ -112673,6 +112678,7 @@
       "change": "changed",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "api",
       "load_addon": null,
       "evidence": [
@@ -127573,6 +127579,7 @@
       "change": "removed",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "docs-extra-event",
       "load_addon": null,
       "evidence": [
@@ -127608,6 +127615,7 @@
       "change": "removed",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "docs-extra-event",
       "load_addon": null,
       "evidence": [
@@ -127643,6 +127651,7 @@
       "change": "removed",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "docs-extra-script-object",
       "load_addon": null,
       "evidence": [
@@ -127770,6 +127779,7 @@
       "change": "removed",
       "status": "best-effort",
       "resolution": "provenance-only",
+      "provenance_only": true,
       "owner": "cvar",
       "load_addon": null,
       "evidence": [

@@ -1877,6 +1877,25 @@ mod tests {
     }
 
     #[test]
+    fn checked_in_provenance_only_flags_match_resolutions() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+        for path in checked_in_patch_manifest_paths(root) {
+            let json = std::fs::read_to_string(&path).expect("manifest should read");
+            let manifest = parse_manifest(&json).expect("manifest should parse");
+            for row in manifest.rows {
+                let uses_provenance_resolution = row.resolution == ResolutionKind::ProvenanceOnly;
+                assert_eq!(
+                    row.provenance_only,
+                    uses_provenance_resolution,
+                    "{} row {} provenance_only flag and provenance-only resolution must match",
+                    path.display(),
+                    row.id
+                );
+            }
+        }
+    }
+
+    #[test]
     fn every_checked_in_patch_manifest_matches_repository_artifacts() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR"));
         for path in checked_in_patch_manifest_paths(root) {
