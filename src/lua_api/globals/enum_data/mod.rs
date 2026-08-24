@@ -21,9 +21,6 @@ pub type EnumDef = (&'static str, &'static [(&'static str, i32)]);
 /// Sequential enum: (enum_name, &[variant_names]) - values are 0, 1, 2, ...
 pub type SeqEnumDef = (&'static str, &'static [&'static str]);
 
-/// Values added to an enum after its base table is registered.
-pub const ENUM_VALUE_ADDITIONS: &[EnumDef] = &[EDIT_MODE_ENCOUNTER_EVENTS_SETTING_ADDITIONS];
-
 // ============================================================================
 // All sequential enums (for batch registration)
 // ============================================================================
@@ -92,7 +89,6 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     EDIT_MODE_COOLDOWN_VIEWER_SETTING,
     EDIT_MODE_PERSONAL_RESOURCE_DISPLAY_SETTING,
     PERSONAL_RESOURCE_DISPLAY_VISIBLE_SETTING,
-    EDIT_MODE_ENCOUNTER_EVENTS_SETTING,
     ENCOUNTER_EVENTS_VIEW_TYPE,
     ENCOUNTER_EVENTS_ORIENTATION,
     ENCOUNTER_EVENTS_VISIBILITY,
@@ -183,6 +179,7 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     EDIT_MODE_STATUS_TRACKING_BAR_SYSTEM_INDICES,
     EDIT_MODE_COOLDOWN_VIEWER_SYSTEM_INDICES,
     EDIT_MODE_ENCOUNTER_EVENTS_SYSTEM_INDICES,
+    EDIT_MODE_ENCOUNTER_EVENTS_SETTING,
     ENCOUNTER_EVENTS_ICON_DIRECTION,
     AURA_FRAME_ICON_DIRECTION,
     AURA_FRAME_ICON_WRAP,

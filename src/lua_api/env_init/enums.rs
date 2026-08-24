@@ -1,7 +1,7 @@
 //! Enum and constant globals: `Enum.*`, `Constants.*`, LE_* values.
 
 use crate::client_profile::{ACTIVE_RETAIL_API_EPOCH, RetailApiEpoch};
-use crate::lua_api::globals::enum_data::{ENUM_VALUE_ADDITIONS, EXPLICIT_ENUMS, SEQUENTIAL_ENUMS};
+use crate::lua_api::globals::enum_data::{EXPLICIT_ENUMS, SEQUENTIAL_ENUMS};
 use crate::lua_api::methods::{create_table, table_get, table_set};
 use rilua::LuaApiMut;
 use rilua::Val;
@@ -218,7 +218,6 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
             }
             table_set(state, enum_table, enum_name, enum_values);
         }
-        apply_enum_value_additions(state, enum_table);
     }
     lua.exec(MISSING_ENUMS_LUA)?;
     if ACTIVE_RETAIL_API_EPOCH == RetailApiEpoch::Retail12_0_0 {
@@ -253,18 +252,6 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         lua.exec(RETAIL_12_0_0_POST_COMPAT_CONSTANT_OVERRIDES_LUA)?;
     }
     Ok(())
-}
-
-fn apply_enum_value_additions(state: &mut rilua::vm::state::LuaState, enum_table: Val) {
-    for &(enum_name, entries) in ENUM_VALUE_ADDITIONS.iter() {
-        let enum_values = table_get(state, enum_table, enum_name);
-        let Val::Table(_) = enum_values else {
-            unreachable!("enum additions require registered enum {enum_name}");
-        };
-        for &(variant_name, value) in entries {
-            table_set(state, enum_values, variant_name, Val::Num(value as f64));
-        }
-    }
 }
 
 #[cfg(feature = "retail-12-1-0")]

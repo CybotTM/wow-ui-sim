@@ -330,28 +330,26 @@ pub const PERSONAL_RESOURCE_DISPLAY_VISIBLE_SETTING: SeqEnumDef = (
     &["Always", "InCombat", "Hidden"],
 );
 
-pub const EDIT_MODE_ENCOUNTER_EVENTS_SETTING: SeqEnumDef = (
+pub const EDIT_MODE_ENCOUNTER_EVENTS_SETTING: EnumDef = (
     "EditModeEncounterEventsSetting",
     &[
-        "Orientation",
-        "IconDirection",
-        "ShowSpellName",
-        "IconSize",
-        "OverallSize",
-        "BackgroundTransparency",
-        "Transparency",
-        "Visibility",
-        "ShowTooltips",
-        "ShowTimer",
-        "ViewType",
-        "FlipHorizontally",
-        "BarWidth",
-        "Padding",
+        ("Orientation", 0),
+        ("IconDirection", 1),
+        ("ShowSpellName", 2),
+        ("IconSize", 3),
+        ("OverallSize", 4),
+        ("BackgroundTransparency", 5),
+        ("Transparency", 6),
+        ("Visibility", 7),
+        ("ShowTooltips", 8),
+        ("TooltipAnchor", 8),
+        ("ShowTimer", 9),
+        ("ViewType", 10),
+        ("FlipHorizontally", 11),
+        ("BarWidth", 12),
+        ("Padding", 13),
     ],
 );
-
-pub const EDIT_MODE_ENCOUNTER_EVENTS_SETTING_ADDITIONS: EnumDef =
-    ("EditModeEncounterEventsSetting", &[("TooltipAnchor", 8)]);
 
 pub const ENCOUNTER_EVENTS_VIEW_TYPE: SeqEnumDef =
     ("EncounterEventsViewType", &["Timeline", "Bars"]);
