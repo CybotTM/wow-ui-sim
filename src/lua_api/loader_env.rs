@@ -107,7 +107,7 @@ impl<'a> LoaderEnv<'a> {
                 mark_secure_state(state, &func)?;
             }
             apply_loading_scoped_fenv_state(state, &func)?;
-            crate::lua_api::script_helpers::call_void_function_with_fallback_state(
+            crate::lua_api::script_helpers::call_void_function_state(
                 state,
                 Val::Function(func.gc_ref()),
                 &[],
@@ -157,11 +157,9 @@ impl<'a> LoaderEnv<'a> {
                 call_args.push(frame);
                 call_args.push(event_name);
                 call_args.extend_from_slice(args);
-                if let Err(error) =
-                    crate::lua_api::script_helpers::call_void_function_with_fallback_state(
-                        state, handler, &call_args,
-                    )
-                {
+                if let Err(error) = crate::lua_api::script_helpers::call_void_function_state(
+                    state, handler, &call_args,
+                ) {
                     call_error_handler_state(state, &error);
                 }
                 Ok(())

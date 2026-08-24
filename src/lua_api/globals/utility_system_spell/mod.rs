@@ -15,8 +15,7 @@ mod table_util;
 
 use crate::lua_api::methods::call_function_state_multi;
 use crate::lua_api::script_helpers::{
-    call_error_handler_state, protected_call_state, protected_lua_pcall_state, registry_value,
-    set_registry_value,
+    call_error_handler_state, protected_call_state, registry_value, set_registry_value,
 };
 use crate::lua_bridge::stack_val;
 use rilua::LuaApiMut;
@@ -463,14 +462,7 @@ fn call_function_with_secure_taint(
     args: &[Val],
 ) -> Result<Vec<Val>, rilua::LuaError> {
     let saved_taints = clear_securecall_taint(state);
-    const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
-    let results = match call_function_state_multi(state, func, args) {
-        Ok(results) => Ok(results),
-        Err(error) if error.to_string().contains(DIRECT_CALL_FALLBACK_ERROR) => {
-            protected_lua_pcall_state(state, func, args).map_err(runtime_error)
-        }
-        Err(error) => Err(error),
-    };
+    let results = call_function_state_multi(state, func, args);
     restore_securecall_taint(state, saved_taints);
     results
 }
@@ -684,7 +676,49 @@ fn register_system_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::lua_api::WowLuaEnv;
+    use rilua::{LuaApi, LuaApiMut};
+
+    #[test]
+    fn secure_taint_call_does_not_retry_matching_lua_error_text() {
+        let mut lua = rilua::Lua::new().expect("lua should initialize");
+        lua.exec("__secure_error_calls = 0")
+            .expect("counter should initialize");
+        let loader = lua
+            .state_mut()
+            .load(
+                r#"
+                    return function()
+                        __secure_error_calls = __secure_error_calls + 1
+                        error("expected Lua closure in execute: genuine secure failure")
+                    end
+                "#,
+            )
+            .expect("failing function source should compile");
+        let failing =
+            call_function_state_multi(lua.state_mut(), Val::Function(loader.gc_ref()), &[])
+                .expect("failing function should load")[0];
+        lua.state_mut().call_stack[0].taint = Some("SecureProbe".to_string());
+
+        let error = call_function_with_secure_taint(lua.state_mut(), failing, &[])
+            .expect_err("genuine Lua failure should be returned");
+        assert!(error.to_string().contains("genuine secure failure"));
+        assert_eq!(
+            lua.state().call_stack[0].taint.as_deref(),
+            Some("SecureProbe"),
+            "securecall must restore caller taint"
+        );
+
+        let counter_loader = lua
+            .state_mut()
+            .load("return __secure_error_calls")
+            .expect("counter source should compile");
+        let calls =
+            call_function_state_multi(lua.state_mut(), Val::Function(counter_loader.gc_ref()), &[])
+                .expect("subsequent direct call should succeed");
+        assert_eq!(calls, vec![Val::Num(1.0)], "failing function must run once");
+    }
 
     #[test]
     fn type_global_returns_wow_type_names() {

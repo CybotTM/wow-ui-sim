@@ -655,11 +655,7 @@ fn call_handler_with_frame(state: &mut LuaState, handler: Val, frame: Val) -> Lu
     let Val::Function(_) = handler else {
         return Ok(());
     };
-    match crate::lua_api::script_helpers::call_void_function_with_fallback_state(
-        state,
-        handler,
-        &[frame],
-    ) {
+    match crate::lua_api::script_helpers::call_void_function_state(state, handler, &[frame]) {
         Ok(_) => Ok(()),
         Err(err) => Err(rilua::runtime_error(err)),
     }
