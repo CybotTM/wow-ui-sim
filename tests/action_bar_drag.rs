@@ -274,7 +274,7 @@ fn action_button_drag_round_trip_keeps_spell_visible() {
 }
 
 #[test]
-fn action_button_1_icon_matches_get_action_texture() {
+fn action_button_1_texture_path_resolves_to_icon_fdid() {
     common::with_timeout(120, move || {
         let env = env_with_action_bar();
         seed_action_slot(&env, 1, 853);
@@ -294,13 +294,21 @@ fn action_button_1_icon_matches_get_action_texture() {
                     return "missing_action_button_1_icon"
                 end
 
-                local expected = GetActionTexture(1)
-                local actual = ActionButton1.icon:GetTexture()
-                if actual ~= expected then
+                local actionTexture = GetActionTexture(1)
+                if actionTexture ~= "ICONS/Spell_Holy_SealOfMight" then
                     return string.format(
-                        "icon_mismatch_expected_%s_actual_%s",
-                        tostring(expected),
-                        tostring(actual)
+                        "action_texture_mismatch_expected_%s_actual_%s",
+                        "ICONS/Spell_Holy_SealOfMight",
+                        tostring(actionTexture)
+                    )
+                end
+
+                local iconTexture = ActionButton1.icon:GetTexture()
+                if iconTexture ~= 135963 then
+                    return string.format(
+                        "icon_fdid_mismatch_expected_%s_actual_%s",
+                        tostring(135963),
+                        tostring(iconTexture)
                     )
                 end
 
@@ -311,7 +319,7 @@ fn action_button_1_icon_matches_get_action_texture() {
 
         assert_eq!(
             result, "ok",
-            "ActionButton1 icon should match GetActionTexture(1): {result}"
+            "ActionButton1 texture path should resolve to the expected icon FDID: {result}"
         );
     });
 }

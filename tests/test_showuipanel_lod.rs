@@ -40,7 +40,7 @@ fn show_macro_frame_loads_and_populates_selector() {
             if MacroFrameText:GetText() ~= "/rw Stack on star" then
                 return "selected_body=" .. tostring(MacroFrameText:GetText())
             end
-            if MacroFrame.SelectedMacroButton.Icon:GetTexture() ~= "Interface\\Icons\\INV_Misc_QuestionMark" then
+            if MacroFrame.SelectedMacroButton.Icon:GetTexture() ~= 134400 then
                 return "selected_icon=" .. tostring(MacroFrame.SelectedMacroButton.Icon:GetTexture())
             end
 
@@ -546,7 +546,7 @@ fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
             if LossOfControlFrame.AbilityName:GetText() ~= "Kidney Shot" then
                 return "text=" .. tostring(LossOfControlFrame.AbilityName:GetText())
             end
-            if LossOfControlFrame.Icon:GetTexture() ~= "Interface\\Icons\\Ability_Rogue_KidneyShot" then
+            if LossOfControlFrame.Icon:GetTexture() ~= 132298 then
                 return "icon=" .. tostring(LossOfControlFrame.Icon:GetTexture())
             end
             if not LossOfControlFrame.TimeLeft:IsShown() then
