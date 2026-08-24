@@ -39,6 +39,10 @@ Links Lua userdata to the Rust `Frame` via `id`. `__newindex` syncs `parent.Chil
 
 Widget-specific: EditBox (SetMultiLine, SetAutoFocus), Slider (SetMinMaxValues, SetValue, SetOrientation), StatusBar (SetStatusBarColor), Cooldown (SetCooldown), Tooltip (SetOwner, AddLine, AddDoubleLine), MessageFrame (AddMessage).
 
+### Texture identity
+
+For known WoW texture paths resolved by the bundled texture manifest, `Texture:GetTexture()` and `Texture:GetTextureFileID()` return the numeric fileDataID, while `Texture:GetTextureFilePath()` preserves the path. Current proofs include `Interface\\TargetingFrame\\UI-Classes-Circles` → `237669` and `Interface\\ICONS\\INV_Misc_QuestionMark` → `134400`.
+
 ## Global Functions
 
 **Core overrides** — `print` appends to `SimState.console_output`; `ipairs` iterates frame children; `getmetatable` returns a fake metatable exposing all frame methods; `string.format` maps `%F` → `%f` for LuaJIT compatibility.
@@ -75,6 +79,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 
 - [lua-api.md](../../lua-api.md) — WowLuaEnv, FrameHandle, method categories, globals, C_* namespaces, timers
 - [spell_description_resolver.rs](../../../src/spell_description_resolver.rs) — shared spell-description token resolver
+- [container_portrait_texture.rs](../../../src/lua_api/workarounds/temporary/container_portrait_texture.rs) — retail texture fileDataID proof
+- [item_button_helper_defaults.rs](../../../src/lua_api/workarounds/temporary/item_button_helper_defaults.rs) — item-button texture fileDataID proof
 - `/home/osso/Repos/simc/SpellDataDump/allspells.txt` — coefficient and variable formulas used for AP/health-scaled spell text
 
 ## See Also
@@ -82,3 +88,4 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [[frame-data-flow]] — method lookup order, __index/__newindex, Mixin() application
 - [[event-system]] — fire_event, SetScript, OnUpdate tick mechanism
 - [[widget-system]] — Frame struct backing each FrameHandle
+- [[texture-atlas]] — texture path resolution, atlas identity, and rendering consumers

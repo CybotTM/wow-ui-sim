@@ -69,7 +69,7 @@ The BLP byte cache is roughly **10× faster** than re-extracting steady-state, a
 
 ## Blizzard UI source cache
 
-`data/blizzard-ui-files/<profile>.txt` manifests list the Blizzard UI source files for each supported profile. `wow-cli casc sync-blizzard-ui` resolves each active-profile manifest entry as `Interface/AddOns/<entry>`, extracts it from the active CASC product into `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns`, and preserves Blizzard's original addon/file casing on disk. The bundled limited listfile is generated from the union of those profile manifests plus tracked `data/listfile-overrides.csv` rows for paths that the upstream community listfile has not published yet.
+`data/blizzard-ui-files/<profile>.txt` manifests list the Blizzard UI source files for each supported profile. The retail manifest mirrors the complete Gethe `live` AddOns tree, including `Classic/` and `Mainline/` family variants; this preserves source inventory even though retail runtime `[Family]` substitution selects `Mainline`. `wow-cli casc sync-blizzard-ui` resolves each active-profile manifest entry as `Interface/AddOns/<entry>`, extracts it from the active CASC product into `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns`, and preserves Blizzard's original addon/file casing on disk. The bundled limited listfile is generated from the union of those profile manifests plus tracked `data/listfile-overrides.csv` rows for paths that the upstream community listfile has not published yet.
 
 Local install archives are tried first through `asset-resolver`. If the active product root/encoding metadata resolves an FDID but the local streaming install lacks that archive chunk, sync downloads the missing authoritative CASC blob from Blizzard's CDN by encoding key via the public `Osso/casc-extract` library. CDN archive indexes persist under `~/.cache/casc-extract/<product>-<build>/indices`.
 
@@ -86,7 +86,7 @@ Run `scripts/test-retail-casc-isolation.py` to verify the retail manifest withou
 
 To add a genuinely required retail file:
 
-1. Confirm a retail `_Mainline.toc` or its transitive dependency references the file. Do not copy paths from Classic, PTR, or another profile manifest.
+1. Confirm the path is present in the Gethe `live` AddOns tree and referenced by a retail `_Mainline.toc` or its transitive dependency. Do not add a path merely because it appears in Classic, PTR, or another profile manifest.
 2. Confirm the path or FDID exists in the active retail CASC product. A file absent from retail CASC is a stale manifest candidate, not a file to fabricate locally.
 3. Add the addon-relative path to `data/blizzard-ui-files/retail.txt` using Blizzard's original casing.
 4. If the community listfile does not map the path yet, add a verified `FDID;interface/addons/...` row to `data/listfile-overrides.csv`.

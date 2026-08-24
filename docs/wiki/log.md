@@ -1,3 +1,7 @@
+## [2026-08-24] correction | Retail manifest family inventory and texture identity
+
+Commits `f8a34a362` and `34a7f7d19` corrected stale tests and establish the current retail source/runtime boundary. The retail Blizzard manifest mirrors the complete Gethe `live` AddOns tree, including `Classic/` and `Mainline/` family variants; this is source completeness, not a second retail load path. Runtime TOC `[Family]` substitution selects `Mainline` for retail. Known resolved texture paths expose numeric fileDataIDs through `Texture:GetTexture()`: class circles `237669` and the question mark `134400`. This supersedes the 2026-07-13 note describing a filtered retail manifest.
+
 ## [2026-08-24] investigation | Resolve default-retail startup error cascade
 
 At HEAD `20f141534`, `target/debug/wow-sim --no-addons --no-saved-vars lua-errors` emits `[]` (0 unique errors, 0 occurrences), artifact `/tmp/claude/wow-sim-lua-errors-after-editmode.out`. `ff01991aa` restored Lua call frames after direct errors; `6ac9e32ee` removed the obsolete exact-string retry; and `7d6051797`, `cb75dd007`, and `20f141534` corrected retail EditMode enum publication. The two missing retail members were `Enum.EditModeEncounterEventsSetting.TooltipAnchor=8` and `Enum.DamageMeterVisibility.InGroup=3`, with metadata boundaries `0/13/14` and `0/3/4`. Their absence aborted EditMode initialization. After the enum correction, the remaining EditMode, CooldownViewer, chat, MicroMenu, compact-raid, WorldFrame, ExtraAbility, and related records disappeared without local fixes, identifying them as startup cascades in this baseline.
@@ -1488,12 +1492,7 @@ ownership split; the next tag will carry the fix.
 
 ## [2026-07-13] update | Retail Blizzard UI manifest curation
 
-Updated `systems/client-profiles.md` and `systems/addon-loading.md` after
-`data/blizzard-ui-files/retail.txt` was independently curated to 3,591 entries,
-excluding 390 legacy-profile entries under `/Classic/`, `/Mists/`, `/Wrath/`,
-`/Cata/`, `/TBC/`, and legacy TOCs. Recorded that retail runtime uses the
-manifest contents directly, without an additional legacy-profile filter, while
-profile-aware TOC and game-type selection remains part of addon discovery.
+Historical note superseded by the 2026-08-24 retail manifest correction above. The earlier 3,591-entry filtered snapshot and its legacy-profile exclusion claim are no longer the retail source-inventory contract.
 
 ## [2026-07-09] investigation | Patch 12.0.5 API audit
 
