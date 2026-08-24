@@ -152,7 +152,7 @@
           "kind": "test",
           "reference": "tests/admin_event_api.rs::test_register_unit_event_reports_registered_unit",
           "summary": "Valid and invalid RegisterUnitEvent filter behavior is directly regression-tested.",
-          "source_hash": "b55f1b3c908cbb1e3b84bfa0cb9a04ad6b083d3da85bb7520481476cc653a0e3"
+          "source_hash": "a6350441c6db6dcfee75a53bc7db80debdd21fc939dd3a71e3b6b31c70ca164c"
         }
       ],
       "tests": [

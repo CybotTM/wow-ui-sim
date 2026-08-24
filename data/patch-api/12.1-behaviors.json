@@ -120,7 +120,7 @@
           "kind": "source",
           "reference": "docs/wiki/systems/xml-template-system.md",
           "summary": "Two-partition/delegate mechanics exist; exact retail private identity is unknown.",
-          "source_hash": "db0ef2c030f005be4b1c226ea47fd9ebc4ac4024a025023252cad09081ee06bd"
+          "source_hash": "b110d3c920d1aa10ac6bef8081eed045e6170007b26e18a1cf32167a57571ed4"
         }
       ],
       "tests": [],
@@ -142,7 +142,7 @@
           "kind": "source",
           "reference": "docs/wiki/systems/xml-template-system.md",
           "summary": "Two-partition/delegate mechanics exist; exact public-key access restrictions are unknown.",
-          "source_hash": "db0ef2c030f005be4b1c226ea47fd9ebc4ac4024a025023252cad09081ee06bd"
+          "source_hash": "b110d3c920d1aa10ac6bef8081eed045e6170007b26e18a1cf32167a57571ed4"
         }
       ],
       "tests": [],
@@ -164,7 +164,7 @@
           "kind": "source",
           "reference": "docs/wiki/systems/xml-template-system.md",
           "summary": "Two-partition/delegate mechanics exist; exact private/forbidden child traversal visibility is unknown.",
-          "source_hash": "db0ef2c030f005be4b1c226ea47fd9ebc4ac4024a025023252cad09081ee06bd"
+          "source_hash": "b110d3c920d1aa10ac6bef8081eed045e6170007b26e18a1cf32167a57571ed4"
         }
       ],
       "tests": [],
@@ -186,7 +186,7 @@
           "kind": "source",
           "reference": "docs/wiki/systems/xml-template-system.md",
           "summary": "Two-partition/delegate mechanics exist; exact private/forbidden hook and taint boundaries are unknown.",
-          "source_hash": "db0ef2c030f005be4b1c226ea47fd9ebc4ac4024a025023252cad09081ee06bd"
+          "source_hash": "b110d3c920d1aa10ac6bef8081eed045e6170007b26e18a1cf32167a57571ed4"
         }
       ],
       "tests": [],
@@ -208,7 +208,7 @@
           "kind": "source",
           "reference": "docs/wiki/systems/xml-template-system.md",
           "summary": "Two-partition/delegate mechanics exist; exact private script storage and access behavior are unknown.",
-          "source_hash": "db0ef2c030f005be4b1c226ea47fd9ebc4ac4024a025023252cad09081ee06bd"
+          "source_hash": "b110d3c920d1aa10ac6bef8081eed045e6170007b26e18a1cf32167a57571ed4"
         }
       ],
       "tests": [],
@@ -230,7 +230,7 @@
           "kind": "source",
           "reference": "docs/wiki/systems/xml-template-system.md",
           "summary": "Two-partition/delegate mechanics exist; exact secure delegate receiver and taint enforcement are unknown.",
-          "source_hash": "db0ef2c030f005be4b1c226ea47fd9ebc4ac4024a025023252cad09081ee06bd"
+          "source_hash": "b110d3c920d1aa10ac6bef8081eed045e6170007b26e18a1cf32167a57571ed4"
         }
       ],
       "tests": [],

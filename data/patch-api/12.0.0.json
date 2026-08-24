@@ -84440,8 +84440,8 @@
         {
           "kind": "test",
           "reference": "tests/admin_event_api.rs",
-          "summary": "Focused event test verifies RegisterEventCallback(\"MINIMAP_PING\") feeds the registered frame through FireEvent and its OnEvent handler.",
-          "source_hash": "b55f1b3c908cbb1e3b84bfa0cb9a04ad6b083d3da85bb7520481476cc653a0e3"
+          "summary": "Focused event test verifies RegisterEventCallback(\"MINIMAP_PING\", callback) invokes the callback directly through FireEvent.",
+          "source_hash": "a6350441c6db6dcfee75a53bc7db80debdd21fc939dd3a71e3b6b31c70ca164c"
         }
       ],
       "tests": [
@@ -84451,7 +84451,7 @@
       "commit": "7a7a440402f4b03a89fe341956b6cb5e2051f465",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to registering MINIMAP_PING and receiving it through the focused FireEvent/OnEvent dispatch path. Complete callback-event allowlists, return values, restricted-event behavior, lifecycle, validation, taint/security, and other edge semantics remain unproven."
+      "notes": "Best-effort behavioral evidence is limited to registering MINIMAP_PING with a callback and receiving direct callback invocation through the focused FireEvent dispatch path. Complete callback-event allowlists, return values, restricted-event behavior, lifecycle, validation, taint/security, and other edge semantics remain unproven."
     },
     {
       "id": "added:Frame.RegisterUnitEventCallback",
@@ -84478,7 +84478,7 @@
           "kind": "test",
           "reference": "tests/admin_event_api.rs",
           "summary": "Focused unit-event test verifies successful player-filter registration, callback owner identity, matching-unit dispatch, and suppression for a nonmatching unit.",
-          "source_hash": "b55f1b3c908cbb1e3b84bfa0cb9a04ad6b083d3da85bb7520481476cc653a0e3"
+          "source_hash": "a6350441c6db6dcfee75a53bc7db80debdd21fc939dd3a71e3b6b31c70ca164c"
         }
       ],
       "tests": [
@@ -99444,7 +99444,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface.rs",
           "summary": "Current simulator does not publish string.concat; legacy global strconcat is unrelated and is not an established alias.",
-          "source_hash": "5712d009242342c436117da3e7a5e4cc1c899b9fa58cbc015c67819ce5aad977"
+          "source_hash": "0c4bdcb6c328e8f041d818d66c02610a60c555b6941e4db5aa4ab6fa1a3796b9"
         },
         {
           "kind": "source",
@@ -100257,7 +100257,7 @@
         {
           "kind": "source",
           "reference": "src/c_api/mod.rs",
-          "source_hash": "5e6959335b6506b739c5af29f99ebd5f7d2ee74e92b6ecfee0ed27dd3f910b3f",
+          "source_hash": "22f2b41e8397899d6cfb89fffab53ec49953be4a66e800fd9c454d8ff2b25e87",
           "summary": "C API registration surface; no method publication was found."
         },
         {
@@ -100351,7 +100351,7 @@
         {
           "kind": "source",
           "reference": "src/c_api/mod.rs",
-          "source_hash": "5e6959335b6506b739c5af29f99ebd5f7d2ee74e92b6ecfee0ed27dd3f910b3f",
+          "source_hash": "22f2b41e8397899d6cfb89fffab53ec49953be4a66e800fd9c454d8ff2b25e87",
           "summary": "C API module registry; no C_ItemInteraction module was found."
         },
         {
@@ -101157,7 +101157,7 @@
         {
           "kind": "source",
           "reference": "src/c_api/mod.rs",
-          "source_hash": "5e6959335b6506b739c5af29f99ebd5f7d2ee74e92b6ecfee0ed27dd3f910b3f",
+          "source_hash": "22f2b41e8397899d6cfb89fffab53ec49953be4a66e800fd9c454d8ff2b25e87",
           "summary": "C API registration surface."
         },
         {
@@ -125685,7 +125685,7 @@
           "kind": "runtime",
           "reference": "src/lua_api/globals/missing_surface.rs",
           "summary": "Compatibility PlaySound accepts numeric sound IDs; audio output is not claimed.",
-          "source_hash": "5712d009242342c436117da3e7a5e4cc1c899b9fa58cbc015c67819ce5aad977"
+          "source_hash": "0c4bdcb6c328e8f041d818d66c02610a60c555b6941e4db5aa4ab6fa1a3796b9"
         }
       ],
       "tests": [
