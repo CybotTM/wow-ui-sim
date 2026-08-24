@@ -1,6 +1,32 @@
 use super::*;
 use crate::lua_api::WowLuaEnv;
-use rilua::LuaApi;
+use rilua::{LuaApi, LuaApiMut};
+
+#[test]
+fn direct_state_call_restores_call_frame_after_lua_error() {
+    let mut lua = rilua::Lua::new().expect("lua should initialize");
+    let failing = lua
+        .state_mut()
+        .load("error('direct-state boom')")
+        .expect("failing function should compile");
+
+    let error = call_function_state(lua.state_mut(), Val::Function(failing.gc_ref()), &[])
+        .expect_err("failing function should return its Lua error");
+    assert!(error.to_string().contains("direct-state boom"));
+    assert_eq!(
+        lua.state().ci,
+        0,
+        "failed direct calls must unwind call frames"
+    );
+
+    let succeeding = lua
+        .state_mut()
+        .load("return 42")
+        .expect("succeeding function should compile");
+    let result = call_function_state(lua.state_mut(), Val::Function(succeeding.gc_ref()), &[])
+        .expect("subsequent direct call should not see a stale Lua frame");
+    assert_eq!(result, Val::Num(42.0));
+}
 
 #[test]
 fn protected_lua_pcall_state_caches_wrapper_factory() {
