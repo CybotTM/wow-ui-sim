@@ -1423,6 +1423,7 @@ pub fn render_checklist(manifest: &PatchAuditManifest) -> String {
 mod tests {
     use super::*;
     use std::io::Write;
+    use std::path::PathBuf;
     use wow_ui_sim::loader::load_addon;
 
     fn fixture_manifest(row: &str) -> PatchAuditManifest {
@@ -1849,9 +1850,7 @@ mod tests {
         );
     }
 
-    #[test]
-    fn every_checked_in_patch_manifest_matches_repository_artifacts() {
-        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    fn checked_in_patch_manifest_paths(root: &Path) -> Vec<PathBuf> {
         let directory = root.join("data/patch-api");
         let mut manifests = Vec::new();
         for entry in std::fs::read_dir(&directory).expect("patch manifest directory should read") {
@@ -1865,7 +1864,36 @@ mod tests {
             !manifests.is_empty(),
             "at least one patch manifest is required"
         );
-        for path in manifests {
+        manifests
+    }
+
+    #[test]
+    fn checked_in_patch_manifest_assertions_are_structured() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+        for path in checked_in_patch_manifest_paths(root) {
+            let json = std::fs::read_to_string(&path).expect("manifest should read");
+            let manifest: serde_json::Value = serde_json::from_str(&json)
+                .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
+            let rows = manifest["rows"]
+                .as_array()
+                .unwrap_or_else(|| panic!("{}: rows must be an array", path.display()));
+            for row in rows {
+                let row_id = row["id"].as_str().unwrap_or("<missing row id>");
+                let assertions = row["assertions"].as_array().unwrap_or_else(|| {
+                    panic!("{}: {row_id}: assertions must be an array", path.display())
+                });
+                for assertion in assertions {
+                    serde_json::from_value::<AuditAssertion>(assertion.clone())
+                        .unwrap_or_else(|error| panic!("{}: {row_id}: {error}", path.display()));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn every_checked_in_patch_manifest_matches_repository_artifacts() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+        for path in checked_in_patch_manifest_paths(root) {
             let json = std::fs::read_to_string(&path).expect("manifest should read");
             let manifest = parse_manifest(&json).expect("manifest should parse");
             validate_repository(&manifest, root)
