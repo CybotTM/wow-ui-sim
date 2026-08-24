@@ -710,6 +710,14 @@ impl SimState {
         true
     }
 
+    pub(crate) fn is_addon_loading(&self, addon_name: &str) -> bool {
+        self.loading_addon_stack.iter().any(|loading_idx| {
+            self.addons
+                .get(*loading_idx as usize)
+                .is_some_and(|addon| addon.folder_name == addon_name)
+        })
+    }
+
     pub fn set_mouse_position(&mut self, pos: Option<(f32, f32)>) {
         self.mouse_position = pos;
         let Some((mx, my)) = pos else {

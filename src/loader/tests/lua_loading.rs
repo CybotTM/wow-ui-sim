@@ -283,6 +283,94 @@ Normal.lua
 }
 
 #[test]
+fn nested_runtime_addon_cycle_is_guarded() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_root = std::env::temp_dir().join("wow-sim-nested-runtime-addon-cycle-test");
+    let addon_a_dir = temp_root.join("RuntimeCycleA");
+    let addon_b_dir = temp_root.join("RuntimeCycleB");
+    std::fs::create_dir_all(&addon_a_dir).unwrap();
+    std::fs::create_dir_all(&addon_b_dir).unwrap();
+
+    std::fs::write(
+        addon_a_dir.join("RuntimeCycleA.toc"),
+        r#"
+## Title: RuntimeCycleA
+## LoadOnDemand: 1
+## Dependencies: RuntimeCycleB
+RuntimeCycleA.lua
+"#,
+    )
+    .unwrap();
+    std::fs::write(
+        addon_a_dir.join("RuntimeCycleA.lua"),
+        r#"
+        RuntimeCycleEvents = RuntimeCycleEvents or {}
+        table.insert(RuntimeCycleEvents, "A:start")
+        table.insert(RuntimeCycleEvents, "A:end")
+        "#,
+    )
+    .unwrap();
+    std::fs::write(
+        addon_b_dir.join("RuntimeCycleB.toc"),
+        r#"
+## Title: RuntimeCycleB
+## LoadOnDemand: 1
+RuntimeCycleB.lua
+"#,
+    )
+    .unwrap();
+    std::fs::write(
+        addon_b_dir.join("RuntimeCycleB.lua"),
+        r#"
+        RuntimeCycleEvents = RuntimeCycleEvents or {}
+        table.insert(RuntimeCycleEvents, "B:start")
+        RuntimeCycleAWasLoading, RuntimeCycleAWasLoaded = C_AddOns.IsAddOnLoaded("RuntimeCycleA")
+        local loaded, reason = C_AddOns.LoadAddOn("RuntimeCycleA")
+        table.insert(RuntimeCycleEvents, "B:load-a:" .. tostring(loaded) .. ":" .. tostring(reason))
+        table.insert(RuntimeCycleEvents, "B:end")
+        "#,
+    )
+    .unwrap();
+
+    env.state().borrow_mut().addon_base_paths = vec![temp_root.clone()];
+    let (loaded, reason): (bool, Option<String>) = env
+        .eval(r#"return C_AddOns.LoadAddOn("RuntimeCycleA")"#)
+        .unwrap();
+    assert!(loaded, "outer LoadAddOn should load addon: {reason:?}");
+    assert_eq!(reason, None);
+
+    let (events, addon_a_loaded, addon_b_loaded, a_was_loading, a_was_loaded): (
+        String,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local _, addonALoaded = C_AddOns.IsAddOnLoaded("RuntimeCycleA")
+            local _, addonBLoaded = C_AddOns.IsAddOnLoaded("RuntimeCycleB")
+            return table.concat(RuntimeCycleEvents, ","), addonALoaded, addonBLoaded,
+                   RuntimeCycleAWasLoading, RuntimeCycleAWasLoaded
+            "#,
+        )
+        .unwrap();
+    assert_eq!(events, "B:start,B:load-a:true:nil,B:end,A:start,A:end");
+    assert!(addon_a_loaded, "RuntimeCycleA should be loaded");
+    assert!(addon_b_loaded, "RuntimeCycleB should be loaded");
+    assert!(
+        a_was_loading,
+        "RuntimeCycleA should report loading inside B"
+    );
+    assert!(
+        !a_was_loaded,
+        "RuntimeCycleA should not report loaded before its outer load commits"
+    );
+
+    std::fs::remove_dir_all(&temp_root).ok();
+}
+
+#[test]
 fn blizzard_lua_files_replay_into_secure_environment() {
     let env = WowLuaEnv::new().unwrap();
     let temp_root = std::env::temp_dir().join("wow-sim-secure-replay-test");

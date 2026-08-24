@@ -32,8 +32,10 @@ pub struct AddonContext<'a> {
     pub taint: bool,
 }
 
-struct LoadingAddonGuard {
+pub(crate) struct LoadingAddonGuard {
     state: Rc<RefCell<SimState>>,
+    addon_idx: u16,
+    entered: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -55,10 +57,33 @@ impl EnvironmentPass {
     }
 }
 
+impl LoadingAddonGuard {
+    pub(crate) fn commit_loaded(&self) {
+        if !self.entered {
+            return;
+        }
+
+        let mut state = self.state.borrow_mut();
+        if let Some(addon) = state.addons.get_mut(self.addon_idx as usize) {
+            addon.loaded = true;
+            addon.bootstrap_loaded = true;
+        }
+    }
+}
+
 impl Drop for LoadingAddonGuard {
     fn drop(&mut self) {
+        if !self.entered {
+            return;
+        }
+
         let mut state = self.state.borrow_mut();
-        state.loading_addon_stack.pop();
+        let position = state
+            .loading_addon_stack
+            .iter()
+            .rposition(|addon_idx| *addon_idx == self.addon_idx)
+            .expect("active addon load must remain in the loading stack");
+        state.loading_addon_stack.remove(position);
         state.loading_addon_index = state.loading_addon_stack.last().copied();
     }
 }
@@ -105,7 +130,7 @@ pub fn load_addon_internal(
 
     let saved_vars_mgr =
         maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
-    let _loading_guard = register_loading_addon(env, folder_name, toc);
+    let loading_guard = begin_addon_load(env, folder_name, toc);
     let ctx = build_addon_context(env, toc, folder_name)?;
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
     let addon_name = result.name.clone();
@@ -122,7 +147,7 @@ pub fn load_addon_internal(
     maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
-    mark_addon_loaded(env, folder_name);
+    loading_guard.commit_loaded();
     Ok(result)
 }
 
@@ -250,22 +275,6 @@ fn patch_playerspells_onload_backfill(env: &LoaderEnv<'_>, result: &mut LoadResu
     }
 }
 
-/// Flip the addon's `loaded` flag in `SimState.addons` and clear the
-/// "currently loading" index so that subsequent `IsAddOnLoaded` calls and
-/// nested-load detection see the correct state.
-fn mark_addon_loaded(env: &LoaderEnv<'_>, folder_name: &str) {
-    let mut state = env.state().borrow_mut();
-    if let Some(addon) = state
-        .addons
-        .iter_mut()
-        .find(|addon| addon.folder_name == folder_name)
-    {
-        addon.loaded = true;
-        addon.bootstrap_loaded = true;
-    }
-    state.loading_addon_index = None;
-}
-
 fn build_addon_context<'a>(
     env: &LoaderEnv<'a>,
     toc: &'a TocFile,
@@ -284,34 +293,44 @@ fn build_addon_context<'a>(
     })
 }
 
-fn register_loading_addon(
+pub(crate) fn begin_addon_load(
     env: &LoaderEnv<'_>,
     folder_name: &str,
     toc: &TocFile,
 ) -> LoadingAddonGuard {
-    // Track the current addon on a stack so nested LoadAddOn calls can see
-    // ancestor loaders and short-circuit reentrant cycles.
     let addon_idx = resolve_addon_index(env, folder_name);
     let mut state = env.state().borrow_mut();
-    state.loading_addon_stack.push(addon_idx);
-    state.loading_addon_index = Some(addon_idx);
-    if let Some(addon) = state.addons.get_mut(addon_idx as usize) {
-        addon.title = toc
-            .metadata
-            .get("Title")
-            .cloned()
-            .unwrap_or_else(|| folder_name.to_string());
-        addon.notes = toc.metadata.get("Notes").cloned().unwrap_or_default();
-        addon.enabled = true;
-        addon.load_on_demand = toc.is_load_on_demand();
-        addon.use_secure_env = toc.is_secure_env();
-        addon.metadata = toc.metadata.clone();
-        addon.dependencies = toc.dependencies();
-        addon.default_enabled = toc.default_enabled();
+    let entered = !state.loading_addon_stack.contains(&addon_idx);
+    if entered {
+        update_addon_metadata(&mut state, addon_idx, folder_name, toc);
+        state.loading_addon_stack.push(addon_idx);
+        state.loading_addon_index = Some(addon_idx);
     }
+
     LoadingAddonGuard {
         state: Rc::clone(env.state()),
+        addon_idx,
+        entered,
     }
+}
+
+fn update_addon_metadata(state: &mut SimState, addon_idx: u16, folder_name: &str, toc: &TocFile) {
+    let Some(addon) = state.addons.get_mut(addon_idx as usize) else {
+        return;
+    };
+
+    addon.title = toc
+        .metadata
+        .get("Title")
+        .cloned()
+        .unwrap_or_else(|| folder_name.to_string());
+    addon.notes = toc.metadata.get("Notes").cloned().unwrap_or_default();
+    addon.enabled = true;
+    addon.load_on_demand = toc.is_load_on_demand();
+    addon.use_secure_env = toc.is_secure_env();
+    addon.metadata = toc.metadata.clone();
+    addon.dependencies = toc.dependencies();
+    addon.default_enabled = toc.default_enabled();
 }
 
 fn is_blizzard_addon(toc: &TocFile) -> bool {

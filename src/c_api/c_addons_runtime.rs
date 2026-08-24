@@ -12,33 +12,25 @@ pub(super) fn load_runtime_addon(state: &mut LuaState, addon_name: &str) -> Resu
     );
     crate::lua_api::workarounds::apply_for_runtime_addon_preload(&loader_env, addon_name);
 
-    let mut loading = HashSet::new();
-    load_runtime_addon_recursive(state, &loader_env, addon_name, &mut loading)
+    load_runtime_addon_recursive(state, &loader_env, addon_name)
 }
 
 fn load_runtime_addon_recursive(
     state: &mut LuaState,
     loader_env: &LoaderEnv<'_>,
     addon_name: &str,
-    loading: &mut HashSet<String>,
 ) -> Result<(), LoadError> {
-    if is_addon_loaded_by_name(state, addon_name) {
-        return Ok(());
-    }
-    if !loading.insert(addon_name.to_string()) {
+    if is_addon_loaded_by_name(state, addon_name) || is_addon_loading_by_name(state, addon_name) {
         return Ok(());
     }
 
-    let result = load_runtime_addon_with_dependencies(state, loader_env, addon_name, loading);
-    loading.remove(addon_name);
-    result
+    load_runtime_addon_with_dependencies(state, loader_env, addon_name)
 }
 
 fn load_runtime_addon_with_dependencies(
     state: &mut LuaState,
     loader_env: &LoaderEnv<'_>,
     addon_name: &str,
-    loading: &mut HashSet<String>,
 ) -> Result<(), LoadError> {
     let origin = crate::loader::runtime_load_addon_origin(
         borrow_state(state)
@@ -50,11 +42,12 @@ fn load_runtime_addon_with_dependencies(
         .ok_or_else(|| missing_runtime_addon_error(addon_name))?;
     crate::loader::trace_load_addon(origin, format!("toc {}", toc_path.display()));
     let toc = crate::toc::TocFile::from_file(&toc_path).map_err(LoadError::Toc)?;
+    let loading_guard = crate::loader::begin_addon_load(loader_env, addon_name, &toc);
     apply_mists_runtime_preload(loader_env, &toc, &toc_path, origin)?;
 
     for dependency in runtime_foundation_dependencies(state, addon_name) {
         crate::loader::trace_load_addon(origin, format!("{addon_name} -> foundation {dependency}"));
-        load_runtime_addon_recursive(state, loader_env, dependency, loading)?;
+        load_runtime_addon_recursive(state, loader_env, dependency)?;
     }
 
     for dependency in runtime_addon_dependencies(state, &toc) {
@@ -62,7 +55,7 @@ fn load_runtime_addon_with_dependencies(
         if super::addon_is_disabled(state, &dependency) {
             return Err(disabled_dep_error(&dependency));
         }
-        load_runtime_addon_recursive(state, loader_env, &dependency, loading)?;
+        load_runtime_addon_recursive(state, loader_env, &dependency)?;
     }
 
     crate::loader::trace_load_addon(origin, format!("files {addon_name}"));
@@ -72,7 +65,7 @@ fn load_runtime_addon_with_dependencies(
     }
     crate::loader::trace_load_addon(origin, format!("loaded {addon_name}"));
     crate::lua_api::workarounds::apply_for_runtime_addon_load(loader_env, addon_name);
-    mark_addon_loaded(loader_env, addon_name);
+    loading_guard.commit_loaded();
     fire_addon_loaded(state, loader_env, addon_name);
     loader_env.state().borrow_mut().invalidate_strata_buckets();
     crate::loader::trace_load_addon(origin, format!("event {addon_name}"));
@@ -188,17 +181,9 @@ fn is_addon_loaded_by_name(state: &LuaState, addon_name: &str) -> bool {
         .unwrap_or(false)
 }
 
-pub(super) fn is_addon_loading_by_name(state: &LuaState, addon_name: &str) -> bool {
+fn is_addon_loading_by_name(state: &LuaState, addon_name: &str) -> bool {
     borrow_state(state)
-        .ok()
-        .map(|sim| {
-            sim.loading_addon_stack.iter().any(|loading_idx| {
-                sim.addons
-                    .get(*loading_idx as usize)
-                    .map(|addon| addon.folder_name == addon_name)
-                    .unwrap_or(false)
-            })
-        })
+        .map(|sim| sim.is_addon_loading(addon_name))
         .unwrap_or(false)
 }
 
@@ -218,12 +203,4 @@ fn fire_addon_loaded(state: &mut LuaState, loader_env: &LoaderEnv<'_>, addon_nam
     let addon_name_val = create_string(state, addon_name);
     let _ = loader_env.fire_event_with_args("ADDON_LOADED", &[addon_name_val]);
     state.top = saved_top;
-}
-
-fn mark_addon_loaded(loader_env: &LoaderEnv, addon_name: &str) {
-    let mut sim = loader_env.state().borrow_mut();
-    if let Some(addon) = sim.addons.iter_mut().find(|a| a.folder_name == addon_name) {
-        addon.loaded = true;
-        addon.enabled = true;
-    }
 }
