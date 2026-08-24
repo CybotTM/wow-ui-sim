@@ -7,9 +7,9 @@ mod event_helpers;
 pub mod panel_fixtures;
 
 use std::ops::Deref;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, OnceLock};
-use wow_ui_sim::loader::load_addon;
+use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 /// Per-test timeout. Exits the process if the closure doesn't complete within `secs`.
@@ -121,6 +121,22 @@ fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
         "CARGO_MANIFEST_DIR"
     )))
+}
+
+pub fn load_required_blizzard_addon(env: &WowLuaEnv, ui: &Path, addon_name: &str) {
+    let addon_dir = ui.join(addon_name);
+    let toc_path = find_toc_file(&addon_dir).unwrap_or_else(|| {
+        panic!(
+            "required Blizzard addon `{addon_name}` has no compatible TOC under {}",
+            addon_dir.display()
+        )
+    });
+    load_addon(&env.loader_env(), &toc_path).unwrap_or_else(|error| {
+        panic!(
+            "failed to load required Blizzard addon `{addon_name}` from {}: {error}",
+            toc_path.display()
+        )
+    });
 }
 
 /// Helper to load Blizzard_SharedXML templates for tests that need them.
