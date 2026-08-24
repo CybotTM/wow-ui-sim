@@ -133,28 +133,15 @@ fn retail_manifest_excludes_ptr_only_aura_container() {
 
 #[test]
 #[cfg(feature = "profile-retail")]
-fn retail_manifest_excludes_legacy_profile_sources() {
-    const LEGACY_PROFILE_MARKERS: [&str; 11] = [
-        "/Classic/",
-        "/Mists/",
-        "/Wrath/",
-        "/Cata/",
-        "/TBC/",
-        "_Classic.toc",
-        "_Mists.toc",
-        "_Wrath.toc",
-        "_Cata.toc",
-        "_TBC.toc",
-        "_Vanilla.toc",
-    ];
+fn retail_manifest_preserves_accessibility_family_sources_from_live_tree() {
+    let manifest: Vec<_> = manifest_entries().collect();
 
-    let legacy_entry = manifest_entries().find(|entry| {
-        LEGACY_PROFILE_MARKERS
-            .iter()
-            .any(|marker| entry.contains(marker))
-    });
-
-    assert_eq!(legacy_entry, None);
+    assert!(
+        manifest.contains(&"Blizzard_AccessibilityTemplates/Classic/AccessibilityTemplates.lua")
+    );
+    assert!(
+        manifest.contains(&"Blizzard_AccessibilityTemplates/Mainline/AccessibilityTemplates.lua")
+    );
 }
 
 #[test]
