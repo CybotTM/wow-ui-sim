@@ -1,3 +1,7 @@
+## [2026-08-24] fix | Model Catalog Shop virtual-currency product query
+
+Commit `f0396bb82` adds the modeled `C_CatalogShop.GetVCProductInfos()` surface. Each call returns a fresh empty table when no virtual-currency products are seeded; populated Catalog Shop data and broader purchase/catalog semantics remain unmodeled. Updated the Lua API architecture references.
+
 ## [2026-08-24] fix | Replay selected Blizzard libraries into secure environment
 
 Commit `7dfc33c3d` expands the evidence-backed secure replay allowlist with `Blizzard_CombatLogBase` and `Blizzard_CatalogShopSharedUtil`. Their `CombatLogUtil` and `CatalogShopUtil` globals are now re-executed into `__secureenv`; the loader does not mirror `_G` generically. Focused tests verify both public and secure bindings. Updated `[[addon-loading]]` and `[[taint-system]]`.

@@ -59,7 +59,7 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 ## C_* Namespaces
 
-C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
+C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
 
 ### `C_PlayerChoice` (PTR 12.1)
 

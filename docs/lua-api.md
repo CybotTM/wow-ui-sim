@@ -284,6 +284,7 @@ anim:SetFromAlpha() / SetToAlpha() / SetDuration()
 | C_Item | `c_item_api.rs` | GetItemInfo, GetItemCooldown (stubs) |
 | C_System | `c_system_api.rs` | GetLocale -> "enUS" |
 | C_EditMode | `c_editmode_api.rs` | GetLayouts |
+| C_CatalogShop | `c_catalog_shop.rs` | GetVCProductInfos -> fresh empty table |
 | C_Quest | `c_quest_api.rs` | IsQuestFlaggedCompleted -> false |
 | C_AchievementInfo | `c_stubs_api.rs` | GetRewardItemID, GetAchievementInfo (nil) |
 | C_ClassTalents | `c_stubs_api.rs` | GetActiveConfigID (nil) |
