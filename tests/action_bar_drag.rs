@@ -244,11 +244,13 @@ fn action_button_drag_round_trip_keeps_spell_visible() {
             .unwrap();
 
         let before_drag: bool = env
-            .eval("return type(ActionButton1.icon:GetTexture()) == 'string'")
+            .eval(
+                "return ActionButton1.icon:IsShown() and ActionButton1.icon:GetTexture() == 135963",
+            )
             .unwrap();
         assert!(
             before_drag,
-            "action button should show its icon before drag"
+            "action button should show spell texture 135963 before drag"
         );
         let has_receive_drag: bool = env
             .eval("return ActionButton1:GetScript('OnReceiveDrag') ~= nil")
@@ -264,11 +266,13 @@ fn action_button_drag_round_trip_keeps_spell_visible() {
             .unwrap();
 
         let after_drag: bool = env
-            .eval("return type(ActionButton1.icon:GetTexture()) == 'string' and HasAction(1)")
+            .eval(
+                "return ActionButton1.icon:IsShown() and ActionButton1.icon:GetTexture() == 135963 and HasAction(1)",
+            )
             .unwrap();
         assert!(
             after_drag,
-            "dragging off and back onto the same button should keep the icon"
+            "dragging off and back onto the same button should keep spell texture 135963 and its action"
         );
     });
 }
