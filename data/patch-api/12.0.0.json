@@ -94379,7 +94379,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Retail 12.0.0 records this docs-extra enum name with no declared members or metadata. No runtime behavior, values, or semantics are claimed."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "added:docs.extra_enums.CharSectionCondition",
@@ -94415,7 +94415,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Retail 12.0.0 records this docs-extra enum name with no declared members or metadata. No runtime behavior, values, or semantics are claimed."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "added:docs.extra_events.COMBAT_LOG_APPLY_FILTER_SETTINGS",
@@ -94498,7 +94498,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Retail 12.0.0 records this docs-extra event name with null value and empty metadata. No runtime publication, payload, firing, restriction, or consumer semantics are claimed."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "added:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES",
@@ -94575,7 +94575,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Retail 12.0.0 records this transient docs-extra script-object entry with null value and empty metadata. The separate GameTooltip runtime is not treated as proof of this entry."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "added:dropsecretaccess",
@@ -95343,7 +95343,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Provenance-only: transient intermediate-snapshot CVar record; absent at both patch endpoints and not published by the current runtime. No runtime behavior or equivalence to floatingCombatTextAuraFade_v2 is claimed.",
+      "notes": "Provenance-only: no runtime behavior claimed.",
       "provenance_only": true
     },
     {
@@ -101160,7 +101160,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Provenance-only: retail 12.0.0 renames the boolean output field hasParagon to factionIsParagon. Input, boolean type, nullability, arity, restrictions, and observable contract are unchanged; no behavior or faction-state semantics are claimed.",
+      "notes": "Provenance-only: no runtime behavior claimed.",
       "provenance_only": true
     },
     {
@@ -110842,7 +110842,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Provenance-only: 12.0.0 renames parameters `unitName1/unitName2` to `unit1/unit2`; both remain unit inputs and the boolean result is unchanged. No behavioral claim or unit-identity gap requirement is made."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "changed:UnitName",
@@ -112706,7 +112706,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Provenance-only: the 12.0.0 metadata removes inaccurate scrub information. No behavior, argument, return, secret-value, taint, producer, consumer, mutation, persistence, or lifecycle semantics are claimed."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "changed:spellActivationOverlayOpacity",
@@ -127607,7 +127607,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Endpoint provenance only: the docs-extra entry is absent at both patch endpoints; no callback registration, payload, producer, delivery, ordering, UI, mutation, persistence, or lifecycle claim."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "removed:docs.extra_events.COMBAT_LOG_REFILTER_ENTRIES",
@@ -127643,7 +127643,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Endpoint provenance only: the docs-extra entry is absent at both patch endpoints; no callback registration, payload, producer, delivery, ordering, UI, mutation, persistence, or lifecycle claim."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "removed:docs.extra_script_objects.FrameAPITooltip",
@@ -127673,7 +127673,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Endpoint provenance only: the docs-extra entry is absent at both patch endpoints; no runtime script-object, GameTooltip, replacement, registration, lifecycle, or consumer claim."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "removed:enablePetBattleFloatingCombatText",
@@ -127813,7 +127813,7 @@
       "commit": null,
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Transient intermediate CVar snapshot only: old name floatingCombatTextAuraFade='0' is absent at both endpoints; provenance-only, with no endpoint publication, behavior, or replacement-equivalence claim."
+      "notes": "Provenance-only: no runtime behavior claimed."
     },
     {
       "id": "removed:floatingCombatTextAuras",

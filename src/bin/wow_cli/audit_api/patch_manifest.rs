@@ -1896,6 +1896,26 @@ mod tests {
     }
 
     #[test]
+    fn checked_in_provenance_only_notes_are_canonical() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+        for path in checked_in_patch_manifest_paths(root) {
+            let json = std::fs::read_to_string(&path).expect("manifest should read");
+            let manifest = parse_manifest(&json).expect("manifest should parse");
+            for row in manifest.rows {
+                if row.provenance_only {
+                    assert_eq!(
+                        row.notes.as_deref(),
+                        Some(PROVENANCE_ONLY_NOTE),
+                        "{} row {} provenance-only note must be canonical",
+                        path.display(),
+                        row.id
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
     fn every_checked_in_patch_manifest_matches_repository_artifacts() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR"));
         for path in checked_in_patch_manifest_paths(root) {
