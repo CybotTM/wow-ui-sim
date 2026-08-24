@@ -96,6 +96,24 @@ fn blizzard_combat_log_processor_loads_without_errors() {
 }
 
 #[test]
+fn blizzard_combat_log_base_replays_util_into_secure_environment() {
+    let env = load_full_game_ui();
+
+    let util_replayed: bool = env
+        .eval(
+            "local secureUtil = rawget(__secureenv, 'CombatLogUtil'); \
+             return type(_G.CombatLogUtil) == 'table' \
+                and type(secureUtil) == 'table' \
+                and type(secureUtil.GenerateDamageResultString) == 'function'",
+        )
+        .expect("CombatLogUtil secure replay query should succeed");
+    assert!(
+        util_replayed,
+        "Blizzard_CombatLogBase should publish CombatLogUtil in both _G and __secureenv"
+    );
+}
+
+#[test]
 fn blizzard_combat_log_processor_table_and_methods_are_defined() {
     let env = load_full_game_ui();
 

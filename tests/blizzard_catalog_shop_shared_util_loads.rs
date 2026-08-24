@@ -59,6 +59,25 @@ fn blizzard_catalog_shop_shared_util_constants_table_is_populated() {
 }
 
 #[test]
+fn blizzard_catalog_shop_shared_util_replays_helpers_into_secure_environment() {
+    let env = load_full_game_ui();
+
+    let helpers_replayed: bool = env
+        .eval(
+            "local secureUtil = rawget(__secureenv, 'CatalogShopUtil'); \
+             return type(_G.CatalogShopUtil) == 'table' \
+                and type(secureUtil) == 'table' \
+                and type(secureUtil.GetPlayerActorLabelTag) == 'function' \
+                and type(secureUtil.CreateDefaultProductDisplayData) == 'function'",
+        )
+        .expect("CatalogShopUtil secure replay query should succeed");
+    assert!(
+        helpers_replayed,
+        "Blizzard_CatalogShopSharedUtil should publish CatalogShopUtil helpers in both _G and __secureenv"
+    );
+}
+
+#[test]
 fn blizzard_catalog_shop_shared_util_exposes_helper_functions() {
     let env = load_full_game_ui();
 
