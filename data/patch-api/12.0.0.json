@@ -88964,8 +88964,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/uiobjects.yaml",
-          "source_hash": "4e175343a65ebe184063e28a572043c2f4eeef0a26afbf8ef6703bef5fe2f391",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Retail declares the LayeredRegion method through docs metadata; checked-in Texture color support does not establish boolean branch selection, resulting vertex state, propagation, rendering, or edge semantics."
         },
         {
@@ -89011,8 +89011,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
-          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Retail declares a global callback API, while the simulator fallback is inert and returns nil. Frame:RegisterEventCallback is separate and does not prove the free global registry or invocation semantics."
         },
         {
@@ -89064,8 +89064,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
-          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Retail declares a global unit-filtered callback API, while the simulator fallback is inert and does not register, filter, or invoke callbacks. Frame:RegisterUnitEventCallback is separate."
         },
         {
@@ -89558,8 +89558,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
-          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Retail adds a boolean no-return cloak setter. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
         },
         {
@@ -89599,8 +89599,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
-          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Retail adds a boolean no-return helm setter. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
         },
         {
@@ -89640,8 +89640,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
-          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Retail adds a zero-argument boolean cloak query. The simulator publishes no global or modeled cloak state; the separate removed docs-extra row is not evidence for this added API."
         },
         {
@@ -89681,8 +89681,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
-          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Retail adds a zero-argument boolean helm query. The simulator publishes no global or modeled helm state; the separate removed docs-extra row is not evidence for this added API."
         },
         {
@@ -89722,8 +89722,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/uiobjects.yaml",
-          "source_hash": "4e175343a65ebe184063e28a572043c2f4eeef0a26afbf8ef6703bef5fe2f391",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "The simulator publishes this method but currently maps it to local secret-value state. Retail anchoring relationships, propagation, taint, and edge semantics remain unproven."
         },
         {
@@ -89769,8 +89769,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
-          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Retail adds a one-string no-return mouse-click injector. The simulator has external mouse-click paths but no public Lua global or proven button-specific script dispatch."
         },
         {
@@ -89822,8 +89822,8 @@
         },
         {
           "kind": "source",
-          "reference": "~/Repos/wowless/data/products/wow/apis.yaml",
-          "source_hash": "607136a825dfbbb1f6c0e63acbc1876d8cf3ffe421b081554f07ddea54b06cc0",
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
           "summary": "Retail adds a one-string no-return mouse-down injector. The simulator has internal physical mouse handling but no public Lua global or proven simulated button/script dispatch."
         },
         {
@@ -100298,9 +100298,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -100345,9 +100345,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -100392,9 +100392,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -100439,9 +100439,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -100486,9 +100486,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -100533,9 +100533,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -100574,9 +100574,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -100615,9 +100615,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -101103,9 +101103,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -101150,9 +101150,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -101210,9 +101210,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -101957,9 +101957,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "9e68c96fb0d22ad2f34177feefcae9cefd711cbd6e504021c4b09a0590ae9453",
-          "summary": "Pre-update manifest SHA-256 captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -103625,9 +103625,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "14f6b3801be540aae48ec7d9384b3d1b66b1005fd6cef3e1f8839c9f63b8adfd",
-          "summary": "Manifest hash captured before this two-row docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [
@@ -103686,9 +103686,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "14f6b3801be540aae48ec7d9384b3d1b66b1005fd6cef3e1f8839c9f63b8adfd",
-          "summary": "Manifest hash captured before this two-row docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [
@@ -109845,9 +109845,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -109978,9 +109978,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110031,9 +110031,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110084,9 +110084,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110137,9 +110137,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110190,9 +110190,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110243,9 +110243,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110296,9 +110296,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110349,9 +110349,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110402,9 +110402,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110455,9 +110455,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110508,9 +110508,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -110561,9 +110561,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         },
         {
           "kind": "source",
@@ -110626,9 +110626,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         },
         {
           "kind": "source",
@@ -110685,9 +110685,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "8ace0ed7cfd3fab77758cd65e92a8347d73177c9987593033ddf9b496d034923",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         },
         {
           "kind": "source",
@@ -110990,9 +110990,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "092635dd9a5d01c4917a2a500d2d758b18e99611c43d0b5fce4960c57a8e25e8",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -111043,9 +111043,9 @@
         },
         {
           "kind": "source",
-          "reference": "data/patch-api/12.0.0.json",
-          "source_hash": "092635dd9a5d01c4917a2a500d2d758b18e99611c43d0b5fce4960c57a8e25e8",
-          "summary": "Manifest hash captured before this docs-only classification update."
+          "reference": "data/patch-api/sources/12.0.0-register.json",
+          "source_hash": "6f26d194d0c3f721b3a071217cf69714f1278950512369272298735bdf44c863",
+          "summary": "Checked-in patch source records the changed occurrence and its before/after metadata."
         }
       ],
       "tests": [],
@@ -116428,30 +116428,6 @@
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
           "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
           "summary": "The simulator intentionally retains CombatLogAdvanceEntry as a temporary compatibility workaround: it mutates the shared cursor by a numeric step clamped at zero and unconditionally returns true. This is fixture-only behavior, not an authoritative legacy contract."
-        },
-        {
-          "kind": "source",
-          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_DeprecatedCombatLog/Deprecated_CombatLog.lua",
-          "source_hash": "d13d4b67c78a4d907086be0840c3884e1e737ba14dcab3c2eee394bd16fe22eb",
-          "summary": "Pinned retail Blizzard_DeprecatedCombatLog publishes the other deprecated combat-log wrappers but does not publish CombatLogAdvanceEntry."
-        },
-        {
-          "kind": "source",
-          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/ptr/AddOns/Blizzard_DeprecatedCombatLog/Deprecated_CombatLog.lua",
-          "source_hash": "d13d4b67c78a4d907086be0840c3884e1e737ba14dcab3c2eee394bd16fe22eb",
-          "summary": "Pinned PTR Blizzard_DeprecatedCombatLog publishes the other deprecated combat-log wrappers but does not publish CombatLogAdvanceEntry."
-        },
-        {
-          "kind": "source",
-          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua",
-          "source_hash": "23d7a4696bd1956fa77491723033787a79df34cf871ec824fa6187ca2e49728d",
-          "summary": "Pinned Wrath Blizzard_CombatLog caller uses CombatLogAdvanceEntry while refiltering the legacy combat log."
-        },
-        {
-          "kind": "source",
-          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/mists/AddOns/Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua",
-          "source_hash": "8522216fcba7f91b8cae4673b33fc646c2715fc9de3f0e884efc79c817d8b7f5",
-          "summary": "Pinned Mists Blizzard_CombatLog compatibility code uses CombatLogAdvanceEntry while refiltering the legacy combat log."
         }
       ],
       "tests": [],
@@ -116709,30 +116685,6 @@
           "reference": "src/lua_api/workarounds/temporary/combat_log_state.rs",
           "source_hash": "a07922ce43a3d8bb4621bda63822d26e3518bd1fea537fb1cd4ec49d6c8279b9",
           "summary": "The simulator intentionally retains CombatLogSetCurrentEntry as a temporary compatibility workaround: it stores a numeric cursor clamped at zero and returns no value. This is fixture-only behavior, not an authoritative legacy contract."
-        },
-        {
-          "kind": "source",
-          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_DeprecatedCombatLog/Deprecated_CombatLog.lua",
-          "source_hash": "d13d4b67c78a4d907086be0840c3884e1e737ba14dcab3c2eee394bd16fe22eb",
-          "summary": "Pinned retail Blizzard_DeprecatedCombatLog publishes the other deprecated combat-log wrappers but does not publish CombatLogSetCurrentEntry."
-        },
-        {
-          "kind": "source",
-          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/ptr/AddOns/Blizzard_DeprecatedCombatLog/Deprecated_CombatLog.lua",
-          "source_hash": "d13d4b67c78a4d907086be0840c3884e1e737ba14dcab3c2eee394bd16fe22eb",
-          "summary": "Pinned PTR Blizzard_DeprecatedCombatLog publishes the other deprecated combat-log wrappers but does not publish CombatLogSetCurrentEntry."
-        },
-        {
-          "kind": "source",
-          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua",
-          "source_hash": "23d7a4696bd1956fa77491723033787a79df34cf871ec824fa6187ca2e49728d",
-          "summary": "Pinned Wrath Blizzard_CombatLog caller uses CombatLogSetCurrentEntry when resetting the legacy combat-log cursor."
-        },
-        {
-          "kind": "source",
-          "reference": "/home/osso/.cache/wow-ui-sim/blizzard-ui/mists/AddOns/Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua",
-          "source_hash": "8522216fcba7f91b8cae4673b33fc646c2715fc9de3f0e884efc79c817d8b7f5",
-          "summary": "Pinned Mists Blizzard_CombatLog compatibility code uses CombatLogSetCurrentEntry when resetting the legacy combat-log cursor."
         }
       ],
       "tests": [],
@@ -132217,18 +132169,6 @@
         },
         {
           "kind": "source",
-          "reference": "/home/osso/Repos/rilua/src/stdlib/mod.rs",
-          "source_hash": "7e682dac189b9b692411ad0f98dd29908f06420a1b395a73201ec7ad97b737c8",
-          "summary": "rilua publishes math.huge as the Lua 5.1 positive-infinity constant."
-        },
-        {
-          "kind": "source",
-          "reference": "/home/osso/Repos/rilua/tests/integration.rs",
-          "source_hash": "63947710a7b4db2fbd75b557ed540240028329cc829e059252523b7d46652c53",
-          "summary": "rilua integration tests cover math.huge and comparisons."
-        },
-        {
-          "kind": "source",
           "reference": "docs/wow-client-diff/WowDiscovery.lua",
           "source_hash": "4cd7ba572f01c0abf7308fe218230fe004983b0b49d4a752cdfedcf672e4a5e6",
           "summary": "Independent discovery provides patch provenance only."
@@ -132270,9 +132210,9 @@
         },
         {
           "kind": "source",
-          "reference": "/home/osso/Repos/rilua/src/stdlib/mod.rs",
-          "source_hash": "7e682dac189b9b692411ad0f98dd29908f06420a1b395a73201ec7ad97b737c8",
-          "summary": "rilua publishes math.pi as the Lua 5.1 numeric constant."
+          "reference": "Cargo.lock",
+          "source_hash": "4f34ad3727be273c8c24d28c52abddbd88f7335d1a2036d2a633e07b35e30039",
+          "summary": "The simulator locks rilua commit e9125785bc12e681eb467ad68b4724170e45e9d2 as its Lua runtime dependency."
         },
         {
           "kind": "source",

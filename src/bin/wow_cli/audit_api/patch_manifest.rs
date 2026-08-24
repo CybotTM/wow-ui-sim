@@ -1868,6 +1868,45 @@ mod tests {
     }
 
     #[test]
+    fn checked_in_evidence_references_are_repository_relative_and_stable() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+        for path in checked_in_patch_manifest_paths(root) {
+            let manifest_path = path
+                .strip_prefix(root)
+                .expect("checked-in manifest should be inside repository");
+            let json = std::fs::read_to_string(&path).expect("manifest should read");
+            let manifest = parse_manifest(&json).expect("manifest should parse");
+            for row in manifest.rows {
+                for evidence in row.evidence {
+                    let reference = reference_path(&evidence.reference);
+                    let reference_path = Path::new(reference);
+                    assert_ne!(
+                        reference_path,
+                        manifest_path,
+                        "{} row {} references its own manifest",
+                        path.display(),
+                        row.id
+                    );
+                    assert!(
+                        !reference_path.is_absolute(),
+                        "{} row {} has absolute evidence reference {}",
+                        path.display(),
+                        row.id,
+                        evidence.reference
+                    );
+                    assert!(
+                        !reference.starts_with("~/"),
+                        "{} row {} has home-relative evidence reference {}",
+                        path.display(),
+                        row.id,
+                        evidence.reference
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
     fn checked_in_patch_manifests_parse() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR"));
         for path in checked_in_patch_manifest_paths(root) {
