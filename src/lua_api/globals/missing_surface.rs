@@ -246,6 +246,7 @@ fn register_map_and_encounter_surfaces(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
+    c_api::c_catalog_shop::register_c_catalog_shop_surface(state)?;
     mythic_plus::register_mythic_plus_surface(state)?;
     if cfg!(feature = "client-mists") {
         quest_choice::register_quest_choice_surface(state)?;

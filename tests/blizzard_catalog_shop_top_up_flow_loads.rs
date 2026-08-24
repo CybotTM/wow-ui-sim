@@ -42,6 +42,35 @@ fn load_full_game_ui() -> WowLuaEnv {
 }
 
 #[test]
+fn c_catalog_shop_vc_product_infos_are_fresh_empty_arrays() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+
+    let function_type: String = env
+        .eval("return type(C_CatalogShop.GetVCProductInfos)")
+        .expect("GetVCProductInfos type query should succeed");
+    assert_eq!(function_type, "function");
+
+    let (first_type, second_type, first_len, second_len, distinct): (
+        String,
+        String,
+        i32,
+        i32,
+        bool,
+    ) = env
+        .eval(
+            "local first = C_CatalogShop.GetVCProductInfos(); \
+             local second = C_CatalogShop.GetVCProductInfos(); \
+             return type(first), type(second), #first, #second, first ~= second",
+        )
+        .expect("GetVCProductInfos calls should succeed");
+    assert_eq!(first_type, "table");
+    assert_eq!(second_type, "table");
+    assert_eq!(first_len, 0);
+    assert_eq!(second_len, 0);
+    assert!(distinct, "each call should return a fresh table");
+}
+
+#[test]
 fn blizzard_catalog_shop_top_up_flow_loads_without_errors() {
     let env = load_full_game_ui();
 

@@ -17,6 +17,7 @@ pub mod c_azerite_essence;
 pub mod c_azerite_item;
 pub mod c_barber_shop;
 pub mod c_battle_net;
+pub mod c_catalog_shop;
 pub mod c_character_services;
 pub mod c_chat_bubbles;
 pub mod c_cursor;
