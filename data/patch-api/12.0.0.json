@@ -100141,7 +100141,7 @@
           "kind": "source",
           "reference": "src/lua_api/loader_env.rs",
           "summary": "Generic event dispatch forwards supplied arguments but does not prove combat-log producer behavior.",
-          "source_hash": "358c43b8dce01b2fc4f7867c950a6cc190ec01fa5b1220d52c2cddc3fdf52a3e"
+          "source_hash": "92b0638108bed656a730c7e1a204e5c86b85d20734ba767612cfb16b39bba037"
         },
         {
           "kind": "source",
