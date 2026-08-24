@@ -1,6 +1,6 @@
 # Lua Call-Frame Restoration After Errors
 
-Commit `ff01991aa` fixed stale `LuaState` call-frame state after direct Lua errors. Before the fix, failed `call_function_state` calls could leave `ci` pointing at a dead frame; later execution then cascaded into `expected Lua closure in execute`. The slice is fixed and focused-tested, but remaining default-retail startup errors are unresolved.
+Commit `ff01991aa` fixed stale `LuaState` call-frame state after direct Lua errors. Commit `6ac9e32ee` then removed the obsolete exact-string retry that could invoke a failing closure twice. After the retail EditMode epoch correction in `7d6051797`, `cb75dd007`, and explicit alias modeling in `20f141534`, default-retail startup is clean: `target/debug/wow-sim --no-addons --no-saved-vars lua-errors` emits `[]` (0 unique errors, 0 occurrences).
 
 ## Content
 
@@ -31,14 +31,29 @@ The regression test:
 
 The RED state reproduced stale-frame behavior; the GREEN state passed after `ff01991aa`.
 
-### Remaining scope
+The retry-removal tests also prove that a genuine error containing `expected Lua closure in execute` runs once, propagates once, restores the caller state, and does not enter the protected retry path. Protected execution remains separate and tested.
 
-This fixes call-frame restoration after direct Lua errors only. It does **not** claim that default-retail startup is clean. Other startup error families remain under investigation, including EditMode initialization, XML lifecycle dispatch, CooldownViewer state, and independent missing/default state.
+### EditMode epoch root cause
+
+After call-frame recovery, the remaining retail startup cascade localized to two missing enum members at the retail 12.0.7 load boundary:
+
+- `Enum.EditModeEncounterEventsSetting.TooltipAnchor = 8`
+- `Enum.DamageMeterVisibility.InGroup = 3`
+
+The corresponding metadata is `EditModeEncounterEventsSettingMeta = 0/13/14` and `DamageMeterVisibilityMeta = 0/3/4`. The modern table preserves `ShowTooltips = 8` and publishes `TooltipAnchor = 8` as an alias. The historical 12.0.0 override retains only `ShowTooltips = 8`; `TooltipAnchor` and `InGroup` are absent there.
+
+Those missing members aborted `Blizzard_EditMode` initialization. After correcting enum publication, every remaining recorded family—including EditMode, CooldownViewer, chat, MicroMenu, compact-raid, WorldFrame, and ExtraAbility—also disappeared without local fixes. The post-fix baseline therefore identifies them as startup cascades rather than separate fixes.
+
+### Final startup proof
+
+At HEAD `20f141534`, the bounded default-retail command produces `[]` with 0 unique errors and 0 occurrences. Artifact: `/tmp/claude/wow-sim-lua-errors-after-editmode.out`. The result covers the call-frame recovery, direct-call retry removal, retail enum epoch correction, and explicit alias modeling together; it does not claim unrelated GUI or full-LoD behavior beyond this command.
 
 ## Sources
 
-- [src/lua_api/methods.rs](../../src/lua_api/methods.rs) — direct Lua call state setup and restoration
-- [src/lua_api/script_helpers/tests.rs](../../src/lua_api/script_helpers/tests.rs) — focused RED/GREEN regression test
+- [src/lua_api/methods.rs](../../../src/lua_api/methods.rs) — direct Lua call state setup and restoration
+- [src/lua_api/script_helpers/tests.rs](../../../src/lua_api/script_helpers/tests.rs) — focused call-frame and exactly-once dispatch tests
+- [src/lua_api/globals/enum_data/edit_mode.rs](../../../src/lua_api/globals/enum_data/edit_mode.rs) — retail EditMode enum values, aliases, and metadata
+- [src/lua_api/env_init/enums.rs](../../../src/lua_api/env_init/enums.rs) — epoch-specific enum overrides
 - [playerspells-runtime-load](playerspells-runtime-load.md) — related nested addon-load call-frame preservation
 - [rilua-mlua-gap-audit](rilua-mlua-gap-audit.md) — rilua migration gap context
 
@@ -47,3 +62,4 @@ This fixes call-frame restoration after direct Lua errors only. It does **not** 
 - [[playerspells-runtime-load]] — nested addon loading must preserve the active caller frame
 - [[rilua-mlua-gap-audit]] — broader rilua migration gaps
 - [[retail-ptr-full-startup-lua-errors]] — startup error investigations and bounded fixes
+- [[micro-menu-click-offset]] — separate MicroMenu interaction/layout investigation; no local startup fix was needed here
