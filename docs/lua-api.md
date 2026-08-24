@@ -285,6 +285,7 @@ anim:SetFromAlpha() / SetToAlpha() / SetDuration()
 | C_System | `c_system_api.rs` | GetLocale -> "enUS" |
 | C_EditMode | `c_editmode_api.rs` | GetLayouts |
 | C_CatalogShop | `c_catalog_shop.rs` | GetVCProductInfos -> fresh empty table |
+| C_ChromieTime | `c_chromie_time.rs` | Empty expansion-option queries; CloseUI/SelectChromieTimeOption no-ops (retail/PTR) |
 | C_Quest | `c_quest_api.rs` | IsQuestFlaggedCompleted -> false |
 | C_AchievementInfo | `c_stubs_api.rs` | GetRewardItemID, GetAchievementInfo (nil) |
 | C_ClassTalents | `c_stubs_api.rs` | GetActiveConfigID (nil) |

@@ -59,7 +59,7 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 ## C_* Namespaces
 
-C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
+C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_ChromieTime (retail/PTR empty-state queries and no-op actions), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
 
 ### `C_PlayerChoice` (PTR 12.1)
 
@@ -81,6 +81,7 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [spell_description_resolver.rs](../../../src/spell_description_resolver.rs) — shared spell-description token resolver
 - [container_portrait_texture.rs](../../../src/lua_api/workarounds/temporary/container_portrait_texture.rs) — retail texture fileDataID proof
 - [item_button_helper_defaults.rs](../../../src/lua_api/workarounds/temporary/item_button_helper_defaults.rs) — item-button texture fileDataID proof
+- [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - `/home/osso/Repos/simc/SpellDataDump/allspells.txt` — coefficient and variable formulas used for AP/health-scaled spell text
 
 ## See Also

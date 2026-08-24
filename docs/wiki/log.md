@@ -1,3 +1,7 @@
+## [2026-08-24] fix | Model Chromie Time empty state
+
+Commit `3fcfa7d31` adds the retail/PTR `C_ChromieTime` surface. Expansion-option queries return nil or fresh empty tables, while `CloseUI()` and `SelectChromieTimeOption()` are no-ops. Broader Chromie Time state, selection, and UI behavior remain unmodeled. Updated the Lua API architecture references.
+
 ## [2026-08-24] fix | Model Catalog Shop virtual-currency product query
 
 Commit `f0396bb82` adds the modeled `C_CatalogShop.GetVCProductInfos()` surface. Each call returns a fresh empty table when no virtual-currency products are seeded; populated Catalog Shop data and broader purchase/catalog semantics remain unmodeled. Updated the Lua API architecture references.
