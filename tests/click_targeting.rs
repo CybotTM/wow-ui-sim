@@ -328,6 +328,14 @@ fn use_action_instant_spell_succeeds() {
 
 fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
     env.exec("ClearTarget()").expect("ClearTarget");
+    env.exec(
+        r#"
+            function C_ClickBindings.GetBindingType(_button, _modifiers)
+                return Enum.ClickBindingType.Interaction
+            end
+        "#,
+    )
+    .expect("install explicit interaction binding");
     create_secure_unit_button(env);
     assert_secure_unit_button_attributes(env);
     click_secure_unit_button(env);
