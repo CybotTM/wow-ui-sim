@@ -7,7 +7,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn token_ui_dir() -> PathBuf {
@@ -336,46 +337,42 @@ fn is_addon_loaded_after_eager_pass() {
 }
 
 #[test]
-fn inbound_bridge_functions_publish_into_secure_environment() {
+fn inbound_bridge_functions_publish_only_into_global_environment() {
     let env = load_full_game_ui();
 
     for fn_name in INBOUND_BRIDGE_FUNCTIONS {
-        let kind: String = env
-            .eval(&format!("return type(__secureenv.{fn_name})"))
-            .unwrap_or_else(|err| panic!("__secureenv.{fn_name} probe failed: {err}"));
+        let (global_kind, secure_kind): (String, String) = env
+            .eval(&format!(
+                "return type(_G.{fn_name}), type(__secureenv.{fn_name})"
+            ))
+            .unwrap_or_else(|err| panic!("{fn_name} publication probe failed: {err}"));
         assert_eq!(
-            kind, "function",
-            "{fn_name} must publish in `__secureenv` as a function — \
-             Blizzard_WowTokenUIInbound.lua calls `SwapToGlobalEnvironment()` at line 2 \
-             intending to switch fenv back to `_G`, but the simulator's \
-             SwapToGlobalEnvironment temporary debug/environment workaround just returns _G \
-             without actually setfenv'ing — it's a no-op. The lua_file loader wired the \
-             whole addon's fenv to `__secureenv` via mark_secure_state at \
-             src/loader/lua_file.rs:58, so file-scope function declarations end up there. \
-             In real WoW these would land in `_G` (the global insecure-callable surface); \
-             in the simulator they're effectively still secure. Pinning the actual behavior \
-             here so a future fenv-swap fix flips this test rather than going unnoticed"
+            global_kind, "function",
+            "{fn_name} must publish in `_G` after Blizzard_WowTokenUIInbound.lua calls \
+             `SwapToGlobalEnvironment()`"
+        );
+        assert_eq!(
+            secure_kind, "nil",
+            "{fn_name} must not remain in `__secureenv` after the environment swap"
         );
     }
 }
 
 #[test]
-fn outbound_table_publishes_in_secure_environment() {
+fn outbound_table_publishes_only_into_secure_environment() {
     let env = load_full_game_ui();
 
-    let kind: String = env
-        .eval("return type(WowTokenOutbound)")
-        .expect("WowTokenOutbound probe should succeed");
+    let (global_kind, secure_kind): (String, String) = env
+        .eval("return type(_G.WowTokenOutbound), type(__secureenv.WowTokenOutbound)")
+        .expect("WowTokenOutbound publication probe should succeed");
     assert_eq!(
-        kind, "table",
-        "WowTokenOutbound must publish as a table. Blizzard_WowTokenUIOutbound.lua does \
-         `local secureEnv = GetCurrentEnvironment()` to capture the secure env, then \
-         `SwapToGlobalEnvironment()` to switch to global, then assigns \
-         `secureEnv.WowTokenOutbound = WowTokenOutbound` and finally nils out secureEnv as a \
-         defense-in-depth measure (`secureEnv = nil` — line 5 comment: `This file shouldn't \
-         be calling back into secure code`). The functions live in the global env where they \
-         `securecall` insecure-side handlers, but the lookup table lives in the secure env so \
-         secure code can find them"
+        global_kind, "nil",
+        "WowTokenOutbound must not publish as a global table"
+    );
+    assert_eq!(
+        secure_kind, "table",
+        "Blizzard_WowTokenUIOutbound.lua must publish WowTokenOutbound into the captured \
+         secure environment"
     );
 
     for outbound_fn in [
@@ -385,11 +382,15 @@ fn outbound_table_publishes_in_secure_environment() {
         "RecruitAFriendTryCancelAutoClaim",
     ] {
         let fn_kind: String = env
-            .eval(&format!("return type(WowTokenOutbound.{outbound_fn})"))
-            .unwrap_or_else(|err| panic!("WowTokenOutbound.{outbound_fn} probe failed: {err}"));
+            .eval(&format!(
+                "return type(__secureenv.WowTokenOutbound.{outbound_fn})"
+            ))
+            .unwrap_or_else(|err| {
+                panic!("__secureenv.WowTokenOutbound.{outbound_fn} probe failed: {err}")
+            });
         assert_eq!(
             fn_kind, "function",
-            "WowTokenOutbound.{outbound_fn} must be a function — each one wraps a \
+            "__secureenv.WowTokenOutbound.{outbound_fn} must be a function — each one wraps a \
              `securecall(\"...\", ...)` to dispatch into the insecure side. The 4 outbound \
              functions cover token-redeem-failed (calls RedeemFailed in Insecure.lua), \
              auction-house token market price update, and 2 RecruitAFriend reward fanfare \
@@ -399,24 +400,20 @@ fn outbound_table_publishes_in_secure_environment() {
 }
 
 #[test]
-fn insecure_redeem_failed_publishes_into_secure_environment() {
+fn insecure_redeem_failed_publishes_only_into_global_environment() {
     let env = load_full_game_ui();
 
-    let kind: String = env
-        .eval("return type(__secureenv.RedeemFailed)")
-        .expect("__secureenv.RedeemFailed probe should succeed");
+    let (global_kind, secure_kind): (String, String) = env
+        .eval("return type(_G.RedeemFailed), type(__secureenv.RedeemFailed)")
+        .expect("RedeemFailed publication probe should succeed");
     assert_eq!(
-        kind, "function",
-        "RedeemFailed must publish in `__secureenv` as a function. \
-         Blizzard_WowTokenUIInsecure.lua loads as a separate TOC body XML wrapper \
-         (Blizzard_WowTokenUIInsecure.xml) but the addon-level `## UseSecureEnvironment: 1` \
-         covers ALL files unless overridden by a per-file `[LoadIntoEnvironment global]` \
-         annotation (which the TOC does NOT declare for the insecure file). The lua's \
-         `SwapToGlobalEnvironment()` call at line 3 is intended to escape to `_G` but the \
-         simulator's stub no-ops, so RedeemFailed lands in `__secureenv` alongside the \
-         secure code despite the file's comment header `DO NOT PUT ANY SENSITIVE CODE IN \
-         THIS FILE`. Real WoW would put it in `_G` so tainted addon code (and the outbound \
-         layer's `securecall(\"RedeemFailed\", ...)`) can find it"
+        global_kind, "function",
+        "RedeemFailed must publish in `_G` after Blizzard_WowTokenUIInsecure.lua calls \
+         `SwapToGlobalEnvironment()`"
+    );
+    assert_eq!(
+        secure_kind, "nil",
+        "RedeemFailed must not remain in `__secureenv` after the environment swap"
     );
 }
 
