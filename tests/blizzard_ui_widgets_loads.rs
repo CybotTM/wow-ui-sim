@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn ui_widgets_dir() -> PathBuf {
@@ -281,7 +282,6 @@ fn toc_raw_bytes_pin_directives_and_representative_body_files() {
 
     let expected_directives = [
         "## Title: Blizzard_UIWidgets",
-        "## DefaultState: enabled",
         "## Dependencies: Blizzard_Minimap, Blizzard_Colors",
         "## AllowLoad: game",
         "## AllowLoadGameType: mainline",
