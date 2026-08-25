@@ -21,6 +21,21 @@ fn collections_journal_opened_to_heirlooms_closes_on_escape() {
         r#"
         COLLECTIONS_JOURNAL_TAB_INDEX_HEIRLOOMS = 4
 
+        local menuManager = {
+            HandleESC = function()
+                return false
+            end,
+        }
+        Menu = {
+            GetManager = function()
+                return menuManager
+            end,
+        }
+
+        ModelPreviewFrame = CreateFrame("Frame", "ModelPreviewFrame", UIParent)
+        ModelPreviewFrame:Hide()
+        DISALLOW_SPELL_FLYOUTS = true
+
         CollectionsJournal = CreateFrame("Frame", "CollectionsJournal", UIParent)
         CollectionsJournal:Hide()
 
