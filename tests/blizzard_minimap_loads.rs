@@ -94,9 +94,10 @@ const GARRISON_FUNCTIONS: &[&str] = &[
     "GarrisonLandingPage_Toggle",
     "GarrisonMinimapBuilding_ShowPulse",
     "GarrisonMinimapMission_ShowPulse",
+    "GarrisonMinimapMission_HidePulse",
     "GarrisonMinimapInvasion_ShowPulse",
     "GarrisonMinimapShipmentCreated_ShowPulse",
-    "GarrisonMinimap_ShowCovenantCallingsNotification",
+    "GarrisonMinimap_CheckShowCovenantCallingsNotification",
     "GarrisonMinimap_OnCallingsUpdated",
     "GarrisonMinimap_SetQueuedHelpTip",
     "GarrisonMinimap_CheckQueuedHelpTip",
@@ -399,11 +400,12 @@ fn blizzard_minimap_publishes_module_level_constants() {
             and MINIMAP_EXPANDER_MAXSIZE == 28 \
             and HUNTER_TRACKING == 1 \
             and TOWNSFOLK_TRACKING == 2 \
-            and GARRISON_ALERT_CONTEXT_BUILDING == 1 \
-            and GARRISON_ALERT_CONTEXT_INVASION == 3 \
+            and type(MinimapPulseLock) == 'table' \
+            and MinimapPulseLock.GarrisonBuilding == 1 \
+            and MinimapPulseLock.GarrisonInvasion == 2 \
+            and MinimapPulseLock.RunesOfPower == 8 \
             and GAMETIME_AM == true \
             and GAMETIME_PM == false \
-            and type(GARRISON_ALERT_CONTEXT_MISSION) == 'table' \
             and type(ExpansionLandingPageMode) == 'table' \
             and ExpansionLandingPageMode.Garrison == 1";
     let ok: bool = env
@@ -412,10 +414,9 @@ fn blizzard_minimap_publishes_module_level_constants() {
     assert!(
         ok,
         "Module-level constants must publish at `_G` with their declared values. \
-         Minimap.lua / GameTime.lua define a fixed set of canonical numbers + booleans \
-         (timing budgets, tracking enum, garrison-alert context codes, am/pm flags) that \
-         every consumer treats as a stable contract — addons read them by name to drive \
-         minimap pulse / fade animations and time-of-day display"
+         Minimap.lua / GameTime.lua define canonical timing budgets, tracking categories, \
+         the eight-entry MinimapPulseLock enum, and am/pm flags that consumers read by \
+         name to drive minimap pulse / fade animations and time-of-day display"
     );
 }
 
@@ -482,9 +483,9 @@ fn blizzard_minimap_publishes_garrison_helper_functions() {
         assert_eq!(
             kind, "function",
             "Garrison helper `{func}` must publish at `_G` as a function. Minimap.lua \
-             carries the legacy garrison-pulse + covenant-callings notification surface as \
-             11 free-standing functions; Blizzard_GarrisonUI calls these by name to drive \
-             building-activation pulses and queued help-tip routing on the minimap button"
+             carries the current 12-function garrison-pulse + covenant-callings surface, \
+             including Mission_HidePulse and CheckShowCovenantCallingsNotification; these \
+             exports drive pulse locks and queued help-tip routing on the minimap button"
         );
     }
 }

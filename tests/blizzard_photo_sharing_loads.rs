@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn photo_sharing_dir() -> PathBuf {
@@ -393,52 +394,35 @@ fn blizzard_photo_sharing_creates_named_frames() {
              PhotoSharingBrowserPopup (resolves to the inner Browser child due to a \
              name COLLISION with the outer top-level Frame; the late-registered \
              child Browser overwrites the earlier top-level Frame in `_G` — verified \
-             separately via the SetFocus probe)"
+             separately by its parent identity)"
         );
     }
 }
 
 #[test]
-fn blizzard_photo_sharing_browser_popup_global_pins_outer_frame_collision_winner() {
+fn blizzard_photo_sharing_browser_popup_global_pins_inner_browser_collision_winner() {
     let env = load_full_game_ui();
 
-    // The XML has BOTH a top-level Frame named "PhotoSharingBrowserPopup"
-    // (Blizzard_PhotoSharingBrowser.xml line 100) AND a nested Browser child
-    // also named "PhotoSharingBrowserPopup" (line 107). The outer's parent
-    // is UIParent; the inner's parent is the outer frame (which is also
-    // named "PhotoSharingBrowserPopup"). Inspecting `:GetParent():GetName()`
-    // tells us which side won the shared `_G` slot.
-    //
-    // CURRENT SIMULATOR BEHAVIOR: the OUTER top-level Frame wins (registered
-    // first; the inner Browser's later `name=` registration is silently
-    // ignored or routed through a different code path that does not
-    // overwrite `_G`). This is the OPPOSITE of WoW retail, where the
-    // last-registered named frame wins — Blizzard_PhotoSharingBrowser.lua:73
-    // invokes `PhotoSharingBrowserPopup:NavigateTo(url)` which only works
-    // when the inner Browser is the global. The bug only surfaces when the
-    // SIMPLE_BROWSER_POPUP event fires (auth-flow trigger), which the load
-    // test never reaches. This assertion pins the current sim behavior so a
-    // future XML-loader fix that flips the resolution direction is caught
-    // intentionally rather than as a silent regression.
+    // The XML declares both a top-level Frame and its nested Browser child with
+    // name="PhotoSharingBrowserPopup". The child is registered last and owns the
+    // shared global, which is required by Blizzard_PhotoSharingBrowser.lua:73-74.
     let parent_name: String = env
-        .eval(
-            "return _G.PhotoSharingBrowserPopup \
-                     and _G.PhotoSharingBrowserPopup:GetParent() \
-                     and _G.PhotoSharingBrowserPopup:GetParent():GetName() or '<none>'",
-        )
-        .expect("parent-name probe succeeds");
+        .eval("return PhotoSharingBrowserPopup:GetParent():GetName()")
+        .expect("popup Browser ownership probe succeeds");
     assert_eq!(
-        parent_name, "UIParent",
-        "_G.PhotoSharingBrowserPopup:GetParent():GetName() currently equals `UIParent` \
-         in the simulator — meaning the OUTER top-level Frame wins the shared global \
-         slot, NOT the inner Browser child. This is the opposite of retail WoW (where \
-         the last `name=` registration wins). The discrepancy is silent during load \
-         because the inner-Browser-only methods (`:NavigateTo`, `:SetFocus` at \
-         Blizzard_PhotoSharingBrowser.lua:73-74) are guarded behind the \
-         SIMPLE_BROWSER_POPUP event that never fires in the test. Pinning the current \
-         resolution direction here so a future XML-loader change to last-wins \
-         semantics surfaces as a deliberate test update rather than a hidden \
-         regression"
+        parent_name, "PhotoSharingBrowserPopup",
+        "The nested Browser must own `_G.PhotoSharingBrowserPopup`; its parent is the \
+         same-named outer Frame rather than UIParent"
+    );
+
+    let navigate_to_kind: String = env
+        .eval("return type(PhotoSharingBrowserPopup.NavigateTo)")
+        .expect("Browser.NavigateTo probe succeeds");
+    assert_eq!(
+        navigate_to_kind, "function",
+        "Browser:NavigateTo must be available because the current SIMPLE_BROWSER_POPUP \
+         handler calls PhotoSharingBrowserPopup:NavigateTo(url) at \
+         Blizzard_PhotoSharingBrowser.lua:73"
     );
 }
 

@@ -612,7 +612,7 @@ fn blizzard_kiosk_kiosk_frame_template_stays_nil_at_global_scope() {
 }
 
 #[test]
-fn blizzard_kiosk_kiosk_frame_carries_methods_from_both_glue_and_game_mixin() {
+fn blizzard_kiosk_kiosk_frame_uses_final_game_mixin_definition() {
     let env = load_full_game_ui_with_kiosk_lod();
 
     let exists: bool = env
@@ -651,13 +651,11 @@ fn blizzard_kiosk_kiosk_frame_carries_methods_from_both_glue_and_game_mixin() {
         .eval("return type(KioskFrame.NavBack)")
         .expect("KioskFrame.NavBack probe should succeed");
     assert_eq!(
-        nav_back_kind, "function",
-        "KioskFrame.NavBack must publish as a function — NavBack is a \
-         GlueKioskFrameMixin-only method (Glue.lua line 42). Both Glue.xml and Game.xml \
-         declare non-virtual frames with name=\"KioskFrame\"; the simulator processes both \
-         (per-file `[AllowLoad Glue]` / `[AllowLoad Game]` annotations are stripped but not \
-         filtered), so the final frame carries the union of both mixins' methods. NavBack \
-         resolves through the still-attached Glue-side mixin"
+        nav_back_kind, "nil",
+        "KioskFrame.NavBack must be nil after Game.xml replaces the earlier Glue.xml frame. \
+         NavBack exists only on GlueKioskFrameMixin; the final same-named KioskFrame is \
+         declared by Game.xml with GameKioskFrameMixin, so duplicate frame registration \
+         does not merge unrelated mixin methods"
     );
 }
 

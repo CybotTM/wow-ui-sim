@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn templates_dir() -> PathBuf {
@@ -116,7 +117,7 @@ const VIRTUAL_TEMPLATES_SAMPLE: &[&str] = &[
 fn load_templates_with_deps(env: &WowLuaEnv) {
     let colors_toc = blizzard_ui_dir()
         .join("Blizzard_Colors")
-        .join("Blizzard_Colors_Mainline.toc");
+        .join("Blizzard_Colors.toc");
     load_addon(&env.loader_env(), &colors_toc).expect("Blizzard_Colors loads cleanly");
     load_addon(&env.loader_env(), &templates_toc())
         .expect("Blizzard_ProfessionsTemplates loads cleanly");
