@@ -132134,8 +132134,8 @@
         {
           "kind": "source",
           "reference": "Cargo.lock",
-          "source_hash": "4f34ad3727be273c8c24d28c52abddbd88f7335d1a2036d2a633e07b35e30039",
-          "summary": "The simulator locks rilua commit e9125785bc12e681eb467ad68b4724170e45e9d2 as its Lua runtime dependency."
+          "source_hash": "67704cd20627b9829b74db4273834de8d6c677332b0e708bb151478dfb6f881d",
+          "summary": "The simulator locks rilua commit 8dedc9fedb0160c7834d1e207af7f9996f2540b5 as its Lua runtime dependency."
         },
         {
           "kind": "source",
@@ -132181,8 +132181,8 @@
         {
           "kind": "source",
           "reference": "Cargo.lock",
-          "source_hash": "4f34ad3727be273c8c24d28c52abddbd88f7335d1a2036d2a633e07b35e30039",
-          "summary": "The simulator locks rilua commit e9125785bc12e681eb467ad68b4724170e45e9d2 as its Lua runtime dependency."
+          "source_hash": "67704cd20627b9829b74db4273834de8d6c677332b0e708bb151478dfb6f881d",
+          "summary": "The simulator locks rilua commit 8dedc9fedb0160c7834d1e207af7f9996f2540b5 as its Lua runtime dependency."
         },
         {
           "kind": "source",
