@@ -127,6 +127,15 @@ pub fn load_addon_internal(
         timing: LoadTiming::default(),
         warnings: Vec::new(),
     };
+    let already_loaded = env
+        .state()
+        .borrow()
+        .addons
+        .iter()
+        .any(|addon| addon.folder_name == folder_name && addon.loaded);
+    if already_loaded {
+        return Ok(result);
+    }
 
     let saved_vars_mgr =
         maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);

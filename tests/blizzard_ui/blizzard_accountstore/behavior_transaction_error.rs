@@ -101,12 +101,63 @@
 //!   started passing resultCode as `text_arg1` would diverge the two
 //!   captures.
 
-use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
+use crate::common::blizzard_addon_harness::{
+    new_blizzard_addon_env, with_blizzard_addon_smoke_shape,
+};
+use crate::common::load_required_blizzard_addon;
+use crate::common::panel_fixtures::{PANEL_ADDONS, blizzard_ui_dir};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
 const POPUP_KEY: &str = "ACCOUNT_STORE_TRANSACTION_ERROR";
 const LOCALIZED_TEXT_SUBSTRING: &str = "The transaction could not be completed.";
+
+#[test]
+fn later_static_popup_load_preserves_runtime_loaded_account_store_popup() {
+    let ui_dir = blizzard_ui_dir();
+    let env = new_blizzard_addon_env(&ui_dir);
+
+    for addon_name in PANEL_ADDONS {
+        if *addon_name == "Blizzard_StaticPopup" {
+            let popup_registered_before_reload: bool = env
+                .eval(&format!(
+                    "return C_AddOns.IsAddOnLoaded('Blizzard_AccountStore') and type(StaticPopupDialogs[{POPUP_KEY:?}]) == 'table'"
+                ))
+                .expect("pre-reload AccountStore popup probe must run cleanly");
+            assert!(
+                popup_registered_before_reload,
+                "UIParent's OnShow path must runtime-load Blizzard_AccountStore and its declared \
+                 Blizzard_StaticPopup dependency before the panel baseline encounters \
+                 Blizzard_StaticPopup directly"
+            );
+
+            env.exec("__account_store_popup_registry_before_reload = StaticPopupDialogs")
+                .expect("popup registry identity capture must run cleanly");
+            load_required_blizzard_addon(&env, &ui_dir, addon_name);
+
+            let (same_registry, popup_type): (bool, String) = env
+                .eval(&format!(
+                    "return rawequal(__account_store_popup_registry_before_reload, StaticPopupDialogs), type(StaticPopupDialogs[{POPUP_KEY:?}])"
+                ))
+                .expect("post-reload AccountStore popup probe must run cleanly");
+            assert!(
+                same_registry,
+                "Loading an already-loaded Blizzard_StaticPopup dependency must not replace its \
+                 public StaticPopupDialogs registry"
+            );
+            assert_eq!(
+                popup_type, "table",
+                "The AccountStore transaction-error popup registered during UIParent's runtime \
+                 load must survive the later panel-baseline encounter with Blizzard_StaticPopup"
+            );
+            return;
+        }
+
+        load_required_blizzard_addon(&env, &ui_dir, addon_name);
+    }
+
+    panic!("PANEL_ADDONS must contain Blizzard_StaticPopup");
+}
 
 #[test]
 fn transaction_error_popup_table_has_expected_six_fields() {
