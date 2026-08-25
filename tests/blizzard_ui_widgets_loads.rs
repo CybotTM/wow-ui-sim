@@ -281,7 +281,6 @@ fn toc_raw_bytes_pin_directives_and_representative_body_files() {
 
     let expected_directives = [
         "## Title: Blizzard_UIWidgets",
-        "## Author: Blizzard Entertainment",
         "## DefaultState: enabled",
         "## Dependencies: Blizzard_Minimap, Blizzard_Colors",
         "## AllowLoad: game",

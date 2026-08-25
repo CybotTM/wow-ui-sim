@@ -5,8 +5,8 @@
 //!
 //! ```text
 //! ## Title: Blizzard_ActionStatus
-//! ## DefaultState: enabled
-//! ## OptionalDep: Blizzard_FrameXML, Blizzard_GlueXML
+//! ## Dep: Blizzard_FrameXML [AllowLoad game]
+//! ## Dep: Blizzard_GlueXML [AllowLoad glue]
 //! ## AllowLoad: Both
 //! ```
 
@@ -20,14 +20,16 @@ use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_ActionStatus";
 const ROOT_TOC_FILE: &str = "Blizzard_ActionStatus.toc";
-const RAW_OPTIONAL_DEP_LINE: &str = "## OptionalDep: Blizzard_FrameXML, Blizzard_GlueXML";
+const REQUIRED_DEPS: [&str; 2] = ["Blizzard_FrameXML", "Blizzard_GlueXML"];
+const RAW_GAME_DEP_LINE: &str = "## Dep: Blizzard_FrameXML [AllowLoad game]";
+const RAW_GLUE_DEP_LINE: &str = "## Dep: Blizzard_GlueXML [AllowLoad glue]";
 
 #[test]
-fn action_status_loads_with_no_required_deps_and_no_lua_errors() {
+fn action_status_loads_with_current_required_deps_and_no_lua_errors() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
         assert_loaded(loaded, "game");
 
-        assert_toc_declares_no_required_deps_and_only_raw_optional_deps();
+        assert_toc_declares_current_required_deps();
 
         assert_no_lua_errors(env, "game");
     });
@@ -50,28 +52,29 @@ fn action_status_allowload_both_loads_in_game_and_glue_screens() {
     });
 }
 
-fn assert_toc_declares_no_required_deps_and_only_raw_optional_deps() {
+fn assert_toc_declares_current_required_deps() {
     let toc = load_root_toc();
 
-    assert!(
-        toc.dependencies().is_empty(),
-        "`{ROOT}` must declare no required dependencies. The TOC only lists the singular \
-         optional dependency line `{RAW_OPTIONAL_DEP_LINE}`."
+    assert_eq!(
+        toc.dependencies(),
+        REQUIRED_DEPS,
+        "`{ROOT}` must declare the current game/glue scoped dependencies"
     );
 
     let toc_path = root_toc_path();
     let raw_toc = std::fs::read_to_string(&toc_path).unwrap_or_else(|err| {
         panic!(
-            "TOC at `{}` MUST be readable for raw OptionalDep verification: {err}",
+            "TOC at `{}` MUST be readable for raw dependency verification: {err}",
             toc_path.display()
         )
     });
 
-    assert!(
-        raw_toc.contains(RAW_OPTIONAL_DEP_LINE),
-        "`{ROOT}` must keep its only listed dependencies optional via the raw singular TOC line \
-         `{RAW_OPTIONAL_DEP_LINE}`. Raw TOC:\n{raw_toc}"
-    );
+    for line in [RAW_GAME_DEP_LINE, RAW_GLUE_DEP_LINE] {
+        assert!(
+            raw_toc.contains(line),
+            "`{ROOT}` must keep the scoped dependency line `{line}`. Raw TOC:\n{raw_toc}"
+        );
+    }
 }
 
 fn assert_toc_allows_game_and_glue_screens() {
