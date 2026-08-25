@@ -3158,7 +3158,7 @@
         {
           "kind": "test",
           "reference": "tests/blizzard_ui/blizzard_actionbar/behavior_extra_action_bar.rs",
-          "source_hash": "79284b4dece211d37110a97bcc31e838f00c74521aec61b0cf2b0b50fde97629",
+          "source_hash": "29db4e7d6ab259043fb0f9bcfb818abcbf1fd0b5f1cc18c0f3b3591382b74a1e",
           "summary": "Focused extra-action behavior test checks HasExtraActionBar-driven show and action-icon round-trip through update events."
         }
       ],
