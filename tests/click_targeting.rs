@@ -250,7 +250,7 @@ fn secure_action_target_calls_target_unit() {
 }
 
 #[test]
-fn click_bindings_fallback_left_click_targets_unit() {
+fn click_bindings_without_profile_report_none_and_do_not_execute() {
     test_timeout! {
         let env = env();
         env.exec("ClearTarget()").expect("ClearTarget");
@@ -259,14 +259,14 @@ fn click_bindings_fallback_left_click_targets_unit() {
             .eval("return C_ClickBindings.GetBindingType('LeftButton', C_ClickBindings.MakeModifiers())")
             .unwrap();
         assert_eq!(
-            binding_type, 2,
-            "temporary click-binding fallback should route left-click through ExecuteBinding"
+            binding_type, 0,
+            "missing click-binding profile should not override secure button attributes"
         );
 
         env.exec("C_ClickBindings.ExecuteBinding('party1', 'LeftButton', 0)")
-            .expect("execute click binding");
-        let target_name: String = env.eval("return UnitName('target')").unwrap();
-        assert_eq!(target_name, "Thrynn");
+            .expect("missing click binding should be inert");
+        let target_exists: bool = env.eval("return UnitExists('target')").unwrap();
+        assert!(!target_exists);
     }
 }
 
