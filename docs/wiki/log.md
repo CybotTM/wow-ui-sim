@@ -1,3 +1,7 @@
+## [2026-08-25] update | Document final retail runtime recovery boundaries
+
+Updated [[lua-api]], [[taint-system]], and [[post-load-workaround-audit]] after the second-wave retail repairs. Documentation now records canonical Font object field precedence for inherited FontStrings; delimiter-receiver `string.split` handling for empty/equal-length inputs; no-profile `C_ClickBindings` behavior; local Encounter Journal numeric-string coercion; `DEFAULT_CHAT_FRAME` assignment without an edit box; and guarded gamepad cursor-global restoration required by the real Collections Escape close stack. No new page or index entry was needed.
+
 ## [2026-08-25] update | Preserve final retail runtime compatibility contracts
 
 Audited the final fixes after `0bb44d828`: `2e06ddba7` and `51ea06091` now document `CreateWindow` as a minimal frame-backed external-tool window contract (size/minimum size, topmost, close, and owner attachment; title/focus are no-ops); `25285d13f` documents inert `Kiosk.GetKioskLoginInfo()` defaults; and `ffccfcb6e` documents preserve-mode EnvironmentCleanup restoration for missing UI strings/constants without clobbering Blizzard assignments. Updated [[lua-api]] and [[post-load-workaround-audit]]. No new page was required.

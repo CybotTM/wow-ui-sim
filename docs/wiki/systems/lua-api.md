@@ -57,15 +57,17 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 **CreateWindow** — Returns a frame-backed `SimpleWindow` for Blizzard external-tool panels. The second argument initializes topmost state; `SetWindowSize`/`SetMinSize` enforce dimensions, `IsTopmost`/`SetTopmost` expose the modeled flag, and `Close` hides the frame. `SetTitle` and `SetFocus` are callable no-ops; popup-style, position, and focus persistence are not modeled. Owner frames use `SetWindow`/`GetWindow` and ordinary anchoring.
 
-**Font system** — `CreateFont()`, standard fonts (GameFontNormal, ChatFontNormal, SystemFont_Small, etc.) stored as Lua tables with `__fontPath`, `__fontHeight`, `__fontFlags` keys.
+**Font system** — `CreateFont()`, standard fonts (GameFontNormal, ChatFontNormal, SystemFont_Small, etc.) stored as Lua tables with canonical `__fontPath`, `__fontHeight`, and `__fontFlags` keys. FontString snapshots prefer those canonical fields and retain legacy aliases (`__font`, `__height`, `__outline`) only as fallback, so XML `inherits="GameFontNormalLarge"` preserves the inherited size and flags.
 
 **Object pools** — `CreateFramePool`, `CreateFrameFactory` (multi-template), `CreateObjectPool` (generic acquire/release).
 
-**Utilities** — `wipe()`, `tinsert/tremove()`, `CopyTable()`, `MergeTable()`, `Mixin()`, `CreateFromMixins()`, `getglobal/setglobal()`, `loadstring()`, `strsplit()`.
+**Utilities** — `wipe()`, `tinsert/tremove()`, `CopyTable()`, `MergeTable()`, `Mixin()`, `CreateFromMixins()`, `getglobal/setglobal()`, `loadstring()`, `strsplit()`. Both `string.split(...)` and string `:split(...)` accept Blizzard's delimiter-receiver form, including empty and equal-length punctuation inputs, while retaining ordinary input-first behavior.
 
-**Security** — `issecure()`, `securecall()`, `securecallfunction()`, `securecallmethod()`, `forceinsecure()`, `hooksecurefunc()` (from Elune or fallback stubs).
+**Security** — `issecure()`, `securecall()`, `securecallfunction()`, `securecallmethod()`, `forceinsecure()`, `hooksecurefunc()` (from Elune or fallback stubs). With no modeled click-binding profile, `C_ClickBindings.GetBindingType()` returns `Enum.ClickBindingType.None` and `ExecuteBinding()` is inert, allowing secure-button `type` attributes to dispatch normally.
 
 **Modeled legacy globals** — `IsTimerunningEnabled()` and `GetRemainingTimerunningSeasonSeconds()` read the simulator's Timerunning season state; the countdown is zero when no season is active. `GetGuildTabardFiles()` is registered on retail as well as classic profiles and returns the modeled guild-tabard file tuple used by Blizzard's guild-bank UI. The temporary `Kiosk` namespace defaults `IsEnabled()` and `IsCompetitiveModeEnabled()` to `false` and `GetKioskLoginInfo()` to three `nil` values while preserving existing members.
+
+**Focused compatibility boundaries** — `EJ_SetLootFilter()` accepts integer Lua values and numeric strings locally; nil, invalid, and non-integral inputs become zero without changing global argument coercion. Chat startup assigns `DEFAULT_CHAT_FRAME` whenever `ChatFrame1` exists, while `ChatFrame1.editBox` remains conditional on `ChatFrame1EditBox`.
 
 ## C_* Namespaces
 
@@ -98,6 +100,12 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [timerunning.rs](../../../src/lua_api/globals/real/timerunning.rs) — state-backed legacy Timerunning globals
 - [bank_storage_verbs.rs](../../../src/lua_api/globals/bank_storage_verbs.rs) — retail guild-tabard lookup registration
 - [c_string_util_decimal.rs](../../../src/c_api/c_string_util_decimal.rs) — decimal escaping for control and invalid UTF-8 bytes
+- [font_strings.rs](../../../src/lua_api/frame/methods/button_anchor_hierarchy/font_strings.rs) — canonical Font object field precedence and FontString snapshots
+- [compat_overrides.rs](../../../src/lua_api/globals/compat_overrides.rs) — table-form `string.split` compatibility
+- [formatting_utility_defaults.rs](../../../src/lua_api/workarounds/temporary/formatting_utility_defaults.rs) — string-metatable `:split` compatibility
+- [click_bindings_defaults.rs](../../../src/lua_api/workarounds/temporary/click_bindings_defaults.rs) — no-profile click-binding behavior
+- [loot.rs](../../../src/lua_api/globals/missing_surface/encounter_journal/loot.rs) — local Encounter Journal filter coercion
+- [chat_init.rs](../../../src/lua_api/chat_init.rs) — default chat-frame initialization
 - [browser.rs](../../../src/lua_api/frame/methods/widgets/browser.rs) — no-result Browser navigation methods
 - [simple_window.rs](../../../src/lua_api/globals/create_frame/simple_window.rs) — frame-backed `CreateWindow` compatibility contract
 - [render_layers.rs](../../../src/lua_api/frame/methods/misc/render_layers.rs) — `SetWindow`/`GetWindow` owner attachment
@@ -108,6 +116,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 
 - [[frame-data-flow]] — method lookup order, __index/__newindex, Mixin() application
 - [[addon-loading]] — addon execution, idempotent loaded-addon handling, and environment boundaries
+- [[taint-system]] — secure/public environments and secure-button publication boundaries
+- [[post-load-workaround-audit]] — explicit post-cleanup restoration hooks
 - [[event-system]] — fire_event, SetScript, OnUpdate tick mechanism
 - [[widget-system]] — Frame struct backing each FrameHandle
 - [[texture-atlas]] — texture path resolution, atlas identity, and rendering consumers
