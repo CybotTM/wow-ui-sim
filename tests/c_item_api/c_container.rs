@@ -359,7 +359,7 @@ fn test_c_container_set_bag_portrait_texture_uses_equipped_bag_icon() {
             local frame = CreateFrame("Frame")
             local portrait = frame:CreateTexture(nil, "ARTWORK")
             C_Container.SetBagPortraitTexture(portrait, Enum.BagIndex.Bag_1)
-            return portrait:GetTexture()
+            return portrait:GetTextureFilePath()
             "#,
         )
         .unwrap();
