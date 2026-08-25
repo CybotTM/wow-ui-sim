@@ -191,16 +191,11 @@ fn blizzard_guild_bank_ui_loads_explicitly_without_unexpected_addon_specific_lua
                 || e.contains("GuildBankTabButtonMixin")
                 || e.contains("GuildBankPopupFrameMixin")
         })
-        .filter(|e| !e.contains("GetGuildTabardFiles"))
         .collect();
     assert!(
         related.is_empty(),
         "Blizzard_GuildBankUI emitted unexpected addon-specific Lua errors during explicit \
-         LoadAddOn (the documented `GetGuildTabardFiles` simulator gap is filtered out — the \
-         simulator does not yet stub the guild-tabard texture-file lookup that \
-         GuildBankFrameMixin:UpdateTabard calls on OnLoad; this is a known low-risk gap and \
-         can be a permissive stub returning the default tabard textures in a future \
-         iteration):\n  {}",
+         LoadAddOn:\n  {}",
         related
             .iter()
             .map(|s| s.as_str())
