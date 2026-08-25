@@ -11,6 +11,7 @@ mod dropdown_api;
 mod dropdown_children;
 mod helpers;
 pub mod helpers_shared;
+mod simple_window;
 mod template_chain;
 
 pub(crate) use helpers::{append_parent_array_entry, apply_frame_mixin, apply_frame_mixins};
@@ -222,6 +223,7 @@ pub fn register_global_frames(lua: &mut rilua::Lua) -> LuaResult<()> {
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     super::loader_script_bindings::register_all(lua)?;
     LuaApiMut::register_function(lua, "CreateFrame", create_frame)?;
+    LuaApiMut::register_function(lua, "CreateWindow", simple_window::create_window)?;
     LuaApiMut::register_function(lua, "EnumerateFrames", enumerate_frames)?;
     register_global_frames(lua)?;
     dropdown_api::register_dropdown_constants(lua)?;

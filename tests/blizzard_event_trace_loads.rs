@@ -151,14 +151,7 @@ fn blizzard_event_trace_is_absent_from_auto_discovery_on_game_and_login() {
 }
 
 #[test]
-fn blizzard_event_trace_loads_via_load_addon_with_only_create_window_gap_error() {
-    // The single expected error during EventTrace load is from `Blizzard_SharedXML/
-    // ToolWindowOwnerMixin.lua:5` calling the OS-level `CreateWindow` global, which the
-    // simulator does not stub (real WoW uses it to spawn a floating native window — well
-    // outside the simulator's UI rendering scope). EventTrace's panel has no `hidden=true`
-    // in XML so OnShow fires automatically on load and calls `self:MoveToNewWindow(...)` →
-    // `CreateWindow(popupStyle, topMost)`. We document the gap here and assert that this is
-    // the ONLY error from the addon.
+fn blizzard_event_trace_loads_via_load_addon_without_addon_specific_errors() {
     let env = load_full_game_ui();
 
     {
@@ -180,39 +173,78 @@ fn blizzard_event_trace_loads_via_load_addon_with_only_create_window_gap_error()
             message.contains("EventTrace")
                 || message.contains("Blizzard_EventTrace")
                 || message.contains("EventTracePanel")
+                || message.contains("ToolWindowOwnerMixin")
         })
         .cloned()
         .collect();
 
-    let unexpected: Vec<&String> = load_errors
-        .iter()
-        .filter(|message| !message.contains("CreateWindow"))
-        .collect();
     assert!(
-        unexpected.is_empty(),
-        "Blizzard_EventTrace emitted unexpected Lua errors during explicit load (the only \
-         allowed error is the documented `CreateWindow` simulator gap from ToolWindowOwnerMixin):\n  {}",
-        unexpected
-            .iter()
-            .map(|s| s.as_str())
-            .collect::<Vec<_>>()
-            .join("\n  ")
+        load_errors.is_empty(),
+        "Blizzard_EventTrace emitted addon-specific Lua errors during explicit load:\n  {}",
+        load_errors.join("\n  ")
     );
+}
 
-    let create_window_errors: Vec<&String> = load_errors
-        .iter()
-        .filter(|message| {
-            message.contains("ToolWindowOwnerMixin") && message.contains("CreateWindow")
-        })
-        .collect();
+#[test]
+fn create_window_models_tool_window_state_and_frame_attachment() {
+    let env = load_full_game_ui();
+
+    let result: (bool, bool, f64, f64, f64, f64, bool, bool, bool) = env
+        .eval(
+            r#"
+            local window = CreateWindow(false, true)
+            local owner = CreateFrame("Frame")
+
+            window:SetTitle("Event Trace")
+            window:SetWindowSize(640, 480)
+            window:SetMinSize(700, 500)
+            window:SetPosition(12, 34)
+            window:SetFocus()
+            window:StartMoving()
+            window:StopMovingOrSizing()
+            window:StartSizing()
+            window:StopMovingOrSizing()
+
+            owner:SetWindow(window)
+            owner:SetAllPoints(window)
+
+            local _, relativeTo = owner:GetPoint(1)
+            local width, height = window:GetSize()
+            local x, y = window:GetPosition()
+            local startsTopmost = window:IsTopmost()
+            window:SetTopmost(false)
+            local endsTopmost = window:IsTopmost()
+            window:Close()
+
+            return owner:GetWindow() == window,
+                relativeTo == window,
+                width,
+                height,
+                x,
+                y,
+                startsTopmost,
+                endsTopmost,
+                window:IsShown()
+            "#,
+        )
+        .expect("CreateWindow behavior probe should evaluate");
+
     assert!(
-        !create_window_errors.is_empty(),
-        "Expected at least one `CreateWindow` error from `ToolWindowOwnerMixin.lua:5` — the \
-         simulator does not stub the OS-level `CreateWindow` global that real WoW provides \
-         for spawning native floating windows. If this assertion flips (no errors), \
-         someone added a `CreateWindow` stub and this test should be simplified to \
-         `assert!(load_errors.is_empty())`"
+        result.0,
+        "SetWindow/GetWindow must preserve SimpleWindow identity"
     );
+    assert!(
+        result.1,
+        "SetAllPoints must anchor the owner to the SimpleWindow"
+    );
+    assert_eq!((result.2, result.3), (700.0, 500.0));
+    assert_eq!((result.4, result.5), (12.0, 34.0));
+    assert!(
+        result.6,
+        "topMost creation argument must initialize topmost state"
+    );
+    assert!(!result.7, "SetTopmost(false) must update topmost state");
+    assert!(!result.8, "Close must hide the modeled external window");
 }
 
 #[test]
