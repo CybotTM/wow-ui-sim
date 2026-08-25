@@ -694,8 +694,8 @@ fn blizzard_secure_unit_button_assist_action_targets_assisted_unit_target() {
 
 #[test]
 fn blizzard_full_ui_click_chain_targets_and_casts() {
-    test_timeout! {
-        common::with_perf_lock(|| {
+    common::with_perf_lock(|| {
+        test_timeout! {
             let env = env_with_full_ui();
             install_test_error_handler(&env);
             assert_blizzard_secure_unit_button_click_targets_party(&env);
@@ -703,6 +703,6 @@ fn blizzard_full_ui_click_chain_targets_and_casts() {
             assert_blizzard_party_member_frame_click_targets_party1(&env);
             assert_blizzard_secure_action_button_click_casts_spell(&env);
             assert_blizzard_action_button_click_casts_via_use_action(&env);
-        });
-    }
+        }
+    });
 }

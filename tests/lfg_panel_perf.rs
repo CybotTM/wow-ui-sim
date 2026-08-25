@@ -45,8 +45,8 @@ fn load_game_ui_addons(env: &WowLuaEnv) {
 
 #[test]
 fn lfg_panel_open_gui_latency_stays_under_budget() {
-    test_timeout! {
-        common::with_perf_lock(|| {
+    common::with_perf_lock(|| {
+        test_timeout! {
             let loaded = load_benchmark_ui();
             let report = benchmark_lfg_panel_open_in_gui(loaded.env)
                 .expect("LFG panel GUI benchmark should complete");
@@ -79,6 +79,6 @@ fn lfg_panel_open_gui_latency_stays_under_budget() {
                 "first LFG open should settle within {LFG_SETTLE_FRAME_BUDGET} frames, got {}",
                 report.first_open.frames
             );
-        });
-    }
+        }
+    });
 }

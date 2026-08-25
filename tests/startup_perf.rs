@@ -67,8 +67,8 @@ fn load_game_ui_addons(env: &WowLuaEnv) -> Duration {
 
 #[test]
 fn full_game_startup_stays_under_budget() {
-    test_timeout! {
-        common::with_perf_lock(|| {
+    common::with_perf_lock(|| {
+        test_timeout! {
             let loaded_ui = load_timed_game_ui();
             let env = &loaded_ui.env;
             let phase_timings = &loaded_ui.phase_timings;
@@ -97,6 +97,6 @@ fn full_game_startup_stays_under_budget() {
                 startup_elapsed,
                 FULL_GAME_STARTUP_BUDGET
             );
-        });
-    }
+        }
+    });
 }
