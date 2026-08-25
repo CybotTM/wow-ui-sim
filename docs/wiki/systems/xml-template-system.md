@@ -8,7 +8,7 @@ Every WoW XML file has a `<Ui>` root deserializing into `UiXml { elements: Vec<X
 
 **XmlElement** (30+ variants): Frame-like widgets (Frame, Button, CheckButton, EditBox, ScrollFrame, Slider, StatusBar, GameTooltip, ModelScene, etc.) all map to `FrameXml`. Regions: `Texture(TextureXml)`, `FontString(FontStringXml)`. File refs: `Script`, `Include` (both with lowercase variants). Font defs: `Font`, `FontFamily`. Container: `ScopedModifier` (transparent wrapper).
 
-**FrameXml** key attributes: `name`, `parent`, `parentKey` (property on parent), `inherits` (comma-separated templates), `mixin`, `virtual/intrinsic` (template-only), `hidden`, `alpha`, `setAllPoints`, `enableMouse`, `parentArray` (appends to parent array). Child elements via `FrameChildElement`: Size, Anchors, Layers, Frames, Scripts, Animations, button-specific textures, widget-specific fields.
+**FrameXml** key attributes: `name`, `parent`, `parentKey` (property on parent), `inherits` (comma-separated templates), `mixin`, `virtual/intrinsic` (template-only), `toplevel`, `hidden`, `alpha`, `setAllPoints`, `enableMouse`, `parentArray` (appends to parent array). Child elements via `FrameChildElement`: Size, Anchors, Layers, Frames, Scripts, Animations, button-specific textures, widget-specific fields.
 
 ## Template Registry
 
@@ -43,6 +43,8 @@ Property resolution per template walk:
 7. Fire lifecycle scripts: OnLoad, then OnShow if visible
 
 The `inherits` parameter in `CreateFrame()` triggers `apply_templates_from_registry()` at runtime, so template children are created before the XML loader recurses into direct children. The root reuse branch is required because UIParent and WorldFrame are created before Blizzard XML loads; their XML scripts, event registrations, mixins, and lifecycle configuration must target the pre-created objects later observed through `_G.UIParent` and `_G.WorldFrame`. A duplicate object strands those behaviors on the original root while later code observes another object, removing UIParent startup handlers and blocking CombatLog runtime loading. The behavior is implemented in `src/loader/xml_frame_codegen.rs` (commit `e5089fbeb2`).
+
+Top-level XML frames with `toplevel="true"` retain the implicit UIParent used during creation instead of being immediately orphaned. If their `OnLoad` calls `SetParent(UIParent)`, that is treated as a same-parent operation, so a non-fixed XML `frameStrata` such as `HIGH` survives the lifecycle callback. Without this preservation, the reparent resets the effective strata to `MEDIUM`; `SettingsPanel` is the covered retail case (commit `c2d26f5c5`).
 
 ## Lua-Side Template Application (`src/lua_api/globals/template/mod.rs`)
 
@@ -81,12 +83,12 @@ For `method="X"`, live PTR 12.1 probing showed two separate stores: the object f
 
 - [xml-template-system.md](../../xml-template-system.md) — XML types, registry, inheritance, conversion pipeline, inline scripts
 - `src/lua_api/env_init/shared_bootstrap.lua` — `GetForbiddenObjectTable` and XML partition helper functions
-- `src/loader/xml_frame_codegen.rs` — XML codegen for partition-aware Mixins, KeyValues, and engine-root reuse
+- `src/loader/xml_frame_codegen.rs` — XML codegen for partition-aware Mixins, KeyValues, engine-root reuse, and top-level implicit-parent preservation
 - `src/loader/addon.rs` — shared addon loading transaction used while XML files execute
 - `src/loader/tests/runtime_template_misc.rs` — regression coverage for forbidden object tables, secure delegates, and XML `method=` binding timing
 
 ## See Also
 
-- [[addon-loading]] — TOC parsing and per-file XML/Lua loading that feeds this system
+- [[addon-loading]] — TOC parsing, per-file XML/Lua loading, and idempotent loaded-addon handling that feeds this system
 - [[widget-system]] — WidgetType and Frame structs produced by XML conversion
 - [[frame-data-flow]] — Mixin() application and __frame_fields storage

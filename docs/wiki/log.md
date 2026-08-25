@@ -1,3 +1,7 @@
+## [2026-08-25] update | Preserve current loader, XML, and runtime-surface contracts
+
+Audited committed behavior from `a3d0f4f21` through `711f8e9c8` and updated [[addon-loading]], [[lua-api]], and [[xml-template-system]]. Documentation now records: loaded-addon idempotence preserving mutable registries such as `StaticPopupDialogs`; enum child-table reseeding that preserves Blizzard extensions; `toplevel="true"` XML frames retaining implicit UIParent so XML strata survives same-parent `OnLoad`; state-backed legacy Timerunning globals; retail `GetGuildTabardFiles`; `C_StringUtil.EscapeDecimalNonPrintables`; and Browser `NavigateTo`/`NavigateHome` no-result compatibility methods. TOC and symbol fixture refreshes were intentionally skipped. No new wiki page was required; existing system pages remain the SSOT.
+
 ## [2026-08-25] update | Document rilua global-slot read modes
 
 Updated `design/track-3-global-slot-abi.md` after commit `f0f5312be` pinned the rilua slot-read fix. The default/no-shadow `GETGLOBAL_SLOT` path now documents current root `_G` coherence after bare assignment, `_G.Name = value`, `rawset`, and nil; the optional live-shadow/freeze mode retains frozen snapshot fallback with shadow overrides taking precedence. Added the design page to `index.md` and recorded the required mode-matrix parity proof.

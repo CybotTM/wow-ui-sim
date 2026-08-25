@@ -14,6 +14,8 @@ pub struct WowLuaEnv {
 
 Initializes with full Lua stdlib, creates UIParent/WorldFrame via `create_builtin_frames`, then calls `register_globals`. Execution entry points: `exec()`, `exec_public()`, `exec_named()`, `exec_with_varargs()` (addon loading with `addonName, addonTable` varargs), `eval()`.
 
+Enum initialization seeds known `Enum.*` values into existing child tables rather than replacing those tables. This matters after Blizzard Lua extends an enum during addon loading: later runtime-surface restoration reseeds required values without deleting Blizzard-added members such as CooldownViewer categories.
+
 ### Loader Environment Boundaries
 
 `LoaderEnv::exec()` runs dynamic loader code in the currently loading addon's environment, including secure-environment and loading-scoped fenv state. `LoaderEnv::exec_public()` deliberately skips that loading fenv state while preserving the addon's secure file execution. Use it only for an addon-specific bridge that must publish a narrow compatibility surface to `_G`; it is not a generic secure-to-public mirroring mechanism. The AuthChallenge workaround uses this boundary to restore five exported callbacks publicly while the `Blizzard_AuthChallengeUI` addon remains secure (`src/lua_api/loader_env.rs`, `src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs`).
@@ -41,7 +43,7 @@ Links Lua userdata to the Rust `Frame` via `id`. `__newindex` syncs `parent.Chil
 | `methods_hierarchy` | GetParent, SetParent, GetChildren, GetNumChildren, GetRegions |
 | `methods_meta` | `__index`, `__newindex`, `__len`, `__eq` |
 
-Widget-specific: EditBox (SetMultiLine, SetAutoFocus), Slider (SetMinMaxValues, SetValue, SetOrientation), StatusBar (SetStatusBarColor), Cooldown (SetCooldown), Tooltip (SetOwner, AddLine, AddDoubleLine), MessageFrame (AddMessage).
+Widget-specific: EditBox (SetMultiLine, SetAutoFocus), Slider (SetMinMaxValues, SetValue, SetOrientation), StatusBar (SetStatusBarColor), Cooldown (SetCooldown), Tooltip (SetOwner, AddLine, AddDoubleLine), MessageFrame (AddMessage), Browser (`NavigateTo`, `NavigateHome`). Browser navigation methods are callable no-result compatibility methods; the simulator does not open external content.
 
 ### Texture identity
 
@@ -61,9 +63,11 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 **Security** — `issecure()`, `securecall()`, `securecallfunction()`, `securecallmethod()`, `forceinsecure()`, `hooksecurefunc()` (from Elune or fallback stubs).
 
+**Modeled legacy globals** — `IsTimerunningEnabled()` and `GetRemainingTimerunningSeasonSeconds()` read the simulator's Timerunning season state; the countdown is zero when no season is active. `GetGuildTabardFiles()` is registered on retail as well as classic profiles and returns the modeled guild-tabard file tuple used by Blizzard's guild-bank UI.
+
 ## C_* Namespaces
 
-C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_ChromieTime (retail/PTR empty-state queries and no-op actions), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
+C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_ChromieTime (retail/PTR empty-state queries and no-op actions), C_StringUtil (`EscapeDecimalNonPrintables` preserves valid UTF-8 and replaces ASCII control bytes except tab/newline/carriage return, plus invalid UTF-8 bytes, with decimal escapes), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
 
 ### `C_PlayerChoice` (PTR 12.1)
 
@@ -88,11 +92,17 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - [loader_env.rs](../../../src/lua_api/loader_env.rs) — secure versus public dynamic loader execution
 - [auth_challenge_frame_parent.rs](../../../src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs) — addon-specific AuthChallenge public export bridge
+- [enums.rs](../../../src/lua_api/env_init/enums.rs) — enum-table reseeding that preserves existing Blizzard extensions
+- [timerunning.rs](../../../src/lua_api/globals/real/timerunning.rs) — state-backed legacy Timerunning globals
+- [bank_storage_verbs.rs](../../../src/lua_api/globals/bank_storage_verbs.rs) — retail guild-tabard lookup registration
+- [c_string_util_decimal.rs](../../../src/c_api/c_string_util_decimal.rs) — decimal escaping for control and invalid UTF-8 bytes
+- [browser.rs](../../../src/lua_api/frame/methods/widgets/browser.rs) — no-result Browser navigation methods
 - `/home/osso/Repos/simc/SpellDataDump/allspells.txt` — coefficient and variable formulas used for AP/health-scaled spell text
 
 ## See Also
 
 - [[frame-data-flow]] — method lookup order, __index/__newindex, Mixin() application
+- [[addon-loading]] — addon execution, idempotent loaded-addon handling, and environment boundaries
 - [[event-system]] — fire_event, SetScript, OnUpdate tick mechanism
 - [[widget-system]] — Frame struct backing each FrameHandle
 - [[texture-atlas]] — texture path resolution, atlas identity, and rendering consumers

@@ -53,6 +53,10 @@ During startup, addon discovery includes non-LoadOnDemand addons only. LoadOnDem
 
 `LoadResult` includes per-addon timing breakdown: `io_time`, `xml_parse_time`, `lua_exec_time`, `saved_vars_time`.
 
+### Idempotent Loaded-Addon Loads
+
+`load_addon_internal()` checks the `SimState` addon record before executing files. If the same addon is already marked loaded, the call returns an empty `LoadResult` without re-running Lua/XML files or post-load patches. This preserves mutable registries created by earlier files, including `StaticPopupDialogs`, and prevents repeated dependency encounters from replacing state. The separate loading transaction still handles in-progress re-entry: an addon is not marked loaded until its files and post-load work complete.
+
 ## Secure Replay Allowlist
 
 The secure Lua environment is separate from `_G`; it has no generic `_G` fallback. After normal loading, the loader explicitly replays only selected Blizzard library addons into `__secureenv` through `is_secure_replay_library_addon()` (`src/loader/addon.rs`). The current allowlist includes `Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_CombatLogBase`, `Blizzard_CatalogShopSharedTemplates`, `Blizzard_CatalogShopSharedUtil`, `Blizzard_AsyncRequest`, and `Blizzard_GameTooltip`.
@@ -121,6 +125,7 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 - [blizzard-ui-files](../../../data/blizzard-ui-files) — committed per-profile Blizzard UI cache manifests, including bootstrap files needed by each active profile cache
 - [blizzard_ui_sync.rs](../../../src/blizzard_ui_sync.rs) and [profile_cache.rs](../../../src/blizzard_ui_sync/profile_cache.rs) — active-profile cache sync and profile-specific cache usability checks
 - [secure replay tests](../../../tests/blizzard_combat_log_processor_loads.rs) and [CatalogShop replay tests](../../../tests/blizzard_catalog_shop_shared_util_loads.rs) — proof that selected Blizzard library globals are available in `__secureenv`
+- [AccountStore popup regression](../../../tests/blizzard_ui/blizzard_accountstore/behavior_transaction_error.rs) — repeated StaticPopup loading must preserve the existing registry and popup definition
 
 ## See Also
 
