@@ -598,9 +598,7 @@ fn test_strsplittable() {
 #[test]
 fn test_string_split_method() {
     let env = env();
-    let (a, b, c): (String, String, String) = env
-        .eval(r#"return ("a-b-c"):split("-")"#)
-        .unwrap();
+    let (a, b, c): (String, String, String) = env.eval(r#"return ("a-b-c"):split("-")"#).unwrap();
     assert_eq!((a.as_str(), b.as_str(), c.as_str()), ("a", "b", "c"));
 }
 
@@ -613,6 +611,20 @@ fn test_string_split_method_accepts_delimiter_receiver() {
         (major.as_str(), minor.as_str(), build.as_str()),
         ("12", "0", "5")
     );
+}
+
+#[test]
+fn test_string_split_method_accepts_empty_delimiter_receiver_input() {
+    let env = env();
+    let value: String = env.eval(r#"return (" "):split("")"#).unwrap();
+    assert_eq!(value, "");
+}
+
+#[test]
+fn test_string_split_function_accepts_empty_delimiter_receiver_input() {
+    let env = env();
+    let value: String = env.eval(r#"return string.split(" ", "")"#).unwrap();
+    assert_eq!(value, "");
 }
 
 #[test]

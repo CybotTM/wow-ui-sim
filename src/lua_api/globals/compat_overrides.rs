@@ -98,8 +98,11 @@ end
 
 if string ~= nil and string.split == nil then
   function string.split(self, delimiter, limit)
-    if type(self) == "string" and type(delimiter) == "string" and #self <= 4 and #delimiter > #self then
-      return strsplit(self, delimiter, limit)
+    if type(self) == "string" and type(delimiter) == "string" then
+      local delimiterFirst = #delimiter == 0 or (#self <= 4 and #delimiter > #self)
+      if delimiterFirst then
+        return strsplit(self, delimiter, limit)
+      end
     end
     return strsplit(delimiter, self, limit)
   end

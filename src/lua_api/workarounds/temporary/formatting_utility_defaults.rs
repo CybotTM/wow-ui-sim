@@ -127,8 +127,11 @@ end
 do
   local stringMeta = getmetatable("")
   local function splitStringMethod(self, delimiterOrInput, limit)
-    if type(self) == "string" and type(delimiterOrInput) == "string" and #self <= 4 and #delimiterOrInput > #self then
-      return strsplit(self, delimiterOrInput, limit)
+    if type(self) == "string" and type(delimiterOrInput) == "string" then
+      local delimiterFirst = #delimiterOrInput == 0 or (#self <= 4 and #delimiterOrInput > #self)
+      if delimiterFirst then
+        return strsplit(self, delimiterOrInput, limit)
+      end
     end
     return strsplit(delimiterOrInput, self, limit)
   end
