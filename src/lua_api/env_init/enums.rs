@@ -205,18 +205,16 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         let state = lua.state_mut();
         let enum_table = ensure_global_table(state, "Enum");
         for &(enum_name, entries) in EXPLICIT_ENUMS.iter() {
-            let enum_values = create_table(state);
+            let enum_values = ensure_table_field(state, enum_table, enum_name);
             for &(variant_name, value) in entries {
                 table_set(state, enum_values, variant_name, Val::Num(value as f64));
             }
-            table_set(state, enum_table, enum_name, enum_values);
         }
         for &(enum_name, entries) in SEQUENTIAL_ENUMS.iter() {
-            let enum_values = create_table(state);
+            let enum_values = ensure_table_field(state, enum_table, enum_name);
             for (index, &variant_name) in entries.iter().enumerate() {
                 table_set(state, enum_values, variant_name, Val::Num(index as f64));
             }
-            table_set(state, enum_table, enum_name, enum_values);
         }
     }
     lua.exec(MISSING_ENUMS_LUA)?;
@@ -276,12 +274,15 @@ fn ensure_on_update_mode_enum(state: &mut rilua::vm::state::LuaState, enum_table
 }
 
 fn ensure_global_table(state: &mut rilua::vm::state::LuaState, key: &str) -> Val {
-    let global = Val::Table(state.global);
-    let existing = table_get(state, global, key);
+    ensure_table_field(state, Val::Table(state.global), key)
+}
+
+fn ensure_table_field(state: &mut rilua::vm::state::LuaState, parent: Val, key: &str) -> Val {
+    let existing = table_get(state, parent, key);
     if matches!(existing, Val::Table(_)) {
         return existing;
     }
     let table = create_table(state);
-    table_set(state, global, key, table);
+    table_set(state, parent, key, table);
     table
 }
