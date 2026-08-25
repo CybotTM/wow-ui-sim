@@ -7,7 +7,7 @@ use super::common;
 
 const CLICK_TARGETING_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
-    ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
+    ("Blizzard_Colors", "Blizzard_Colors.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
     (
         "Blizzard_SharedXMLGame",
