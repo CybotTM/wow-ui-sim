@@ -19,12 +19,39 @@ pub(crate) fn restore_post_cleanup_globals(
     crate::lua_api::globals::strings::restore_missing_ui_strings(lua)?;
     crate::c_api::register_utility_bootstrap_tables(lua.state_mut())?;
     super::debug_environment_defaults::apply_bootstrap(lua)?;
+    super::gamepad_cursor_control_defaults::apply_bootstrap(lua)?;
     super::ui_parent_panel_toggles::apply_bootstrap(lua)
 }
 
 #[cfg(test)]
 mod tests {
     use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn post_cleanup_restore_reinstalls_gamepad_cursor_defaults() {
+        let env = WowLuaEnv::new().expect("Lua environment should initialize");
+        env.exec(
+            r#"
+            CanAutoSetGamePadCursorControl = nil
+            SetGamePadCursorControl = nil
+            "#,
+        )
+        .expect("gamepad cursor-control defaults should clear");
+
+        env.restore_post_cleanup_globals();
+
+        let restored: (String, String, bool, bool) = env
+            .eval(
+                r#"
+                return type(CanAutoSetGamePadCursorControl),
+                    type(SetGamePadCursorControl),
+                    CanAutoSetGamePadCursorControl(true) == false,
+                    pcall(SetGamePadCursorControl, true)
+                "#,
+            )
+            .expect("restored gamepad cursor-control defaults should run");
+        assert_eq!(restored, ("function".into(), "function".into(), true, true));
+    }
 
     #[test]
     fn post_cleanup_restore_preserves_existing_deprecation_constants() {

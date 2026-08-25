@@ -5,6 +5,18 @@ fn collections_journal_opened_to_heirlooms_closes_on_escape() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.apply_post_load_workarounds();
 
+    let gamepad_cursor_defaults: (String, String) = env
+        .eval(
+            "return type(CanAutoSetGamePadCursorControl), \
+                type(SetGamePadCursorControl)",
+        )
+        .expect("post-cleanup gamepad cursor-control globals should be readable");
+    assert_eq!(
+        gamepad_cursor_defaults,
+        ("function".into(), "function".into()),
+        "ToggleGameMenu must retain its gamepad cursor-control dependencies after cleanup"
+    );
+
     env.exec(
         r#"
         COLLECTIONS_JOURNAL_TAB_INDEX_HEIRLOOMS = 4
