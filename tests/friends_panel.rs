@@ -49,20 +49,24 @@ fn social_panel_toggle_realizes_online_rows_and_provides_offline_friend_data() {
             let (
                 realized_online_names,
                 expected_online_names,
+                realized_names_match,
                 has_offline_element,
                 offline_name,
                 offline_connected,
-            ): (String, String, bool, String, bool) = env
+            ): (String, String, bool, bool, String, bool) = env
                 .eval(
                     r#"
                     ToggleSocialPanel()
 
                     local realizedOnlineNames = {}
+                    local realizedNamesMatch = true
                     FriendsListFrame.ScrollBox:ForEachFrame(function(frame, elementData)
                         if elementData.buttonType == FRIENDS_BUTTON_TYPE_WOW then
                             local info = C_FriendList.GetFriendInfoByIndex(elementData.id)
                             if info and info.connected then
-                                table.insert(realizedOnlineNames, frame.name:GetText())
+                                local frameText = frame.name:GetText() or ""
+                                realizedNamesMatch = realizedNamesMatch and string.find(frameText, info.name, 1, true) ~= nil
+                                table.insert(realizedOnlineNames, info.name)
                             end
                         end
                     end)
@@ -88,6 +92,7 @@ fn social_panel_toggle_realizes_online_rows_and_provides_offline_friend_data() {
 
                     return table.concat(realizedOnlineNames, "\n"),
                         table.concat(expectedOnlineNames, "\n"),
+                        realizedNamesMatch,
                         offlineElement ~= nil,
                         offlineInfo and offlineInfo.name or "",
                         offlineInfo and offlineInfo.connected or false
@@ -102,6 +107,10 @@ fn social_panel_toggle_realizes_online_rows_and_provides_offline_friend_data() {
             assert_eq!(
                 realized_online_names, expected_online_names,
                 "initially realized WoW friend rows should match the state-backed online friends"
+            );
+            assert!(
+                realized_names_match,
+                "each realized online friend row should render its state-backed friend name"
             );
             assert!(
                 has_offline_element,
