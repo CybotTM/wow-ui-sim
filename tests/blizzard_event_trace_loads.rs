@@ -186,10 +186,10 @@ fn blizzard_event_trace_loads_via_load_addon_without_addon_specific_errors() {
 }
 
 #[test]
-fn create_window_models_tool_window_state_and_frame_attachment() {
+fn create_window_supports_tool_window_owner_contract() {
     let env = load_full_game_ui();
 
-    let result: (bool, bool, f64, f64, f64, f64, bool, bool, bool) = env
+    let result: (bool, bool, f64, f64, bool, bool, bool) = env
         .eval(
             r#"
             local window = CreateWindow(false, true)
@@ -198,7 +198,6 @@ fn create_window_models_tool_window_state_and_frame_attachment() {
             window:SetTitle("Event Trace")
             window:SetWindowSize(640, 480)
             window:SetMinSize(700, 500)
-            window:SetPosition(12, 34)
             window:SetFocus()
             window:StartMoving()
             window:StopMovingOrSizing()
@@ -210,7 +209,6 @@ fn create_window_models_tool_window_state_and_frame_attachment() {
 
             local _, relativeTo = owner:GetPoint(1)
             local width, height = window:GetSize()
-            local x, y = window:GetPosition()
             local startsTopmost = window:IsTopmost()
             window:SetTopmost(false)
             local endsTopmost = window:IsTopmost()
@@ -220,8 +218,6 @@ fn create_window_models_tool_window_state_and_frame_attachment() {
                 relativeTo == window,
                 width,
                 height,
-                x,
-                y,
                 startsTopmost,
                 endsTopmost,
                 window:IsShown()
@@ -238,13 +234,12 @@ fn create_window_models_tool_window_state_and_frame_attachment() {
         "SetAllPoints must anchor the owner to the SimpleWindow"
     );
     assert_eq!((result.2, result.3), (700.0, 500.0));
-    assert_eq!((result.4, result.5), (12.0, 34.0));
     assert!(
-        result.6,
+        result.4,
         "topMost creation argument must initialize topmost state"
     );
-    assert!(!result.7, "SetTopmost(false) must update topmost state");
-    assert!(!result.8, "Close must hide the modeled external window");
+    assert!(!result.5, "SetTopmost(false) must update topmost state");
+    assert!(!result.6, "Close must hide the modeled external window");
 }
 
 #[test]

@@ -9,16 +9,11 @@ use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-const POPUP_STYLE_FIELD: &str = "__simpleWindowPopupStyle";
 const TOPMOST_FIELD: &str = "__simpleWindowTopmost";
-const FOCUSED_FIELD: &str = "__simpleWindowFocused";
 const MIN_WIDTH_FIELD: &str = "__simpleWindowMinWidth";
 const MIN_HEIGHT_FIELD: &str = "__simpleWindowMinHeight";
-const POSITION_X_FIELD: &str = "__simpleWindowPositionX";
-const POSITION_Y_FIELD: &str = "__simpleWindowPositionY";
 
 pub(super) fn create_window(state: &mut LuaState) -> LuaResult<u32> {
-    let popup_style = bool_arg_or_default(state, 1, true)?;
     let topmost = bool_arg_or_default(state, 2, false)?;
     let window_id = super::create_frame_instance(
         state,
@@ -31,7 +26,7 @@ pub(super) fn create_window(state: &mut LuaState) -> LuaResult<u32> {
     )?;
 
     initialize_window_frame(state, window_id)?;
-    install_window_fields(state, window_id, popup_style, topmost)?;
+    install_window_fields(state, window_id, topmost)?;
     let window = frame_ref(state, window_id)?;
     state.push(window);
     Ok(1)
@@ -53,43 +48,26 @@ fn initialize_window_frame(state: &mut LuaState, window_id: u64) -> LuaResult<()
     Ok(())
 }
 
-fn install_window_fields(
-    state: &mut LuaState,
-    window_id: u64,
-    popup_style: bool,
-    topmost: bool,
-) -> LuaResult<()> {
+fn install_window_fields(state: &mut LuaState, window_id: u64, topmost: bool) -> LuaResult<()> {
     let fields = get_or_create_frame_fields(state, window_id);
-    table_set_static(state, fields, POPUP_STYLE_FIELD, Val::Bool(popup_style));
     table_set_static(state, fields, TOPMOST_FIELD, Val::Bool(topmost));
-    table_set_static(state, fields, FOCUSED_FIELD, Val::Bool(false));
     table_set_static(state, fields, MIN_WIDTH_FIELD, Val::Num(0.0));
     table_set_static(state, fields, MIN_HEIGHT_FIELD, Val::Num(0.0));
-    table_set_static(state, fields, POSITION_X_FIELD, Val::Num(0.0));
-    table_set_static(state, fields, POSITION_Y_FIELD, Val::Num(0.0));
 
     let Val::Table(fields_ref) = fields else {
         return Ok(());
     };
-    table_set_rust_fn_static(state, fields_ref, "SetTitle", set_title)?;
+    table_set_rust_fn_static(state, fields_ref, "SetTitle", no_result)?;
     table_set_rust_fn_static(state, fields_ref, "SetWindowSize", set_window_size)?;
     table_set_rust_fn_static(state, fields_ref, "SetMinSize", set_min_size)?;
-    table_set_rust_fn_static(state, fields_ref, "SetPosition", set_position)?;
-    table_set_rust_fn_static(state, fields_ref, "GetPosition", get_position)?;
-    table_set_rust_fn_static(state, fields_ref, "SetFocus", set_focus)?;
+    table_set_rust_fn_static(state, fields_ref, "SetFocus", no_result)?;
     table_set_rust_fn_static(state, fields_ref, "IsTopmost", is_topmost)?;
     table_set_rust_fn_static(state, fields_ref, "SetTopmost", set_topmost)?;
     table_set_rust_fn_static(state, fields_ref, "Close", close)?;
     Ok(())
 }
 
-fn set_title(state: &mut LuaState) -> LuaResult<u32> {
-    let window_id = frame_id_from_stack(state, 1)?;
-    let title = String::from_stack(state, 2)?;
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(window) = sim.widgets.get_mut_visual(window_id) {
-        window.title = Some(title);
-    }
+fn no_result(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
@@ -145,33 +123,6 @@ fn update_window_size(
     }
     sim.widgets.mark_rect_dirty(window_id);
     Ok(())
-}
-
-fn set_position(state: &mut LuaState) -> LuaResult<u32> {
-    let window_id = frame_id_from_stack(state, 1)?;
-    let x = f64::from_stack(state, 2)?;
-    let y = f64::from_stack(state, 3)?;
-    let fields = get_or_create_frame_fields(state, window_id);
-    table_set_static(state, fields, POSITION_X_FIELD, Val::Num(x));
-    table_set_static(state, fields, POSITION_Y_FIELD, Val::Num(y));
-    Ok(0)
-}
-
-fn get_position(state: &mut LuaState) -> LuaResult<u32> {
-    let window_id = frame_id_from_stack(state, 1)?;
-    let fields = get_or_create_frame_fields(state, window_id);
-    let x = number_field(state, fields, POSITION_X_FIELD);
-    let y = number_field(state, fields, POSITION_Y_FIELD);
-    state.push(Val::Num(x as f64));
-    state.push(Val::Num(y as f64));
-    Ok(2)
-}
-
-fn set_focus(state: &mut LuaState) -> LuaResult<u32> {
-    let window_id = frame_id_from_stack(state, 1)?;
-    let fields = get_or_create_frame_fields(state, window_id);
-    table_set_static(state, fields, FOCUSED_FIELD, Val::Bool(true));
-    Ok(0)
 }
 
 fn is_topmost(state: &mut LuaState) -> LuaResult<u32> {
