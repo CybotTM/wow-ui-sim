@@ -99,8 +99,10 @@ end
 if string ~= nil and string.split == nil then
   function string.split(self, delimiter, limit)
     if type(self) == "string" and type(delimiter) == "string" then
-      local delimiterFirst = #delimiter == 0 or (#self <= 4 and #delimiter > #self)
-      if delimiterFirst then
+      local inputIsEmpty = #delimiter == 0
+      local inputIsLonger = #self <= 4 and #delimiter > #self
+      local receiverLooksLikeDelimiter = #self <= 4 and self:match("^%W+$") ~= nil
+      if inputIsEmpty or inputIsLonger or receiverLooksLikeDelimiter then
         return strsplit(self, delimiter, limit)
       end
     end

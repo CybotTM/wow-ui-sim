@@ -196,7 +196,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/formatting_utility_defaults.rs",
           "summary": "Current temporary fallback ignores NumberAbbrevOptions and returns a floored numeric string; abbreviation thresholds, localization, options, validation, and edge semantics are unmodeled.",
-          "source_hash": "2b8f1f9045252e6b168f111dc3577b40ce8a12234403485d5897f286d8e24180"
+          "source_hash": "ab224bc98a89071db5da1574862458713303b127a213c08edc6465b691024e1c"
         }
       ],
       "tests": [],
@@ -225,7 +225,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/formatting_utility_defaults.rs",
           "summary": "Current temporary fallback ignores NumberAbbrevOptions and returns a direct string conversion; abbreviation thresholds, localization, options, validation, and edge semantics are unmodeled.",
-          "source_hash": "2b8f1f9045252e6b168f111dc3577b40ce8a12234403485d5897f286d8e24180"
+          "source_hash": "ab224bc98a89071db5da1574862458713303b127a213c08edc6465b691024e1c"
         }
       ],
       "tests": [],
@@ -97050,7 +97050,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/formatting_utility_defaults.rs",
           "summary": "A duplicate temporary fallback/test covers only basic doubling behavior.",
-          "source_hash": "2b8f1f9045252e6b168f111dc3577b40ce8a12234403485d5897f286d8e24180"
+          "source_hash": "ab224bc98a89071db5da1574862458713303b127a213c08edc6465b691024e1c"
         },
         {
           "kind": "source",

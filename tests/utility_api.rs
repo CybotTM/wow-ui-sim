@@ -628,6 +628,20 @@ fn test_string_split_function_accepts_empty_delimiter_receiver_input() {
 }
 
 #[test]
+fn test_string_split_method_accepts_equal_length_delimiter_receiver_input() {
+    let env = env();
+    let value: String = env.eval(r#"return (" "):split("?")"#).unwrap();
+    assert_eq!(value, "?");
+}
+
+#[test]
+fn test_string_split_function_accepts_equal_length_delimiter_receiver_input() {
+    let env = env();
+    let value: String = env.eval(r#"return string.split(" ", "?")"#).unwrap();
+    assert_eq!(value, "?");
+}
+
+#[test]
 fn test_format_alias() {
     let env = env();
     let result: String = env.eval("return format('%d items', 5)").unwrap();

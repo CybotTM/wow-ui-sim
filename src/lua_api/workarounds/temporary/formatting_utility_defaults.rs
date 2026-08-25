@@ -128,8 +128,10 @@ do
   local stringMeta = getmetatable("")
   local function splitStringMethod(self, delimiterOrInput, limit)
     if type(self) == "string" and type(delimiterOrInput) == "string" then
-      local delimiterFirst = #delimiterOrInput == 0 or (#self <= 4 and #delimiterOrInput > #self)
-      if delimiterFirst then
+      local inputIsEmpty = #delimiterOrInput == 0
+      local inputIsLonger = #self <= 4 and #delimiterOrInput > #self
+      local receiverLooksLikeDelimiter = #self <= 4 and self:match("^%W+$") ~= nil
+      if inputIsEmpty or inputIsLonger or receiverLooksLikeDelimiter then
         return strsplit(self, delimiterOrInput, limit)
       end
     end
