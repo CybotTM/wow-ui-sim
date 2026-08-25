@@ -20,12 +20,13 @@ pub(super) fn build_frame_lua_code(
     parent: &str,
     parent_ref_expr: &str,
 ) -> String {
+    let keep_implicit_parent = frame.set_all_points == Some(true) || frame.toplevel == Some(true);
     let mut lua_code = build_create_frame_code(
         widget_type,
         name,
         explicit_parent,
         inherits,
-        frame.set_all_points == Some(true),
+        keep_implicit_parent,
         parent_ref_expr,
     );
     append_parent_key_code(&mut lua_code, frame, inherits, parent, parent_ref_expr);
@@ -48,7 +49,7 @@ fn build_create_frame_code(
     name: &str,
     parent: Option<&str>,
     inherits: &str,
-    set_all_points: bool,
+    keep_implicit_parent: bool,
     parent_ref_expr: &str,
 ) -> String {
     let inherits_arg = if inherits.is_empty() {
@@ -72,10 +73,9 @@ fn build_create_frame_code(
         // here and orphan the frame with SetParent(nil) afterwards.
         None => "UIParent".to_string(),
     };
-    let orphan_code = if parent.is_none() && !set_all_points {
-        // In WoW, top-level XML frames without a parent attribute are created
-        // as orphans (no parent). Our Lua CreateFrame always defaults to
-        // UIParent, so we create with UIParent then immediately orphan.
+    let orphan_code = if parent.is_none() && !keep_implicit_parent {
+        // Parentless XML frames are orphans unless their root-layout attributes
+        // require the implicit UIParent used during creation.
         "\n        frame:SetParent(nil)"
     } else {
         ""
