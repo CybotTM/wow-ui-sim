@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn script_errors_frame_dir() -> PathBuf {
@@ -400,8 +401,8 @@ fn script_errors_frame_mixin_publishes_with_eleven_methods() {
              render path — keys errors by `message\\nstack` in the `seen` table, \
              increments `count` on duplicates, calls PrintToDebugWindow on \
              first-occurrence, auto-Shows when not hidden by \
-             ShouldHideErrorFrame('scriptErrors'), tracks messageCount and calls \
-             OnExcessiveErrors at >=1000 messages); GetEditBox (returns \
+             ShouldHideErrorFrame('scriptErrors'), invokes the messageCounter \
+             closure and calls OnExcessiveErrors at >=1000 messages); GetEditBox (returns \
              ScrollFrame.Text); Update (renders ERROR_FORMAT or WARNING_FORMAT, \
              triggers ScrollingEdit re-layout, resets vertical scroll); \
              UpdateButtons (enable/disable PreviousError/NextError, set IndexLabel \
@@ -539,7 +540,6 @@ fn display_message_internal_dedups_identical_message_stack_pairs() {
         r#"
         ScriptErrorsFrame.errorData = {}
         ScriptErrorsFrame.seen = {}
-        ScriptErrorsFrame.messageCount = 0
         ScriptErrorsFrame.index = 0
         ScriptErrorsFrame:DisplayMessageInternal("synthetic-error", 0, "synthetic-stack", "synthetic-locals")
         ScriptErrorsFrame:DisplayMessageInternal("synthetic-error", 0, "synthetic-stack", "synthetic-locals")
@@ -568,17 +568,5 @@ fn display_message_internal_dedups_identical_message_stack_pairs() {
         "errorData[1].count must equal 3 after 3 identical raises — the dedup \
          path increments the count field instead of appending a new errorData \
          entry"
-    );
-
-    let total_messages: f64 = env
-        .eval("return ScriptErrorsFrame.messageCount")
-        .expect("messageCount probe succeeds");
-    assert_eq!(
-        total_messages, 3.0,
-        "messageCount must equal 3 — even though dedup collapsed the 3 raises \
-         into one errorData entry, the running messageCount counter increments \
-         on every DisplayMessageInternal call. This is the counter that triggers \
-         OnExcessiveErrors at >=1000 to protect the player from an infinite \
-         error loop"
     );
 }
