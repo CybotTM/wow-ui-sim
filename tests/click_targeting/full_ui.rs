@@ -11,7 +11,7 @@ const CLICK_TARGETING_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
     (
         "Blizzard_SharedXMLGame",
-        "Blizzard_SharedXMLGame_Mainline.toc",
+        "Blizzard_SharedXMLGame.toc",
     ),
     (
         "Blizzard_UIPanelTemplates",
@@ -35,7 +35,7 @@ const CLICK_TARGETING_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Mainline.toc"),
     ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
-    ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
+    ("Blizzard_StoreUI", "Blizzard_StoreUI.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
@@ -56,7 +56,7 @@ const CLICK_TARGETING_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil_Mainline.toc"),
+    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
     ("Blizzard_Menu", "Blizzard_Menu.toc"),
     ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
     ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
