@@ -610,6 +610,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     register_utility_globals(lua)?;
     register_system_globals(lua)?;
     spell_api::register_spell_globals(lua)?;
+    crate::lua_api::globals::real::timerunning::register_all(lua)?;
 
     let state = lua.state_mut();
     register_system_tables(state)?;

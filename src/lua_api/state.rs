@@ -177,6 +177,7 @@ macro_rules! build_empty_sim_state {
             net_stats: NetStats::default(),
             store_frame_shown: false,
             timerunning_season_id: None,
+            timerunning_season_seconds_remaining: 0,
             modifier_keys: ModifierKeys::default(),
             game_rules: GameRulesState::default(),
             discord: DiscordState::default(),

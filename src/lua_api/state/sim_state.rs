@@ -162,6 +162,7 @@ pub struct SimState {
     pub net_stats: NetStats,
     pub store_frame_shown: bool,
     pub timerunning_season_id: Option<u32>,
+    pub timerunning_season_seconds_remaining: u64,
     pub modifier_keys: ModifierKeys,
     pub mouse_buttons: MouseButtons,
     pub game_rules: GameRulesState,
