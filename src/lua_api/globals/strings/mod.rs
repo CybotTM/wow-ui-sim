@@ -4,38 +4,107 @@ pub mod string_data;
 
 use crate::client_profile::{ACTIVE_RETAIL_API_EPOCH, RetailApiEpoch};
 use crate::loader::helpers::resolve_lua_escapes;
-use crate::lua_api::methods::{create_string, table_set};
+use crate::lua_api::methods::{create_string, table_get, table_set};
 use rilua::LuaApiMut;
 use rilua::Val;
+use rilua::vm::state::LuaState;
+
+#[derive(Clone, Copy)]
+enum ExistingGlobalPolicy {
+    Replace,
+    Preserve,
+}
 
 pub fn register_all_ui_strings(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_ui_strings(lua, ExistingGlobalPolicy::Replace)
+}
+
+pub fn restore_missing_ui_strings(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_ui_strings(lua, ExistingGlobalPolicy::Preserve)
+}
+
+fn register_ui_strings(
+    lua: &mut rilua::Lua,
+    existing_policy: ExistingGlobalPolicy,
+) -> crate::Result<()> {
     let state = lua.state_mut();
     let global = Val::Table(state.global);
+    register_global_strings(state, global, existing_policy);
+    register_integer_constants(state, global, existing_policy);
+    register_float_constants(state, global, existing_policy);
+    register_string_constants(state, global, existing_policy);
+    Ok(())
+}
+
+fn register_global_strings(
+    state: &mut LuaState,
+    global: Val,
+    existing_policy: ExistingGlobalPolicy,
+) {
     for (name, value) in crate::global_strings::GLOBAL_STRINGS.entries() {
-        let resolved = resolve_lua_escapes(value);
-        let lua_value = create_string(state, &resolved);
-        table_set(state, global, name, lua_value);
-    }
-    for defs in INT_DEFS {
-        for &(name, value) in defs.iter() {
-            if should_register_int_constant(name, ACTIVE_RETAIL_API_EPOCH) {
-                table_set(state, global, name, Val::Num(value as f64));
-            }
-        }
-    }
-    for defs in FLOAT_DEFS {
-        for &(name, value) in defs.iter() {
-            table_set(state, global, name, Val::Num(value));
-        }
-    }
-    for defs in STRING_DEFS {
-        for &(name, value) in defs.iter() {
+        if should_set_global(state, global, name, existing_policy) {
             let resolved = resolve_lua_escapes(value);
             let lua_value = create_string(state, &resolved);
             table_set(state, global, name, lua_value);
         }
     }
-    Ok(())
+}
+
+fn register_integer_constants(
+    state: &mut LuaState,
+    global: Val,
+    existing_policy: ExistingGlobalPolicy,
+) {
+    for defs in INT_DEFS {
+        for &(name, value) in defs.iter() {
+            let supported = should_register_int_constant(name, ACTIVE_RETAIL_API_EPOCH);
+            if supported && should_set_global(state, global, name, existing_policy) {
+                table_set(state, global, name, Val::Num(value as f64));
+            }
+        }
+    }
+}
+
+fn register_float_constants(
+    state: &mut LuaState,
+    global: Val,
+    existing_policy: ExistingGlobalPolicy,
+) {
+    for defs in FLOAT_DEFS {
+        for &(name, value) in defs.iter() {
+            if should_set_global(state, global, name, existing_policy) {
+                table_set(state, global, name, Val::Num(value));
+            }
+        }
+    }
+}
+
+fn register_string_constants(
+    state: &mut LuaState,
+    global: Val,
+    existing_policy: ExistingGlobalPolicy,
+) {
+    for defs in STRING_DEFS {
+        for &(name, value) in defs.iter() {
+            if should_set_global(state, global, name, existing_policy) {
+                let resolved = resolve_lua_escapes(value);
+                let lua_value = create_string(state, &resolved);
+                table_set(state, global, name, lua_value);
+            }
+        }
+    }
+}
+
+fn should_set_global(
+    state: &mut LuaState,
+    global: Val,
+    name: &str,
+    existing_policy: ExistingGlobalPolicy,
+) -> bool {
+    match existing_policy {
+        ExistingGlobalPolicy::Replace => true,
+        ExistingGlobalPolicy::Preserve => matches!(table_get(state, global, name), Val::Nil),
+    }
 }
 
 const INT_DEFS: &[&[crate::lua_api::globals::strings::string_data::IntDef]] = &[
