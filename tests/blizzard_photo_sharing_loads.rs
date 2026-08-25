@@ -415,14 +415,23 @@ fn blizzard_photo_sharing_browser_popup_global_pins_inner_browser_collision_winn
          same-named outer Frame rather than UIParent"
     );
 
-    let navigate_to_kind: String = env
-        .eval("return type(PhotoSharingBrowserPopup.NavigateTo)")
-        .expect("Browser.NavigateTo probe succeeds");
+    let navigation_contract: (String, String, bool) = env
+        .eval(
+            r#"
+            local navigateToResult = PhotoSharingBrowserPopup:NavigateTo("https://example.invalid")
+            local navigateHomeResult = PhotoSharingBrowser:NavigateHome("PhotoSharing")
+            return type(PhotoSharingBrowserPopup.NavigateTo),
+                type(PhotoSharingBrowser.NavigateHome),
+                navigateToResult == nil and navigateHomeResult == nil
+            "#,
+        )
+        .expect("Browser navigation methods should be callable");
     assert_eq!(
-        navigate_to_kind, "function",
-        "Browser:NavigateTo must be available because the current SIMPLE_BROWSER_POPUP \
-         handler calls PhotoSharingBrowserPopup:NavigateTo(url) at \
-         Blizzard_PhotoSharingBrowser.lua:73"
+        navigation_contract,
+        ("function".to_string(), "function".to_string(), true),
+        "Browser:NavigateTo and Browser:NavigateHome must be callable no-result methods. \
+         Blizzard_PhotoSharingBrowser.lua calls them for popup URLs and the PhotoSharing \
+         home page; the simulator performs no external browser navigation"
     );
 }
 
