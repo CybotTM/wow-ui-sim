@@ -41,35 +41,79 @@ fn load_all_blizzard_addons(env: &WowLuaEnv, ui: &Path) {
 }
 
 #[test]
-fn social_panel_toggle_realizes_online_and_offline_friend_rows() {
+fn social_panel_toggle_realizes_online_rows_and_provides_offline_friend_data() {
     common::with_perf_lock(|| {
         common::with_timeout(120, || {
             let env = full_game_env_after_startup();
 
-            let result: String = env
+            let (
+                realized_online_names,
+                expected_online_names,
+                has_offline_element,
+                offline_name,
+                offline_connected,
+            ): (String, String, bool, String, bool) = env
                 .eval(
                     r#"
                     ToggleSocialPanel()
 
-                    local rows = {}
+                    local realizedOnlineNames = {}
                     FriendsListFrame.ScrollBox:ForEachFrame(function(frame, elementData)
                         if elementData.buttonType == FRIENDS_BUTTON_TYPE_WOW then
-                            table.insert(rows, frame.name:GetText() .. "|" .. frame.info:GetText())
+                            local info = C_FriendList.GetFriendInfoByIndex(elementData.id)
+                            if info and info.connected then
+                                table.insert(realizedOnlineNames, frame.name:GetText())
+                            end
                         end
                     end)
+                    table.sort(realizedOnlineNames)
 
-                    return table.concat(rows, "\n")
+                    local expectedOnlineNames = {}
+                    for index = 1, C_FriendList.GetNumFriends() do
+                        local info = C_FriendList.GetFriendInfoByIndex(index)
+                        if info and info.connected then
+                            table.insert(expectedOnlineNames, info.name)
+                        end
+                    end
+                    table.sort(expectedOnlineNames)
+
+                    local offlineElement = FriendsListFrame.ScrollBox:GetDataProvider():FindElementDataByPredicate(function(elementData)
+                        if elementData.buttonType ~= FRIENDS_BUTTON_TYPE_WOW then
+                            return false
+                        end
+                        local info = C_FriendList.GetFriendInfoByIndex(elementData.id)
+                        return info and not info.connected
+                    end)
+                    local offlineInfo = offlineElement and C_FriendList.GetFriendInfoByIndex(offlineElement.id)
+
+                    return table.concat(realizedOnlineNames, "\n"),
+                        table.concat(expectedOnlineNames, "\n"),
+                        offlineElement ~= nil,
+                        offlineInfo and offlineInfo.name or "",
+                        offlineInfo and offlineInfo.connected or false
                     "#,
                 )
                 .unwrap();
 
             assert!(
-                result.contains("Alyth"),
-                "friends panel should show the online friend row, got: {result:?}"
+                !expected_online_names.is_empty(),
+                "state-backed friend fixture should include an online friend"
+            );
+            assert_eq!(
+                realized_online_names, expected_online_names,
+                "initially realized WoW friend rows should match the state-backed online friends"
             );
             assert!(
-                result.contains("Brennor"),
-                "friends panel should show the offline friend row, got: {result:?}"
+                has_offline_element,
+                "friends data provider should contain a state-backed offline WoW friend"
+            );
+            assert!(
+                !offline_name.is_empty(),
+                "offline data-provider row should resolve to a named friend"
+            );
+            assert!(
+                !offline_connected,
+                "offline data-provider row should resolve with connected=false"
             );
 
             let (wow_alpha, offline_alpha): (f64, f64) = env
