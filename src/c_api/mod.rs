@@ -49,6 +49,7 @@ pub mod c_spell_book;
 pub mod c_spell_diminish;
 pub mod c_stable_info;
 pub mod c_string_util;
+mod c_string_util_decimal;
 pub mod c_summon_info;
 pub mod c_texture;
 pub mod c_ui_file_asset;
@@ -102,6 +103,7 @@ fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {
     c_string_util::register_c_string_util(state)?;
+    c_string_util_decimal::register_escape_decimal_non_printables(state)?;
     c_pvp::register_c_pvp_surface(state)?;
     c_ping_secure::register_c_ping_secure_surface(state)?;
     c_wowtoken_secure::register_c_wowtoken_secure(state)?;

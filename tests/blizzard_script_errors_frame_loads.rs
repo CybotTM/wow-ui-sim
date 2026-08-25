@@ -59,6 +59,68 @@ const FRAME_CHILD_KEYS: &[&str] = &[
     "Close",
 ];
 
+#[test]
+fn escape_decimal_non_printables_preserves_printable_text_and_valid_utf8() {
+    let env = WowLuaEnv::new().expect("Lua environment initializes");
+    let escaped: String = env
+        .eval(
+            r#"
+            return C_StringUtil.EscapeDecimalNonPrintables(
+                "ASCII punctuation: !@#$%^&*() café 日本語"
+            )
+            "#,
+        )
+        .expect("EscapeDecimalNonPrintables accepts valid UTF-8");
+
+    assert_eq!(escaped, "ASCII punctuation: !@#$%^&*() café 日本語");
+}
+
+#[test]
+fn escape_decimal_non_printables_escapes_ascii_controls_except_tab_newline_and_return() {
+    let env = WowLuaEnv::new().expect("Lua environment initializes");
+    let matches_expected: bool = env
+        .eval(
+            r#"
+            local slash = string.char(92)
+            local input = {}
+            local expected = {}
+            for byte = 0, 31 do
+                table.insert(input, string.char(byte))
+                if byte == 9 or byte == 10 or byte == 13 then
+                    table.insert(expected, string.char(byte))
+                else
+                    table.insert(expected, slash .. string.format("%03d", byte))
+                end
+            end
+            table.insert(input, string.char(32, 126, 127))
+            table.insert(expected, " ~" .. slash .. "127")
+            return C_StringUtil.EscapeDecimalNonPrintables(table.concat(input))
+                == table.concat(expected)
+            "#,
+        )
+        .expect("EscapeDecimalNonPrintables accepts ASCII bytes");
+
+    assert!(matches_expected);
+}
+
+#[test]
+fn escape_decimal_non_printables_escapes_each_invalid_utf8_byte() {
+    let env = WowLuaEnv::new().expect("Lua environment initializes");
+    let matches_expected: bool = env
+        .eval(
+            r#"
+            local slash = string.char(92)
+            local input = "é" .. string.char(195, 40, 255, 226, 130) .. "日本語"
+            local expected = "é" .. slash .. "195(" .. slash .. "255"
+                .. slash .. "226" .. slash .. "130" .. "日本語"
+            return C_StringUtil.EscapeDecimalNonPrintables(input) == expected
+            "#,
+        )
+        .expect("EscapeDecimalNonPrintables accepts invalid UTF-8 bytes");
+
+    assert!(matches_expected);
+}
+
 fn load_full_game_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
