@@ -1,3 +1,7 @@
+## [2026-08-25] update | Document rilua global-slot read modes
+
+Updated `design/track-3-global-slot-abi.md` after commit `f0f5312be` pinned the rilua slot-read fix. The default/no-shadow `GETGLOBAL_SLOT` path now documents current root `_G` coherence after bare assignment, `_G.Name = value`, `rawset`, and nil; the optional live-shadow/freeze mode retains frozen snapshot fallback with shadow overrides taking precedence. Added the design page to `index.md` and recorded the required mode-matrix parity proof.
+
 ## [2026-08-25] fix | Bound Lua bytecode cache growth
 
 Commit `39caf2662` updates `investigations/bytecode-cache-growth.md`. A valid `WOWBC002` pack had reached **32,316,662,045 bytes** with **25,256,274 unique hashes**, stalling isolated addon loading because the cap applied only at the next load and `read_to_end` preceded the size check. The cache now checks metadata/bounded reads before parsing, enforces serialized size before append, compacts or rebuilds at the limit, and persists before replacing in-memory state. Focused `bytecode_cache` tests cover bounded oversized-pack rejection, compaction, rebuild, oversized entries, failed-append rollback, and legacy promotion. Added `[[bytecode-cache-growth]]` and cross-linked it to `[[track-3-global-slot-abi]]`.

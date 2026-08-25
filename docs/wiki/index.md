@@ -256,6 +256,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | Page | Summary |
 |------|---------|
 | [[architecture-overview]] | Project goals, Lua+Rust dual system, module layout, design decisions, phase summary |
+| [[track-3-global-slot-abi]] | Global-slot fast path: default root-table coherence, optional frozen shadow mode, slot numbering, cache-version contract, and parity proofs |
 | [[scaling-coordinates]] | WoW bottom-left Y-up coordinate system, canvas sizing, projection matrix, known issues |
 | [[debug-tools]] | Inspector panel (middle-click), dump-tree CLI (standalone + connected), debug overlay flags |
 
