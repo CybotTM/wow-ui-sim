@@ -34,6 +34,10 @@ fn collections_journal_opened_to_heirlooms_closes_on_escape() {
 
         ModelPreviewFrame = CreateFrame("Frame", "ModelPreviewFrame", UIParent)
         ModelPreviewFrame:Hide()
+        GameMenuFrame:Hide()
+        HelpFrame:Hide()
+        EditModeManagerFrame:Hide()
+        SettingsPanel:Hide()
         DISALLOW_SPELL_FLYOUTS = true
 
         CollectionsJournal = CreateFrame("Frame", "CollectionsJournal", UIParent)
