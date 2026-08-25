@@ -224,7 +224,7 @@ fn toc_body_starts_with_util_then_edge_templates_then_button_templates() {
 }
 
 #[test]
-fn toc_body_ends_with_frame_grid_completing_layout_chain() {
+fn toc_body_ends_with_frame_grid_then_auto_commit_frame() {
     let raw = std::fs::read_to_string(talent_ui_toc()).expect("TOC reads utf-8");
 
     let body_lines: Vec<&str> = raw
@@ -235,19 +235,19 @@ fn toc_body_ends_with_frame_grid_completing_layout_chain() {
         })
         .collect();
 
-    let last_two = &body_lines[body_lines.len() - 2..];
+    let last_four = &body_lines[body_lines.len() - 4..];
     assert_eq!(
-        last_two,
+        last_four,
         [
             "Blizzard_TalentFrameGrid.lua",
-            "Blizzard_TalentFrameGrid.xml"
+            "Blizzard_TalentFrameGrid.xml",
+            "Blizzard_AutoCommitTraitFrame.lua",
+            "Blizzard_AutoCommitTraitFrame.xml",
         ],
-        "TOC body MUST end with FrameGrid lua/xml pair — TalentFrameGridMixin \
-         is the layout strategy that all consumer talent UIs (PlayerSpells \
-         spec tab, Profession trees) inherit when they need a 2D grid \
-         positioning of nodes. Loading FrameGrid last lets it reference every \
-         button/edge/card mixin defined earlier in the chain. Got: \
-         {last_two:?}"
+        "TOC body MUST end with the FrameGrid pair followed by the \
+         AutoCommitTraitFrame pair. FrameGrid completes the shared layout \
+         chain before AutoCommitTraitFrame consumes the published talent \
+         frame and button mixins. Got: {last_four:?}"
     );
 }
 
@@ -268,22 +268,24 @@ fn toc_body_count_breakdown_matches_filesystem_layout() {
 
     assert_eq!(
         lua_count + xml_count,
-        32,
-        "TOC body lists exactly 32 file entries — counted from the upstream \
-         `vendor/wow-ui-source` checkout. Got lua={lua_count} xml={xml_count}"
+        34,
+        "TOC body lists exactly 34 file entries from the active retail \
+         Blizzard UI cache. Got lua={lua_count} xml={xml_count}"
     );
     assert_eq!(
-        lua_count, 16,
-        "TOC body must list exactly 16 .lua entries (Util + AnimUtil + \
-         per-component .lua files). 4 additional .lua siblings \
-         (EdgeTemplates, SelectionTemplates, FrameTemplates, Frame) are \
-         loaded indirectly via `<Script file=...>` from their companion .xml \
-         and so are NOT listed in the TOC body. Got: {lua_count}"
+        lua_count, 17,
+        "TOC body must list exactly 17 .lua entries (Util + AnimUtil + \
+         per-component files, including AutoCommitTraitFrame). 4 additional \
+         .lua siblings (EdgeTemplates, SelectionTemplates, FrameTemplates, \
+         Frame) are loaded indirectly via `<Script file=...>` from their \
+         companion .xml and so are NOT listed in the TOC body. Got: \
+         {lua_count}"
     );
     assert_eq!(
-        xml_count, 16,
-        "TOC body must list exactly 16 .xml entries — one per component that \
-         registers virtual templates or instantiates frames. Got: {xml_count}"
+        xml_count, 17,
+        "TOC body must list exactly 17 .xml entries — one per component that \
+         registers virtual templates or instantiates frames, including \
+         AutoCommitTraitFrame. Got: {xml_count}"
     );
 }
 

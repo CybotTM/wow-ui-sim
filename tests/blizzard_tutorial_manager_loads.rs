@@ -183,9 +183,9 @@ fn toc_raw_bytes_pin_three_directives_and_nine_body_files() {
     let raw = std::fs::read_to_string(tutorial_manager_toc()).expect("TOC reads utf-8");
 
     let expected_lines = [
-        "## Author: Blizzard Entertainment",
-        "## Title: Blizzard Tutorial Manager",
-        "## Dependencies: Blizzard_Dispatcher, Blizzard_HelpPlate",
+        "## Title: Blizzard_TutorialManager",
+        "## Dep: Blizzard_Dispatcher",
+        "## Dep: Blizzard_HelpPlate",
         "Blizzard_TutorialQueue.lua",
         "Blizzard_TutorialQuestManager.lua",
         "Blizzard_TutorialRangeManager.lua",
@@ -209,6 +209,7 @@ fn toc_raw_bytes_pin_three_directives_and_nine_body_files() {
         );
     }
 
+    assert!(!raw.contains("## Author"));
     assert!(!raw.contains("## LoadOnDemand"));
     assert!(!raw.contains("## AllowLoad"));
     assert!(!raw.contains("## DefaultState"));

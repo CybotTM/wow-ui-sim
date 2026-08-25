@@ -28,9 +28,8 @@ const REQUIRED_DEPS: &[&str] = &[
     "Blizzard_MawBuffs",
     "Blizzard_TieredEntranceTraits",
     "Blizzard_TransmogShared",
+    "Blizzard_UIWidgets",
 ];
-
-const OPTIONAL_DEPS: &[&str] = &["Blizzard_UIWidgets", "Blizzard_UIWidgets_WoWLabs"];
 
 const ANNOTATED_MANAGER_FILE: &str = "Blizzard_ObjectiveTrackerManager.lua";
 
@@ -137,7 +136,7 @@ fn blizzard_objective_tracker_find_toc_resolves_bare_variant() {
 }
 
 #[test]
-fn blizzard_objective_tracker_toc_declares_eager_game_only_with_three_required_deps() {
+fn blizzard_objective_tracker_toc_declares_eager_game_only_with_four_required_deps() {
     let toc =
         TocFile::from_file(&objective_tracker_toc()).expect("Blizzard_ObjectiveTracker TOC parses");
 
@@ -176,23 +175,14 @@ fn blizzard_objective_tracker_toc_declares_eager_game_only_with_three_required_d
     assert_eq!(
         toc.dependencies(),
         REQUIRED_DEPS,
-        "TOC must declare exactly 3 RequiredDeps in canonical order: Blizzard_MawBuffs (the \
-         Maw-zone buff frame mounted into the tracker container during Shadowlands content), \
-         Blizzard_TieredEntranceTraits (Mythic+ tiered-entrance trait widgets that mount \
-         under the scenario tracker), Blizzard_TransmogShared (shared transmog data tables \
-         consumed by the rewards-toast UI for cosmetic quest rewards). All three are HARD \
-         deps — the tracker's container refuses to load if any are missing because their \
-         frames are referenced by name from the tracker's XML at parse time"
+        "TOC must declare exactly 4 hard dependencies in source order: \
+         Blizzard_MawBuffs, Blizzard_TieredEntranceTraits, \
+         Blizzard_TransmogShared, and Blizzard_UIWidgets"
     );
 
-    assert_eq!(
-        toc.optional_deps(),
-        OPTIONAL_DEPS,
-        "TOC must declare exactly 2 OptionalDeps: Blizzard_UIWidgets (provides the generic \
-         UIWidget frame primitives consumed by the Blizzard_ObjectiveTrackerUIWidgetContainer \
-         module), Blizzard_UIWidgets_WoWLabs (the WoW-Labs / Plunderstorm-specific widget \
-         layer; ABSENT from disk in the retail extract — optional-deps tolerate missing \
-         siblings, so the addon still loads cleanly without it)"
+    assert!(
+        toc.optional_deps().is_empty(),
+        "Current retail TOC declares no optional dependencies"
     );
 
     assert!(

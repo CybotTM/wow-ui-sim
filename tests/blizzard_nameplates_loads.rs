@@ -150,43 +150,29 @@ fn blizzard_nameplates_find_toc_resolves_bare_variant() {
 }
 
 #[test]
-fn blizzard_nameplates_toc_declares_eager_load_with_three_optional_deps() {
+fn blizzard_nameplates_toc_declares_eager_load_with_two_required_deps() {
     let toc = TocFile::from_file(&nameplates_toc()).expect("Blizzard_NamePlates TOC parses");
     assert!(
         !toc.is_load_on_demand(),
-        "TOC declares `## LoadOnDemand: 0` — the unit-nameplate driver eager-loads. \
+        "TOC omits `## LoadOnDemand`, so the unit-nameplate driver eager-loads. \
          NAME_PLATE_CREATED / NAME_PLATE_UNIT_ADDED events fire during world entry; the \
-         driver mixin's OnLoad must be wired before PLAYER_ENTERING_WORLD or the first wave of \
-         visible units would have no driver to register against"
+         driver mixin's OnLoad must be wired before PLAYER_ENTERING_WORLD"
     );
     assert!(!toc.is_load_first());
     assert!(!toc.is_secure_env());
-    assert!(
-        toc.dependencies().is_empty(),
-        "Zero `## Dependencies:` — NamePlates does not require any sibling addon. The driver \
-         resolves UnitFrame templates by name at frame-pool creation time (via the \
-         BaseNamePlateUnitFrameTemplate inheritance chain owned by Blizzard_UnitFrame), but \
-         that wiring is structured as an OptionalDep, not a hard Dependency — NamePlates can \
-         load without it and the unit frames simply remain unstyled"
+    assert_eq!(
+        toc.dependencies(),
+        vec![
+            "Blizzard_UIWidgets".to_string(),
+            "Blizzard_UnitFrame".to_string(),
+        ],
+        "Repeated `## Dep:` lines declare UIWidgets and UnitFrame as hard \
+         dependencies in source order"
     );
-
-    let optional_deps_owned = toc.optional_deps();
-    let optional: Vec<&str> = optional_deps_owned.iter().map(String::as_str).collect();
-    let optional_set: std::collections::HashSet<&str> = optional.iter().copied().collect();
-    for expected in &[
-        "Blizzard_UIWidgets",
-        "Blizzard_UIWidgets_WoWLabs",
-        "Blizzard_UnitFrame",
-    ] {
-        assert!(
-            optional_set.contains(expected),
-            "TOC must list `{expected}` in `## OptionalDeps:`. The full optional-dep set is \
-             [Blizzard_UIWidgets, Blizzard_UIWidgets_WoWLabs, Blizzard_UnitFrame] — three \
-             siblings the driver leans on but does not require. UIWidgets supplies status-bar \
-             chrome, UIWidgets_WoWLabs supplies WoW-Labs-only widget bindings, and UnitFrame \
-             supplies the BaseNamePlateUnitFrameTemplate inheritance chain. Got: {optional:?}"
-        );
-    }
+    assert!(
+        toc.optional_deps().is_empty(),
+        "Current retail TOC declares no optional dependencies"
+    );
 
     assert!(
         toc.saved_variables().is_empty(),
@@ -233,16 +219,13 @@ fn blizzard_nameplates_toc_filters_wowhack_files_during_retail_parse() {
 }
 
 #[test]
-fn blizzard_nameplates_toc_declares_explicit_eager_load_in_raw_bytes() {
+fn blizzard_nameplates_toc_omits_load_on_demand_in_raw_bytes() {
     let raw =
         std::fs::read_to_string(nameplates_toc()).expect("Blizzard_NamePlates TOC reads as utf-8");
     assert!(
-        raw.contains("## LoadOnDemand: 0"),
-        "TOC must declare `## LoadOnDemand: 0` exactly. The explicit `0` (rather than omitting \
-         the directive) is a load-author signal: the addon definitely eager-loads, and any \
-         tool scanning for LOD addons via `## LoadOnDemand:` substring matching must read the \
-         value, not assume presence-means-true. `is_load_on_demand()` at src/toc.rs returns \
-         false when the value parses to anything other than `1`"
+        !raw.contains("## LoadOnDemand"),
+        "TOC must omit `## LoadOnDemand`; omission is the current retail eager-load \
+         spelling for Blizzard_NamePlates"
     );
     assert!(
         raw.contains("[AllowLoadGameType wowhack]"),

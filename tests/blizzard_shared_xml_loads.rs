@@ -293,13 +293,13 @@ fn mainline_toc_body_count_breakdown_matches_filesystem_layout() {
 
     assert_eq!(
         lua_count + xml_count,
-        218,
-        "TOC body must list exactly 218 file entries. Got lua={lua_count} \
+        219,
+        "TOC body must list exactly 219 file entries. Got lua={lua_count} \
          xml={xml_count}"
     );
     assert_eq!(
-        lua_count, 146,
-        "TOC body must list exactly 146 .lua entries — most utility \
+        lua_count, 147,
+        "TOC body must list exactly 147 .lua entries — most utility \
          modules + per-mixin .lua files. Got: {lua_count}"
     );
     assert_eq!(

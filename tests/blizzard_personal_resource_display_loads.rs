@@ -26,6 +26,7 @@ const PRD_TOC_FILES: &[&str] = &[
     "AlternatePowerBars/DemonHunterAlternatePower.lua",
     "AlternatePowerBars/EvokerAlternatePower.lua",
     "AlternatePowerBars/MonkAlternatePower.lua",
+    "AlternatePowerBars/ManaAlternatePower.lua",
     "Blizzard_PersonalResourceDisplay.lua",
     "Blizzard_PersonalResourceDisplay.xml",
 ];
@@ -37,6 +38,9 @@ const PUBLIC_MIXINS: &[&str] = &[
     "DemonHunterAlternatePowerBarMixin",
     "EvokerAlternatePowerBarMixin",
     "MonkAlternatePowerBarMixin",
+    "ManaAlternatePowerMixin",
+    "PriestAlternatePowerBarMixin",
+    "DruidAlternatePowerBarMixin",
 ];
 
 const PUBLIC_NAMED_FRAMES: &[&str] = &["PersonalResourceDisplayFrame"];
@@ -219,7 +223,7 @@ fn blizzard_personal_resource_display_toc_declares_metadata_in_raw_bytes() {
 }
 
 #[test]
-fn blizzard_personal_resource_display_toc_lists_five_files_alternate_power_bars_first() {
+fn blizzard_personal_resource_display_toc_lists_six_files_alternate_power_bars_first() {
     let toc = TocFile::from_file(&prd_toc()).expect("Blizzard_PersonalResourceDisplay TOC parses");
     let listed: Vec<String> = toc
         .files
@@ -228,16 +232,12 @@ fn blizzard_personal_resource_display_toc_lists_five_files_alternate_power_bars_
         .collect();
     assert_eq!(
         listed, PRD_TOC_FILES,
-        "TOC body must list exactly 5 files: 3 alternate-power-bar Lua files \
-         first (DemonHunter, Evoker, Monk — alphabetical), then the base Lua \
-         and base XML last. The TOC has an inline comment \
-         `# Alternate Power Bars (must be loaded before Base)` documenting the \
-         ordering: the 3 alternate-bar files declare \
-         DemonHunterAlternatePowerBarMixin / EvokerAlternatePowerBarMixin / \
-         MonkAlternatePowerBarMixin at module top, and the base Lua's \
-         SetupAlternatePowerBar reaches for those mixins by name to materialize \
-         the spec-specific bar. Loading the base first would resolve the mixin \
-         names to nil and skip the alternate bar setup"
+        "TOC body must list exactly 6 files: 4 alternate-power-bar Lua files \
+         first (DemonHunter, Evoker, Monk, Mana), then the base Lua and base XML \
+         last. The TOC comment `# Alternate Power Bars (must be loaded before \
+         Base)` documents the ordering: each alternate-bar file publishes its \
+         mixins before the base Lua's SetupAlternatePowerBar selects one for \
+         the current class and specialization"
     );
 }
 
@@ -334,7 +334,7 @@ fn blizzard_personal_resource_display_is_addon_loaded_after_eager_sweep() {
 }
 
 #[test]
-fn blizzard_personal_resource_display_publishes_four_mixin_tables() {
+fn blizzard_personal_resource_display_publishes_seven_mixin_tables() {
     let env = load_full_game_ui();
 
     for mixin in PUBLIC_MIXINS {
@@ -343,21 +343,9 @@ fn blizzard_personal_resource_display_publishes_four_mixin_tables() {
             .unwrap_or_else(|err| panic!("type(_G.{mixin}) probe failed: {err}"));
         assert_eq!(
             kind, "table",
-            "_G.{mixin} must publish as a table — Blizzard_PersonalResourceDisplay \
-             declares 4 mixins: PersonalResourceDisplayMixin (the panel-level \
-             owner — owns OnLoad / OnShow / OnHide / OnEvent / OnUpdate / \
-             SetIsInEditMode / UpdateShownState / SetupHealthBar / SetupMaxHealth / \
-             UpdateHealth / UpdateHealthPrediction / SetupPowerBar / \
-             UpdatePredictedPowerCost / UpdateMaxPower / UpdatePower / \
-             SetupAlternatePowerBar / SetupClassBar / UpdateAdditionalBarAnchors; \
-             18 methods orchestrating the health / power / alternate-power / \
-             class-resource bars), DemonHunterAlternatePowerBarMixin (DH \
-             Devourer-spec Soul Fragments bar; requiredClass=DEMONHUNTER, \
-             requiredSpec=SPEC_DEMONHUNTER_DEVOURER, powerName=SOUL_FRAGMENTS), \
-             EvokerAlternatePowerBarMixin (Evoker Ebon Might bar; tracks aura \
-             spell ID 395296 with a 20-second design-specified visual range), \
-             and MonkAlternatePowerBarMixin (Monk Stagger bar with red/yellow/ \
-             green threshold-state coloring at 60%/30% stagger percentages)"
+            "_G.{mixin} must publish as a table — the base display and all \
+             four alternate-power files load before the frame XML. The Mana \
+             file publishes its base mixin plus Priest and Druid derivatives"
         );
     }
 }

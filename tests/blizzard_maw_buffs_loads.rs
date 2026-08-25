@@ -107,7 +107,7 @@ fn blizzard_maw_buffs_find_toc_resolves_bare_variant() {
 }
 
 #[test]
-fn blizzard_maw_buffs_toc_declares_eager_load_with_uiframemanager_required_dep() {
+fn blizzard_maw_buffs_toc_declares_eager_load_with_two_required_deps() {
     let toc = TocFile::from_file(&maw_buffs_toc()).expect("Blizzard_MawBuffs TOC parses");
     assert!(
         !toc.is_load_on_demand(),
@@ -128,10 +128,14 @@ fn blizzard_maw_buffs_toc_declares_eager_load_with_uiframemanager_required_dep()
     );
     assert_eq!(
         toc.dependencies(),
-        vec!["Blizzard_UIFrameManager".to_string()],
-        "Blizzard_MawBuffs declares exactly one `## RequiredDep: Blizzard_UIFrameManager`. \
-         UIFrameManager publishes the frame-style / texture-kit infrastructure used by the \
-         jailerstower-animapowerlist atlases inside the MawBuffsContainer button chrome"
+        vec![
+            "Blizzard_UIFrameManager".to_string(),
+            "Blizzard_Colors".to_string(),
+        ],
+        "Blizzard_MawBuffs declares `## RequiredDep: Blizzard_UIFrameManager, \
+         Blizzard_Colors` in that order. UIFrameManager publishes frame-style \
+         infrastructure, while Blizzard_Colors supplies shared color data used \
+         by the Maw buff presentation"
     );
     assert!(toc.optional_deps().is_empty());
     assert!(

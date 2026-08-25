@@ -25,7 +25,7 @@ const GLUE_SCREENS: &[ScreenKind] = &[
     ScreenKind::CharacterCreate,
 ];
 
-const TOC_REQUIRED_DEPS: &[&str] = &["Blizzard_TutorialManager"];
+const TOC_REQUIRED_DEPS: &[&str] = &["Blizzard_TutorialManager", "Blizzard_UIFrameManager"];
 
 const MODULE_TABLES: &[&str] = &[
     "GameTutorials",
@@ -121,7 +121,7 @@ fn find_toc_file_resolves_bare_toc() {
 }
 
 #[test]
-fn toc_is_eager_with_required_dep() {
+fn toc_is_eager_with_two_required_deps() {
     let toc = TocFile::from_file(&tutorials_toc()).expect("TOC parses");
 
     assert!(
@@ -136,19 +136,17 @@ fn toc_is_eager_with_required_dep() {
     assert_eq!(
         deps.len(),
         TOC_REQUIRED_DEPS.len(),
-        "RequiredDep is read by `dependencies()` at toc.rs:209-217 \
-         (RequiredDep / RequiredDeps / Dependencies are interchangeable). \
-         Expected exactly {} entry. Got: {:?}",
+        "Repeated `## Dep:` lines are merged by `dependencies()`. Expected \
+         exactly {} entries. Got: {:?}",
         TOC_REQUIRED_DEPS.len(),
         deps
     );
     for expected in TOC_REQUIRED_DEPS {
         assert!(
             deps.iter().any(|d| d == expected),
-            "TOC must declare `{expected}` via RequiredDep — without it, \
-             TutorialManager would be nil when GameTutorials:Initialize \
-             tries to register TutorialManager.TutorialsEnabled \
-             callbacks. Got: {deps:?}"
+            "TOC must declare `{expected}` via a repeated `## Dep:` line. \
+             TutorialManager supplies tutorial orchestration and UIFrameManager \
+             supplies the in-game frame-management surface. Got: {deps:?}"
         );
     }
 
@@ -192,13 +190,13 @@ fn allow_load_game_type_standard_is_not_restricted() {
 }
 
 #[test]
-fn toc_raw_bytes_pin_four_directives_and_sixteen_body_files() {
+fn toc_raw_bytes_pin_four_directives_and_fifteen_body_files() {
     let raw = std::fs::read_to_string(tutorials_toc()).expect("TOC reads utf-8");
 
     let expected_lines = [
-        "## Author: Blizzard Entertainment",
-        "## Title: Blizzard Tutorials",
-        "## RequiredDep: Blizzard_TutorialManager",
+        "## Title: Blizzard_Tutorials",
+        "## Dep: Blizzard_TutorialManager",
+        "## Dep: Blizzard_UIFrameManager",
         "## AllowLoadGameType: standard",
         "StateMachineUtil.lua",
         "StateMachineTutorialUtil.lua",
@@ -235,6 +233,7 @@ fn toc_raw_bytes_pin_four_directives_and_sixteen_body_files() {
         );
     }
 
+    assert!(!raw.contains("## Author"));
     assert!(!raw.contains("## LoadOnDemand"));
     assert!(!raw.contains("## AllowLoad: "));
     assert!(!raw.contains("## DefaultState"));
