@@ -142,32 +142,21 @@ fn lane_dep_edges_pin_canonical_chain() {
 }
 
 #[test]
-fn shared_xml_game_singular_dep_form_is_invisible_to_dependencies_accessor() {
+fn shared_xml_game_repeated_singular_deps_are_accumulated() {
     let game = parse_lane_toc("Blizzard_SharedXMLGame");
 
-    let game_deps = game.dependencies();
-    assert!(
-        game_deps.is_empty(),
-        "SIMULATOR GAP — SharedXMLGame uses the singular `## Dep:` form (one line per dep) and \
-         the simulator's `dependencies()` accessor at src/toc.rs:210-217 only honors \
-         `RequiredDep` / `Dependencies` / `RequiredDeps`. The `Dep` key is silently dropped \
-         from dep-graph audits. Real WoW honors `Dep`; downstream plans that walk the dep \
-         graph via the public accessor will see SharedXMLGame as DEP-LESS. The lane still \
-         loads correctly because both targets (Blizzard_SharedXML, Blizzard_Colors) are \
-         themselves eager (AllowLoad: Both / Game with no LoadOnDemand) and get pulled in by \
-         the screen sweep regardless. The gap matters for: (a) dep-graph linters; (b) any \
-         test that asserts SharedXMLGame depends on SharedXML; (c) load-order verification \
-         scripts. Got: {game_deps:?}"
+    assert_eq!(
+        game.dependencies(),
+        vec![
+            "Blizzard_SharedXML".to_string(),
+            "Blizzard_Colors".to_string(),
+        ],
+        "SharedXMLGame's repeated `## Dep:` directives must remain ordered and complete"
     );
 
     let raw =
         std::fs::read_to_string(lane_toc("Blizzard_SharedXMLGame")).expect("SharedXMLGame reads");
-    assert!(
-        raw.contains("## Dep: Blizzard_SharedXML"),
-        "Raw bytes must pin the singular `## Dep: Blizzard_SharedXML` directive — the gap is \
-         in the parser, NOT the source. Downstream plans should consult raw bytes, not the \
-         accessor, when auditing SharedXMLGame's deps"
-    );
+    assert!(raw.contains("## Dep: Blizzard_SharedXML"));
     assert!(raw.contains("## Dep: Blizzard_Colors"));
 }
 

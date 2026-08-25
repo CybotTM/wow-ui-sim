@@ -190,24 +190,17 @@ fn lane_dep_edges_pin_canonical_chain() {
 }
 
 #[test]
-fn frame_xml_util_singular_dep_form_is_invisible_to_dependencies_accessor() {
+fn frame_xml_util_repeated_singular_deps_are_accumulated() {
     let util = parse_lane_toc("Blizzard_FrameXMLUtil");
 
-    let util_deps = util.dependencies();
-    assert!(
-        util_deps.is_empty(),
-        "SIMULATOR GAP — FrameXMLUtil uses the singular `## Dep:` form (one line per dep) and \
-         the simulator's `dependencies()` accessor at src/toc.rs:210-217 only honors \
-         `RequiredDep` / `Dependencies` / `RequiredDeps`. The singular `Dep` key is silently \
-         dropped from dep-graph audits. Real WoW honors `Dep`. The util addon still loads \
-         correctly because: (a) it has `AllowLoad: Game` and is non-LoD so eager Game discovery \
-         pulls it; (b) FrameXML lists `Blizzard_FrameXMLUtil` in its multi-value `Dependencies`, \
-         so the loader pulls FrameXMLUtil before FrameXML regardless of FrameXMLUtil's own \
-         declared deps. The gap matters for: (i) dep-graph linters; (ii) any test that asserts \
-         FrameXMLUtil depends on SharedXMLGame / Colors / StaticPopup; (iii) the additional \
-         metadata-overwrite latent bug at src/toc.rs:105 (each `## Dep:` line overwrites the \
-         prior — only the LAST `Dep` value would survive even if the accessor were patched to \
-         read `Dep`). Got: {util_deps:?}"
+    assert_eq!(
+        util.dependencies(),
+        vec![
+            "Blizzard_SharedXMLGame".to_string(),
+            "Blizzard_Colors".to_string(),
+            "Blizzard_StaticPopup".to_string(),
+        ],
+        "FrameXMLUtil's repeated `## Dep:` directives must remain ordered and complete"
     );
 
     let raw =
@@ -217,12 +210,7 @@ fn frame_xml_util_singular_dep_form_is_invisible_to_dependencies_accessor() {
         "## Dep: Blizzard_Colors",
         "## Dep: Blizzard_StaticPopup",
     ] {
-        assert!(
-            raw.contains(entry),
-            "Raw bytes must pin `{entry}` — the gap is in the parser, NOT the source. Three \
-             singular `## Dep:` lines exist; downstream plans should consult raw bytes when \
-             auditing FrameXMLUtil's deps"
-        );
+        assert!(raw.contains(entry), "raw TOC must contain `{entry}`");
     }
 }
 

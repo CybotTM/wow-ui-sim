@@ -88,23 +88,16 @@ fn find_toc_file_resolves_bare_toc() {
 }
 
 #[test]
-fn dependencies_accessor_returns_empty_for_singular_dep_form() {
+fn dependencies_accessor_returns_repeated_singular_deps() {
     let toc = TocFile::from_file(&shared_xml_game_toc()).expect("TOC parses");
 
-    let deps = toc.dependencies();
-    assert!(
-        deps.is_empty(),
-        "OBSERVATIONAL QUIRK: SharedXMLGame uses the singular `## Dep:` \
-         form (one line per dep) — `## Dep: Blizzard_SharedXML` and \
-         `## Dep: Blizzard_Colors`. The simulator's `dependencies()` \
-         accessor at src/toc.rs:210-217 only honors `RequiredDep`, \
-         `Dependencies`, `RequiredDeps` keys and falls through silently on \
-         the singular `Dep` form. In real WoW the singular form is \
-         honored, but here it surfaces as empty. Both targets still load \
-         because Blizzard_SharedXML and Blizzard_Colors are themselves \
-         eager (AllowLoad: Both / Game with no LoadOnDemand) — the missing \
-         dep edge is invisible at load time but matters for any audit \
-         that walks the dep graph via `dependencies()`. Got: {deps:?}"
+    assert_eq!(
+        toc.dependencies(),
+        vec![
+            "Blizzard_SharedXML".to_string(),
+            "Blizzard_Colors".to_string(),
+        ],
+        "repeated `## Dep:` directives must be exposed in source order"
     );
 }
 

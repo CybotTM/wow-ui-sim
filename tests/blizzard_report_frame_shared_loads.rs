@@ -181,14 +181,13 @@ fn toc_declares_optional_dep_singular_advisory_only() {
          Blizzard_GlueParent` — the SINGULAR `OptionalDep` form. The TOC parser at src/toc.rs:96 \
          stores keys verbatim so the metadata HashMap holds `OptionalDep` (singular) as the key"
     );
-    assert!(
-        toc.optional_deps().is_empty(),
-        "TocFile::optional_deps() at src/toc.rs:229-234 only reads the PLURAL `OptionalDeps` key \
-         — so for this addon's `## OptionalDep:` (singular) form, the helper returns an EMPTY \
-         vec. This is a real parser-vs-WoW-source divergence: the WoW format permits both \
-         singular and plural variants, but our helper recognises only the plural. Effect on \
-         loading is nil because optional deps are advisory and never block dependency \
-         resolution; effect on tooling is that `optional_deps()` underreports for this addon"
+    assert_eq!(
+        toc.optional_deps(),
+        vec![
+            "Blizzard_UIParent".to_string(),
+            "Blizzard_GlueParent".to_string(),
+        ],
+        "the singular `## OptionalDep:` directive must expose both advisory dependencies"
     );
 }
 

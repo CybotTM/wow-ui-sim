@@ -99,17 +99,14 @@ fn blizzard_frame_xml_util_toc_uses_dep_alias_and_allow_load_game() {
          in-world only, glue/login screens have their own utility addons"
     );
 
-    let parsed_deps = toc.dependencies();
-    assert!(
-        parsed_deps.is_empty(),
-        "src/toc.rs:210-217 only recognizes `RequiredDep` / `Dependencies` / \
-         `RequiredDeps` keys — the singular-line `## Dep:` shorthand is silently \
-         ignored, so `toc.dependencies()` returns an empty Vec for this TOC. The \
-         addon still loads correctly because all three deps (Blizzard_SharedXMLGame, \
-         Blizzard_Colors, Blizzard_StaticPopup) are themselves non-LOD addons that \
-         auto-discover and end up loaded as part of the Game-screen tier regardless \
-         of explicit dependency declaration. Got: {:?}",
-        parsed_deps
+    assert_eq!(
+        toc.dependencies(),
+        vec![
+            "Blizzard_SharedXMLGame".to_string(),
+            "Blizzard_Colors".to_string(),
+            "Blizzard_StaticPopup".to_string(),
+        ],
+        "repeated `## Dep:` directives must be exposed in source order"
     );
 }
 

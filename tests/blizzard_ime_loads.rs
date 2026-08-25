@@ -79,15 +79,13 @@ fn blizzard_ime_toc_declares_no_required_deps_with_two_optional_deps() {
          is implicitly loaded by every screen's foundational shared XML pass before any addon \
          runs"
     );
-    assert!(
-        toc.optional_deps().is_empty(),
-        "Known parser gap: simulator's `optional_deps()` (src/toc.rs:229-234) only reads the \
-         plural `OptionalDeps` key. Blizzard_IME uses the singular `OptionalDep` form — 12 \
-         Blizzard addons currently use the singular spelling and are silently ignored. Adding \
-         singular fallback caused a stack overflow regression in `emit_addon_recursive` \
-         (topological sort recursion deepened past 2MB test thread stack), so the parser was \
-         reverted pending bounded-recursion fix. This assertion locks the gap so future fixes \
-         must update both the parser AND this test together"
+    assert_eq!(
+        toc.optional_deps(),
+        vec![
+            "Blizzard_FrameXML".to_string(),
+            "Blizzard_GlueXML".to_string(),
+        ],
+        "Blizzard_IME's singular `## OptionalDep:` directive must expose both screen roots"
     );
 
     let raw = std::fs::read_to_string(ime_toc()).expect("Blizzard_IME TOC should read");

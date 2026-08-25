@@ -172,21 +172,17 @@ fn toc_declares_eager_both_with_two_hard_deps() {
 }
 
 #[test]
-fn toc_uses_singular_optional_dep_so_accessor_returns_empty() {
+fn toc_singular_optional_dep_is_exposed_by_accessor() {
     let toc = TocFile::from_file(&settings_shared_toc()).expect("TOC parses");
 
-    assert!(
-        toc.optional_deps().is_empty(),
-        "TOC declares `## OptionalDep:` (singular) NOT `## OptionalDeps:` (plural) \
-         — the simulator's `optional_deps()` accessor at src/toc.rs:229-234 reads \
-         only the plural key, so the singular form falls through silently and the \
-         3 listed soft siblings (Blizzard_StaticPopup_Glue, \
-         Blizzard_StaticPopup_Game, Blizzard_UIParent) do NOT surface via \
-         `optional_deps()`. This is a quirk of the singular-vs-plural metadata \
-         split: in real WoW both forms are read, but here only the plural is \
-         honored. The 3 siblings are still loaded by name when they exist (eager \
-         discovery handles them independently), so the missing accessor read is \
-         observational, not load-blocking"
+    assert_eq!(
+        toc.optional_deps(),
+        vec![
+            "Blizzard_StaticPopup_Glue".to_string(),
+            "Blizzard_StaticPopup_Game".to_string(),
+            "Blizzard_UIParent".to_string(),
+        ],
+        "the singular `## OptionalDep:` directive must expose all three soft dependencies"
     );
 }
 
