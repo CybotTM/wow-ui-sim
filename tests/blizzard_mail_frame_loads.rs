@@ -89,6 +89,9 @@ const OPEN_ALL_MAIL_MIXIN_METHODS: &[&str] = &[
     "Reset",
     "StartOpening",
     "StopOpening",
+    "ShouldSkipCurrentMail",
+    "ShouldSkipCurrentAttachment",
+    "AdvanceToNextMail",
     "AdvanceToNextItem",
     "AdvanceAndProcessNextItem",
     "ProcessNextItem",
@@ -97,8 +100,8 @@ const OPEN_ALL_MAIL_MIXIN_METHODS: &[&str] = &[
     "OnUpdate",
     "OnClick",
     "OnHide",
-    "AddBlacklistedItem",
-    "IsItemBlacklisted",
+    "AddFailedItem",
+    "IsItemFailed",
 ];
 
 const NAMED_MAIL_FRAMES: &[&str] = &[
@@ -405,9 +408,8 @@ fn blizzard_mail_frame_publishes_open_all_mail_mixin() {
             .unwrap_or_else(|err| panic!("OpenAllMailMixin.{method} probe failed: {err}"));
         assert_eq!(
             method_kind, "function",
-            "OpenAllMailMixin.{method} must be a function — drives the OpenAllMail button's \
-             event-driven inbox sweep state machine (Reset / StartOpening / AdvanceToNextItem \
-             / ProcessNextItem / StopOpening). Missing any one would freeze the sweep mid-loop"
+            "OpenAllMailMixin.{method} must match the current event-driven inbox sweep \
+             implementation, including mail/attachment skipping and failed-item tracking"
         );
     }
 }

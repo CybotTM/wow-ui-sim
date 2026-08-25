@@ -99,7 +99,7 @@ const BAGS_BAR_MIXIN_METHODS: &[&str] = &[
     "IsHorizontal",
     "IsDirectionLeft",
     "IsDirectionUp",
-    "OnUpdateEndCaps",
+    "MainActionBarStateOverridden",
 ];
 
 const NAMED_BAG_FRAMES: &[&str] = &[
@@ -563,20 +563,21 @@ fn blizzard_bags_bar_mixin_publishes_with_methods() {
 }
 
 #[test]
-fn blizzard_calculate_total_number_of_free_bag_slots_publishes() {
+fn blizzard_calculate_total_number_of_free_bag_slots_is_owned_by_c_container() {
     let env = load_full_game_ui();
 
-    let kind: String = env
-        .eval("return type(CalculateTotalNumberOfFreeBagSlots)")
-        .expect("CalculateTotalNumberOfFreeBagSlots probe succeeds");
+    let kinds: (String, String) = env
+        .eval(
+            "return type(C_Container.CalculateTotalNumberOfFreeBagSlots), \
+                    type(CalculateTotalNumberOfFreeBagSlots)",
+        )
+        .expect("free-bag-slot owner probe succeeds");
     assert_eq!(
-        kind, "function",
-        "CalculateTotalNumberOfFreeBagSlots must publish at `_G` as a function — the only \
-         non-mixin free function exported by Mainline/MainMenuBarBagButtons.lua (line 280). \
-         Iterates BACKPACK_CONTAINER..NUM_TOTAL_EQUIPPED_BAG_SLOTS via \
-         C_Container.GetContainerNumFreeSlots and sums the free slots of bagFamily=0 \
-         containers (excludes profession bags). Consumed by \
-         MainMenuBarBackpackMixin:UpdateFreeSlots to populate the backpack count text"
+        kinds,
+        ("function".to_string(), "nil".to_string()),
+        "MainMenuBarBackpackMixin:UpdateFreeSlots calls the current \
+         C_Container.CalculateTotalNumberOfFreeBagSlots API. MainMenuBarBagButtons.lua no \
+         longer publishes a same-named global helper"
     );
 }
 

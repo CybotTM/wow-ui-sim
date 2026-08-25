@@ -369,35 +369,28 @@ fn blizzard_generic_trait_ui_publishes_frame_mixin_with_full_lifecycle() {
 }
 
 #[test]
-fn blizzard_generic_trait_ui_frame_mixin_publishes_purchase_and_selection_methods() {
+fn blizzard_generic_trait_ui_purchase_and_selection_methods_have_current_owners() {
     let env = load_full_game_ui_with_trait_lod_chain();
 
     let methods: (bool, bool, bool, bool, bool, bool, bool, bool) = env
         .eval(
-            "return type(GenericTraitFrameMixin.PurchaseRank) == 'function', \
-                    type(GenericTraitFrameMixin.PurchaseRankCallback) == 'function', \
-                    type(GenericTraitFrameMixin.SetSelection) == 'function', \
-                    type(GenericTraitFrameMixin.SetSelectionCallback) == 'function', \
-                    type(GenericTraitFrameMixin.AttemptConfigOperation) == 'function', \
-                    type(GenericTraitFrameMixin.CheckAndReportCommitOperation) == 'function', \
-                    type(GenericTraitFrameMixin.GetConfigCommitErrorString) == 'function', \
+            "return type(AutoCommitTraitFrameMixin.PurchaseRank) == 'function', \
+                    type(AutoCommitTraitFrameMixin.PurchaseRankCallback) == 'function', \
+                    type(AutoCommitTraitFrameMixin.SetSelection) == 'function', \
+                    type(AutoCommitTraitFrameMixin.SetSelectionCallback) == 'function', \
+                    type(AutoCommitTraitFrameMixin.AttemptConfigOperation) == 'function', \
+                    type(AutoCommitTraitFrameMixin.CheckAndReportCommitOperation) == 'function', \
+                    type(TalentFrameBaseMixin.GetConfigCommitErrorString) == 'function', \
                     type(GenericTraitFrameMixin.UpdateTreeCurrencyInfo) == 'function'",
         )
-        .expect("Purchase/selection method probe should succeed");
+        .expect("Purchase/selection method-owner probe should succeed");
     assert_eq!(
         methods,
         (true, true, true, true, true, true, true, true),
-        "GenericTraitFrameMixin must expose the trait commit/purchase surface: PurchaseRank \
-         + PurchaseRankCallback (the StaticPopup confirmation flow that wraps \
-         C_Traits.PurchaseRank with a GenerateClosure callback), SetSelection + \
-         SetSelectionCallback (the choice-node selection flow that wraps \
-         C_Traits.SetSelection), AttemptConfigOperation (the generic wrapper that routes \
-         every commit through CheckAndReportCommitOperation), \
-         CheckAndReportCommitOperation (returns false + UIErrorsFrame:AddMessage when \
-         C_Traits.IsReadyForCommit reports a problem), GetConfigCommitErrorString \
-         (translates the C_Traits commit-error code to a localized string), \
-         UpdateTreeCurrencyInfo (refreshes the GenericTraitFrameCurrencyFrame badge based \
-         on C_Traits.GetTreeCurrencyInfo)"
+        "AutoCommitTraitFrameMixin owns the purchase, selection, and auto-commit methods \
+         inherited by GenericTraitFrame through AutoCommitTraitFrameTemplate. \
+         TalentFrameBaseMixin owns the overridable commit-error string method, while \
+         GenericTraitFrameMixin directly owns its currency-display refresh override"
     );
 }
 
