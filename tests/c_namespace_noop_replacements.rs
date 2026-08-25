@@ -437,7 +437,7 @@ fn encounter_journal_global_filters_and_tier_are_numeric() {
             EJ_SetLootFilter("invalid", 2.5)
             local invalidClass, nonIntegralSpec = EJ_GetLootFilter()
 
-            EJ_SelectTier("11")
+            EJ_SelectTier(11)
             local tierAfter = EJ_GetCurrentTier()
 
             return type(tierBefore),
