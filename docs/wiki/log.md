@@ -1,3 +1,7 @@
+## [2026-08-25] update | Preserve final retail runtime compatibility contracts
+
+Audited the final fixes after `0bb44d828`: `2e06ddba7` and `51ea06091` now document `CreateWindow` as a minimal frame-backed external-tool window contract (size/minimum size, topmost, close, and owner attachment; title/focus are no-ops); `25285d13f` documents inert `Kiosk.GetKioskLoginInfo()` defaults; and `ffccfcb6e` documents preserve-mode EnvironmentCleanup restoration for missing UI strings/constants without clobbering Blizzard assignments. Updated [[lua-api]] and [[post-load-workaround-audit]]. No new page was required.
+
 ## [2026-08-25] update | Preserve current loader, XML, and runtime-surface contracts
 
 Audited committed behavior from `a3d0f4f21` through `711f8e9c8` and updated [[addon-loading]], [[lua-api]], and [[xml-template-system]]. Documentation now records: loaded-addon idempotence preserving mutable registries such as `StaticPopupDialogs`; enum child-table reseeding that preserves Blizzard extensions; `toplevel="true"` XML frames retaining implicit UIParent so XML strata survives same-parent `OnLoad`; state-backed legacy Timerunning globals; retail `GetGuildTabardFiles`; `C_StringUtil.EscapeDecimalNonPrintables`; and Browser `NavigateTo`/`NavigateHome` no-result compatibility methods. TOC and symbol fixture refreshes were intentionally skipped. No new wiki page was required; existing system pages remain the SSOT.
