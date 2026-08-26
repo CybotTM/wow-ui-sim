@@ -67,7 +67,7 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 **Security** — `issecure()`, `securecall()`, `securecallfunction()`, `securecallmethod()`, `forceinsecure()`, `hooksecurefunc()` (from Elune or fallback stubs). With no modeled click-binding profile, `C_ClickBindings.GetBindingType()` returns `Enum.ClickBindingType.None` and `ExecuteBinding()` is inert, allowing secure-button `type` attributes to dispatch normally.
 
-**Modeled legacy globals** — `IsTimerunningEnabled()` and `GetRemainingTimerunningSeasonSeconds()` read the simulator's Timerunning season state; the countdown is zero when no season is active. `GetGuildTabardFiles()` is registered on retail as well as classic profiles and returns the modeled guild-tabard file tuple used by Blizzard's guild-bank UI. The temporary `Kiosk` namespace defaults `IsEnabled()` and `IsCompetitiveModeEnabled()` to `false` and `GetKioskLoginInfo()` to three `nil` values while preserving existing members.
+**Modeled legacy globals** — `ClearTarget()` clears the current target and returns `true` iff a target existed; it returns `false` when no target was set and preserves the `PLAYER_TARGET_CHANGED` event. `IsTimerunningEnabled()` and `GetRemainingTimerunningSeasonSeconds()` read the simulator's Timerunning season state; the countdown is zero when no season is active. `GetGuildTabardFiles()` is registered on retail as well as classic profiles and returns the modeled guild-tabard file tuple used by Blizzard's guild-bank UI. The temporary `Kiosk` namespace defaults `IsEnabled()` and `IsCompetitiveModeEnabled()` to `false` and `GetKioskLoginInfo()` to three `nil` values while preserving existing members.
 
 **Focused compatibility boundaries** — `EJ_SetLootFilter()` accepts integer Lua values and numeric strings locally; nil, invalid, and non-integral inputs become zero without changing global argument coercion. Chat startup assigns `DEFAULT_CHAT_FRAME` whenever `ChatFrame1` exists, while `ChatFrame1.editBox` remains conditional on `ChatFrame1EditBox`. Temporary chat-window state also backs `SetChatWindowName()` and `SetChatWindowDocked()` round-trips through `GetChatWindowInfo()`; these fields remain in the compatibility table until saved chat-layout state is modeled.
 
@@ -115,6 +115,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [simple_window.rs](../../../src/lua_api/globals/create_frame/simple_window.rs) — frame-backed `CreateWindow` compatibility contract
 - [render_layers.rs](../../../src/lua_api/frame/methods/misc/render_layers.rs) — `SetWindow`/`GetWindow` owner attachment
 - [kiosk_namespace_defaults.rs](../../../src/lua_api/workarounds/temporary/kiosk_namespace_defaults.rs) — inert Kiosk defaults
+- [targeting_verbs.rs](../../../src/lua_api/globals/targeting_verbs.rs) — state-backed targeting globals, including `ClearTarget()`'s boolean result
+- [targeting_verbs.rs](../../../tests/targeting_verbs.rs) — targeting global behavior proofs
 - `/home/osso/Repos/simc/SpellDataDump/allspells.txt` — coefficient and variable formulas used for AP/health-scaled spell text
 
 ## See Also

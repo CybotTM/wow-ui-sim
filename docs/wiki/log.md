@@ -1,3 +1,7 @@
+## [2026-08-26] audit | Document ClearTarget boolean return
+
+Audited commit `f77dd9d7e`. Updated [[lua-api]] and `docs/lua-api.md` to record that global `ClearTarget()` returns `true` only when it clears an existing target, returns `false` otherwise, and preserves `PLAYER_TARGET_CHANGED`.
+
 ## [2026-08-26] audit | Document BC-backed mask resolution
 
 Audited commit `c2647c005`. Updated [[mask-texture]], [[rendering-pipeline]], and [[texture-atlas]] plus their source docs to record that deferred mask requests resolve from either the RGBA tiers or BC1/BC3 atlases, remap UVs into the selected slot, and apply the correct mask coverage path. CircleMask-style BC masks no longer become unresolved pending masks and render unmasked.

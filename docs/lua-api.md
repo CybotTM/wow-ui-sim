@@ -191,6 +191,11 @@ patch_string_format
 - **getmetatable** -- Returns fake metatable with widget-filtered `__index` methods; direct userdata calls still resolve through the shared `FrameRef` registration path
 - **string.format** -- Converts `%F` -> `%f` (WoW LuaJIT vs standard Lua 5.1)
 
+### Modeled targeting global
+**File:** `src/lua_api/globals/targeting_verbs.rs`
+
+`ClearTarget()` clears the current target and returns `true` iff a target existed; it returns `false` when no target was set and preserves the `PLAYER_TARGET_CHANGED` event.
+
 ### CreateFrame
 **File:** `src/lua_api/globals/create_frame.rs`
 
