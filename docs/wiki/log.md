@@ -3112,3 +3112,7 @@ Promoted the retail/PTR `C_LootHistory` read surface from generated fallback beh
 ## [2026-08-24] investigation | Restore Lua call frames after errors
 
 Documented commit `ff01991aa`: direct `call_function_state`/`call_function_state_multi` calls now save and restore `LuaState` frame state (`top`, `base`, `ci`, and overflow status) when Lua execution fails. The focused `direct_state_call_restores_call_frame_after_lua_error` regression proves a failed call leaves `ci == 0` and a subsequent direct call returns `42`. This prevents the later `expected Lua closure in execute` cascade; remaining default-retail startup errors are not resolved by this slice.
+
+## [2026-08-26] update | Document limited listfile canonical casing
+
+Updated [`updating-blizzard-ui-to-a-new-patch`](../../updating-blizzard-ui-to-a-new-patch.md), [`casc-loading`](../specs/casc-loading.md), and [[casc-asset-cache]] for commit `2f88b2cab`. Ordinary community rows remain normalized lowercase; `data/listfile-overrides.csv` authoritatively replaces source display paths for normalized path and FDID resolution while preserving slash-normalized canonical casing. Generated rows sort by normalized path. Existing `index.md` catalog text remains accurate; no index change was needed.
