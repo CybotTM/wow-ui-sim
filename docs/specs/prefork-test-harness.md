@@ -1,0 +1,58 @@
+# Prefork test harness
+
+The Linux prefork test harness provides a reusable custom test-runner contract for expensive parent-owned test state. Its source lives in `tests/common/prefork.rs`; detailed design documentation may be added at [the prefork harness wiki page](../wiki/systems/prefork-test-harness.md).
+
+## What it must do
+
+### Platform and lifecycle
+
+- [x] Run only on Linux.
+- [x] Keep the runner parent single-threaded and reject every fork attempt unless `/proc/self/task` reports exactly one task immediately before the fork.
+- [x] Borrow immutable state created by the parent in each selected child without leaking child mutations back to the parent or sibling cases.
+- [x] Run one child process for every selected case.
+- [x] Bound concurrent children with explicit default and hard-maximum worker counts.
+- [x] Honor both `--test-threads` forms and `RUST_TEST_THREADS`, with the command-line value taking precedence.
+- [x] Run the fast conformance phase during ordinary default target execution before any future expensive preload.
+
+### Selection and output
+
+- [x] Support one positional substring filter and exact matching with `--exact`.
+- [x] Support `--skip VALUE` and `--skip=VALUE` exclusions.
+- [x] Support `--list` with libtest-compatible case and summary data.
+- [x] Reject unsupported, duplicate, or conflicting arguments instead of ignoring them.
+- [x] Capture child stdout and stderr by default, suppress successful captured output, and print captured output for failures.
+- [x] Inherit child stdout and stderr when `--nocapture` is selected.
+
+### Failure handling
+
+- [x] Catch panics and report panic text as structured failure data.
+- [x] Distinguish panic, signal, unexpected exit, and timeout failures.
+- [x] Place each child and its descendants in a process group.
+- [x] On timeout, send `SIGTERM`, wait a bounded grace period, send `SIGKILL`, reap the child, and remove its process tree.
+- [x] Exit unsuccessfully when argument validation, runner operation, or any selected case fails.
+
+## How it works
+
+- [Prefork test harness system](../wiki/systems/prefork-test-harness.md)
+
+## Implementation inventory
+
+- `Cargo.toml` — declares the dedicated Linux prefork conformance target contract.
+- `build.rs` — keeps the custom target root out of the generated integration harness.
+- `tests/common/prefork.rs` — reusable test-only runner API and execution behavior.
+- `tests/prefork_full_ui.rs` — custom target entry point, fixture cases, and behavioral conformance checks.
+
+## Tests asserting this spec
+
+- `tests/prefork_full_ui.rs`
+
+## Known gaps (current cycle)
+
+- [ ] Migrate selected real `WowLuaEnv` full-UI tests onto the reusable runner.
+- [ ] Benchmark prefork execution against the current in-target test execution path.
+
+## Out of scope
+
+- Non-Linux prefork support, because the contract depends on Linux process and `/proc` semantics.
+- Runtime production behavior; this harness is test-only.
+- Compatibility fallbacks for unsupported custom-runner arguments.

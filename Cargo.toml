@@ -136,6 +136,12 @@ name = "integration"
 path = "tests/integration.rs"
 
 [[test]]
+name = "prefork_full_ui"
+path = "tests/prefork_full_ui.rs"
+harness = false
+required-features = ["client-retail"]
+
+[[test]]
 name = "patch_12_1_audit"
 path = "patch-tests/patch_12_1.rs"
 required-features = ["client-ptr"]

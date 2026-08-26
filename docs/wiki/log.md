@@ -1,3 +1,7 @@
+## [2026-08-26] system | Add prefork test harness core
+
+Added [[prefork-test-harness]] for the Linux-only custom test runner introduced by `prefork_full_ui`. The page records the single-thread pre-fork invariant, immutable parent-state borrowing, bounded process workers, structured child outcomes, capture modes, and process-group timeout escalation. Current proof is runner conformance only; real `WowLuaEnv` migration and benchmarking remain open.
+
 ## [2026-08-26] audit | Document model no-op and texture identity contracts
 
 Audited commits `b062bab23`, `802516f34`, `847052f41`, `73caa97fe`, and `f79deb010`. Updated [[lua-api]] and [[widget-system]] to record the permanent model-family boundary: Lua-facing model methods such as `ClearFog` remain callable while 3D visual behavior is intentionally unimplemented. Clarified that known texture paths may expose numeric fileDataIDs through `GetTexture()`/`GetTextureFileID()`, while `GetTextureFilePath()` is the source-path assertion API. Updated existing `index.md` summaries; no new wiki page or feature spec was required. Routine fixture, cursor, ready-check, and quest-blob test changes required no documentation.

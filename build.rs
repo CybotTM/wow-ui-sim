@@ -92,6 +92,7 @@ fn should_include_in_integration_harness(path: &Path) -> bool {
             | "frame_positions.rs"
             | "integration.rs"
             | "mists_addonlist_interactions.rs"
+            | "prefork_full_ui.rs"
     )
 }
 
