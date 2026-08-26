@@ -101957,7 +101957,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/targeting_verbs.rs",
-          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "source_hash": "dae4a68421c9c181e1f1e7dae6f7b2215ef33da0ceefd2709b797c1640ff010e",
           "summary": "Current runtime registers CanBeRaidTarget and returns a boolean from simulator unit-token resolution; this does not prove retail eligibility semantics."
         },
         {
@@ -101992,7 +101992,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/targeting_verbs.rs",
-          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "source_hash": "dae4a68421c9c181e1f1e7dae6f7b2215ef33da0ceefd2709b797c1640ff010e",
           "summary": "Current runtime does not register or implement ClearRaidMarker; related targeting functions have no shared raid-marker state."
         },
         {
@@ -108645,7 +108645,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/targeting_verbs.rs",
           "summary": "Runtime registers GetRaidTargetIndex and returns nil while assigned raid markers are unmodeled.",
-          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a"
+          "source_hash": "dae4a68421c9c181e1f1e7dae6f7b2215ef33da0ceefd2709b797c1640ff010e"
         },
         {
           "kind": "test",
@@ -108865,7 +108865,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/targeting_verbs.rs",
-          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "source_hash": "dae4a68421c9c181e1f1e7dae6f7b2215ef33da0ceefd2709b797c1640ff010e",
           "summary": "Current targeting runtime lacks shared raid-marker state needed to establish IsRaidMarkerActive semantics."
         },
         {
@@ -109508,7 +109508,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/targeting_verbs.rs",
-          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "source_hash": "dae4a68421c9c181e1f1e7dae6f7b2215ef33da0ceefd2709b797c1640ff010e",
           "summary": "Current runtime does not register or implement PlaceRaidMarker and has no shared raid-marker backing state."
         },
         {
@@ -109549,7 +109549,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/targeting_verbs.rs",
-          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "source_hash": "dae4a68421c9c181e1f1e7dae6f7b2215ef33da0ceefd2709b797c1640ff010e",
           "summary": "Current runtime does not register or implement RemoveRaidTargets; related raid-target functions have no shared marker state."
         },
         {
@@ -109590,7 +109590,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/targeting_verbs.rs",
-          "source_hash": "ae38dc1ca9d9e2f60d2a921e6f381cc8ed65c6743619b8e922652d745ae90b8a",
+          "source_hash": "dae4a68421c9c181e1f1e7dae6f7b2215ef33da0ceefd2709b797c1640ff010e",
           "summary": "Current SetRaidTarget validates a token and fires RAID_TARGET_UPDATE but stores no raid-marker state; GetRaidTargetIndex remains nil."
         },
         {
