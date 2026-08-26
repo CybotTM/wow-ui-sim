@@ -277,8 +277,8 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 |------|---------|
 | [[layout-system]] | AnchorPoint enum (9 positions), single vs multi-anchor resolution, coordinate system (top-left screen / bottom-left Lua), SetPoint API, cycle detection |
 | [[rendering-pipeline]] | QuadBatch (36-byte QuadVertex), four-tier GPU texture atlas, WGSL shaders, strata/level sorting, alpha propagation, hit testing |
-| [[widget-system]] | Frame struct (~140 fields), WidgetType enum (18 types), WidgetRegistry, default children, button text rendering, three-slice pattern |
-| [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, 200+ globals, C_* namespaces, spell-description token resolution, timer system, animation system |
+| [[widget-system]] | Frame struct (~140 fields), WidgetType enum (18 types), WidgetRegistry, default children, button text rendering, three-slice pattern, model-family 3D no-op boundary |
+| [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, model-family compatibility surface, texture fileDataID/path identity, C_* namespaces, timers, animation system |
 | [[event-system]] | EventQueue, 36+ script handler types, dispatch flow, OnUpdate tick, startup event sequence, XML script setup |
 | [[xml-template-system]] | XML parsing (30+ element types), template registry, inheritance chain resolution, XML-to-widget Lua code generation, same-object engine-root reuse, inline scripts/events |
 | [[addon-loading]] | TOC parsing, discovered Blizzard load order, inline `[Bootstrap]` semantics, per-file Lua/XML loading, single SimState-owned RAII load transactions, explicit secure replay allowlist, SavedVariables, startup sequence |

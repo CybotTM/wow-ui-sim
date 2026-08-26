@@ -1,3 +1,7 @@
+## [2026-08-26] audit | Document model no-op and texture identity contracts
+
+Audited commits `b062bab23`, `802516f34`, `847052f41`, `73caa97fe`, and `f79deb010`. Updated [[lua-api]] and [[widget-system]] to record the permanent model-family boundary: Lua-facing model methods such as `ClearFog` remain callable while 3D visual behavior is intentionally unimplemented. Clarified that known texture paths may expose numeric fileDataIDs through `GetTexture()`/`GetTextureFileID()`, while `GetTextureFilePath()` is the source-path assertion API. Updated existing `index.md` summaries; no new wiki page or feature spec was required. Routine fixture, cursor, ready-check, and quest-blob test changes required no documentation.
+
 ## [2026-08-26] fix | Preserve widget-handler Lua tracebacks
 
 Updated [[lua-call-frame-restoration]] for commits `430ac3cb8`, `f32ae4470`, `9bcfa511a`, and `326bcf335`. Rust-driven widget dispatch now reaches `debug.traceback` through rilua's native `xpcall` before failed Lua frames unwind, while retaining variadic arguments, original-error fallback, and the existing policy that handled protected-call failures do not enter `lua_error_counts`. Focused `system_api::`, `error_handler::`, and `game_menu::` modules pass.

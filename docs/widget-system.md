@@ -126,6 +126,10 @@ pub enum WidgetType {
 
 **Type conversion:** `from_str()` maps WoW names ("ItemButton" -> Button, "ScrollingMessageFrame" -> MessageFrame). `as_str()` reverses to canonical WoW names.
 
+### Model-family boundary
+
+`Model`, `ModelScene`, `PlayerModel`, and related model widgets preserve the Lua-facing object and method surface needed by Blizzard UI code, but the simulator does not render 3D models or visual model effects. Visual-only methods such as `ClearFog` absorb calls as no-ops; this does not claim camera, lighting, mesh, animation, or model-scene rendering behavior.
+
 ---
 
 ## WidgetRegistry

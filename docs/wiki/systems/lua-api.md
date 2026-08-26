@@ -45,9 +45,11 @@ Links Lua userdata to the Rust `Frame` via `id`. `__newindex` syncs `parent.Chil
 
 Widget-specific: EditBox (SetMultiLine, SetAutoFocus), Slider (SetMinMaxValues, SetValue, SetOrientation), StatusBar (SetStatusBarColor), Cooldown (SetCooldown), Tooltip (SetOwner, AddLine, AddDoubleLine), MessageFrame (AddMessage), Browser (`NavigateTo`, `NavigateHome`). Browser navigation methods are callable no-result compatibility methods; the simulator does not open external content.
 
+Model-family widgets (`Model`, `ModelScene`, `PlayerModel`, and related model frames) expose the Lua surface needed by Blizzard code, but 3D rendering is intentionally out of scope. Visual-only calls such as `ClearFog` are callable no-ops; modeled object state and actor methods remain separately documented where supported.
+
 ### Texture identity
 
-For known WoW texture paths resolved by the bundled texture manifest, `Texture:GetTexture()` and `Texture:GetTextureFileID()` return the numeric fileDataID, while `Texture:GetTextureFilePath()` preserves the path. Current proofs include `Interface\\TargetingFrame\\UI-Classes-Circles` → `237669` and `Interface\\ICONS\\INV_Misc_QuestionMark` → `134400`.
+For known WoW texture paths resolved by the bundled texture manifest, `Texture:GetTexture()` and `Texture:GetTextureFileID()` return the numeric fileDataID, while `Texture:GetTextureFilePath()` preserves the source path. Use `GetTextureFilePath()` when an assertion needs the authored path rather than the numeric texture identity. Current proofs include `Interface\\TargetingFrame\\UI-Classes-Circles` → `237669` and `Interface\\ICONS\\INV_Misc_QuestionMark` → `134400`.
 
 ## Global Functions
 
@@ -108,6 +110,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [loot.rs](../../../src/lua_api/globals/missing_surface/encounter_journal/loot.rs) — local Encounter Journal filter coercion
 - [chat_init.rs](../../../src/lua_api/chat_init.rs) — default chat-frame initialization
 - [browser.rs](../../../src/lua_api/frame/methods/widgets/browser.rs) — no-result Browser navigation methods
+- [model.rs](../../../src/lua_api/frame/methods/widgets/model.rs) — model-family Lua surface and intentional 3D visual no-ops
+- [widget_methods_model.rs](../../../tests/widget_methods_model.rs) — `ClearFog` publication and no-op behavior proof
 - [simple_window.rs](../../../src/lua_api/globals/create_frame/simple_window.rs) — frame-backed `CreateWindow` compatibility contract
 - [render_layers.rs](../../../src/lua_api/frame/methods/misc/render_layers.rs) — `SetWindow`/`GetWindow` owner attachment
 - [kiosk_namespace_defaults.rs](../../../src/lua_api/workarounds/temporary/kiosk_namespace_defaults.rs) — inert Kiosk defaults
