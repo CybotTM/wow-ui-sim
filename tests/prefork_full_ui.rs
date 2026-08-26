@@ -19,7 +19,9 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Barrier};
 use std::time::{Duration, Instant};
 use tempfile::TempDir;
-use wow_ui_sim::loader::{enter_bytecode_cache_read_only_mode, load_addon};
+use wow_ui_sim::loader::{
+    enter_bytecode_cache_read_only_mode, load_addon, release_prefork_parent_bytecode_cache_memory,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 const CONFORMANCE_MODE_ENV: &str = "PREFORK_CONFORMANCE_SUITE";
@@ -292,6 +294,12 @@ fn run_bytecode_driver() -> ExitCode {
             .file_name()
             .is_some_and(|name| name == "pack.bin")),
         "parent prewarm must create pack.bin"
+    );
+    let released_bytes = release_prefork_parent_bytecode_cache_memory()
+        .expect("release prewarmed parent bytecode cache memory");
+    assert!(
+        released_bytes > 0,
+        "parent prewarm must release non-empty in-memory bytecode pack state"
     );
 
     let state = BytecodeFixtureState {

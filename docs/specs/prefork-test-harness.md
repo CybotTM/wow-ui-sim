@@ -30,7 +30,8 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Build one parent-owned 1024x768 `ScreenKind::Game` `WowLuaEnv` from the synced default-retail Blizzard UI cache.
 - [x] Stop GC, discover the normal game-screen Blizzard addon set, load it in dependency order without SavedVariables or third-party addons, and fire `ADDON_LOADED` after every successful load.
 - [x] Restore post-cleanup globals after `Blizzard_EnvironmentCleanup`, sync the string metatable, apply post-load workarounds, restart bootstrap GC, and run the normal game startup event sequence.
-- [x] Fail setup explicitly with addon context on addon-load, `ADDON_LOADED`, EnvironmentCleanup restoration, startup Lua, or bootstrap-GC errors instead of continuing with a partial parent snapshot.
+- [x] After successful startup, release the parent process's in-memory bytecode pack bytes and index while preserving the on-disk pack and loaded-state flags; disabled caching is a successful no-op and unexpected cache state fails setup explicitly.
+- [x] Fail setup explicitly with addon context on addon-load, `ADDON_LOADED`, EnvironmentCleanup restoration, startup Lua, bootstrap-GC, or bytecode-memory release errors instead of continuing with a partial parent snapshot.
 - [x] Run the nine `test_keybindings_panels_detail` cases as immutable `fn(&WowLuaEnv)` children with a 120-second child timeout and read-only bytecode-cache child setup.
 
 ### Bytecode-cache child contract
@@ -40,7 +41,14 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Preserve current-pack and legacy cache hits while suppressing legacy promotion and on-disk migration.
 - [x] Compile cache misses normally without counting suppressed cache stores as failures.
 - [x] In read-only mode, never create, append, replace, compact, truncate, remove, rename, or stage temporary bytecode-cache files.
-- [x] Prove the contract in a fresh subprocess with an isolated `XDG_CACHE_HOME`: parent prewarm creates `pack.bin`, a unique child Lua chunk compiles, and the prewarmed cache tree bytes and metadata remain identical.
+- [x] Prove the contract in a fresh subprocess with an isolated `XDG_CACHE_HOME`: parent prewarm creates `pack.bin`, releases non-empty in-memory pack state, a unique child Lua chunk compiles, the prewarmed cache tree bytes and metadata remain identical, and the parent remains writable.
+
+### Performance proof
+
+- [x] Preserve all nine migrated behaviors after memory release.
+- [x] Retain serial wall-time improvement over the pre-migration path: 6.30 seconds versus 23.49 seconds.
+- [x] Reduce child-phase peak process-tree PSS from 1,654,161 KiB to 985,250 KiB and final parent PSS from 1,432,519 KiB to 752,381 KiB.
+- [x] Record that whole-command maximum RSS remains effectively unchanged (1,438,268 KiB to 1,442,156 KiB), because the preload allocates the pack before releasing it.
 
 ### Failure handling
 
@@ -63,8 +71,8 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - `tests/common/prefork_full_ui_preload.rs` — target-only normal retail game-screen preload and migrated-case helpers.
 - `tests/prefork_full_ui.rs` — custom target entry point, real-case registry, fixture cases, and behavioral conformance checks.
 - `tests/test_keybindings_panels_detail.rs` — nine migrated immutable-environment case bodies.
-- `src/loader/bytecode_cache.rs` — process-local cache mode and mutation-boundary enforcement.
-- `src/loader/mod.rs` — narrow doc-hidden child entry point.
+- `src/loader/bytecode_cache.rs` — process-local cache mode, mutation-boundary enforcement, and completed-parent in-memory pack release.
+- `src/loader/mod.rs` — narrow doc-hidden prefork cache entry points.
 
 ## Tests asserting this spec
 
@@ -73,7 +81,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 ## Known gaps (current cycle)
 
 - [x] Migrate the nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
-- [ ] Benchmark prefork execution against the current in-target test execution path.
+- [x] Benchmark prefork execution against the current in-target test execution path.
 
 ## Out of scope
 

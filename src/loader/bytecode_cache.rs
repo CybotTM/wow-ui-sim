@@ -53,6 +53,37 @@ pub(crate) fn enter_read_only_mode() {
     BYTECODE_CACHE_READ_ONLY.store(true, Ordering::Release);
 }
 
+pub(crate) fn release_prefork_parent_memory() -> Result<usize, String> {
+    if is_disabled() {
+        return Ok(0);
+    }
+
+    let mut state = cache_state()
+        .lock()
+        .map_err(|_| "release prefork bytecode cache memory: cache lock poisoned".to_string())?;
+    release_loaded_pack_memory(&mut state)
+}
+
+fn release_loaded_pack_memory(state: &mut CacheState) -> Result<usize, String> {
+    if !state.initialized {
+        return Err("release prefork bytecode cache memory: cache is not initialized".to_string());
+    }
+    if !state.pack_exists {
+        return Err("release prefork bytecode cache memory: pack is not loaded".to_string());
+    }
+    if state.values.is_empty() {
+        return Err(
+            "release prefork bytecode cache memory: in-memory pack was already released"
+                .to_string(),
+        );
+    }
+
+    let released_bytes = state.values.len();
+    state.values = Vec::new();
+    state.index = HashMap::new();
+    Ok(released_bytes)
+}
+
 #[derive(Default)]
 struct CacheState {
     initialized: bool,

@@ -1,3 +1,7 @@
+## [2026-08-26] performance | Release prefork parent bytecode memory
+
+Updated [[prefork-test-harness]] so the completed full-UI parent drops the bytecode cache's in-memory pack and index before forking while preserving disk state and later parent writes. Nine migrated cases pass; child-phase peak PSS fell 40.4% and final parent PSS fell 47.5%. Whole-command maximum RSS remains unchanged because preload allocates the pack before release.
+
 ## [2026-08-26] fix | Skip zero-match prefork setup and propagate cleanup restore errors
 
 Updated [[prefork-test-harness]] so non-list filters selecting zero cases return a successful zero-test result without conformance or full-UI preload. The full-UI preload now propagates `Blizzard_EnvironmentCleanup` restoration failures through the result-returning loader API with explicit addon context.

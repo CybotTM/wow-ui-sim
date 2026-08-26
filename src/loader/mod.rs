@@ -47,6 +47,11 @@ pub fn enter_bytecode_cache_read_only_mode() {
     bytecode_cache::enter_read_only_mode();
 }
 
+#[doc(hidden)]
+pub fn release_prefork_parent_bytecode_cache_memory() -> Result<usize, String> {
+    bytecode_cache::release_prefork_parent_memory()
+}
+
 const ENV_PROFILE_LUA_FILES: &str = "WOW_SIM_PROFILE_LUA_FILES";
 
 #[derive(Debug, Clone)]

@@ -18,9 +18,17 @@ Timeout handling remains separate: it signals the whole child process group with
 
 `tests/prefork_full_ui.rs` runs runner conformance in a fresh subprocess before expensive setup during ordinary execution; successful conformance output stays hidden, while failure output is printed. Driver and process-tree fixture modes bypass that orchestration, and `--list` bypasses both conformance and preload.
 
-The target then builds one 1024x768 default-retail game-screen `WowLuaEnv`: synced Blizzard UI path, stopped GC, dependency-ordered eager addon discovery/loading, one `ADDON_LOADED` per successful addon, post-`Blizzard_EnvironmentCleanup` global restoration, string-metatable sync, post-load workarounds, bootstrap GC restart, and normal game startup events. It rejects partial setup with addon context when loading, addon events, EnvironmentCleanup restoration, startup Lua, or GC restart fails. The immutable parent snapshot backs nine migrated `test_keybindings_panels_detail` cases, one child per case, with 120-second timeouts and read-only bytecode-cache child setup.
+The target then builds one 1024x768 default-retail game-screen `WowLuaEnv`: synced Blizzard UI path, stopped GC, dependency-ordered eager addon discovery/loading, one `ADDON_LOADED` per successful addon, post-`Blizzard_EnvironmentCleanup` global restoration, string-metatable sync, post-load workarounds, bootstrap GC restart, and normal game startup events. It rejects partial setup with addon context when loading, addon events, EnvironmentCleanup restoration, startup Lua, or GC restart fails.
 
-Bytecode conformance still runs in a fresh subprocess with an isolated XDG cache root, prewarms `pack.bin` in the parent, compiles a unique generated addon chunk in a read-only child, compares cache-tree bytes and metadata, and then proves the parent remains writable. Benchmarking remains open.
+After startup succeeds, the parent releases the bytecode cache's process-local `values` buffer and hash index. The cache remains initialized and keeps its `pack_exists` state, while `pack.bin` is untouched. Forked read-only children therefore compile misses without reloading the large disk pack; a later writable parent operation can still append to the existing pack. Disabled bytecode caching makes the release a no-op, while poisoned, uninitialized, missing-pack, or repeated-release state fails explicitly. The immutable parent snapshot backs nine migrated `test_keybindings_panels_detail` cases, one child per case, with 120-second timeouts and read-only bytecode-cache child setup.
+
+Bytecode conformance runs in a fresh subprocess with an isolated XDG cache root. It prewarms `pack.bin`, verifies that non-empty in-memory state was released, compiles a unique generated addon chunk in a read-only child, compares cache-tree bytes and metadata, and then proves the parent remains writable.
+
+## Measured result
+
+The same direct test binary and nine-case serial filter passed 9/9 after release. Relative to commit `804c89951`, child-phase peak process-tree PSS fell from 1,654,161 KiB to 985,250 KiB (40.4%), sampled process-tree RSS fell from 2,858,196 KiB to 1,501,064 KiB (47.5%), and final parent PSS fell from 1,432,519 KiB to 752,381 KiB (47.5%). Whole-command peak tree PSS, which includes preload before release, fell 12.9% to 1,440,837 KiB.
+
+Wall time was 6.30 seconds, still 73.2% below the 23.49-second pre-migration serial baseline. `/usr/bin/time` maximum RSS remained effectively unchanged at 1,442,156 KiB versus 1,438,268 KiB because the parent must allocate the pack during preload before it can release it. The run recorded 595,413 minor faults and zero major faults.
 
 ## Sources
 

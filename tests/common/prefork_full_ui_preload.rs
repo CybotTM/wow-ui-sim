@@ -70,6 +70,8 @@ pub(crate) fn preload_full_game_ui() -> Result<WowLuaEnv, String> {
     env.gc_restart_after_bootstrap()
         .map_err(|error| format!("restart bootstrap GC: {error}"))?;
     fire_startup_events(&env)?;
+    wow_ui_sim::loader::release_prefork_parent_bytecode_cache_memory()
+        .map_err(|error| format!("release prefork parent bytecode cache memory: {error}"))?;
     Ok(env)
 }
 
