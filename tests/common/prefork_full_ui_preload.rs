@@ -73,7 +73,11 @@ pub(crate) fn preload_full_game_ui() -> Result<WowLuaEnv, String> {
     Ok(env)
 }
 
-fn load_blizzard_addon(env: &WowLuaEnv, name: &str, toc_path: &Path) -> Result<(), String> {
+pub(crate) fn load_blizzard_addon(
+    env: &WowLuaEnv,
+    name: &str,
+    toc_path: &Path,
+) -> Result<(), String> {
     let error_count = lua_error_count(env);
     load_addon(&env.loader_env(), toc_path).map_err(|error| {
         format!(
@@ -97,7 +101,11 @@ fn load_blizzard_addon(env: &WowLuaEnv, name: &str, toc_path: &Path) -> Result<(
     )?;
 
     if name == "Blizzard_EnvironmentCleanup" {
-        env.restore_post_cleanup_globals();
+        env.loader_env()
+            .restore_post_cleanup_globals()
+            .map_err(|error| {
+                format!("restore post-cleanup globals after Blizzard addon `{name}`: {error}")
+            })?;
     }
     Ok(())
 }

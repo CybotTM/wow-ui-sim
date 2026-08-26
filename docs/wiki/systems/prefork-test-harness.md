@@ -4,7 +4,7 @@ Linux-only custom test-runner core for reusing immutable parent-owned test state
 
 ## Content
 
-`tests/common/prefork.rs` accepts a borrowed parent state and registered `fn(&S)` cases. Its lazy-state entry point parses arguments and prints `--list` before invoking setup, so expensive state is built only for ordinary execution. Each selected case forks into its own process, while the parent schedules at most the configured bounded worker count.
+`tests/common/prefork.rs` accepts a borrowed parent state and registered `fn(&S)` cases. Its lazy-state entry point parses selection before invoking setup: `--list` returns listing data, and zero selected cases return a successful zero-test result, without conformance or expensive preload. Each selected case forks into its own process, while the parent schedules at most the configured bounded worker count.
 
 Every fork is immediately preceded by a `/proc/self/task` count check requiring exactly one task. The child establishes its process group, reports setup status over a socket, and waits for the parent to verify `getpgid(child) == child` before the test body is released or the case counts as scheduled. Setup failure terminates and reaps the direct child without allowing test code to run.
 
@@ -18,7 +18,7 @@ Timeout handling remains separate: it signals the whole child process group with
 
 `tests/prefork_full_ui.rs` runs runner conformance in a fresh subprocess before expensive setup during ordinary execution; successful conformance output stays hidden, while failure output is printed. Driver and process-tree fixture modes bypass that orchestration, and `--list` bypasses both conformance and preload.
 
-The target then builds one 1024x768 default-retail game-screen `WowLuaEnv`: synced Blizzard UI path, stopped GC, dependency-ordered eager addon discovery/loading, one `ADDON_LOADED` per successful addon, post-`Blizzard_EnvironmentCleanup` global restoration, string-metatable sync, post-load workarounds, bootstrap GC restart, and normal game startup events. It rejects partial setup when loading, addon events, startup Lua, or GC restart fails. The immutable parent snapshot backs nine migrated `test_keybindings_panels_detail` cases, one child per case, with 120-second timeouts and read-only bytecode-cache child setup.
+The target then builds one 1024x768 default-retail game-screen `WowLuaEnv`: synced Blizzard UI path, stopped GC, dependency-ordered eager addon discovery/loading, one `ADDON_LOADED` per successful addon, post-`Blizzard_EnvironmentCleanup` global restoration, string-metatable sync, post-load workarounds, bootstrap GC restart, and normal game startup events. It rejects partial setup with addon context when loading, addon events, EnvironmentCleanup restoration, startup Lua, or GC restart fails. The immutable parent snapshot backs nine migrated `test_keybindings_panels_detail` cases, one child per case, with 120-second timeouts and read-only bytecode-cache child setup.
 
 Bytecode conformance still runs in a fresh subprocess with an isolated XDG cache root, prewarms `pack.bin` in the parent, compiles a unique generated addon chunk in a read-only child, compares cache-tree bytes and metadata, and then proves the parent remains writable. Benchmarking remains open.
 

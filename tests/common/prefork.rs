@@ -150,6 +150,10 @@ fn run_selected_from_args<'a, S>(
         print_list(&selected);
         return Ok(true);
     }
+    if selected.is_empty() {
+        print_zero_test_result();
+        return Ok(true);
+    }
 
     let worker_count = resolve_worker_count(&options).map_err(report_cli_error)?;
     execute(selected, worker_count, options.nocapture).map_err(report_runner_error)
@@ -289,6 +293,12 @@ fn print_list<S>(selected: &[SelectedCase<'_, S>]) {
     println!();
     let noun = if selected.len() == 1 { "test" } else { "tests" };
     println!("{} {noun}, 0 benchmarks", selected.len());
+}
+
+fn print_zero_test_result() {
+    println!("running 0 tests");
+    println!();
+    println!("test result: ok. 0 passed; 0 failed; 0 total");
 }
 
 fn resolve_worker_count(options: &Options) -> Result<usize, String> {

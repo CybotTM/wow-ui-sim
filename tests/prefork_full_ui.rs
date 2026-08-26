@@ -72,6 +72,10 @@ static BYTECODE_CHILD_SETUP_RAN: AtomicBool = AtomicBool::new(false);
 
 const CONFORMANCE_CASES: &[Case<ConformanceState>] = &[
     Case::new("conformance::filtering_and_listing", filtering_and_listing),
+    Case::new(
+        "conformance::environment_cleanup_restore_errors_are_contextual",
+        environment_cleanup_restore_errors_are_contextual,
+    ),
     Case::new("conformance::copy_on_write", copy_on_write),
     Case::new("conformance::panic_and_capture", panic_and_capture),
     Case::new("conformance::nocapture", nocapture),
@@ -471,6 +475,53 @@ fn filtering_and_listing(state: &ConformanceState) {
     assert_success(&repeated_skip);
     assert!(!stdout(&repeated_skip).contains("alpha::"));
     assert!(!stdout(&repeated_skip).contains("beta::"));
+
+    let zero_match_marker = temp.path().join("zero-match-setup-ran");
+    let zero_match = run_driver_with_os_env(
+        state,
+        ["definitely_no_matching_fixture_case"],
+        [(DRIVER_SETUP_MARKER_ENV, zero_match_marker.as_os_str())],
+    );
+    assert_success(&zero_match);
+    assert_eq!(
+        stdout(&zero_match),
+        "running 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 total\n"
+    );
+    assert!(
+        !zero_match_marker.exists(),
+        "zero-match execution must not invoke expensive state setup"
+    );
+}
+
+fn environment_cleanup_restore_errors_are_contextual(_: &ConformanceState) {
+    let temp = TempDir::new().expect("create EnvironmentCleanup failure fixture");
+    let addon_dir = temp.path().join("Blizzard_EnvironmentCleanup");
+    std::fs::create_dir(&addon_dir).expect("create EnvironmentCleanup addon directory");
+    let toc_path = addon_dir.join("Blizzard_EnvironmentCleanup.toc");
+    std::fs::write(
+        &toc_path,
+        "## Interface: 120000\nBlizzard_EnvironmentCleanup.lua\n",
+    )
+    .expect("write EnvironmentCleanup fixture TOC");
+    std::fs::write(
+        addon_dir.join("Blizzard_EnvironmentCleanup.lua"),
+        "setmetatable = nil\n",
+    )
+    .expect("write EnvironmentCleanup failure fixture");
+
+    let env = WowLuaEnv::new().expect("create EnvironmentCleanup fixture environment");
+    let error = prefork_full_ui_preload::load_blizzard_addon(
+        &env,
+        "Blizzard_EnvironmentCleanup",
+        &toc_path,
+    )
+    .expect_err("post-cleanup restore failure must fail preload");
+    assert!(
+        error.contains(
+            "restore post-cleanup globals after Blizzard addon `Blizzard_EnvironmentCleanup`"
+        ),
+        "missing addon restore context: {error}"
+    );
 }
 
 fn copy_on_write(state: &ConformanceState) {

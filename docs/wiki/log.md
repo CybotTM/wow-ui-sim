@@ -1,3 +1,7 @@
+## [2026-08-26] fix | Skip zero-match prefork setup and propagate cleanup restore errors
+
+Updated [[prefork-test-harness]] so non-list filters selecting zero cases return a successful zero-test result without conformance or full-UI preload. The full-UI preload now propagates `Blizzard_EnvironmentCleanup` restoration failures through the result-returning loader API with explicit addon context.
+
 ## [2026-08-26] system | Migrate world-map detail cases to full-UI prefork
 
 Updated [[prefork-test-harness]] with lazy argument selection, isolated conformance-before-preload execution, and the normal default-retail game startup snapshot. Nine `test_keybindings_panels_detail` cases now run as immutable 120-second prefork children with read-only bytecode-cache setup; listing bypasses conformance and preload, and the standard integration harness no longer registers those cases.

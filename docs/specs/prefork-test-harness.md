@@ -14,7 +14,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Bound concurrent children with explicit default and hard-maximum worker counts.
 - [x] Honor both `--test-threads` forms and `RUST_TEST_THREADS`, with the command-line value taking precedence.
 - [x] Run all runner conformance cases in a fresh subprocess before the normal full-UI preload during ordinary target execution; hide successful conformance output and print it on failure.
-- [x] Parse selection and `--list` before setup so listing the real target runs neither conformance nor preload, while setup failure exits the target explicitly.
+- [x] Parse selection before setup so `--list` and zero-match execution run neither conformance nor preload; zero matches report a successful zero-test result, while selected-case setup failure exits explicitly.
 
 ### Selection and output
 
@@ -30,7 +30,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Build one parent-owned 1024x768 `ScreenKind::Game` `WowLuaEnv` from the synced default-retail Blizzard UI cache.
 - [x] Stop GC, discover the normal game-screen Blizzard addon set, load it in dependency order without SavedVariables or third-party addons, and fire `ADDON_LOADED` after every successful load.
 - [x] Restore post-cleanup globals after `Blizzard_EnvironmentCleanup`, sync the string metatable, apply post-load workarounds, restart bootstrap GC, and run the normal game startup event sequence.
-- [x] Fail setup explicitly on addon-load, addon-event, startup Lua, or bootstrap-GC errors instead of continuing with a partial parent snapshot.
+- [x] Fail setup explicitly with addon context on addon-load, `ADDON_LOADED`, EnvironmentCleanup restoration, startup Lua, or bootstrap-GC errors instead of continuing with a partial parent snapshot.
 - [x] Run the nine `test_keybindings_panels_detail` cases as immutable `fn(&WowLuaEnv)` children with a 120-second child timeout and read-only bytecode-cache child setup.
 
 ### Bytecode-cache child contract
