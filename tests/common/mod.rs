@@ -4,6 +4,7 @@ pub mod addon_coverage_baseline;
 pub mod blizzard_addon_harness;
 pub mod blizzard_addon_manifest;
 mod event_helpers;
+pub mod game_menu_fixture;
 pub mod panel_fixtures;
 
 use std::ops::Deref;
