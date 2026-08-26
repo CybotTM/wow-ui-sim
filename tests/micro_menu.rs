@@ -181,10 +181,10 @@ fn texture_path(env: &WowLuaEnv, texture_expr: &str) -> String {
     let code = format!(
         r#"
         local tex = {texture_expr}
-        if not tex or not tex.GetTexture then
+        if not tex or not tex.GetTextureFilePath then
             return ""
         end
-        return tex:GetTexture() or ""
+        return tex:GetTextureFilePath() or ""
         "#
     );
     env.eval::<String>(&code).unwrap_or_default()
