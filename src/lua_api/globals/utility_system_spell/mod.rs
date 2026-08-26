@@ -392,35 +392,44 @@ pub fn pcall(state: &mut LuaState) -> LuaResult<u32> {
     }
 }
 
-/// xpcall(f, handler, ...) — protected call with error handler.
-pub fn xpcall(state: &mut LuaState) -> LuaResult<u32> {
-    let func = stack_val(state, 1);
-    let handler = stack_val(state, 2);
-    let args: Vec<Val> = ((state.base + 2)..state.top)
-        .map(|index| state.stack_get(index))
-        .collect();
-    match protected_call_state(state, func, &args) {
-        Ok(results) => {
-            state.push(Val::Bool(true));
-            for result in &results {
-                state.push(*result);
-            }
-            Ok(1 + results.len() as u32)
-        }
-        Err(error) => {
-            let handled = if matches!(handler, Val::Function(_)) {
-                protected_call_state(state, handler, &[error])
-                    .ok()
-                    .and_then(|results| results.into_iter().next())
-                    .unwrap_or(error)
-            } else {
-                error
-            };
-            state.push(Val::Bool(false));
-            state.push(handled);
-            Ok(2)
-        }
+fn install_xpcall(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let native_xpcall = LuaApiMut::get_global_val(lua, "xpcall");
+    if !matches!(native_xpcall, Val::Function(_)) {
+        return Err(runtime_error("native xpcall missing"));
     }
+
+    let factory = lua.state_mut().load(
+        r##"
+        local native_xpcall = ...
+        local unpack_args = unpack
+        local select_args = select
+        return function(func, handler, ...)
+            local argc = select_args("#", ...)
+            local args = { ... }
+            return native_xpcall(function()
+                return func(unpack_args(args, 1, argc))
+            end, function(error)
+                local ok, handled = native_xpcall(
+                    function() return handler(error) end,
+                    function() return nil end
+                )
+                if ok then
+                    return handled
+                end
+                return error
+            end)
+        end
+        "##,
+    )?;
+    let wrapper = call_function_state_multi(
+        lua.state_mut(),
+        Val::Function(factory.gc_ref()),
+        &[native_xpcall],
+    )?
+    .into_iter()
+    .next()
+    .ok_or_else(|| runtime_error("xpcall wrapper factory returned no function"))?;
+    LuaApiMut::set_global_val(lua, "xpcall", wrapper)
 }
 
 /// securecall(name_or_func, ...) — call a function by name in a secure context.
@@ -667,7 +676,7 @@ fn register_system_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "IsGMClient", is_gm_client)?;
     LuaApiMut::register_function(lua, "RegisterStaticConstants", register_static_constants)?;
     LuaApiMut::register_function(lua, "pcall", pcall)?;
-    LuaApiMut::register_function(lua, "xpcall", xpcall)?;
+    install_xpcall(lua)?;
     LuaApiMut::register_function(lua, "securecall", securecall)?;
     LuaApiMut::register_function(lua, "seterrorhandler", seterrorhandler)?;
     LuaApiMut::register_function(lua, "geterrorhandler", geterrorhandler)?;

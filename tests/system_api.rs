@@ -145,6 +145,29 @@ fn test_xpcall_passes_args() {
 }
 
 #[test]
+fn test_xpcall_error_handler_sees_failing_lua_call_path() {
+    let env = env();
+    let (ok, error): (bool, String) = env
+        .eval(
+            r#"
+            return xpcall(function()
+                local function inner()
+                    error("traceback boom")
+                end
+                inner()
+            end, debug.traceback)
+            "#,
+        )
+        .unwrap();
+
+    assert!(!ok);
+    assert!(
+        error.contains("inner"),
+        "traceback should include the failing Lua call path, got: {error}"
+    );
+}
+
+#[test]
 fn test_protected_calls_record_errors_in_shared_tracker() {
     let env = env();
     let result: String = env
