@@ -1,3 +1,7 @@
+## [2026-08-26] audit | Document BC-backed mask resolution
+
+Audited commit `c2647c005`. Updated [[mask-texture]], [[rendering-pipeline]], and [[texture-atlas]] plus their source docs to record that deferred mask requests resolve from either the RGBA tiers or BC1/BC3 atlases, remap UVs into the selected slot, and apply the correct mask coverage path. CircleMask-style BC masks no longer become unresolved pending masks and render unmasked.
+
 ## [2026-08-26] audit | Clarify prefork cache-disabled contract
 
 Audited commits `4d8136fc4` through `880d58943` against the current prefork loader. Clarified that cache sealing applies only when bytecode caching is enabled; disabled caching remains a successful no-op, and sealing rejects initialized or populated cache state rather than any bypass API call. Added the related bytecode-cache growth cross-link.

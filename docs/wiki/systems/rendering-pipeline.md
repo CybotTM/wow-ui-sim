@@ -1,18 +1,21 @@
 # Rendering Pipeline
 
-The rendering pipeline traverses the frame hierarchy, batches geometry into a `QuadBatch`, uploads it to the GPU, and draws via custom WGSL shaders. A separate headless path renders screenshots without a window.
+The rendering pipeline traverses the frame hierarchy, batches geometry into a `QuadBatch`, uploads it to the GPU, and draws via custom WGSL shaders. A separate headless path renders screenshots without a window. Texture bindings cover five RGBA atlas tiers plus glyph, BC1, and BC3 atlases; mask requests can resolve through either the RGBA or BC atlases.
 
 ## QuadBatch System
 
-**QuadVertex** (`src/render/shader/quad.rs`) — 36 bytes per vertex:
+**QuadVertex** (`src/render/shader/quad.rs`) — 60 bytes per vertex:
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | `position` | `[f32; 2]` | Screen pixels, top-left origin |
 | `tex_coords` | `[f32; 2]` | UV 0.0–1.0 |
 | `color` | `[f32; 4]` | RGBA premultiplied |
-| `tex_index` | `i32` | Atlas tier 0–3, 4=glyph, -1=solid, -2=pending |
-| `flags` | `u32` | Blend mode bits |
+| `tex_index` | `i32` | RGBA tier 0–4, glyph 5, BC1 6, BC3 7, -1=solid, -2=pending |
+| `flags` | `u32` | Blend mode and effect bits |
+| `local_uv` | `[f32; 2]` | Quad-local UV preserved across atlas remapping |
+| `mask_tex_index` | `i32` | Mask binding: -1=none, -2=pending, or atlas binding |
+| `mask_tex_coords` | `[f32; 2]` | UVs into the resolved mask atlas slot |
 
 Each quad = 4 vertices + 6 indices (two triangles). `BlendMode`: Alpha (default) or Additive (glow/highlights — zeroes output alpha so GPU produces `src + dst`).
 
@@ -26,7 +29,7 @@ Prepare phase: resize power-of-two buffers if needed, upload vertices and indice
 
 ## WGSL Shaders (`src/render/shader/quad.wgsl`)
 
-Fragment shader samples the four-tier texture atlas; `tex_index < 0` uses vertex color directly (solid quads). All colors are premultiplied: `color = vec4f(rgb * a, a)`. Additive quads zero output alpha. UV coords are clamped to `[0, 0.9999]` to prevent edge bleeding. No mipmapping (`textureSampleLevel(..., 0.0)`).
+Fragment shader samples the five-tier RGBA atlas, glyph atlas, or BC1/BC3 compressed atlas according to `tex_index`; `tex_index < 0` uses vertex color directly (solid or unresolved quads). All colors are premultiplied: `color = vec4f(rgb * a, a)`. Additive quads zero output alpha. UV coords are clamped to `[0, 0.9999]` to prevent edge bleeding. No mipmapping (`textureSampleLevel(..., 0.0)`). Mask coverage is applied after sampling, using alpha coverage for alpha-backed masks and RGB intensity for masks that encode coverage in RGB.
 
 ## Tiered Texture Atlas (`src/render/shader/atlas.rs`)
 
@@ -36,8 +39,9 @@ Fragment shader samples the four-tier texture atlas; `tex_index < 0` uses vertex
 | 1 | 128×128 | 32×32 | 1,024 |
 | 2 | 256×256 | 16×16 | 256 |
 | 3 | 512×512 | 8×8 | 64 |
+| 4 | 2048×2048 | 2×2 | 4 |
 
-All tiers back a 4096×4096 texture. Glyph atlas is a separate 2048×2048 texture at binding 5. Tier selection: smallest tier that fits; falls back to largest with scaling if oversized.
+All RGBA tiers back a 4096×4096 texture. Glyph, BC1, and BC3 atlases are separate bindings. Deferred mask requests check the RGBA map first, then the BC map; resolved UVs are remapped into the selected slot. Tier selection: smallest tier that fits; falls back to largest with scaling if oversized.
 
 ## Strata and Draw Layer Sorting
 
