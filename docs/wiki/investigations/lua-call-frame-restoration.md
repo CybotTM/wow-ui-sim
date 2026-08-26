@@ -1,6 +1,6 @@
 # Lua Call-Frame Restoration After Errors
 
-Commit `ff01991aa` fixed stale `LuaState` call-frame state after direct Lua errors. Commit `6ac9e32ee` then removed the obsolete exact-string retry that could invoke a failing closure twice. After the retail EditMode epoch correction in `7d6051797`, `cb75dd007`, and explicit alias modeling in `20f141534`, default-retail startup is clean: `target/debug/wow-sim --no-addons --no-saved-vars lua-errors` emits `[]` (0 unique errors, 0 occurrences).
+Commit `ff01991aa` fixed stale `LuaState` call-frame state after direct Lua errors. Commit `6ac9e32ee` then removed the obsolete exact-string retry that could invoke a failing closure twice. Commits `430ac3cb8`, `f32ae4470`, and `326bcf335` preserve nested Lua tracebacks during Rust-driven widget dispatch. After the retail EditMode epoch correction in `7d6051797`, `cb75dd007`, and explicit alias modeling in `20f141534`, the bounded default-retail startup proof at that revision was clean: `target/debug/wow-sim --no-addons --no-saved-vars lua-errors` emitted `[]` (0 unique errors, 0 occurrences).
 
 ## Content
 
@@ -33,6 +33,20 @@ The RED state reproduced stale-frame behavior; the GREEN state passed after `ff0
 
 The retry-removal tests also prove that a genuine error containing `expected Lua closure in execute` runs once, propagates once, restores the caller state, and does not enter the protected retry path. Protected execution remains separate and tested.
 
+### Widget-dispatch traceback root cause
+
+`call_widget_handler` originally used the direct protected-call boundary. By the time Rust routed its error to the configured WoW error handler, the failing Lua frames had already unwound, so a nested handler failure reported the message but omitted the local `inner` call path.
+
+Commit `430ac3cb8` switched widget dispatch to `protected_lua_pcall_state`, whose Lua bridge uses `xpcall(..., debug.traceback)`. That exposed a second boundary error: simulator initialization replaced rilua's native `xpcall` with a Rust implementation. The replacement called `protected_call_state`, restored the caller frame, and only then invoked the supplied error handler. `debug.traceback` therefore still saw only the wrapper stack.
+
+Commits `f32ae4470` and `326bcf335` replace that override with a variadic Lua wrapper around the native rilua `xpcall` captured during initialization. The native implementation invokes the error handler before restoring the failed call frame. The wrapper retains WoW's extra-argument behavior and returns the original error if the supplied handler also fails. Handled `pcall`/`xpcall` failures remain excluded from `lua_error_counts`, matching commit `75e829f0`; commit `9bcfa511a` corrected stale tests that still expected collection.
+
+Focused proof:
+
+- `tests/system_api.rs::test_xpcall_error_handler_sees_failing_lua_call_path` verifies initialized-runtime `xpcall` includes `inner`.
+- `tests/error_handler.rs::test_error_handler_receives_event_dispatch_traceback` verifies Rust-fired `OnEvent` dispatch preserves the same nested path through the configured error handler.
+- The complete `system_api::`, `error_handler::`, and `game_menu::` focused modules pass after the change.
+
 ### EditMode epoch root cause
 
 After call-frame recovery, the remaining retail startup cascade localized to two missing enum members at the retail 12.0.7 load boundary:
@@ -52,6 +66,10 @@ At HEAD `20f141534`, the bounded default-retail command produces `[]` with 0 uni
 
 - [src/lua_api/methods.rs](../../../src/lua_api/methods.rs) — direct Lua call state setup and restoration
 - [src/lua_api/script_helpers/tests.rs](../../../src/lua_api/script_helpers/tests.rs) — focused call-frame and exactly-once dispatch tests
+- [src/lua_api/env_events.rs](../../../src/lua_api/env_events.rs) — Rust-driven widget dispatch and error routing
+- [src/lua_api/globals/utility_system_spell/mod.rs](../../../src/lua_api/globals/utility_system_spell/mod.rs) — variadic native-`xpcall` wrapper installation
+- [tests/error_handler.rs](../../../tests/error_handler.rs) — event-dispatch traceback and error-handler integration proof
+- [tests/system_api.rs](../../../tests/system_api.rs) — initialized-runtime `xpcall` behavior proof
 - [src/lua_api/globals/enum_data/edit_mode.rs](../../../src/lua_api/globals/enum_data/edit_mode.rs) — retail EditMode enum values, aliases, and metadata
 - [src/lua_api/env_init/enums.rs](../../../src/lua_api/env_init/enums.rs) — epoch-specific enum overrides
 - [playerspells-runtime-load](playerspells-runtime-load.md) — related nested addon-load call-frame preservation

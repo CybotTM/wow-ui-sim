@@ -1,3 +1,7 @@
+## [2026-08-26] fix | Preserve widget-handler Lua tracebacks
+
+Updated [[lua-call-frame-restoration]] for commits `430ac3cb8`, `f32ae4470`, `9bcfa511a`, and `326bcf335`. Rust-driven widget dispatch now reaches `debug.traceback` through rilua's native `xpcall` before failed Lua frames unwind, while retaining variadic arguments, original-error fallback, and the existing policy that handled protected-call failures do not enter `lua_error_counts`. Focused `system_api::`, `error_handler::`, and `game_menu::` modules pass.
+
 ## [2026-08-26] update | Document chat-window compatibility state
 
 Updated [[lua-api]] and [[post-load-workaround-audit]] for commit `98a48859f`: temporary `__wow_chat_window_state` now stores `SetChatWindowName()` and `SetChatWindowDocked()` values consumed by `GetChatWindowInfo()`. The fields are compatibility state, not saved-layout persistence, and should retire with a modeled chat-layout subsystem. Test-only third-wave changes required no documentation update.
