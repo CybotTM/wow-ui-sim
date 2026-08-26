@@ -17,11 +17,11 @@ fn blizzard_ui_dir() -> PathBuf {
 /// Blizzard addons in dependency order (mirrors BLIZZARD_ADDONS in main.rs).
 const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
-    ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
+    ("Blizzard_Colors", "Blizzard_Colors.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
     (
         "Blizzard_SharedXMLGame",
-        "Blizzard_SharedXMLGame_Mainline.toc",
+        "Blizzard_SharedXMLGame.toc",
     ),
     (
         "Blizzard_UIPanelTemplates",
@@ -47,7 +47,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
     ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
-    ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
+    ("Blizzard_StoreUI", "Blizzard_StoreUI.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
@@ -74,7 +74,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ),
     (
         "Blizzard_FrameXMLUtil",
-        "Blizzard_FrameXMLUtil_Mainline.toc",
+        "Blizzard_FrameXMLUtil.toc",
     ),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
