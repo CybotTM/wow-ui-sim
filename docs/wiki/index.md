@@ -276,7 +276,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | Page | Summary |
 |------|---------|
 | [[layout-system]] | AnchorPoint enum (9 positions), single vs multi-anchor resolution, coordinate system (top-left screen / bottom-left Lua), SetPoint API, cycle detection |
-| [[rendering-pipeline]] | QuadBatch (60-byte QuadVertex), five-tier RGBA GPU atlas plus glyph/BC1/BC3 bindings, WGSL shaders, mask resolution, strata/level sorting, alpha propagation, hit testing |
+| [[rendering-pipeline]] | QuadBatch (60-byte QuadVertex), five-tier RGBA GPU atlas plus glyph/BC1/BC3 bindings, WGSL shaders, mask resolution, stable-atlas headless batch comparisons, strata/level sorting, alpha propagation, hit testing |
 | [[widget-system]] | Frame struct (~140 fields), WidgetType enum (18 types), WidgetRegistry, default children, button text rendering, three-slice pattern, model-family 3D no-op boundary |
 | [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, model-family compatibility surface, texture fileDataID/path identity, C_* namespaces, timers, animation system |
 | [[event-system]] | EventQueue, 36+ script handler types, dispatch flow, OnUpdate tick, startup event sequence, XML script setup |
@@ -286,7 +286,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[client-profiles]] | Six client profiles selected by mutually-exclusive cargo features, plus cumulative retail API epoch features; profile-aware loader, per-profile manifests, compat bootstraps, vendor pinning, CI matrix |
 | [[patch-api-audit-manifest]] | Checked-in per-item patch audit SSOT, structural/completion validation, lifecycle assertions, four falsifier families, and generated compact checklists |
 | [[prefork-test-harness]] | Linux-only custom test runner with lazy full-UI preload, immutable parent state, one process per case, bounded workers, structured failures, capture control, and process-tree timeouts |
-| [[texture-atlas]] | TextureManager (BLP/PNG/WebP), ~50K-entry compiled atlas database, five RGBA GPU tiers plus optional BC1/BC3 atlases, nine-slice kit detection, UV remapping |
+| [[texture-atlas]] | TextureManager (BLP/PNG/WebP), ~50K-entry compiled atlas database, five RGBA GPU tiers plus optional BC1/BC3 atlases, persistent live/shared-headless atlas contexts, nine-slice kit detection, UV remapping |
 | [[frame-data-flow]] | Parallel Lua/Rust systems, same-object engine-root XML configuration, addon-load ownership/cleanup, global tables (__frame_fields/__scripts), method lookup order, Mixin() application, event dispatch flow |
 | [[taint-system]] | Protected-frame gating, dual Lua environment (genv/secureenv), Elune-backed issecure/securecall, Blizzard `issecure()` call-site matrix, SecureHandler fallback, state/attribute drivers |
 | [[casc-asset-cache]] | CASC cache layers (FDID resolution sqlite, BLP byte cache, Blizzard UI source cache, in-memory texture cache), measured timings, failure modes |

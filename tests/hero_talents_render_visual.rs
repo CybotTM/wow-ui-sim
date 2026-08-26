@@ -1,7 +1,5 @@
 #![cfg(feature = "gui")]
 
-#[path = "hero_talents_render_visual/artifact_bbox.rs"]
-mod artifact_bbox;
 use crate::common;
 
 use std::cell::RefCell;

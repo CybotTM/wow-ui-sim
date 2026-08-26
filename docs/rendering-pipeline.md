@@ -4,7 +4,7 @@
 
 Two-tier rendering architecture:
 - **Quad-based GPU rendering** via WGPU shaders (primary path)
-- **Headless software rendering** for screenshots without GUI
+- **Headless GPU rendering** for screenshots without GUI
 
 The pipeline traverses the frame hierarchy, collects rendering commands into a `QuadBatch`, uploads to GPU, and renders via custom WGSL shaders with tiered texture atlases.
 
@@ -177,18 +177,19 @@ pub fn build_quad_batch_for_registry(registry, screen_size, ...) -> QuadBatch {
 
 ---
 
-## Software Rendering (Screenshots)
+## Headless GPU Rendering (Screenshots)
 
-**File:** `src/render/software.rs`
+**File:** `src/render/headless.rs`
 
-Headless GPU rendering without window/swapchain:
+Headless rendering uses the same WGPU pipeline without a window or swapchain:
 
-1. Create headless wgpu device + queue
-2. Create render target texture (`Rgba8UnormSrgb`, RENDER_ATTACHMENT | COPY_SRC)
-3. Create WowUiPipeline (same as GUI)
-4. Prepare: upload textures, resolve indices
-5. Render to texture with `LoadOp::Clear`
-6. Read back pixels via `copy_texture_to_buffer()` + `buffer_slice.map_async()` + `poll()`
+1. Create a headless wgpu device + queue.
+2. Create an `Rgba8UnormSrgb` render target (`RENDER_ATTACHMENT | COPY_SRC`).
+3. Create `WowUiPipeline` (the same pipeline used by the GUI).
+4. Prepare batches: upload textures and resolve atlas indices.
+5. Clear, render, and read back pixels via `copy_texture_to_buffer()` and `map_async()`.
+
+`render_to_image()` renders one batch with a fresh headless context. Related before/after images should use `render_batches_to_images(&[&QuadBatch], ...)`: it preloads the union of primary, mask, and glyph textures, then renders every batch through one device, pipeline, render target, and GPU atlas. This models the live renderer's persistent atlas. Separate one-image calls can repack atlas slots independently; bilinear sampling and remapped UVs then produce packing-dependent edge differences outside the geometry change being tested.
 
 ---
 
@@ -388,4 +389,4 @@ Framebuffer (presented by iced)
 | Hit Testing | `src/iced_app/view.rs` | Strata sorting, containment tests |
 | Glyphs | `src/render/glyph.rs` | GlyphAtlas, text emission |
 | Fonts | `src/render/font.rs` | cosmic-text integration |
-| Software Render | `src/render/software.rs` | Headless screenshot pipeline |
+| Headless Render | `src/render/headless.rs` | Single-image and shared-atlas screenshot pipeline |

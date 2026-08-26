@@ -65,9 +65,11 @@ Draw layer order: `BACKGROUND < BORDER < ARTWORK < OVERLAY < HIGHLIGHT`.
 - Glyph atlas uploaded to GPU only when dirty
 - Frame time smoothed via EMA (alpha=0.33, ~5-sample window)
 
-## Software Rendering
+## Headless GPU Rendering
 
-Headless path (`src/render/software.rs`): creates a wgpu device without a window, renders to `Rgba8UnormSrgb` texture with `LoadOp::Clear`, reads back pixels via `copy_texture_to_buffer` + `map_async` + `poll`.
+The headless path is implemented in `src/render/headless.rs` and uses the same WGPU pipeline without a window: it creates an `Rgba8UnormSrgb` target, prepares atlas bindings, clears, renders, and reads pixels back with `copy_texture_to_buffer()` and `map_async()`.
+
+`render_to_image()` creates a fresh context for one batch. Related before/after images should use `render_batches_to_images(&[&QuadBatch], ...)`, which preloads the union of primary, mask, and glyph textures and renders all batches through one device, pipeline, target, and GPU atlas. That matches the live renderer's persistent atlas; separate calls can repack slots and create bilinear/UV edge differences unrelated to the changed geometry.
 
 ## Sources
 

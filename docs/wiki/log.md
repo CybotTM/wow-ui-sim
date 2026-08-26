@@ -1,3 +1,7 @@
+## [2026-08-26] audit | Document shared-atlas headless rendering
+
+Audited commit `a3f12b265`. Updated [[rendering-pipeline]] and [[texture-atlas]] plus their source docs to record `render_batches_to_images`: union texture/glyph preloading and sequential rendering through one WGPU device, pipeline, target, and GPU atlas. Related before/after images must share that context to model the live persistent atlas and avoid packing-dependent bilinear/UV edge differences.
+
 ## [2026-08-26] audit | Document ClearTarget boolean return
 
 Audited commit `f77dd9d7e`. Updated [[lua-api]] and `docs/lua-api.md` to record that global `ClearTarget()` returns `true` only when it clears an existing target, returns `false` otherwise, and preserves `PLAYER_TARGET_CHANGED`.
