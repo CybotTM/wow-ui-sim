@@ -9,7 +9,7 @@
 615977;fonts/bhei01b.ttf
 615965;fonts/bkai00m.ttf
 615963;fonts/blei00d.ttf
-615960;fonts/frizqt__.ttf
+615960;Fonts/FRIZQT__.TTF
 615971;fonts/frizqt___cyr.ttf
 615975;fonts/k_damage.ttf
 615972;fonts/k_pagetext.ttf
@@ -28898,7 +28898,7 @@
 235424;interface/buttons/ui-panel-button-glow.blp
 130826;interface/buttons/ui-panel-button-highlight.blp
 130827;interface/buttons/ui-panel-button-highlight2.blp
-130828;interface/buttons/ui-panel-button-up.blp
+130828;Interface/Buttons/UI-Panel-Button-Up.blp
 462649;interface/buttons/ui-panel-button-yellowhighlight.blp
 252123;interface/buttons/ui-panel-collapsebutton-disabled.blp
 252124;interface/buttons/ui-panel-collapsebutton-down.blp
@@ -74550,7 +74550,7 @@
 610611;interface/icons/trade_enchanting_largeetherealshard.blp
 610612;interface/icons/trade_enchanting_lessermysteriousessence.blp
 610613;interface/icons/trade_enchanting_smalletherealshard.blp
-136243;interface/icons/trade_engineering.blp
+136243;Interface/Icons/Trade_Engineering.blp
 136244;interface/icons/trade_engraving.blp
 136245;interface/icons/trade_fishing.blp
 136246;interface/icons/trade_herbalism.blp
