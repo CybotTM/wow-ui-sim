@@ -1,8 +1,16 @@
+#[path = "prefork_process.rs"]
+mod prefork_process;
+
+use self::prefork_process::{
+    Pipe, create_pipe, create_setup_socket, establish_child_process_group,
+    kill_process_group_and_child, prepare_capture_pipe, reap_child, signal_process_group,
+    terminate_and_reap_child, verify_and_release_child,
+};
 use std::env;
 use std::ffi::OsString;
 use std::fs;
 use std::io::{self, Write};
-use std::os::fd::RawFd;
+use std::os::fd::{AsRawFd, OwnedFd, RawFd};
 use std::panic::{self, AssertUnwindSafe};
 use std::process::ExitCode;
 use std::time::{Duration, Instant};
@@ -55,19 +63,14 @@ struct SelectedCase<'a, S> {
     case: &'a Case<S>,
 }
 
-struct Pipe {
-    read_fd: RawFd,
-    write_fd: RawFd,
-}
-
 struct RunningChild<'a, S> {
     selected: SelectedCase<'a, S>,
     pid: libc::pid_t,
     started: Instant,
     termination: Termination,
-    stdout_fd: Option<RawFd>,
-    stderr_fd: Option<RawFd>,
-    status_fd: RawFd,
+    stdout_fd: Option<OwnedFd>,
+    stderr_fd: Option<OwnedFd>,
+    status_fd: OwnedFd,
     stdout: Vec<u8>,
     stderr: Vec<u8>,
 }
@@ -139,6 +142,7 @@ fn parse_argument(
         }
         "--skip" => {
             let value = next_option_value(args, "--skip")?;
+            require_nonempty(&value, "--skip")?;
             options.skips.push(value);
             Ok(())
         }
@@ -271,18 +275,19 @@ fn run_selected<S>(
     let mut passed = 0;
     let mut failed = 0;
 
-    loop {
-        while running.len() < worker_count {
-            let Some(selected_case) = pending.next() else {
-                break;
-            };
-            running.push(spawn_child(state, selected_case, nocapture)?);
-        }
-        if running.is_empty() {
-            break;
-        }
-        collect_finished_children(&mut running, config, &mut passed, &mut failed)?;
-        std::thread::sleep(CHILD_POLL_INTERVAL);
+    let execution = execute_selected(
+        state,
+        &mut pending,
+        &mut running,
+        config,
+        worker_count,
+        nocapture,
+        &mut passed,
+        &mut failed,
+    );
+    if let Err(error) = execution {
+        let cleanup_error = cleanup_running_children(&mut running).err();
+        return Err(append_cleanup_error(error, cleanup_error));
     }
 
     println!();
@@ -291,28 +296,74 @@ fn run_selected<S>(
     Ok(failed == 0)
 }
 
+fn execute_selected<'a, S>(
+    state: &S,
+    pending: &mut impl Iterator<Item = SelectedCase<'a, S>>,
+    running: &mut Vec<RunningChild<'a, S>>,
+    config: Config,
+    worker_count: usize,
+    nocapture: bool,
+    passed: &mut usize,
+    failed: &mut usize,
+) -> Result<(), String> {
+    loop {
+        while running.len() < worker_count {
+            let Some(selected_case) = pending.next() else {
+                break;
+            };
+            running.push(spawn_child(state, selected_case, nocapture)?);
+        }
+        if running.is_empty() {
+            return Ok(());
+        }
+        collect_finished_children(running, config, passed, failed)?;
+        std::thread::sleep(CHILD_POLL_INTERVAL);
+    }
+}
+
 fn spawn_child<'a, S>(
     state: &S,
     selected: SelectedCase<'a, S>,
     nocapture: bool,
 ) -> Result<RunningChild<'a, S>, String> {
     let status_pipe = create_pipe()?;
+    let (parent_setup_fd, child_setup_fd) = create_setup_socket()?;
     let stdout_pipe = (!nocapture).then(create_pipe).transpose()?;
     let stderr_pipe = (!nocapture).then(create_pipe).transpose()?;
 
     assert_single_threaded_parent()?;
     let pid = unsafe { libc::fork() };
     if pid == -1 {
-        close_pipe(status_pipe);
-        stdout_pipe.map(close_pipe);
-        stderr_pipe.map(close_pipe);
         return Err(format!("fork failed: {}", io::Error::last_os_error()));
     }
     if pid == 0 {
-        run_child(state, &selected, status_pipe, stdout_pipe, stderr_pipe);
+        drop(parent_setup_fd);
+        run_child(
+            state,
+            &selected,
+            status_pipe,
+            stdout_pipe,
+            stderr_pipe,
+            child_setup_fd,
+        );
     }
 
-    prepare_parent_child(pid, status_pipe, stdout_pipe, stderr_pipe, selected)
+    drop(child_setup_fd);
+    let prepared = prepare_parent_child(
+        pid,
+        status_pipe,
+        stdout_pipe,
+        stderr_pipe,
+        parent_setup_fd,
+        selected,
+    );
+    match prepared {
+        Ok(child) => Ok(child),
+        Err(error) => {
+            let cleanup_error = terminate_and_reap_child(pid).err();
+            Err(append_cleanup_error(error, cleanup_error))
+        }
+    }
 }
 
 fn prepare_parent_child<'a, S>(
@@ -320,12 +371,14 @@ fn prepare_parent_child<'a, S>(
     status_pipe: Pipe,
     stdout_pipe: Option<Pipe>,
     stderr_pipe: Option<Pipe>,
+    setup_fd: OwnedFd,
     selected: SelectedCase<'a, S>,
 ) -> Result<RunningChild<'a, S>, String> {
-    close_fd(status_pipe.write_fd);
+    drop(status_pipe.write_fd);
     let stdout_fd = prepare_capture_pipe(stdout_pipe)?;
     let stderr_fd = prepare_capture_pipe(stderr_pipe)?;
-    set_child_process_group(pid)?;
+    verify_and_release_child(pid, setup_fd)?;
+
     Ok(RunningChild {
         selected,
         pid,
@@ -345,28 +398,25 @@ fn run_child<S>(
     status_pipe: Pipe,
     stdout_pipe: Option<Pipe>,
     stderr_pipe: Option<Pipe>,
+    setup_fd: OwnedFd,
 ) -> ! {
-    close_fd(status_pipe.read_fd);
-    configure_child_process_group(status_pipe.write_fd);
-    redirect_child_output(stdout_pipe, libc::STDOUT_FILENO, status_pipe.write_fd);
-    redirect_child_output(stderr_pipe, libc::STDERR_FILENO, status_pipe.write_fd);
+    drop(status_pipe.read_fd);
+    let status_fd = status_pipe.write_fd.as_raw_fd();
+    if let Err(error) = establish_child_process_group(setup_fd.as_raw_fd()) {
+        write_child_status_and_exit(status_fd, CHILD_PANIC, &error, 101);
+    }
+    drop(setup_fd);
+    redirect_child_output(stdout_pipe, libc::STDOUT_FILENO, status_fd);
+    redirect_child_output(stderr_pipe, libc::STDERR_FILENO, status_fd);
 
     let result = panic::catch_unwind(AssertUnwindSafe(|| (selected.case.test)(state)));
     flush_child_output();
     match result {
-        Ok(()) => write_child_status_and_exit(status_pipe.write_fd, CHILD_PASS, "", 0),
+        Ok(()) => write_child_status_and_exit(status_fd, CHILD_PASS, "", 0),
         Err(payload) => {
             let panic_text = panic_payload_text(payload);
-            write_child_status_and_exit(status_pipe.write_fd, CHILD_PANIC, &panic_text, 101)
+            write_child_status_and_exit(status_fd, CHILD_PANIC, &panic_text, 101)
         }
-    }
-}
-
-fn configure_child_process_group(status_fd: RawFd) {
-    let result = unsafe { libc::setpgid(0, 0) };
-    if result == -1 {
-        let detail = format!("setpgid failed: {}", io::Error::last_os_error());
-        write_child_status_and_exit(status_fd, CHILD_PANIC, &detail, 101);
     }
 }
 
@@ -374,14 +424,15 @@ fn redirect_child_output(pipe: Option<Pipe>, target_fd: RawFd, status_fd: RawFd)
     let Some(pipe) = pipe else {
         return;
     };
-    close_fd(pipe.read_fd);
-    let result = unsafe { libc::dup2(pipe.write_fd, target_fd) };
+    drop(pipe.read_fd);
+    let write_fd = pipe.write_fd.as_raw_fd();
+    let result = unsafe { libc::dup2(write_fd, target_fd) };
     if result == -1 {
         let detail = format!("dup2 failed: {}", io::Error::last_os_error());
         write_child_status_and_exit(status_fd, CHILD_PANIC, &detail, 101);
     }
-    if pipe.write_fd != target_fd {
-        close_fd(pipe.write_fd);
+    if write_fd == target_fd {
+        std::mem::forget(pipe.write_fd);
     }
 }
 
@@ -406,8 +457,8 @@ fn write_child_status_and_exit(status_fd: RawFd, kind: u8, detail: &str, code: i
     status.push(kind);
     status.extend_from_slice(detail.as_bytes());
     write_all_fd(status_fd, &status);
-    close_fd(status_fd);
     unsafe {
+        libc::close(status_fd);
         libc::_exit(code);
     }
 }
@@ -451,17 +502,16 @@ fn collect_finished_children<S>(
         } else {
             *failed += 1;
         }
-        close_child_fds(&mut child);
     }
     Ok(())
 }
 
 fn drain_child_output<S>(child: &mut RunningChild<'_, S>) -> Result<(), String> {
-    if let Some(fd) = child.stdout_fd {
-        drain_fd(fd, &mut child.stdout)?;
+    if let Some(fd) = child.stdout_fd.as_ref() {
+        drain_fd(fd.as_raw_fd(), &mut child.stdout)?;
     }
-    if let Some(fd) = child.stderr_fd {
-        drain_fd(fd, &mut child.stderr)?;
+    if let Some(fd) = child.stderr_fd.as_ref() {
+        drain_fd(fd.as_raw_fd(), &mut child.stderr)?;
     }
     Ok(())
 }
@@ -501,18 +551,6 @@ fn enforce_timeout<S>(child: &mut RunningChild<'_, S>, config: Config) -> Result
     Ok(())
 }
 
-fn signal_process_group(pid: libc::pid_t, signal: i32) -> Result<(), String> {
-    let result = unsafe { libc::kill(-pid, signal) };
-    if result == 0 {
-        return Ok(());
-    }
-    let error = io::Error::last_os_error();
-    if error.raw_os_error() == Some(libc::ESRCH) {
-        return Ok(());
-    }
-    Err(format!("signal process group {pid} failed: {error}"))
-}
-
 fn poll_child(pid: libc::pid_t) -> Result<Option<i32>, String> {
     let mut status = 0;
     let result = unsafe { libc::waitpid(pid, &mut status, libc::WNOHANG) };
@@ -540,7 +578,7 @@ fn classify_child<S>(
         });
     }
 
-    let status = read_status(child.status_fd)?;
+    let status = read_status(child.status_fd.as_raw_fd())?;
     if status.first() == Some(&CHILD_PANIC) {
         let panic_text = String::from_utf8_lossy(&status[1..]);
         return Ok(ChildResult {
@@ -611,72 +649,36 @@ fn print_capture(test_name: &str, stream_name: &str, bytes: &[u8]) {
     }
 }
 
-fn close_child_fds<S>(child: &mut RunningChild<'_, S>) {
-    child.stdout_fd.take().map(close_fd);
-    child.stderr_fd.take().map(close_fd);
-    close_fd(child.status_fd);
-}
-
-fn create_pipe() -> Result<Pipe, String> {
-    let mut fds = [0; 2];
-    let result = unsafe { libc::pipe2(fds.as_mut_ptr(), libc::O_CLOEXEC) };
-    if result == -1 {
-        return Err(format!("pipe2 failed: {}", io::Error::last_os_error()));
+fn cleanup_running_children<S>(running: &mut Vec<RunningChild<'_, S>>) -> Result<(), String> {
+    let mut errors = Vec::new();
+    for child in running.iter() {
+        collect_cleanup_error(&mut errors, kill_process_group_and_child(child.pid));
     }
-    Ok(Pipe {
-        read_fd: fds[0],
-        write_fd: fds[1],
-    })
-}
-
-fn prepare_capture_pipe(pipe: Option<Pipe>) -> Result<Option<RawFd>, String> {
-    let Some(pipe) = pipe else {
-        return Ok(None);
-    };
-    close_fd(pipe.write_fd);
-    set_nonblocking(pipe.read_fd)?;
-    Ok(Some(pipe.read_fd))
-}
-
-fn set_nonblocking(fd: RawFd) -> Result<(), String> {
-    let flags = unsafe { libc::fcntl(fd, libc::F_GETFL) };
-    if flags == -1 {
-        return Err(format!(
-            "fcntl F_GETFL failed: {}",
-            io::Error::last_os_error()
-        ));
+    for child in running.drain(..) {
+        collect_cleanup_error(&mut errors, reap_child(child.pid));
     }
-    let result = unsafe { libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK) };
-    if result == -1 {
-        return Err(format!(
-            "fcntl F_SETFL failed: {}",
-            io::Error::last_os_error()
-        ));
-    }
-    Ok(())
+    cleanup_result(errors)
 }
 
-fn close_pipe(pipe: Pipe) {
-    close_fd(pipe.read_fd);
-    close_fd(pipe.write_fd);
-}
-
-fn close_fd(fd: RawFd) {
-    unsafe {
-        libc::close(fd);
+fn collect_cleanup_error(errors: &mut Vec<String>, result: Result<(), String>) {
+    if let Err(error) = result {
+        errors.push(error);
     }
 }
 
-fn set_child_process_group(pid: libc::pid_t) -> Result<(), String> {
-    let result = unsafe { libc::setpgid(pid, pid) };
-    if result == 0 {
-        return Ok(());
+fn cleanup_result(errors: Vec<String>) -> Result<(), String> {
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors.join("; "))
     }
-    let error = io::Error::last_os_error();
-    if error.raw_os_error() == Some(libc::EACCES) {
-        return Ok(());
+}
+
+fn append_cleanup_error(error: String, cleanup_error: Option<String>) -> String {
+    match cleanup_error {
+        Some(cleanup_error) => format!("{error}; cleanup failed: {cleanup_error}"),
+        None => error,
     }
-    Err(format!("setpgid for child {pid} failed: {error}"))
 }
 
 fn assert_single_threaded_parent() -> Result<(), String> {

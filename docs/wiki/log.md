@@ -1,3 +1,7 @@
+## [2026-08-26] fix | Make prefork setup and failure cleanup leak-free
+
+Updated [[prefork-test-harness]] after conformance exposed empty split skips and a real `RLIMIT_NOFILE` failure with active children. Parent-owned pipes and setup sockets now use ownership-based closure; a two-way setup handshake verifies the child process group before test release; every parent-side error kills active groups/direct children, reaps direct children, and drops remaining descriptors. Timeout escalation and grandchild-disappearance behavior remain unchanged.
+
 ## [2026-08-26] system | Add prefork test harness core
 
 Added [[prefork-test-harness]] for the Linux-only custom test runner introduced by `prefork_full_ui`. The page records the single-thread pre-fork invariant, immutable parent-state borrowing, bounded process workers, structured child outcomes, capture modes, and process-group timeout escalation. Current proof is runner conformance only; real `WowLuaEnv` migration and benchmarking remain open.

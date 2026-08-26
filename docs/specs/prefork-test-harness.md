@@ -17,9 +17,9 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 ### Selection and output
 
 - [x] Support one positional substring filter and exact matching with `--exact`.
-- [x] Support `--skip VALUE` and `--skip=VALUE` exclusions.
+- [x] Support repeatable `--skip VALUE` and `--skip=VALUE` exclusions, rejecting empty values.
 - [x] Support `--list` with libtest-compatible case and summary data.
-- [x] Reject unsupported, duplicate, or conflicting arguments instead of ignoring them.
+- [x] Reject unsupported arguments, duplicate singleton flags/options, and conflicting arguments instead of ignoring them.
 - [x] Capture child stdout and stderr by default, suppress successful captured output, and print captured output for failures.
 - [x] Inherit child stdout and stderr when `--nocapture` is selected.
 
@@ -27,8 +27,9 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 - [x] Catch panics and report panic text as structured failure data.
 - [x] Distinguish panic, signal, unexpected exit, and timeout failures.
-- [x] Place each child and its descendants in a process group.
+- [x] Establish and parent-verify each child process group before releasing the child test body or scheduling another case.
 - [x] On timeout, send `SIGTERM`, wait a bounded grace period, send `SIGKILL`, reap the child, and remove its process tree.
+- [x] On parent-side runner failure, terminate every active process group, reap every direct child, and close every owned descriptor before returning.
 - [x] Exit unsuccessfully when argument validation, runner operation, or any selected case fails.
 
 ## How it works

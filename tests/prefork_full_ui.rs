@@ -9,7 +9,7 @@ use std::env;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
-use std::process::{Command, ExitCode, Output};
+use std::process::{Command, ExitCode, Output, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Barrier};
 use std::time::{Duration, Instant};
@@ -22,8 +22,13 @@ const WORKER_STATE_ENV: &str = "PREFORK_CONFORMANCE_WORKER_STATE";
 const TREE_PID_ENV: &str = "PREFORK_CONFORMANCE_TREE_PID";
 const DRIVER_TIMEOUT_MS_ENV: &str = "PREFORK_CONFORMANCE_TIMEOUT_MS";
 const DRIVER_TERM_GRACE_MS_ENV: &str = "PREFORK_CONFORMANCE_TERM_GRACE_MS";
+const CLEANUP_REPORT_ENV: &str = "PREFORK_CONFORMANCE_CLEANUP_REPORT";
 const WORKER_HOLD: Duration = Duration::from_millis(40);
+const RESOURCE_SHORT_HOLD: Duration = Duration::from_secs(1);
+const RESOURCE_LONG_HOLD: Duration = Duration::from_secs(30);
+const RESOURCE_CHILD_WAIT: Duration = Duration::from_secs(2);
 const PROCESS_DEATH_WAIT: Duration = Duration::from_secs(2);
+const FD_SCAN_LIMIT: i32 = 256;
 
 struct ConformanceState {
     executable: PathBuf,
@@ -49,6 +54,14 @@ const CONFORMANCE_CASES: &[Case<ConformanceState>] = &[
         rejects_multithreaded_fork,
     ),
     Case::new("conformance::rejects_bad_arguments", rejects_bad_arguments),
+    Case::new(
+        "conformance::validates_worker_counts",
+        validates_worker_counts,
+    ),
+    Case::new(
+        "conformance::cleans_up_after_resource_failure",
+        cleans_up_after_resource_failure,
+    ),
 ];
 
 const FIXTURE_CASES: &[Case<FixtureState>] = &[
@@ -70,6 +83,9 @@ const FIXTURE_CASES: &[Case<FixtureState>] = &[
     Case::new("worker::05", fixture_worker),
     Case::new("worker::06", fixture_worker),
     Case::new("worker::07", fixture_worker),
+    Case::new("resource::hold", fixture_resource_hold),
+    Case::new("resource::release", fixture_resource_release),
+    Case::new("resource::pending", fixture_pass),
 ];
 
 fn main() -> ExitCode {
@@ -95,9 +111,41 @@ fn run_fixture_driver() -> ExitCode {
         timeout: duration_from_env(DRIVER_TIMEOUT_MS_ENV, 2_000),
         term_grace: duration_from_env(DRIVER_TERM_GRACE_MS_ENV, 100),
     };
+    let cleanup_report = prepare_cleanup_report();
     let result = prefork::run(&state, FIXTURE_CASES, config);
+    write_cleanup_report(cleanup_report);
     drop(thread_guard);
     result
+}
+
+fn prepare_cleanup_report() -> Option<(File, Vec<i32>)> {
+    let path = env::var_os(CLEANUP_REPORT_ENV)?;
+    let file = File::create(path).expect("create cleanup report");
+    let open_fds = open_fd_numbers();
+    Some((file, open_fds))
+}
+
+fn write_cleanup_report(report: Option<(File, Vec<i32>)>) {
+    let Some((mut file, before)) = report else {
+        return;
+    };
+    let after = open_fd_numbers();
+    writeln!(file, "before={before:?}").expect("write cleanup report baseline");
+    writeln!(file, "after={after:?}").expect("write cleanup report result");
+}
+
+fn open_fd_numbers() -> Vec<i32> {
+    (0..FD_SCAN_LIMIT)
+        .filter(|fd| {
+            let result = unsafe { libc::fcntl(*fd, libc::F_GETFD) };
+            if result != -1 {
+                return true;
+            }
+            let error = std::io::Error::last_os_error();
+            assert_eq!(error.raw_os_error(), Some(libc::EBADF), "inspect fd {fd}");
+            false
+        })
+        .collect()
 }
 
 fn duration_from_env(name: &str, default_ms: u64) -> Duration {
@@ -151,6 +199,11 @@ fn filtering_and_listing(state: &ConformanceState) {
     let split_skip = run_driver(state, ["--list", "--skip", "alpha"], []);
     assert_success(&split_skip);
     assert!(!stdout(&split_skip).contains("alpha::"));
+
+    let repeated_skip = run_driver(state, ["--list", "--skip", "alpha", "--skip=beta"], []);
+    assert_success(&repeated_skip);
+    assert!(!stdout(&repeated_skip).contains("alpha::"));
+    assert!(!stdout(&repeated_skip).contains("beta::"));
 }
 
 fn copy_on_write(state: &ConformanceState) {
@@ -248,6 +301,124 @@ fn rejects_bad_arguments(state: &ConformanceState) {
     let two_filters = run_driver(state, ["alpha", "beta"], []);
     assert_failure(&two_filters);
     assert!(stderr(&two_filters).contains("only one positional filter is supported"));
+
+    let empty_split_skip = run_driver(state, ["--skip", ""], []);
+    assert_failure(&empty_split_skip);
+    assert!(stderr(&empty_split_skip).contains("--skip requires a non-empty value"));
+}
+
+fn validates_worker_counts(state: &ConformanceState) {
+    for value in ["invalid", "0", "18446744073709551616"] {
+        let compact = run_driver(
+            state,
+            ["alpha::one", "--exact", &format!("--test-threads={value}")],
+            [],
+        );
+        assert_failure(&compact);
+        assert!(stderr(&compact).contains("--test-threads must be a positive integer"));
+
+        let environment = run_driver(
+            state,
+            ["alpha::one", "--exact"],
+            [("RUST_TEST_THREADS", value)],
+        );
+        assert_failure(&environment);
+        assert!(stderr(&environment).contains("RUST_TEST_THREADS must be a positive integer"));
+    }
+}
+
+fn cleans_up_after_resource_failure(state: &ConformanceState) {
+    let temp = TempDir::new().expect("create resource-failure temp dir");
+    let stdout_path = temp.path().join("stdout.txt");
+    let stderr_path = temp.path().join("stderr.txt");
+    let cleanup_path = temp.path().join("cleanup.txt");
+
+    let mut command = driver_command(state);
+    command
+        .args(["resource::", "--test-threads=2", "--nocapture"])
+        .env(CLEANUP_REPORT_ENV, &cleanup_path)
+        .stdout(Stdio::from(
+            File::create(&stdout_path).expect("create resource-failure stdout"),
+        ))
+        .stderr(Stdio::from(
+            File::create(&stderr_path).expect("create resource-failure stderr"),
+        ));
+    let mut driver = command.spawn().expect("spawn resource-failure driver");
+    let child_pids = wait_for_direct_children(driver.id() as libc::pid_t, 2);
+    lower_nofile_limit(driver.id() as libc::pid_t);
+    let status = driver.wait().expect("wait for resource-failure driver");
+    let output = Output {
+        status,
+        stdout: std::fs::read(&stdout_path).expect("read resource-failure stdout"),
+        stderr: std::fs::read(&stderr_path).expect("read resource-failure stderr"),
+    };
+
+    let cleanup = std::fs::read_to_string(&cleanup_path).expect("read cleanup report");
+    let mut report_lines = cleanup.lines();
+    let before = report_lines.next().expect("cleanup baseline");
+    let after = report_lines.next().expect("cleanup result");
+    assert_failure(&output);
+    assert!(stderr(&output).contains("pipe2 failed"));
+    assert_eq!(before.strip_prefix("before="), after.strip_prefix("after="));
+    assert_processes_disappear(&child_pids);
+}
+
+fn wait_for_direct_children(parent_pid: libc::pid_t, expected: usize) -> Vec<libc::pid_t> {
+    let children_path = format!("/proc/{parent_pid}/task/{parent_pid}/children");
+    let deadline = Instant::now() + RESOURCE_CHILD_WAIT;
+    while Instant::now() < deadline {
+        let contents = std::fs::read_to_string(&children_path).expect("read driver children");
+        let children = contents
+            .split_whitespace()
+            .map(|value| value.parse().expect("parse driver child pid"))
+            .collect::<Vec<_>>();
+        if children.len() >= expected {
+            return children;
+        }
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    panic!("driver did not start {expected} children before resource failure");
+}
+
+fn lower_nofile_limit(pid: libc::pid_t) {
+    let mut current = libc::rlimit {
+        rlim_cur: 0,
+        rlim_max: 0,
+    };
+    let read_result =
+        unsafe { libc::prlimit(pid, libc::RLIMIT_NOFILE, std::ptr::null(), &mut current) };
+    assert_eq!(read_result, 0, "read driver RLIMIT_NOFILE");
+
+    let limited = libc::rlimit {
+        rlim_cur: 0,
+        rlim_max: current.rlim_max,
+    };
+    let write_result =
+        unsafe { libc::prlimit(pid, libc::RLIMIT_NOFILE, &limited, std::ptr::null_mut()) };
+    assert_eq!(write_result, 0, "lower driver RLIMIT_NOFILE");
+}
+
+fn assert_processes_disappear(pids: &[libc::pid_t]) {
+    let deadline = Instant::now() + RESOURCE_CHILD_WAIT;
+    loop {
+        let lingering = pids
+            .iter()
+            .copied()
+            .filter(|pid| unsafe { libc::kill(*pid, 0) } == 0)
+            .collect::<Vec<_>>();
+        if lingering.is_empty() {
+            return;
+        }
+        if Instant::now() >= deadline {
+            for pid in &lingering {
+                unsafe {
+                    libc::kill(*pid, libc::SIGKILL);
+                }
+            }
+            panic!("resource-failure children still exist after runner error: {lingering:?}");
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
 }
 
 fn assert_worker_limit<const N: usize, const E: usize>(
@@ -394,6 +565,14 @@ fn fixture_worker(_: &FixtureState) {
     update_worker_counts(&path, 1);
     std::thread::sleep(WORKER_HOLD);
     update_worker_counts(&path, -1);
+}
+
+fn fixture_resource_hold(_: &FixtureState) {
+    std::thread::sleep(RESOURCE_LONG_HOLD);
+}
+
+fn fixture_resource_release(_: &FixtureState) {
+    std::thread::sleep(RESOURCE_SHORT_HOLD);
 }
 
 fn update_worker_counts(path: &Path, delta: isize) {
