@@ -1,9 +1,8 @@
 use super::{
     LoadedTexture, ResolvedTextureEntry, UvRemap, WowUiPipeline, WowUiPrimitive,
     apply_resolved_mask_entry, apply_resolved_texture_entry, bc_texture_dimensions_fit_gpu_atlas,
-    decode_crop_request,
-    load_texture_prefer_bc, load_texture_prefer_bc_with_telemetry, remap_bc_entry_uv,
-    remap_entry_uv, resolve_and_scale_quads,
+    decode_crop_request, load_texture_prefer_bc, load_texture_prefer_bc_with_telemetry,
+    remap_bc_entry_uv, remap_entry_uv, resolve_and_scale_quads,
 };
 use crate::render::BlendMode;
 use crate::render::shader::QuadBatch;
@@ -483,19 +482,13 @@ fn resolved_bc_entries_remap_mask_uvs_into_bc_slot() {
     assert_eq!(vertices[0].mask_tex_index, bc_entry.tex_index());
     assert_eq!(vertices[1].mask_tex_index, bc_entry.tex_index());
     assert!(
-        (vertices[0].mask_tex_coords[0] - remap_bc_entry_uv(0.0, 0.25, 0.125, 128)).abs()
-            < 1e-6
+        (vertices[0].mask_tex_coords[0] - remap_bc_entry_uv(0.0, 0.25, 0.125, 128)).abs() < 1e-6
     );
+    assert!((vertices[0].mask_tex_coords[1] - remap_bc_entry_uv(0.0, 0.5, 0.25, 64)).abs() < 1e-6);
     assert!(
-        (vertices[0].mask_tex_coords[1] - remap_bc_entry_uv(0.0, 0.5, 0.25, 64)).abs() < 1e-6
+        (vertices[1].mask_tex_coords[0] - remap_bc_entry_uv(1.0, 0.25, 0.125, 128)).abs() < 1e-6
     );
-    assert!(
-        (vertices[1].mask_tex_coords[0] - remap_bc_entry_uv(1.0, 0.25, 0.125, 128)).abs()
-            < 1e-6
-    );
-    assert!(
-        (vertices[1].mask_tex_coords[1] - remap_bc_entry_uv(1.0, 0.5, 0.25, 64)).abs() < 1e-6
-    );
+    assert!((vertices[1].mask_tex_coords[1] - remap_bc_entry_uv(1.0, 0.5, 0.25, 64)).abs() < 1e-6);
 }
 
 #[test]
