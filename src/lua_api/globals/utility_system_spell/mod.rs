@@ -23,6 +23,27 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
 
 const BYTE_LOOKUP_SIZE: usize = 256;
+const XPCALL_WRAPPER_FACTORY_LUA: &str = r##"
+    local native_xpcall = ...
+    local unpack_args = unpack
+    local select_args = select
+    return function(func, handler, ...)
+        local argc = select_args("#", ...)
+        local args = { ... }
+        return native_xpcall(function()
+            return func(unpack_args(args, 1, argc))
+        end, function(error)
+            local ok, handled = native_xpcall(
+                function() return handler(error) end,
+                function() return nil end
+            )
+            if ok then
+                return handled
+            end
+            return error
+        end)
+    end
+"##;
 
 // ── Utility API ─────────────────────────────────────────────────────────────
 
@@ -398,29 +419,7 @@ fn install_xpcall(lua: &mut rilua::Lua) -> LuaResult<()> {
         return Err(runtime_error("native xpcall missing"));
     }
 
-    let factory = lua.state_mut().load(
-        r##"
-        local native_xpcall = ...
-        local unpack_args = unpack
-        local select_args = select
-        return function(func, handler, ...)
-            local argc = select_args("#", ...)
-            local args = { ... }
-            return native_xpcall(function()
-                return func(unpack_args(args, 1, argc))
-            end, function(error)
-                local ok, handled = native_xpcall(
-                    function() return handler(error) end,
-                    function() return nil end
-                )
-                if ok then
-                    return handled
-                end
-                return error
-            end)
-        end
-        "##,
-    )?;
+    let factory = lua.state_mut().load(XPCALL_WRAPPER_FACTORY_LUA)?;
     let wrapper = call_function_state_multi(
         lua.state_mut(),
         Val::Function(factory.gc_ref()),
