@@ -83,6 +83,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIPanels_Game",
         "Blizzard_UIPanels_Game_Mainline.toc",
     ),
+    ("Blizzard_TokenUI", "Blizzard_TokenUI.toc"),
     (
         "Blizzard_MapCanvasSecureUtil",
         "Blizzard_MapCanvasSecureUtil.toc",
@@ -239,15 +240,16 @@ fn professions_primary_spell_button_nameframe_texture(
         if not primary or not primary.{button_name} then
             return ""
         end
-        local frame_name = primary.{button_name}:GetName()
-        if not frame_name then
-            return ""
+        for _, region in ipairs({{ primary.{button_name}:GetRegions() }}) do
+            if region:GetObjectType() == "Texture" then
+                local draw_layer = region:GetDrawLayer()
+                local width, height = region:GetSize()
+                if draw_layer == "BACKGROUND" and width == 108 and height == 41 then
+                    return region:GetTextureFilePath() or ""
+                end
+            end
         end
-        local name_frame = _G[frame_name .. "NameFrame"]
-        if not name_frame or not name_frame.GetTexture then
-            return ""
-        end
-        return name_frame:GetTexture() or ""
+        return ""
         "#
     );
     env.eval::<String>(&code).unwrap_or_default()
