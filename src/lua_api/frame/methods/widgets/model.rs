@@ -631,6 +631,7 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetPortraitZoom", SKIP_3D_RENDERING),
     ("SetLight", SKIP_3D_RENDERING),
     ("ResetLights", SKIP_3D_RENDERING),
+    ("ClearFog", SKIP_3D_RENDERING),
     ("RefreshUnit", refresh_unit),
     ("RefreshCamera", refresh_camera),
     (

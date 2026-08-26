@@ -23,6 +23,32 @@ fn test_player_model_methods_still_resolve() {
 }
 
 #[test]
+fn test_model_and_model_scene_clear_fog_methods_absorb_visual_reset() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let (model_method, model_call, scene_method, scene_call): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local model = CreateFrame("Model")
+            local scene = CreateFrame("ModelScene")
+            return type(model.ClearFog) == "function",
+                   pcall(model.ClearFog, model),
+                   type(scene.ClearFog) == "function",
+                   pcall(scene.ClearFog, scene)
+            "#,
+        )
+        .unwrap();
+
+    assert!(model_method, "Model should expose ClearFog");
+    assert!(model_call, "Model:ClearFog should absorb the visual reset");
+    assert!(scene_method, "ModelScene should expose ClearFog");
+    assert!(
+        scene_call,
+        "ModelScene:ClearFog should absorb the visual reset"
+    );
+}
+
+#[test]
 fn test_player_model_set_model_persists_path_and_clears_file_id() {
     let env = WowLuaEnv::new().unwrap();
 
