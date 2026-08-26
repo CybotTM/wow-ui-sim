@@ -1,3 +1,7 @@
+## [2026-08-26] system | Add read-only prefork bytecode-cache children
+
+Updated [[prefork-test-harness]] with the generic child setup hook and the process-local one-way Lua bytecode-cache mode. Fresh-subprocess conformance now proves child-only setup state, unchanged parent-prewarmed cache bytes/metadata/directory contents across a unique child compile, and continued parent writability. Focused cache tests cover invalid and oversized removal suppression, torn-pack truncation suppression, legacy in-memory hits without file promotion/migration, and skipped append/replacement/temp-file paths.
+
 ## [2026-08-26] fix | Make prefork setup and failure cleanup leak-free
 
 Updated [[prefork-test-harness]] after conformance exposed empty split skips and a real `RLIMIT_NOFILE` failure with active children. Parent-owned pipes and setup sockets now use ownership-based closure; a two-way setup handshake verifies the child process group before test release; every parent-side error kills active groups/direct children, reaps direct children, and drops remaining descriptors. Timeout escalation and grandchild-disappearance behavior remain unchanged.

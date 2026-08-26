@@ -10,11 +10,13 @@ Every fork is immediately preceded by a `/proc/self/task` count check requiring 
 
 Parent-owned pipes and setup sockets use `OwnedFd`, so partial construction or setup failure closes every acquired descriptor through ownership. If any runner operation fails after cases have started, the parent sends `SIGKILL` to every active process group and direct child, reaps every direct child, then drops all remaining status/capture descriptors before returning the error.
 
-Each child catches panic payloads into a status channel and terminates with `_exit`. The parent classifies structured panic status, signals, unexpected exits, and timeouts. Captured mode redirects stdout and stderr into parent-drained pipes; successful output stays hidden, failed output is printed with stream labels, and `--nocapture` leaves both streams inherited.
+Each child catches panic payloads into a status channel and terminates with `_exit`. `Config` carries one `fn()` child setup hook, defaulting to a no-op; the child invokes it after process-group establishment and before the registered case body inside the same panic boundary. The parent classifies structured panic status, signals, unexpected exits, and timeouts. Captured mode redirects stdout and stderr into parent-drained pipes; successful output stays hidden, failed output is printed with stream labels, and `--nocapture` leaves both streams inherited.
+
+Prefork children can explicitly enter process-local read-only Lua bytecode-cache mode through the runner hook. Cache reads, current hits, legacy hits, and source compilation continue, but all on-disk mutation paths are suppressed: invalid or oversized removal, torn-pack truncation, standalone legacy migration, legacy-key promotion, append, replacement/compaction, temporary-file creation, rename, and cleanup removal. Suppressed stores have a distinct non-failure result. Production and the prefork parent remain writable because the one-way mode switch is called only after `fork()` in the child process.
 
 Timeout handling remains separate: it signals the whole child process group with `SIGTERM`, waits the configured grace period, escalates to `SIGKILL`, and reaps the direct child. Worker selection honors `--test-threads` before `RUST_TEST_THREADS`, with both capped by the hard maximum.
 
-`tests/prefork_full_ui.rs` currently preloads only lightweight conformance state. Its default execution proves runner semantics before the future full-UI preload and real `WowLuaEnv` case migration.
+`tests/prefork_full_ui.rs` currently preloads only lightweight conformance state. Bytecode conformance runs in a fresh subprocess with an isolated XDG cache root, prewarms `pack.bin` in the parent, compiles a unique generated addon chunk in a read-only child, compares cache-tree bytes and metadata, and then proves the parent remains writable. Real full-UI `WowLuaEnv` case migration remains future work.
 
 ## Sources
 

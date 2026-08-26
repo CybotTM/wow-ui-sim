@@ -8,12 +8,15 @@ use prefork::{Case, Config};
 use std::env;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom, Write};
+use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode, Output, Stdio};
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Barrier};
 use std::time::{Duration, Instant};
 use tempfile::TempDir;
+use wow_ui_sim::loader::{enter_bytecode_cache_read_only_mode, load_addon};
+use wow_ui_sim::lua_api::WowLuaEnv;
 
 const DRIVER_MODE_ENV: &str = "PREFORK_CONFORMANCE_DRIVER";
 const TREE_CHILD_MODE_ENV: &str = "PREFORK_CONFORMANCE_TREE_CHILD";
@@ -23,6 +26,7 @@ const TREE_PID_ENV: &str = "PREFORK_CONFORMANCE_TREE_PID";
 const DRIVER_TIMEOUT_MS_ENV: &str = "PREFORK_CONFORMANCE_TIMEOUT_MS";
 const DRIVER_TERM_GRACE_MS_ENV: &str = "PREFORK_CONFORMANCE_TERM_GRACE_MS";
 const CLEANUP_REPORT_ENV: &str = "PREFORK_CONFORMANCE_CLEANUP_REPORT";
+const BYTECODE_DRIVER_ENV: &str = "PREFORK_CONFORMANCE_BYTECODE_DRIVER";
 const WORKER_HOLD: Duration = Duration::from_millis(40);
 const RESOURCE_SHORT_HOLD: Duration = Duration::from_secs(1);
 const RESOURCE_LONG_HOLD: Duration = Duration::from_secs(30);
@@ -37,6 +41,27 @@ struct ConformanceState {
 struct FixtureState {
     cow_value: AtomicUsize,
 }
+
+struct BytecodeFixtureState {
+    env: WowLuaEnv,
+    child_toc: PathBuf,
+    expected_value: String,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct CachePathSnapshot {
+    relative_path: PathBuf,
+    is_directory: bool,
+    is_file: bool,
+    len: u64,
+    modified_seconds: i64,
+    modified_nanoseconds: i64,
+    inode: u64,
+    mode: u32,
+    bytes: Option<Vec<u8>>,
+}
+
+static BYTECODE_CHILD_SETUP_RAN: AtomicBool = AtomicBool::new(false);
 
 const CONFORMANCE_CASES: &[Case<ConformanceState>] = &[
     Case::new("conformance::filtering_and_listing", filtering_and_listing),
@@ -62,7 +87,16 @@ const CONFORMANCE_CASES: &[Case<ConformanceState>] = &[
         "conformance::cleans_up_after_resource_failure",
         cleans_up_after_resource_failure,
     ),
+    Case::new(
+        "conformance::read_only_bytecode_cache_child",
+        read_only_bytecode_cache_child,
+    ),
 ];
+
+const BYTECODE_FIXTURE_CASES: &[Case<BytecodeFixtureState>] = &[Case::new(
+    "bytecode::read_only_child",
+    fixture_read_only_bytecode_cache,
+)];
 
 const FIXTURE_CASES: &[Case<FixtureState>] = &[
     Case::new("alpha::one", fixture_pass),
@@ -103,6 +137,10 @@ fn main() -> ExitCode {
 }
 
 fn run_fixture_driver() -> ExitCode {
+    if env::var_os(BYTECODE_DRIVER_ENV).is_some() {
+        return run_bytecode_driver();
+    }
+
     let thread_guard = start_optional_guard_thread();
     let state = FixtureState {
         cow_value: AtomicUsize::new(7),
@@ -110,12 +148,138 @@ fn run_fixture_driver() -> ExitCode {
     let config = Config {
         timeout: duration_from_env(DRIVER_TIMEOUT_MS_ENV, 2_000),
         term_grace: duration_from_env(DRIVER_TERM_GRACE_MS_ENV, 100),
+        ..Config::default()
     };
     let cleanup_report = prepare_cleanup_report();
     let result = prefork::run(&state, FIXTURE_CASES, config);
     write_cleanup_report(cleanup_report);
     drop(thread_guard);
     result
+}
+
+fn run_bytecode_driver() -> ExitCode {
+    let addon_dir = TempDir::new().expect("create bytecode conformance addon directory");
+    let unique = format!(
+        "{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system time before unix epoch")
+            .as_nanos()
+    );
+    let prewarm_toc = write_lua_addon(
+        addon_dir.path(),
+        "PreforkBytecodePrewarm",
+        &format!("_G.__prefork_bytecode_prewarm = {unique:?}"),
+    );
+    let child_toc = write_lua_addon(
+        addon_dir.path(),
+        "PreforkBytecodeChild",
+        &format!("_G.__prefork_bytecode_child = {unique:?}"),
+    );
+    let parent_after_toc = write_lua_addon(
+        addon_dir.path(),
+        "PreforkBytecodeParentAfter",
+        &format!("_G.__prefork_bytecode_parent_after = {unique:?}"),
+    );
+
+    let env = WowLuaEnv::new().expect("create bytecode conformance Lua environment");
+    load_addon(&env.loader_env(), &prewarm_toc).expect("prewarm parent bytecode cache");
+    let cache_root = PathBuf::from(env::var_os("XDG_CACHE_HOME").expect("XDG cache root"))
+        .join("wow-ui-sim")
+        .join("lua-bytecode");
+    let before = snapshot_cache_tree(&cache_root);
+    assert!(
+        before.iter().any(|entry| entry
+            .relative_path
+            .file_name()
+            .is_some_and(|name| name == "pack.bin")),
+        "parent prewarm must create pack.bin"
+    );
+
+    let state = BytecodeFixtureState {
+        env,
+        child_toc,
+        expected_value: unique,
+    };
+    let config = Config {
+        timeout: duration_from_env(DRIVER_TIMEOUT_MS_ENV, 2_000),
+        term_grace: duration_from_env(DRIVER_TERM_GRACE_MS_ENV, 100),
+        child_setup: enable_read_only_bytecode_cache_in_child,
+    };
+    let result = prefork::run(&state, BYTECODE_FIXTURE_CASES, config);
+    if result != ExitCode::SUCCESS {
+        return result;
+    }
+
+    assert!(
+        !BYTECODE_CHILD_SETUP_RAN.load(Ordering::SeqCst),
+        "child setup mutation must not reach parent process state"
+    );
+    assert_eq!(
+        snapshot_cache_tree(&cache_root),
+        before,
+        "read-only child must leave cache bytes, metadata, and directory contents unchanged"
+    );
+
+    load_addon(&state.env.loader_env(), &parent_after_toc)
+        .expect("parent bytecode cache must remain writable");
+    assert_ne!(
+        snapshot_cache_tree(&cache_root),
+        before,
+        "child read-only mode must not change parent cache mode"
+    );
+    result
+}
+
+fn write_lua_addon(root: &Path, name: &str, source: &str) -> PathBuf {
+    let addon_dir = root.join(name);
+    std::fs::create_dir(&addon_dir).expect("create bytecode conformance addon directory");
+    let toc_path = addon_dir.join(format!("{name}.toc"));
+    let lua_name = format!("{name}.lua");
+    std::fs::write(&toc_path, format!("## Interface: 120000\n{lua_name}\n"))
+        .expect("write bytecode conformance TOC");
+    std::fs::write(addon_dir.join(lua_name), source).expect("write bytecode conformance Lua file");
+    toc_path
+}
+
+fn snapshot_cache_tree(root: &Path) -> Vec<CachePathSnapshot> {
+    let mut snapshots = Vec::new();
+    snapshot_cache_directory(root, root, &mut snapshots);
+    snapshots.sort_by(|left, right| left.relative_path.cmp(&right.relative_path));
+    snapshots
+}
+
+fn snapshot_cache_directory(root: &Path, directory: &Path, snapshots: &mut Vec<CachePathSnapshot>) {
+    for entry in std::fs::read_dir(directory).expect("read bytecode cache directory") {
+        let path = entry.expect("read bytecode cache entry").path();
+        let metadata = std::fs::symlink_metadata(&path).expect("read bytecode cache metadata");
+        let is_directory = metadata.is_dir();
+        let is_file = metadata.is_file();
+        let bytes = is_file.then(|| std::fs::read(&path).expect("read bytecode cache file"));
+        snapshots.push(CachePathSnapshot {
+            relative_path: path
+                .strip_prefix(root)
+                .expect("cache path below root")
+                .to_path_buf(),
+            is_directory,
+            is_file,
+            len: metadata.len(),
+            modified_seconds: metadata.mtime(),
+            modified_nanoseconds: metadata.mtime_nsec(),
+            inode: metadata.ino(),
+            mode: metadata.mode(),
+            bytes,
+        });
+        if is_directory {
+            snapshot_cache_directory(root, &path, snapshots);
+        }
+    }
+}
+
+fn enable_read_only_bytecode_cache_in_child() {
+    BYTECODE_CHILD_SETUP_RAN.store(true, Ordering::SeqCst);
+    enter_bytecode_cache_read_only_mode();
 }
 
 fn prepare_cleanup_report() -> Option<(File, Vec<i32>)> {
@@ -363,6 +527,18 @@ fn cleans_up_after_resource_failure(state: &ConformanceState) {
     assert_processes_disappear(&child_pids);
 }
 
+fn read_only_bytecode_cache_child(state: &ConformanceState) {
+    let cache_root = TempDir::new().expect("create isolated XDG cache root");
+    let environment = [
+        (BYTECODE_DRIVER_ENV, "1".as_ref()),
+        ("XDG_CACHE_HOME", cache_root.path().as_os_str()),
+        ("WOW_SIM_ENABLE_BYTECODE_CACHE", "1".as_ref()),
+    ];
+    let output =
+        run_driver_with_os_env(state, ["bytecode::read_only_child", "--exact"], environment);
+    assert_success(&output);
+}
+
 fn wait_for_direct_children(parent_pid: libc::pid_t, expected: usize) -> Vec<libc::pid_t> {
     let children_path = format!("/proc/{parent_pid}/task/{parent_pid}/children");
     let deadline = Instant::now() + RESOURCE_CHILD_WAIT;
@@ -469,6 +645,7 @@ fn driver_command(state: &ConformanceState) -> Command {
         .env_remove(TREE_PID_ENV)
         .env_remove(DRIVER_TIMEOUT_MS_ENV)
         .env_remove(DRIVER_TERM_GRACE_MS_ENV)
+        .env_remove(BYTECODE_DRIVER_ENV)
         .env_remove("RUST_TEST_THREADS");
     command
 }
@@ -504,6 +681,23 @@ fn assert_process_disappears(pid: libc::pid_t) {
         std::thread::sleep(Duration::from_millis(10));
     }
     panic!("grandchild process {pid} still exists after process-group cleanup");
+}
+
+fn fixture_read_only_bytecode_cache(state: &BytecodeFixtureState) {
+    assert!(
+        BYTECODE_CHILD_SETUP_RAN.load(Ordering::SeqCst),
+        "child setup must run before the registered test body"
+    );
+    let result = load_addon(&state.env.loader_env(), &state.child_toc)
+        .expect("compile unique Lua chunk in read-only child");
+    assert_eq!(result.timing.cache_misses, 1);
+    assert_eq!(result.timing.cache_store_successes, 0);
+    assert_eq!(result.timing.cache_store_failures, 0);
+    let loaded_value: String = state
+        .env
+        .eval("return __prefork_bytecode_child")
+        .expect("read value assigned by unique child chunk");
+    assert_eq!(loaded_value, state.expected_value);
 }
 
 fn fixture_pass(_: &FixtureState) {}

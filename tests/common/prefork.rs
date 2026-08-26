@@ -38,6 +38,7 @@ impl<S> Case<S> {
 pub struct Config {
     pub timeout: Duration,
     pub term_grace: Duration,
+    pub child_setup: fn(),
 }
 
 impl Default for Config {
@@ -45,9 +46,12 @@ impl Default for Config {
         Self {
             timeout: Duration::from_secs(30),
             term_grace: Duration::from_millis(100),
+            child_setup: no_op_child_setup,
         }
     }
 }
+
+fn no_op_child_setup() {}
 
 #[derive(Default)]
 struct Options {
@@ -311,7 +315,7 @@ fn execute_selected<'a, S>(
             let Some(selected_case) = pending.next() else {
                 break;
             };
-            running.push(spawn_child(state, selected_case, nocapture)?);
+            running.push(spawn_child(state, selected_case, config, nocapture)?);
         }
         if running.is_empty() {
             return Ok(());
@@ -324,6 +328,7 @@ fn execute_selected<'a, S>(
 fn spawn_child<'a, S>(
     state: &S,
     selected: SelectedCase<'a, S>,
+    config: Config,
     nocapture: bool,
 ) -> Result<RunningChild<'a, S>, String> {
     let status_pipe = create_pipe()?;
@@ -345,6 +350,7 @@ fn spawn_child<'a, S>(
             stdout_pipe,
             stderr_pipe,
             child_setup_fd,
+            config.child_setup,
         );
     }
 
@@ -399,6 +405,7 @@ fn run_child<S>(
     stdout_pipe: Option<Pipe>,
     stderr_pipe: Option<Pipe>,
     setup_fd: OwnedFd,
+    child_setup: fn(),
 ) -> ! {
     drop(status_pipe.read_fd);
     let status_fd = status_pipe.write_fd.as_raw_fd();
@@ -409,7 +416,10 @@ fn run_child<S>(
     redirect_child_output(stdout_pipe, libc::STDOUT_FILENO, status_fd);
     redirect_child_output(stderr_pipe, libc::STDERR_FILENO, status_fd);
 
-    let result = panic::catch_unwind(AssertUnwindSafe(|| (selected.case.test)(state)));
+    let result = panic::catch_unwind(AssertUnwindSafe(|| {
+        child_setup();
+        (selected.case.test)(state);
+    }));
     flush_child_output();
     match result {
         Ok(()) => write_child_status_and_exit(status_fd, CHILD_PASS, "", 0),

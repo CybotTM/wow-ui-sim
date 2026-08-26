@@ -9,6 +9,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Run only on Linux.
 - [x] Keep the runner parent single-threaded and reject every fork attempt unless `/proc/self/task` reports exactly one task immediately before the fork.
 - [x] Borrow immutable state created by the parent in each selected child without leaking child mutations back to the parent or sibling cases.
+- [x] Support one optional `fn()` child setup hook, defaulting to a no-op, after child process-group establishment and before the registered case body under the same panic capture.
 - [x] Run one child process for every selected case.
 - [x] Bound concurrent children with explicit default and hard-maximum worker counts.
 - [x] Honor both `--test-threads` forms and `RUST_TEST_THREADS`, with the command-line value taking precedence.
@@ -22,6 +23,15 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Reject unsupported arguments, duplicate singleton flags/options, and conflicting arguments instead of ignoring them.
 - [x] Capture child stdout and stderr by default, suppress successful captured output, and print captured output for failures.
 - [x] Inherit child stdout and stderr when `--nocapture` is selected.
+
+### Bytecode-cache child contract
+
+- [x] Keep the Lua bytecode cache writable by default in production and the prefork parent.
+- [x] Allow a forked child setup hook to enter one-way process-local read-only bytecode-cache mode without changing parent state.
+- [x] Preserve current-pack and legacy cache hits while suppressing legacy promotion and on-disk migration.
+- [x] Compile cache misses normally without counting suppressed cache stores as failures.
+- [x] In read-only mode, never create, append, replace, compact, truncate, remove, rename, or stage temporary bytecode-cache files.
+- [x] Prove the contract in a fresh subprocess with an isolated `XDG_CACHE_HOME`: parent prewarm creates `pack.bin`, a unique child Lua chunk compiles, and the prewarmed cache tree bytes and metadata remain identical.
 
 ### Failure handling
 
@@ -42,6 +52,8 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - `build.rs` — keeps the custom target root out of the generated integration harness.
 - `tests/common/prefork.rs` — reusable test-only runner API and execution behavior.
 - `tests/prefork_full_ui.rs` — custom target entry point, fixture cases, and behavioral conformance checks.
+- `src/loader/bytecode_cache.rs` — process-local cache mode and mutation-boundary enforcement.
+- `src/loader/mod.rs` — narrow doc-hidden child entry point.
 
 ## Tests asserting this spec
 
@@ -55,5 +67,5 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 ## Out of scope
 
 - Non-Linux prefork support, because the contract depends on Linux process and `/proc` semantics.
-- Runtime production behavior; this harness is test-only.
+- General runtime read-only behavior beyond Lua bytecode-cache mutation suppression in explicitly configured forked test children.
 - Compatibility fallbacks for unsupported custom-runner arguments.
