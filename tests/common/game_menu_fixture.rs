@@ -79,7 +79,9 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ),
     ("Blizzard_WorldMap", "Blizzard_WorldMap_Mainline.toc"),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
+    ("Blizzard_StaticPopup_Game", "Blizzard_StaticPopup_Game.toc"),
     ("Blizzard_GameMenu", "Blizzard_GameMenu_Mainline.toc"),
+    ("Blizzard_HelpFrame", "Blizzard_HelpFrame.toc"),
 ];
 
 pub fn setup_game_menu_env() -> WowLuaEnv {
