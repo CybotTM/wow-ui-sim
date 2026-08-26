@@ -1,6 +1,6 @@
 # Prefork test harness
 
-The Linux prefork test harness provides a reusable custom test-runner contract for expensive parent-owned test state. Its source lives in `tests/common/prefork.rs`; detailed design documentation may be added at [the prefork harness wiki page](../wiki/systems/prefork-test-harness.md).
+The Linux prefork test harness provides a reusable custom test-runner contract for expensive parent-owned test state. Its source lives in `tests/common/prefork.rs`; implementation details are documented at [the prefork harness wiki page](../wiki/systems/prefork-test-harness.md).
 
 ## What it must do
 
@@ -28,16 +28,16 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 ### Normal retail full-UI preload
 
 - [x] Enter process-local parent-bypass bytecode-cache mode before building one parent-owned 1024x768 `ScreenKind::Game` `WowLuaEnv` from the synced default-retail Blizzard UI cache.
-- [x] Stop GC, compile Blizzard Lua from source without reading or writing the bytecode pack, discover the normal game-screen Blizzard addon set, load it in dependency order without SavedVariables or third-party addons, and fire `ADDON_LOADED` after every successful load.
+- [x] Stop GC, compile Blizzard Lua from source without reading or writing the bytecode pack, discover the normal game-screen Blizzard addon set, load it in dependency order without SavedVariables or third-party addons, and fire `ADDON_LOADED` after every successful load; disabled bytecode caching remains disabled.
 - [x] Restore post-cleanup globals after `Blizzard_EnvironmentCleanup`, sync the string metatable, apply post-load workarounds, restart bootstrap GC, and run the normal game startup event sequence.
-- [x] After successful startup, seal the bypassed cache as empty and initialized so read-only children cannot reload the disk pack; preserve whether `pack.bin` exists, return a successful zero-byte release outcome, and fail if cache use occurred before sealing.
+- [x] After successful startup, when bytecode caching is enabled, seal the bypassed cache as empty and initialized so read-only children cannot reload the disk pack; preserve whether `pack.bin` exists, return a successful zero-byte release outcome, and fail if cache state was initialized or populated before sealing. Disabled caching returns a successful no-op.
 - [x] Fail setup explicitly with addon context on addon-load, `ADDON_LOADED`, EnvironmentCleanup restoration, startup Lua, bootstrap-GC, or bytecode-cache sealing errors instead of continuing with a partial parent snapshot.
 - [x] Run the nine `test_keybindings_panels_detail` cases as immutable `fn(&WowLuaEnv)` children with a 120-second child timeout and read-only bytecode-cache child setup.
 
 ### Bytecode-cache child contract
 
 - [x] Keep the Lua bytecode cache writable by default in production; use process-local parent-bypass mode only for the dedicated prefork preload.
-- [x] In parent-bypass mode, return cache misses without loading `pack.bin`, compile source normally, and treat suppressed stores as non-failures.
+- [x] In parent-bypass mode, return cache misses without loading `pack.bin`, compile source normally, and treat suppressed stores as non-failures; disabled caching remains a successful no-op.
 - [x] Allow a forked child setup hook to transition the inherited bypassed state into one-way process-local read-only mode without changing parent state.
 - [x] Preserve current-pack and legacy cache hits while suppressing legacy promotion and on-disk migration.
 - [x] Compile cache misses normally without counting suppressed cache stores as failures.

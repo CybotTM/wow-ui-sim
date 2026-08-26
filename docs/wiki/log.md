@@ -1,3 +1,7 @@
+## [2026-08-26] audit | Clarify prefork cache-disabled contract
+
+Audited commits `4d8136fc4` through `880d58943` against the current prefork loader. Clarified that cache sealing applies only when bytecode caching is enabled; disabled caching remains a successful no-op, and sealing rejects initialized or populated cache state rather than any bypass API call. Added the related bytecode-cache growth cross-link.
+
 ## [2026-08-26] system | Bypass bytecode pack during prefork preload
 
 Updated [[prefork-test-harness]] with process-local `ParentBypass` entered before the parent `WowLuaEnv` exists. Prefork preload now compiles source without reading or writing `pack.bin`, seals empty initialized cache state after startup, and transitions children to read-only without allowing them to reload the pack. Separate conformance preserves the warm read-only contract. The serial nine-case benchmark completed in 10.12 seconds; process maximum RSS fell 33.8% and process-tree PSS fell 12.5% against the retained baseline. Aggregate tree RSS rose because it double-counts shared copy-on-write pages.
