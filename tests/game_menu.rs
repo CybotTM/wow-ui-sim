@@ -19,12 +19,9 @@ fn blizzard_ui_dir() -> PathBuf {
 /// Minimal addon set needed to load GameMenuFrame (mirrors test_keybindings.rs).
 const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
-    ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
+    ("Blizzard_Colors", "Blizzard_Colors.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    (
-        "Blizzard_SharedXMLGame",
-        "Blizzard_SharedXMLGame_Mainline.toc",
-    ),
+    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -50,7 +47,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
     ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
     ("Blizzard_SimpleCheckout", "Blizzard_SimpleCheckout.toc"),
-    ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
+    ("Blizzard_StoreUI", "Blizzard_StoreUI.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
