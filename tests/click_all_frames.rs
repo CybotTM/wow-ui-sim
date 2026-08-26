@@ -181,10 +181,16 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_AddOnList", "Blizzard_AddOnList.toc"),
     ("Blizzard_TimerunningUtil", "Blizzard_TimerunningUtil.toc"),
     ("Blizzard_MawBuffs", "Blizzard_MawBuffs.toc"),
+    ("Blizzard_AutoComplete", "Blizzard_AutoComplete.toc"),
     (
         "Blizzard_ChatFrameBase",
         "Blizzard_ChatFrameBase_Mainline.toc",
     ),
+    (
+        "Blizzard_VoiceToggleButton",
+        "Blizzard_VoiceToggleButton.toc",
+    ),
+    ("Blizzard_ChatFrame", "Blizzard_ChatFrame_Mainline.toc"),
     ("Blizzard_GuildControlUI", "Blizzard_GuildControlUI.toc"),
     (
         "Blizzard_CommunitiesSecure",
