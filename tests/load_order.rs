@@ -101,8 +101,8 @@ fn test_uipanels_game_loads_before_bag_buttons() {
     }
 }
 
-/// Blizzard_ItemButton currently loads before Blizzard_FrameXMLUtil, so
-/// ItemButtonMixin:PostOnShow can run before ItemButtonUtil exists.
+/// Blizzard_ItemButton appears before Blizzard_FrameXMLUtil in eager discovery.
+/// Runtime addon loads may still pull FrameXMLUtil in earlier as a foundation.
 #[test]
 fn test_item_button_loads_before_framexmlutil() {
     test_timeout! {
@@ -128,38 +128,6 @@ fn test_item_button_loads_before_framexmlutil() {
             "Blizzard_ItemButton (pos {}) must currently load before Blizzard_FrameXMLUtil (pos {})",
             item_button_pos.unwrap(),
             framexmlutil_pos.unwrap(),
-        );
-    }
-}
-
-/// When Blizzard_ItemButton has loaded but Blizzard_FrameXMLUtil has not,
-/// ItemButtonMixin exists but ItemButtonUtil still does not.
-#[test]
-fn test_item_button_mixin_exists_before_item_button_util() {
-    test_timeout! {
-        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-        let ui = blizzard_ui_dir();
-        let addons = discover_blizzard_addons(&ui);
-
-        for (name, toc_path) in &addons {
-            load_addon(&env.loader_env(), toc_path).ok();
-            if name == "Blizzard_ItemButton" {
-                break;
-            }
-        }
-
-        let (has_item_button_mixin, has_item_button_util): (bool, bool) = env
-            .eval(
-                r#"
-                return type(ItemButtonMixin) == "table",
-                    type(ItemButtonUtil) == "table"
-                "#,
-            )
-            .unwrap();
-        assert!(has_item_button_mixin);
-        assert!(
-            !has_item_button_util,
-            "ItemButtonUtil should still be unavailable when Blizzard_ItemButton finishes loading"
         );
     }
 }
