@@ -26,7 +26,9 @@ Warm-cache conformance remains in a fresh subprocess with an isolated XDG cache 
 
 ## Measured result
 
-The post-startup-release benchmark is superseded: it still loaded the approximately 671 MiB pack during parent preload, so it could not lower whole-command peak RSS. The retained pre-migration serial baseline is 23.49 seconds, 1,190,600 KiB process maximum RSS, and 1,189,511 KiB sampled process-tree PSS. Parent-bypass measurements are pending against committed implementation.
+The committed parent-bypass target passed all nine migrated cases with one worker in 10.12 seconds, down 56.9% from the retained 23.49-second pre-migration serial baseline. `/usr/bin/time` process maximum RSS fell from 1,190,600 KiB to 788,236 KiB (33.8%), and sampled process-tree PSS fell from 1,189,511 KiB to 1,040,276 KiB (12.5%). Parent-only peak PSS was 768,995 KiB; the one-child phase produced the whole-tree PSS peak.
+
+Sampled process-tree RSS rose from 1,196,596 KiB to 1,523,432 KiB. This metric double-counts copy-on-write pages mapped by both parent and child; PSS is the aggregate host-footprint comparison because it apportions shared pages. The benchmark used the same nine-case filter and `--test-threads=1`, with `/usr/bin/time -v` plus 20 ms `/proc/*/smaps_rollup` sampling.
 
 ## Sources
 

@@ -1,6 +1,6 @@
 ## [2026-08-26] system | Bypass bytecode pack during prefork preload
 
-Updated [[prefork-test-harness]] with process-local `ParentBypass` entered before the parent `WowLuaEnv` exists. Prefork preload now compiles source without reading or writing `pack.bin`, seals empty initialized cache state after startup, and transitions children to read-only without allowing them to reload the pack. Added separate conformance against an existing pack while preserving the warm read-only cache contract. Current parent-bypass performance proof is pending; prior release-only measurements are superseded.
+Updated [[prefork-test-harness]] with process-local `ParentBypass` entered before the parent `WowLuaEnv` exists. Prefork preload now compiles source without reading or writing `pack.bin`, seals empty initialized cache state after startup, and transitions children to read-only without allowing them to reload the pack. Separate conformance preserves the warm read-only contract. The serial nine-case benchmark completed in 10.12 seconds; process maximum RSS fell 33.8% and process-tree PSS fell 12.5% against the retained baseline. Aggregate tree RSS rose because it double-counts shared copy-on-write pages.
 
 ## [2026-08-26] performance | Release prefork parent bytecode memory
 

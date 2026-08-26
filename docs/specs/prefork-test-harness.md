@@ -47,9 +47,10 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 ### Performance proof
 
-- [ ] Preserve all nine migrated behaviors with parent bypass enabled.
-- [ ] Retain serial wall-time improvement over the 23.49-second pre-migration path.
-- [ ] Measure whole-command process maximum RSS and process-tree PSS with parent bypass; the prior post-startup-release measurements are superseded because they still loaded the pack during preload.
+- [x] Preserve all nine migrated behaviors with parent bypass enabled.
+- [x] Reduce serial wall time from 23.49 seconds to 10.12 seconds (56.9%).
+- [x] Reduce `/usr/bin/time` process maximum RSS from 1,190,600 KiB to 788,236 KiB (33.8%) and sampled process-tree PSS from 1,189,511 KiB to 1,040,276 KiB (12.5%).
+- [x] Record sampled process-tree RSS separately: it rises from 1,196,596 KiB to 1,523,432 KiB because RSS counts shared copy-on-write pages in both parent and child, while PSS apportions them.
 
 ### Failure handling
 
@@ -82,7 +83,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 ## Known gaps (current cycle)
 
 - [x] Migrate the nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
-- [ ] Benchmark the parent-bypass prefork execution against the retained current in-target baseline.
+- [x] Benchmark the parent-bypass prefork execution against the retained current in-target baseline.
 
 ## Out of scope
 
