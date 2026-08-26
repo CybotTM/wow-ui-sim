@@ -98,11 +98,51 @@ pub fn run<S>(state: &S, cases: &[Case<S>], config: Config) -> ExitCode {
     }
 }
 
+pub fn run_with_setup<S, E>(
+    cases: &[Case<S>],
+    config: Config,
+    setup: impl FnOnce() -> Result<S, E>,
+) -> ExitCode
+where
+    E: std::fmt::Display,
+{
+    let args = env::args_os().skip(1);
+    match run_with_setup_args(cases, config, setup, args) {
+        Ok(true) => ExitCode::SUCCESS,
+        Ok(false) | Err(()) => ExitCode::FAILURE,
+    }
+}
+
+fn run_with_setup_args<S, E>(
+    cases: &[Case<S>],
+    config: Config,
+    setup: impl FnOnce() -> Result<S, E>,
+    args: impl Iterator<Item = OsString>,
+) -> Result<bool, ()>
+where
+    E: std::fmt::Display,
+{
+    run_selected_from_args(cases, args, |selected, worker_count, nocapture| {
+        let state = setup().map_err(|error| format!("setup failed: {error}"))?;
+        run_selected(&state, selected, config, worker_count, nocapture)
+    })
+}
+
 fn run_with_args<S>(
     state: &S,
     cases: &[Case<S>],
     config: Config,
     args: impl Iterator<Item = OsString>,
+) -> Result<bool, ()> {
+    run_selected_from_args(cases, args, |selected, worker_count, nocapture| {
+        run_selected(state, selected, config, worker_count, nocapture)
+    })
+}
+
+fn run_selected_from_args<'a, S>(
+    cases: &'a [Case<S>],
+    args: impl Iterator<Item = OsString>,
+    execute: impl FnOnce(Vec<SelectedCase<'a, S>>, usize, bool) -> Result<bool, String>,
 ) -> Result<bool, ()> {
     let options = parse_args(args).map_err(report_cli_error)?;
     let selected = select_cases(cases, &options);
@@ -112,8 +152,7 @@ fn run_with_args<S>(
     }
 
     let worker_count = resolve_worker_count(&options).map_err(report_cli_error)?;
-    run_selected(state, selected, config, worker_count, options.nocapture)
-        .map_err(report_runner_error)
+    execute(selected, worker_count, options.nocapture).map_err(report_runner_error)
 }
 
 fn parse_args(args: impl Iterator<Item = OsString>) -> Result<Options, String> {

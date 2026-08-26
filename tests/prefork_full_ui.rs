@@ -3,6 +3,10 @@ compile_error!("prefork_full_ui is Linux-only");
 
 #[path = "common/prefork.rs"]
 mod prefork;
+#[path = "common/prefork_full_ui_preload.rs"]
+mod prefork_full_ui_preload;
+#[path = "test_keybindings_panels_detail.rs"]
+mod test_keybindings_panels_detail;
 
 use prefork::{Case, Config};
 use std::env;
@@ -18,6 +22,7 @@ use tempfile::TempDir;
 use wow_ui_sim::loader::{enter_bytecode_cache_read_only_mode, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+const CONFORMANCE_MODE_ENV: &str = "PREFORK_CONFORMANCE_SUITE";
 const DRIVER_MODE_ENV: &str = "PREFORK_CONFORMANCE_DRIVER";
 const TREE_CHILD_MODE_ENV: &str = "PREFORK_CONFORMANCE_TREE_CHILD";
 const START_THREAD_ENV: &str = "PREFORK_CONFORMANCE_START_THREAD";
@@ -25,6 +30,8 @@ const WORKER_STATE_ENV: &str = "PREFORK_CONFORMANCE_WORKER_STATE";
 const TREE_PID_ENV: &str = "PREFORK_CONFORMANCE_TREE_PID";
 const DRIVER_TIMEOUT_MS_ENV: &str = "PREFORK_CONFORMANCE_TIMEOUT_MS";
 const DRIVER_TERM_GRACE_MS_ENV: &str = "PREFORK_CONFORMANCE_TERM_GRACE_MS";
+const DRIVER_SETUP_MARKER_ENV: &str = "PREFORK_CONFORMANCE_SETUP_MARKER";
+const DRIVER_SETUP_FAILURE_ENV: &str = "PREFORK_CONFORMANCE_SETUP_FAILURE";
 const CLEANUP_REPORT_ENV: &str = "PREFORK_CONFORMANCE_CLEANUP_REPORT";
 const BYTECODE_DRIVER_ENV: &str = "PREFORK_CONFORMANCE_BYTECODE_DRIVER";
 const WORKER_HOLD: Duration = Duration::from_millis(40);
@@ -98,6 +105,45 @@ const BYTECODE_FIXTURE_CASES: &[Case<BytecodeFixtureState>] = &[Case::new(
     fixture_read_only_bytecode_cache,
 )];
 
+const FULL_UI_CASES: &[Case<WowLuaEnv>] = &[
+    Case::new(
+        "test_keybindings_panels_detail::keybind_m_opens_world_map",
+        test_keybindings_panels_detail::keybind_m_opens_world_map,
+    ),
+    Case::new(
+        "test_keybindings_panels_detail::world_map_floor_dropdown_hidden_without_subzone_or_map_group",
+        test_keybindings_panels_detail::world_map_floor_dropdown_hidden_without_subzone_or_map_group,
+    ),
+    Case::new(
+        "test_keybindings_panels_detail::keybind_m_toggles_world_map_without_errors",
+        test_keybindings_panels_detail::keybind_m_toggles_world_map_without_errors,
+    ),
+    Case::new(
+        "test_keybindings_panels_detail::world_map_title_text_is_non_empty_after_opening",
+        test_keybindings_panels_detail::world_map_title_text_is_non_empty_after_opening,
+    ),
+    Case::new(
+        "test_keybindings_panels_detail::world_map_exploration_pin_has_visible_overlay_textures_after_opening",
+        test_keybindings_panels_detail::world_map_exploration_pin_has_visible_overlay_textures_after_opening,
+    ),
+    Case::new(
+        "test_keybindings_panels_detail::world_map_exploration_pin_converges_visible_after_onupdate_ticks",
+        test_keybindings_panels_detail::world_map_exploration_pin_converges_visible_after_onupdate_ticks,
+    ),
+    Case::new(
+        "test_keybindings_panels_detail::world_map_exploration_pin_first_open_settles_without_reopen",
+        test_keybindings_panels_detail::world_map_exploration_pin_first_open_settles_without_reopen,
+    ),
+    Case::new(
+        "test_keybindings_panels_detail::world_map_exploration_pin_recovers_when_first_overlay_fetch_is_empty",
+        test_keybindings_panels_detail::world_map_exploration_pin_recovers_when_first_overlay_fetch_is_empty,
+    ),
+    Case::new(
+        "test_keybindings_panels_detail::world_map_registers_fog_of_war_pin_template_as_fog_of_war_frame",
+        test_keybindings_panels_detail::world_map_registers_fog_of_war_pin_template_as_fog_of_war_frame,
+    ),
+];
+
 const FIXTURE_CASES: &[Case<FixtureState>] = &[
     Case::new("alpha::one", fixture_pass),
     Case::new("alpha::two", fixture_pass),
@@ -129,11 +175,51 @@ fn main() -> ExitCode {
     if env::var_os(DRIVER_MODE_ENV).is_some() {
         return run_fixture_driver();
     }
+    if env::var_os(CONFORMANCE_MODE_ENV).is_some() {
+        return run_conformance_suite();
+    }
 
+    let config = Config {
+        timeout: Duration::from_secs(120),
+        child_setup: wow_ui_sim::loader::enter_bytecode_cache_read_only_mode,
+        ..Config::default()
+    };
+    prefork::run_with_setup(FULL_UI_CASES, config, || {
+        run_conformance_subprocess()?;
+        prefork_full_ui_preload::preload_full_game_ui()
+    })
+}
+
+fn run_conformance_suite() -> ExitCode {
     let state = ConformanceState {
         executable: env::current_exe().expect("resolve prefork conformance executable"),
     };
     prefork::run(&state, CONFORMANCE_CASES, Config::default())
+}
+
+fn run_conformance_subprocess() -> Result<(), String> {
+    let executable = env::current_exe()
+        .map_err(|error| format!("resolve prefork conformance executable: {error}"))?;
+    let output = Command::new(executable)
+        .env(CONFORMANCE_MODE_ENV, "1")
+        .env_remove(DRIVER_MODE_ENV)
+        .env_remove(TREE_CHILD_MODE_ENV)
+        .output()
+        .map_err(|error| format!("run prefork conformance subprocess: {error}"))?;
+    if output.status.success() {
+        return Ok(());
+    }
+
+    std::io::stdout()
+        .write_all(&output.stdout)
+        .map_err(|error| format!("print conformance stdout: {error}"))?;
+    std::io::stderr()
+        .write_all(&output.stderr)
+        .map_err(|error| format!("print conformance stderr: {error}"))?;
+    Err(format!(
+        "prefork conformance subprocess failed with {}",
+        output.status
+    ))
 }
 
 fn run_fixture_driver() -> ExitCode {
@@ -142,16 +228,23 @@ fn run_fixture_driver() -> ExitCode {
     }
 
     let thread_guard = start_optional_guard_thread();
-    let state = FixtureState {
-        cow_value: AtomicUsize::new(7),
-    };
     let config = Config {
         timeout: duration_from_env(DRIVER_TIMEOUT_MS_ENV, 2_000),
         term_grace: duration_from_env(DRIVER_TERM_GRACE_MS_ENV, 100),
         ..Config::default()
     };
     let cleanup_report = prepare_cleanup_report();
-    let result = prefork::run(&state, FIXTURE_CASES, config);
+    let result = prefork::run_with_setup(FIXTURE_CASES, config, || {
+        if env::var_os(DRIVER_SETUP_FAILURE_ENV).is_some() {
+            return Err("deliberate fixture setup failure".to_string());
+        }
+        if let Some(marker_path) = env::var_os(DRIVER_SETUP_MARKER_ENV) {
+            std::fs::write(marker_path, "setup ran").map_err(|error| error.to_string())?;
+        }
+        Ok(FixtureState {
+            cow_value: AtomicUsize::new(7),
+        })
+    });
     write_cleanup_report(cleanup_report);
     drop(thread_guard);
     result
@@ -342,7 +435,17 @@ fn start_optional_guard_thread() -> Option<std::thread::JoinHandle<()>> {
 }
 
 fn filtering_and_listing(state: &ConformanceState) {
-    let substring = run_driver(state, ["--list", "alpha"], []);
+    let temp = TempDir::new().expect("create lazy setup marker temp dir");
+    let setup_marker = temp.path().join("setup-ran");
+    let substring = run_driver_with_os_env(
+        state,
+        ["--list", "alpha"],
+        [(DRIVER_SETUP_MARKER_ENV, setup_marker.as_os_str())],
+    );
+    assert!(
+        !setup_marker.exists(),
+        "listing must not invoke expensive state setup"
+    );
     assert_success(&substring);
     assert_eq!(
         stdout(&substring),
@@ -469,6 +572,18 @@ fn rejects_bad_arguments(state: &ConformanceState) {
     let empty_split_skip = run_driver(state, ["--skip", ""], []);
     assert_failure(&empty_split_skip);
     assert!(stderr(&empty_split_skip).contains("--skip requires a non-empty value"));
+
+    let setup_failure = run_driver(
+        state,
+        ["alpha::one", "--exact"],
+        [(DRIVER_SETUP_FAILURE_ENV, "1")],
+    );
+    assert_failure(&setup_failure);
+    assert!(
+        stderr(&setup_failure).contains("setup failed: deliberate fixture setup failure"),
+        "setup failure should be explicit: {}",
+        stderr(&setup_failure)
+    );
 }
 
 fn validates_worker_counts(state: &ConformanceState) {
@@ -645,6 +760,8 @@ fn driver_command(state: &ConformanceState) -> Command {
         .env_remove(TREE_PID_ENV)
         .env_remove(DRIVER_TIMEOUT_MS_ENV)
         .env_remove(DRIVER_TERM_GRACE_MS_ENV)
+        .env_remove(DRIVER_SETUP_MARKER_ENV)
+        .env_remove(DRIVER_SETUP_FAILURE_ENV)
         .env_remove(BYTECODE_DRIVER_ENV)
         .env_remove("RUST_TEST_THREADS");
     command

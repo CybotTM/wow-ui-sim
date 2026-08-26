@@ -13,7 +13,8 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Run one child process for every selected case.
 - [x] Bound concurrent children with explicit default and hard-maximum worker counts.
 - [x] Honor both `--test-threads` forms and `RUST_TEST_THREADS`, with the command-line value taking precedence.
-- [x] Run the fast conformance phase during ordinary default target execution before any future expensive preload.
+- [x] Run all runner conformance cases in a fresh subprocess before the normal full-UI preload during ordinary target execution; hide successful conformance output and print it on failure.
+- [x] Parse selection and `--list` before setup so listing the real target runs neither conformance nor preload, while setup failure exits the target explicitly.
 
 ### Selection and output
 
@@ -23,6 +24,14 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Reject unsupported arguments, duplicate singleton flags/options, and conflicting arguments instead of ignoring them.
 - [x] Capture child stdout and stderr by default, suppress successful captured output, and print captured output for failures.
 - [x] Inherit child stdout and stderr when `--nocapture` is selected.
+
+### Normal retail full-UI preload
+
+- [x] Build one parent-owned 1024x768 `ScreenKind::Game` `WowLuaEnv` from the synced default-retail Blizzard UI cache.
+- [x] Stop GC, discover the normal game-screen Blizzard addon set, load it in dependency order without SavedVariables or third-party addons, and fire `ADDON_LOADED` after every successful load.
+- [x] Restore post-cleanup globals after `Blizzard_EnvironmentCleanup`, sync the string metatable, apply post-load workarounds, restart bootstrap GC, and run the normal game startup event sequence.
+- [x] Fail setup explicitly on addon-load, addon-event, startup Lua, or bootstrap-GC errors instead of continuing with a partial parent snapshot.
+- [x] Run the nine `test_keybindings_panels_detail` cases as immutable `fn(&WowLuaEnv)` children with a 120-second child timeout and read-only bytecode-cache child setup.
 
 ### Bytecode-cache child contract
 
@@ -50,8 +59,10 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 - `Cargo.toml` — declares the dedicated Linux prefork conformance target contract.
 - `build.rs` — keeps the custom target root out of the generated integration harness.
-- `tests/common/prefork.rs` — reusable test-only runner API and execution behavior.
-- `tests/prefork_full_ui.rs` — custom target entry point, fixture cases, and behavioral conformance checks.
+- `tests/common/prefork.rs` — reusable eager and lazy-state test-only runner APIs and execution behavior.
+- `tests/common/prefork_full_ui_preload.rs` — target-only normal retail game-screen preload and migrated-case helpers.
+- `tests/prefork_full_ui.rs` — custom target entry point, real-case registry, fixture cases, and behavioral conformance checks.
+- `tests/test_keybindings_panels_detail.rs` — nine migrated immutable-environment case bodies.
 - `src/loader/bytecode_cache.rs` — process-local cache mode and mutation-boundary enforcement.
 - `src/loader/mod.rs` — narrow doc-hidden child entry point.
 
@@ -61,7 +72,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 ## Known gaps (current cycle)
 
-- [ ] Migrate selected real `WowLuaEnv` full-UI tests onto the reusable runner.
+- [x] Migrate the nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
 - [ ] Benchmark prefork execution against the current in-target test execution path.
 
 ## Out of scope

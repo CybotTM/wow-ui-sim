@@ -93,6 +93,7 @@ fn should_include_in_integration_harness(path: &Path) -> bool {
             | "integration.rs"
             | "mists_addonlist_interactions.rs"
             | "prefork_full_ui.rs"
+            | "test_keybindings_panels_detail.rs"
     )
 }
 

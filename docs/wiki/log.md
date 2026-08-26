@@ -1,3 +1,7 @@
+## [2026-08-26] system | Migrate world-map detail cases to full-UI prefork
+
+Updated [[prefork-test-harness]] with lazy argument selection, isolated conformance-before-preload execution, and the normal default-retail game startup snapshot. Nine `test_keybindings_panels_detail` cases now run as immutable 120-second prefork children with read-only bytecode-cache setup; listing bypasses conformance and preload, and the standard integration harness no longer registers those cases.
+
 ## [2026-08-26] system | Add read-only prefork bytecode-cache children
 
 Updated [[prefork-test-harness]] with the generic child setup hook and the process-local one-way Lua bytecode-cache mode. Fresh-subprocess conformance now proves child-only setup state, unchanged parent-prewarmed cache bytes/metadata/directory contents across a unique child compile, and continued parent writability. Focused cache tests cover invalid and oversized removal suppression, torn-pack truncation suppression, legacy in-memory hits without file promotion/migration, and skipped append/replacement/temp-file paths.
