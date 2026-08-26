@@ -213,6 +213,7 @@ fn load_all_blizzard_addons(env: &WowLuaEnv) {
             eprintln!("[load {name}] FAILED: {e}");
         } else {
             env.apply_runtime_addon_load_workarounds(name);
+            common::fire_addon_loaded(env, name);
         }
     }
     env.apply_post_load_workarounds();
