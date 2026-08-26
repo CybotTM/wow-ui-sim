@@ -42,6 +42,8 @@ temporary workarounds until the named simulator subsystem is modeled directly.
 
 `restore_post_cleanup_globals` calls `restore_missing_ui_strings` after Blizzard cleanup. The preserve policy fills nil entries across the shared string, integer, float, and font-color tables; it restores required autocomplete priorities and combat-log raid-target constants while retaining Blizzard reassignment and table extensions. It also reapplies the guarded `CanAutoSetGamePadCursorControl` and `SetGamePadCursorControl` defaults, which GameMenu calls before the close-window stack. This is targeted runtime restoration, not generic global mirroring.
 
+`chat_window_defaults.rs` remains a separate temporary compatibility surface: its existing `__wow_chat_window_state` table now stores chat-window names and docked flags for `SetChatWindowName()` / `SetChatWindowDocked()` and returns them through `GetChatWindowInfo()`. Retire this table when saved chat-layout state is modeled; no `SimState` persistence is claimed.
+
 ### Runtime-surface buckets
 
 `patch_runtime_surface_for_addon_load` also runs broader buckets before the
@@ -63,6 +65,7 @@ runtime subsystem instead of by one visible addon symptom:
 - [strings/mod.rs](../../../src/lua_api/globals/strings/mod.rs) — replace versus preserve UI-string registration policies
 - [environment_cleanup_restore.rs](../../../src/lua_api/workarounds/temporary/environment_cleanup_restore.rs) — post-cleanup restore ordering and regression coverage
 - [gamepad_cursor_control_defaults.rs](../../../src/lua_api/workarounds/temporary/gamepad_cursor_control_defaults.rs) — guarded gamepad cursor-control defaults restored after cleanup
+- [chat_window_defaults.rs](../../../src/lua_api/workarounds/temporary/chat_window_defaults.rs) — temporary chat-window name/docking state and round-trip defaults
 - [collections_escape.rs](../../../tests/collections_escape.rs) — real Blizzard Collections Escape close-stack coverage
 - [recent_runtime_bootstrap_boundaries.rs](../../../tests/recent_runtime_bootstrap_boundaries.rs) — dispatcher bootstrap boundary coverage
 - [achievement_search_bootstrap_boundaries.rs](../../../tests/achievement_search_bootstrap_boundaries.rs) — achievement search bootstrap boundary coverage

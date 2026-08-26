@@ -1,3 +1,7 @@
+## [2026-08-26] update | Document chat-window compatibility state
+
+Updated [[lua-api]] and [[post-load-workaround-audit]] for commit `98a48859f`: temporary `__wow_chat_window_state` now stores `SetChatWindowName()` and `SetChatWindowDocked()` values consumed by `GetChatWindowInfo()`. The fields are compatibility state, not saved-layout persistence, and should retire with a modeled chat-layout subsystem. Test-only third-wave changes required no documentation update.
+
 ## [2026-08-25] update | Document final retail runtime recovery boundaries
 
 Updated [[lua-api]], [[taint-system]], and [[post-load-workaround-audit]] after the second-wave retail repairs. Documentation now records canonical Font object field precedence for inherited FontStrings; delimiter-receiver `string.split` handling for empty/equal-length inputs; no-profile `C_ClickBindings` behavior; local Encounter Journal numeric-string coercion; `DEFAULT_CHAT_FRAME` assignment without an edit box; and guarded gamepad cursor-global restoration required by the real Collections Escape close stack. No new page or index entry was needed.

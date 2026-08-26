@@ -67,7 +67,7 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 **Modeled legacy globals** — `IsTimerunningEnabled()` and `GetRemainingTimerunningSeasonSeconds()` read the simulator's Timerunning season state; the countdown is zero when no season is active. `GetGuildTabardFiles()` is registered on retail as well as classic profiles and returns the modeled guild-tabard file tuple used by Blizzard's guild-bank UI. The temporary `Kiosk` namespace defaults `IsEnabled()` and `IsCompetitiveModeEnabled()` to `false` and `GetKioskLoginInfo()` to three `nil` values while preserving existing members.
 
-**Focused compatibility boundaries** — `EJ_SetLootFilter()` accepts integer Lua values and numeric strings locally; nil, invalid, and non-integral inputs become zero without changing global argument coercion. Chat startup assigns `DEFAULT_CHAT_FRAME` whenever `ChatFrame1` exists, while `ChatFrame1.editBox` remains conditional on `ChatFrame1EditBox`.
+**Focused compatibility boundaries** — `EJ_SetLootFilter()` accepts integer Lua values and numeric strings locally; nil, invalid, and non-integral inputs become zero without changing global argument coercion. Chat startup assigns `DEFAULT_CHAT_FRAME` whenever `ChatFrame1` exists, while `ChatFrame1.editBox` remains conditional on `ChatFrame1EditBox`. Temporary chat-window state also backs `SetChatWindowName()` and `SetChatWindowDocked()` round-trips through `GetChatWindowInfo()`; these fields remain in the compatibility table until saved chat-layout state is modeled.
 
 ## C_* Namespaces
 
@@ -101,6 +101,7 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [bank_storage_verbs.rs](../../../src/lua_api/globals/bank_storage_verbs.rs) — retail guild-tabard lookup registration
 - [c_string_util_decimal.rs](../../../src/c_api/c_string_util_decimal.rs) — decimal escaping for control and invalid UTF-8 bytes
 - [font_strings.rs](../../../src/lua_api/frame/methods/button_anchor_hierarchy/font_strings.rs) — canonical Font object field precedence and FontString snapshots
+- [chat_window_defaults.rs](../../../src/lua_api/workarounds/temporary/chat_window_defaults.rs) — temporary chat-window name/docking state and public round-trip defaults
 - [compat_overrides.rs](../../../src/lua_api/globals/compat_overrides.rs) — table-form `string.split` compatibility
 - [formatting_utility_defaults.rs](../../../src/lua_api/workarounds/temporary/formatting_utility_defaults.rs) — string-metatable `:split` compatibility
 - [click_bindings_defaults.rs](../../../src/lua_api/workarounds/temporary/click_bindings_defaults.rs) — no-profile click-binding behavior
