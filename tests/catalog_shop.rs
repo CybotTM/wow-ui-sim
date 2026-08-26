@@ -125,7 +125,7 @@ fn catalog_shop_loads_and_populates_navigation_and_products() {
 }
 
 #[test]
-fn catalog_shop_bundle_card_uses_selected_model_scene_id_when_default_is_missing() {
+fn catalog_shop_bundle_card_uses_default_model_scene_id() {
     let env = load_full_game_ui();
 
     let (loaded, reason): (bool, Option<String>) = env
@@ -149,7 +149,7 @@ fn catalog_shop_bundle_card_uses_selected_model_scene_id_when_default_is_missing
             catalogShopProductID = 1,
             cardDisplayData = {
                 selectedModelSceneID = 4242,
-                defaultModelSceneID = nil,
+                defaultModelSceneID = 31337,
                 overrideModelSceneID = 4242,
             },
             isBundleChild = false,
@@ -157,7 +157,7 @@ fn catalog_shop_bundle_card_uses_selected_model_scene_id_when_default_is_missing
         }
 
         local displayInfo = {
-            defaultCardModelSceneID = nil,
+            defaultCardModelSceneID = 31337,
             overrideCardModelSceneID = 4242,
             selectedModelSceneID = 4242,
             hasUnknownLicense = false,
@@ -165,10 +165,10 @@ fn catalog_shop_bundle_card_uses_selected_model_scene_id_when_default_is_missing
         }
 
         card:SetModelScene(card.productInfo, true, displayInfo, CatalogShopConstants.ProductType.Bundle)
-        assert(seen_model_scene_id == 4242, "bundle cards should use the selected scene id when the default is missing")
+        assert(seen_model_scene_id == 31337, "bundle cards should pass defaultCardModelSceneID to SetupModelSceneForBundle")
         "#,
     )
-    .expect("bundle card model scene fallback should run");
+    .expect("bundle card default model scene routing should run");
 }
 
 #[test]
