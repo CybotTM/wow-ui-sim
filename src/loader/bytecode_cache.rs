@@ -16,7 +16,7 @@ use std::ffi::OsStr;
 use std::hash::{Hash, Hasher};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU8, AtomicU64, Ordering};
 use std::sync::{Mutex, OnceLock};
 
 const PACK_FILE: &str = "pack.bin";
@@ -27,21 +27,31 @@ const PACK_HEADER_LEN: usize = PACK_MAGIC.len() + 4;
 const PACK_ENTRY_HEADER_LEN: usize = 8 + 4;
 const MAX_PACK_SIZE: u64 = 768 * 1024 * 1024;
 static NEXT_TEMP_PACK_ID: AtomicU64 = AtomicU64::new(1);
-static BYTECODE_CACHE_READ_ONLY: AtomicBool = AtomicBool::new(false);
+static BYTECODE_CACHE_MODE: AtomicU8 = AtomicU8::new(CacheMode::WRITABLE);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum CacheMode {
     Writable,
+    ParentBypass,
     ReadOnly,
 }
 
 impl CacheMode {
+    const WRITABLE: u8 = 0;
+    const PARENT_BYPASS: u8 = 1;
+    const READ_ONLY: u8 = 2;
+
     fn current() -> Self {
-        if BYTECODE_CACHE_READ_ONLY.load(Ordering::Acquire) {
-            Self::ReadOnly
-        } else {
-            Self::Writable
+        match BYTECODE_CACHE_MODE.load(Ordering::Acquire) {
+            Self::WRITABLE => Self::Writable,
+            Self::PARENT_BYPASS => Self::ParentBypass,
+            Self::READ_ONLY => Self::ReadOnly,
+            value => panic!("invalid bytecode cache mode {value}"),
         }
+    }
+
+    fn allows_reads(self) -> bool {
+        self != Self::ParentBypass
     }
 
     fn allows_writes(self) -> bool {
@@ -49,8 +59,12 @@ impl CacheMode {
     }
 }
 
+pub(crate) fn enter_parent_bypass_mode() {
+    BYTECODE_CACHE_MODE.store(CacheMode::PARENT_BYPASS, Ordering::Release);
+}
+
 pub(crate) fn enter_read_only_mode() {
-    BYTECODE_CACHE_READ_ONLY.store(true, Ordering::Release);
+    BYTECODE_CACHE_MODE.store(CacheMode::READ_ONLY, Ordering::Release);
 }
 
 pub(crate) fn release_prefork_parent_memory() -> Result<usize, String> {
@@ -61,7 +75,23 @@ pub(crate) fn release_prefork_parent_memory() -> Result<usize, String> {
     let mut state = cache_state()
         .lock()
         .map_err(|_| "release prefork bytecode cache memory: cache lock poisoned".to_string())?;
+    if CacheMode::current() == CacheMode::ParentBypass {
+        return seal_parent_bypass_state(&mut state);
+    }
     release_loaded_pack_memory(&mut state)
+}
+
+fn seal_parent_bypass_state(state: &mut CacheState) -> Result<usize, String> {
+    if state.initialized || !state.values.is_empty() || !state.index.is_empty() {
+        return Err(
+            "release prefork bytecode cache memory: parent bypass started after cache use"
+                .to_string(),
+        );
+    }
+
+    state.initialized = true;
+    state.pack_exists = pack_path().is_some_and(|path| path.is_file());
+    Ok(0)
 }
 
 fn release_loaded_pack_memory(state: &mut CacheState) -> Result<usize, String> {
@@ -173,6 +203,10 @@ pub fn with_cached_bytecode_deferred<R>(
     callback: impl FnOnce(&[u8]) -> R,
 ) -> Option<R> {
     let mode = CacheMode::current();
+    if !mode.allows_reads() {
+        return None;
+    }
+
     let mut state = cache_state().lock().ok()?;
     ensure_loaded(&mut state, mode);
     with_cached_bytecode_from_state(&mut state, mode, hash, legacy_hash, callback)

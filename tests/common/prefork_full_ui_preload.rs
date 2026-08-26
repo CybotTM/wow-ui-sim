@@ -51,6 +51,7 @@ pub(crate) fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
 }
 
 pub(crate) fn preload_full_game_ui() -> Result<WowLuaEnv, String> {
+    wow_ui_sim::loader::enter_bytecode_cache_parent_bypass_mode();
     let env = WowLuaEnv::new().map_err(|error| format!("create full-UI environment: {error}"))?;
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Game);

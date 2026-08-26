@@ -43,6 +43,11 @@ pub use xml_frame::create_frame_from_xml;
 pub use xml_frame::{fast_create_frame_profile_body_report, fast_create_frame_profile_report};
 
 #[doc(hidden)]
+pub fn enter_bytecode_cache_parent_bypass_mode() {
+    bytecode_cache::enter_parent_bypass_mode();
+}
+
+#[doc(hidden)]
 pub fn enter_bytecode_cache_read_only_mode() {
     bytecode_cache::enter_read_only_mode();
 }

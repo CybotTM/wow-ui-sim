@@ -20,7 +20,8 @@ use std::sync::{Arc, Barrier};
 use std::time::{Duration, Instant};
 use tempfile::TempDir;
 use wow_ui_sim::loader::{
-    enter_bytecode_cache_read_only_mode, load_addon, release_prefork_parent_bytecode_cache_memory,
+    enter_bytecode_cache_parent_bypass_mode, enter_bytecode_cache_read_only_mode, load_addon,
+    release_prefork_parent_bytecode_cache_memory,
 };
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -36,6 +37,8 @@ const DRIVER_SETUP_MARKER_ENV: &str = "PREFORK_CONFORMANCE_SETUP_MARKER";
 const DRIVER_SETUP_FAILURE_ENV: &str = "PREFORK_CONFORMANCE_SETUP_FAILURE";
 const CLEANUP_REPORT_ENV: &str = "PREFORK_CONFORMANCE_CLEANUP_REPORT";
 const BYTECODE_DRIVER_ENV: &str = "PREFORK_CONFORMANCE_BYTECODE_DRIVER";
+const BYTECODE_PARENT_BYPASS_DRIVER_ENV: &str =
+    "PREFORK_CONFORMANCE_BYTECODE_PARENT_BYPASS_DRIVER";
 const WORKER_HOLD: Duration = Duration::from_millis(40);
 const RESOURCE_SHORT_HOLD: Duration = Duration::from_secs(1);
 const RESOURCE_LONG_HOLD: Duration = Duration::from_secs(30);
@@ -103,6 +106,10 @@ const CONFORMANCE_CASES: &[Case<ConformanceState>] = &[
     Case::new(
         "conformance::read_only_bytecode_cache_child",
         read_only_bytecode_cache_child,
+    ),
+    Case::new(
+        "conformance::parent_bypass_bytecode_cache",
+        parent_bypass_bytecode_cache,
     ),
 ];
 
@@ -229,6 +236,9 @@ fn run_conformance_subprocess() -> Result<(), String> {
 }
 
 fn run_fixture_driver() -> ExitCode {
+    if env::var_os(BYTECODE_PARENT_BYPASS_DRIVER_ENV).is_some() {
+        return run_parent_bypass_bytecode_driver();
+    }
     if env::var_os(BYTECODE_DRIVER_ENV).is_some() {
         return run_bytecode_driver();
     }
@@ -333,6 +343,70 @@ fn run_bytecode_driver() -> ExitCode {
         snapshot_cache_tree(&cache_root),
         before,
         "child read-only mode must not change parent cache mode"
+    );
+    result
+}
+
+fn run_parent_bypass_bytecode_driver() -> ExitCode {
+    let addon_dir = TempDir::new().expect("create parent-bypass addon directory");
+    let unique = format!("parent-bypass-{}", std::process::id());
+    let parent_toc = write_lua_addon(
+        addon_dir.path(),
+        "PreforkBytecodeParentBypass",
+        &format!("_G.__prefork_bytecode_parent_bypass = {unique:?}"),
+    );
+    let child_toc = write_lua_addon(
+        addon_dir.path(),
+        "PreforkBytecodeBypassChild",
+        &format!("_G.__prefork_bytecode_child = {unique:?}"),
+    );
+    let cache_root = PathBuf::from(env::var_os("XDG_CACHE_HOME").expect("XDG cache root"))
+        .join("wow-ui-sim")
+        .join("lua-bytecode");
+    let before = snapshot_cache_tree(&cache_root);
+    assert!(
+        before.iter().any(|entry| entry
+            .relative_path
+            .file_name()
+            .is_some_and(|name| name == "pack.bin")),
+        "parent-bypass fixture requires an existing pack"
+    );
+
+    enter_bytecode_cache_parent_bypass_mode();
+    let env = WowLuaEnv::new().expect("create parent-bypass Lua environment");
+    load_addon(&env.loader_env(), &parent_toc).expect("compile parent source with cache bypassed");
+    assert_eq!(
+        env.eval::<String>("return __prefork_bytecode_parent_bypass")
+            .expect("read parent-bypass addon value"),
+        unique
+    );
+    assert_eq!(
+        release_prefork_parent_bytecode_cache_memory()
+            .expect("release bypassed parent bytecode cache memory"),
+        0,
+        "bypassed parent must not load pack bytes"
+    );
+    assert_eq!(
+        snapshot_cache_tree(&cache_root),
+        before,
+        "parent bypass must not read-and-repair or write the cache tree"
+    );
+
+    let state = BytecodeFixtureState {
+        env,
+        child_toc,
+        expected_value: unique,
+    };
+    let config = Config {
+        timeout: duration_from_env(DRIVER_TIMEOUT_MS_ENV, 2_000),
+        term_grace: duration_from_env(DRIVER_TERM_GRACE_MS_ENV, 100),
+        child_setup: enable_read_only_bytecode_cache_in_child,
+    };
+    let result = prefork::run(&state, BYTECODE_FIXTURE_CASES, config);
+    assert_eq!(
+        snapshot_cache_tree(&cache_root),
+        before,
+        "read-only child from bypassed parent must leave the cache tree unchanged"
     );
     result
 }
@@ -711,6 +785,33 @@ fn read_only_bytecode_cache_child(state: &ConformanceState) {
     let output =
         run_driver_with_os_env(state, ["bytecode::read_only_child", "--exact"], environment);
     assert_success(&output);
+}
+
+fn parent_bypass_bytecode_cache(state: &ConformanceState) {
+    let cache_root = TempDir::new().expect("create isolated XDG cache root");
+    let warm_environment = [
+        (BYTECODE_DRIVER_ENV, "1".as_ref()),
+        ("XDG_CACHE_HOME", cache_root.path().as_os_str()),
+        ("WOW_SIM_ENABLE_BYTECODE_CACHE", "1".as_ref()),
+    ];
+    let warm_output = run_driver_with_os_env(
+        state,
+        ["bytecode::read_only_child", "--exact"],
+        warm_environment,
+    );
+    assert_success(&warm_output);
+
+    let bypass_environment = [
+        (BYTECODE_PARENT_BYPASS_DRIVER_ENV, "1".as_ref()),
+        ("XDG_CACHE_HOME", cache_root.path().as_os_str()),
+        ("WOW_SIM_ENABLE_BYTECODE_CACHE", "1".as_ref()),
+    ];
+    let bypass_output = run_driver_with_os_env(
+        state,
+        ["bytecode::read_only_child", "--exact"],
+        bypass_environment,
+    );
+    assert_success(&bypass_output);
 }
 
 fn wait_for_direct_children(parent_pid: libc::pid_t, expected: usize) -> Vec<libc::pid_t> {
