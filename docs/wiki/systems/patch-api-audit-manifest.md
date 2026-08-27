@@ -361,7 +361,7 @@ The bounded four-row preview-cart/refund slice classifies `C_HousingCatalog.IsPr
 The housing preview-state slice is separate from `HousingPreviewItemData` payload fields: it claims only temporary state transitions for four `C_HousingDecor` APIs and keeps the six-row payload-field contract unclaimed.
 Provenance-only rows are source metadata with no simulator-visible runtime contract. They use `best-effort` status only as bookkeeping, `provenance-only` resolution, `provenance_only: true`, source-only hashed evidence, empty runtime proof fields, and exact no-runtime-claim notes; validation permits completion without a commit. The 33 migrated 12.0.0 structure declarations use this contract; their field/API rows remain separate and no payload behavior is claimed. The nine remaining behavior-linked or removal-sensitive structure declarations are evidence-required/unsafe; source metadata or method absence does not prove their exact runtime contracts or removal/replacement identity.
 
-Patch API audits use a checked-in JSON register for every patch-list occurrence. The register preserves duplicate names across added, changed, and removed directions, records evidence and lifecycle expectations, and generates the compact checklist used for final chat review.
+Patch API audits use a checked-in JSON register for every patch-list occurrence. The register preserves duplicate names across added, changed, and removed directions, records evidence and lifecycle expectations, and generates the compact checklist used for final chat review. Named test references may target ordinary `#[test]` functions or generated `prefork_full_ui_case!` marker cases; unmarked functions remain invalid.
 
 ## Content
 

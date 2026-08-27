@@ -1,3 +1,7 @@
+## [2026-08-27] audit | Refresh patch evidence hashes and accept prefork test references
+
+Audited commits `85b00c5cb` and `da273a149`. Refreshed checkout-byte evidence hashes in the 12.0.0, 12.0.5, and 12.1 patch manifests. The patch-manifest validator now treats generated `prefork_full_ui_case!` marker cases as valid named test references alongside ordinary `#[test]` functions, while unmarked functions remain invalid. Updated the patch-manifest and prefork specs plus their wiki system pages; no evidence files or index summary required changes.
+
 ## [2026-08-27] audit | Finalize prefork eligibility coverage
 
 Updated [[prefork-test-harness]], the prefork spec, and index from `/tmp/prefork-final-eligibility.json` and `/tmp/prefork-final-registry-list.txt`. The dedicated default-retail target lists 1,946 tests: 1,936 migrated full-environment cases and 10 manual/nested prefork cases. The final ordinary startup-like scan contains 309 tests with zero eligible remaining. Exact exclusions: 75 pre-start custom, 9 non-equivalent lifecycle, 113 partial custom, 13 partial domain, 3 partial template, 55 partial thread-sensitive, 15 alternate-screen, 12 render custom, 5 owned-timeout, 7 profile-specific, 1 post-drop global-state, and 1 version-specific. The 211 partial/custom/glue/render/thread-sensitive setup-family cases and the 14 profile/version/owned-timeout/post-drop cases remain ordinary libtest; no code, tests, cargo commands, or commit were run.

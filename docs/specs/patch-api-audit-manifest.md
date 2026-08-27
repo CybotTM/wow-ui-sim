@@ -386,7 +386,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - [x] Record target flavor/build, source owner, distinct LoD addon identity, lifecycle assertions, evidence file hashes, tests, commit, and per-item approval provenance.
 - [x] Recompute patch-source, Blizzard manifest, and evidence hashes from repository files.
 - [x] Accept legacy direction arrays or a generic categorized `occurrences` array; validate each occurrence's direction, nonblank category, optional nonblank change detail, symbol path, and deterministic added/changed/removed ordering.
-- [x] Verify focused test references exist and named tests occur in those files.
+- [x] Verify focused test references exist and named test cases occur in those files; accept ordinary `#[test]` functions and generated `prefork_full_ui_case!` marker cases.
 - [x] Verify implementation commits resolve and are ancestors of the audited checkout.
 - [x] Reject unknown schema fields, blank values, invalid status/resolution combinations, and incomplete lifecycle contracts.
 - [x] Ingest an observation artifact tied to the exact manifest hash and compare every assertion by row, flavor, phase, addon, presence, and Lua type.
@@ -407,7 +407,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - any `untriaged` row;
 - any `evidence-required` row;
 - missing or mismatched repository evidence;
-- missing/fake named `#[test]` references or implementation commits;
+- missing/fake named test-case references or implementation commits;
 - any `exception-requested` row whose resolution is not `unsafe` or `impossible`;
 - any unsafe `exception-requested` row without a unique approval ID beginning `user-chat:<change:symbol>:`;
 - any impossible `exception-requested` row without either that approval ID or a validated allowlisted scope exception;

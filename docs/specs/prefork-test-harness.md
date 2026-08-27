@@ -33,7 +33,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] After successful startup, when bytecode caching is enabled, seal the bypassed cache as empty and initialized so read-only children cannot reload the disk pack; preserve whether `pack.bin` exists, return a successful zero-byte release outcome, and fail if cache state was initialized or populated before sealing. Disabled caching returns a successful no-op.
 - [x] Fail setup explicitly with addon context on addon-load, `ADDON_LOADED`, EnvironmentCleanup restoration, startup Lua, bootstrap-GC, or bytecode-cache sealing errors instead of continuing with a partial parent snapshot.
 - [x] Run registered full-UI cases as immutable `fn(&WowLuaEnv)` children with a 120-second child timeout and read-only bytecode-cache child setup.
-- [x] Define migrated cases with the explicit `prefork_full_ui_case!` marker; `build.rs` parses marker items with `syn`, renders the registry with `quote`, and assigns stable `<module>::<function>` names.
+- [x] Define migrated cases with the explicit `prefork_full_ui_case!` marker; `build.rs` parses marker items with `syn`, renders the registry with `quote`, and assigns stable `<module>::<function>` names. Patch-manifest test references accept these generated marker cases alongside ordinary `#[test]` functions.
 - [x] Include the generated integration module tree in the prefork target so mixed modules compile once while unmarked tests remain under libtest.
 - [x] Prove nested-module discovery and inherited startup state with `prefork_full_ui_nested::fixture::preloaded_parent_has_normal_game_startup`.
 - [x] Register the generated default-retail full-UI registry with stable `<module>::<function>` names and retain 10 manual/nested prefork cases.
