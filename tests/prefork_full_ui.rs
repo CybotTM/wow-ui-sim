@@ -83,6 +83,10 @@ const CONFORMANCE_CASES: &[Case<ConformanceState>] = &[
         generated_registry_lists_nested_marker_case,
     ),
     Case::new(
+        "conformance::generated_registry_lists_foundation_batch",
+        generated_registry_lists_foundation_batch,
+    ),
+    Case::new(
         "conformance::environment_cleanup_restore_errors_are_contextual",
         environment_cleanup_restore_errors_are_contextual,
     ),
@@ -608,6 +612,46 @@ fn generated_registry_lists_nested_marker_case(state: &ConformanceState) {
         stdout(&output),
         format!("{CASE_NAME}: test\n\n1 test, 0 benchmarks\n")
     );
+}
+
+fn generated_registry_lists_foundation_batch(state: &ConformanceState) {
+    const MODULE_COUNTS: &[(&str, usize)] = &[
+        ("blizzard_shared_xml_base_loads::", 16),
+        ("blizzard_shared_xml_loads::", 13),
+        ("blizzard_shared_talent_ui_loads::", 11),
+        ("blizzard_shared_xml_game_loads::", 10),
+        ("blizzard_shared_widget_frames_loads::", 9),
+        ("blizzard_foundation_lane::", 4),
+        ("blizzard_core_frame_lane::", 5),
+    ];
+
+    let mut total = 0;
+    for (module_filter, expected_count) in MODULE_COUNTS {
+        let output = Command::new(&state.executable)
+            .args(["--list", module_filter])
+            .env_remove(CONFORMANCE_MODE_ENV)
+            .env_remove(DRIVER_MODE_ENV)
+            .env_remove(TREE_CHILD_MODE_ENV)
+            .output()
+            .expect("list generated foundation prefork cases");
+
+        assert_success(&output);
+        let listed = stdout(&output);
+        let actual_count = listed
+            .lines()
+            .filter(|line| line.ends_with(": test"))
+            .count();
+        assert_eq!(
+            actual_count, *expected_count,
+            "unexpected generated case count for {module_filter}:\n{listed}"
+        );
+        assert!(
+            listed.ends_with(&format!("\n{expected_count} tests, 0 benchmarks\n")),
+            "unexpected libtest-compatible summary for {module_filter}:\n{listed}"
+        );
+        total += actual_count;
+    }
+    assert_eq!(total, 68);
 }
 
 fn environment_cleanup_restore_errors_are_contextual(_: &ConformanceState) {

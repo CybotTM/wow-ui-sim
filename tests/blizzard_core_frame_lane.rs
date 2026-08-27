@@ -79,19 +79,6 @@ fn fresh_lane_env() -> WowLuaEnv {
     env
 }
 
-fn load_full_game_ui() -> WowLuaEnv {
-    let env = fresh_lane_env();
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        wow_ui_sim::loader::load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
-    }
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-    env
-}
-
 #[test]
 fn each_lane_addon_directory_resolves_with_a_toc() {
     for name in LANE_ADDONS_BASE_TO_CONSUMER {
@@ -501,175 +488,176 @@ fn lane_appears_in_eager_discovery_with_load_first_promoted_for_frame_xml() {
     );
 }
 
-#[test]
-fn lane_addons_are_loaded_after_eager_sweep_for_full_game_ui() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+    fn lane_addons_are_loaded_after_eager_sweep_for_full_game_ui(env: &WowLuaEnv) {
 
-    for name in LANE_ADDONS_BASE_TO_CONSUMER {
-        let loaded: bool = env
-            .eval(&format!("return C_AddOns.IsAddOnLoaded('{name}')"))
-            .unwrap_or_else(|err| panic!("IsAddOnLoaded({name}) probe failed: {err}"));
+        for name in LANE_ADDONS_BASE_TO_CONSUMER {
+            let loaded: bool = env
+                .eval(&format!("return C_AddOns.IsAddOnLoaded('{name}')"))
+                .unwrap_or_else(|err| panic!("IsAddOnLoaded({name}) probe failed: {err}"));
+            assert!(
+                loaded,
+                "C_AddOns.IsAddOnLoaded('{name}') must return true after the eager Game sweep. The \
+                 required harness shape for any downstream test is therefore: \
+                 (1) `WowLuaEnv::new()` (pre-creates UIParent / WorldFrame / panel attrs), \
+                 (2) `set_screen_size(W, H)` + `set_screen_mode(ScreenKind::Game)`, \
+                 (3) `state.addon_base_paths = vec![blizzard_ui_dir()]`, \
+                 (4) `register_intrinsic_templates()`, \
+                 (5) `discover_blizzard_addons_for_screen(&ui, ScreenKind::Game)` + per-result \
+                 `load_addon` (the eager sweep brings in the full lane plus all other AllowLoad: \
+                 Game eager addons), \
+                 (6) `apply_post_load_workarounds()`, \
+                 (7) `fire_startup_events_for_screen(&env, ScreenKind::Game)`. Downstream tests \
+                 do NOT need to call load_addon for any lane addon directly"
+            );
+        }
+    }
+}
+
+prefork_full_ui_case! {
+    fn lane_publishes_panel_manager_globals_after_full_game_load(env: &WowLuaEnv) {
+
+        let panel_manager_globals = [
+            ("ShowUIPanel", "function"),
+            ("HideUIPanel", "function"),
+            ("GetUIPanel", "function"),
+            ("SetUIPanelAttribute", "function"),
+            ("UpdateUIPanelPositions", "function"),
+            ("UIPanelWindows", "table"),
+            ("UIParentLoadAddOn", "function"),
+        ];
+
+        for (global, expected_kind) in panel_manager_globals {
+            let actual: String = env
+                .eval(&format!("return type({global})"))
+                .unwrap_or_else(|err| panic!("type({global}) probe failed: {err}"));
+            assert_eq!(
+                actual, expected_kind,
+                "Panel-manager global `{global}` must publish as `{expected_kind}` after the lane \
+                 loads. ShowUIPanel/HideUIPanel/GetUIPanel/SetUIPanelAttribute live in \
+                 Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua at lines 828, 853, \
+                 881, 115; UpdateUIPanelPositions in UpdateUIPanelPositions.lua; UIPanelWindows is \
+                 a literal table populated by UIPanelWindows.lua's `UIPanelWindows_Initialize()`; \
+                 UIParentLoadAddOn is the on-demand panel trigger declared in \
+                 Blizzard_UIParent/Mainline/UIParent.lua. Downstream addons rely on every one of \
+                 these being live at file scope; if any is nil, the entire panel-show flow is \
+                 dead"
+            );
+        }
+
+        let panel_count: f64 = env
+            .eval("local n = 0 for _ in pairs(UIPanelWindows) do n = n + 1 end return n")
+            .expect("UIPanelWindows count probe");
         assert!(
-            loaded,
-            "C_AddOns.IsAddOnLoaded('{name}') must return true after the eager Game sweep. The \
-             required harness shape for any downstream test is therefore: \
-             (1) `WowLuaEnv::new()` (pre-creates UIParent / WorldFrame / panel attrs), \
-             (2) `set_screen_size(W, H)` + `set_screen_mode(ScreenKind::Game)`, \
-             (3) `state.addon_base_paths = vec![blizzard_ui_dir()]`, \
-             (4) `register_intrinsic_templates()`, \
-             (5) `discover_blizzard_addons_for_screen(&ui, ScreenKind::Game)` + per-result \
-             `load_addon` (the eager sweep brings in the full lane plus all other AllowLoad: \
-             Game eager addons), \
-             (6) `apply_post_load_workarounds()`, \
-             (7) `fire_startup_events_for_screen(&env, ScreenKind::Game)`. Downstream tests \
-             do NOT need to call load_addon for any lane addon directly"
+            panel_count > 30.0,
+            "UIPanelWindows must contain >30 entries after the eager sweep — the registry is the \
+             lookup table for ShowUIPanel and lists every panel that participates in the slot-based \
+             positioning system. UIPanelWindows.lua registers GameMenuFrame / HelpFrame / \
+             CharacterFrame / ProfessionsBookFrame / PVPUIFrame / EncounterJournal / CollectionsJournal \
+             / TradeFrame / LootFrame / MerchantFrame / TabardFrame / MailFrame / BankFrame / \
+             QuestLogPopupDetailFrame / QuestFrame / GuildRegistrarFrame / GossipFrame / DressUpFrame \
+             / PetitionFrame / ItemTextFrame / FriendsFrame / ... — well over 30. Got: {panel_count}"
         );
     }
 }
 
-#[test]
-fn lane_publishes_panel_manager_globals_after_full_game_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+    fn lane_publishes_global_frames_parented_to_uiparent_after_full_game_load(env: &WowLuaEnv) {
 
-    let panel_manager_globals = [
-        ("ShowUIPanel", "function"),
-        ("HideUIPanel", "function"),
-        ("GetUIPanel", "function"),
-        ("SetUIPanelAttribute", "function"),
-        ("UpdateUIPanelPositions", "function"),
-        ("UIPanelWindows", "table"),
-        ("UIParentLoadAddOn", "function"),
-    ];
+        let global_frames = [
+            ("UIErrorsFrame", "MessageFrame"),
+            ("AlertFrame", "Frame"),
+            ("SplashFrame", "Frame"),
+            ("CinematicFrame", "Frame"),
+            ("MovieFrame", "Frame"),
+            ("ColorPickerFrame", "Frame"),
+            ("StackSplitFrame", "Frame"),
+            ("ReadyCheckFrame", "Frame"),
+            ("StaticPopup1", "Frame"),
+        ];
 
-    for (global, expected_kind) in panel_manager_globals {
-        let actual: String = env
-            .eval(&format!("return type({global})"))
-            .unwrap_or_else(|err| panic!("type({global}) probe failed: {err}"));
-        assert_eq!(
-            actual, expected_kind,
-            "Panel-manager global `{global}` must publish as `{expected_kind}` after the lane \
-             loads. ShowUIPanel/HideUIPanel/GetUIPanel/SetUIPanelAttribute live in \
-             Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua at lines 828, 853, \
-             881, 115; UpdateUIPanelPositions in UpdateUIPanelPositions.lua; UIPanelWindows is \
-             a literal table populated by UIPanelWindows.lua's `UIPanelWindows_Initialize()`; \
-             UIParentLoadAddOn is the on-demand panel trigger declared in \
-             Blizzard_UIParent/Mainline/UIParent.lua. Downstream addons rely on every one of \
-             these being live at file scope; if any is nil, the entire panel-show flow is \
-             dead"
-        );
+        for (frame, _expected_kind_doc) in global_frames {
+            let exists: bool = env
+                .eval(&format!(
+                    "return _G['{frame}'] ~= nil and type(_G['{frame}']) == 'table'"
+                ))
+                .unwrap_or_else(|err| panic!("global frame `{frame}` probe failed: {err}"));
+            assert!(
+                exists,
+                "Global frame `{frame}` MUST publish as a userdata-frame after FrameXML loads. \
+                 `UIErrorsFrame` ships in FrameXML/UIErrorsFrame.xml as a MessageFrame parented to \
+                 UIParent at frameStrata DIALOG; `AlertFrame` in Mainline/AlertFrames.xml; \
+                 `SplashFrame` in SplashFrame.xml; `CinematicFrame` in Shared/CinematicFrame.xml; \
+                 `MovieFrame` in MovieFrame.xml; `ColorPickerFrame` in Mainline/ColorPickerFrame.xml; \
+                 `StackSplitFrame` in Mainline/StackSplitFrame.xml; `ReadyCheckFrame` in \
+                 Mainline/ReadyCheck.xml; `StaticPopup1` from Blizzard_StaticPopup (a dep of \
+                 FrameXMLUtil, included in the eager sweep). The lane defines the universe of \
+                 `parent=\"UIParent\"` global frames that downstream addons reference"
+            );
+        }
     }
-
-    let panel_count: f64 = env
-        .eval("local n = 0 for _ in pairs(UIPanelWindows) do n = n + 1 end return n")
-        .expect("UIPanelWindows count probe");
-    assert!(
-        panel_count > 30.0,
-        "UIPanelWindows must contain >30 entries after the eager sweep — the registry is the \
-         lookup table for ShowUIPanel and lists every panel that participates in the slot-based \
-         positioning system. UIPanelWindows.lua registers GameMenuFrame / HelpFrame / \
-         CharacterFrame / ProfessionsBookFrame / PVPUIFrame / EncounterJournal / CollectionsJournal \
-         / TradeFrame / LootFrame / MerchantFrame / TabardFrame / MailFrame / BankFrame / \
-         QuestLogPopupDetailFrame / QuestFrame / GuildRegistrarFrame / GossipFrame / DressUpFrame \
-         / PetitionFrame / ItemTextFrame / FriendsFrame / ... — well over 30. Got: {panel_count}"
-    );
 }
 
-#[test]
-fn lane_publishes_global_frames_parented_to_uiparent_after_full_game_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+    fn lane_publishes_managed_frame_templates_for_panel_layout_inheritance(env: &WowLuaEnv) {
+        let _env = env;
 
-    let global_frames = [
-        ("UIErrorsFrame", "MessageFrame"),
-        ("AlertFrame", "Frame"),
-        ("SplashFrame", "Frame"),
-        ("CinematicFrame", "Frame"),
-        ("MovieFrame", "Frame"),
-        ("ColorPickerFrame", "Frame"),
-        ("StackSplitFrame", "Frame"),
-        ("ReadyCheckFrame", "Frame"),
-        ("StaticPopup1", "Frame"),
-    ];
+        let lane_templates = [
+            (
+                "UIParentManagedFrameTemplate",
+                "Blizzard_UIParent/Mainline/UIParent.xml",
+            ),
+            (
+                "UIParentBottomManagedFrameTemplate",
+                "Blizzard_UIParent/Mainline/UIParent.xml",
+            ),
+            (
+                "UIParentRightManagedFrameTemplate",
+                "Blizzard_UIParent/Mainline/UIParent.xml",
+            ),
+            (
+                "AlertFrameTemplate",
+                "Blizzard_FrameXML/Mainline/AlertFrames.xml",
+            ),
+        ];
 
-    for (frame, _expected_kind_doc) in global_frames {
-        let exists: bool = env
-            .eval(&format!(
-                "return _G['{frame}'] ~= nil and type(_G['{frame}']) == 'table'"
-            ))
-            .unwrap_or_else(|err| panic!("global frame `{frame}` probe failed: {err}"));
+        for (template, source) in lane_templates {
+            assert!(
+                wow_ui_sim::xml::get_template(template).is_some(),
+                "Lane template `{template}` (defined in {source}) must register in \
+                 `wow_ui_sim::xml::get_template`. UIParent*ManagedFrameTemplate is the inheritance \
+                 point for downstream addon frames that opt into the bottom/right-strip auto-layout \
+                 system (ObjectiveTrackerFrame, CompactArenaFrames, etc.); AlertFrameTemplate is \
+                 the base for FrameXML/Mainline/AlertFrameSystems.xml's per-system alert variants. \
+                 If this regresses, downstream addons fail to instantiate their managed frames"
+            );
+        }
+    }
+}
+
+prefork_full_ui_case! {
+    fn lane_emits_no_addon_specific_lua_errors_during_full_load(env: &WowLuaEnv) {
+
+        let load_errors: Vec<String> = env
+            .state()
+            .borrow()
+            .lua_errors
+            .iter()
+            .filter(|message| {
+                LANE_ADDONS_BASE_TO_CONSUMER
+                    .iter()
+                    .any(|name| message.contains(name))
+            })
+            .cloned()
+            .collect();
+
         assert!(
-            exists,
-            "Global frame `{frame}` MUST publish as a userdata-frame after FrameXML loads. \
-             `UIErrorsFrame` ships in FrameXML/UIErrorsFrame.xml as a MessageFrame parented to \
-             UIParent at frameStrata DIALOG; `AlertFrame` in Mainline/AlertFrames.xml; \
-             `SplashFrame` in SplashFrame.xml; `CinematicFrame` in Shared/CinematicFrame.xml; \
-             `MovieFrame` in MovieFrame.xml; `ColorPickerFrame` in Mainline/ColorPickerFrame.xml; \
-             `StackSplitFrame` in Mainline/StackSplitFrame.xml; `ReadyCheckFrame` in \
-             Mainline/ReadyCheck.xml; `StaticPopup1` from Blizzard_StaticPopup (a dep of \
-             FrameXMLUtil, included in the eager sweep). The lane defines the universe of \
-             `parent=\"UIParent\"` global frames that downstream addons reference"
+            load_errors.is_empty(),
+            "Core lane MUST load without lane-specific Lua errors — every Game-screen addon \
+             depends on this lane being clean. Got:\n  {}",
+            load_errors.join("\n  ")
         );
     }
-}
-
-#[test]
-fn lane_publishes_managed_frame_templates_for_panel_layout_inheritance() {
-    let _env = load_full_game_ui();
-
-    let lane_templates = [
-        (
-            "UIParentManagedFrameTemplate",
-            "Blizzard_UIParent/Mainline/UIParent.xml",
-        ),
-        (
-            "UIParentBottomManagedFrameTemplate",
-            "Blizzard_UIParent/Mainline/UIParent.xml",
-        ),
-        (
-            "UIParentRightManagedFrameTemplate",
-            "Blizzard_UIParent/Mainline/UIParent.xml",
-        ),
-        (
-            "AlertFrameTemplate",
-            "Blizzard_FrameXML/Mainline/AlertFrames.xml",
-        ),
-    ];
-
-    for (template, source) in lane_templates {
-        assert!(
-            wow_ui_sim::xml::get_template(template).is_some(),
-            "Lane template `{template}` (defined in {source}) must register in \
-             `wow_ui_sim::xml::get_template`. UIParent*ManagedFrameTemplate is the inheritance \
-             point for downstream addon frames that opt into the bottom/right-strip auto-layout \
-             system (ObjectiveTrackerFrame, CompactArenaFrames, etc.); AlertFrameTemplate is \
-             the base for FrameXML/Mainline/AlertFrameSystems.xml's per-system alert variants. \
-             If this regresses, downstream addons fail to instantiate their managed frames"
-        );
-    }
-}
-
-#[test]
-fn lane_emits_no_addon_specific_lua_errors_during_full_load() {
-    let env = load_full_game_ui();
-
-    let load_errors: Vec<String> = env
-        .state()
-        .borrow()
-        .lua_errors
-        .iter()
-        .filter(|message| {
-            LANE_ADDONS_BASE_TO_CONSUMER
-                .iter()
-                .any(|name| message.contains(name))
-        })
-        .cloned()
-        .collect();
-
-    assert!(
-        load_errors.is_empty(),
-        "Core lane MUST load without lane-specific Lua errors — every Game-screen addon \
-         depends on this lane being clean. Got:\n  {}",
-        load_errors.join("\n  ")
-    );
 }
 
 #[test]

@@ -60,19 +60,6 @@ fn fresh_lane_env() -> WowLuaEnv {
     env
 }
 
-fn load_full_game_ui() -> WowLuaEnv {
-    let env = fresh_lane_env();
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        wow_ui_sim::loader::load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
-    }
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-    env
-}
-
 #[test]
 fn each_lane_addon_directory_resolves_with_a_toc() {
     for name in LANE_ADDONS_BASE_TO_CONSUMER {
@@ -362,131 +349,132 @@ fn shared_xml_base_loads_on_glue_screens_others_do_not() {
     }
 }
 
-#[test]
-fn lane_publishes_foundational_globals_after_full_game_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+    fn lane_publishes_foundational_globals_after_full_game_load(env: &WowLuaEnv) {
 
-    let foundational_globals = [
-        ("Mixin", "function"),
-        ("CreateFromMixins", "function"),
-        ("CallbackRegistryMixin", "table"),
-        ("FrameUtil", "table"),
-        ("AnchorUtil", "table"),
-        ("TableUtil", "table"),
-        ("CreateColor", "function"),
-        ("ColorMixin", "table"),
-        ("HelpTip", "table"),
-        ("ScrollUtil", "table"),
-        ("EventRegistry", "table"),
-    ];
+        let foundational_globals = [
+            ("Mixin", "function"),
+            ("CreateFromMixins", "function"),
+            ("CallbackRegistryMixin", "table"),
+            ("FrameUtil", "table"),
+            ("AnchorUtil", "table"),
+            ("TableUtil", "table"),
+            ("CreateColor", "function"),
+            ("ColorMixin", "table"),
+            ("HelpTip", "table"),
+            ("ScrollUtil", "table"),
+            ("EventRegistry", "table"),
+        ];
 
-    for (global, expected_kind) in foundational_globals {
-        let actual: String = env
-            .eval(&format!("return type({global})"))
-            .unwrap_or_else(|err| panic!("type({global}) probe failed: {err}"));
-        assert_eq!(
-            actual, expected_kind,
-            "Foundation global `{global}` must publish as `{expected_kind}` after the lane \
-             loads. If this regresses, downstream addon plans cannot rely on the global being \
-             live at file scope. `Mixin` is from SharedXMLBase/Mixin.lua; `CallbackRegistryMixin` \
-             from SharedXMLBase/CallbackRegistry.lua; `FrameUtil`/`AnchorUtil`/`TableUtil` \
-             from SharedXMLBase; `HelpTip` from SharedXML/HelpTip.lua (carries \
-             `[AllowLoadEnvironment Global]`, which the TOC parser maps to a global-env \
-             override); \
-             `ScrollUtil` from SharedXML/Shared/Scroll/ScrollUtil.lua; `CreateColor` \
-             constructor + `ColorMixin` table from SharedXMLBase/Color.lua (the global is the \
-             constructor function `CreateColor`, not a `Color` global — `ColorMixin` is the \
-             reusable mixin table that `CreateColor` returns instances of via \
-             `CreateFromMixins(ColorMixin)`)"
+        for (global, expected_kind) in foundational_globals {
+            let actual: String = env
+                .eval(&format!("return type({global})"))
+                .unwrap_or_else(|err| panic!("type({global}) probe failed: {err}"));
+            assert_eq!(
+                actual, expected_kind,
+                "Foundation global `{global}` must publish as `{expected_kind}` after the lane \
+                 loads. If this regresses, downstream addon plans cannot rely on the global being \
+                 live at file scope. `Mixin` is from SharedXMLBase/Mixin.lua; `CallbackRegistryMixin` \
+                 from SharedXMLBase/CallbackRegistry.lua; `FrameUtil`/`AnchorUtil`/`TableUtil` \
+                 from SharedXMLBase; `HelpTip` from SharedXML/HelpTip.lua (carries \
+                 `[AllowLoadEnvironment Global]`, which the TOC parser maps to a global-env \
+                 override); \
+                 `ScrollUtil` from SharedXML/Shared/Scroll/ScrollUtil.lua; `CreateColor` \
+                 constructor + `ColorMixin` table from SharedXMLBase/Color.lua (the global is the \
+                 constructor function `CreateColor`, not a `Color` global — `ColorMixin` is the \
+                 reusable mixin table that `CreateColor` returns instances of via \
+                 `CreateFromMixins(ColorMixin)`)"
+            );
+        }
+    }
+}
+
+prefork_full_ui_case! {
+    fn lane_xml_templates_register_for_downstream_inheritance(env: &WowLuaEnv) {
+        let _env = env;
+
+        let foundational_templates = [
+            (
+                "CallbackRegistrantTemplate",
+                "Blizzard_SharedXMLBase/CallbackRegistrant.xml",
+            ),
+            (
+                "ColorSwatchTemplate",
+                "Blizzard_SharedXMLBase/ColorSwatch.xml",
+            ),
+            (
+                "UIPanelButtonTemplate",
+                "Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.xml",
+            ),
+            (
+                "ManagedHorizontalLayoutFrameTemplate",
+                "Blizzard_SharedXML/ManagedLayoutFrame.xml",
+            ),
+            (
+                "ManagedVerticalLayoutFrameTemplate",
+                "Blizzard_SharedXML/ManagedLayoutFrame.xml",
+            ),
+        ];
+
+        for (template, source) in foundational_templates {
+            assert!(
+                wow_ui_sim::xml::get_template(template).is_some(),
+                "Foundation template `{template}` (defined in {source}) must register in \
+                 `wow_ui_sim::xml::get_template`. Downstream addon XML files use \
+                 `inherits=\"{template}\"` and the parser resolves the inheritance at element- \
+                 instantiation time. If this regresses, downstream addons fail to instantiate \
+                 their named frames"
+            );
+        }
+    }
+}
+
+prefork_full_ui_case! {
+    fn lane_emits_no_addon_specific_lua_errors_during_full_load(env: &WowLuaEnv) {
+
+        let load_errors: Vec<String> = env
+            .state()
+            .borrow()
+            .lua_errors
+            .iter()
+            .filter(|message| {
+                LANE_ADDONS_BASE_TO_CONSUMER
+                    .iter()
+                    .any(|name| message.contains(name))
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            load_errors.is_empty(),
+            "Foundation lane MUST load without lane-specific Lua errors — the lane is the floor \
+             for everything else, so any error here cascades. Got:\n  {}",
+            load_errors.join("\n  ")
         );
     }
 }
 
-#[test]
-fn lane_xml_templates_register_for_downstream_inheritance() {
-    let _env = load_full_game_ui();
+prefork_full_ui_case! {
+    fn lane_addons_are_loaded_after_eager_sweep(env: &WowLuaEnv) {
 
-    let foundational_templates = [
-        (
-            "CallbackRegistrantTemplate",
-            "Blizzard_SharedXMLBase/CallbackRegistrant.xml",
-        ),
-        (
-            "ColorSwatchTemplate",
-            "Blizzard_SharedXMLBase/ColorSwatch.xml",
-        ),
-        (
-            "UIPanelButtonTemplate",
-            "Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.xml",
-        ),
-        (
-            "ManagedHorizontalLayoutFrameTemplate",
-            "Blizzard_SharedXML/ManagedLayoutFrame.xml",
-        ),
-        (
-            "ManagedVerticalLayoutFrameTemplate",
-            "Blizzard_SharedXML/ManagedLayoutFrame.xml",
-        ),
-    ];
-
-    for (template, source) in foundational_templates {
-        assert!(
-            wow_ui_sim::xml::get_template(template).is_some(),
-            "Foundation template `{template}` (defined in {source}) must register in \
-             `wow_ui_sim::xml::get_template`. Downstream addon XML files use \
-             `inherits=\"{template}\"` and the parser resolves the inheritance at element- \
-             instantiation time. If this regresses, downstream addons fail to instantiate \
-             their named frames"
-        );
-    }
-}
-
-#[test]
-fn lane_emits_no_addon_specific_lua_errors_during_full_load() {
-    let env = load_full_game_ui();
-
-    let load_errors: Vec<String> = env
-        .state()
-        .borrow()
-        .lua_errors
-        .iter()
-        .filter(|message| {
-            LANE_ADDONS_BASE_TO_CONSUMER
-                .iter()
-                .any(|name| message.contains(name))
-        })
-        .cloned()
-        .collect();
-
-    assert!(
-        load_errors.is_empty(),
-        "Foundation lane MUST load without lane-specific Lua errors — the lane is the floor \
-         for everything else, so any error here cascades. Got:\n  {}",
-        load_errors.join("\n  ")
-    );
-}
-
-#[test]
-fn lane_addons_are_loaded_after_eager_sweep() {
-    let env = load_full_game_ui();
-
-    for name in LANE_ADDONS_BASE_TO_CONSUMER {
-        let loaded: bool = env
-            .eval(&format!("return C_AddOns.IsAddOnLoaded('{name}')"))
-            .unwrap_or_else(|err| panic!("IsAddOnLoaded({name}) probe failed: {err}"));
-        assert!(
-            loaded,
-            "C_AddOns.IsAddOnLoaded('{name}') must return true after the eager Game sweep. \
-             The required harness shape for any downstream test is therefore: \
-             (1) `WowLuaEnv::new()`, (2) `set_screen_mode(ScreenKind::Game)`, \
-             (3) `state.addon_base_paths = vec![blizzard_ui_dir()]`, \
-             (4) `register_intrinsic_templates()`, \
-             (5) `discover_blizzard_addons_for_screen(&ui, ScreenKind::Game)` + per-result \
-             `load_addon`, (6) `apply_post_load_workarounds()`, \
-             (7) `fire_startup_events_for_screen(&env, ScreenKind::Game)`. The eager sweep \
-             brings in the full lane plus all other AllowLoad: Game eager addons, so \
-             downstream tests do not need to call load_addon for any lane addon directly"
-        );
+        for name in LANE_ADDONS_BASE_TO_CONSUMER {
+            let loaded: bool = env
+                .eval(&format!("return C_AddOns.IsAddOnLoaded('{name}')"))
+                .unwrap_or_else(|err| panic!("IsAddOnLoaded({name}) probe failed: {err}"));
+            assert!(
+                loaded,
+                "C_AddOns.IsAddOnLoaded('{name}') must return true after the eager Game sweep. \
+                 The required harness shape for any downstream test is therefore: \
+                 (1) `WowLuaEnv::new()`, (2) `set_screen_mode(ScreenKind::Game)`, \
+                 (3) `state.addon_base_paths = vec![blizzard_ui_dir()]`, \
+                 (4) `register_intrinsic_templates()`, \
+                 (5) `discover_blizzard_addons_for_screen(&ui, ScreenKind::Game)` + per-result \
+                 `load_addon`, (6) `apply_post_load_workarounds()`, \
+                 (7) `fire_startup_events_for_screen(&env, ScreenKind::Game)`. The eager sweep \
+                 brings in the full lane plus all other AllowLoad: Game eager addons, so \
+                 downstream tests do not need to call load_addon for any lane addon directly"
+            );
+        }
     }
 }
 
