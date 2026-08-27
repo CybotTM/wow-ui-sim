@@ -36,7 +36,14 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Define migrated cases with the explicit `prefork_full_ui_case!` marker; `build.rs` parses marker items with `syn`, renders the registry with `quote`, and assigns stable `<module>::<function>` names.
 - [x] Include the generated integration module tree in the prefork target so mixed modules compile once while unmarked tests remain under libtest.
 - [x] Prove nested-module discovery and inherited startup state with `prefork_full_ui_nested::fixture::preloaded_parent_has_normal_game_startup`.
-- [x] Register 12 full-UI cases: 9 manual keybinding cases, 2 behavioral-messaging cases, and 1 nested registry/preloaded-startup fixture.
+- [x] Register the generated default-retail full-UI registry with stable `<module>::<function>` names and retain 10 manual/nested prefork cases.
+
+### Final coverage and eligibility
+
+- [x] List 1,946 cases in the dedicated default-retail prefork target: 1,936 migrated full-environment cases and 10 manual/nested prefork cases.
+- [x] Audit all 309 remaining ordinary startup-like tests and confirm zero eligible cases remain for the finalized shared parent preload.
+- [x] Classify exclusions exactly: 75 pre-start custom fixtures; 9 non-equivalent lifecycle fixtures; 211 partial/custom/glue/render/thread-sensitive fixtures; 5 owned-timeout fixtures; 7 profile-specific fixtures; 1 post-drop global-state fixture; and 1 version-specific fixture.
+- [x] Preserve exclusion rationale: the finalized parent is incompatible with the 75 pre-start and 9 lifecycle cases, while the 211 setup-family cases use partial/custom, alternate-screen, render-sensitive, or thread-sensitive state that is not normal-retail startup.
 
 ### Bytecode-cache child contract
 
@@ -90,9 +97,9 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 ## Known gaps (current cycle)
 
 - [x] Migrate the initial nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
-- [x] Add the two behavioral-messaging cases and one nested registry/preloaded-startup fixture; 12 full-UI cases are currently registered.
+- [x] Add the two behavioral-messaging cases and one nested registry/preloaded-startup fixture.
 - [x] Benchmark the parent-bypass prefork execution against the retained current in-target baseline.
-- [ ] Migrate the remaining eligible normal-retail full-environment tests; the current registry is incomplete.
+- [x] Migrate every eligible normal-retail full-environment test and complete the final 309-test ordinary startup-like eligibility audit.
 
 ## Out of scope
 

@@ -24,7 +24,30 @@ The target enters parent-bypass mode, then builds one 1024x768 default-retail ga
 
 After startup succeeds, enabled-cache sealing verifies that cache state was not initialized or populated, marks that state initialized with empty values/index, and records `pack.bin` existence without reading its contents. Disabled caching skips sealing as a successful no-op. The immutable parent snapshot backs each registered case, one child per case, with 120-second timeouts and read-only bytecode-cache child setup. The initial nine-case benchmark below predates the registry expansion.
 
-The generated ordinary full-UI migration aggregate is now 1,936 cases: 1,780 previously migrated cases plus 156 newly migrated post-start LoadOnDemand cases across 17 modules. These cases use borrowed-environment child setup that performs only the original explicit addon loads after the shared normal-retail preload, preserving dependency order; they do not alter the parent preload. `Blizzard_SharedMapDataProviders` remains excluded: its nine-case fixture loads before post-load workarounds and omits startup events, so it is not equivalent to the finalized shared snapshot. Two PTR-only GuildBank/ItemUpgrade tests were restored to ordinary libtest with profile-specific full startup rather than using the retail prefork snapshot. GenericTraitUI's listing includes three previously migrated cases, so generic-batch registry conformance covers 159 listed cases while the unique new migration is 156. The conformance case passed 1/1, the `is_addon_loaded` filter passed 135/135, GenericTraitUI publication passed 4/4, each restored PTR test passed 1/1, and no orphan processes remained. The nine manual keybinding cases, two behavioral-messaging cases, one nested registry/preloaded-startup fixture, and earlier SpellSearch/explicit/housing batches remain separately categorized. Pre-start, partial/custom, glue, and otherwise non-equivalent lifecycle fixtures remain excluded from the normal-preload migration.
+The final eligibility audit records 1,946 tests in the dedicated default-retail prefork target: 1,936 migrated full-environment cases and 10 manual/nested prefork cases. The ordinary startup-like scan found 309 remaining tests and zero eligible cases for the finalized shared parent. Final audit artifacts are `/tmp/prefork-final-eligibility.json` and `/tmp/prefork-final-registry-list.txt`; see [Final eligibility classification](#final-eligibility-classification) for rationale without duplicating all 309 rows.
+
+## Final eligibility classification
+
+The 309 ordinary startup-like tests are all excluded, with exact counts from `/tmp/prefork-final-eligibility.json`:
+
+| Category | Count | Rationale |
+|---|---:|---|
+| Pre-start custom fixture | 75 | Extra addon/state setup occurs before post-load workarounds or startup; the finalized parent is not equivalent. |
+| Non-equivalent lifecycle | 9 | Custom load omits or reorders startup lifecycle steps relative to the finalized parent. |
+| Partial/custom fixture | 113 | Curated addon/panel fixture, custom state/events, rendering, or locking differs from normal eager startup. |
+| Partial domain fixture | 13 | Curated addon graph and seeded domain state differ from normal startup. |
+| Partial template fixture | 3 | Minimal inline-template environment has no Blizzard startup. |
+| Partial thread-sensitive fixture | 55 | Custom keybinding/panel fixture seams, events, or environment locking differ from normal preload. |
+| Alternate screen | 15 | Glue Login/CharacterSelect/CharacterCreate startup is not the normal Game-screen parent. |
+| Render custom fixture | 12 | Render-sensitive fixture uses a custom startup lifecycle. |
+| Owned-timeout fixture | 5 | `test_timeout!` requires an owned `Send + 'static` environment, not borrowed prefork state. |
+| Profile-specific | 7 | PTR/Mists-specific coverage remains ordinary libtest. |
+| Post-drop global state | 1 | Assertion depends on process-global state after dropping the environment. |
+| Version-specific | 1 | Patch-version-gated coverage remains ordinary libtest. |
+
+The exclusion boundary is deliberate: 75 pre-start cases and 9 lifecycle cases cannot use the finalized parent snapshot, while 211 partial/custom/glue/render/thread-sensitive setup-family cases are not normal-retail startup. The remaining 14 cases are owned-timeout (5), profile-specific (7), post-drop global-state (1), or version-specific (1). Counts sum to 309; `eligible_remaining` is zero.
+
+Earlier SpellSearch, explicit, housing, and generic post-start batches use borrowed-environment child setup only where their load ordering matches the finalized parent contract. `Blizzard_SharedMapDataProviders` remains excluded because its nine-case fixture loads before post-load workarounds and omits startup events. Two PTR-only GuildBank/ItemUpgrade tests remain ordinary libtest with profile-specific full startup.
 
 Warm-cache conformance remains in a fresh subprocess with an isolated XDG cache root: it prewarms `pack.bin`, releases non-empty memory, compiles a unique child chunk without mutation, and proves the parent remains writable. Separate parent-bypass conformance reuses an existing pack, compiles unique parent and child chunks, requires a zero-byte seal result, and compares cache-tree bytes and metadata before and after both phases.
 
