@@ -190,9 +190,8 @@ fn blizzard_load_locale_auto_discovered_on_every_screen() {
     }
 }
 
-#[test]
-fn blizzard_load_locale_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_load_locale_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -213,10 +212,10 @@ fn blizzard_load_locale_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_load_locale_is_addon_loaded_after_auto_discovery() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_load_locale_is_addon_loaded_after_auto_discovery(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_LoadLocale')")
@@ -229,10 +228,10 @@ fn blizzard_load_locale_is_addon_loaded_after_auto_discovery() {
          load_addon call required"
     );
 }
+}
 
-#[test]
-fn blizzard_load_locale_publishes_locale_ptpt_global_as_true() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_load_locale_publishes_locale_ptpt_global_as_true(env: &WowLuaEnv) {
 
     let marker: (String, bool, String) = env
         .eval("return type(LOCALE_ptPT), LOCALE_ptPT, type(LOCALE_enUS)")
@@ -244,10 +243,10 @@ fn blizzard_load_locale_publishes_locale_ptpt_global_as_true() {
          locale markers, including LOCALE_enUS, remain absent"
     );
 }
+}
 
-#[test]
-fn blizzard_load_locale_publishes_ui_locale_global_as_ptpt_string() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_load_locale_publishes_ui_locale_global_as_ptpt_string(env: &WowLuaEnv) {
 
     let locale: (String, String) = env
         .eval("return type(UI_LOCALE), UI_LOCALE")
@@ -258,4 +257,5 @@ fn blizzard_load_locale_publishes_ui_locale_global_as_ptpt_string() {
         "Current LoadLocale.lua publishes UI_LOCALE = \"ptPT\", which \
          LocalizationMachinery.lua uses as the l10n table key"
     );
+}
 }

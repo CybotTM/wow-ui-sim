@@ -178,9 +178,8 @@ fn blizzard_ime_appears_in_every_screen_auto_discovery() {
     }
 }
 
-#[test]
-fn blizzard_ime_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_ime_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -200,10 +199,10 @@ fn blizzard_ime_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_ime_is_addon_loaded_via_game_screen_pass() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_ime_is_addon_loaded_via_game_screen_pass(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_IME')")
@@ -215,10 +214,10 @@ fn blizzard_ime_is_addon_loaded_via_game_screen_pass() {
          `## LoadOnDemand:` makes the addon part of the eager auto-discovery sweep"
     );
 }
+}
 
-#[test]
-fn blizzard_ime_virtual_candidate_template_stays_nil_at_global_scope() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_ime_virtual_candidate_template_stays_nil_at_global_scope(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(_G['IMECandidate'])")
@@ -231,10 +230,10 @@ fn blizzard_ime_virtual_candidate_template_stays_nil_at_global_scope() {
          the global scope"
     );
 }
+}
 
-#[test]
-fn blizzard_ime_named_frame_publishes_with_tooltip_strata_and_starts_hidden() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_ime_named_frame_publishes_with_tooltip_strata_and_starts_hidden(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(IMECandidatesFrame)")
@@ -274,10 +273,10 @@ fn blizzard_ime_named_frame_publishes_with_tooltip_strata_and_starts_hidden() {
          the platform IME bridge fires a composition-start event and Show()s the frame"
     );
 }
+}
 
-#[test]
-fn blizzard_ime_named_frame_carries_ten_candidate_children() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_ime_named_frame_carries_ten_candidate_children(env: &WowLuaEnv) {
 
     for parent_key in CANDIDATE_PARENT_KEYS {
         let kind: String = env
@@ -293,10 +292,10 @@ fn blizzard_ime_named_frame_carries_ten_candidate_children() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_ime_candidate_children_carry_label_and_candidate_fontstrings() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_ime_candidate_children_carry_label_and_candidate_fontstrings(env: &WowLuaEnv) {
 
     let label_kind: String = env
         .eval("return type(IMECandidatesFrame.c1.label)")
@@ -318,10 +317,10 @@ fn blizzard_ime_candidate_children_carry_label_and_candidate_fontstrings() {
          word/character emitted by the platform IME for the current composition step"
     );
 }
+}
 
-#[test]
-fn blizzard_ime_named_frame_carries_background_selection_and_reading_layers() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_ime_named_frame_carries_background_selection_and_reading_layers(env: &WowLuaEnv) {
 
     for (parent_key, label, layer_rationale) in [
         (
@@ -354,6 +353,7 @@ fn blizzard_ime_named_frame_carries_background_selection_and_reading_layers() {
             "IMECandidatesFrame.{parent_key} ({label}) must publish — {layer_rationale}"
         );
     }
+}
 }
 
 #[test]

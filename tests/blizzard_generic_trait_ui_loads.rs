@@ -181,9 +181,8 @@ fn blizzard_generic_trait_ui_excluded_from_game_auto_discovery_due_to_lod() {
     );
 }
 
-#[test]
-fn blizzard_generic_trait_ui_loads_explicitly_via_load_addon_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_generic_trait_ui_loads_explicitly_via_load_addon_without_errors(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -211,10 +210,10 @@ fn blizzard_generic_trait_ui_loads_explicitly_via_load_addon_without_errors() {
         trait_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_generic_trait_ui_is_addon_loaded_returns_true_after_explicit_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_generic_trait_ui_is_addon_loaded_returns_true_after_explicit_load(env: &WowLuaEnv) {
 
     let before: bool = env
         .eval("return C_AddOns and C_AddOns.IsAddOnLoaded('Blizzard_GenericTraitUI') or false")
@@ -239,9 +238,10 @@ fn blizzard_generic_trait_ui_is_addon_loaded_returns_true_after_explicit_load() 
          that backs IsAddOnLoaded)"
     );
 }
+}
 
-#[test]
-fn blizzard_shared_talent_ui_is_non_lod_dep_loaded_by_game_auto_discovery() {
+prefork_full_ui_case! {
+fn blizzard_shared_talent_ui_is_non_lod_dep_loaded_by_game_auto_discovery(env: &WowLuaEnv) {
     let toc =
         TocFile::from_file(&shared_talent_ui_toc()).expect("Blizzard_SharedTalentUI TOC parse");
     assert!(
@@ -251,7 +251,6 @@ fn blizzard_shared_talent_ui_is_non_lod_dep_loaded_by_game_auto_discovery() {
          already present at the moment LoadAddOn(\"Blizzard_GenericTraitUI\") fires"
     );
 
-    let env = load_full_game_ui();
     let shared_loaded: bool = env
         .eval("return C_AddOns and C_AddOns.IsAddOnLoaded('Blizzard_SharedTalentUI') or false")
         .expect("IsAddOnLoaded probe should succeed");
@@ -262,6 +261,7 @@ fn blizzard_shared_talent_ui_is_non_lod_dep_loaded_by_game_auto_discovery() {
          only enumerates SharedTalentUI as a dep (the dep itself is non-LOD and pulled in \
          eagerly)"
     );
+}
 }
 
 #[test]

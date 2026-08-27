@@ -142,9 +142,8 @@ fn blizzard_friends_frame_auto_loads_on_game_screen() {
     );
 }
 
-#[test]
-fn blizzard_friends_frame_loads_via_full_game_ui_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_loads_via_full_game_ui_without_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -169,10 +168,10 @@ fn blizzard_friends_frame_loads_via_full_game_ui_without_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_is_addon_loaded_returns_true_after_full_game_ui_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_is_addon_loaded_returns_true_after_full_game_ui_load(env: &WowLuaEnv) {
 
     let post_load: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_FriendsFrame') and true or false")
@@ -184,10 +183,10 @@ fn blizzard_friends_frame_is_addon_loaded_returns_true_after_full_game_ui_load()
          `mark_addon_loaded` registers it"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_four_top_level_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_four_top_level_frames(env: &WowLuaEnv) {
 
     let frames: (bool, bool, bool, bool) = env
         .eval(
@@ -208,10 +207,10 @@ fn blizzard_friends_frame_publishes_four_top_level_frames() {
          dialog)"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_internal_subframes() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_internal_subframes(env: &WowLuaEnv) {
 
     let subframes: (bool, bool, bool, bool) = env
         .eval(
@@ -232,10 +231,10 @@ fn blizzard_friends_frame_publishes_internal_subframes() {
          TabSystemOwnerTemplate hosting the four social-panel tabs)"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_friend_list_button_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_friend_list_button_mixins(env: &WowLuaEnv) {
 
     let list_mixins: (bool, bool, bool, bool) = env
         .eval(
@@ -256,10 +255,10 @@ fn blizzard_friends_frame_publishes_friend_list_button_mixins() {
          in FriendsFrame.xml"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_tab_and_dialog_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_tab_and_dialog_mixins(env: &WowLuaEnv) {
 
     let tab_mixins: (bool, bool, bool, bool) = env
         .eval(
@@ -280,10 +279,10 @@ fn blizzard_friends_frame_publishes_tab_and_dialog_mixins() {
          friends list)"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_addfriend_and_summon_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_addfriend_and_summon_mixins(env: &WowLuaEnv) {
 
     let dialog_mixins: (bool, bool, bool, bool) = env
         .eval(
@@ -322,10 +321,10 @@ fn blizzard_friends_frame_publishes_addfriend_and_summon_mixins() {
          (line 1992 — the BattleNet broadcast-status edit popup)"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_friends_friends_and_contacts_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_friends_friends_and_contacts_mixins(env: &WowLuaEnv) {
 
     let extras: (bool, bool, bool) = env
         .eval(
@@ -343,10 +342,10 @@ fn blizzard_friends_frame_publishes_friends_friends_and_contacts_mixins() {
          ContactsMenuMixin (line 3085 — the right-click context menu for friend rows)"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_display_count_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_display_count_constants(env: &WowLuaEnv) {
 
     let counts: (i64, i64, i64, i64, i64) = env
         .eval(
@@ -378,10 +377,10 @@ fn blizzard_friends_frame_publishes_display_count_constants() {
          the remaining"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_row_height_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_row_height_constants(env: &WowLuaEnv) {
 
     let heights: (i64, i64, i64, i64) = env
         .eval(
@@ -410,10 +409,10 @@ fn blizzard_friends_frame_publishes_row_height_constants() {
          FRIENDS_FRAME_FRIEND_HEIGHT=34 with header padding"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_friend_button_type_enum() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_friend_button_type_enum(env: &WowLuaEnv) {
 
     let button_types: (i64, i64, i64, i64, i64, i64, i64) = env
         .eval(
@@ -436,10 +435,10 @@ fn blizzard_friends_frame_publishes_friend_button_type_enum() {
          INVITE_HEADER=5, PARTY_INVITE=6 group invite, PARTY_INVITE_HEADER=7)"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_friend_tab_enum() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_friend_tab_enum(env: &WowLuaEnv) {
 
     let tabs: (i64, i64, i64, i64, i64) = env
         .eval(
@@ -460,10 +459,10 @@ fn blizzard_friends_frame_publishes_friend_tab_enum() {
          without hard-coding the count"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_squelch_and_friends_friends_enums() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_squelch_and_friends_friends_enums(env: &WowLuaEnv) {
 
     let squelch: (i64, i64) = env
         .eval(
@@ -494,10 +493,10 @@ fn blizzard_friends_frame_publishes_squelch_and_friends_friends_enums() {
          (everyone the selected friend follows)"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_status_texture_path_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_status_texture_path_globals(env: &WowLuaEnv) {
 
     let textures: (String, String, String, String, String) = env
         .eval(
@@ -524,10 +523,10 @@ fn blizzard_friends_frame_publishes_status_texture_path_globals() {
          by the texture loader's BLP/webp fallback chain"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_subframes_table() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_subframes_table(env: &WowLuaEnv) {
 
     let subframes: (String, String, String, String, String, String, i64) = env
         .eval(
@@ -571,10 +570,10 @@ fn blizzard_friends_frame_publishes_subframes_table() {
          is meaningful in PvP brawl mode)"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_show_sub_frame_helper() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_show_sub_frame_helper(env: &WowLuaEnv) {
 
     let helpers: (bool, bool, bool, bool) = env
         .eval(
@@ -595,10 +594,10 @@ fn blizzard_friends_frame_publishes_show_sub_frame_helper() {
          dispatcher), FriendsFrame_Update (line 423 — refresh-all entry point)"
     );
 }
+}
 
-#[test]
-fn blizzard_friends_frame_publishes_dropdown_helpers() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_friends_frame_publishes_dropdown_helpers(env: &WowLuaEnv) {
 
     let dropdowns: (bool, bool) = env
         .eval(
@@ -615,4 +614,5 @@ fn blizzard_friends_frame_publishes_dropdown_helpers() {
          FriendsFrame_ShowBNDropdown (line 207 — BattleNet account row menu adds \
          block / report / target-game-account submenu)"
     );
+}
 }
