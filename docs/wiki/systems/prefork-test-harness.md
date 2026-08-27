@@ -1,6 +1,6 @@
 # Prefork Test Harness
 
-Linux-only custom test-runner core for reusing immutable parent-owned test state across isolated child cases without entering libtest worker threads.
+Linux-only custom test-runner core for reusing immutable parent-owned test state across isolated child cases without entering libtest worker threads. Migrated cases use explicit `prefork_full_ui_case!` marker bodies and a build-generated stable `<module>::<function>` registry.
 
 ## Content
 
@@ -20,13 +20,17 @@ Timeout handling remains separate: it signals the whole child process group with
 
 The target enters parent-bypass mode, then builds one 1024x768 default-retail game-screen `WowLuaEnv`: synced Blizzard UI path, stopped GC, source-compiled dependency-ordered eager addon discovery/loading, one `ADDON_LOADED` per successful addon, post-`Blizzard_EnvironmentCleanup` global restoration, string-metatable sync, post-load workarounds, bootstrap GC restart, and normal game startup events. It rejects partial setup with addon context when loading, addon events, EnvironmentCleanup restoration, startup Lua, GC restart, or cache sealing fails.
 
-After startup succeeds, enabled-cache sealing verifies that cache state was not initialized or populated, marks that state initialized with empty values/index, and records `pack.bin` existence without reading its contents. Disabled caching skips sealing as a successful no-op. The immutable parent snapshot backs nine migrated `test_keybindings_panels_detail` cases, one child per case, with 120-second timeouts and read-only bytecode-cache child setup.
+`build.rs` parses explicit `prefork_full_ui_case! { fn name(env: &WowLuaEnv) { ... } }` items with `syn` and renders one registry with `quote`. Registry names are stable `<module>::<function>` paths. The prefork target includes the generated integration module tree, so mixed modules keep unmarked tests under libtest while marked bodies are registered only in the prefork runner. The nested fixture `prefork_full_ui_nested::fixture::preloaded_parent_has_normal_game_startup` proves both nested registry resolution and observable inherited Game startup state.
+
+After startup succeeds, enabled-cache sealing verifies that cache state was not initialized or populated, marks that state initialized with empty values/index, and records `pack.bin` existence without reading its contents. Disabled caching skips sealing as a successful no-op. The immutable parent snapshot backs each registered case, one child per case, with 120-second timeouts and read-only bytecode-cache child setup. The initial nine-case benchmark below predates the registry expansion.
+
+The current registry has 12 full-UI cases: 9 manual keybinding cases, 2 behavioral-messaging cases, and 1 nested registry/preloaded-startup fixture. Migration remains incomplete; other eligible normal-retail full-environment tests still run outside this registry.
 
 Warm-cache conformance remains in a fresh subprocess with an isolated XDG cache root: it prewarms `pack.bin`, releases non-empty memory, compiles a unique child chunk without mutation, and proves the parent remains writable. Separate parent-bypass conformance reuses an existing pack, compiles unique parent and child chunks, requires a zero-byte seal result, and compares cache-tree bytes and metadata before and after both phases.
 
 ## Measured result
 
-The committed parent-bypass target passed all nine migrated cases with one worker in 10.12 seconds, down 56.9% from the retained 23.49-second pre-migration serial baseline. `/usr/bin/time` process maximum RSS fell from 1,190,600 KiB to 788,236 KiB (33.8%), and sampled process-tree PSS fell from 1,189,511 KiB to 1,040,276 KiB (12.5%). Parent-only peak PSS was 768,995 KiB; the one-child phase produced the whole-tree PSS peak.
+The committed parent-bypass target passed the initial nine migrated cases with one worker in 10.12 seconds, down 56.9% from the retained 23.49-second pre-migration serial baseline. `/usr/bin/time` process maximum RSS fell from 1,190,600 KiB to 788,236 KiB (33.8%), and sampled process-tree PSS fell from 1,189,511 KiB to 1,040,276 KiB (12.5%). Parent-only peak PSS was 768,995 KiB; the one-child phase produced the whole-tree PSS peak.
 
 Sampled process-tree RSS rose from 1,196,596 KiB to 1,523,432 KiB. This metric double-counts copy-on-write pages mapped by both parent and child; PSS is the aggregate host-footprint comparison because it apportions shared pages. The benchmark used the same nine-case filter and `--test-threads=1`, with `/usr/bin/time -v` plus 20 ms `/proc/*/smaps_rollup` sampling.
 
@@ -35,6 +39,9 @@ Sampled process-tree RSS rose from 1,196,596 KiB to 1,523,432 KiB. This metric d
 - [Prefork test harness spec](../../specs/prefork-test-harness.md) — behavioral contract and current gaps
 - [Conformance target](../../../tests/prefork_full_ui.rs) — behavioral proof and fixture processes
 - [Reusable runner](../../../tests/common/prefork.rs) — current implementation
+- [Build registry](../../../build.rs) — `syn`/`quote` marker parsing and stable case generation
+- [Behavioral-messaging cases](../../../tests/blizzard_behavioral_messaging_loads.rs) — two marker-defined cases with remaining libtest tests
+- [Nested registry fixture](../../../tests/prefork_full_ui_nested/fixture.rs) — nested path and inherited-startup proof
 
 ## See Also
 

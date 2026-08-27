@@ -32,7 +32,11 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Restore post-cleanup globals after `Blizzard_EnvironmentCleanup`, sync the string metatable, apply post-load workarounds, restart bootstrap GC, and run the normal game startup event sequence.
 - [x] After successful startup, when bytecode caching is enabled, seal the bypassed cache as empty and initialized so read-only children cannot reload the disk pack; preserve whether `pack.bin` exists, return a successful zero-byte release outcome, and fail if cache state was initialized or populated before sealing. Disabled caching returns a successful no-op.
 - [x] Fail setup explicitly with addon context on addon-load, `ADDON_LOADED`, EnvironmentCleanup restoration, startup Lua, bootstrap-GC, or bytecode-cache sealing errors instead of continuing with a partial parent snapshot.
-- [x] Run the nine `test_keybindings_panels_detail` cases as immutable `fn(&WowLuaEnv)` children with a 120-second child timeout and read-only bytecode-cache child setup.
+- [x] Run registered full-UI cases as immutable `fn(&WowLuaEnv)` children with a 120-second child timeout and read-only bytecode-cache child setup.
+- [x] Define migrated cases with the explicit `prefork_full_ui_case!` marker; `build.rs` parses marker items with `syn`, renders the registry with `quote`, and assigns stable `<module>::<function>` names.
+- [x] Include the generated integration module tree in the prefork target so mixed modules compile once while unmarked tests remain under libtest.
+- [x] Prove nested-module discovery and inherited startup state with `prefork_full_ui_nested::fixture::preloaded_parent_has_normal_game_startup`.
+- [x] Register 12 full-UI cases: 9 manual keybinding cases, 2 behavioral-messaging cases, and 1 nested registry/preloaded-startup fixture.
 
 ### Bytecode-cache child contract
 
@@ -47,7 +51,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 ### Performance proof
 
-- [x] Preserve all nine migrated behaviors with parent bypass enabled.
+- [x] Preserve the initial nine migrated behaviors with parent bypass enabled.
 - [x] Reduce serial wall time from 23.49 seconds to 10.12 seconds (56.9%).
 - [x] Reduce `/usr/bin/time` process maximum RSS from 1,190,600 KiB to 788,236 KiB (33.8%) and sampled process-tree PSS from 1,189,511 KiB to 1,040,276 KiB (12.5%).
 - [x] Record sampled process-tree RSS separately: it rises from 1,196,596 KiB to 1,523,432 KiB because RSS counts shared copy-on-write pages in both parent and child, while PSS apportions them.
@@ -64,15 +68,18 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 ## How it works
 
 - [Prefork test harness system](../wiki/systems/prefork-test-harness.md)
+- `prefork_full_ui_case!` marker bodies are the single implementation of migrated cases; they are not also emitted as ordinary `#[test]` functions.
 
 ## Implementation inventory
 
 - `Cargo.toml` — declares the dedicated Linux prefork conformance target contract.
-- `build.rs` — keeps the custom target root out of the generated integration harness.
+- `build.rs` — keeps the custom target root out of the generated integration harness and builds the stable marker registry with `syn`/`quote`.
 - `tests/common/prefork.rs` — reusable eager and lazy-state test-only runner APIs and execution behavior.
 - `tests/common/prefork_full_ui_preload.rs` — target-only normal retail game-screen preload and migrated-case helpers.
 - `tests/prefork_full_ui.rs` — custom target entry point, real-case registry, fixture cases, and behavioral conformance checks.
-- `tests/test_keybindings_panels_detail.rs` — nine migrated immutable-environment case bodies.
+- `tests/test_keybindings_panels_detail.rs` — nine manually registered immutable-environment case bodies.
+- `tests/blizzard_behavioral_messaging_loads.rs` — two marker-defined immutable-environment case bodies; its lightweight tests remain under libtest.
+- `tests/prefork_full_ui_nested/fixture.rs` — nested-module registry and preloaded-startup behavior fixture.
 - `src/loader/bytecode_cache.rs` — writable, parent-bypass, and read-only process modes; mutation-boundary enforcement; and empty-state sealing before child forks.
 - `src/loader/mod.rs` — narrow doc-hidden prefork cache entry points.
 
@@ -82,8 +89,10 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 ## Known gaps (current cycle)
 
-- [x] Migrate the nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
+- [x] Migrate the initial nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
+- [x] Add the two behavioral-messaging cases and one nested registry/preloaded-startup fixture; 12 full-UI cases are currently registered.
 - [x] Benchmark the parent-bypass prefork execution against the retained current in-target baseline.
+- [ ] Migrate the remaining eligible normal-retail full-environment tests; the current registry is incomplete.
 
 ## Out of scope
 

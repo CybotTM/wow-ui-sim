@@ -1,3 +1,7 @@
+## [2026-08-27] system | Generate prefork full-UI case registry
+
+Audited commit `fe0d8f5a1`. Updated [[prefork-test-harness]] and the prefork spec to document explicit `prefork_full_ui_case!` marker bodies, `syn`/`quote` build-generated stable `<module>::<function>` registration, generated integration-tree reuse for mixed modules, and the nested registry/preloaded-startup fixture. The current registry contains 12 full-UI cases: 9 manual keybinding cases, 2 behavioral-messaging cases, and 1 nested fixture. Remaining eligible normal-retail full-environment tests are not yet migrated. The existing index entry remains current; no index change was needed.
+
 ## [2026-08-26] audit | Document ItemButton runtime load ordering
 
 Audited commit `9b1ba9bcd`. Updated [[addon-load-order]], `docs/addon-load-order-investigation.md`, and the existing index summary to replace the obsolete claim that `ItemButtonUtil` remained unavailable until after `Blizzard_ItemButton`. `WowLuaEnv::new` does not publish it; loading `Blizzard_UIParent` dispatches `UIParent_OnShow`, which runtime-loads `Blizzard_AccountStore`; runtime `C_AddOns` loads the game foundation lane through `Blizzard_FrameXMLUtil`; and `ItemUtil.lua` publishes `ItemButtonUtil` before eager discovery reaches `Blizzard_ItemButton`. The removed intermediate-state test was obsolete; the production load-order snapshot remains unchanged and green. No new wiki page was required.
