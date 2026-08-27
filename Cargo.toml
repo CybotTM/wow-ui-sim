@@ -223,6 +223,9 @@ iced-layout-inspector = { git = "https://github.com/Osso/iced-layout-inspector.g
 
 [build-dependencies]
 winresource = "0.1"
+# Parse explicit prefork test marker items in build.rs instead of maintaining a bespoke Rust lexer.
+syn = { version = "2", features = ["full", "parsing"] }
+quote = "1"
 
 [patch.crates-io]
 iced_wgpu = { path = "iced-wgpu-patched" }

@@ -75,6 +75,17 @@ impl Deref for LockedEnv {
     }
 }
 
+#[macro_export]
+macro_rules! prefork_full_ui_case {
+    (fn $name:ident($env:ident: &WowLuaEnv) $body:block) => {
+        pub(crate) mod $name {
+            use super::*;
+
+            pub(crate) fn run($env: &WowLuaEnv) $body
+        }
+    };
+}
+
 /// Convenience macro: wraps a test body with a 120s timeout.
 ///
 /// ```ignore

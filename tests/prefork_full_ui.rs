@@ -8,6 +8,8 @@ mod prefork_full_ui_preload;
 #[path = "test_keybindings_panels_detail.rs"]
 mod test_keybindings_panels_detail;
 
+include!(concat!(env!("OUT_DIR"), "/integration_tests.rs"));
+
 use prefork::{Case, Config};
 use std::env;
 use std::fs::{File, OpenOptions};
@@ -77,6 +79,10 @@ static BYTECODE_CHILD_SETUP_RAN: AtomicBool = AtomicBool::new(false);
 const CONFORMANCE_CASES: &[Case<ConformanceState>] = &[
     Case::new("conformance::filtering_and_listing", filtering_and_listing),
     Case::new(
+        "conformance::generated_registry_lists_nested_marker_case",
+        generated_registry_lists_nested_marker_case,
+    ),
+    Case::new(
         "conformance::environment_cleanup_restore_errors_are_contextual",
         environment_cleanup_restore_errors_are_contextual,
     ),
@@ -117,7 +123,7 @@ const BYTECODE_FIXTURE_CASES: &[Case<BytecodeFixtureState>] = &[Case::new(
     fixture_read_only_bytecode_cache,
 )];
 
-const FULL_UI_CASES: &[Case<WowLuaEnv>] = &[
+const MANUAL_FULL_UI_CASES: &[Case<WowLuaEnv>] = &[
     Case::new(
         "test_keybindings_panels_detail::keybind_m_opens_world_map",
         test_keybindings_panels_detail::keybind_m_opens_world_map,
@@ -155,6 +161,17 @@ const FULL_UI_CASES: &[Case<WowLuaEnv>] = &[
         test_keybindings_panels_detail::world_map_registers_fog_of_war_pin_template_as_fog_of_war_frame,
     ),
 ];
+
+const GENERATED_FULL_UI_CASES: &[Case<WowLuaEnv>] =
+    include!(concat!(env!("OUT_DIR"), "/prefork_full_ui_cases.rs"));
+
+fn full_ui_cases() -> Vec<Case<WowLuaEnv>> {
+    MANUAL_FULL_UI_CASES
+        .iter()
+        .chain(GENERATED_FULL_UI_CASES)
+        .map(|case| Case::new(case.name, case.test))
+        .collect()
+}
 
 const FIXTURE_CASES: &[Case<FixtureState>] = &[
     Case::new("alpha::one", fixture_pass),
@@ -196,7 +213,8 @@ fn main() -> ExitCode {
         child_setup: wow_ui_sim::loader::enter_bytecode_cache_read_only_mode,
         ..Config::default()
     };
-    prefork::run_with_setup(FULL_UI_CASES, config, || {
+    let full_ui_cases = full_ui_cases();
+    prefork::run_with_setup(&full_ui_cases, config, || {
         run_conformance_subprocess()?;
         prefork_full_ui_preload::preload_full_game_ui()
     })
@@ -571,6 +589,24 @@ fn filtering_and_listing(state: &ConformanceState) {
     assert!(
         !zero_match_marker.exists(),
         "zero-match execution must not invoke expensive state setup"
+    );
+}
+
+fn generated_registry_lists_nested_marker_case(state: &ConformanceState) {
+    const CASE_NAME: &str =
+        "prefork_full_ui_nested::fixture::preloaded_parent_has_normal_game_startup";
+    let output = Command::new(&state.executable)
+        .args(["--list", CASE_NAME, "--exact"])
+        .env_remove(CONFORMANCE_MODE_ENV)
+        .env_remove(DRIVER_MODE_ENV)
+        .env_remove(TREE_CHILD_MODE_ENV)
+        .output()
+        .expect("list generated prefork registry case");
+
+    assert_success(&output);
+    assert_eq!(
+        stdout(&output),
+        format!("{CASE_NAME}: test\n\n1 test, 0 benchmarks\n")
     );
 }
 
