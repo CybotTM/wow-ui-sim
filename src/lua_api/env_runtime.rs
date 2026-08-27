@@ -71,6 +71,11 @@ impl WowLuaEnv {
         app_data.font_system = Some(font_system);
     }
 
+    pub(crate) fn install_initial_screen_size_globals(&self) {
+        let state = self.state.borrow();
+        install_screen_size_globals(self, state.screen_width, state.screen_height);
+    }
+
     /// Update screen dimensions in SimState and resize UIParent/WorldFrame to match.
     pub fn set_screen_size(&self, width: f32, height: f32) {
         {
