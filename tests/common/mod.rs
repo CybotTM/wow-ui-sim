@@ -6,6 +6,10 @@ pub mod blizzard_addon_manifest;
 mod event_helpers;
 pub mod game_menu_fixture;
 pub mod panel_fixtures;
+#[cfg(target_os = "linux")]
+mod prefork_process;
+#[cfg(target_os = "linux")]
+mod timeout_reexec;
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -13,8 +17,14 @@ use std::sync::{Mutex, MutexGuard, OnceLock};
 use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-/// Per-test timeout. Exits the process if the closure doesn't complete within `secs`.
+/// Run a test closure with a per-call timeout.
 /// Default 120s — enough for full Blizzard UI load + test logic.
+#[cfg(target_os = "linux")]
+pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
+    timeout_reexec::run(secs, f);
+}
+
+#[cfg(not(target_os = "linux"))]
 pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
     let (tx, rx) = std::sync::mpsc::channel();
     let handle = std::thread::spawn(move || {
@@ -24,15 +34,10 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
     match rx.recv_timeout(std::time::Duration::from_secs(secs)) {
         Ok(()) => handle.join().expect("test thread panicked"),
         Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
-            eprintln!("test timed out after {secs}s");
-            std::process::exit(1);
+            panic!("test timed out after {secs}s")
         }
         Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
-            handle
-                .join()
-                .expect_err("test thread panicked but join succeeded");
-            eprintln!("test thread panicked (see above)");
-            std::process::exit(1);
+            handle.join().expect("test thread panicked")
         }
     }
 }

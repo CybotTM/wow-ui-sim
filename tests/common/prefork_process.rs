@@ -1,5 +1,7 @@
 use std::io;
 use std::os::fd::{AsRawFd, FromRawFd, OwnedFd, RawFd};
+use std::os::unix::process::CommandExt;
+use std::process::Command;
 
 const SETUP_READY: u8 = 0;
 const SETUP_FAILED: u8 = 1;
@@ -63,7 +65,10 @@ pub(super) fn establish_child_process_group(setup_fd: RawFd) -> Result<(), Strin
     Ok(())
 }
 
-pub(super) fn verify_and_release_child(pid: libc::pid_t, setup_fd: OwnedFd) -> Result<(), String> {
+pub(super) fn verify_and_release_child(
+    pid: libc::pid_t,
+    setup_fd: OwnedFd,
+) -> Result<(), String> {
     await_child_process_group(pid, &setup_fd)?;
     verify_child_process_group(pid)?;
     send_all_socket(
@@ -71,6 +76,17 @@ pub(super) fn verify_and_release_child(pid: libc::pid_t, setup_fd: OwnedFd) -> R
         &[SETUP_RELEASE],
         "release child setup",
     )
+}
+
+pub(super) fn configure_command_process_group(command: &mut Command) {
+    unsafe {
+        command.pre_exec(|| {
+            if libc::setpgid(0, 0) == -1 {
+                return Err(io::Error::last_os_error());
+            }
+            Ok(())
+        });
+    }
 }
 
 pub(super) fn signal_process_group(pid: libc::pid_t, signal: i32) -> Result<(), String> {

@@ -1,7 +1,4 @@
-#[path = "prefork_process.rs"]
-mod prefork_process;
-
-use self::prefork_process::{
+use crate::common::prefork_process::{
     Pipe, create_pipe, create_setup_socket, establish_child_process_group,
     kill_process_group_and_child, prepare_capture_pipe, reap_child, signal_process_group,
     terminate_and_reap_child, verify_and_release_child,
