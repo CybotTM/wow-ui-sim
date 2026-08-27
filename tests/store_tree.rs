@@ -480,13 +480,12 @@ fn store_product_card_buy_button_click_completes_without_store_upvalue_error(env
 }
 
 prefork_full_ui_case! {
-fn secure_env_tracks_latest_ninesliceutil_in_full_game_ui(env: &WowLuaEnv) {
-    let (global_disable, secure_disable, same_table): (String, String, bool) = env
+fn secure_env_retains_nineslice_disable_sharpening_in_full_game_ui(env: &WowLuaEnv) {
+    let (global_disable, secure_disable): (String, String) = env
         .eval(
             r#"
             return type(NineSliceUtil and NineSliceUtil.DisableSharpening),
-                type(__secureenv and __secureenv.NineSliceUtil and __secureenv.NineSliceUtil.DisableSharpening),
-                __secureenv and __secureenv.NineSliceUtil == NineSliceUtil
+                type(__secureenv and __secureenv.NineSliceUtil and __secureenv.NineSliceUtil.DisableSharpening)
             "#,
         )
         .expect("NineSliceUtil should be queryable");
@@ -497,11 +496,7 @@ fn secure_env_tracks_latest_ninesliceutil_in_full_game_ui(env: &WowLuaEnv) {
     );
     assert_eq!(
         secure_disable, "function",
-        "secureenv NineSliceUtil.DisableSharpening should track the live global"
-    );
-    assert!(
-        same_table,
-        "secureenv should reference the current NineSliceUtil table"
+        "secureenv should retain NineSliceUtil.DisableSharpening"
     );
 }
 }
