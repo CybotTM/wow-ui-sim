@@ -1,3 +1,7 @@
+## [2026-08-27] system | Migrate SpellSearch and post-start explicit/LoD cases
+
+Audited commits `e05310123` and `054067c53`. Updated [[prefork-test-harness]] and its index summary: 15 SpellSearch cases now explicitly load `Blizzard_SpellSearch` in each child after normal preload; 96 additional post-start explicit/LoadOnDemand cases across ten modules use borrowed-environment child setup with dependency order preserved. Generated-registry conformance totals 111 cases including SpellSearch; the `is_addon_loaded` behavior filter passed 106/106, and no orphan processes remained. Pre-start or otherwise behaviorally non-equivalent custom fixtures remain excluded pending separate proof. The generated ordinary full-UI aggregate is 1,591 cases (1,480 + 15 + 96), while manual and fixture/conformance cases remain separately categorized.
+
 ## [2026-08-27] system | Generate prefork full-UI case registry
 
 Audited commit `fe0d8f5a1`. Updated [[prefork-test-harness]] and the prefork spec to document explicit `prefork_full_ui_case!` marker bodies, `syn`/`quote` build-generated stable `<module>::<function>` registration, generated integration-tree reuse for mixed modules, and the nested registry/preloaded-startup fixture. The current registry contains 12 full-UI cases: 9 manual keybinding cases, 2 behavioral-messaging cases, and 1 nested fixture. Remaining eligible normal-retail full-environment tests are not yet migrated. The existing index entry remains current; no index change was needed.
