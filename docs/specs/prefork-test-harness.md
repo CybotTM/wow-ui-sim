@@ -40,10 +40,10 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 ### Final coverage and eligibility
 
-- [x] List 1,946 cases in the dedicated default-retail prefork target: 1,936 migrated full-environment cases and 10 manual/nested prefork cases.
-- [x] Audit all 309 remaining ordinary startup-like tests and confirm zero eligible cases remain for the finalized shared parent preload.
-- [x] Classify exclusions exactly: 75 pre-start custom fixtures; 9 non-equivalent lifecycle fixtures; 211 partial/custom/glue/render/thread-sensitive fixtures; 5 owned-timeout fixtures; 7 profile-specific fixtures; 1 post-drop global-state fixture; and 1 version-specific fixture.
-- [x] Preserve exclusion rationale: the finalized parent is incompatible with the 75 pre-start and 9 lifecycle cases, while the 211 setup-family cases use partial/custom, alternate-screen, render-sensitive, or thread-sensitive state that is not normal-retail startup.
+- [x] List 1,951 cases in the dedicated default-retail prefork target: 1,941 migrated full-environment cases and 10 manual/nested prefork cases.
+- [x] Audit all 304 remaining ordinary startup-like tests and confirm zero eligible cases remain for the finalized shared parent preload.
+- [x] Classify exclusions exactly: 15 alternate-screen; 9 non-equivalent lifecycle; 113 partial custom; 13 partial domain; 3 partial template; 55 partial thread-sensitive; 1 post-drop global state; 75 pre-start custom; 7 profile-specific; 12 render custom; and 1 version-specific.
+- [x] Preserve exclusion rationale: the finalized parent is incompatible with the 75 pre-start and 9 lifecycle cases, while the remaining partial/custom, alternate-screen, render-sensitive, and thread-sensitive cases are not normal-retail startup; the five migrated timeout-wrapped cases now run as prefork children with the same 120-second timeout and process-tree cleanup.
 
 ### Bytecode-cache child contract
 
@@ -99,7 +99,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Migrate the initial nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
 - [x] Add the two behavioral-messaging cases and one nested registry/preloaded-startup fixture.
 - [x] Benchmark the parent-bypass prefork execution against the retained current in-target baseline.
-- [x] Migrate every eligible normal-retail full-environment test and complete the final 309-test ordinary startup-like eligibility audit.
+- [x] Migrate every eligible normal-retail full-environment test and complete the final 304-test ordinary startup-like eligibility audit.
 
 ## Out of scope
 

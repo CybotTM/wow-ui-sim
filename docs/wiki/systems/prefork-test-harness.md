@@ -22,13 +22,13 @@ The target enters parent-bypass mode, then builds one 1024x768 default-retail ga
 
 `build.rs` parses explicit `prefork_full_ui_case! { fn name(env: &WowLuaEnv) { ... } }` items with `syn` and renders one registry with `quote`. Registry names are stable `<module>::<function>` paths. The prefork target includes the generated integration module tree, so mixed modules keep unmarked tests under libtest while marked bodies are registered only in the prefork runner. The patch-manifest validator accepts these generated marker cases as test references alongside ordinary `#[test]` functions. The nested fixture `prefork_full_ui_nested::fixture::preloaded_parent_has_normal_game_startup` proves both nested registry resolution and observable inherited Game startup state.
 
-After startup succeeds, enabled-cache sealing verifies that cache state was not initialized or populated, marks that state initialized with empty values/index, and records `pack.bin` existence without reading its contents. Disabled caching skips sealing as a successful no-op. The immutable parent snapshot backs each registered case, one child per case, with 120-second timeouts and read-only bytecode-cache child setup. The initial nine-case benchmark below predates the registry expansion.
+After startup succeeds, enabled-cache sealing verifies that cache state was not initialized or populated, marks that state initialized with empty values/index, and records `pack.bin` existence without reading its contents. Disabled caching skips sealing as a successful no-op. The immutable parent snapshot backs each registered case, one child per case, with 120-second timeouts and read-only bytecode-cache child setup. Timeout handling still cleans up the whole child process tree. The initial nine-case benchmark below predates the registry expansion.
 
-The final eligibility audit records 1,946 tests in the dedicated default-retail prefork target: 1,936 migrated full-environment cases and 10 manual/nested prefork cases. The ordinary startup-like scan found 309 remaining tests and zero eligible cases for the finalized shared parent. Final audit artifacts are `/tmp/prefork-final-eligibility.json` and `/tmp/prefork-final-registry-list.txt`; see [Final eligibility classification](#final-eligibility-classification) for rationale without duplicating all 309 rows.
+The final eligibility audit records 1,951 tests in the dedicated default-retail prefork target: 1,941 migrated full-environment cases and 10 manual/nested prefork cases. The ordinary startup-like scan found 304 remaining tests and zero eligible cases for the finalized shared parent. Final audit artifacts are `/tmp/prefork-final-eligibility.json` and `/tmp/prefork-final-registry-list.txt`; see [Final eligibility classification](#final-eligibility-classification) for rationale without duplicating all 304 rows.
 
 ## Final eligibility classification
 
-The 309 ordinary startup-like tests are all excluded, with exact counts from `/tmp/prefork-final-eligibility.json`:
+The 304 ordinary startup-like tests are all excluded, with exact counts from `/tmp/prefork-final-eligibility.json`:
 
 | Category | Count | Rationale |
 |---|---:|---|
@@ -40,12 +40,11 @@ The 309 ordinary startup-like tests are all excluded, with exact counts from `/t
 | Partial thread-sensitive fixture | 55 | Custom keybinding/panel fixture seams, events, or environment locking differ from normal preload. |
 | Alternate screen | 15 | Glue Login/CharacterSelect/CharacterCreate startup is not the normal Game-screen parent. |
 | Render custom fixture | 12 | Render-sensitive fixture uses a custom startup lifecycle. |
-| Owned-timeout fixture | 5 | `test_timeout!` requires an owned `Send + 'static` environment, not borrowed prefork state. |
 | Profile-specific | 7 | PTR/Mists-specific coverage remains ordinary libtest. |
 | Post-drop global state | 1 | Assertion depends on process-global state after dropping the environment. |
 | Version-specific | 1 | Patch-version-gated coverage remains ordinary libtest. |
 
-The exclusion boundary is deliberate: 75 pre-start cases and 9 lifecycle cases cannot use the finalized parent snapshot, while 211 partial/custom/glue/render/thread-sensitive setup-family cases are not normal-retail startup. The remaining 14 cases are owned-timeout (5), profile-specific (7), post-drop global-state (1), or version-specific (1). Counts sum to 309; `eligible_remaining` is zero.
+The exclusion boundary is deliberate: 75 pre-start cases and 9 lifecycle cases cannot use the finalized parent snapshot, while 211 partial/custom/glue/render/thread-sensitive setup-family cases are not normal-retail startup. The remaining 9 cases are profile-specific (7), post-drop global-state (1), or version-specific (1). Counts sum to 304; `eligible_remaining` is zero.
 
 Earlier SpellSearch, explicit, housing, and generic post-start batches use borrowed-environment child setup only where their load ordering matches the finalized parent contract. `Blizzard_SharedMapDataProviders` remains excluded because its nine-case fixture loads before post-load workarounds and omits startup events. Two PTR-only GuildBank/ItemUpgrade tests remain ordinary libtest with profile-specific full startup.
 
