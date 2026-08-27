@@ -163,9 +163,8 @@ fn blizzard_frame_xml_auto_loads_on_game_and_skips_login() {
     );
 }
 
-#[test]
-fn blizzard_frame_xml_loads_via_full_game_ui_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_loads_via_full_game_ui_without_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -184,10 +183,10 @@ fn blizzard_frame_xml_loads_via_full_game_ui_without_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_is_addon_loaded_returns_true_after_full_game_ui_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_is_addon_loaded_returns_true_after_full_game_ui_load(env: &WowLuaEnv) {
 
     let post_load: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_FrameXML') and true or false")
@@ -199,10 +198,10 @@ fn blizzard_frame_xml_is_addon_loaded_returns_true_after_full_game_ui_load() {
          and `mark_addon_loaded` registers it"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_publishes_canonical_top_level_singleton_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_publishes_canonical_top_level_singleton_frames(env: &WowLuaEnv) {
 
     let singletons_present: (bool, bool, bool, bool, bool, bool, bool) = env
         .eval(
@@ -234,10 +233,10 @@ fn blizzard_frame_xml_publishes_canonical_top_level_singleton_frames() {
          mixin=TalkingHeadFrameMixin, the NPC dialog overlay)"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_publishes_secondary_top_level_singleton_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_publishes_secondary_top_level_singleton_frames(env: &WowLuaEnv) {
 
     let singletons_present: (bool, bool, bool, bool, bool) = env
         .eval(
@@ -264,10 +263,10 @@ fn blizzard_frame_xml_publishes_secondary_top_level_singleton_frames() {
          resolution"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_publishes_canonical_alert_and_panel_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_publishes_canonical_alert_and_panel_mixins(env: &WowLuaEnv) {
 
     let mixins_present: (bool, bool, bool, bool, bool, bool, bool) = env
         .eval(
@@ -295,10 +294,10 @@ fn blizzard_frame_xml_publishes_canonical_alert_and_panel_mixins() {
          SplashFrameMixin (SplashFrame — expansion-feature splash driver)"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_publishes_canonical_overlay_and_toast_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_publishes_canonical_overlay_and_toast_mixins(env: &WowLuaEnv) {
 
     let mixins_present: (bool, bool, bool, bool, bool, bool, bool) = env
         .eval(
@@ -327,10 +326,10 @@ fn blizzard_frame_xml_publishes_canonical_overlay_and_toast_mixins() {
          retired)"
     );
 }
+}
 
-#[test]
-fn earning_achievement_displays_achievement_alert_toast() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn earning_achievement_displays_achievement_alert_toast(env: &WowLuaEnv) {
     wow_ui_sim::startup::run_extra_update_ticks(&env, 1);
 
     let result: String = env
@@ -366,10 +365,10 @@ fn earning_achievement_displays_achievement_alert_toast() {
         "earning achievement 6 should display one visible achievement alert toast with the achievement name"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_publishes_equipment_manager_inventory_and_bag_slot_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_publishes_equipment_manager_inventory_and_bag_slot_tables(env: &WowLuaEnv) {
 
     let tables_present: (bool, bool) = env
         .eval(
@@ -390,10 +389,10 @@ fn blizzard_frame_xml_publishes_equipment_manager_inventory_and_bag_slot_tables(
          attempted"
     );
 }
+}
 
-#[test]
-fn equipment_manager_free_space_update_handles_bank_tab_count() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn equipment_manager_free_space_update_handles_bank_tab_count(env: &WowLuaEnv) {
 
     let last_bag_slot: i32 = env
         .eval(
@@ -407,10 +406,10 @@ fn equipment_manager_free_space_update_handles_bank_tab_count() {
          the bank API must return a non-nil numeric tab count"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_publishes_alert_frame_subsystem_derivative_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_publishes_alert_frame_subsystem_derivative_mixins(env: &WowLuaEnv) {
 
     let derived_mixins: (bool, bool, bool) = env
         .eval(
@@ -433,10 +432,10 @@ fn blizzard_frame_xml_publishes_alert_frame_subsystem_derivative_mixins() {
          table must also publish for the inheritance chain to resolve"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_top_level_singleton_default_visibility_matches_xml() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_top_level_singleton_default_visibility_matches_xml(env: &WowLuaEnv) {
 
     let visibility: (bool, bool, bool, bool, bool, bool) = env
         .eval(
@@ -460,4 +459,5 @@ fn blizzard_frame_xml_top_level_singleton_default_visibility_matches_xml() {
          player-death). Any of these summoning automatically would block player input \
          on every login"
     );
+}
 }

@@ -153,9 +153,8 @@ fn blizzard_frame_xml_base_auto_loads_on_game_and_skips_login() {
     );
 }
 
-#[test]
-fn blizzard_frame_xml_base_loads_via_full_game_ui_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_loads_via_full_game_ui_without_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -181,10 +180,10 @@ fn blizzard_frame_xml_base_loads_via_full_game_ui_without_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_is_addon_loaded_returns_true_after_full_game_ui_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_is_addon_loaded_returns_true_after_full_game_ui_load(env: &WowLuaEnv) {
 
     let post_load: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_FrameXMLBase') and true or false")
@@ -196,10 +195,10 @@ fn blizzard_frame_xml_base_is_addon_loaded_returns_true_after_full_game_ui_load(
          `mark_addon_loaded` registers it"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_status_bar_and_data_provider_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_status_bar_and_data_provider_mixins(env: &WowLuaEnv) {
 
     let mixins: (bool, bool, bool, bool) = env
         .eval(
@@ -223,10 +222,10 @@ fn blizzard_frame_xml_base_publishes_status_bar_and_data_provider_mixins() {
          connector line widget with connected/disconnected/locked states)"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_inventory_slot_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_inventory_slot_constants(env: &WowLuaEnv) {
 
     let slots: (i64, i64, i64, i64, i64, i64) = env
         .eval(
@@ -258,10 +257,10 @@ fn blizzard_frame_xml_base_publishes_inventory_slot_constants() {
          slots that can be equipped in combat — head/chest/etc. are NOT in the set"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_class_sort_order_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_class_sort_order_constants(env: &WowLuaEnv) {
 
     let class_count: (bool, i64, bool, bool) = env
         .eval(
@@ -292,10 +291,10 @@ fn blizzard_frame_xml_base_publishes_class_sort_order_constants() {
          after addon load"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_bag_slot_constants_from_constants_namespace() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_bag_slot_constants_from_constants_namespace(env: &WowLuaEnv) {
 
     let bag: (bool, bool, bool) = env
         .eval(
@@ -314,14 +313,14 @@ fn blizzard_frame_xml_base_publishes_bag_slot_constants_from_constants_namespace
          chain is wired correctly"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_loot_and_item_location_bitflags() {
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_loot_and_item_location_bitflags(env: &WowLuaEnv) {
     const ITEM_INVENTORY_LOCATION_PLAYER: i64 = 0x00100000;
     const ITEM_INVENTORY_LOCATION_BAGS: i64 = 0x00200000;
     const ITEM_INVENTORY_LOCATION_BANK: i64 = 0x00400000;
 
-    let env = load_full_game_ui();
 
     let flags: (i64, i64, i64, i64, i64, i64, i64) = env
         .eval(
@@ -347,10 +346,10 @@ fn blizzard_frame_xml_base_publishes_loot_and_item_location_bitflags() {
          serializer"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_totem_priority_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_totem_priority_tables(env: &WowLuaEnv) {
 
     let totems: (i64, i64, i64, i64, i64) = env
         .eval(
@@ -380,10 +379,10 @@ fn blizzard_frame_xml_base_publishes_totem_priority_tables() {
          SHAMAN_TOTEM_PRIORITIES[1] == EARTH_TOTEM_SLOT == 2 (shamans see earth first)"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_quest_difficulty_color_table() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_quest_difficulty_color_table(env: &WowLuaEnv) {
 
     let colors: (bool, bool, bool, bool) = env
         .eval(
@@ -418,10 +417,10 @@ fn blizzard_frame_xml_base_publishes_quest_difficulty_color_table() {
         impossible_color
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_frame_lock_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_frame_lock_globals(env: &WowLuaEnv) {
 
     let frame_lock_api: (bool, bool, bool, bool, bool, bool, bool) = env
         .eval(
@@ -462,10 +461,10 @@ fn blizzard_frame_xml_base_publishes_frame_lock_globals() {
          desired states"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_flow_container_helpers() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_flow_container_helpers(env: &WowLuaEnv) {
 
     let flow_container: (bool, bool, bool, bool, bool) = env
         .eval(
@@ -485,10 +484,10 @@ fn blizzard_frame_xml_base_publishes_flow_container_helpers() {
          (horizontal/vertical), SetMaxPerLine (cap)"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_html_and_spec_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_html_and_spec_constants(env: &WowLuaEnv) {
 
     let html: (String, String, String) = env
         .eval("return HTML_START, HTML_START_CENTERED, HTML_END")
@@ -516,10 +515,10 @@ fn blizzard_frame_xml_base_publishes_html_and_spec_constants() {
          Drives every talent-tab switching path in the UI"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_animated_status_bar_template() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_animated_status_bar_template(env: &WowLuaEnv) {
 
     let templates: (bool, bool) = env
         .eval(
@@ -536,10 +535,10 @@ fn blizzard_frame_xml_base_publishes_animated_status_bar_template() {
          OnUpdate snaps the bar back to its base values"
     );
 }
+}
 
-#[test]
-fn blizzard_frame_xml_base_publishes_max_raid_member_constants_from_shared() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_frame_xml_base_publishes_max_raid_member_constants_from_shared(env: &WowLuaEnv) {
 
     let raid: (i64, i64, i64) = env
         .eval("return MAX_RAID_MEMBERS, NUM_RAID_GROUPS, MEMBERS_PER_RAID_GROUP")
@@ -551,4 +550,5 @@ fn blizzard_frame_xml_base_publishes_max_raid_member_constants_from_shared() {
          MEMBERS_PER_RAID_GROUP=5. The TOC's `Shared\\Constants.lua` line ensures these \
          are loaded — confirms the Mainline-vs-Shared subdir resolution works"
     );
+}
 }

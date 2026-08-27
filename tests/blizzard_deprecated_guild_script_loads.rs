@@ -100,9 +100,8 @@ fn blizzard_deprecated_guild_script_appears_in_game_discovery_only() {
     );
 }
 
-#[test]
-fn blizzard_deprecated_guild_script_loads_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_guild_script_loads_without_errors(env: &WowLuaEnv) {
 
     let addon_errors: Vec<String> = env
         .state()
@@ -120,10 +119,10 @@ fn blizzard_deprecated_guild_script_loads_without_errors() {
         addon_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_guild_script_installs_guild_management_function_shims() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_guild_script_installs_guild_management_function_shims(env: &WowLuaEnv) {
 
     let installed: bool = env
         .eval(
@@ -150,10 +149,10 @@ fn blizzard_deprecated_guild_script_installs_guild_management_function_shims() {
          alias becomes a callable no-op, not nil"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_guild_script_installs_guild_text_function_shims() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_guild_script_installs_guild_text_function_shims(env: &WowLuaEnv) {
 
     let installed: bool = env
         .eval(
@@ -192,10 +191,10 @@ fn blizzard_deprecated_guild_script_installs_guild_text_function_shims() {
          C_GuildInfo._textState.infoText (runtime_surface_bootstrap.lua:8822), not empty"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_guild_script_globals_alias_c_guild_info_methods() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_guild_script_globals_alias_c_guild_info_methods(env: &WowLuaEnv) {
 
     let aliases_match: bool = env
         .eval(
@@ -222,10 +221,10 @@ fn blizzard_deprecated_guild_script_globals_alias_c_guild_info_methods() {
          invariant — confirms both sides see the same value object"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_guild_script_load_deprecation_fallbacks_cvar_is_default_on() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_guild_script_load_deprecation_fallbacks_cvar_is_default_on(env: &WowLuaEnv) {
 
     let cvar_on: bool = env
         .eval("return GetCVarBool('loadDeprecationFallbacks')")
@@ -238,6 +237,7 @@ fn blizzard_deprecated_guild_script_load_deprecation_fallbacks_cvar_is_default_o
          and any legacy guild-management addon calling GuildInvite / GuildPromote / \
          GetGuildRosterMOTD / etc. blows up with `attempt to call a nil value`"
     );
+}
 }
 
 #[test]

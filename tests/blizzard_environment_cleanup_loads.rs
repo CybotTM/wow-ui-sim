@@ -226,9 +226,8 @@ fn blizzard_environment_cleanup_loads_after_all_six_mainline_dependencies() {
     }
 }
 
-#[test]
-fn blizzard_environment_cleanup_loads_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_environment_cleanup_loads_without_errors(env: &WowLuaEnv) {
 
     let addon_errors: Vec<String> = env
         .state()
@@ -244,10 +243,10 @@ fn blizzard_environment_cleanup_loads_without_errors() {
         addon_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_environment_cleanup_is_addon_loaded_returns_true() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_environment_cleanup_is_addon_loaded_returns_true(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_EnvironmentCleanup') and true or false")
@@ -258,13 +257,13 @@ fn blizzard_environment_cleanup_is_addon_loaded_returns_true() {
          addon auto-loads on the Game screen"
     );
 }
+}
 
-#[test]
-fn blizzard_environment_cleanup_secure_namespaces_get_restored_post_load() {
+prefork_full_ui_case! {
+fn blizzard_environment_cleanup_secure_namespaces_get_restored_post_load(env: &WowLuaEnv) {
     // EnvironmentCleanup.lua nils these secure-only namespaces. The simulator's per-addon
     // hook immediately restores its runtime bootstrap surface so later Blizzard addons and
     // full startup can still invoke them.
-    let env = load_full_game_ui();
 
     let restored: (bool, bool, bool, bool) = env
         .eval(
@@ -282,9 +281,10 @@ fn blizzard_environment_cleanup_secure_namespaces_get_restored_post_load() {
          the rest of startup can invoke those namespaces"
     );
 }
+}
 
-#[test]
-fn blizzard_environment_cleanup_removes_secure_helpers_before_restoring_delegate() {
+prefork_full_ui_case! {
+fn blizzard_environment_cleanup_removes_secure_helpers_before_restoring_delegate(env: &WowLuaEnv) {
     let cleanup_env = execute_environment_cleanup_source_without_restore();
     let removed: (bool, bool, bool, bool, bool, bool, bool) = cleanup_env
         .eval(
@@ -304,7 +304,6 @@ fn blizzard_environment_cleanup_removes_secure_helpers_before_restoring_delegate
          post-load restoration hook runs"
     );
 
-    let env = load_full_game_ui();
     let create_secure_delegate_restored: bool = env
         .eval("return type(CreateSecureDelegate) == 'function'")
         .expect("CreateSecureDelegate probe should succeed");
@@ -313,6 +312,7 @@ fn blizzard_environment_cleanup_removes_secure_helpers_before_restoring_delegate
         "Full startup must restore CreateSecureDelegate through the explicit \
          EnvironmentCleanup post-load workaround"
     );
+}
 }
 
 #[test]

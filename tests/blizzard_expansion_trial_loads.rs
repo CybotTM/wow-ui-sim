@@ -138,9 +138,8 @@ fn blizzard_expansion_trial_is_absent_from_auto_discovery_on_game_and_login() {
     );
 }
 
-#[test]
-fn blizzard_expansion_trial_loads_via_load_addon_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_expansion_trial_loads_via_load_addon_without_errors(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -171,10 +170,10 @@ fn blizzard_expansion_trial_loads_via_load_addon_without_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_expansion_trial_is_addon_loaded_returns_true_after_explicit_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_expansion_trial_is_addon_loaded_returns_true_after_explicit_load(env: &WowLuaEnv) {
 
     let pre_load: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_ExpansionTrial') and true or false")
@@ -198,10 +197,10 @@ fn blizzard_expansion_trial_is_addon_loaded_returns_true_after_explicit_load() {
          the loaded-set"
     );
 }
+}
 
-#[test]
-fn blizzard_expansion_trial_check_point_dialog_singleton_publishes_with_correct_parent() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_expansion_trial_check_point_dialog_singleton_publishes_with_correct_parent(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &expansion_trial_toc())
         .expect("Blizzard_ExpansionTrial should load via Rust loader");
 
@@ -224,10 +223,10 @@ fn blizzard_expansion_trial_check_point_dialog_singleton_publishes_with_correct_
          and `:GetParent()` is UIParent"
     );
 }
+}
 
-#[test]
-fn blizzard_expansion_trial_mixin_publishes_four_dialog_type_enum_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_expansion_trial_mixin_publishes_four_dialog_type_enum_constants(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &expansion_trial_toc())
         .expect("Blizzard_ExpansionTrial should load via Rust loader");
 
@@ -249,10 +248,10 @@ fn blizzard_expansion_trial_mixin_publishes_four_dialog_type_enum_constants() {
          using these IDs to dispatch the four UI configurators"
     );
 }
+}
 
-#[test]
-fn blizzard_expansion_trial_mixin_inherits_base_expandable_dialog_methods() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_expansion_trial_mixin_inherits_base_expandable_dialog_methods(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &expansion_trial_toc())
         .expect("Blizzard_ExpansionTrial should load via Rust loader");
 
@@ -273,10 +272,10 @@ fn blizzard_expansion_trial_mixin_inherits_base_expandable_dialog_methods() {
          `Blizzard_SharedXML/SharedBasicControls.lua:69` and provides both methods"
     );
 }
+}
 
-#[test]
-fn blizzard_expansion_trial_dialog_publishes_six_parent_key_children() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_expansion_trial_dialog_publishes_six_parent_key_children(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &expansion_trial_toc())
         .expect("Blizzard_ExpansionTrial should load via Rust loader");
 
@@ -304,10 +303,10 @@ fn blizzard_expansion_trial_dialog_publishes_six_parent_key_children() {
          absorbs mouse+keyboard during the modal, xml:90)"
     );
 }
+}
 
-#[test]
-fn blizzard_expansion_trial_gained_level_container_inherits_virtual_template_layers() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_expansion_trial_gained_level_container_inherits_virtual_template_layers(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &expansion_trial_toc())
         .expect("Blizzard_ExpansionTrial should load via Rust loader");
 
@@ -333,10 +332,10 @@ fn blizzard_expansion_trial_gained_level_container_inherits_virtual_template_lay
          template-inheritance pipeline"
     );
 }
+}
 
-#[test]
-fn blizzard_expansion_trial_dialog_starts_hidden_after_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_expansion_trial_dialog_starts_hidden_after_load(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &expansion_trial_toc())
         .expect("Blizzard_ExpansionTrial should load via Rust loader");
 
@@ -352,4 +351,5 @@ fn blizzard_expansion_trial_dialog_starts_hidden_after_load() {
          `upgradingFromExpansionTrial`). Auto-showing on load would block the entire UI \
          behind the EatAllInput modal"
     );
+}
 }

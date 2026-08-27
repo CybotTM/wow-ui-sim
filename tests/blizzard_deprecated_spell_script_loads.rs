@@ -107,9 +107,8 @@ fn blizzard_deprecated_spell_script_appears_in_game_discovery_only() {
     );
 }
 
-#[test]
-fn blizzard_deprecated_spell_script_loads_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_loads_without_errors(env: &WowLuaEnv) {
 
     let addon_errors: Vec<String> = env
         .state()
@@ -127,10 +126,10 @@ fn blizzard_deprecated_spell_script_loads_without_errors() {
         addon_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_spell_script_installs_four_direct_aliases() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_installs_four_direct_aliases(env: &WowLuaEnv) {
 
     let installed: bool = env
         .eval(
@@ -152,10 +151,10 @@ fn blizzard_deprecated_spell_script_installs_four_direct_aliases() {
          school name string)"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_spell_script_direct_aliases_are_identity_equal_to_c_spell() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_direct_aliases_are_identity_equal_to_c_spell(env: &WowLuaEnv) {
 
     let aliases_match: bool = env
         .eval(
@@ -174,10 +173,10 @@ fn blizzard_deprecated_spell_script_direct_aliases_are_identity_equal_to_c_spell
          cached `function() return nil end` materialized by `__wow_namespace_mt.__index`"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_spell_script_get_spell_queue_window_aliases_share_the_same_closure() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_get_spell_queue_window_aliases_share_the_same_closure(env: &WowLuaEnv) {
 
     let same_closure: bool = env
         .eval("return GetMaxSpellStartRecoveryOffset == GetSpellQueueWindow")
@@ -192,10 +191,10 @@ fn blizzard_deprecated_spell_script_get_spell_queue_window_aliases_share_the_sam
          identity-equal references to that single closure value"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_spell_script_installs_three_wrapper_closures() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_installs_three_wrapper_closures(env: &WowLuaEnv) {
 
     let wrappers_installed: bool = env
         .eval(
@@ -217,10 +216,10 @@ fn blizzard_deprecated_spell_script_installs_three_wrapper_closures() {
          the temporary C_Spell.GetVisibilityInfo visibility shim)"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_spell_script_wrapper_closures_are_not_identity_equal_to_c_spell() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_wrapper_closures_are_not_identity_equal_to_c_spell(env: &WowLuaEnv) {
 
     let not_identity_equal: bool = env
         .eval(
@@ -238,10 +237,10 @@ fn blizzard_deprecated_spell_script_wrapper_closures_are_not_identity_equal_to_c
          function values from the registered Rust impls"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_spell_script_visibility_wrapper_translates_string_keys() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_visibility_wrapper_translates_string_keys(env: &WowLuaEnv) {
 
     let translated: bool = env
         .eval(
@@ -263,10 +262,10 @@ fn blizzard_deprecated_spell_script_visibility_wrapper_translates_string_keys() 
          visibility overrides"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_spell_script_installs_get_spell_loss_of_control_cooldown_on_c_spell() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_installs_get_spell_loss_of_control_cooldown_on_c_spell(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(C_Spell.GetSpellLossOfControlCooldown)")
@@ -292,10 +291,10 @@ fn blizzard_deprecated_spell_script_installs_get_spell_loss_of_control_cooldown_
          in-place mutation of the C_Spell namespace ONLY"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_spell_script_loss_of_control_returns_nothing_for_unknown_spell_id() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_loss_of_control_returns_nothing_for_unknown_spell_id(env: &WowLuaEnv) {
 
     let returned_nothing: bool = env
         .eval(
@@ -315,10 +314,10 @@ fn blizzard_deprecated_spell_script_loss_of_control_returns_nothing_for_unknown_
          destructured locals are nil"
     );
 }
+}
 
-#[test]
-fn blizzard_deprecated_spell_script_load_deprecation_fallbacks_cvar_is_default_on() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_deprecated_spell_script_load_deprecation_fallbacks_cvar_is_default_on(env: &WowLuaEnv) {
 
     let cvar_on: bool = env
         .eval("return GetCVarBool('loadDeprecationFallbacks')")
@@ -330,6 +329,7 @@ fn blizzard_deprecated_spell_script_load_deprecation_fallbacks_cvar_is_default_o
          the 7 globals (4 direct aliases + 3 wrappers) and the in-place \
          C_Spell.GetSpellLossOfControlCooldown mutation are applied"
     );
+}
 }
 
 #[test]
