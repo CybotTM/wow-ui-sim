@@ -4,6 +4,8 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
+#[cfg(feature = "client-ptr")]
+use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -103,6 +105,35 @@ const VIRTUAL_TEMPLATE_NAMES: &[&str] = &[
 fn load_item_upgrade_ui(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &item_upgrade_mainline_toc())
         .expect("Blizzard_ItemUpgradeUI_Mainline should load via explicit Rust loader call");
+}
+
+#[cfg(feature = "client-ptr")]
+fn load_full_game_ui_with_item_upgrade_lod() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Game);
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+
+    wow_ui_sim::xml::register_intrinsic_templates();
+
+    let ui = blizzard_ui_dir();
+    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
+    for (name, toc_path) in &addons {
+        load_addon(&env.loader_env(), toc_path)
+            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
+    }
+
+    env.apply_post_load_workarounds();
+    fire_startup_events_for_screen(&env, ScreenKind::Game);
+
+    load_addon(&env.loader_env(), &item_upgrade_mainline_toc())
+        .expect("Blizzard_ItemUpgradeUI_Mainline should load via explicit Rust loader call");
+
+    env
 }
 
 #[test]
@@ -536,9 +567,9 @@ fn blizzard_item_upgrade_publishes_two_free_helper_functions(env: &WowLuaEnv) {
 }
 
 #[cfg(feature = "client-ptr")]
-prefork_full_ui_case! {
-fn ptr_item_upgrade_does_not_publish_reversed_hide_wrapper(env: &WowLuaEnv) {
-    load_item_upgrade_ui(env);
+#[test]
+fn ptr_item_upgrade_does_not_publish_reversed_hide_wrapper() {
+    let env = load_full_game_ui_with_item_upgrade_lod();
 
     let wrapper_is_absent: bool = env
         .eval("return HideItemUpgradeFrame == nil")
@@ -547,7 +578,6 @@ fn ptr_item_upgrade_does_not_publish_reversed_hide_wrapper(env: &WowLuaEnv) {
         wrapper_is_absent,
         "snapshot-only HideItemUpgradeFrame unexpectedly exists after PTR addon load"
     );
-}
 }
 
 prefork_full_ui_case! {

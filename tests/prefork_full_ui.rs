@@ -759,7 +759,7 @@ fn generated_registry_lists_post_start_housing_batch(state: &ConformanceState) {
 fn generated_registry_lists_post_start_generic_batch(state: &ConformanceState) {
     const MODULE_COUNTS: &[(&str, usize)] = &[
         ("blizzard_gm_chat_ui_loads::", 6),
-        ("blizzard_guild_bank_ui_loads::", 8),
+        ("blizzard_guild_bank_ui_loads::", 7),
         ("blizzard_guild_control_ui_loads::", 7),
         ("blizzard_hybrid_minimap_loads::", 7),
         ("blizzard_inspect_ui_loads::", 11),
@@ -767,11 +767,11 @@ fn generated_registry_lists_post_start_generic_batch(state: &ConformanceState) {
         ("blizzard_islands_queue_ui_loads::", 8),
         ("blizzard_item_interaction_ui_loads::", 12),
         ("blizzard_item_socketing_ui_loads::", 10),
-        ("blizzard_item_upgrade_ui_loads::", 15),
+        ("blizzard_item_upgrade_ui_loads::", 14),
         ("blizzard_kiosk_loads::", 12),
         ("blizzard_landing_soulbinds_loads::", 7),
         ("blizzard_macro_ui_loads::", 11),
-        ("blizzard_generic_trait_ui_loads::", 9),
+        ("blizzard_generic_trait_ui_loads::", 12),
         ("blizzard_warfronts_party_pose_ui_loads::", 9),
         ("blizzard_weekly_rewards_loads::", 10),
         ("blizzard_move_pad_loads::", 7),
@@ -803,7 +803,7 @@ fn generated_registry_lists_post_start_generic_batch(state: &ConformanceState) {
         );
         total += actual_count;
     }
-    assert_eq!(total, 158);
+    assert_eq!(total, 159);
 }
 
 fn environment_cleanup_restore_errors_are_contextual(_: &ConformanceState) {
