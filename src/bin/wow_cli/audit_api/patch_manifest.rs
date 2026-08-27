@@ -1128,7 +1128,7 @@ fn validate_test_reference(root: &Path, reference: &str) -> Result<(), String> {
         require_text("test symbol", symbol)?;
         let source = strip_rust_comments(&contents);
         if !defines_rust_test(&source, symbol)? {
-            return Err(format!("test {path} does not define #[test] fn {symbol}"));
+            return Err(format!("test {path} does not define test case {symbol}"));
         }
     }
     Ok(())
@@ -1136,8 +1136,8 @@ fn validate_test_reference(root: &Path, reference: &str) -> Result<(), String> {
 
 fn defines_rust_test(source: &str, symbol: &str) -> Result<bool, String> {
     let escaped = regex::escape(symbol);
-    let pattern = format!(r"^\s*(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?fn\s+{escaped}\s*\(");
-    let definition = Regex::new(&pattern)
+    let function_pattern = format!(r"(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?fn\s+{escaped}\s*\(");
+    let definition = Regex::new(&format!(r"^\s*{function_pattern}"))
         .map_err(|error| format!("invalid test definition pattern: {error}"))?;
     let lines: Vec<&str> = source.lines().collect();
     for (index, line) in lines.iter().enumerate() {
@@ -1145,7 +1145,12 @@ fn defines_rust_test(source: &str, symbol: &str) -> Result<bool, String> {
             return Ok(true);
         }
     }
-    Ok(false)
+
+    let prefork_pattern =
+        format!(r"(?m)^[ \t]*prefork_full_ui_case!\s*\{{\s*(?:#\[[^\n]*\]\s*)*{function_pattern}");
+    Regex::new(&prefork_pattern)
+        .map(|prefork_definition| prefork_definition.is_match(source))
+        .map_err(|error| format!("invalid prefork test definition pattern: {error}"))
 }
 
 fn preceding_attributes_include_test(lines: &[&str]) -> bool {
@@ -2508,6 +2513,24 @@ mod tests {
         let root = Path::new(env!("CARGO_MANIFEST_DIR"));
         assert!(validate_test_reference(root, "tests/not-real.rs::not_real").is_err());
         assert!(validate_commit(root, "0000000000000000000000000000000000000000").is_err());
+    }
+
+    #[test]
+    fn defines_rust_test_accepts_prefork_marker_and_rejects_unmarked_function() {
+        let source = r#"
+#[cfg(feature = "client-retail")]
+
+prefork_full_ui_case! {
+fn migrated(env: &WowLuaEnv) {
+    let _env = env;
+}
+}
+
+fn unmarked(env: &WowLuaEnv) {}
+"#;
+
+        assert!(defines_rust_test(source, "migrated").expect("pattern should compile"));
+        assert!(!defines_rust_test(source, "unmarked").expect("pattern should compile"));
     }
 
     #[test]
