@@ -289,9 +289,8 @@ fn tutorial_manager_dep_directory_exists_on_disk() {
     }
 }
 
-#[test]
-fn full_game_load_publishes_module_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_module_tables(env: &WowLuaEnv) {
 
     for module in MODULE_TABLES {
         let kind: String = env
@@ -310,10 +309,10 @@ fn full_game_load_publishes_module_tables() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_mixins(env: &WowLuaEnv) {
 
     for mixin in MIXINS {
         let kind: String = env
@@ -338,10 +337,10 @@ fn full_game_load_publishes_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_class_subclasses() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_class_subclasses(env: &WowLuaEnv) {
 
     for class in TUTORIAL_CLASSES {
         let kind: String = env
@@ -359,10 +358,10 @@ fn full_game_load_publishes_class_subclasses() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_free_functions() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_free_functions(env: &WowLuaEnv) {
 
     for func in FREE_FUNCTIONS {
         let kind: String = env
@@ -383,10 +382,10 @@ fn full_game_load_publishes_free_functions() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_creates_named_non_virtual_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_creates_named_non_virtual_frames(env: &WowLuaEnv) {
 
     for frame in NAMED_NON_VIRTUAL_FRAMES {
         let exists: bool = env
@@ -407,10 +406,10 @@ fn full_game_load_creates_named_non_virtual_frames() {
         );
     }
 }
+}
 
-#[test]
-fn game_tutorials_initialize_method_exists() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn game_tutorials_initialize_method_exists(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(GameTutorials.Initialize)")
@@ -426,10 +425,10 @@ fn game_tutorials_initialize_method_exists() {
          TutorialManager.TutorialsInit"
     );
 }
+}
 
-#[test]
-fn full_game_load_emits_no_addon_specific_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_emits_no_addon_specific_errors(env: &WowLuaEnv) {
 
     let errors: Vec<String> = env.state().borrow().lua_errors.clone();
     let addon_specific: Vec<&String> = errors
@@ -450,4 +449,5 @@ fn full_game_load_emits_no_addon_specific_errors() {
          must tolerate the simulator's Enum/CVar/C_AddOns/C_Item stubs \
          without raising. Found: {addon_specific:?}"
     );
+}
 }

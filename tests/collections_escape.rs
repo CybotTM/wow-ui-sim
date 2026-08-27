@@ -33,9 +33,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
-#[test]
-fn collections_journal_opened_to_heirlooms_closes_on_escape() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn collections_journal_opened_to_heirlooms_closes_on_escape(env: &WowLuaEnv) {
 
     let (loaded, reason): (bool, Option<String>) = env
         .eval(
@@ -113,4 +112,5 @@ fn collections_journal_opened_to_heirlooms_closes_on_escape() {
         (true, true),
         "ESCAPE should close the real CollectionsJournal without opening GameMenuFrame"
     );
+}
 }

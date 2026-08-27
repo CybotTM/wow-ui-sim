@@ -258,9 +258,8 @@ fn no_addon_declares_transform_manipulator_as_dependency() {
     );
 }
 
-#[test]
-fn full_game_load_publishes_four_mixins_with_expected_method_counts() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_four_mixins_with_expected_method_counts(env: &WowLuaEnv) {
 
     for (mixin, expected_methods) in PUBLISHED_MIXINS {
         let kind: String = env
@@ -301,10 +300,10 @@ fn full_game_load_publishes_four_mixins_with_expected_method_counts() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_no_named_top_level_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_no_named_top_level_frames(env: &WowLuaEnv) {
 
     let template_globals = [
         "RotateControlArrowButtonTemplate",
@@ -329,10 +328,10 @@ fn full_game_load_publishes_no_named_top_level_frames() {
         );
     }
 }
+}
 
-#[test]
-fn published_templates_appear_in_xml_template_registry() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn published_templates_appear_in_xml_template_registry(env: &WowLuaEnv) {
 
     let template_names = [
         "RotateControlArrowButtonTemplate",
@@ -366,6 +365,7 @@ fn published_templates_appear_in_xml_template_registry() {
         "CreateFrame for RotateControlArrowButtonTemplate must yield a \
          FrameRef (type=='table'). Got type={kind}"
     );
+}
 }
 
 #[test]

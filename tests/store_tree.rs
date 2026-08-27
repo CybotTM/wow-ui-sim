@@ -261,9 +261,8 @@ fn store_catalog_exposes_fake_products_after_product_refresh() {
     assert_eq!(first_name, "Apprentice Rider Bundle");
 }
 
-#[test]
-fn store_open_does_not_record_store_state_errors_or_connecting_notice() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn store_open_does_not_record_store_state_errors_or_connecting_notice(env: &WowLuaEnv) {
     let notice: (bool, Option<String>, Option<String>) = env
         .eval(
             r#"
@@ -286,6 +285,7 @@ fn store_open_does_not_record_store_state_errors_or_connecting_notice() {
         "plain store open should not show notice: title={:?} desc={:?}",
         notice.1, notice.2
     );
+}
 }
 
 #[test]
@@ -471,9 +471,8 @@ fn store_catalog_button_slice_geometry_stays_bounded() {
     }
 }
 
-#[test]
-fn store_product_card_buy_button_click_completes_without_store_upvalue_error() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn store_product_card_buy_button_click_completes_without_store_upvalue_error(env: &WowLuaEnv) {
     let result: (bool, Option<String>) = env
         .eval(
             r#"
@@ -506,10 +505,10 @@ fn store_product_card_buy_button_click_completes_without_store_upvalue_error() {
         "store product card buy button click should not record Lua errors: {errors:#?}"
     );
 }
+}
 
-#[test]
-fn secure_env_tracks_latest_ninesliceutil_in_full_game_ui() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn secure_env_tracks_latest_ninesliceutil_in_full_game_ui(env: &WowLuaEnv) {
     let (global_disable, secure_disable, same_table): (String, String, bool) = env
         .eval(
             r#"
@@ -533,10 +532,10 @@ fn secure_env_tracks_latest_ninesliceutil_in_full_game_ui() {
         "secureenv should reference the current NineSliceUtil table"
     );
 }
+}
 
-#[test]
-fn secure_env_preserves_secure_store_free_check_function() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn secure_env_preserves_secure_store_free_check_function(env: &WowLuaEnv) {
     let (global_type, secure_type, same_func): (String, String, bool) = env
         .eval(
             r#"
@@ -559,6 +558,7 @@ fn secure_env_preserves_secure_store_free_check_function() {
         global_type == "nil" || !same_func,
         "secureenv StoreFrame_CheckForFree should not be overwritten by the inbound wrapper"
     );
+}
 }
 
 #[test]

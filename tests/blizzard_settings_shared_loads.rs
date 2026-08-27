@@ -393,9 +393,8 @@ fn appears_on_every_screen_eager_discovery() {
     }
 }
 
-#[test]
-fn loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let errors: Vec<String> = env.state().borrow().lua_errors.clone();
     let relevant: Vec<&String> = errors
@@ -423,10 +422,10 @@ fn loads_without_addon_specific_lua_errors() {
             .join("\n  ")
     );
 }
+}
 
-#[test]
-fn is_addon_loaded_after_eager_sweep() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn is_addon_loaded_after_eager_sweep(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_Settings_Shared')")
@@ -438,10 +437,10 @@ fn is_addon_loaded_after_eager_sweep() {
          (non-LoD, AllowLoad=Both, AllowLoadGameType=mainline)"
     );
 }
+}
 
-#[test]
-fn publishes_settings_namespace_with_enum_subtables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn publishes_settings_namespace_with_enum_subtables(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(Settings)")
@@ -483,10 +482,10 @@ fn publishes_settings_namespace_with_enum_subtables() {
          coercion path"
     );
 }
+}
 
-#[test]
-fn publishes_36_widget_and_setting_mixin_tables_across_settings_pipeline() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn publishes_36_widget_and_setting_mixin_tables_across_settings_pipeline(env: &WowLuaEnv) {
 
     for mixin in PUBLIC_MIXINS {
         let kind: String = env
@@ -501,10 +500,10 @@ fn publishes_36_widget_and_setting_mixin_tables_across_settings_pipeline() {
         );
     }
 }
+}
 
-#[test]
-fn publishes_settings_factory_and_registrar_functions() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn publishes_settings_factory_and_registrar_functions(env: &WowLuaEnv) {
 
     for func in PUBLIC_SETTINGS_FUNCTIONS {
         let kind: String = env
@@ -520,10 +519,10 @@ fn publishes_settings_factory_and_registrar_functions() {
         );
     }
 }
+}
 
-#[test]
-fn publishes_layout_factory_globals_for_canvas_and_vertical_modes() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn publishes_layout_factory_globals_for_canvas_and_vertical_modes(env: &WowLuaEnv) {
 
     for factory in ["CreateVerticalLayout", "CreateCanvasLayout"] {
         let kind: String = env
@@ -537,6 +536,7 @@ fn publishes_layout_factory_globals_for_canvas_and_vertical_modes() {
              descriptor wrapped around the SettingsLayoutMixin instance"
         );
     }
+}
 }
 
 #[test]
@@ -563,9 +563,8 @@ fn post_cleanup_restore_preserves_blizzard_settings_get_category() {
     );
 }
 
-#[test]
-fn publishes_settings_panel_named_frame_with_high_strata_and_hidden_default() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn publishes_settings_panel_named_frame_with_high_strata_and_hidden_default(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(SettingsPanel)")
@@ -604,10 +603,10 @@ fn publishes_settings_panel_named_frame_with_high_strata_and_hidden_default() {
          login"
     );
 }
+}
 
-#[test]
-fn publishes_new_settings_tracking_globals_seeded_then_populated() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn publishes_new_settings_tracking_globals_seeded_then_populated(env: &WowLuaEnv) {
 
     let new_kind: String = env
         .eval("return type(NewSettings)")
@@ -644,10 +643,10 @@ fn publishes_new_settings_tracking_globals_seeded_then_populated() {
          keyed array. Empty array would mean the data load was skipped"
     );
 }
+}
 
-#[test]
-fn category_set_enum_publishes_addons_and_game_keys() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn category_set_enum_publishes_addons_and_game_keys(env: &WowLuaEnv) {
 
     let game_id: i64 = env
         .eval("return Settings.CategorySet.Game")
@@ -663,10 +662,10 @@ fn category_set_enum_publishes_addons_and_game_keys() {
          categories into the Game and AddOns buckets shown side-by-side"
     );
 }
+}
 
-#[test]
-fn settings_panel_registers_as_ui_panel_only_in_game_screen() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn settings_panel_registers_as_ui_panel_only_in_game_screen(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(UIPanelWindows.SettingsPanel)")
@@ -682,4 +681,5 @@ fn settings_panel_registers_as_ui_panel_only_in_game_screen() {
          entry should be present, but accept nil too in case the registration \
          path is gated differently in the simulator's glue stub. Got: {kind}"
     );
+}
 }

@@ -229,9 +229,8 @@ fn appears_in_eager_discovery_on_all_four_screens() {
     }
 }
 
-#[test]
-fn full_game_load_emits_no_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_emits_no_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let errors = env.state().borrow().lua_errors.clone();
     let needles = [
@@ -257,10 +256,10 @@ fn full_game_load_emits_no_addon_specific_lua_errors() {
         matched
     );
 }
+}
 
-#[test]
-fn is_addon_loaded_reports_true_after_eager_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn is_addon_loaded_reports_true_after_eager_load(env: &WowLuaEnv) {
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_StoreUI')")
         .expect("IsAddOnLoaded probe");
@@ -270,10 +269,10 @@ fn is_addon_loaded_reports_true_after_eager_load() {
          (AllowLoad: Both + non-LoD = always loaded eagerly)"
     );
 }
+}
 
-#[test]
-fn store_button_mixin_publishes_with_six_atlas_swap_methods() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn store_button_mixin_publishes_with_six_atlas_swap_methods(env: &WowLuaEnv) {
 
     let probe = "local function lookup(name) \
                     return _G[name] or (__secureenv and rawget(__secureenv, name)) \
@@ -307,6 +306,7 @@ fn store_button_mixin_publishes_with_six_atlas_swap_methods() {
              three-slice button states (6 methods total)"
         );
     }
+}
 }
 
 #[test]

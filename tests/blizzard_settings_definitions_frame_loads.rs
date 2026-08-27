@@ -320,9 +320,8 @@ fn root_directory_holds_eight_mainline_overrides_in_subdir() {
     }
 }
 
-#[test]
-fn loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -346,10 +345,10 @@ fn loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn is_addon_loaded_after_eager_sweep() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn is_addon_loaded_after_eager_sweep(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_SettingsDefinitions_Frame')")
@@ -360,10 +359,10 @@ fn is_addon_loaded_after_eager_sweep() {
          return true after the eager Game-screen sweep"
     );
 }
+}
 
-#[test]
-fn publishes_nine_override_namespace_globals_as_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn publishes_nine_override_namespace_globals_as_tables(env: &WowLuaEnv) {
 
     for namespace in PUBLIC_GLOBAL_NAMESPACES {
         let kind: String = env
@@ -382,10 +381,10 @@ fn publishes_nine_override_namespace_globals_as_tables() {
         );
     }
 }
+}
 
-#[test]
-fn publishes_twelve_global_mixin_tables_for_settings_widgets() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn publishes_twelve_global_mixin_tables_for_settings_widgets(env: &WowLuaEnv) {
 
     for mixin in PUBLIC_GLOBAL_MIXINS {
         let kind: String = env
@@ -409,10 +408,10 @@ fn publishes_twelve_global_mixin_tables_for_settings_widgets() {
         );
     }
 }
+}
 
-#[test]
-fn custom_gameplay_settings_order_publishes_with_label_keys() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn custom_gameplay_settings_order_publishes_with_label_keys(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(_G.CUSTOM_GAMEPLAY_SETTINGS_ORDER)")
@@ -431,10 +430,10 @@ fn custom_gameplay_settings_order_publishes_with_label_keys() {
          category file's Register() function reads it"
     );
 }
+}
 
-#[test]
-fn self_cast_setting_values_publishes_four_named_modes_from_combat_lua() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn self_cast_setting_values_publishes_four_named_modes_from_combat_lua(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(_G.SELF_CAST_SETTING_VALUES)")
@@ -465,4 +464,5 @@ fn self_cast_setting_values_publishes_four_named_modes_from_combat_lua() {
              player's saved self-cast preference"
         );
     }
+}
 }

@@ -263,9 +263,8 @@ fn no_addon_declares_trainer_ui_as_dependency() {
     );
 }
 
-#[test]
-fn explicit_load_publishes_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_publishes_constants(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &trainer_toc())
         .expect("Blizzard_TrainerUI must load via Rust loader");
@@ -283,10 +282,10 @@ fn explicit_load_publishes_constants() {
         );
     }
 }
+}
 
-#[test]
-fn explicit_load_publishes_global_functions() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_publishes_global_functions(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &trainer_toc())
         .expect("Blizzard_TrainerUI must load via Rust loader");
@@ -309,10 +308,10 @@ fn explicit_load_publishes_global_functions() {
         );
     }
 }
+}
 
-#[test]
-fn explicit_load_creates_class_trainer_frame_global() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_creates_class_trainer_frame_global(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &trainer_toc())
         .expect("Blizzard_TrainerUI must load via Rust loader");
@@ -332,10 +331,10 @@ fn explicit_load_creates_class_trainer_frame_global() {
          instantiated by the WowScrollBoxList view"
     );
 }
+}
 
-#[test]
-fn explicit_load_registers_ui_panel_windows_entry() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_registers_ui_panel_windows_entry(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &trainer_toc())
         .expect("Blizzard_TrainerUI must load via Rust loader");
@@ -363,6 +362,7 @@ fn explicit_load_registers_ui_panel_windows_entry() {
          dock on the left edge of the screen alongside other primary \
          interaction windows (merchant, banker, mailbox)"
     );
+}
 }
 
 #[test]
@@ -394,9 +394,8 @@ fn player_interaction_frame_manager_routes_trainer_via_load_addon() {
     );
 }
 
-#[test]
-fn class_trainer_frame_load_ui_published_at_boot() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn class_trainer_frame_load_ui_published_at_boot(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(ClassTrainerFrame_LoadUI)")
@@ -413,10 +412,10 @@ fn class_trainer_frame_load_ui_published_at_boot() {
          playerInteractionToFrameInfo table is constructed)"
     );
 }
+}
 
-#[test]
-fn explicit_load_emits_no_addon_specific_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_emits_no_addon_specific_errors(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -445,4 +444,5 @@ fn explicit_load_emits_no_addon_specific_errors() {
         addon_specific.len(),
         addon_specific
     );
+}
 }

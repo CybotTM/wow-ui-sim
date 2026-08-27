@@ -288,9 +288,8 @@ fn absent_from_glue_screen_auto_discovery() {
     }
 }
 
-#[test]
-fn loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -311,10 +310,10 @@ fn loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn is_addon_loaded_after_eager_pass() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn is_addon_loaded_after_eager_pass(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_WowTokenUI')")
@@ -335,10 +334,10 @@ fn is_addon_loaded_after_eager_pass() {
         );
     }
 }
+}
 
-#[test]
-fn inbound_bridge_functions_publish_only_into_global_environment() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn inbound_bridge_functions_publish_only_into_global_environment(env: &WowLuaEnv) {
 
     for fn_name in INBOUND_BRIDGE_FUNCTIONS {
         let (global_kind, secure_kind): (String, String) = env
@@ -357,10 +356,10 @@ fn inbound_bridge_functions_publish_only_into_global_environment() {
         );
     }
 }
+}
 
-#[test]
-fn outbound_table_publishes_only_into_secure_environment() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn outbound_table_publishes_only_into_secure_environment(env: &WowLuaEnv) {
 
     let (global_kind, secure_kind): (String, String) = env
         .eval("return type(_G.WowTokenOutbound), type(__secureenv.WowTokenOutbound)")
@@ -398,10 +397,10 @@ fn outbound_table_publishes_only_into_secure_environment() {
         );
     }
 }
+}
 
-#[test]
-fn insecure_redeem_failed_publishes_only_into_global_environment() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn insecure_redeem_failed_publishes_only_into_global_environment(env: &WowLuaEnv) {
 
     let (global_kind, secure_kind): (String, String) = env
         .eval("return type(_G.RedeemFailed), type(__secureenv.RedeemFailed)")
@@ -416,10 +415,10 @@ fn insecure_redeem_failed_publishes_only_into_global_environment() {
         "RedeemFailed must not remain in `__secureenv` after the environment swap"
     );
 }
+}
 
-#[test]
-fn redemption_frame_handlers_publish_into_secure_environment() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn redemption_frame_handlers_publish_into_secure_environment(env: &WowLuaEnv) {
 
     for handler in REDEMPTION_FRAME_HANDLERS {
         let kind: String = env
@@ -437,10 +436,10 @@ fn redemption_frame_handlers_publish_into_secure_environment() {
         );
     }
 }
+}
 
-#[test]
-fn dialog_handlers_publish_into_secure_environment() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn dialog_handlers_publish_into_secure_environment(env: &WowLuaEnv) {
 
     for handler in DIALOG_HANDLERS {
         let kind: String = env
@@ -455,10 +454,11 @@ fn dialog_handlers_publish_into_secure_environment() {
         );
     }
 }
+}
 
-#[test]
-fn wow_token_button_template_registers_as_virtual() {
-    let _env = load_full_game_ui();
+prefork_full_ui_case! {
+fn wow_token_button_template_registers_as_virtual(env: &WowLuaEnv) {
+    let _env = env;
     assert!(
         wow_ui_sim::xml::get_template("WowTokenButtonTemplate").is_some(),
         "WowTokenButtonTemplate (`<Button virtual=\"true\">` from Blizzard_WowTokenUI.xml \
@@ -470,10 +470,10 @@ fn wow_token_button_template_registers_as_virtual() {
          and swaps to UI-Panel-Button-Down/Disabled atlases on OnMouseDown/OnDisable"
     );
 }
+}
 
-#[test]
-fn named_frames_publish_with_dialog_strata_and_uiparent_parent() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn named_frames_publish_with_dialog_strata_and_uiparent_parent(env: &WowLuaEnv) {
 
     for frame_name in NAMED_FRAMES {
         let kind: String = env
@@ -500,10 +500,10 @@ fn named_frames_publish_with_dialog_strata_and_uiparent_parent() {
         );
     }
 }
+}
 
-#[test]
-fn redemption_frame_inherits_default_panel_template() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn redemption_frame_inherits_default_panel_template(env: &WowLuaEnv) {
 
     let object_type: String = env
         .eval("return WowTokenRedemptionFrame:GetObjectType()")
@@ -516,10 +516,10 @@ fn redemption_frame_inherits_default_panel_template() {
          (close button + title bar + nine-slice border)"
     );
 }
+}
 
-#[test]
-fn wow_token_dialog_publishes_with_toplevel_flag() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn wow_token_dialog_publishes_with_toplevel_flag(env: &WowLuaEnv) {
 
     let object_type: String = env
         .eval("return WowTokenDialog:GetObjectType()")
@@ -538,10 +538,10 @@ fn wow_token_dialog_publishes_with_toplevel_flag() {
          the redemption frame) needs the click-raise behavior"
     );
 }
+}
 
-#[test]
-fn forbidden_scoped_modifier_marks_named_frames_forbidden() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn forbidden_scoped_modifier_marks_named_frames_forbidden(env: &WowLuaEnv) {
 
     for frame_name in NAMED_FRAMES {
         let is_forbidden: bool = env
@@ -559,4 +559,5 @@ fn forbidden_scoped_modifier_marks_named_frames_forbidden() {
              reached both named frames"
         );
     }
+}
 }

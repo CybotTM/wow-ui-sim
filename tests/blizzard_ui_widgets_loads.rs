@@ -353,9 +353,8 @@ fn dep_directories_exist_on_disk() {
     }
 }
 
-#[test]
-fn full_game_load_publishes_manager_and_container_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_manager_and_container_mixins(env: &WowLuaEnv) {
 
     for mixin in MANAGER_AND_CONTAINER_MIXINS {
         let kind: String = env
@@ -377,10 +376,10 @@ fn full_game_load_publishes_manager_and_container_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_base_and_helper_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_base_and_helper_mixins(env: &WowLuaEnv) {
 
     for mixin in BASE_AND_HELPER_MIXINS {
         let kind: String = env
@@ -400,10 +399,10 @@ fn full_game_load_publishes_base_and_helper_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_template_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_template_mixins(env: &WowLuaEnv) {
 
     for mixin in TEMPLATE_MIXINS {
         let kind: String = env
@@ -431,10 +430,10 @@ fn full_game_load_publishes_template_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_flipbook_and_nested_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_flipbook_and_nested_mixins(env: &WowLuaEnv) {
 
     for mixin in FLIPBOOK_AND_NESTED_MIXINS {
         let kind: String = env
@@ -456,10 +455,10 @@ fn full_game_load_publishes_flipbook_and_nested_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_widget_util() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_widget_util(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(WidgetUtil)")
@@ -483,10 +482,10 @@ fn full_game_load_publishes_widget_util() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_registers_representative_virtual_templates() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_registers_representative_virtual_templates(env: &WowLuaEnv) {
     let _ = env;
 
     for template in REPRESENTATIVE_VIRTUAL_TEMPLATES {
@@ -517,10 +516,10 @@ fn full_game_load_registers_representative_virtual_templates() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_named_top_level_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_named_top_level_frames(env: &WowLuaEnv) {
 
     for name in NAMED_TOP_LEVEL_FRAMES {
         let frame_kind: String = env
@@ -546,10 +545,10 @@ fn full_game_load_publishes_named_top_level_frames() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_emits_no_addon_specific_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_emits_no_addon_specific_errors(env: &WowLuaEnv) {
 
     let errors: Vec<String> = env.state().borrow().lua_errors.clone();
     let addon_specific: Vec<&String> = errors
@@ -568,4 +567,5 @@ fn full_game_load_emits_no_addon_specific_errors() {
          into every widget-type Template extending \
          UIWidgetBaseTemplateMixin. Found: {addon_specific:?}"
     );
+}
 }

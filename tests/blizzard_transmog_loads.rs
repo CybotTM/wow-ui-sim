@@ -370,9 +370,8 @@ fn transmog_shared_dep_directory_exists_on_disk() {
     );
 }
 
-#[test]
-fn explicit_load_publishes_main_lua_mixin_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_publishes_main_lua_mixin_tables(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &transmog_toc())
         .expect("Blizzard_Transmog must load via Rust loader");
@@ -390,10 +389,10 @@ fn explicit_load_publishes_main_lua_mixin_tables() {
         );
     }
 }
+}
 
-#[test]
-fn explicit_load_publishes_templates_lua_mixin_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_publishes_templates_lua_mixin_tables(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &transmog_toc())
         .expect("Blizzard_Transmog must load via Rust loader");
@@ -413,10 +412,10 @@ fn explicit_load_publishes_templates_lua_mixin_tables() {
         );
     }
 }
+}
 
-#[test]
-fn explicit_load_creates_transmog_frame_global() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_creates_transmog_frame_global(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &transmog_toc())
         .expect("Blizzard_Transmog must load via Rust loader");
@@ -436,10 +435,10 @@ fn explicit_load_creates_transmog_frame_global() {
          everything else is a Mixin/Template"
     );
 }
+}
 
-#[test]
-fn refresh_weapon_dropdown_counts_sparse_weapon_categories() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn refresh_weapon_dropdown_counts_sparse_weapon_categories(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &transmog_toc())
         .expect("Blizzard_Transmog must load via Rust loader");
@@ -521,10 +520,10 @@ fn refresh_weapon_dropdown_counts_sparse_weapon_categories() {
          Blizzard_Transmog loads."
     );
 }
+}
 
-#[test]
-fn explicit_load_registers_ui_panel_via_registration_lua() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_registers_ui_panel_via_registration_lua(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &transmog_toc())
         .expect("Blizzard_Transmog must load via Rust loader");
@@ -554,10 +553,10 @@ fn explicit_load_registers_ui_panel_via_registration_lua() {
          before considering it overflowing"
     );
 }
+}
 
-#[test]
-fn transmog_load_ui_published_at_boot() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn transmog_load_ui_published_at_boot(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(Transmog_LoadUI)")
@@ -571,10 +570,10 @@ fn transmog_load_ui_published_at_boot() {
          the first transmog interaction would race the LoD load"
     );
 }
+}
 
-#[test]
-fn explicit_load_emits_no_addon_specific_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_emits_no_addon_specific_errors(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -606,4 +605,5 @@ fn explicit_load_emits_no_addon_specific_errors() {
         addon_specific.len(),
         addon_specific
     );
+}
 }

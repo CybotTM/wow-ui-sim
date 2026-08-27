@@ -270,9 +270,8 @@ fn dep_directories_exist_on_disk() {
     }
 }
 
-#[test]
-fn explicit_load_publishes_module_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_publishes_module_tables(env: &WowLuaEnv) {
 
     for module in MODULE_TABLES {
         let kind: String = env
@@ -290,10 +289,10 @@ fn explicit_load_publishes_module_tables() {
         );
     }
 }
+}
 
-#[test]
-fn explicit_load_publishes_mixin_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_publishes_mixin_tables(env: &WowLuaEnv) {
 
     for mixin in MIXINS {
         let kind: String = env
@@ -309,10 +308,10 @@ fn explicit_load_publishes_mixin_tables() {
         );
     }
 }
+}
 
-#[test]
-fn tutorial_quest_manager_is_built_from_mixin() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn tutorial_quest_manager_is_built_from_mixin(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(TutorialQuestManager)")
@@ -326,10 +325,10 @@ fn tutorial_quest_manager_is_built_from_mixin() {
          on this instance"
     );
 }
+}
 
-#[test]
-fn explicit_load_publishes_tutorial_manager_methods() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_publishes_tutorial_manager_methods(env: &WowLuaEnv) {
 
     for method in TUTORIAL_MANAGER_METHODS {
         let kind: String = env
@@ -344,10 +343,10 @@ fn explicit_load_publishes_tutorial_manager_methods() {
         );
     }
 }
+}
 
-#[test]
-fn explicit_load_publishes_class_tutorial_base() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_publishes_class_tutorial_base(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(Class_TutorialBase)")
@@ -364,10 +363,10 @@ fn explicit_load_publishes_class_tutorial_base() {
          static methods"
     );
 }
+}
 
-#[test]
-fn explicit_load_publishes_debug_tutorials_function() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_publishes_debug_tutorials_function(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(DebugTutorials)")
@@ -380,10 +379,10 @@ fn explicit_load_publishes_debug_tutorials_function() {
          debug logging for live troubleshooting"
     );
 }
+}
 
-#[test]
-fn explicit_load_creates_named_non_virtual_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn explicit_load_creates_named_non_virtual_frames(env: &WowLuaEnv) {
 
     for frame in NAMED_NON_VIRTUAL_FRAMES {
         let exists: bool = env
@@ -402,10 +401,10 @@ fn explicit_load_creates_named_non_virtual_frames() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_emits_no_addon_specific_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_emits_no_addon_specific_errors(env: &WowLuaEnv) {
 
     let errors: Vec<String> = env.state().borrow().lua_errors.clone();
     let addon_specific: Vec<&String> = errors
@@ -422,4 +421,5 @@ fn full_game_load_emits_no_addon_specific_errors() {
          C_TutorialState/C_QuestLog/etc. stubs without raising. \
          Found: {addon_specific:?}"
     );
+}
 }

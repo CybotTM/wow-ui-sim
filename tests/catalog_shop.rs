@@ -36,9 +36,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
-#[test]
-fn catalog_shop_loads_and_populates_navigation_and_products() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn catalog_shop_loads_and_populates_navigation_and_products(env: &WowLuaEnv) {
 
     let (loaded, reason): (bool, Option<String>) = env
         .eval("return LoadAddOn('Blizzard_CatalogShop')")
@@ -123,10 +122,10 @@ fn catalog_shop_loads_and_populates_navigation_and_products() {
 
     assert_eq!(result, "Apprentice Rider Bundle");
 }
+}
 
-#[test]
-fn catalog_shop_bundle_card_uses_default_model_scene_id() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn catalog_shop_bundle_card_uses_default_model_scene_id(env: &WowLuaEnv) {
 
     let (loaded, reason): (bool, Option<String>) = env
         .eval("return LoadAddOn('Blizzard_CatalogShop')")
@@ -170,10 +169,10 @@ fn catalog_shop_bundle_card_uses_default_model_scene_id() {
     )
     .expect("bundle card default model scene routing should run");
 }
+}
 
-#[test]
-fn catalog_shop_product_display_translation_uses_override_scene_when_default_is_missing() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn catalog_shop_product_display_translation_uses_override_scene_when_default_is_missing(env: &WowLuaEnv) {
 
     env.exec(
         r#"
@@ -198,10 +197,10 @@ fn catalog_shop_product_display_translation_uses_override_scene_when_default_is_
     )
     .expect("catalog shop product display translation should run");
 }
+}
 
-#[test]
-fn catalog_shop_load_does_not_request_nil_model_scene_ids() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn catalog_shop_load_does_not_request_nil_model_scene_ids(env: &WowLuaEnv) {
 
     env.exec(
         r#"
@@ -233,4 +232,5 @@ fn catalog_shop_load_does_not_request_nil_model_scene_ids() {
         calls.is_empty(),
         "CatalogShop should not request nil model scene ids:\n{calls}"
     );
+}
 }

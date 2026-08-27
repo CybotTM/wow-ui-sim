@@ -455,9 +455,8 @@ fn dep_directories_exist_on_disk() {
     }
 }
 
-#[test]
-fn full_game_load_publishes_frame_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_frame_mixins(env: &WowLuaEnv) {
 
     for mixin in REPRESENTATIVE_FRAME_MIXINS {
         let kind: String = env
@@ -480,10 +479,10 @@ fn full_game_load_publishes_frame_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_resource_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_resource_mixins(env: &WowLuaEnv) {
 
     for mixin in REPRESENTATIVE_RESOURCE_MIXINS {
         let kind: String = env
@@ -503,10 +502,10 @@ fn full_game_load_publishes_resource_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_compact_and_aura_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_compact_and_aura_mixins(env: &WowLuaEnv) {
 
     for mixin in REPRESENTATIVE_COMPACT_AND_AURA_MIXINS {
         let kind: String = env
@@ -530,10 +529,10 @@ fn full_game_load_publishes_compact_and_aura_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_module_load_number_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_module_load_number_constants(env: &WowLuaEnv) {
 
     for (name, expected) in MODULE_LOAD_NUMBER_CONSTANTS {
         let value: f64 = env
@@ -555,10 +554,10 @@ fn full_game_load_publishes_module_load_number_constants() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_registers_representative_virtual_templates() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_registers_representative_virtual_templates(env: &WowLuaEnv) {
     let _ = env;
 
     for template in REPRESENTATIVE_VIRTUAL_TEMPLATES {
@@ -579,10 +578,10 @@ fn full_game_load_registers_representative_virtual_templates() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_named_top_level_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_named_top_level_frames(env: &WowLuaEnv) {
 
     for name in REPRESENTATIVE_NON_VIRTUAL_FRAMES {
         let frame_kind: String = env
@@ -613,10 +612,10 @@ fn full_game_load_publishes_named_top_level_frames() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_emits_no_addon_specific_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_emits_no_addon_specific_errors(env: &WowLuaEnv) {
 
     let errors: Vec<String> = env.state().borrow().lua_errors.clone();
     let addon_specific: Vec<&String> = errors
@@ -634,4 +633,5 @@ fn full_game_load_emits_no_addon_specific_errors() {
          resource bars; any failure cascades into the entire visible \
          in-world UI. Found: {addon_specific:?}"
     );
+}
 }

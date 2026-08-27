@@ -354,9 +354,8 @@ fn dep_directories_exist_on_disk() {
     }
 }
 
-#[test]
-fn full_game_load_publishes_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_mixins(env: &WowLuaEnv) {
 
     for mixin in MIXINS {
         let kind: String = env
@@ -374,10 +373,10 @@ fn full_game_load_publishes_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_module_load_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_module_load_tables(env: &WowLuaEnv) {
 
     for table in MODULE_LOAD_TABLES {
         let kind: String = env
@@ -397,10 +396,10 @@ fn full_game_load_publishes_module_load_tables() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_module_load_number_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_module_load_number_constants(env: &WowLuaEnv) {
 
     for (name, expected) in MODULE_LOAD_NUMBER_CONSTANTS {
         let value: f64 = env
@@ -417,10 +416,10 @@ fn full_game_load_publishes_module_load_number_constants() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_free_functions() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_free_functions(env: &WowLuaEnv) {
 
     for func in FREE_FUNCTIONS {
         let kind: String = env
@@ -444,10 +443,10 @@ fn full_game_load_publishes_free_functions() {
         );
     }
 }
+}
 
-#[test]
-fn world_frame_onupdate_runs_without_mirror_timer_constant_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn world_frame_onupdate_runs_without_mirror_timer_constant_errors(env: &WowLuaEnv) {
 
     let before = env.state().borrow().lua_errors.len();
     env.fire_on_update(0.016)
@@ -461,10 +460,11 @@ fn world_frame_onupdate_runs_without_mirror_timer_constant_errors() {
          hidden mirror timers. New errors: {new_errors:?}"
     );
 }
+}
 
-#[test]
-fn full_game_load_registers_virtual_templates() {
-    let _env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_registers_virtual_templates(env: &WowLuaEnv) {
+    let _env = env;
 
     for template in VIRTUAL_TEMPLATES {
         let entry = wow_ui_sim::xml::get_template(template);
@@ -482,10 +482,10 @@ fn full_game_load_registers_virtual_templates() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_publishes_named_non_virtual_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_publishes_named_non_virtual_frames(env: &WowLuaEnv) {
 
     for name in NAMED_NON_VIRTUAL_FRAMES {
         let exists: bool = env
@@ -506,10 +506,10 @@ fn full_game_load_publishes_named_non_virtual_frames() {
         );
     }
 }
+}
 
-#[test]
-fn full_game_load_emits_no_addon_specific_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn full_game_load_emits_no_addon_specific_errors(env: &WowLuaEnv) {
 
     let errors: Vec<String> = env.state().borrow().lua_errors.clone();
     let addon_specific: Vec<&String> = errors
@@ -526,4 +526,5 @@ fn full_game_load_emits_no_addon_specific_errors() {
          and the UIParent_OnEvent megaswitch; all must execute cleanly. \
          Found: {addon_specific:?}"
     );
+}
 }

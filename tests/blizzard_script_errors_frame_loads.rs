@@ -327,9 +327,8 @@ fn xml_wraps_frame_in_scoped_modifier_with_secure_env_addition() {
     );
 }
 
-#[test]
-fn loads_without_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn loads_without_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -349,10 +348,10 @@ fn loads_without_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn is_addon_loaded_after_eager_sweep() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn is_addon_loaded_after_eager_sweep(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_ScriptErrorsFrame')")
@@ -363,10 +362,10 @@ fn is_addon_loaded_after_eager_sweep() {
          after the eager Game-screen sweep"
     );
 }
+}
 
-#[test]
-fn script_errors_frame_mixin_publishes_with_eleven_methods() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn script_errors_frame_mixin_publishes_with_eleven_methods(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(_G.ScriptErrorsFrameMixin)")
@@ -411,10 +410,10 @@ fn script_errors_frame_mixin_publishes_with_eleven_methods() {
         );
     }
 }
+}
 
-#[test]
-fn set_hide_error_frame_predicate_publishes_globally() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn set_hide_error_frame_predicate_publishes_globally(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(_G.SetHideErrorFramePredicate)")
@@ -431,10 +430,10 @@ fn set_hide_error_frame_predicate_publishes_globally() {
          experience"
     );
 }
+}
 
-#[test]
-fn module_locals_stay_off_global_scope() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn module_locals_stay_off_global_scope(env: &WowLuaEnv) {
 
     for name in MODULE_LOCAL_NAMES {
         let kind: String = env
@@ -453,10 +452,10 @@ fn module_locals_stay_off_global_scope() {
         );
     }
 }
+}
 
-#[test]
-fn script_errors_frame_publishes_as_named_global_hidden_by_default() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn script_errors_frame_publishes_as_named_global_hidden_by_default(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(_G.ScriptErrorsFrame)")
@@ -488,10 +487,10 @@ fn script_errors_frame_publishes_as_named_global_hidden_by_default() {
          UI element so it cannot be obscured by a misbehaving addon's frame stack"
     );
 }
+}
 
-#[test]
-fn script_errors_frame_publishes_seven_named_child_keys() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn script_errors_frame_publishes_seven_named_child_keys(env: &WowLuaEnv) {
 
     for child_key in FRAME_CHILD_KEYS {
         let child_kind: String = env
@@ -512,10 +511,10 @@ fn script_errors_frame_publishes_seven_named_child_keys() {
         );
     }
 }
+}
 
-#[test]
-fn registers_lua_warning_event_after_onload() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn registers_lua_warning_event_after_onload(env: &WowLuaEnv) {
 
     let registered: bool = env
         .eval("return ScriptErrorsFrame:IsEventRegistered('LUA_WARNING')")
@@ -531,10 +530,10 @@ fn registers_lua_warning_event_after_onload() {
          routes hard errors via AddLuaErrorHandler"
     );
 }
+}
 
-#[test]
-fn display_message_internal_dedups_identical_message_stack_pairs() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn display_message_internal_dedups_identical_message_stack_pairs(env: &WowLuaEnv) {
 
     env.exec(
         r#"
@@ -569,4 +568,5 @@ fn display_message_internal_dedups_identical_message_stack_pairs() {
          path increments the count field instead of appending a new errorData \
          entry"
     );
+}
 }
