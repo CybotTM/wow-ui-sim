@@ -51,9 +51,8 @@ fn blizzard_combat_log_is_load_on_demand_not_in_discovery() {
     );
 }
 
-#[test]
-fn blizzard_combat_log_is_loaded_via_runtime_loadaddon() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_combat_log_is_loaded_via_runtime_loadaddon(env: &WowLuaEnv) {
 
     let already_loaded: bool = env
         .eval(
@@ -69,10 +68,10 @@ fn blizzard_combat_log_is_loaded_via_runtime_loadaddon() {
          while wiring up COMBATLOG=ChatFrame2"
     );
 }
+}
 
-#[test]
-fn blizzard_combat_log_loads_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_combat_log_loads_without_errors(env: &WowLuaEnv) {
 
     let combat_log_errors: Vec<String> = env
         .state()
@@ -92,10 +91,10 @@ fn blizzard_combat_log_loads_without_errors() {
         combat_log_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_combat_log_quick_button_frame_is_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_combat_log_quick_button_frame_is_defined(env: &WowLuaEnv) {
 
     let frame_present: bool = env
         .eval(
@@ -110,10 +109,10 @@ fn blizzard_combat_log_quick_button_frame_is_defined() {
          + $parentAdditionalFilterButton children should be defined after load"
     );
 }
+}
 
-#[test]
-fn blizzard_combat_log_globals_and_settings_are_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_combat_log_globals_and_settings_are_defined(env: &WowLuaEnv) {
 
     let globals_present: bool = env
         .eval(
@@ -132,10 +131,10 @@ fn blizzard_combat_log_globals_and_settings_are_defined() {
          Blizzard_CombatLog_Filters/Filter_Defaults/CurrentSettings should all be populated"
     );
 }
+}
 
-#[test]
-fn blizzard_combat_log_driver_mixin_is_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_combat_log_driver_mixin_is_defined(env: &WowLuaEnv) {
 
     let mixin_present: bool = env
         .eval(
@@ -156,10 +155,10 @@ fn blizzard_combat_log_driver_mixin_is_defined() {
          after load"
     );
 }
+}
 
-#[test]
-fn blizzard_combat_log_helper_functions_are_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_combat_log_helper_functions_are_defined(env: &WowLuaEnv) {
 
     let helpers_present: bool = env
         .eval(
@@ -185,4 +184,5 @@ fn blizzard_combat_log_helper_functions_are_defined() {
          RefreshGlobalLinks/CreateUnitMenu/CreateFilterMenu/CreateSpellMenu/CreateActionMenu) \
          and CreateCombatLogContextMenu should be defined after load"
     );
+}
 }

@@ -120,9 +120,8 @@ fn blizzard_cooldown_broadcaster_is_absent_from_auto_discovery() {
     );
 }
 
-#[test]
-fn blizzard_cooldown_broadcaster_loads_via_load_addon_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_cooldown_broadcaster_loads_via_load_addon_without_errors(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -140,6 +139,7 @@ fn blizzard_cooldown_broadcaster_loads_via_load_addon_without_errors() {
         "Blizzard_CooldownBroadcaster emitted Lua errors during explicit load:\n  {}",
         load_errors.join("\n  ")
     );
+}
 }
 
 #[test]

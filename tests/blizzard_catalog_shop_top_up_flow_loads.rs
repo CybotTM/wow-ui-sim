@@ -70,9 +70,8 @@ fn c_catalog_shop_vc_product_infos_are_fresh_empty_arrays() {
     assert!(distinct, "each call should return a fresh table");
 }
 
-#[test]
-fn blizzard_catalog_shop_top_up_flow_loads_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_catalog_shop_top_up_flow_loads_without_errors(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -117,10 +116,10 @@ fn blizzard_catalog_shop_top_up_flow_loads_without_errors() {
         "CatalogShopTopUpFrame mixins should be defined after load"
     );
 }
+}
 
-#[test]
-fn catalog_shop_top_up_frame_show_and_hide_run_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn catalog_shop_top_up_frame_show_and_hide_run_without_errors(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &top_up_flow_toc())
         .expect("Blizzard_CatalogShopTopUpFlow should load");
@@ -157,4 +156,5 @@ fn catalog_shop_top_up_frame_show_and_hide_run_without_errors() {
         "CatalogShopTopUpFrame Show/Hide emitted unexpected Lua errors:\n  {}",
         unexpected_errors.join("\n  ")
     );
+}
 }

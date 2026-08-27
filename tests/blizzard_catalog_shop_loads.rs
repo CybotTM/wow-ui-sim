@@ -44,9 +44,8 @@ fn assert_catalog_shop_loaded(env: &WowLuaEnv) {
     assert!(finished, "Blizzard_CatalogShop startup load should finish");
 }
 
-#[test]
-fn blizzard_catalog_shop_loads_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_catalog_shop_loads_without_errors(env: &WowLuaEnv) {
     assert_catalog_shop_loaded(&env);
 
     let load_errors: Vec<String> = env.state().borrow().lua_errors.clone();
@@ -80,10 +79,10 @@ fn blizzard_catalog_shop_loads_without_errors() {
         "CatalogShopMixin should be defined after load"
     );
 }
+}
 
-#[test]
-fn catalog_shop_show_and_hide_run_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn catalog_shop_show_and_hide_run_without_errors(env: &WowLuaEnv) {
     assert_catalog_shop_loaded(&env);
 
     {
@@ -135,4 +134,5 @@ fn catalog_shop_show_and_hide_run_without_errors() {
         "CatalogShopFrame Show/Hide emitted unexpected Lua errors:\n  {}",
         unexpected_errors.join("\n  ")
     );
+}
 }

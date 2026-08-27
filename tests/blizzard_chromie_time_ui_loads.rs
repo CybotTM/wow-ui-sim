@@ -87,9 +87,8 @@ fn c_chromie_time_actions_are_no_ops() {
     assert_eq!(select_type, "function");
 }
 
-#[test]
-fn blizzard_chromie_time_ui_loads_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_chromie_time_ui_loads_without_errors(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -129,10 +128,10 @@ fn blizzard_chromie_time_ui_loads_without_errors() {
         "Blizzard_ChromieTimeUI mixin tables should be defined after load"
     );
 }
+}
 
-#[test]
-fn chromie_time_frame_show_and_hide_run_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn chromie_time_frame_show_and_hide_run_without_errors(env: &WowLuaEnv) {
 
     load_addon(&env.loader_env(), &chromie_time_ui_toc())
         .expect("Blizzard_ChromieTimeUI should load");
@@ -161,4 +160,5 @@ fn chromie_time_frame_show_and_hide_run_without_errors() {
         "ChromieTimeFrame Show/Hide emitted unexpected Lua errors:\n  {}",
         unexpected_errors.join("\n  ")
     );
+}
 }

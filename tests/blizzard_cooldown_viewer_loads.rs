@@ -81,9 +81,8 @@ fn blizzard_cooldown_viewer_appears_in_game_discovery() {
     );
 }
 
-#[test]
-fn blizzard_cooldown_viewer_loads_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_cooldown_viewer_loads_without_errors(env: &WowLuaEnv) {
 
     let addon_errors: Vec<String> = env
         .state()
@@ -104,10 +103,10 @@ fn blizzard_cooldown_viewer_loads_without_errors() {
         addon_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_cooldown_viewer_toplevel_frames_are_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_cooldown_viewer_toplevel_frames_are_defined(env: &WowLuaEnv) {
 
     let frames_present: bool = env
         .eval(
@@ -133,10 +132,10 @@ fn blizzard_cooldown_viewer_toplevel_frames_are_defined() {
          hidden=true — opened via the `/cdmgr` slash command)"
     );
 }
+}
 
-#[test]
-fn blizzard_cooldown_viewer_constants_and_enums_are_populated() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_cooldown_viewer_constants_and_enums_are_populated(env: &WowLuaEnv) {
 
     let constants_present: bool = env
         .eval(
@@ -174,10 +173,10 @@ fn blizzard_cooldown_viewer_constants_and_enums_are_populated() {
          COOLDOWN_VIEWER_CLASS_AND_SPEC_FORMAT='%s - %s'"
     );
 }
+}
 
-#[test]
-fn blizzard_cooldown_viewer_core_mixins_are_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_cooldown_viewer_core_mixins_are_defined(env: &WowLuaEnv) {
 
     let mixins_present: bool = env
         .eval(
@@ -209,10 +208,10 @@ fn blizzard_cooldown_viewer_core_mixins_are_defined() {
          ItemDebuffBorder mixin)"
     );
 }
+}
 
-#[test]
-fn blizzard_cooldown_viewer_settings_panel_mixins_are_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_cooldown_viewer_settings_panel_mixins_are_defined(env: &WowLuaEnv) {
 
     let mixins_present: bool = env
         .eval(
@@ -244,10 +243,10 @@ fn blizzard_cooldown_viewer_settings_panel_mixins_are_defined() {
          per-category drop zones)"
     );
 }
+}
 
-#[test]
-fn blizzard_cooldown_viewer_util_helpers_round_trip_class_spec_tag() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_cooldown_viewer_util_helpers_round_trip_class_spec_tag(env: &WowLuaEnv) {
 
     let util_present: bool = env
         .eval(
@@ -268,10 +267,10 @@ fn blizzard_cooldown_viewer_util_helpers_round_trip_class_spec_tag() {
          IsDisabledCategory must return true for both and false for any normal category id"
     );
 }
+}
 
-#[test]
-fn blizzard_cooldown_viewer_settings_panel_starts_hidden_and_toggles() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_cooldown_viewer_settings_panel_starts_hidden_and_toggles(env: &WowLuaEnv) {
 
     let toggles_correctly: bool = env
         .eval(
@@ -289,4 +288,5 @@ fn blizzard_cooldown_viewer_settings_panel_starts_hidden_and_toggles() {
          a Show()/Hide() round-trip should cycle visibility cleanly without the slash-command \
          registration interfering with the Show frame method"
     );
+}
 }

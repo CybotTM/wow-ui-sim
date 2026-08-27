@@ -77,9 +77,8 @@ fn blizzard_covenant_preview_ui_is_absent_from_game_auto_discovery() {
     );
 }
 
-#[test]
-fn blizzard_covenant_preview_ui_loads_via_load_addon_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_covenant_preview_ui_loads_via_load_addon_without_errors(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -98,10 +97,10 @@ fn blizzard_covenant_preview_ui_loads_via_load_addon_without_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_covenant_preview_frame_is_defined_and_parented_to_uiparent() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_covenant_preview_frame_is_defined_and_parented_to_uiparent(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &covenant_preview_ui_toc())
         .expect("Blizzard_CovenantPreviewUI should load via Rust loader");
 
@@ -120,10 +119,10 @@ fn blizzard_covenant_preview_frame_is_defined_and_parented_to_uiparent() {
          CovenantPreviewFrame:TryShow(covenantInfo) is called"
     );
 }
+}
 
-#[test]
-fn blizzard_covenant_preview_frame_mixin_methods_are_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_covenant_preview_frame_mixin_methods_are_defined(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &covenant_preview_ui_toc())
         .expect("Blizzard_CovenantPreviewUI should load via Rust loader");
 
@@ -159,10 +158,10 @@ fn blizzard_covenant_preview_frame_mixin_methods_are_defined() {
          covenant feature/abilities/soulbinds/model scene/info panel)"
     );
 }
+}
 
-#[test]
-fn blizzard_covenant_preview_ability_and_feature_and_soulbind_mixins_are_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_covenant_preview_ability_and_feature_and_soulbind_mixins_are_defined(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &covenant_preview_ui_toc())
         .expect("Blizzard_CovenantPreviewUI should load via Rust loader");
 
@@ -197,10 +196,10 @@ fn blizzard_covenant_preview_ability_and_feature_and_soulbind_mixins_are_defined
          CovenantPreviewModelSceneContainerMixin (single ShouldAcceptDressUp returning false)"
     );
 }
+}
 
-#[test]
-fn blizzard_covenant_preview_xml_templates_are_registered() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_covenant_preview_xml_templates_are_registered(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &covenant_preview_ui_toc())
         .expect("Blizzard_CovenantPreviewUI should load via Rust loader");
 
@@ -216,10 +215,10 @@ fn blizzard_covenant_preview_xml_templates_are_registered() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_covenant_preview_frame_pools_are_created_on_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_covenant_preview_frame_pools_are_created_on_load(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &covenant_preview_ui_toc())
         .expect("Blizzard_CovenantPreviewUI should load via Rust loader");
 
@@ -242,10 +241,10 @@ fn blizzard_covenant_preview_frame_pools_are_created_on_load() {
          ReleaseAll for the per-covenant ability/soulbind row population during TryShow"
     );
 }
+}
 
-#[test]
-fn blizzard_covenant_preview_covenant_ability_type_enum_matches_expected_values() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_covenant_preview_covenant_ability_type_enum_matches_expected_values(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &covenant_preview_ui_toc())
         .expect("Blizzard_CovenantPreviewUI should load via Rust loader");
 
@@ -264,4 +263,5 @@ fn blizzard_covenant_preview_covenant_ability_type_enum_matches_expected_values(
          Blizzard_CovenantPreviewUI.lua) — the simulator's missing_enums.lua must populate \
          {{Class=0, Signature=1, Soulbind=2}} before this addon can label its preview rows"
     );
+}
 }

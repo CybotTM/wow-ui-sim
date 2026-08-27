@@ -84,9 +84,8 @@ fn blizzard_debug_tools_is_absent_from_game_auto_discovery() {
     );
 }
 
-#[test]
-fn blizzard_debug_tools_loads_via_load_addon_without_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_loads_via_load_addon_without_errors(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -119,10 +118,10 @@ fn blizzard_debug_tools_loads_via_load_addon_without_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn devtools_dump_captures_frame_array_metadata() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn devtools_dump_captures_frame_array_metadata(env: &WowLuaEnv) {
     let (
         dump_type,
         handler_type,
@@ -166,10 +165,10 @@ fn devtools_dump_captures_frame_array_metadata() {
     assert!(!messages.is_empty());
     assert!(messages.join("\n").contains("foo"));
 }
+}
 
-#[test]
-fn blizzard_debug_tools_frame_stack_tooltip_is_created() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_frame_stack_tooltip_is_created(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &debug_tools_toc())
         .expect("Blizzard_DebugTools should load via Rust loader");
 
@@ -192,10 +191,10 @@ fn blizzard_debug_tools_frame_stack_tooltip_is_created() {
          frame command)"
     );
 }
+}
 
-#[test]
-fn blizzard_debug_tools_frame_stack_helper_globals_are_defined() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_frame_stack_helper_globals_are_defined(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &debug_tools_toc())
         .expect("Blizzard_DebugTools should load via Rust loader");
 
@@ -232,10 +231,10 @@ fn blizzard_debug_tools_frame_stack_helper_globals_are_defined() {
          ...` ordered comparison"
     );
 }
+}
 
-#[test]
-fn blizzard_debug_tools_anchor_highlight_mixin_is_published() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_anchor_highlight_mixin_is_published(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &debug_tools_toc())
         .expect("Blizzard_DebugTools should load via Rust loader");
 
@@ -255,10 +254,10 @@ fn blizzard_debug_tools_anchor_highlight_mixin_is_published() {
          FrameStackHighlight to draw the green/yellow overlays)"
     );
 }
+}
 
-#[test]
-fn blizzard_debug_tools_table_inspector_mixin_is_published() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_table_inspector_mixin_is_published(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &debug_tools_toc())
         .expect("Blizzard_DebugTools should load via Rust loader");
 
@@ -297,10 +296,10 @@ fn blizzard_debug_tools_table_inspector_mixin_is_published() {
          by FrameStackTooltip_InspectTable"
     );
 }
+}
 
-#[test]
-fn blizzard_debug_tools_table_inspector_data_provider_mixins_are_published() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_table_inspector_data_provider_mixins_are_published(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &debug_tools_toc())
         .expect("Blizzard_DebugTools should load via Rust loader");
 
@@ -341,10 +340,10 @@ fn blizzard_debug_tools_table_inspector_data_provider_mixins_are_published() {
          TableAttributeLineTitleMixin"
     );
 }
+}
 
-#[test]
-fn blizzard_debug_tools_texture_info_generator_mixin_is_published() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_texture_info_generator_mixin_is_published(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &debug_tools_toc())
         .expect("Blizzard_DebugTools should load via Rust loader");
 
@@ -370,10 +369,10 @@ fn blizzard_debug_tools_texture_info_generator_mixin_is_published() {
          via `Mixin(self, TextureInfoGeneratorMixin)` in FrameStackTooltip_OnLoad"
     );
 }
+}
 
-#[test]
-fn blizzard_debug_tools_texel_snapping_visualizer_is_gated_on_gm_client() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_texel_snapping_visualizer_is_gated_on_gm_client(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &debug_tools_toc())
         .expect("Blizzard_DebugTools should load via Rust loader");
 
@@ -396,10 +395,10 @@ fn blizzard_debug_tools_texel_snapping_visualizer_is_gated_on_gm_client() {
          created — the file should silently exit during load and not emit Lua errors"
     );
 }
+}
 
-#[test]
-fn blizzard_debug_tools_xml_templates_are_registered() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_xml_templates_are_registered(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &debug_tools_toc())
         .expect("Blizzard_DebugTools should load via Rust loader");
 
@@ -426,10 +425,10 @@ fn blizzard_debug_tools_xml_templates_are_registered() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_debug_tools_table_attribute_display_is_created_after_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_debug_tools_table_attribute_display_is_created_after_load(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &debug_tools_toc())
         .expect("Blizzard_DebugTools should load via Rust loader");
 
@@ -455,4 +454,5 @@ fn blizzard_debug_tools_table_attribute_display_is_created_after_load() {
          customTitle, tableFocusedCallback)` is the public entry point that spawns a fresh \
          inspector frame from the template via `CreateFrame`"
     );
+}
 }
