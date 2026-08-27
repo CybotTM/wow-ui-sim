@@ -90,15 +90,12 @@ fn frame_chain(env: &WowLuaEnv, frame_id: u64) -> Vec<String> {
 }
 
 fn frame_center(env: &WowLuaEnv, lua_expr: &str) -> Point {
-    let name: String = env
-        .eval(&format!("return {lua_expr}:GetName()"))
-        .expect("frame name should be queryable");
+    let frame_id: i64 = env
+        .eval(&format!("return {lua_expr}:GetID()"))
+        .expect("frame ID should be queryable");
+    let frame_id = u64::try_from(frame_id).expect("frame ID should be non-negative");
     let mut state = env.state().borrow_mut();
     state.ensure_layout_rects();
-    let frame_id = state
-        .widgets
-        .get_id_by_name(&name)
-        .expect("frame should exist in the widget registry");
     let rect = state
         .widgets
         .get(frame_id)
