@@ -89,13 +89,26 @@ fn frame_chain(env: &WowLuaEnv, frame_id: u64) -> Vec<String> {
     chain
 }
 
-fn frame_center(env: &WowLuaEnv, lua_expr: &str) -> Point {
-    let frame_id: i64 = env
-        .eval(&format!("return {lua_expr}:GetID()"))
-        .expect("frame ID should be queryable");
-    let frame_id = u64::try_from(frame_id).expect("frame ID should be non-negative");
+fn frame_center(env: &WowLuaEnv, frame_path: &str) -> Point {
     let mut state = env.state().borrow_mut();
     state.ensure_layout_rects();
+
+    let mut segments = frame_path.split('.');
+    let root_name = segments.next().expect("frame path should have a root");
+    let mut frame_id = state
+        .widgets
+        .get_id_by_name(root_name)
+        .expect("root frame should exist in the widget registry");
+
+    for segment in segments {
+        frame_id = state
+            .widgets
+            .get(frame_id)
+            .and_then(|frame| frame.children_keys.get(segment))
+            .copied()
+            .unwrap_or_else(|| panic!("frame path segment `{segment}` should exist: {frame_path}"));
+    }
+
     let rect = state
         .widgets
         .get(frame_id)
