@@ -91,6 +91,10 @@ const CONFORMANCE_CASES: &[Case<ConformanceState>] = &[
         generated_registry_lists_post_start_explicit_batch,
     ),
     Case::new(
+        "conformance::generated_registry_lists_post_start_housing_batch",
+        generated_registry_lists_post_start_housing_batch,
+    ),
+    Case::new(
         "conformance::environment_cleanup_restore_errors_are_contextual",
         environment_cleanup_restore_errors_are_contextual,
     ),
@@ -700,6 +704,52 @@ fn generated_registry_lists_post_start_explicit_batch(state: &ConformanceState) 
         total += actual_count;
     }
     assert_eq!(total, 111);
+}
+
+fn generated_registry_lists_post_start_housing_batch(state: &ConformanceState) {
+    const MODULE_COUNTS: &[(&str, usize)] = &[
+        ("blizzard_housing_bulletin_board_loads::", 15),
+        ("blizzard_housing_create_neighborhood_loads::", 18),
+        ("blizzard_housing_dashboard_loads::", 26),
+        ("blizzard_housing_house_finder_loads::", 20),
+        ("blizzard_house_editor_loads::", 14),
+        ("blizzard_house_list_loads::", 10),
+        ("blizzard_housing_charter_loads::", 13),
+        ("blizzard_housing_controls_loads::", 12),
+        ("blizzard_housing_cornerstone_loads::", 20),
+        ("blizzard_housing_inspect_mode_ui_loads::", 8),
+        ("blizzard_housing_market_cart_loads::", 10),
+        ("blizzard_housing_model_preview_loads::", 10),
+        ("blizzard_housing_house_settings_loads::", 13),
+    ];
+
+    let mut total = 0;
+    for (module_filter, expected_count) in MODULE_COUNTS {
+        let output = Command::new(&state.executable)
+            .args(["--list", module_filter])
+            .env_remove(CONFORMANCE_MODE_ENV)
+            .env_remove(DRIVER_MODE_ENV)
+            .env_remove(TREE_CHILD_MODE_ENV)
+            .output()
+            .expect("list generated post-start housing prefork cases");
+
+        assert_success(&output);
+        let listed = stdout(&output);
+        let actual_count = listed
+            .lines()
+            .filter(|line| line.ends_with(": test"))
+            .count();
+        assert_eq!(
+            actual_count, *expected_count,
+            "unexpected generated case count for {module_filter}:\n{listed}"
+        );
+        assert!(
+            listed.ends_with(&format!("\n{expected_count} tests, 0 benchmarks\n")),
+            "unexpected libtest-compatible summary for {module_filter}:\n{listed}"
+        );
+        total += actual_count;
+    }
+    assert_eq!(total, 189);
 }
 
 fn environment_cleanup_restore_errors_are_contextual(_: &ConformanceState) {

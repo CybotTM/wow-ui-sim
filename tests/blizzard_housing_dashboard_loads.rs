@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -25,32 +24,9 @@ fn parse_dashboard_toc() -> TocFile {
     TocFile::from_file(&dashboard_toc()).expect("HousingDashboard TOC should parse")
 }
 
-fn load_full_game_ui_with_dashboard_lod() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-
-    wow_ui_sim::xml::register_intrinsic_templates();
-
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
-    }
-
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-
+fn load_housing_dashboard(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &dashboard_toc())
         .expect("Blizzard_HousingDashboard should load via explicit Rust loader call");
-
-    env
 }
 
 fn assert_mixin_methods(env: &WowLuaEnv, mixin: &str, methods: &[&str], rationale: &str) {
@@ -183,9 +159,9 @@ fn blizzard_housing_dashboard_excluded_from_all_screen_auto_discovery_passes() {
     }
 }
 
-#[test]
-fn blizzard_housing_dashboard_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
 
     let lua_errors: Vec<String> = env.state().borrow().lua_errors.clone();
     let related: Vec<&String> = lua_errors
@@ -224,10 +200,11 @@ fn blizzard_housing_dashboard_loads_without_addon_specific_lua_errors() {
             .join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_is_addon_loaded_returns_true_after_explicit_lod_load() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_is_addon_loaded_returns_true_after_explicit_lod_load(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_HousingDashboard')")
@@ -237,10 +214,11 @@ fn blizzard_housing_dashboard_is_addon_loaded_returns_true_after_explicit_lod_lo
         "After explicit LoD load, `IsAddOnLoaded('Blizzard_HousingDashboard')` must return true"
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_template_dependency_loads_via_game_screen_pass() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_template_dependency_loads_via_game_screen_pass(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
 
     let templates_loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_HousingTemplates')")
@@ -254,10 +232,11 @@ fn blizzard_housing_dashboard_template_dependency_loads_via_game_screen_pass() {
          separately when they need the model preview frame"
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_publishes_single_named_frame_globally() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_publishes_single_named_frame_globally(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
 
     let exists: bool = env
         .eval(
@@ -271,10 +250,11 @@ fn blizzard_housing_dashboard_publishes_single_named_frame_globally() {
          else is `virtual=\"true\"` and only materializes through inheritance"
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_does_not_publish_virtual_templates() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_does_not_publish_virtual_templates(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
 
     for template_name in [
         "HousingDashboardSideTabTemplate",
@@ -301,10 +281,11 @@ fn blizzard_housing_dashboard_does_not_publish_virtual_templates() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_umbrella_mixin_publishes_nine_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_umbrella_mixin_publishes_nine_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HousingDashboardFrameMixin",
@@ -324,10 +305,11 @@ fn blizzard_housing_dashboard_umbrella_mixin_publishes_nine_methods() {
          no-houses behaviour driven by UpdateSizeToContent",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_upgrade_mixin_publishes_fourteen_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_upgrade_mixin_publishes_fourteen_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HousingUpgradeFrameMixin",
@@ -352,10 +334,11 @@ fn blizzard_housing_dashboard_house_upgrade_mixin_publishes_fourteen_methods() {
          HOUSE_LEVEL_REWARDS_UPDATED via OnEvent",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_upgrade_level_mixin_publishes_three_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_upgrade_level_mixin_publishes_three_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HouseUpgradeLevelFrameMixin",
@@ -365,10 +348,11 @@ fn blizzard_housing_dashboard_house_upgrade_level_mixin_publishes_three_methods(
          based on completed-vs-incomplete-vs-selected",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_teleport_mixin_publishes_ten_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_teleport_mixin_publishes_ten_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HousingTeleportToHouseMixin",
@@ -388,10 +372,11 @@ fn blizzard_housing_dashboard_teleport_mixin_publishes_ten_methods() {
          events; OnClick validates state then dispatches the teleport",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_upgrade_reward_mixin_publishes_two_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_upgrade_reward_mixin_publishes_two_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HouseUpgradeRewardFrameMixin",
@@ -401,10 +386,11 @@ fn blizzard_housing_dashboard_house_upgrade_reward_mixin_publishes_two_methods()
          OnLeave hides the tooltip",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_upgrade_current_level_mixin_publishes_two_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_upgrade_current_level_mixin_publishes_two_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HouseUpgradeCurrentLevelFrameMixin",
@@ -413,10 +399,11 @@ fn blizzard_housing_dashboard_house_upgrade_current_level_mixin_publishes_two_me
          the upgrade track",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_watch_favor_button_mixin_publishes_four_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_watch_favor_button_mixin_publishes_four_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HouseWatchFavorButtonMixin",
@@ -426,10 +413,11 @@ fn blizzard_housing_dashboard_house_watch_favor_button_mixin_publishes_four_meth
          UpdateState refreshes the checked atlas, OnShow re-runs UpdateState",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_upgrade_progress_bar_mixin_publishes_eight_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_upgrade_progress_bar_mixin_publishes_eight_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HouseUpgradeProgressBarMixin",
@@ -450,10 +438,11 @@ fn blizzard_housing_dashboard_house_upgrade_progress_bar_mixin_publishes_eight_m
          animation chain",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_level_track_mixin_extends_reward_track() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_level_track_mixin_extends_reward_track(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
 
     let exists: bool = env
         .eval("return type(HouseLevelTrackFrameMixin) == 'table'")
@@ -466,10 +455,11 @@ fn blizzard_housing_dashboard_house_level_track_mixin_extends_reward_track() {
          overrides"
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_info_mixin_publishes_nine_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_info_mixin_publishes_nine_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HousingDashboardHouseInfoMixin",
@@ -489,10 +479,11 @@ fn blizzard_housing_dashboard_house_info_mixin_publishes_nine_methods() {
          Dashboard:UpdateSizeToContent), routes the HouseFinder + tutorial button clicks",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_info_content_mixin_publishes_five_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_info_content_mixin_publishes_five_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HousingDashboardHouseInfoContentFrameMixin",
@@ -507,10 +498,11 @@ fn blizzard_housing_dashboard_house_info_content_mixin_publishes_five_methods() 
          SetToDefaultAvailableTab walks IsTabAvailable to find the first eligible tab",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_finder_button_mixin_publishes_one_method() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_finder_button_mixin_publishes_one_method(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HouseFinderButtonMixin",
@@ -519,10 +511,11 @@ fn blizzard_housing_dashboard_house_finder_button_mixin_publishes_one_method() {
          Blizzard_HousingHouseFinder then shows that frame",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_house_xp_cap_icon_mixin_publishes_three_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_house_xp_cap_icon_mixin_publishes_three_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HouseXPCapIconMixin",
@@ -531,10 +524,11 @@ fn blizzard_housing_dashboard_house_xp_cap_icon_mixin_publishes_three_methods() 
          UpdateVisibility queries C_HousingNeighborhood.IsHouseAtWeeklyXPCap",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_initiatives_tab_mixin_publishes_seventeen_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_initiatives_tab_mixin_publishes_seventeen_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "InitiativesTabMixin",
@@ -561,10 +555,11 @@ fn blizzard_housing_dashboard_initiatives_tab_mixin_publishes_seventeen_methods(
          + task list scrollboxes plus the threshold reward animation tied to the progress bar",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_initiative_task_button_mixin_publishes_nine_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_initiative_task_button_mixin_publishes_nine_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "InitiativeTaskButtonMixin",
@@ -584,10 +579,11 @@ fn blizzard_housing_dashboard_initiative_task_button_mixin_publishes_nine_method
          GetData returns the bound task info for tooltip rendering)",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_progress_threshold_mixin_publishes_four_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_progress_threshold_mixin_publishes_four_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "ProgressThresholdMixin",
@@ -597,10 +593,11 @@ fn blizzard_housing_dashboard_progress_threshold_mixin_publishes_four_methods() 
          chevron pip when the parent bar's value advances past the threshold",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_initiative_neighborhood_switcher_mixin_publishes_one_method() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_initiative_neighborhood_switcher_mixin_publishes_one_method(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "InitiativeActiveNeighborhoodSwitcherMixin",
@@ -609,10 +606,11 @@ fn blizzard_housing_dashboard_initiative_neighborhood_switcher_mixin_publishes_o
          player has multiple eligible neighborhoods to earn favor in",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_catalog_frame_mixin_publishes_thirteen_methods() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_catalog_frame_mixin_publishes_thirteen_methods(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HousingCatalogFrameMixin",
@@ -637,10 +635,11 @@ fn blizzard_housing_dashboard_catalog_frame_mixin_publishes_thirteen_methods() {
          scroll-to-entry from chat link clicks",
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_frame_publishes_tab_buttons_and_content_children() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_frame_publishes_tab_buttons_and_content_children(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
 
     for child in [
         "HouseInfoContent",
@@ -661,10 +660,11 @@ fn blizzard_housing_dashboard_frame_publishes_tab_buttons_and_content_children()
         );
     }
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_tab_buttons_array_holds_two_entries() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_tab_buttons_array_holds_two_entries(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
 
     let count: i64 = env
         .eval("local arr = HousingDashboardFrame.TabButtons; return arr and #arr or -1")
@@ -677,10 +677,11 @@ fn blizzard_housing_dashboard_tab_buttons_array_holds_two_entries() {
          length {count}"
     );
 }
+}
 
-#[test]
-fn blizzard_housing_dashboard_registers_left_panel_with_extra_width_func() {
-    let env = load_full_game_ui_with_dashboard_lod();
+prefork_full_ui_case! {
+fn blizzard_housing_dashboard_registers_left_panel_with_extra_width_func(env: &WowLuaEnv) {
+    load_housing_dashboard(env);
 
     let area: String = env
         .eval(
@@ -716,4 +717,5 @@ fn blizzard_housing_dashboard_registers_left_panel_with_extra_width_func() {
          this lets UIParent reserve room for the side tab strip outside the dashboard's main \
          frame width when computing left-area layout slots"
     );
+}
 }
