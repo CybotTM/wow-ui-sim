@@ -308,9 +308,8 @@ fn blizzard_objective_tracker_appears_in_game_screen_eager_discovery_only() {
     }
 }
 
-#[test]
-fn blizzard_objective_tracker_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_objective_tracker_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -342,10 +341,10 @@ fn blizzard_objective_tracker_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_objective_tracker_is_addon_loaded_after_eager_sweep() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_objective_tracker_is_addon_loaded_after_eager_sweep(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_ObjectiveTracker')")
@@ -356,10 +355,10 @@ fn blizzard_objective_tracker_is_addon_loaded_after_eager_sweep() {
          Game-screen sweep — no LoadOnDemand puts the addon in the eager set"
     );
 }
+}
 
-#[test]
-fn blizzard_objective_tracker_publishes_manager_singleton_with_initial_state() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_objective_tracker_publishes_manager_singleton_with_initial_state(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(_G.ObjectiveTrackerManager)")
@@ -387,10 +386,10 @@ fn blizzard_objective_tracker_publishes_manager_singleton_with_initial_state() {
          module to register on first load"
     );
 }
+}
 
-#[test]
-fn blizzard_objective_tracker_publishes_base_mixin_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_objective_tracker_publishes_base_mixin_tables(env: &WowLuaEnv) {
 
     for mixin in PUBLIC_BASE_MIXINS {
         let kind: String = env
@@ -414,10 +413,10 @@ fn blizzard_objective_tracker_publishes_base_mixin_tables() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_objective_tracker_publishes_eleven_module_mixin_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_objective_tracker_publishes_eleven_module_mixin_tables(env: &WowLuaEnv) {
 
     for mixin in PUBLIC_MODULE_MIXINS {
         let kind: String = env
@@ -436,10 +435,10 @@ fn blizzard_objective_tracker_publishes_eleven_module_mixin_tables() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_objective_tracker_creates_named_xml_frames_as_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_objective_tracker_creates_named_xml_frames_as_globals(env: &WowLuaEnv) {
 
     for frame_name in NAMED_NON_VIRTUAL_FRAMES {
         let kind: String = env
@@ -460,10 +459,10 @@ fn blizzard_objective_tracker_creates_named_xml_frames_as_globals() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_objective_tracker_does_not_leak_virtual_templates_to_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_objective_tracker_does_not_leak_virtual_templates_to_globals(env: &WowLuaEnv) {
 
     for template in VIRTUAL_TEMPLATES_NOT_IN_GLOBALS {
         let kind: String = env
@@ -482,4 +481,5 @@ fn blizzard_objective_tracker_does_not_leak_virtual_templates_to_globals() {
              instance"
         );
     }
+}
 }

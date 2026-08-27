@@ -386,9 +386,8 @@ fn blizzard_professions_templates_appears_in_full_addon_inventory() {
     );
 }
 
-#[test]
-fn blizzard_professions_templates_loads_explicitly_after_dependencies() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_professions_templates_loads_explicitly_after_dependencies(env: &WowLuaEnv) {
 
     {
         let mut state = env.state().borrow_mut();
@@ -420,10 +419,10 @@ fn blizzard_professions_templates_loads_explicitly_after_dependencies() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_professions_templates_publishes_forty_seven_mixin_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_professions_templates_publishes_forty_seven_mixin_globals(env: &WowLuaEnv) {
     load_templates_with_deps(&env);
 
     assert_eq!(
@@ -464,10 +463,10 @@ fn blizzard_professions_templates_publishes_forty_seven_mixin_globals() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_professions_templates_publishes_table_constants_global() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_professions_templates_publishes_table_constants_global(env: &WowLuaEnv) {
     load_templates_with_deps(&env);
 
     let kind: String = env
@@ -510,10 +509,10 @@ fn blizzard_professions_templates_publishes_table_constants_global() {
          layout that drives every Crafter / Customer table view"
     );
 }
+}
 
-#[test]
-fn blizzard_professions_templates_virtual_templates_not_in_global_env() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_professions_templates_virtual_templates_not_in_global_env(env: &WowLuaEnv) {
     load_templates_with_deps(&env);
 
     for template in VIRTUAL_TEMPLATES_SAMPLE {
@@ -538,10 +537,10 @@ fn blizzard_professions_templates_virtual_templates_not_in_global_env() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_professions_templates_publishes_no_named_top_level_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_professions_templates_publishes_no_named_top_level_frames(env: &WowLuaEnv) {
     load_templates_with_deps(&env);
 
     let kind: String = env
@@ -561,4 +560,5 @@ fn blizzard_professions_templates_publishes_no_named_top_level_frames() {
          shared-templates addon: declare virtual templates + mixins, never \
          materialize a named frame"
     );
+}
 }

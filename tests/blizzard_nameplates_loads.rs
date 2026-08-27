@@ -286,9 +286,8 @@ fn blizzard_nameplates_appears_in_discover_all_blizzard_addons() {
     );
 }
 
-#[test]
-fn blizzard_nameplates_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_nameplates_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -310,10 +309,10 @@ fn blizzard_nameplates_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_nameplates_is_addon_loaded_after_auto_discovery() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_nameplates_is_addon_loaded_after_auto_discovery(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_NamePlates')")
@@ -325,10 +324,10 @@ fn blizzard_nameplates_is_addon_loaded_after_auto_discovery() {
          during the standard Game-screen boot pipeline, no explicit load_addon call required"
     );
 }
+}
 
-#[test]
-fn blizzard_nameplates_publishes_driver_frame_and_constants_table() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_nameplates_publishes_driver_frame_and_constants_table(env: &WowLuaEnv) {
 
     let driver_kind: String = env
         .eval("return type(NamePlateDriverFrame)")
@@ -364,10 +363,10 @@ fn blizzard_nameplates_publishes_driver_frame_and_constants_table() {
          OnNamePlateResized to compute the per-plate scale"
     );
 }
+}
 
-#[test]
-fn blizzard_nameplates_publishes_all_driver_and_base_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_nameplates_publishes_all_driver_and_base_mixins(env: &WowLuaEnv) {
 
     for mixin in PUBLIC_DRIVER_AND_BASE_MIXINS {
         let kind: String = env
@@ -383,10 +382,10 @@ fn blizzard_nameplates_publishes_all_driver_and_base_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_nameplates_publishes_all_class_bar_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_nameplates_publishes_all_class_bar_globals(env: &WowLuaEnv) {
 
     for global in PUBLIC_CLASS_BAR_GLOBALS {
         let kind: String = env
@@ -402,10 +401,10 @@ fn blizzard_nameplates_publishes_all_class_bar_globals() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_nameplates_does_not_leak_wowhack_only_mixin() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_nameplates_does_not_leak_wowhack_only_mixin(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval(&format!("return type(_G.{WOWHACK_ONLY_GLOBAL})"))
@@ -420,10 +419,10 @@ fn blizzard_nameplates_does_not_leak_wowhack_only_mixin() {
          the per-file gate is wired through to runtime visibility"
     );
 }
+}
 
-#[test]
-fn blizzard_nameplates_does_not_leak_file_local_helpers_to_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_nameplates_does_not_leak_file_local_helpers_to_globals(env: &WowLuaEnv) {
 
     for symbol in FILE_PRIVATE_LOCALS_THAT_MUST_NOT_LEAK {
         let kind: String = env
@@ -437,4 +436,5 @@ fn blizzard_nameplates_does_not_leak_file_local_helpers_to_globals() {
              addon namespaces and break the file-encapsulation contract"
         );
     }
+}
 }

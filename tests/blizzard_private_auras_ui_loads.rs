@@ -292,9 +292,8 @@ fn blizzard_private_auras_ui_appears_in_full_addon_inventory() {
     );
 }
 
-#[test]
-fn blizzard_private_auras_ui_is_addon_loaded_after_game_screen_boot() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_private_auras_ui_is_addon_loaded_after_game_screen_boot(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_PrivateAurasUI')")
@@ -305,10 +304,10 @@ fn blizzard_private_auras_ui_is_addon_loaded_after_game_screen_boot() {
          eager Game-screen sweep"
     );
 }
+}
 
-#[test]
-fn blizzard_private_auras_ui_publishes_five_mixins_into_secure_env() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_private_auras_ui_publishes_five_mixins_into_secure_env(env: &WowLuaEnv) {
 
     for name in PUBLIC_MIXIN_GLOBALS {
         let in_secure_env: String = env
@@ -342,10 +341,10 @@ fn blizzard_private_auras_ui_publishes_five_mixins_into_secure_env() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_private_auras_ui_virtual_templates_are_not_in_global_env() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_private_auras_ui_virtual_templates_are_not_in_global_env(env: &WowLuaEnv) {
 
     for template in VIRTUAL_TEMPLATES_NOT_IN_GLOBAL_ENV {
         let kind: String = env
@@ -366,10 +365,10 @@ fn blizzard_private_auras_ui_virtual_templates_are_not_in_global_env() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_private_auras_ui_scoped_named_frames_stay_out_of_global_env() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_private_auras_ui_scoped_named_frames_stay_out_of_global_env(env: &WowLuaEnv) {
 
     for frame in SCOPED_NAMED_FRAMES_HIDDEN_FROM_GLOBAL_ENV {
         let kind: String = env
@@ -383,6 +382,7 @@ fn blizzard_private_auras_ui_scoped_named_frames_stay_out_of_global_env() {
              frames inside the scope are created without publishing global bindings"
         );
     }
+}
 }
 
 #[test]
@@ -429,9 +429,8 @@ fn blizzard_private_auras_ui_xml_uses_scoped_modifier_wrapper() {
     );
 }
 
-#[test]
-fn blizzard_private_auras_ui_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_private_auras_ui_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -453,4 +452,5 @@ fn blizzard_private_auras_ui_loads_without_addon_specific_lua_errors() {
         "Blizzard_PrivateAurasUI emitted addon-specific Lua errors during load:\n  {}",
         load_errors.join("\n  ")
     );
+}
 }

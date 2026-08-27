@@ -335,9 +335,8 @@ fn blizzard_raid_ui_appears_in_full_addon_inventory() {
     );
 }
 
-#[test]
-fn blizzard_raid_ui_is_loaded_via_runtime_loadaddon_on_group_roster_update() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_raid_ui_is_loaded_via_runtime_loadaddon_on_group_roster_update(env: &WowLuaEnv) {
 
     let already_loaded: bool = env
         .eval(
@@ -364,10 +363,10 @@ fn blizzard_raid_ui_is_loaded_via_runtime_loadaddon_on_group_roster_update() {
          spectator client explicitly triggers it"
     );
 }
+}
 
-#[test]
-fn blizzard_raid_ui_loads_without_errors_during_startup() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_raid_ui_loads_without_errors_during_startup(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -390,10 +389,10 @@ fn blizzard_raid_ui_loads_without_errors_during_startup() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_raid_ui_publishes_module_constants_after_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_raid_ui_publishes_module_constants_after_load(env: &WowLuaEnv) {
 
     let constants_present: bool = env
         .eval(
@@ -437,10 +436,10 @@ fn blizzard_raid_ui_publishes_module_constants_after_load() {
          table merged into RAID_PULLOUT_POSITIONS[filterID].settings on save"
     );
 }
+}
 
-#[test]
-fn blizzard_raid_ui_publishes_top_level_handler_functions() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_raid_ui_publishes_top_level_handler_functions(env: &WowLuaEnv) {
 
     for func_name in TOP_LEVEL_FUNCTIONS {
         let kind: String = env
@@ -476,10 +475,10 @@ fn blizzard_raid_ui_publishes_top_level_handler_functions() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_raid_ui_publishes_named_numbered_frame_arrays() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_raid_ui_publishes_named_numbered_frame_arrays(env: &WowLuaEnv) {
 
     let class_buttons_present: bool = env
         .eval(
@@ -539,10 +538,10 @@ fn blizzard_raid_ui_publishes_named_numbered_frame_arrays() {
          $parentSlot1..5 hierarchy"
     );
 }
+}
 
-#[test]
-fn blizzard_raid_ui_virtual_templates_not_in_global_env() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_raid_ui_virtual_templates_not_in_global_env(env: &WowLuaEnv) {
 
     for template in VIRTUAL_TEMPLATES {
         let kind: String = env
@@ -574,10 +573,10 @@ fn blizzard_raid_ui_virtual_templates_not_in_global_env() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_raid_ui_registers_extra_events_on_raid_frame() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_raid_ui_registers_extra_events_on_raid_frame(env: &WowLuaEnv) {
 
     for event in ON_LOAD_REGISTERED_EVENTS {
         let registered: bool = env
@@ -604,6 +603,7 @@ fn blizzard_raid_ui_registers_extra_events_on_raid_frame() {
              SetScript at lua:154"
         );
     }
+}
 }
 
 #[test]

@@ -345,9 +345,8 @@ fn blizzard_pet_battle_ui_appears_in_full_addon_inventory() {
     );
 }
 
-#[test]
-fn blizzard_pet_battle_ui_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_pet_battle_ui_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -374,10 +373,10 @@ fn blizzard_pet_battle_ui_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_pet_battle_ui_is_addon_loaded_after_eager_sweep() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_pet_battle_ui_is_addon_loaded_after_eager_sweep(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_PetBattleUI')")
@@ -389,10 +388,10 @@ fn blizzard_pet_battle_ui_is_addon_loaded_after_eager_sweep() {
          sweep loads it directly"
     );
 }
+}
 
-#[test]
-fn blizzard_pet_battle_ui_publishes_micro_button_frame_mixin() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_pet_battle_ui_publishes_micro_button_frame_mixin(env: &WowLuaEnv) {
 
     for mixin in PUBLIC_MIXINS {
         let kind: String = env
@@ -414,10 +413,10 @@ fn blizzard_pet_battle_ui_publishes_micro_button_frame_mixin() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_pet_battle_ui_publishes_global_script_handlers() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_pet_battle_ui_publishes_global_script_handlers(env: &WowLuaEnv) {
 
     for func in PUBLIC_GLOBAL_FUNCTIONS {
         let kind: String = env
@@ -439,10 +438,10 @@ fn blizzard_pet_battle_ui_publishes_global_script_handlers() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_pet_battle_ui_creates_named_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_pet_battle_ui_creates_named_frames(env: &WowLuaEnv) {
 
     for frame in PUBLIC_NAMED_FRAMES {
         let kind: String = env
@@ -469,10 +468,10 @@ fn blizzard_pet_battle_ui_creates_named_frames() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_pet_battle_ui_does_not_leak_virtual_templates_to_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_pet_battle_ui_does_not_leak_virtual_templates_to_globals(env: &WowLuaEnv) {
 
     for template in PUBLIC_VIRTUAL_TEMPLATES {
         let kind: String = env
@@ -502,4 +501,5 @@ fn blizzard_pet_battle_ui_does_not_leak_virtual_templates_to_globals() {
              normal frame-template path"
         );
     }
+}
 }

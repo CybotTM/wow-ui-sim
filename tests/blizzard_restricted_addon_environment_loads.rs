@@ -386,9 +386,8 @@ fn root_directory_holds_eight_lua_and_two_xml_files() {
     );
 }
 
-#[test]
-fn loads_without_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn loads_without_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -417,10 +416,10 @@ fn loads_without_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn is_addon_loaded_after_eager_sweep() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn is_addon_loaded_after_eager_sweep(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_RestrictedAddOnEnvironment')")
@@ -434,10 +433,10 @@ fn is_addon_loaded_after_eager_sweep() {
          global"
     );
 }
+}
 
-#[test]
-fn restricted_infrastructure_publishes_frame_handle_namespace_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn restricted_infrastructure_publishes_frame_handle_namespace_globals(env: &WowLuaEnv) {
 
     for fname in RESTRICTED_INFRASTRUCTURE_GLOBALS {
         let kind: String = env
@@ -458,10 +457,10 @@ fn restricted_infrastructure_publishes_frame_handle_namespace_globals() {
         );
     }
 }
+}
 
-#[test]
-fn init_frame_handle_namespace_is_explicitly_nilled_after_use() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn init_frame_handle_namespace_is_explicitly_nilled_after_use(env: &WowLuaEnv) {
     let kind: String = env
         .eval("return type(_G['InitFrameHandleNamespace'])")
         .expect("type(_G.InitFrameHandleNamespace) probe should succeed");
@@ -475,10 +474,10 @@ fn init_frame_handle_namespace_is_explicitly_nilled_after_use() {
          deliberate one-shot pattern matching real WoW behaviour"
     );
 }
+}
 
-#[test]
-fn restricted_execution_publishes_call_restricted_closure() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn restricted_execution_publishes_call_restricted_closure(env: &WowLuaEnv) {
     for fname in RESTRICTED_EXECUTION_GLOBALS {
         let kind: String = env
             .eval(&format!("return type(_G['{fname}'])"))
@@ -494,10 +493,10 @@ fn restricted_execution_publishes_call_restricted_closure() {
         );
     }
 }
+}
 
-#[test]
-fn rtable_namespace_publishes_with_restricted_table_helpers() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn rtable_namespace_publishes_with_restricted_table_helpers(env: &WowLuaEnv) {
     let kind: String = env
         .eval("return type(rtable)")
         .expect("type(rtable) probe should succeed");
@@ -520,20 +519,20 @@ fn rtable_namespace_publishes_with_restricted_table_helpers() {
          immediately after rtable construction"
     );
 }
+}
 
-#[test]
-fn secure_handler_execute_persists_restricted_tables_for_show_handlers() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn secure_handler_execute_persists_restricted_tables_for_show_handlers(env: &WowLuaEnv) {
     let count: String = env
         .eval(r#"local frame = CreateFrame("Button", "SecureHandlerExecutePersistenceProbe", UIParent, "SecureHandlerShowHideTemplate"); frame:Hide(); frame:Execute([[ keybinds = table.new("ALT-X") ]]); frame:SetAttribute("_onshow", [[ self:SetAttribute("observedCount", tostring(table.maxn(keybinds))) ]]); frame:Show(); return frame:GetAttribute("observedCount")"#)
         .unwrap();
 
     assert_eq!(count, "1");
 }
+}
 
-#[test]
-fn secure_handlers_publish_full_global_surface() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn secure_handlers_publish_full_global_surface(env: &WowLuaEnv) {
     for fname in SECURE_HANDLER_GLOBALS {
         let kind: String = env
             .eval(&format!("return type(_G['{fname}'])"))
@@ -554,10 +553,10 @@ fn secure_handlers_publish_full_global_surface() {
         );
     }
 }
+}
 
-#[test]
-fn secure_state_driver_publishes_attribute_state_unit_drivers() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn secure_state_driver_publishes_attribute_state_unit_drivers(env: &WowLuaEnv) {
     for fname in SECURE_STATE_DRIVER_GLOBALS {
         let kind: String = env
             .eval(&format!("return type(_G['{fname}'])"))
@@ -573,10 +572,10 @@ fn secure_state_driver_publishes_attribute_state_unit_drivers() {
         );
     }
 }
+}
 
-#[test]
-fn secure_hover_driver_publishes_auto_hide_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn secure_hover_driver_publishes_auto_hide_globals(env: &WowLuaEnv) {
     for fname in SECURE_HOVER_DRIVER_GLOBALS {
         let kind: String = env
             .eval(&format!("return type(_G['{fname}'])"))
@@ -592,10 +591,10 @@ fn secure_hover_driver_publishes_auto_hide_globals() {
         );
     }
 }
+}
 
-#[test]
-fn secure_group_headers_publish_full_lifecycle_surface() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn secure_group_headers_publish_full_lifecycle_surface(env: &WowLuaEnv) {
     for fname in SECURE_GROUP_HEADER_GLOBALS {
         let kind: String = env
             .eval(&format!("return type(_G['{fname}'])"))
@@ -612,10 +611,10 @@ fn secure_group_headers_publish_full_lifecycle_surface() {
         );
     }
 }
+}
 
-#[test]
-fn restricted_environment_module_locals_stay_file_scoped() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn restricted_environment_module_locals_stay_file_scoped(env: &WowLuaEnv) {
     let no_module_local_leak: bool = env
         .eval(
             "return _G['RESTRICTED_FUNCTIONS_SCOPE'] == nil \
@@ -639,10 +638,10 @@ fn restricted_environment_module_locals_stay_file_scoped() {
          file-locals and the addonTable export"
     );
 }
+}
 
-#[test]
-fn virtual_templates_stay_off_global_scope() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn virtual_templates_stay_off_global_scope(env: &WowLuaEnv) {
     for template in VIRTUAL_TEMPLATES {
         let kind: String = env
             .eval(&format!("return type(_G['{template}'])"))
@@ -659,10 +658,10 @@ fn virtual_templates_stay_off_global_scope() {
         );
     }
 }
+}
 
-#[test]
-fn named_manager_frames_publish_globally_under_secure_template() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn named_manager_frames_publish_globally_under_secure_template(env: &WowLuaEnv) {
     for fname in NAMED_MANAGER_FRAMES {
         let (exists, is_protected, blocked_insecure_attribute): (bool, bool, bool) = env
             .eval(&format!(
@@ -710,6 +709,7 @@ fn named_manager_frames_publish_globally_under_secure_template() {
              enforcement path is not using the XML/template-derived protection flag."
         );
     }
+}
 }
 
 #[test]

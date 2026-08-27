@@ -273,9 +273,8 @@ fn blizzard_recruit_a_friend_appears_in_eager_game_discovery() {
     );
 }
 
-#[test]
-fn blizzard_recruit_a_friend_loads_without_errors_during_full_game_startup() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_loads_without_errors_during_full_game_startup(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -297,10 +296,10 @@ fn blizzard_recruit_a_friend_loads_without_errors_during_full_game_startup() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_recruit_a_friend_is_addon_loaded_returns_true_after_full_game_ui_load() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_is_addon_loaded_returns_true_after_full_game_ui_load(env: &WowLuaEnv) {
 
     let post_load: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_RecruitAFriend') and true or false")
@@ -312,10 +311,10 @@ fn blizzard_recruit_a_friend_is_addon_loaded_returns_true_after_full_game_ui_loa
          `mark_addon_loaded` registers it"
     );
 }
+}
 
-#[test]
-fn blizzard_recruit_a_friend_publishes_nineteen_mixin_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_publishes_nineteen_mixin_tables(env: &WowLuaEnv) {
 
     for mixin in MIXIN_TABLES {
         let exists: bool = env
@@ -344,10 +343,10 @@ fn blizzard_recruit_a_friend_publishes_nineteen_mixin_tables() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_recruit_a_friend_publishes_three_named_top_level_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_publishes_three_named_top_level_frames(env: &WowLuaEnv) {
 
     for frame in NAMED_TOP_LEVEL_FRAMES {
         let exists: bool = env
@@ -369,10 +368,10 @@ fn blizzard_recruit_a_friend_publishes_three_named_top_level_frames() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_recruit_a_friend_virtual_templates_not_in_global_env() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_virtual_templates_not_in_global_env(env: &WowLuaEnv) {
 
     for tmpl in VIRTUAL_TEMPLATES {
         let leaked: bool = env
@@ -391,10 +390,10 @@ fn blizzard_recruit_a_friend_virtual_templates_not_in_global_env() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_recruit_a_friend_frame_is_in_friends_frame_subframes_table() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_frame_is_in_friends_frame_subframes_table(env: &WowLuaEnv) {
 
     let in_subframes: bool = env
         .eval(
@@ -415,10 +414,10 @@ fn blizzard_recruit_a_friend_frame_is_in_friends_frame_subframes_table() {
          hard dep, ensuring FRIENDSFRAME_SUBFRAMES exists by the time RAF's XML parses"
     );
 }
+}
 
-#[test]
-fn blizzard_recruit_a_friend_frame_mixin_publishes_callback_event_enum() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_frame_mixin_publishes_callback_event_enum(env: &WowLuaEnv) {
 
     let events: (bool, bool, bool, bool) = env
         .eval(
@@ -443,10 +442,10 @@ fn blizzard_recruit_a_friend_frame_mixin_publishes_callback_event_enum() {
          GenerateCallbackEvents — distinct from the static enums in older addons"
     );
 }
+}
 
-#[test]
-fn blizzard_recruit_a_friend_frame_mixin_exposes_lifecycle_and_state_methods() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_frame_mixin_exposes_lifecycle_and_state_methods(env: &WowLuaEnv) {
 
     let lifecycle: (bool, bool, bool) = env
         .eval(
@@ -486,10 +485,10 @@ fn blizzard_recruit_a_friend_frame_mixin_exposes_lifecycle_and_state_methods() {
          C_RecruitAFriend.GetRAFInfo struct"
     );
 }
+}
 
-#[test]
-fn blizzard_recruit_a_friend_row_height_constants_stay_file_local() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_row_height_constants_stay_file_local(env: &WowLuaEnv) {
 
     let leaked: (bool, bool) = env
         .eval("return RECRUIT_HEIGHT ~= nil, DIVIDER_HEIGHT ~= nil")
@@ -508,10 +507,10 @@ fn blizzard_recruit_a_friend_row_height_constants_stay_file_local() {
          module file isn't tempted to namespace these constants under an addon table"
     );
 }
+}
 
-#[test]
-fn blizzard_recruit_a_friend_frame_registers_six_events_in_onload() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_recruit_a_friend_frame_registers_six_events_in_onload(env: &WowLuaEnv) {
 
     for event in REGISTERED_EVENTS {
         let registered: bool = env
@@ -535,4 +534,5 @@ fn blizzard_recruit_a_friend_frame_registers_six_events_in_onload() {
              ready)"
         );
     }
+}
 }

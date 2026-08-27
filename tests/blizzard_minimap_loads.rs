@@ -305,9 +305,8 @@ fn blizzard_minimap_required_deps_appear_in_game_discovery() {
     }
 }
 
-#[test]
-fn blizzard_minimap_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_minimap_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let addon_errors: Vec<String> = env
         .state()
@@ -330,10 +329,10 @@ fn blizzard_minimap_loads_without_addon_specific_lua_errors() {
         addon_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_minimap_is_addon_loaded_after_auto_discovery() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_minimap_is_addon_loaded_after_auto_discovery(env: &WowLuaEnv) {
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_Minimap')")
         .expect("IsAddOnLoaded probe succeeds");
@@ -344,10 +343,10 @@ fn blizzard_minimap_is_addon_loaded_after_auto_discovery() {
          during the standard Game-screen boot pipeline"
     );
 }
+}
 
-#[test]
-fn blizzard_minimap_publishes_ten_minimap_mixins_as_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_minimap_publishes_ten_minimap_mixins_as_tables(env: &WowLuaEnv) {
     for mixin in MINIMAP_MIXINS {
         let kind: String = env
             .eval(&format!("return type(_G.{mixin})"))
@@ -361,10 +360,10 @@ fn blizzard_minimap_publishes_ten_minimap_mixins_as_tables() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_minimap_publishes_addon_compartment_mixin_with_five_methods() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_minimap_publishes_addon_compartment_mixin_with_five_methods(env: &WowLuaEnv) {
     let kind: String = env
         .eval("return type(_G.AddonCompartmentMixin)")
         .expect("AddonCompartmentMixin probe");
@@ -388,10 +387,10 @@ fn blizzard_minimap_publishes_addon_compartment_mixin_with_five_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_minimap_publishes_module_level_constants() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_minimap_publishes_module_level_constants(env: &WowLuaEnv) {
     let probe = "\
         return MINIMAPPING_TIMER == 5.5 \
             and MINIMAPPING_FADE_TIMER == 0.5 \
@@ -419,10 +418,10 @@ fn blizzard_minimap_publishes_module_level_constants() {
          name to drive minimap pulse / fade animations and time-of-day display"
     );
 }
+}
 
-#[test]
-fn blizzard_minimap_publishes_named_frames_with_correct_widget_types() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_minimap_publishes_named_frames_with_correct_widget_types(env: &WowLuaEnv) {
     for frame in NAMED_FRAMES {
         let exists: bool = env
             .eval(&format!("return type(_G.{frame}) == 'table'"))
@@ -438,10 +437,10 @@ fn blizzard_minimap_publishes_named_frames_with_correct_widget_types() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_minimap_publishes_gametime_helper_functions() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_minimap_publishes_gametime_helper_functions(env: &WowLuaEnv) {
     for func in GAMETIME_FUNCTIONS {
         let kind: String = env
             .eval(&format!("return type(_G.{func})"))
@@ -455,10 +454,10 @@ fn blizzard_minimap_publishes_gametime_helper_functions() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_minimap_publishes_minimap_helper_functions() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_minimap_publishes_minimap_helper_functions(env: &WowLuaEnv) {
     for func in MINIMAP_FUNCTIONS {
         let kind: String = env
             .eval(&format!("return type(_G.{func})"))
@@ -472,10 +471,10 @@ fn blizzard_minimap_publishes_minimap_helper_functions() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_minimap_publishes_garrison_helper_functions() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_minimap_publishes_garrison_helper_functions(env: &WowLuaEnv) {
     for func in GARRISON_FUNCTIONS {
         let kind: String = env
             .eval(&format!("return type(_G.{func})"))
@@ -488,4 +487,5 @@ fn blizzard_minimap_publishes_garrison_helper_functions() {
              exports drive pulse locks and queued help-tip routing on the minimap button"
         );
     }
+}
 }

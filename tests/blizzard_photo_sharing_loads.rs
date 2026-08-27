@@ -274,9 +274,8 @@ fn blizzard_photo_sharing_appears_in_full_addon_inventory() {
     );
 }
 
-#[test]
-fn blizzard_photo_sharing_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_photo_sharing_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -297,10 +296,10 @@ fn blizzard_photo_sharing_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_photo_sharing_is_addon_loaded_after_eager_sweep() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_photo_sharing_is_addon_loaded_after_eager_sweep(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_PhotoSharing')")
@@ -311,10 +310,10 @@ fn blizzard_photo_sharing_is_addon_loaded_after_eager_sweep() {
          eager Game-screen sweep — no LoadOnDemand puts the addon in the eager set"
     );
 }
+}
 
-#[test]
-fn blizzard_photo_sharing_publishes_five_mixins() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_photo_sharing_publishes_five_mixins(env: &WowLuaEnv) {
 
     for mixin in PUBLIC_MIXINS {
         let kind: String = env
@@ -335,10 +334,10 @@ fn blizzard_photo_sharing_publishes_five_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_photo_sharing_publishes_tab_list_global() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_photo_sharing_publishes_tab_list_global(env: &WowLuaEnv) {
 
     let kind: String = env
         .eval("return type(_G.PHOTO_SHARING_TAB_LIST)")
@@ -373,10 +372,10 @@ fn blizzard_photo_sharing_publishes_tab_list_global() {
         .expect("[2] probe succeeds");
     assert_eq!(second, "PhotoSharingDescriptionEditBox");
 }
+}
 
-#[test]
-fn blizzard_photo_sharing_creates_named_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_photo_sharing_creates_named_frames(env: &WowLuaEnv) {
 
     for frame in PUBLIC_NAMED_FRAMES {
         let kind: String = env
@@ -398,10 +397,10 @@ fn blizzard_photo_sharing_creates_named_frames() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_photo_sharing_browser_popup_global_pins_inner_browser_collision_winner() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_photo_sharing_browser_popup_global_pins_inner_browser_collision_winner(env: &WowLuaEnv) {
 
     // The XML declares both a top-level Frame and its nested Browser child with
     // name="PhotoSharingBrowserPopup". The child is registered last and owns the
@@ -434,10 +433,10 @@ fn blizzard_photo_sharing_browser_popup_global_pins_inner_browser_collision_winn
          home page; the simulator performs no external browser navigation"
     );
 }
+}
 
-#[test]
-fn blizzard_photo_sharing_does_not_leak_virtual_templates_to_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_photo_sharing_does_not_leak_virtual_templates_to_globals(env: &WowLuaEnv) {
 
     for tmpl in PUBLIC_VIRTUAL_TEMPLATES {
         let kind: String = env
@@ -455,10 +454,10 @@ fn blizzard_photo_sharing_does_not_leak_virtual_templates_to_globals() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_photo_sharing_c_photo_sharing_authorization_probe_works() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_photo_sharing_c_photo_sharing_authorization_probe_works(env: &WowLuaEnv) {
 
     // PhotoSharingMixin:OnLoad calls self:UpdatePublishButton() which calls
     // C_PhotoSharing.IsAuthorized() — verified callable here so the mixin's
@@ -486,4 +485,5 @@ fn blizzard_photo_sharing_c_photo_sharing_authorization_probe_works() {
          exercises this default path and must take the `else` branch (showing the \
          `Sign in` button) without erroring"
     );
+}
 }

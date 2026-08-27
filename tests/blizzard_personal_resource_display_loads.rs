@@ -291,9 +291,8 @@ fn blizzard_personal_resource_display_appears_in_full_addon_inventory() {
     );
 }
 
-#[test]
-fn blizzard_personal_resource_display_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_personal_resource_display_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
 
     let load_errors: Vec<String> = env
         .state()
@@ -317,10 +316,10 @@ fn blizzard_personal_resource_display_loads_without_addon_specific_lua_errors() 
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_personal_resource_display_is_addon_loaded_after_eager_sweep() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_personal_resource_display_is_addon_loaded_after_eager_sweep(env: &WowLuaEnv) {
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_PersonalResourceDisplay')")
@@ -332,10 +331,10 @@ fn blizzard_personal_resource_display_is_addon_loaded_after_eager_sweep() {
          Game-screen sweep loads it directly"
     );
 }
+}
 
-#[test]
-fn blizzard_personal_resource_display_publishes_seven_mixin_tables() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_personal_resource_display_publishes_seven_mixin_tables(env: &WowLuaEnv) {
 
     for mixin in PUBLIC_MIXINS {
         let kind: String = env
@@ -349,10 +348,10 @@ fn blizzard_personal_resource_display_publishes_seven_mixin_tables() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_personal_resource_display_creates_personal_resource_display_frame_global() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_personal_resource_display_creates_personal_resource_display_frame_global(env: &WowLuaEnv) {
 
     for frame in PUBLIC_NAMED_FRAMES {
         let kind: String = env
@@ -379,4 +378,5 @@ fn blizzard_personal_resource_display_creates_personal_resource_display_frame_gl
              extend it"
         );
     }
+}
 }

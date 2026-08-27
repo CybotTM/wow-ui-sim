@@ -309,9 +309,8 @@ fn blizzard_quick_join_appears_in_full_addon_inventory() {
     );
 }
 
-#[test]
-fn blizzard_quick_join_loads_in_eager_game_sweep_without_lua_errors() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_quick_join_loads_in_eager_game_sweep_without_lua_errors(env: &WowLuaEnv) {
 
     let addon_errors: Vec<String> = env
         .state()
@@ -336,10 +335,10 @@ fn blizzard_quick_join_loads_in_eager_game_sweep_without_lua_errors() {
         addon_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_quick_join_publishes_eight_mixin_globals() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_quick_join_publishes_eight_mixin_globals(env: &WowLuaEnv) {
 
     for mixin in PUBLIC_MIXIN_GLOBALS {
         let kind: String = env
@@ -368,10 +367,10 @@ fn blizzard_quick_join_publishes_eight_mixin_globals() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_quick_join_publishes_three_named_top_level_frames() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_quick_join_publishes_three_named_top_level_frames(env: &WowLuaEnv) {
 
     for frame_name in PUBLIC_NAMED_FRAMES {
         let kind: String = env
@@ -395,10 +394,10 @@ fn blizzard_quick_join_publishes_three_named_top_level_frames() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_quick_join_virtual_templates_not_in_global_env() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_quick_join_virtual_templates_not_in_global_env(env: &WowLuaEnv) {
 
     for template in VIRTUAL_TEMPLATES_SAMPLE {
         let kind: String = env
@@ -424,10 +423,10 @@ fn blizzard_quick_join_virtual_templates_not_in_global_env() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_quick_join_publishes_global_helper_functions() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_quick_join_publishes_global_helper_functions(env: &WowLuaEnv) {
 
     for helper in PUBLIC_GLOBAL_HELPERS {
         let kind: String = env
@@ -452,10 +451,10 @@ fn blizzard_quick_join_publishes_global_helper_functions() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_quick_join_toast_registers_four_events_in_onload() {
-    let env = load_full_game_ui();
+prefork_full_ui_case! {
+fn blizzard_quick_join_toast_registers_four_events_in_onload(env: &WowLuaEnv) {
 
     for event in TOAST_ON_LOAD_REGISTERED_EVENTS {
         let registered: bool = env
@@ -479,4 +478,5 @@ fn blizzard_quick_join_toast_registers_four_events_in_onload() {
              OnHide, so it is NOT in this OnLoad-registered set"
         );
     }
+}
 }
