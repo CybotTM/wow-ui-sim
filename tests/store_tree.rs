@@ -1,13 +1,8 @@
-use crate::common;
-
 use std::collections::HashSet;
 use std::path::PathBuf;
-use wow_ui_sim::loader::{
-    discover_blizzard_addon_closure_for_screen, discover_blizzard_addons_for_screen, load_addon,
-};
+use wow_ui_sim::loader::{discover_blizzard_addon_closure_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::fire_startup_events_for_screen;
 
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
@@ -41,29 +36,6 @@ fn load_store_addons(env: &WowLuaEnv) {
             panic!("[load {name}] FAILED: {err}");
         });
     }
-}
-
-fn load_full_game_ui() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-    wow_ui_sim::xml::register_intrinsic_templates();
-
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path).unwrap_or_else(|err| {
-            panic!("[load {name}] FAILED: {err}");
-        });
-    }
-
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-    env
 }
 
 fn assert_no_child_cycle(
@@ -561,97 +533,89 @@ fn secure_env_preserves_secure_store_free_check_function(env: &WowLuaEnv) {
 }
 }
 
-#[test]
-fn store_button_full_game_path_shows_store_frame() {
-    test_timeout! {
-        let env = load_full_game_ui();
-        let (ok, err, store_shown, isshown_attr, action): (
-            bool,
-            Option<String>,
-            bool,
-            bool,
-            Option<String>,
-        ) = env
-            .eval(
-                r#"
-                local ok, err = pcall(function()
-                    StoreMicroButton:GetScript("OnClick")(StoreMicroButton, "LeftButton", false)
-                end)
-                return ok, err, StoreFrame:IsShown() == true, StoreFrame:GetAttribute("isshown") == true, StoreFrame:GetAttribute("action")
-                "#,
-            )
-            .expect("store micro button click should return");
-
-        assert_eq!(action.as_deref(), Some("Show"));
-        assert!(store_shown, "StoreFrame should be shown after the store button click");
-        assert!(isshown_attr, "OnShow should set isshown=true after the store button click");
-        assert!(ok, "store button path should return cleanly now: err={err:?}");
-    }
-}
-
-#[test]
-fn store_button_full_game_path_fires_onshow() {
-    test_timeout! {
-        let env = load_full_game_ui();
-        let (store_shown, onshow_count, onhide_count, isshown_attr, action): (
-            bool,
-            i32,
-            i32,
-            bool,
-            Option<String>,
-        ) = env
-            .eval(
-                r#"
-                local onShowCount, onHideCount = 0, 0
-                StoreFrame:HookScript("OnShow", function() onShowCount = onShowCount + 1 end)
-                StoreFrame:HookScript("OnHide", function() onHideCount = onHideCount + 1 end)
-
+prefork_full_ui_case! {
+fn store_button_full_game_path_shows_store_frame(env: &WowLuaEnv) {
+    let (ok, err, store_shown, isshown_attr, action): (
+        bool,
+        Option<String>,
+        bool,
+        bool,
+        Option<String>,
+    ) = env
+        .eval(
+            r#"
+            local ok, err = pcall(function()
                 StoreMicroButton:GetScript("OnClick")(StoreMicroButton, "LeftButton", false)
+            end)
+            return ok, err, StoreFrame:IsShown() == true, StoreFrame:GetAttribute("isshown") == true, StoreFrame:GetAttribute("action")
+            "#,
+        )
+        .expect("store micro button click should return");
 
-                return StoreFrame:IsShown() == true,
-                    onShowCount,
-                    onHideCount,
-                    StoreFrame:GetAttribute("isshown") == true,
-                    StoreFrame:GetAttribute("action")
-                "#,
-            )
-            .expect("store micro button click should return");
-
-        assert_eq!(action.as_deref(), Some("Show"));
-        assert!(
-            onshow_count >= 1,
-            "OnShow should fire when the store button successfully shows the frame"
-        );
-        assert_eq!(onhide_count, 0, "OnHide should not have fired in the broken path");
-        assert!(isshown_attr, "isshown attribute should be true after showing the store");
-        assert!(store_shown, "store should be visible after the button click");
-    }
+    assert_eq!(action.as_deref(), Some("Show"));
+    assert!(store_shown, "StoreFrame should be shown after the store button click");
+    assert!(isshown_attr, "OnShow should set isshown=true after the store button click");
+    assert!(ok, "store button path should return cleanly now: err={err:?}");
+}
 }
 
-#[test]
-fn store_frame_set_shown_full_game_path_shows_frame() {
-    test_timeout! {
-        let env = load_full_game_ui();
-        let result: bool = env
-            .eval(
-                r#"
-                StoreFrame_SetShown(true, "StoreMicroButton")
-                return StoreFrame:GetAttribute("action") == "Show" and StoreFrame:IsShown() == true and StoreFrame:GetAttribute("isshown") == true
-                "#,
-            )
-            .expect("direct StoreFrame_SetShown should return cleanly");
-        assert!(result, "StoreFrame_SetShown should now show the frame in the full game path");
-    }
+prefork_full_ui_case! {
+fn store_button_full_game_path_fires_onshow(env: &WowLuaEnv) {
+    let (store_shown, onshow_count, onhide_count, isshown_attr, action): (
+        bool,
+        i32,
+        i32,
+        bool,
+        Option<String>,
+    ) = env
+        .eval(
+            r#"
+            local onShowCount, onHideCount = 0, 0
+            StoreFrame:HookScript("OnShow", function() onShowCount = onShowCount + 1 end)
+            StoreFrame:HookScript("OnHide", function() onHideCount = onHideCount + 1 end)
+
+            StoreMicroButton:GetScript("OnClick")(StoreMicroButton, "LeftButton", false)
+
+            return StoreFrame:IsShown() == true,
+                onShowCount,
+                onHideCount,
+                StoreFrame:GetAttribute("isshown") == true,
+                StoreFrame:GetAttribute("action")
+            "#,
+        )
+        .expect("store micro button click should return");
+
+    assert_eq!(action.as_deref(), Some("Show"));
+    assert!(
+        onshow_count >= 1,
+        "OnShow should fire when the store button successfully shows the frame"
+    );
+    assert_eq!(onhide_count, 0, "OnHide should not have fired in the broken path");
+    assert!(isshown_attr, "isshown attribute should be true after showing the store");
+    assert!(store_shown, "store should be visible after the button click");
+}
 }
 
-#[test]
-fn store_frame_subtree_has_no_cycles_in_full_game_ui() {
-    test_timeout! {
-        let env = load_full_game_ui();
-        let state = env.state().borrow();
-        let store_id = state.widgets.get_id_by_name("StoreFrame").expect("StoreFrame should exist");
-        let mut path = Vec::new();
-        let mut seen = HashSet::new();
-        assert_no_child_cycle(&state.widgets, store_id, &mut path, &mut seen);
-    }
+prefork_full_ui_case! {
+fn store_frame_set_shown_full_game_path_shows_frame(env: &WowLuaEnv) {
+    let result: bool = env
+        .eval(
+            r#"
+            StoreFrame_SetShown(true, "StoreMicroButton")
+            return StoreFrame:GetAttribute("action") == "Show" and StoreFrame:IsShown() == true and StoreFrame:GetAttribute("isshown") == true
+            "#,
+        )
+        .expect("direct StoreFrame_SetShown should return cleanly");
+    assert!(result, "StoreFrame_SetShown should now show the frame in the full game path");
+}
+}
+
+prefork_full_ui_case! {
+fn store_frame_subtree_has_no_cycles_in_full_game_ui(env: &WowLuaEnv) {
+    let state = env.state().borrow();
+    let store_id = state.widgets.get_id_by_name("StoreFrame").expect("StoreFrame should exist");
+    let mut path = Vec::new();
+    let mut seen = HashSet::new();
+    assert_no_child_cycle(&state.widgets, store_id, &mut path, &mut seen);
+}
 }
