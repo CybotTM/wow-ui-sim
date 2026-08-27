@@ -1,3 +1,7 @@
+## [2026-08-27] system | Migrate housing post-start LoD cases
+
+Audited commit `ee6f58cbf`. Updated [[prefork-test-harness]] to record 189 post-start housing LoadOnDemand cases across 13 modules migrated with child-only borrowed-environment setup, exact generated-registry conformance of 189, and the representative `is_addon_loaded` proof passing 119/119 with no orphan processes. The generated ordinary full-UI aggregate is now 1,780 cases. Normal-retail shared-preload cases remain distinct from custom child setup; pre-start, partial/custom, glue, and otherwise non-equivalent fixtures remain excluded.
+
 ## [2026-08-27] system | Migrate SpellSearch and post-start explicit/LoD cases
 
 Audited commits `e05310123` and `054067c53`. Updated [[prefork-test-harness]] and its index summary: 15 SpellSearch cases now explicitly load `Blizzard_SpellSearch` in each child after normal preload; 96 additional post-start explicit/LoadOnDemand cases across ten modules use borrowed-environment child setup with dependency order preserved. Generated-registry conformance totals 111 cases including SpellSearch; the `is_addon_loaded` behavior filter passed 106/106, and no orphan processes remained. Pre-start or otherwise behaviorally non-equivalent custom fixtures remain excluded pending separate proof. The generated ordinary full-UI aggregate is 1,591 cases (1,480 + 15 + 96), while manual and fixture/conformance cases remain separately categorized.
