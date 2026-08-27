@@ -102,11 +102,9 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
-fn load_full_game_ui_with_macro_ui_lod() -> WowLuaEnv {
-    let env = load_full_game_ui();
+fn load_macro_ui(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &macro_ui_toc())
         .expect("Blizzard_MacroUI should load via explicit Rust loader call");
-    env
 }
 
 #[test]
@@ -275,9 +273,9 @@ fn blizzard_macro_ui_excluded_from_every_screen_auto_discovery() {
     }
 }
 
-#[test]
-fn blizzard_macro_ui_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     let load_errors: Vec<String> = env
         .state()
@@ -302,10 +300,11 @@ fn blizzard_macro_ui_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_macro_ui_is_addon_loaded_after_explicit_lod_call() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_is_addon_loaded_after_explicit_lod_call(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_MacroUI')")
@@ -317,10 +316,11 @@ fn blizzard_macro_ui_is_addon_loaded_after_explicit_lod_call() {
          ShowUIPanel(MacroFrame)-equivalent load_addon path runs"
     );
 }
+}
 
-#[test]
-fn blizzard_macro_ui_publishes_macro_define_constants() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_publishes_macro_define_constants(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     for (name, expected) in MACRO_DEFINE_CONSTANTS {
         let value: i64 = env
@@ -335,10 +335,11 @@ fn blizzard_macro_ui_publishes_macro_define_constants() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_macro_ui_publishes_macro_frame_mixin_with_all_methods() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_publishes_macro_frame_mixin_with_all_methods(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     let kind: String = env
         .eval("return type(MacroFrameMixin)")
@@ -366,10 +367,11 @@ fn blizzard_macro_ui_publishes_macro_frame_mixin_with_all_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_macro_ui_publishes_macro_button_mixin_with_three_methods() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_publishes_macro_button_mixin_with_three_methods(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     let kind: String = env
         .eval("return type(MacroButtonMixin)")
@@ -393,10 +395,11 @@ fn blizzard_macro_ui_publishes_macro_button_mixin_with_three_methods() {
         assert!(has_method, "MacroButtonMixin.{method} must be a function");
     }
 }
+}
 
-#[test]
-fn blizzard_macro_ui_publishes_macro_popup_frame_mixin_with_seven_methods() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_publishes_macro_popup_frame_mixin_with_seven_methods(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     let kind: String = env
         .eval("return type(MacroPopupFrameMixin)")
@@ -422,6 +425,7 @@ fn blizzard_macro_ui_publishes_macro_popup_frame_mixin_with_seven_methods() {
             "MacroPopupFrameMixin.{method} must be a function"
         );
     }
+}
 }
 
 #[cfg(feature = "client-ptr")]
@@ -457,9 +461,9 @@ fn ptr_macro_save_placeholder_is_replaced_by_lod_delegate() {
     assert!(lod_delegate_called);
 }
 
-#[test]
-fn blizzard_macro_ui_publishes_six_free_functions_at_global_scope() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_publishes_six_free_functions_at_global_scope(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     for fn_name in MACRO_FREE_FUNCTIONS {
         let kind: String = env
@@ -475,10 +479,11 @@ fn blizzard_macro_ui_publishes_six_free_functions_at_global_scope() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_macro_ui_registers_static_popup_dialog_for_delete_confirmation() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_registers_static_popup_dialog_for_delete_confirmation(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     let kind: String = env
         .eval("return type(StaticPopupDialogs and StaticPopupDialogs['CONFIRM_DELETE_SELECTED_MACRO'])")
@@ -500,10 +505,11 @@ fn blizzard_macro_ui_registers_static_popup_dialog_for_delete_confirmation() {
         "OnAccept must be a function — runs MacroFrame:DeleteMacro on confirmation"
     );
 }
+}
 
-#[test]
-fn blizzard_macro_ui_registers_ui_panel_window_entry_for_macro_frame() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_registers_ui_panel_window_entry_for_macro_frame(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     let kind: String = env
         .eval("return type(UIPanelWindows and UIPanelWindows['MacroFrame'])")
@@ -524,10 +530,11 @@ fn blizzard_macro_ui_registers_ui_panel_window_entry_for_macro_frame() {
          the left UIPanel slot (the same slot character / spellbook / talent panels use)"
     );
 }
+}
 
-#[test]
-fn blizzard_macro_ui_publishes_macro_frame_global_with_button_frame_template() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_publishes_macro_frame_global_with_button_frame_template(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     let frame_present: bool = env
         .eval("return MacroFrame ~= nil and type(MacroFrame.IsShown) == 'function'")
@@ -557,10 +564,11 @@ fn blizzard_macro_ui_publishes_macro_frame_global_with_button_frame_template() {
          micro-button or /macro chat handler)"
     );
 }
+}
 
-#[test]
-fn blizzard_macro_ui_publishes_macro_popup_frame_global_parented_to_macro_frame() {
-    let env = load_full_game_ui_with_macro_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_macro_ui_publishes_macro_popup_frame_global_parented_to_macro_frame(env: &WowLuaEnv) {
+    load_macro_ui(env);
 
     let frame_present: bool = env
         .eval("return MacroPopupFrame ~= nil and type(MacroPopupFrame.IsShown) == 'function'")
@@ -590,4 +598,5 @@ fn blizzard_macro_ui_publishes_macro_popup_frame_global_parented_to_macro_frame(
         "MacroPopupFrame XML declares `hidden=\"true\"` — the icon picker only shows when \
          the player clicks New / Edit (which sets MacroPopupFrame.mode + calls Show)"
     );
+}
 }

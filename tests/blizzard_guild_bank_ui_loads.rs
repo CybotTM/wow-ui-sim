@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -21,32 +20,9 @@ fn guild_bank_toc() -> PathBuf {
     guild_bank_dir().join("Blizzard_GuildBankUI.toc")
 }
 
-fn load_full_game_ui_with_guild_bank_lod() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-
-    wow_ui_sim::xml::register_intrinsic_templates();
-
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
-    }
-
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-
+fn load_guild_bank_ui(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &guild_bank_toc())
         .expect("Blizzard_GuildBankUI should load via explicit Rust loader call");
-
-    env
 }
 
 #[test]
@@ -177,9 +153,9 @@ fn blizzard_guild_bank_ui_excluded_from_all_screen_auto_discovery_due_to_lod() {
     }
 }
 
-#[test]
-fn blizzard_guild_bank_ui_loads_explicitly_without_unexpected_addon_specific_lua_errors() {
-    let env = load_full_game_ui_with_guild_bank_lod();
+prefork_full_ui_case! {
+fn blizzard_guild_bank_ui_loads_explicitly_without_unexpected_addon_specific_lua_errors(env: &WowLuaEnv) {
+    load_guild_bank_ui(env);
 
     let lua_errors: Vec<String> = env.state().borrow().lua_errors.clone();
     let related: Vec<&String> = lua_errors
@@ -203,11 +179,12 @@ fn blizzard_guild_bank_ui_loads_explicitly_without_unexpected_addon_specific_lua
             .join("\n  ")
     );
 }
+}
 
 #[cfg(feature = "client-ptr")]
-#[test]
-fn ptr_guild_bank_does_not_publish_snapshot_only_hide_wrapper() {
-    let env = load_full_game_ui_with_guild_bank_lod();
+prefork_full_ui_case! {
+fn ptr_guild_bank_does_not_publish_snapshot_only_hide_wrapper(env: &WowLuaEnv) {
+    load_guild_bank_ui(env);
 
     let wrapper_is_absent: bool = env
         .eval("return HideGuildBankFrame == nil")
@@ -217,10 +194,11 @@ fn ptr_guild_bank_does_not_publish_snapshot_only_hide_wrapper() {
         "snapshot-only HideGuildBankFrame unexpectedly exists after PTR addon load"
     );
 }
+}
 
-#[test]
-fn blizzard_guild_bank_ui_is_addon_loaded_returns_true_after_explicit_load() {
-    let env = load_full_game_ui_with_guild_bank_lod();
+prefork_full_ui_case! {
+fn blizzard_guild_bank_ui_is_addon_loaded_returns_true_after_explicit_load(env: &WowLuaEnv) {
+    load_guild_bank_ui(env);
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_GuildBankUI')")
@@ -232,10 +210,11 @@ fn blizzard_guild_bank_ui_is_addon_loaded_returns_true_after_explicit_load() {
          its TOC"
     );
 }
+}
 
-#[test]
-fn blizzard_guild_bank_ui_publishes_eight_mixins() {
-    let env = load_full_game_ui_with_guild_bank_lod();
+prefork_full_ui_case! {
+fn blizzard_guild_bank_ui_publishes_eight_mixins(env: &WowLuaEnv) {
+    load_guild_bank_ui(env);
 
     for mixin in [
         "GuildBankFrameMixin",
@@ -261,10 +240,11 @@ fn blizzard_guild_bank_ui_publishes_eight_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_guild_bank_ui_publishes_guild_bank_frame_mixin_lifecycle_methods() {
-    let env = load_full_game_ui_with_guild_bank_lod();
+prefork_full_ui_case! {
+fn blizzard_guild_bank_ui_publishes_guild_bank_frame_mixin_lifecycle_methods(env: &WowLuaEnv) {
+    load_guild_bank_ui(env);
 
     for method in [
         "OnLoad",
@@ -294,10 +274,11 @@ fn blizzard_guild_bank_ui_publishes_guild_bank_frame_mixin_lifecycle_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_guild_bank_ui_publishes_guild_bank_frame_global() {
-    let env = load_full_game_ui_with_guild_bank_lod();
+prefork_full_ui_case! {
+fn blizzard_guild_bank_ui_publishes_guild_bank_frame_global(env: &WowLuaEnv) {
+    load_guild_bank_ui(env);
 
     let exists: bool = env
         .eval(
@@ -313,10 +294,11 @@ fn blizzard_guild_bank_ui_publishes_guild_bank_frame_global() {
          as a runtime frame"
     );
 }
+}
 
-#[test]
-fn blizzard_guild_bank_ui_publishes_four_guild_bank_frame_tab_buttons() {
-    let env = load_full_game_ui_with_guild_bank_lod();
+prefork_full_ui_case! {
+fn blizzard_guild_bank_ui_publishes_four_guild_bank_frame_tab_buttons(env: &WowLuaEnv) {
+    load_guild_bank_ui(env);
 
     for tab_id in 1..=4 {
         let exists: bool = env
@@ -335,10 +317,11 @@ fn blizzard_guild_bank_ui_publishes_four_guild_bank_frame_tab_buttons() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_guild_bank_ui_publishes_guild_bank_money_frame_global() {
-    let env = load_full_game_ui_with_guild_bank_lod();
+prefork_full_ui_case! {
+fn blizzard_guild_bank_ui_publishes_guild_bank_money_frame_global(env: &WowLuaEnv) {
+    load_guild_bank_ui(env);
 
     let exists: bool = env
         .eval(
@@ -353,4 +336,5 @@ fn blizzard_guild_bank_ui_publishes_guild_bank_money_frame_global() {
          non-virtual frame materializes inside GuildBankFrame, displaying the guild's \
          current money balance"
     );
+}
 }

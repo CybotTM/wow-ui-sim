@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -70,36 +69,13 @@ const DIFFICULTY_METHODS: &[&str] = &[
     "GetActiveDifficulty",
 ];
 
-fn load_full_game_ui_with_islands_queue_lod() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-
-    wow_ui_sim::xml::register_intrinsic_templates();
-
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
-    }
-
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-
+fn load_islands_queue_ui_with_dependencies(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &ui_widgets_toc())
         .expect("Blizzard_UIWidgets should load via explicit Rust loader call");
     load_addon(&env.loader_env(), &help_plate_toc())
         .expect("Blizzard_HelpPlate should load via explicit Rust loader call");
     load_addon(&env.loader_env(), &islands_queue_toc())
         .expect("Blizzard_IslandsQueueUI should load via explicit Rust loader call");
-
-    env
 }
 
 #[test]
@@ -241,9 +217,9 @@ fn blizzard_islands_queue_excluded_from_every_screen_auto_discovery() {
     }
 }
 
-#[test]
-fn blizzard_islands_queue_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui_with_islands_queue_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_queue_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
+    load_islands_queue_ui_with_dependencies(env);
 
     let load_errors: Vec<String> = env
         .state()
@@ -264,10 +240,11 @@ fn blizzard_islands_queue_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_islands_queue_is_addon_loaded_after_explicit_lod_with_deps() {
-    let env = load_full_game_ui_with_islands_queue_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_queue_is_addon_loaded_after_explicit_lod_with_deps(env: &WowLuaEnv) {
+    load_islands_queue_ui_with_dependencies(env);
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_IslandsQueueUI')")
@@ -296,10 +273,11 @@ fn blizzard_islands_queue_is_addon_loaded_after_explicit_lod_with_deps() {
          tutorial-overlay infrastructure the IslandsQueueFrameTutorialTemplate consumes"
     );
 }
+}
 
-#[test]
-fn blizzard_islands_queue_publishes_all_four_mixins() {
-    let env = load_full_game_ui_with_islands_queue_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_queue_publishes_all_four_mixins(env: &WowLuaEnv) {
+    load_islands_queue_ui_with_dependencies(env);
 
     for mixin in MIXIN_NAMES {
         let kind: String = env
@@ -313,10 +291,11 @@ fn blizzard_islands_queue_publishes_all_four_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_islands_queue_weekly_quest_mixin_carries_seven_methods() {
-    let env = load_full_game_ui_with_islands_queue_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_queue_weekly_quest_mixin_carries_seven_methods(env: &WowLuaEnv) {
+    load_islands_queue_ui_with_dependencies(env);
 
     for method in WEEKLY_QUEST_METHODS {
         let kind: String = env
@@ -336,10 +315,11 @@ fn blizzard_islands_queue_weekly_quest_mixin_carries_seven_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_islands_queue_difficulty_mixin_carries_twelve_methods() {
-    let env = load_full_game_ui_with_islands_queue_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_queue_difficulty_mixin_carries_twelve_methods(env: &WowLuaEnv) {
+    load_islands_queue_ui_with_dependencies(env);
 
     for method in DIFFICULTY_METHODS {
         let kind: String = env
@@ -360,10 +340,11 @@ fn blizzard_islands_queue_difficulty_mixin_carries_twelve_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_islands_queue_frame_mixin_carries_three_lifecycle_methods() {
-    let env = load_full_game_ui_with_islands_queue_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_queue_frame_mixin_carries_three_lifecycle_methods(env: &WowLuaEnv) {
+    load_islands_queue_ui_with_dependencies(env);
 
     for method in &["OnLoad", "OnShow", "OnHide"] {
         let kind: String = env
@@ -378,10 +359,11 @@ fn blizzard_islands_queue_frame_mixin_carries_three_lifecycle_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_islands_queue_virtual_templates_stay_nil_at_global_scope() {
-    let env = load_full_game_ui_with_islands_queue_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_queue_virtual_templates_stay_nil_at_global_scope(env: &WowLuaEnv) {
+    load_islands_queue_ui_with_dependencies(env);
 
     for template_name in VIRTUAL_TEMPLATES {
         let kind: String = env
@@ -396,10 +378,11 @@ fn blizzard_islands_queue_virtual_templates_stay_nil_at_global_scope() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_islands_queue_named_frame_publishes_with_portrait_template_chain() {
-    let env = load_full_game_ui_with_islands_queue_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_queue_named_frame_publishes_with_portrait_template_chain(env: &WowLuaEnv) {
+    load_islands_queue_ui_with_dependencies(env);
 
     let kind: String = env
         .eval("return type(IslandsQueueFrame)")
@@ -434,4 +417,5 @@ fn blizzard_islands_queue_named_frame_publishes_with_portrait_template_chain() {
         "IslandsQueueFrame declares `hidden=\"true\"` — must start hidden until the islands \
          queue flow Show()s the frame"
     );
+}
 }

@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -99,32 +98,9 @@ const PUBLIC_FUNCTIONS: &[&str] = &[
     "InspectGuildFrame_Update",
 ];
 
-fn load_full_game_ui_with_inspect_ui_lod() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-
-    wow_ui_sim::xml::register_intrinsic_templates();
-
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
-    }
-
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-
+fn load_inspect_ui(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &inspect_ui_toc())
         .expect("Blizzard_InspectUI should load via explicit Rust loader call");
-
-    env
 }
 
 #[test]
@@ -253,9 +229,9 @@ fn blizzard_inspect_ui_excluded_from_every_screen_auto_discovery() {
     }
 }
 
-#[test]
-fn blizzard_inspect_ui_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     let load_errors: Vec<String> = env
         .state()
@@ -280,10 +256,11 @@ fn blizzard_inspect_ui_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_is_addon_loaded_after_explicit_lod() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_is_addon_loaded_after_explicit_lod(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_InspectUI')")
@@ -295,10 +272,11 @@ fn blizzard_inspect_ui_is_addon_loaded_after_explicit_lod() {
          registers in the loaded-addon list"
     );
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_named_main_frame_publishes_with_inherits_chain() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_named_main_frame_publishes_with_inherits_chain(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     let kind: String = env
         .eval("return type(InspectFrame)")
@@ -324,10 +302,11 @@ fn blizzard_inspect_ui_named_main_frame_publishes_with_inherits_chain() {
          until InspectFrame_Show(unit) calls ShowUIPanel after INSPECT_READY arrives"
     );
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_main_frame_carries_three_tab_buttons() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_main_frame_carries_three_tab_buttons(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     for tab_name in TAB_BUTTON_NAMES {
         let kind: String = env
@@ -356,10 +335,11 @@ fn blizzard_inspect_ui_main_frame_carries_three_tab_buttons() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_main_frame_carries_three_subframes() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_main_frame_carries_three_subframes(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     for subframe_name in SUBFRAME_NAMES {
         let kind: String = env
@@ -384,10 +364,11 @@ fn blizzard_inspect_ui_main_frame_carries_three_subframes() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_paperdoll_frame_publishes_eighteen_item_slot_buttons() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_paperdoll_frame_publishes_eighteen_item_slot_buttons(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     for slot_name in ITEM_SLOT_NAMES {
         let kind: String = env
@@ -406,10 +387,11 @@ fn blizzard_inspect_ui_paperdoll_frame_publishes_eighteen_item_slot_buttons() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_virtual_templates_stay_nil_at_global_scope() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_virtual_templates_stay_nil_at_global_scope(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     for template_name in VIRTUAL_TEMPLATES {
         let kind: String = env
@@ -424,10 +406,11 @@ fn blizzard_inspect_ui_virtual_templates_stay_nil_at_global_scope() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_publishes_all_public_script_handler_functions() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_publishes_all_public_script_handler_functions(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     for fn_name in PUBLIC_FUNCTIONS {
         let kind: String = env
@@ -443,10 +426,11 @@ fn blizzard_inspect_ui_publishes_all_public_script_handler_functions() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_publishes_inspectframe_subframes_lookup_table() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_publishes_inspectframe_subframes_lookup_table(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     let kind: String = env
         .eval("return type(INSPECTFRAME_SUBFRAMES)")
@@ -471,10 +455,11 @@ fn blizzard_inspect_ui_publishes_inspectframe_subframes_lookup_table() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_inspected_unit_initializes_to_nil() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_inspected_unit_initializes_to_nil(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     let kind: String = env
         .eval("return type(INSPECTED_UNIT)")
@@ -487,10 +472,11 @@ fn blizzard_inspect_ui_inspected_unit_initializes_to_nil() {
          Initial nil state proves no inspect session is active immediately after load"
     );
 }
+}
 
-#[test]
-fn blizzard_inspect_ui_uipanelwindows_registers_inspectframe_left_area() {
-    let env = load_full_game_ui_with_inspect_ui_lod();
+prefork_full_ui_case! {
+fn blizzard_inspect_ui_uipanelwindows_registers_inspectframe_left_area(env: &WowLuaEnv) {
+    load_inspect_ui(env);
 
     let area: String = env
         .eval("return UIPanelWindows['InspectFrame'].area")
@@ -511,4 +497,5 @@ fn blizzard_inspect_ui_uipanelwindows_registers_inspectframe_left_area() {
          to the secondary panel slot, so opening another left-area panel will close \
          InspectFrame instead of stacking"
     );
+}
 }

@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -40,36 +39,13 @@ const MIXIN_METHODS: &[&str] = &[
 
 const PARENT_KEY_CHILDREN: &[&str] = &["OverlayElements", "ModelScene", "Score", "LeaveButton"];
 
-fn load_full_game_ui_with_islands_party_pose_lod() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-
-    wow_ui_sim::xml::register_intrinsic_templates();
-
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
-    }
-
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-
+fn load_islands_party_pose_ui_with_dependencies(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &ui_widgets_toc())
         .expect("Blizzard_UIWidgets should load via explicit Rust loader call");
     load_addon(&env.loader_env(), &party_pose_toc())
         .expect("Blizzard_PartyPoseUI should load via explicit Rust loader call");
     load_addon(&env.loader_env(), &islands_party_pose_toc())
         .expect("Blizzard_IslandsPartyPoseUI should load via explicit Rust loader call");
-
-    env
 }
 
 #[test]
@@ -211,9 +187,9 @@ fn blizzard_islands_party_pose_excluded_from_every_screen_auto_discovery() {
     }
 }
 
-#[test]
-fn blizzard_islands_party_pose_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui_with_islands_party_pose_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_party_pose_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
+    load_islands_party_pose_ui_with_dependencies(env);
 
     let load_errors: Vec<String> = env
         .state()
@@ -233,10 +209,11 @@ fn blizzard_islands_party_pose_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_islands_party_pose_is_addon_loaded_after_explicit_lod_with_deps() {
-    let env = load_full_game_ui_with_islands_party_pose_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_party_pose_is_addon_loaded_after_explicit_lod_with_deps(env: &WowLuaEnv) {
+    load_islands_party_pose_ui_with_dependencies(env);
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_IslandsPartyPoseUI')")
@@ -257,10 +234,11 @@ fn blizzard_islands_party_pose_is_addon_loaded_after_explicit_lod_with_deps() {
          consumes"
     );
 }
+}
 
-#[test]
-fn blizzard_islands_party_pose_mixin_publishes_with_partypose_inherited_methods() {
-    let env = load_full_game_ui_with_islands_party_pose_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_party_pose_mixin_publishes_with_partypose_inherited_methods(env: &WowLuaEnv) {
+    load_islands_party_pose_ui_with_dependencies(env);
 
     let kind: String = env
         .eval("return type(IslandsPartyPoseMixin)")
@@ -296,10 +274,11 @@ fn blizzard_islands_party_pose_mixin_publishes_with_partypose_inherited_methods(
          `self:AddReward(...)` per Blizzard_IslandsPartyPoseUI.lua:32)"
     );
 }
+}
 
-#[test]
-fn blizzard_islands_party_pose_named_frame_publishes_with_inherits_and_mixin_chain() {
-    let env = load_full_game_ui_with_islands_party_pose_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_party_pose_named_frame_publishes_with_inherits_and_mixin_chain(env: &WowLuaEnv) {
+    load_islands_party_pose_ui_with_dependencies(env);
 
     let kind: String = env
         .eval("return type(IslandsPartyPoseFrame)")
@@ -317,10 +296,11 @@ fn blizzard_islands_party_pose_named_frame_publishes_with_inherits_and_mixin_cha
         .expect("IslandsPartyPoseFrame:GetName() probe should succeed");
     assert_eq!(name, "IslandsPartyPoseFrame");
 }
+}
 
-#[test]
-fn blizzard_islands_party_pose_named_frame_carries_four_parent_key_children() {
-    let env = load_full_game_ui_with_islands_party_pose_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_party_pose_named_frame_carries_four_parent_key_children(env: &WowLuaEnv) {
+    load_islands_party_pose_ui_with_dependencies(env);
 
     for parent_key in PARENT_KEY_CHILDREN {
         let kind: String = env
@@ -345,10 +325,11 @@ fn blizzard_islands_party_pose_named_frame_carries_four_parent_key_children() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_islands_party_pose_overlay_elements_carries_topper_texture() {
-    let env = load_full_game_ui_with_islands_party_pose_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_party_pose_overlay_elements_carries_topper_texture(env: &WowLuaEnv) {
+    load_islands_party_pose_ui_with_dependencies(env);
 
     let kind: String = env
         .eval("return type(IslandsPartyPoseFrame.OverlayElements.Topper)")
@@ -361,10 +342,11 @@ fn blizzard_islands_party_pose_overlay_elements_carries_topper_texture() {
          the Texture's atlas is faction-driven at runtime, not baked into the XML"
     );
 }
+}
 
-#[test]
-fn blizzard_islands_party_pose_modelscene_publishes_as_modelscene_subtype() {
-    let env = load_full_game_ui_with_islands_party_pose_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_party_pose_modelscene_publishes_as_modelscene_subtype(env: &WowLuaEnv) {
+    load_islands_party_pose_ui_with_dependencies(env);
 
     let object_type: String = env
         .eval("return IslandsPartyPoseFrame.ModelScene:GetObjectType()")
@@ -376,10 +358,11 @@ fn blizzard_islands_party_pose_modelscene_publishes_as_modelscene_subtype() {
          the loader instantiates the 3D-pose-backdrop widget type, not a plain Frame"
     );
 }
+}
 
-#[test]
-fn blizzard_islands_party_pose_score_widget_container_keeps_register_visibility_off() {
-    let env = load_full_game_ui_with_islands_party_pose_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_party_pose_score_widget_container_keeps_register_visibility_off(env: &WowLuaEnv) {
+    load_islands_party_pose_ui_with_dependencies(env);
 
     let kv: bool = env
         .eval("return IslandsPartyPoseFrame.Score.showAndHideOnWidgetSetRegistration")
@@ -393,10 +376,11 @@ fn blizzard_islands_party_pose_score_widget_container_keeps_register_visibility_
          by the UIWidget API auto-toggling whenever a widget set registers / unregisters"
     );
 }
+}
 
-#[test]
-fn blizzard_islands_party_pose_leave_button_keeps_minimum_width_keyvalue() {
-    let env = load_full_game_ui_with_islands_party_pose_lod();
+prefork_full_ui_case! {
+fn blizzard_islands_party_pose_leave_button_keeps_minimum_width_keyvalue(env: &WowLuaEnv) {
+    load_islands_party_pose_ui_with_dependencies(env);
 
     let min_width: f64 = env
         .eval("return IslandsPartyPoseFrame.LeaveButton.minimumWidth")
@@ -409,4 +393,5 @@ fn blizzard_islands_party_pose_leave_button_keeps_minimum_width_keyvalue() {
          this floor when ResizeToFit shrinks the button to fit the ISLAND_LEAVE locale string \
          so the button never collapses below 164px regardless of locale"
     );
+}
 }

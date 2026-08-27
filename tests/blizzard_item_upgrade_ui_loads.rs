@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -101,32 +100,9 @@ const VIRTUAL_TEMPLATE_NAMES: &[&str] = &[
     "ItemUpgradePreviewTemplate",
 ];
 
-fn load_full_game_ui_with_item_upgrade_lod() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-
-    wow_ui_sim::xml::register_intrinsic_templates();
-
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
-    }
-
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-
+fn load_item_upgrade_ui(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &item_upgrade_mainline_toc())
         .expect("Blizzard_ItemUpgradeUI_Mainline should load via explicit Rust loader call");
-
-    env
 }
 
 #[test]
@@ -295,9 +271,9 @@ fn blizzard_item_upgrade_excluded_from_every_screen_auto_discovery() {
     }
 }
 
-#[test]
-fn blizzard_item_upgrade_loads_without_addon_specific_lua_errors() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     let load_errors: Vec<String> = env
         .state()
@@ -323,10 +299,11 @@ fn blizzard_item_upgrade_loads_without_addon_specific_lua_errors() {
         load_errors.join("\n  ")
     );
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_is_addon_loaded_via_explicit_load() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_is_addon_loaded_via_explicit_load(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     let loaded: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_ItemUpgradeUI')")
@@ -339,10 +316,11 @@ fn blizzard_item_upgrade_is_addon_loaded_via_explicit_load() {
          name regardless of which flavor TOC actually loaded"
     );
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_main_mixin_publishes_with_twenty_six_methods() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_main_mixin_publishes_with_twenty_six_methods(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     let kind: String = env
         .eval("return type(ItemUpgradeMixin)")
@@ -376,10 +354,11 @@ fn blizzard_item_upgrade_main_mixin_publishes_with_twenty_six_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_publishes_six_secondary_mixins() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_publishes_six_secondary_mixins(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     for mixin in SECONDARY_MIXIN_NAMES {
         let kind: String = env
@@ -401,10 +380,11 @@ fn blizzard_item_upgrade_publishes_six_secondary_mixins() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_button_mixin_carries_three_methods() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_button_mixin_carries_three_methods(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     for method in ITEM_UPGRADE_BUTTON_METHODS {
         let kind: String = env
@@ -421,10 +401,11 @@ fn blizzard_item_upgrade_button_mixin_carries_three_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_preview_mixin_carries_five_methods() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_preview_mixin_carries_five_methods(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     for method in ITEM_UPGRADE_PREVIEW_METHODS {
         let kind: String = env
@@ -442,10 +423,11 @@ fn blizzard_item_upgrade_preview_mixin_carries_five_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_slot_mixin_carries_six_methods() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_slot_mixin_carries_six_methods(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     for method in ITEM_UPGRADE_SLOT_METHODS {
         let kind: String = env
@@ -462,10 +444,11 @@ fn blizzard_item_upgrade_slot_mixin_carries_six_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_item_info_mixin_carries_one_method() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_item_info_mixin_carries_one_method(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     for method in ITEM_UPGRADE_ITEM_INFO_METHODS {
         let kind: String = env
@@ -482,10 +465,11 @@ fn blizzard_item_upgrade_item_info_mixin_carries_one_method() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_cost_quantity_mixin_carries_two_methods() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_cost_quantity_mixin_carries_two_methods(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     for method in ITEM_UPGRADE_COST_QUANTITY_METHODS {
         let kind: String = env
@@ -504,10 +488,11 @@ fn blizzard_item_upgrade_cost_quantity_mixin_carries_two_methods() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_cost_icon_mixin_carries_one_method() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_cost_icon_mixin_carries_one_method(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     for method in ITEM_UPGRADE_COST_ICON_METHODS {
         let kind: String = env
@@ -525,10 +510,11 @@ fn blizzard_item_upgrade_cost_icon_mixin_carries_one_method() {
         );
     }
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_publishes_two_free_helper_functions() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_publishes_two_free_helper_functions(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     for helper in FREE_HELPER_FUNCTIONS {
         let kind: String = env
@@ -547,11 +533,12 @@ fn blizzard_item_upgrade_publishes_two_free_helper_functions() {
         );
     }
 }
+}
 
 #[cfg(feature = "client-ptr")]
-#[test]
-fn ptr_item_upgrade_does_not_publish_reversed_hide_wrapper() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn ptr_item_upgrade_does_not_publish_reversed_hide_wrapper(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     let wrapper_is_absent: bool = env
         .eval("return HideItemUpgradeFrame == nil")
@@ -561,10 +548,11 @@ fn ptr_item_upgrade_does_not_publish_reversed_hide_wrapper() {
         "snapshot-only HideItemUpgradeFrame unexpectedly exists after PTR addon load"
     );
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_named_frame_publishes_with_portrait_template_chain() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_named_frame_publishes_with_portrait_template_chain(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     let kind: String = env
         .eval("return type(ItemUpgradeFrame)")
@@ -594,10 +582,11 @@ fn blizzard_item_upgrade_named_frame_publishes_with_portrait_template_chain() {
          the frame stays invisible until ItemUpgradeFrame_Show fires"
     );
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_registers_ui_panel_window_entry() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_registers_ui_panel_window_entry(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     let area: String = env
         .eval("return tostring(UIPanelWindows['ItemUpgradeFrame'].area)")
@@ -621,10 +610,11 @@ fn blizzard_item_upgrade_registers_ui_panel_window_entry() {
          via ItemUpgradeFrame_Show's IsShown() guard that calls C_ItemUpgrade.CloseItemUpgrade)"
     );
 }
+}
 
-#[test]
-fn blizzard_item_upgrade_virtual_templates_stay_nil_at_global_scope() {
-    let env = load_full_game_ui_with_item_upgrade_lod();
+prefork_full_ui_case! {
+fn blizzard_item_upgrade_virtual_templates_stay_nil_at_global_scope(env: &WowLuaEnv) {
+    load_item_upgrade_ui(env);
 
     for template in VIRTUAL_TEMPLATE_NAMES {
         let kind: String = env
@@ -645,4 +635,5 @@ fn blizzard_item_upgrade_virtual_templates_stay_nil_at_global_scope() {
              is consumed only via XML `inherits=\"...\"` resolution"
         );
     }
+}
 }
