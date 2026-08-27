@@ -1,3 +1,7 @@
+## [2026-08-27] system | Migrate generic post-start LoD cases
+
+Audited commits `3faf7ad57` and `9cd3988a7`. Updated [[prefork-test-harness]] and its index summary: 156 newly migrated default-retail post-start LoadOnDemand cases across 17 modules use borrowed-environment child setup with dependency order preserved. `Blizzard_SharedMapDataProviders` remains excluded because its nine-case fixture loads before post-load workarounds and omits startup events. Two PTR-only GuildBank/ItemUpgrade tests were restored to ordinary libtest with profile-specific full startup. GenericTraitUI listing includes three previously migrated cases, so conformance covers 159 listed cases while the unique new migration is 156. Conformance passed 1/1; `is_addon_loaded` passed 135/135; GenericTraitUI publication passed 4/4; each restored PTR test passed 1/1; no orphan processes remained. The generated ordinary full-UI aggregate is now 1,936 cases.
+
 ## [2026-08-27] system | Migrate housing post-start LoD cases
 
 Audited commit `ee6f58cbf`. Updated [[prefork-test-harness]] to record 189 post-start housing LoadOnDemand cases across 13 modules migrated with child-only borrowed-environment setup, exact generated-registry conformance of 189, and the representative `is_addon_loaded` proof passing 119/119 with no orphan processes. The generated ordinary full-UI aggregate is now 1,780 cases. Normal-retail shared-preload cases remain distinct from custom child setup; pre-start, partial/custom, glue, and otherwise non-equivalent fixtures remain excluded.
