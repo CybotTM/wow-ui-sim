@@ -20,9 +20,9 @@ Retail `PlayerSpellsUtil.ToggleSpellBookFrame()` and `ToggleClassTalentFrame()` 
 
 ## 2026-08-27 SpellBook fallback completion
 
-The global `ToggleSpellBook()` path must not treat a successful Lua call as proof that `PlayerSpellsUtil.ToggleSpellBookFrame()` handled the toggle. The temporary bootstrap wrapper can return `nil` without error when `Blizzard_PlayerSpells` cannot materialize `PlayerSpellsFrame`; treating that return as handled skipped the simulator fallback and left `SimState.open_panels["SpellBook"]` closed in a bare environment.
+The global `ToggleSpellBook()` path must not treat a successful Lua call as proof that `PlayerSpellsUtil.ToggleSpellBookFrame()` handled the toggle. The temporary bootstrap wrapper can return `nil` without error while a failed `Blizzard_PlayerSpells` load leaves a partially initialized, hidden `PlayerSpellsFrame`; treating that return as handled skipped the simulator fallback and left `SimState.open_panels["SpellBook"]` closed in a bare environment.
 
-The fix checks the observable `PlayerSpellsFrame` visibility transition after the helper call. If the frame did not materialize and toggle, `ToggleSpellBook()` uses its existing `open_panels`/frame-visibility fallback. Real full-UI helper behavior remains Blizzard-owned; the fallback covers only the no-frame path.
+The fix checks whether `PlayerSpellsFrame` reached the expected toggled visibility after the helper call. If not, `ToggleSpellBook()` uses its existing `open_panels`/frame-visibility fallback. Real full-UI helper behavior remains Blizzard-owned; the fallback covers only the helper no-op or failure path.
 
 ## Sources
 
