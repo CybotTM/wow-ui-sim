@@ -1,3 +1,7 @@
+## [2026-08-27] audit | Default-suite repair slices
+
+Audited commits `5dfbd222c`, `2a876dc25`, `8adadc959`, `d301bd023`, and `af662c223`. No spec or changelog update was warranted: the QuestAsync TOC resolver, Mists-only test gate, duplicate fallback removal, and corrected fixture expectation are test/maintenance changes. Updated [[playerspells-runtime-load]], [[on-update-dirty]], and the index because the SpellBook helper now requires an observable-frame check before falling back, and the settled solo leave-instance path does not query instance/LFG state.
+
 ## [2026-08-27] audit | Refresh patch evidence hashes and accept prefork test references
 
 Audited commits `85b00c5cb` and `da273a149`. Refreshed checkout-byte evidence hashes in the 12.0.0, 12.0.5, and 12.1 patch manifests. The patch-manifest validator now treats generated `prefork_full_ui_case!` marker cases as valid named test references alongside ordinary `#[test]` functions, while unmarked functions remain invalid. Updated the patch-manifest and prefork specs plus their wiki system pages; no evidence files or index summary required changes.
