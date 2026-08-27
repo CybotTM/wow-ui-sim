@@ -273,7 +273,7 @@
           "kind": "test",
           "reference": "tests/blizzard_debug_tools_loads.rs::devtools_dump_captures_frame_array_metadata",
           "summary": "Frame array insertion, slot retrieval, DevTools_Dump return shape, and emitted metadata are directly regression-tested.",
-          "source_hash": "9d44fb3ac9b37dc85b603f85d885fb3f911e4f92127778011e5a1fe690d6fbff"
+          "source_hash": "faa4c0cae51e448f92edd56afab785c86a51a796193a130fbafbd338c95c572f"
         }
       ],
       "tests": [

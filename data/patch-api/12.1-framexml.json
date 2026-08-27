@@ -3400,7 +3400,7 @@
           "kind": "runtime",
           "reference": "tests/blizzard_macro_ui_loads.rs",
           "summary": "PTR lifecycle test proves the eager UIParent no-op placeholder is present and harmless, then explicit Blizzard_MacroUI loading replaces it with the MacroFrame:SaveMacro delegate.",
-          "source_hash": "548905419a0508532f48bb7dee736b991d60eab84e48fa57f3bf5d20794409b1"
+          "source_hash": "596a5fb3149bea5d14873b0ac0e201895a5cef9d03b1e1202095d061a63e52ce"
         }
       ],
       "tests": [
@@ -6045,7 +6045,7 @@
           "kind": "runtime",
           "reference": "tests/blizzard_macro_ui_loads.rs",
           "summary": "PTR lifecycle test proves the eager UIParent no-op placeholder is present and harmless, then explicit Blizzard_MacroUI loading replaces it with the MacroFrame:SaveMacro delegate.",
-          "source_hash": "548905419a0508532f48bb7dee736b991d60eab84e48fa57f3bf5d20794409b1"
+          "source_hash": "596a5fb3149bea5d14873b0ac0e201895a5cef9d03b1e1202095d061a63e52ce"
         }
       ],
       "tests": [

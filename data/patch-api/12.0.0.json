@@ -18716,7 +18716,7 @@
           "kind": "source",
           "reference": "tests/blizzard_stable_ui_loads.rs",
           "summary": "Existing stable UI coverage proves vendor references and refresh wiring only, not the API result or talent/configuration transitions.",
-          "source_hash": "ae180ca2bf98cf4324a7f32d52486d4a6dc90c70f951365f98751dc96ddd5809"
+          "source_hash": "2ef3a97975233623713291bcb16600a4040d0fc580bbed41d7340f0062d0871c"
         }
       ],
       "tests": [],
@@ -19061,7 +19061,7 @@
           "kind": "test",
           "reference": "tests/blizzard_shared_xml_game_loads.rs",
           "summary": "Existing coverage proves Blizzard TooltipComparisonManager loads, not that the native C_TooltipComparison namespace or comparison workflow works.",
-          "source_hash": "384e0b41c24699b6c92850e7bb64f15ddbeb2ab99650229c3255b2fb649f96b7"
+          "source_hash": "4fe0434bf18c7ad3f3cb908f33792df749913dc803c4c6639aa210a4c0e43f47"
         },
         {
           "kind": "test",
@@ -23745,7 +23745,7 @@
           "kind": "test",
           "reference": "tests/blizzard_transmog_loads.rs",
           "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
-          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+          "source_hash": "71dea430663541c41effc4a3abb4e70b2c8a6eb4af1bedfa492f1a8762987a32"
         }
       ],
       "tests": [],
@@ -23780,7 +23780,7 @@
           "kind": "test",
           "reference": "tests/blizzard_transmog_loads.rs",
           "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
-          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+          "source_hash": "71dea430663541c41effc4a3abb4e70b2c8a6eb4af1bedfa492f1a8762987a32"
         }
       ],
       "tests": [],
@@ -23815,7 +23815,7 @@
           "kind": "test",
           "reference": "tests/blizzard_transmog_loads.rs",
           "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
-          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+          "source_hash": "71dea430663541c41effc4a3abb4e70b2c8a6eb4af1bedfa492f1a8762987a32"
         }
       ],
       "tests": [],
@@ -23850,7 +23850,7 @@
           "kind": "test",
           "reference": "tests/blizzard_transmog_loads.rs",
           "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
-          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+          "source_hash": "71dea430663541c41effc4a3abb4e70b2c8a6eb4af1bedfa492f1a8762987a32"
         }
       ],
       "tests": [],
@@ -23885,7 +23885,7 @@
           "kind": "test",
           "reference": "tests/blizzard_transmog_loads.rs",
           "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
-          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+          "source_hash": "71dea430663541c41effc4a3abb4e70b2c8a6eb4af1bedfa492f1a8762987a32"
         }
       ],
       "tests": [],
@@ -23920,7 +23920,7 @@
           "kind": "test",
           "reference": "tests/blizzard_transmog_loads.rs",
           "summary": "Existing coverage verifies Blizzard transmog addon loading, not this runtime contract or state transition.",
-          "source_hash": "4176a325692677340836f0bdf71b0b8104b4ef2ff7c0547afffb3f0a3b5e1ceb"
+          "source_hash": "71dea430663541c41effc4a3abb4e70b2c8a6eb4af1bedfa492f1a8762987a32"
         }
       ],
       "tests": [],
@@ -29630,7 +29630,7 @@
           "kind": "test",
           "reference": "tests/blizzard_damage_meter_loads.rs",
           "summary": "Existing Damage Meter coverage proves addon/UI/constants loading only, not event production, payload, reset/session mutation, or timing.",
-          "source_hash": "fc252d9775efb0fe530a6c73992028e39686648b29bba4447135f3dc135cb62d"
+          "source_hash": "df59aa6b7bf83ba14b59a28954538260765aee3f0a7fdf44f8a02d6ab9141f87"
         }
       ],
       "tests": [],
@@ -29665,7 +29665,7 @@
           "kind": "test",
           "reference": "tests/blizzard_damage_meter_loads.rs",
           "summary": "Existing Damage Meter coverage proves addon/UI/constants loading only, not event production, payload, reset/session mutation, or timing.",
-          "source_hash": "fc252d9775efb0fe530a6c73992028e39686648b29bba4447135f3dc135cb62d"
+          "source_hash": "df59aa6b7bf83ba14b59a28954538260765aee3f0a7fdf44f8a02d6ab9141f87"
         }
       ],
       "tests": [],
@@ -29700,7 +29700,7 @@
           "kind": "test",
           "reference": "tests/blizzard_damage_meter_loads.rs",
           "summary": "Existing Damage Meter coverage proves addon/UI/constants loading only, not event production, payload, reset/session mutation, or timing.",
-          "source_hash": "fc252d9775efb0fe530a6c73992028e39686648b29bba4447135f3dc135cb62d"
+          "source_hash": "df59aa6b7bf83ba14b59a28954538260765aee3f0a7fdf44f8a02d6ab9141f87"
         }
       ],
       "tests": [],
@@ -29735,7 +29735,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_timeline_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+          "source_hash": "6f8018a7c45cf0208e6bff798a230c8c8d4252d60ef7d5a008d82148451198e2"
         }
       ],
       "tests": [],
@@ -29770,7 +29770,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_timeline_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+          "source_hash": "6f8018a7c45cf0208e6bff798a230c8c8d4252d60ef7d5a008d82148451198e2"
         }
       ],
       "tests": [],
@@ -29805,7 +29805,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_timeline_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+          "source_hash": "6f8018a7c45cf0208e6bff798a230c8c8d4252d60ef7d5a008d82148451198e2"
         }
       ],
       "tests": [],
@@ -29840,7 +29840,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_timeline_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+          "source_hash": "6f8018a7c45cf0208e6bff798a230c8c8d4252d60ef7d5a008d82148451198e2"
         }
       ],
       "tests": [],
@@ -29875,7 +29875,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_timeline_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+          "source_hash": "6f8018a7c45cf0208e6bff798a230c8c8d4252d60ef7d5a008d82148451198e2"
         }
       ],
       "tests": [],
@@ -29910,7 +29910,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_timeline_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+          "source_hash": "6f8018a7c45cf0208e6bff798a230c8c8d4252d60ef7d5a008d82148451198e2"
         }
       ],
       "tests": [],
@@ -29945,7 +29945,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_timeline_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+          "source_hash": "6f8018a7c45cf0208e6bff798a230c8c8d4252d60ef7d5a008d82148451198e2"
         }
       ],
       "tests": [],
@@ -29980,7 +29980,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_timeline_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+          "source_hash": "6f8018a7c45cf0208e6bff798a230c8c8d4252d60ef7d5a008d82148451198e2"
         }
       ],
       "tests": [],
@@ -30015,7 +30015,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_timeline_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "90b2a865b49bc99829b11c00b3e51a05003f63c4cce5ac713f27bd486ee02f82"
+          "source_hash": "6f8018a7c45cf0208e6bff798a230c8c8d4252d60ef7d5a008d82148451198e2"
         }
       ],
       "tests": [],
@@ -30050,7 +30050,7 @@
           "kind": "test",
           "reference": "tests/blizzard_encounter_warnings_loads.rs",
           "summary": "Existing Blizzard addon coverage proves loading, mixins, and registration only, not this event payload, production, ordering, or lifecycle.",
-          "source_hash": "ccb3f0762819380f219f4350da58cd9eb785d5f7366dcd081a40754c1288115e"
+          "source_hash": "7fdebdea855e64dbe5c92fb7b798954fdd84e667d1af41a926006d5ad63f43d8"
         }
       ],
       "tests": [],
@@ -89453,7 +89453,7 @@
         {
           "kind": "test",
           "reference": "tests/mouse_probes.rs",
-          "source_hash": "473a5da657a7d7d58039f31ff3acfa963e1453ca5dea23d4d8e6c2f27bf9aba5",
+          "source_hash": "57062f495b1ecbae75936bdf0ba9c31189fed98d5aa2e1b0f4e6c2e930b97746",
           "summary": "Retail adds a public two-number cursor setter. The simulator has GetCursorPosition and an admin-only state setter, but no public setter or proven coordinate mutation contract."
         },
         {
@@ -92522,7 +92522,7 @@
           "kind": "test",
           "reference": "tests/blizzard_deprecated_loads.rs",
           "summary": "Focused behavioral test `blizzard_deprecated_unit_is_spell_target_returns_false_for_non_player_target` proves the bounded behavior described above.",
-          "source_hash": "24cd1fdb77acb26ff99f081982f7c073c486403038019a8a77bbaaf685e52e8b"
+          "source_hash": "69f0d7f36b2431bbc9da2dac350896f2c2167e7bff76db2f5286ca8dea32b435"
         }
       ],
       "tests": [
@@ -132134,7 +132134,7 @@
         {
           "kind": "source",
           "reference": "Cargo.lock",
-          "source_hash": "67704cd20627b9829b74db4273834de8d6c677332b0e708bb151478dfb6f881d",
+          "source_hash": "af21e4904d76e815ece0b20f1c0b745e3ea808bcf0e159e406a0c6e8a9ae8898",
           "summary": "The simulator locks rilua commit 8dedc9fedb0160c7834d1e207af7f9996f2540b5 as its Lua runtime dependency."
         },
         {
@@ -132181,7 +132181,7 @@
         {
           "kind": "source",
           "reference": "Cargo.lock",
-          "source_hash": "67704cd20627b9829b74db4273834de8d6c677332b0e708bb151478dfb6f881d",
+          "source_hash": "af21e4904d76e815ece0b20f1c0b745e3ea808bcf0e159e406a0c6e8a9ae8898",
           "summary": "The simulator locks rilua commit 8dedc9fedb0160c7834d1e207af7f9996f2540b5 as its Lua runtime dependency."
         },
         {
