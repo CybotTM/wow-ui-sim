@@ -379,7 +379,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only, empty `UIParent` worklists short-circuit, but the fresh 90s world-map profile still sits at 31 steady-state handlers |
 | [[world-map-voice-chat-alerts]] | Reduced world-map stacks can show voice prompt frames above the map when `Blizzard_Channels` is loaded without `Blizzard_SocialToast` / chat-alert prerequisites |
 | [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |
-| [[transparent-wrapper-render-order]] | Renderless `Frame`/`ScrollFrame` wrappers were creating fake z-order boundaries; descendant regions now hoist through them |
+| [[transparent-wrapper-render-order]] | Regionless wrappers may hoist descendant regions; wrappers with owned regions retain raw frame-level ordering |
 | [[talent-sheen]] | 22s synchronized sweep; white rectangle bug when masking broken |
 | [[tooltip-alignment]] | NineSlice inner box vs outer bounds; 15px effective inset |
 | [[tooltip-layout-timing]] | Tooltip sizing ran after layout resolution, so one frame could use stale bounds |

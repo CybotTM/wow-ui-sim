@@ -3156,3 +3156,7 @@ Documented commit `ff01991aa`: direct `call_function_state`/`call_function_state
 ## [2026-08-26] update | Document limited listfile canonical casing
 
 Updated [`updating-blizzard-ui-to-a-new-patch`](../../updating-blizzard-ui-to-a-new-patch.md), [`casc-loading`](../specs/casc-loading.md), and [[casc-asset-cache]] for commit `2f88b2cab`. Ordinary community rows remain normalized lowercase; `data/listfile-overrides.csv` authoritatively replaces source display paths for normalized path and FDID resolution while preserving slash-normalized canonical casing. Generated rows sort by normalized path. Existing `index.md` catalog text remains accurate; no index change was needed.
+
+## [2026-08-27] update | Correct transparent-wrapper frame-level contract
+
+Updated `investigations/transparent-wrapper-render-order.md` after current retail XML and bucket ordering showed the old opaque level-100 border regression was invalid. Documented that only regionless wrappers hoist descendants, wrappers with owned regions retain frame-level boundaries, and higher raw frame levels render after lower levels.
