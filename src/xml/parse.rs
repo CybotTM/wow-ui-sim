@@ -443,7 +443,6 @@ mod tests {
                 _ => None,
             })
             .collect::<Vec<_>>();
-
         assert_eq!(
             names,
             vec!["BaseTemplate", "MiddleTemplate", "DerivedTemplate"]
