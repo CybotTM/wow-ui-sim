@@ -66,7 +66,7 @@ fn collect_addon_load_warnings(env: &WowLuaEnv, name: &str, toc_path: &Path) -> 
 fn load_and_startup() -> Vec<String> {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Login);
+    env.set_screen_mode(ScreenKind::Game);
 
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
@@ -192,7 +192,7 @@ fn test_edit_mode_layout_update_ignores_preset_layouts_during_startup() {
 fn load_all_addons() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Login);
+    env.set_screen_mode(ScreenKind::Game);
 
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
