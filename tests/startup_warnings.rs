@@ -45,6 +45,11 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
     common::drain_string_table(env, "__test_errors")
 }
 
+fn fire(env: &WowLuaEnv, event: &str, args: &[rilua::Val]) -> Vec<String> {
+    env.fire_event_with_args(event, args).ok();
+    drain_test_errors(env)
+}
+
 fn collect_handler_warnings(env: &WowLuaEnv, phase: &str) -> Vec<String> {
     drain_test_errors(env)
         .into_iter()
