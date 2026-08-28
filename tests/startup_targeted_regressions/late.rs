@@ -275,8 +275,8 @@ fn startup_legacy_dropdown_check_regions_remain_textures() {
                     if region:GetObjectType() ~= "Texture" then
                         return name .. "_type=" .. tostring(region:GetObjectType())
                     end
-                    if button.CheckButton ~= nil then
-                        return name .. "_checkbutton=" .. tostring(button.CheckButton:GetObjectType())
+                    if button.CheckButton ~= region then
+                        return name .. "_check-region-mismatch"
                     end
                 end
                 return "ok"
