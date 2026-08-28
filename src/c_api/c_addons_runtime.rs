@@ -63,6 +63,7 @@ fn load_runtime_addon_with_dependencies(
     for warning in &result.warnings {
         crate::loader::trace_load_addon(origin, format!("warning {addon_name}: {warning}"));
     }
+    queue_nested_addon_warnings_for_parent(loader_env, &result.warnings);
     crate::loader::trace_load_addon(origin, format!("loaded {addon_name}"));
     crate::lua_api::workarounds::apply_for_runtime_addon_load(loader_env, addon_name);
     loading_guard.commit_loaded();
@@ -70,6 +71,22 @@ fn load_runtime_addon_with_dependencies(
     loader_env.state().borrow_mut().invalidate_strata_buckets();
     crate::loader::trace_load_addon(origin, format!("event {addon_name}"));
     Ok(())
+}
+
+fn queue_nested_addon_warnings_for_parent(loader_env: &LoaderEnv<'_>, warnings: &[String]) {
+    if warnings.is_empty() {
+        return;
+    }
+
+    let mut state = loader_env.state().borrow_mut();
+    let Some(parent_index) = state.loading_addon_stack.iter().rev().nth(1).copied() else {
+        return;
+    };
+    state
+        .pending_nested_addon_warnings
+        .entry(parent_index)
+        .or_default()
+        .extend(warnings.iter().cloned());
 }
 
 #[cfg(feature = "client-mists")]

@@ -85,6 +85,7 @@ impl Drop for LoadingAddonGuard {
         state
             .global_publications
             .retain(|(addon_index, _)| *addon_index != self.addon_idx);
+        state.pending_nested_addon_warnings.remove(&self.addon_idx);
         let position = state
             .loading_addon_stack
             .iter()
@@ -162,15 +163,32 @@ pub fn load_addon_internal(
     maybe_replay_blizzard_lua_in_secure_env(env, toc, folder_name, &ctx, &mut result);
     maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
+    let addon_index = loading_guard.addon_index();
     append_nil_symbol_access_warnings(
         env,
-        loading_guard.addon_index(),
+        addon_index,
         &addon_name,
         nil_symbol_access_start,
         &mut result,
     );
+    append_pending_nested_addon_warnings(env, addon_index, &mut result);
     loading_guard.commit_loaded();
     Ok(result)
+}
+
+fn append_pending_nested_addon_warnings(
+    env: &LoaderEnv<'_>,
+    addon_index: u16,
+    result: &mut LoadResult,
+) {
+    let pending = env
+        .state()
+        .borrow_mut()
+        .pending_nested_addon_warnings
+        .remove(&addon_index);
+    if let Some(pending) = pending {
+        result.warnings.extend(pending);
+    }
 }
 
 /// Run hand-written workarounds that must fire after specific Blizzard addons

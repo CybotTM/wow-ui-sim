@@ -149,6 +149,7 @@ pub struct SimState {
     pub lua_error_counts: HashMap<String, usize>,
     pub nil_symbol_accesses: Vec<NilSymbolAccess>,
     pub global_publications: HashSet<(u16, String)>,
+    pub pending_nested_addon_warnings: HashMap<u16, Vec<String>>,
     pub global_show_hide_depth: u32,
     pub anim_sync_times: HashMap<String, std::time::Duration>,
 

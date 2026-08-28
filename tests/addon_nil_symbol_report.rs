@@ -108,7 +108,15 @@ end
     writeln!(nested_toc, "## Title: NestedPublisher").unwrap();
     writeln!(nested_toc, "NestedPublisher.lua").unwrap();
     let mut nested_lua = std::fs::File::create(nested_dir.join("NestedPublisher.lua")).unwrap();
-    writeln!(nested_lua, "NestedPublishedGlobal = true").unwrap();
+    writeln!(
+        nested_lua,
+        r#"local _ = C_Container.NestedMissingMethod
+local _ = NestedResolvedGlobal
+NestedResolvedGlobal = true
+NestedPublishedGlobal = true
+"#
+    )
+    .unwrap();
 
     dir
 }
@@ -220,6 +228,26 @@ fn publication_guard_nested_addon_does_not_resolve_outer_warning() {
         .expect("nested publication should be readable");
 
     assert!(nested_global, "nested addon should publish its global");
+    let nested_method_warning =
+        "NestedPublisher needs C_Container.NestedMissingMethod (accessed at NestedPublisher.lua:1)";
+    assert_eq!(
+        result
+            .warnings
+            .iter()
+            .filter(|warning| warning.as_str() == nested_method_warning)
+            .count(),
+        1,
+        "nested addon warning should propagate exactly once: {:?}",
+        result.warnings
+    );
+    assert!(
+        !result
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("NestedResolvedGlobal")),
+        "nested addon's resolved global should stay reconciled: {:?}",
+        result.warnings
+    );
     assert!(
         result.warnings.contains(
             &"OuterConsumer needs global NestedPublishedGlobal (accessed at OuterConsumer.lua:1)"
