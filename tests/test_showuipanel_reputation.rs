@@ -338,7 +338,7 @@ fn show_ui_panel_locks_reputation_frame_layout() {
 fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
     test_timeout! {
         let env = setup_env();
-        let result: String = env
+        let setup_result: String = env
             .eval(
                 r#"
                 if not CharacterFrame or not ReputationFrame or not ReputationFrame.filterDropdown then
@@ -353,14 +353,33 @@ fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
                     ReputationFrame:OnShow()
                 end
 
+                return "ready"
+                "#,
+            )
+            .unwrap();
+        assert_eq!(setup_result, "ready");
+
+        let state = env.state();
+        let dropdown_id = {
+            let sim = state.borrow();
+            let reputation_id = sim
+                .widgets
+                .get_id_by_name("ReputationFrame")
+                .expect("ReputationFrame should exist");
+            sim.widgets
+                .get(reputation_id)
+                .and_then(|frame| frame.children_keys.get("filterDropdown"))
+                .copied()
+                .expect("ReputationFrame filterDropdown should exist")
+        };
+        let left_button = env.lua_string("LeftButton");
+        env.fire_script_handler(dropdown_id, "OnMouseDown", vec![left_button])
+            .expect("reputation filter OnMouseDown should dispatch");
+
+        let result: String = env
+            .eval(
+                r#"
                 local dropdown = ReputationFrame.filterDropdown
-                local handler = dropdown:GetScript("OnMouseDown")
-                if type(handler) ~= "function" then
-                    return "missing_mouse_down_handler"
-                end
-
-                handler(dropdown, "LeftButton")
-
                 local buttons = dropdown.__wow_menu_buttons
                 if type(buttons) ~= "table" then
                     return "missing_buttons"
