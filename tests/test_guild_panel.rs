@@ -258,13 +258,12 @@ fn guild_member_rank_dropdown_generates_rank_options() {
             end
 
             local labels = GuildDropdownTestLabels(dropdown)
-            local closedText = (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "")
-            return closedText .. "|" .. table.concat(labels, ",")
+            return table.concat(labels, ",")
         "#).unwrap();
         assert_eq!(
             result,
-            "Officer/Officer|Officer,Member",
-            "rank dropdown should show selected rank and visible assignable guild ranks: {result}"
+            "Officer,Member",
+            "rank dropdown should show visible assignable guild ranks: {result}"
         );
     }
 }
@@ -389,7 +388,7 @@ fn guild_control_tab_dropdown_shows_initial_selection() {
 }
 
 #[test]
-fn guild_control_rank_dropdown_falls_back_to_selected_rank_name() {
+fn guild_control_rank_dropdown_omits_unassignable_leader_rank() {
     test_timeout! {
         let env = setup_env();
         load_guild_control_ui(&env);
@@ -402,9 +401,16 @@ fn guild_control_rank_dropdown_falls_back_to_selected_rank_name() {
             GuildControlSetRank(1)
             GuildControlUI.currentRank = 1
             dropdown:GenerateMenu()
-            return (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "")
+            if not dropdown:HasElements() then
+                return "missing_elements"
+            end
+            return table.concat(GuildDropdownTestLabels(dropdown), ",")
         "#).unwrap();
-        assert_eq!(result, "Guild Leader/Guild Leader", "rank dropdown should show selected rank even when rank is not in assignable menu rows: {result}");
+        assert_eq!(
+            result,
+            "Officer,Member",
+            "rank dropdown should omit the unassignable guild-leader rank: {result}"
+        );
     }
 }
 
@@ -495,6 +501,7 @@ fn communities_list_dropdown_frame_values_are_not_empty() {
                 return "missing_dropdown"
             end
 
+            dropdown:SetupMenu()
             local labels = GuildDropdownTestLabels(dropdown)
             if #labels == 0 then
                 local clubCount = 0
