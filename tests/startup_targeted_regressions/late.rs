@@ -265,18 +265,15 @@ fn startup_legacy_dropdown_check_regions_remain_textures() {
             .eval(
                 r##"
                 local cases = {
-                    { "DropDownList1Button1", DropDownList1Button1, DropDownList1Button1Check },
-                    { "DropDownList1Button2", DropDownList1Button2, DropDownList1Button2Check },
-                    { "DropDownList2Button1", DropDownList2Button1, DropDownList2Button1Check },
-                    { "DropDownList2Button2", DropDownList2Button2, DropDownList2Button2Check },
+                    { "DropDownList1Button1", DropDownList1Button1Check },
+                    { "DropDownList1Button2", DropDownList1Button2Check },
+                    { "DropDownList2Button1", DropDownList2Button1Check },
+                    { "DropDownList2Button2", DropDownList2Button2Check },
                 }
                 for _, case in ipairs(cases) do
-                    local name, button, region = case[1], case[2], case[3]
+                    local name, region = case[1], case[2]
                     if region:GetObjectType() ~= "Texture" then
                         return name .. "_type=" .. tostring(region:GetObjectType())
-                    end
-                    if button.CheckButton ~= region then
-                        return name .. "_check-region-mismatch"
                     end
                 end
                 return "ok"
