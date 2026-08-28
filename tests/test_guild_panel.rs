@@ -584,7 +584,14 @@ fn communities_stream_dropdown_click_opens_menu() {
             .expect("stream dropdown OnMouseDown should dispatch");
 
         let result: String = env.eval(r#"
-            local labels = GuildDropdownTestVisibleLabels(CommunitiesFrame.StreamDropdown)
+            local dropdown = CommunitiesFrame.StreamDropdown
+            if not dropdown:IsMenuOpen() then
+                return "menu_closed"
+            end
+            if dropdown.menu == nil then
+                return "missing_menu"
+            end
+            local labels = GuildDropdownTestVisibleLabels(dropdown)
             if #labels == 0 then
                 return "empty_stream_buttons"
             end
