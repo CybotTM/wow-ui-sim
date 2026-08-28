@@ -1,5 +1,6 @@
 #![cfg(target_os = "linux")]
 
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::thread;
@@ -82,6 +83,29 @@ fn timeout_kills_descendant_and_later_sibling_runs() {
     assert_final_failure_list(
         &stdout,
         "timeout_reexec::fixtures::timeout_case::a_times_out_with_descendant",
+    );
+}
+
+#[test]
+fn nested_guards_execute_each_closure_once() {
+    let temp = TempDir::new().expect("create nested fixture tempdir");
+    let marker = temp.path().join("nested-closures");
+    let output = run_fixture(
+        "timeout_reexec::fixtures::nested_case::",
+        "nested",
+        &marker,
+        None,
+    );
+    let stdout = stdout(&output);
+    let stderr = stderr(&output);
+
+    assert!(
+        output.status.success(),
+        "nested timeout guards failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_eq!(
+        std::fs::read_to_string(&marker).expect("read nested closure marker"),
+        "first\nsecond\n"
     );
 }
 
@@ -218,10 +242,26 @@ mod fixtures {
         }
     }
 
+    pub(super) mod nested_case {
+        use super::*;
+
+        #[test]
+        fn nested_guards_run_both_closures() {
+            if fixture_mode() != Some("nested") {
+                return;
+            }
+            crate::common::with_timeout(5, || {
+                record_nested_closure("first");
+                crate::common::with_timeout(5, || record_nested_closure("second"));
+            });
+        }
+    }
+
     fn fixture_mode() -> Option<&'static str> {
         match std::env::var(FIXTURE_MODE_ENV).as_deref() {
             Ok("panic") => Some("panic"),
             Ok("timeout") => Some("timeout"),
+            Ok("nested") => Some("nested"),
             _ => None,
         }
     }
@@ -231,5 +271,17 @@ mod fixtures {
             std::env::var_os(SIBLING_MARKER_ENV).expect("sibling marker path environment"),
         );
         std::fs::write(marker, "complete\n").expect("record later sibling completion");
+    }
+
+    fn record_nested_closure(label: &str) {
+        let marker = PathBuf::from(
+            std::env::var_os(SIBLING_MARKER_ENV).expect("nested closure marker environment"),
+        );
+        let mut marker = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(marker)
+            .expect("open nested closure marker");
+        writeln!(marker, "{label}").expect("record nested closure");
     }
 }

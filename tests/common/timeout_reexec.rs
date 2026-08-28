@@ -7,6 +7,7 @@ use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, ExitStatus, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Once;
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
@@ -16,6 +17,7 @@ const CHILD_POLL_INTERVAL: Duration = Duration::from_millis(10);
 const TERMINATION_GRACE: Duration = Duration::from_millis(100);
 
 static HANDSHAKE_SEQUENCE: AtomicU64 = AtomicU64::new(0);
+static CHILD_HANDSHAKE: Once = Once::new();
 
 pub(super) fn run<F: FnOnce() + Send + 'static>(secs: u64, closure: F) {
     let test_name = current_test_name();
@@ -44,7 +46,7 @@ fn run_guarded_child<F: FnOnce()>(
         test_name,
         "timeout child guard selected a different registered test"
     );
-    record_handshake(test_name);
+    CHILD_HANDSHAKE.call_once(|| record_handshake(test_name));
     closure();
 }
 
