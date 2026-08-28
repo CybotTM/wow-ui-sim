@@ -846,5 +846,6 @@ fn resolve_inherited_string(
     let inherits = frame.inherits.as_deref()?;
     crate::xml::get_template_chain(inherits)
         .iter()
+        .rev()
         .find_map(|entry| project(&entry.frame).cloned())
 }
