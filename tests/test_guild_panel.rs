@@ -14,6 +14,7 @@ fn blizzard_ui_dir() -> PathBuf {
 /// Blizzard addons needed for the guild/communities panel.
 const GUILD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
+    ("Blizzard_Menu", "Blizzard_Menu.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
     (
@@ -98,8 +99,42 @@ fn setup_env() -> WowLuaEnv {
     }
 
     env.apply_post_load_workarounds();
+    install_dropdown_test_helpers(&env);
     fire_startup_events(&env);
     env
+}
+
+fn install_dropdown_test_helpers(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        function GuildDropdownTestVisibleLabels(dropdown)
+            local labels = {}
+            if dropdown.menu then
+                for _, child in ipairs({ dropdown.menu:GetChildren() }) do
+                    if child:GetObjectType() == "Button" and child:IsShown() then
+                        local text = child:GetText()
+                        if (text == nil or text == "") and child.fontString then
+                            text = child.fontString:GetText()
+                        end
+                        if (text == nil or text == "") and child.Text then
+                            text = child.Text:GetText()
+                        end
+                        if text ~= nil and text ~= "" then
+                            labels[#labels + 1] = text
+                        end
+                    end
+                end
+            end
+            return labels
+        end
+
+        function GuildDropdownTestLabels(dropdown)
+            dropdown:OpenMenu()
+            return GuildDropdownTestVisibleLabels(dropdown)
+        end
+        "#,
+    )
+    .expect("guild dropdown test helpers should install");
 }
 
 fn load_guild_control_ui(env: &WowLuaEnv) {
@@ -217,27 +252,20 @@ fn guild_member_rank_dropdown_generates_rank_options() {
             setmetatable(detail, { __index = CommunitiesGuildMemberDetailMixin })
 
             detail:SetupRankDropdown()
-            local desc = dropdown:GenerateMenu()
-            if type(desc) ~= "table" or type(desc.__wow_elements) ~= "table" then
+            dropdown:GenerateMenu()
+            if not dropdown:HasElements() then
                 return "missing_elements"
             end
+
+            local labels = GuildDropdownTestLabels(dropdown)
             local closedText = (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "")
-
-            local labels = {}
-            for _, element in ipairs(desc.__wow_elements) do
-                table.insert(labels, element.text or "")
-            end
-            local descriptorLabels = table.concat(labels, ",")
-
-            dropdown:OpenMenu()
-            local first = GuildRankDropdownProbeMenuButton1
-            local second = GuildRankDropdownProbeMenuButton2
-            if first == nil or second == nil then
-                return descriptorLabels .. "|missing_buttons"
-            end
-            return closedText .. "|" .. descriptorLabels .. "|" .. first:GetText() .. "," .. second:GetText()
+            return closedText .. "|" .. table.concat(labels, ",")
         "#).unwrap();
-        assert_eq!(result, "Officer/Officer|Officer,Member|Officer,Member", "rank dropdown should show selected rank and visible assignable guild ranks: {result}");
+        assert_eq!(
+            result,
+            "Officer/Officer|Officer,Member",
+            "rank dropdown should show selected rank and visible assignable guild ranks: {result}"
+        );
     }
 }
 
@@ -286,29 +314,14 @@ fn communities_member_detail_rank_dropdown_shows_rank_rows() {
                 return "rank_dropdown_hidden"
             end
 
-            local desc = dropdown:GenerateMenu()
-            local descLabels = {}
-            if type(desc) == "table" and type(desc.__wow_elements) == "table" then
-                for _, element in ipairs(desc.__wow_elements) do
-                    if element.text ~= nil and element.text ~= "" then
-                        table.insert(descLabels, element.text)
-                    end
-                end
+            dropdown:GenerateMenu()
+            if not dropdown:HasElements() then
+                return "missing_elements"
             end
 
-            dropdown:OpenMenu()
-            local labels = {}
-            for _, button in ipairs(dropdown.__wow_menu_buttons or {}) do
-                if button ~= nil and button:IsVisible() then
-                    local text = button:GetText()
-                    if text ~= nil and text ~= "" then
-                        table.insert(labels, text)
-                    end
-                end
-            end
-
+            local labels = GuildDropdownTestLabels(dropdown)
             if #labels == 0 then
-                return "empty_rank_frames:desc=" .. table.concat(descLabels, ",")
+                return "empty_rank_frames"
             end
 
             local closedText = dropdown.Text and dropdown.Text:GetText() or dropdown:GetText()
@@ -343,17 +356,16 @@ fn guild_control_rank_settings_dropdown_shows_rank_rows() {
                 return "missing_dropdown"
             end
 
-            dropdown:OpenMenu()
-            local first = GuildControlUIRankSettingsFrameRankDropdownMenuButton1
-            local second = GuildControlUIRankSettingsFrameRankDropdownMenuButton2
-            if first == nil or second == nil then
-                return "missing_buttons"
+            dropdown:GenerateMenu()
+            if not dropdown:HasElements() then
+                return "missing_elements"
             end
+            local labels = GuildDropdownTestLabels(dropdown)
             local textWidth = dropdown.Text and dropdown.Text:GetWidth() or 0
             if textWidth <= 0 then
                 return "zero_text_width:" .. tostring(textWidth)
             end
-            return (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "") .. "/" .. tostring(textWidth) .. "|" .. first:GetText() .. "," .. second:GetText()
+            return (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "") .. "/" .. tostring(textWidth) .. "|" .. table.concat(labels, ",")
         "#).unwrap();
         assert!(result.starts_with("Officer/Officer/"), "guild control rank dropdown should show selected rank and visible rank rows: {result}");
         assert!(result.ends_with("|Officer,Member"), "guild control rank dropdown should materialize visible rank rows: {result}");
@@ -397,28 +409,11 @@ fn guild_control_rank_dropdown_falls_back_to_selected_rank_name() {
 }
 
 #[test]
-fn guild_dropdown_value_lists_are_not_empty() {
+fn guild_dropdown_descriptions_have_elements() {
     test_timeout! {
         let env = setup_env();
         load_guild_control_ui(&env);
         let result: String = env.eval(r#"
-            local function values(dropdown)
-                if dropdown == nil then
-                    return nil
-                end
-                local desc = dropdown:GenerateMenu()
-                if type(desc) ~= "table" or type(desc.__wow_elements) ~= "table" then
-                    return {}
-                end
-                local labels = {}
-                for _, element in ipairs(desc.__wow_elements) do
-                    if type(element) == "table" and element.text and element.text ~= "" then
-                        table.insert(labels, element.text)
-                    end
-                end
-                return labels
-            end
-
             local checks = {
                 { "guild_control_tabs", GuildControlUI and GuildControlUI.dropdown },
                 { "rank_settings", GuildControlUIRankSettingsFrame and GuildControlUIRankSettingsFrame.dropdown },
@@ -426,59 +421,36 @@ fn guild_dropdown_value_lists_are_not_empty() {
             }
 
             local failures = {}
-            local summaries = {}
             for _, check in ipairs(checks) do
                 local name, dropdown = check[1], check[2]
-                local labels = values(dropdown)
-                if labels == nil then
-                    table.insert(failures, name .. ":missing_dropdown")
-                elseif #labels == 0 then
-                    table.insert(failures, name .. ":empty")
+                if dropdown == nil then
+                    failures[#failures + 1] = name .. ":missing_dropdown"
                 else
-                    table.insert(summaries, name .. "=" .. table.concat(labels, ","))
+                    dropdown:GenerateMenu()
+                    if not dropdown:HasElements() then
+                        failures[#failures + 1] = name .. ":empty"
+                    end
                 end
             end
 
             if #failures > 0 then
-                return "fail:" .. table.concat(failures, ";") .. "|values:" .. table.concat(summaries, ";")
+                return "fail:" .. table.concat(failures, ";")
             end
-            return "ok:" .. table.concat(summaries, ";")
+            return "ok"
         "#).unwrap();
-        assert!(
-            result.starts_with("ok:"),
-            "guild dropdown value lists must not be empty: {result}"
+        assert_eq!(
+            result, "ok",
+            "guild dropdown descriptions must expose elements: {result}"
         );
     }
 }
 
 #[test]
-fn guild_dropdown_materialized_frame_values_are_not_empty() {
+fn guild_dropdown_materialized_buttons_have_labels() {
     test_timeout! {
         let env = setup_env();
         load_guild_control_ui(&env);
         let result: String = env.eval(r#"
-            local function frameValues(dropdown)
-                if dropdown == nil or type(dropdown.GetName) ~= "function" then
-                    return nil
-                end
-                local name = dropdown:GetName()
-                if name == nil or name == "" then
-                    return nil
-                end
-                dropdown:OpenMenu()
-                local labels = {}
-                for index = 1, 10 do
-                    local button = _G[name .. "MenuButton" .. index]
-                    if button ~= nil and button:IsVisible() then
-                        local text = button:GetText()
-                        if text ~= nil and text ~= "" then
-                            table.insert(labels, text)
-                        end
-                    end
-                end
-                return labels
-            end
-
             local checks = {
                 { "guild_control_tabs", GuildControlUI and GuildControlUI.dropdown },
                 { "rank_settings", GuildControlUIRankSettingsFrame and GuildControlUIRankSettingsFrame.dropdown },
@@ -489,24 +461,26 @@ fn guild_dropdown_materialized_frame_values_are_not_empty() {
             local summaries = {}
             for _, check in ipairs(checks) do
                 local name, dropdown = check[1], check[2]
-                local labels = frameValues(dropdown)
-                if labels == nil then
-                    table.insert(failures, name .. ":missing_dropdown")
-                elseif #labels == 0 then
-                    table.insert(failures, name .. ":empty_frames")
+                if dropdown == nil then
+                    failures[#failures + 1] = name .. ":missing_dropdown"
                 else
-                    table.insert(summaries, name .. "=" .. table.concat(labels, ","))
+                    local labels = GuildDropdownTestLabels(dropdown)
+                    if #labels == 0 then
+                        failures[#failures + 1] = name .. ":empty_buttons"
+                    else
+                        summaries[#summaries + 1] = name .. "=" .. table.concat(labels, ",")
+                    end
                 end
             end
 
             if #failures > 0 then
-                return "fail:" .. table.concat(failures, ";") .. "|frames:" .. table.concat(summaries, ";")
+                return "fail:" .. table.concat(failures, ";") .. "|buttons:" .. table.concat(summaries, ";")
             end
             return "ok:" .. table.concat(summaries, ";")
         "#).unwrap();
         assert!(
             result.starts_with("ok:"),
-            "guild dropdown materialized frame values must not be empty: {result}"
+            "guild dropdown materialized buttons must have labels: {result}"
         );
     }
 }
@@ -521,21 +495,7 @@ fn communities_list_dropdown_frame_values_are_not_empty() {
                 return "missing_dropdown"
             end
 
-            local function frameValues()
-                dropdown:OpenMenu()
-                local labels = {}
-                for _, button in ipairs(dropdown.__wow_menu_buttons or {}) do
-                    if button ~= nil and button:IsVisible() then
-                        local text = button:GetText()
-                        if text ~= nil and text ~= "" then
-                            table.insert(labels, text)
-                        end
-                    end
-                end
-                return labels
-            end
-
-            local labels = frameValues()
+            local labels = GuildDropdownTestLabels(dropdown)
             if #labels == 0 then
                 local clubCount = 0
                 local clubs = C_Club.GetSubscribedClubs()
@@ -580,17 +540,7 @@ fn communities_stream_dropdown_shows_guild_officer_and_notification_settings() {
             }
             frame.selectedStreamForClub["guild-0"] = C_Club.GetStreamInfo("guild-0", 1)
             dropdown:SetupMenu()
-            dropdown:OpenMenu()
-
-            local labels = {}
-            for _, button in ipairs(dropdown.__wow_menu_buttons or {}) do
-                if button ~= nil and button:IsVisible() then
-                    local text = button:GetText()
-                    if text ~= nil and text ~= "" then
-                        table.insert(labels, text)
-                    end
-                end
-            end
+            local labels = GuildDropdownTestLabels(dropdown)
 
             if #labels == 0 then
                 return "empty_stream_frames"
@@ -610,16 +560,8 @@ fn communities_stream_dropdown_shows_guild_officer_and_notification_settings() {
 fn communities_stream_dropdown_click_opens_menu() {
     test_timeout! {
         let env = setup_env();
-        let result: String = env.eval(r#"
+        env.exec(r#"
             local frame = CommunitiesFrame
-            if frame == nil then
-                return "missing_communities_frame"
-            end
-            local dropdown = frame.StreamDropdown
-            if dropdown == nil then
-                return "missing_stream_dropdown"
-            end
-
             frame.selectedClubId = "guild-0"
             frame.selectedClubInfo = C_Club.GetClubInfo("guild-0")
             frame.privilegesForClub["guild-0"] = {
@@ -627,26 +569,30 @@ fn communities_stream_dropdown_click_opens_menu() {
                 canDestroyStream = false,
             }
             frame.selectedStreamForClub["guild-0"] = C_Club.GetStreamInfo("guild-0", 1)
-            dropdown:SetupMenu()
+            frame.StreamDropdown:SetupMenu()
+        "#).unwrap();
 
-            local onMouseDown = dropdown:GetScript("OnMouseDown")
-            if type(onMouseDown) ~= "function" then
-                return "missing_on_mouse_down"
-            end
-            onMouseDown(dropdown, "LeftButton")
+        let dropdown_id = {
+            let state = env.state().borrow();
+            let communities_id = state
+                .widgets
+                .get_id_by_name("CommunitiesFrame")
+                .expect("CommunitiesFrame should exist");
+            state
+                .widgets
+                .get(communities_id)
+                .and_then(|frame| frame.children_keys.get("StreamDropdown"))
+                .copied()
+                .expect("CommunitiesFrame.StreamDropdown should exist")
+        };
+        let left_button = env.lua_string("LeftButton");
+        env.fire_script_handler(dropdown_id, "OnMouseDown", vec![left_button])
+            .expect("stream dropdown OnMouseDown should dispatch");
 
-            local labels = {}
-            for _, button in ipairs(dropdown.__wow_menu_buttons or {}) do
-                if button ~= nil and button:IsVisible() then
-                    local text = button:GetText()
-                    if text ~= nil and text ~= "" then
-                        table.insert(labels, text)
-                    end
-                end
-            end
-
+        let result: String = env.eval(r#"
+            local labels = GuildDropdownTestVisibleLabels(CommunitiesFrame.StreamDropdown)
             if #labels == 0 then
-                return "empty_stream_frames"
+                return "empty_stream_buttons"
             end
             return "ok:" .. table.concat(labels, "|")
         "#).unwrap();
