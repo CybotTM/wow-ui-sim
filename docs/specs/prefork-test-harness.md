@@ -32,6 +32,8 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] On a real timeout, terminate the child process group/tree, reap the child, and return a test failure; the normal `test_timeout!` limit remains 120 seconds, while timeout-reexec conformance fixtures use a 1-second limit only to prove cleanup.
 - [x] Forward visible-output flags (`--nocapture`, `--no-capture`, and `--show-output`) to the exact child test while preserving captured output for failure reporting.
 - [x] Share process-group and process-tree cleanup helpers with the prefork runner without sharing its parent preload, fork scheduling, or immutable-state contract.
+- [x] Treat nested `with_timeout` calls inside an exact-test child as guarded closures in that same child, recording one handshake and avoiding a second re-exec boundary.
+- [x] Wrap multi-shard same-process tests in one outer timeout and run their inner shard bodies without nested timeout wrappers, so the outer boundary governs the complete sequence.
 
 ### Normal retail full-UI preload
 
