@@ -3160,3 +3160,11 @@ Updated [`updating-blizzard-ui-to-a-new-patch`](../../updating-blizzard-ui-to-a-
 ## [2026-08-27] update | Correct transparent-wrapper frame-level contract
 
 Updated `investigations/transparent-wrapper-render-order.md` after current retail XML and bucket ordering showed the old opaque level-100 border regression was invalid. Documented that only regionless wrappers hoist descendants, wrappers with owned regions retain frame-level boundaries, and higher raw frame levels render after lower levels.
+
+## [2026-08-27] update | Refresh PartyFrame tree against current retail XML
+
+Updated `investigations/partyframe-tree.md` and its index summary. Current `EditModeSystemSelectionBaseTemplate` explicitly uses frame level 1000, so PartyFrame Selection/highlight/corner dump expectations are 1000/1001/1002 rather than the historical master LOW:3/4/5 values. Preserved the startup-hang root causes and recorded resolved sizing/coordinate follow-ups.
+
+## [2026-08-28] update | Verify PartyFrame region draw-layer contract
+
+Updated `investigations/partyframe-tree.md`, its index summary, and focused coverage. Portrait remains `BACKGROUND`/0; Flash and Name remain `ARTWORK`/0 through `GetDrawLayer()`. Texture and FontString raw dump strata/levels remain simulator diagnostics rather than client API assertions.
