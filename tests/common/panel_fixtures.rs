@@ -51,6 +51,8 @@ pub const PANEL_ADDONS: &[&str] = &[
     "Blizzard_ItemButton",
     "Blizzard_QuickKeybind",
     "Blizzard_UIPanels_Game",
+    "Blizzard_ActionBar",
+    "Blizzard_UnitFrame",
     "Blizzard_TokenUI",
     "Blizzard_Minimap",
 ];
@@ -146,10 +148,10 @@ pub fn install_uiparent_load_addon_seam(env: &WowLuaEnv) {
 
 /// Install the `ActionButtonUtil` namespace used by `Blizzard_SpellSearch`
 /// (`SpellSearchUtil.GetActionBarStatusFor*`) and the talent / spellbook
-/// item templates. Loading the real `Blizzard_ActionBar` addon would drag
-/// in MainActionBar, the MultiBars, StanceBar, PetActionBar, and the
-/// `C_ActionBar` API surface — none of which the LoD panel tests need.
-/// Instead the fixture:
+/// item templates. The fixture loads `Blizzard_ActionBar` and
+/// `Blizzard_UnitFrame` for CharacterFrame dependencies, while this harness
+/// keeps the three ActionButtonUtil status probes deterministic and overridable.
+/// The fixture:
 ///
 /// * publishes the `ActionBarActionStatus` enum literal Blizzard addons
 ///   key off (NotMissing / MissingFromAllBars / OnInactiveBonusBar /
