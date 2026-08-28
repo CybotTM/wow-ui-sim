@@ -407,7 +407,7 @@ fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
                     if text ~= expectedText then
                         return "button_" .. tostring(index) .. "=" .. tostring(text)
                     end
-                    if button:GetFrameStrata() ~= "TOOLTIP" then
+                    if button:GetFrameStrata() ~= "FULLSCREEN_DIALOG" then
                         return "button_" .. tostring(index) .. "_strata=" .. tostring(button:GetFrameStrata())
                     end
                 end
