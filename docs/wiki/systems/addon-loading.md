@@ -122,12 +122,15 @@ Implementation: [nil-symbol reports](../../../src/loader/addon/nil_symbol_report
 
 Nil-symbol diagnostics remain strict: unresolved regular globals and every `C_*` namespace or method gap remain warnings. A regular public global read as nil earlier in an addon is reconciled only when that same addon explicitly publishes it later through ordinary Lua assignment or a named XML frame, and the global remains non-nil when addon loading completes. Publication ownership uses the stable addon index; a nested `C_AddOns.LoadAddOn` publication belongs to the nested addon and does not resolve the outer addon's warning. Globals later cleared remain warned. Publication-ledger entries are cleaned up with the `LoadingAddonGuard` transaction lifecycle.
 
+Nested runtime-addon loads finalize warnings under the nested addon, then forward those warning strings exactly once to the immediate parent `LoadResult`; forwarding is transitive for nested-nested loads and does not reprocess raw nil-access records. The publication recorder used by the global assignment hook is captured in a bootstrap-local upvalue and removed from `_G` before addon code runs, so addon Lua cannot forge publication-ledger entries; ordinary Lua assignments and named XML frame publications remain tracked.
+
 ## Sources
 
 - [addon-loading-pipeline.md](../../addon-loading-pipeline.md) — TOC parsing, load flow, XML handlers, SavedVariables, load order
 - [addon_loading.rs](../../../src/bin/wow_sim/addon_loading.rs) — Blizzard eager load, third-party addon discovery, metadata pre-registration, enable-state application, and load loop
 - [toc/mod.rs](../../../src/toc/mod.rs) — TOC metadata, normal file list, `[Bootstrap]` parsing, path resolution
-- [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution, inline `[Bootstrap]` entries, and the secure replay allowlist
+- [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution, inline `[Bootstrap]` entries, load transactions, warning finalization, and the secure replay allowlist
+- [c_addons_runtime.rs](../../../src/c_api/c_addons_runtime.rs) — nested runtime-addon loading and exactly-once warning forwarding
 - [blizzard-ui-files](../../../data/blizzard-ui-files) — committed per-profile Blizzard UI cache manifests, including bootstrap files needed by each active profile cache
 - [blizzard_ui_sync.rs](../../../src/blizzard_ui_sync.rs) and [profile_cache.rs](../../../src/blizzard_ui_sync/profile_cache.rs) — active-profile cache sync and profile-specific cache usability checks
 - [secure replay tests](../../../tests/blizzard_combat_log_processor_loads.rs) and [CatalogShop replay tests](../../../tests/blizzard_catalog_shop_shared_util_loads.rs) — proof that selected Blizzard library globals are available in `__secureenv`

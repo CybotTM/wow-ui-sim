@@ -301,6 +301,8 @@ Implementation: `src/loader/addon/nil_symbol_reports.rs`, `src/lua_api/globals/c
 
 Nil-symbol diagnostics remain strict: unresolved regular globals and every `C_*` namespace or method gap remain warnings. A regular public global read as nil earlier in an addon is reconciled only when that same addon explicitly publishes the global later through ordinary Lua assignment or a named XML frame, and the global remains non-nil when addon loading completes. Publication ownership uses the stable addon index; a nested `C_AddOns.LoadAddOn` publication belongs to the nested addon and does not resolve the outer addon's warning. Globals later cleared remain warned. Publication-ledger entries are cleaned up with the `LoadingAddonGuard` transaction lifecycle.
 
+Nested runtime-addon loads finalize warnings under the nested addon, then forward those warning strings exactly once to the immediate parent `LoadResult`; forwarding is transitive for nested-nested loads and does not reprocess raw nil-access records. The publication recorder used by the global assignment hook is captured in a bootstrap-local upvalue and removed from `_G` before addon code runs, so addon Lua cannot forge publication-ledger entries; ordinary Lua assignments and named XML frame publications remain tracked.
+
 **Path resolution fallback** (helpers.rs:52-79): Tries case-sensitive relative to XML, case-insensitive relative to XML, case-sensitive relative to addon root, case-insensitive relative to addon root.
 
 ---

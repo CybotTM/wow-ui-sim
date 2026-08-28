@@ -1,3 +1,7 @@
+## [2026-08-28] audit | Document nested warning propagation and recorder encapsulation
+
+Audited commits `88cf327a7` and `8a6b5f61a`. Updated [[addon-loading]] and the top-level addon-loading pipeline documentation: nested runtime-addon warnings are finalized under the nested addon and forwarded exactly once to the immediate parent `LoadResult` (transitively for nested-nested loads, without raw-access reprocessing), while the global-publication recorder is captured in a bootstrap-local upvalue and removed from `_G` so addon Lua cannot forge publication events. Updated the existing index summary and added the runtime loader source link; no spec or new wiki page was warranted.
+
 ## [2026-08-28] audit | Document same-addon nil-symbol publication reconciliation
 
 Audited commits `473031857` and `e2545a3d1`. Updated [[addon-loading]] and the top-level addon-loading pipeline documentation to record strict nil-symbol diagnostics with reconciliation limited to regular public globals explicitly published later by the same stable addon index through ordinary Lua assignment or named XML frame creation. Nested `C_AddOns.LoadAddOn` publications do not resolve the outer warning, cleared globals and all `C_*` gaps remain warned, and publication-ledger cleanup follows `LoadingAddonGuard`. Updated the existing index summary; no spec change was warranted.
