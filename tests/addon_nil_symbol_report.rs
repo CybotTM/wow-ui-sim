@@ -96,6 +96,10 @@ fn create_nested_publication_addons() -> tempfile::TempDir {
         r#"local _ = NestedPublishedGlobal
 local loaded, reason = C_AddOns.LoadAddOn("NestedPublisher")
 assert(loaded, tostring(reason))
+local recordPublication = rawget(_G, "__wow_record_public_global_publication")
+if type(recordPublication) == "function" then
+    recordPublication("NestedPublishedGlobal")
+end
 "#
     )
     .unwrap();

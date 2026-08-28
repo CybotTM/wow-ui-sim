@@ -1542,13 +1542,15 @@ __global_mt.__index = function(t, key)
   __wow_log_nil_symbol_access("_G", key)
   return nil
 end
+local __wow_record_public_global_publication = rawget(_G, "__wow_record_public_global_publication")
+rawset(_G, "__wow_record_public_global_publication", nil)
+
 local function __wow_record_public_global_assignment(t, key, value)
   if t ~= _G or type(key) ~= "string" or value == nil or key:sub(1, 2) == "C_" then
     return
   end
-  local record = rawget(_G, "__wow_record_public_global_publication")
-  if type(record) == "function" then
-    record(key)
+  if type(__wow_record_public_global_publication) == "function" then
+    __wow_record_public_global_publication(key)
   end
 end
 
