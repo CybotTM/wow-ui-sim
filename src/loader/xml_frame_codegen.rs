@@ -20,18 +20,21 @@ pub(super) fn build_frame_lua_code(
     parent: &str,
     parent_ref_expr: &str,
 ) -> String {
-    let keep_implicit_parent = frame.set_all_points == Some(true) || frame.toplevel == Some(true);
+    let key_values_initialized_during_create =
+        !is_engine_root_frame(name) && frame.key_values().is_some();
     let mut lua_code = build_create_frame_code(
         widget_type,
         name,
         explicit_parent,
         inherits,
-        keep_implicit_parent,
+        frame,
         parent_ref_expr,
     );
     append_parent_key_code(&mut lua_code, frame, inherits, parent, parent_ref_expr);
     append_mixins_code(&mut lua_code, frame, inherits);
-    append_key_values_code(&mut lua_code, frame, inherits);
+    if !key_values_initialized_during_create {
+        append_key_values_code(&mut lua_code, frame, inherits);
+    }
     append_xml_attributes_code(&mut lua_code, frame);
     // SetID must be in the Lua chunk (not deferred to Rust direct-set) because
     // template child OnLoad handlers may call GetParent():GetID() during
@@ -49,7 +52,7 @@ fn build_create_frame_code(
     name: &str,
     parent: Option<&str>,
     inherits: &str,
-    keep_implicit_parent: bool,
+    frame: &crate::xml::FrameXml,
     parent_ref_expr: &str,
 ) -> String {
     let inherits_arg = if inherits.is_empty() {
@@ -59,7 +62,7 @@ fn build_create_frame_code(
     };
     // Engine-root frames are pre-created without a parent. Their XML definitions
     // configure those existing objects even when the parent attribute is omitted.
-    if matches!(name, "UIParent" | "WorldFrame") {
+    if is_engine_root_frame(name) {
         let root_ref = lua_global_ref(name);
         return format!(
             r#"
@@ -67,6 +70,7 @@ fn build_create_frame_code(
         "#,
         );
     }
+    let keep_implicit_parent = frame.set_all_points == Some(true) || frame.toplevel == Some(true);
     let parent_arg = match parent {
         Some(_) => format!("{parent_ref_expr} or UIParent"),
         // Lua CreateFrame defaults nil parent to UIParent, so pass UIParent
@@ -80,11 +84,24 @@ fn build_create_frame_code(
     } else {
         ""
     };
+    let template_initializer_arg = build_key_values_initializer(frame)
+        .map(|initializer| format!(", nil, {initializer}"))
+        .unwrap_or_default();
     format!(
         r#"
-        local frame = CreateFrame("{widget_type}", "{name}", {parent_arg}, {inherits_arg}){orphan_code}
+        local frame = CreateFrame("{widget_type}", "{name}", {parent_arg}, {inherits_arg}{template_initializer_arg}){orphan_code}
         "#,
     )
+}
+
+fn is_engine_root_frame(name: &str) -> bool {
+    matches!(name, "UIParent" | "WorldFrame")
+}
+
+fn build_key_values_initializer(frame: &crate::xml::FrameXml) -> Option<String> {
+    let mut body = String::new();
+    append_key_values_code(&mut body, frame, "");
+    (!body.is_empty()).then(|| format!("function(frame){body}\n        end"))
 }
 
 /// Append parentKey assignment so sibling frames can reference this frame.

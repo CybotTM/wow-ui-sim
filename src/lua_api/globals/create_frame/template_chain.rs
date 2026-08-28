@@ -22,6 +22,12 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
+enum RuntimeTemplateOverrides<'a> {
+    None,
+    Frame(&'a crate::xml::FrameXml),
+    Initializer(Val),
+}
+
 // ---------------------------------------------------------------------------
 // Public entry point
 // ---------------------------------------------------------------------------
@@ -32,7 +38,13 @@ pub(crate) fn apply_runtime_template_chain(
     inherits: Option<&str>,
     fire_on_load: bool,
 ) -> LuaResult<()> {
-    apply_runtime_template_chain_impl(state, frame_id, inherits, fire_on_load, None)
+    apply_runtime_template_chain_impl(
+        state,
+        frame_id,
+        inherits,
+        fire_on_load,
+        RuntimeTemplateOverrides::None,
+    )
 }
 
 pub(crate) fn replay_runtime_template_parent_links(
@@ -59,7 +71,27 @@ pub(crate) fn apply_runtime_template_chain_with_frame_overrides(
     fire_on_load: bool,
     frame: &crate::xml::FrameXml,
 ) -> LuaResult<()> {
-    apply_runtime_template_chain_impl(state, frame_id, inherits, fire_on_load, Some(frame))
+    apply_runtime_template_chain_impl(
+        state,
+        frame_id,
+        inherits,
+        fire_on_load,
+        RuntimeTemplateOverrides::Frame(frame),
+    )
+}
+
+pub(super) fn apply_runtime_template_chain_with_initializer(
+    state: &mut LuaState,
+    frame_id: u64,
+    inherits: Option<&str>,
+    fire_on_load: bool,
+    initializer: Val,
+) -> LuaResult<()> {
+    let overrides = match initializer {
+        Val::Function(_) => RuntimeTemplateOverrides::Initializer(initializer),
+        _ => RuntimeTemplateOverrides::None,
+    };
+    apply_runtime_template_chain_impl(state, frame_id, inherits, fire_on_load, overrides)
 }
 
 fn apply_runtime_template_chain_impl(
@@ -67,17 +99,15 @@ fn apply_runtime_template_chain_impl(
     frame_id: u64,
     inherits: Option<&str>,
     fire_on_load: bool,
-    direct_frame: Option<&crate::xml::FrameXml>,
+    overrides: RuntimeTemplateOverrides<'_>,
 ) -> LuaResult<()> {
     let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
-        if let Some(frame) = direct_frame {
-            apply_template_partition_marker(state, frame_id, frame);
-            apply_template_key_values(state, frame_id, frame.all_key_values());
-        }
+        apply_runtime_template_overrides(state, frame_id, overrides)?;
         return Ok(());
     };
     let chain = crate::xml::get_template_chain(inherits);
     if chain.is_empty() {
+        apply_runtime_template_overrides(state, frame_id, overrides)?;
         return Ok(());
     }
 
@@ -85,7 +115,7 @@ fn apply_runtime_template_chain_impl(
     let frame_name = frame_lookup_name(state, frame_id);
     apply_template_parent_links(state, frame_id, &chain)?;
     apply_chain_entries(state, frame_id, &chain)?;
-    apply_direct_frame_key_values(state, frame_id, direct_frame);
+    apply_runtime_template_overrides(state, frame_id, overrides)?;
     apply_runtime_template_loader_effects(state, frame_id, inherits, &frame_name, &chain)?;
     create_runtime_template_child_frames(state, &state_rc, frame_id, &frame_name, &chain)?;
 
@@ -99,14 +129,23 @@ fn apply_runtime_template_chain_impl(
     )
 }
 
-fn apply_direct_frame_key_values(
+fn apply_runtime_template_overrides(
     state: &mut LuaState,
     frame_id: u64,
-    direct_frame: Option<&crate::xml::FrameXml>,
-) {
-    if let Some(frame) = direct_frame {
-        apply_template_partition_marker(state, frame_id, frame);
-        apply_template_key_values(state, frame_id, frame.all_key_values());
+    overrides: RuntimeTemplateOverrides<'_>,
+) -> LuaResult<()> {
+    match overrides {
+        RuntimeTemplateOverrides::None => Ok(()),
+        RuntimeTemplateOverrides::Frame(frame) => {
+            apply_template_partition_marker(state, frame_id, frame);
+            apply_template_key_values(state, frame_id, frame.all_key_values());
+            Ok(())
+        }
+        RuntimeTemplateOverrides::Initializer(initializer) => {
+            let frame = frame_ref(state, frame_id)?;
+            crate::lua_api::script_helpers::call_void_function_state(state, initializer, &[frame])
+                .map_err(rilua::runtime_error)
+        }
     }
 }
 

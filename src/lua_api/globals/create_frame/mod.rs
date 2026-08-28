@@ -36,9 +36,15 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
     let (parent_id, parent_explicit) =
         resolve_parent_id(state, args.parent_val, args.default_parent_allowed)?;
     let runtime_inherits = build_runtime_inherits(&args.frame_type, args.inherits.as_deref());
+    let template_initializer = args.template_initializer;
     args.name = resolve_frame_name(state, args.name.take(), parent_id, parent_explicit)?;
     let frame_id = register_runtime_frame(state, args, parent_id, parent_explicit)?;
-    apply_runtime_frame_templates(state, frame_id, runtime_inherits.as_deref())?;
+    apply_runtime_frame_templates(
+        state,
+        frame_id,
+        runtime_inherits.as_deref(),
+        template_initializer,
+    )?;
     let frame_val = frame_ref(state, frame_id)?;
     state.push(frame_val);
     Ok(1)
@@ -80,6 +86,7 @@ struct CreateFrameArgs {
     default_parent_allowed: bool,
     inherits: Option<String>,
     id: Option<i32>,
+    template_initializer: Val,
 }
 
 fn register_runtime_frame(
@@ -103,10 +110,17 @@ fn apply_runtime_frame_templates(
     state: &mut LuaState,
     frame_id: u64,
     runtime_inherits: Option<&str>,
+    template_initializer: Val,
 ) -> LuaResult<()> {
     template_chain::ensure_runtime_slider_children(state, frame_id)?;
     let fire_on_load = borrow_state(state)?.suppress_runtime_on_load_depth == 0;
-    template_chain::apply_runtime_template_chain(state, frame_id, runtime_inherits, fire_on_load)?;
+    template_chain::apply_runtime_template_chain_with_initializer(
+        state,
+        frame_id,
+        runtime_inherits,
+        fire_on_load,
+        template_initializer,
+    )?;
     replay_runtime_template_parent_links(state, frame_id, runtime_inherits)
 }
 
@@ -117,6 +131,7 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
     let arg3 = stack_val(state, 3);
     let arg4 = stack_val(state, 4);
     let arg5 = stack_val(state, 5);
+    let arg6 = stack_val(state, 6);
     let name = if matches!(arg2, Val::Str(_)) || matches!(arg2, Val::Nil) {
         Option::<String>::from_stack(state, 2)?
     } else {
@@ -133,6 +148,13 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
         Val::Num(n) => Some(n as i32),
         _ => None,
     };
+    let template_initializer = if borrow_state(state)?.suppress_runtime_on_load_depth > 0
+        && matches!(arg6, Val::Function(_))
+    {
+        arg6
+    } else {
+        Val::Nil
+    };
     let widget_type = resolve_runtime_widget_type(&frame_type)?;
     Ok(CreateFrameArgs {
         frame_type,
@@ -142,6 +164,7 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
         default_parent_allowed,
         inherits,
         id,
+        template_initializer,
     })
 }
 
