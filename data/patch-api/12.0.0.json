@@ -12284,7 +12284,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback synthesizes missing methods that return nil, which does not satisfy the required boolean contract or establish encounter resurrection-limit semantics.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -12319,7 +12319,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback synthesizes missing methods that return nil, which does not satisfy the required boolean contract or establish encounter release-suppression semantics.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -12354,7 +12354,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback synthesizes missing methods that return nil, which does not satisfy the required boolean contract or establish encounter timeline-visibility semantics.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -12395,7 +12395,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback synthesizes the missing method as a nil-returning placeholder, which does not satisfy the required boolean contract or account-binding semantics.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -12643,7 +12643,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback supplies missing CreateListing/UpdateListing methods that return nil, which does not satisfy input parsing or modeled listing mutation.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -12721,7 +12721,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback synthesizes the missing method as a nil-returning placeholder, which does not satisfy the required boolean or security-sensitive input contract.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13349,7 +13349,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback synthesizes the missing method as a nil-returning placeholder, which does not satisfy the required GUID string contract.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13384,7 +13384,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback returns nil for the missing method, covering at most an absent-value shape without establishing present payloads or activity-log semantics.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13419,7 +13419,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback synthesizes the missing method as a nil-returning placeholder, which does not satisfy the required string contract.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13489,7 +13489,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback returns nil for the missing method, covering at most a no-active placeholder without establishing populated payload behavior.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13524,7 +13524,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic namespace fallback synthesizes the missing method as a nil-returning placeholder, which does not satisfy the required numeric contract.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13618,7 +13618,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves the activity-log query as nil-returning, so no runtime InitiativeActivityLogEntry payload or amount field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13653,7 +13653,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves the activity-log query as nil-returning, so no runtime InitiativeActivityLogEntry payload or completionTime field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13688,7 +13688,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves the activity-log query as nil-returning, so no runtime InitiativeActivityLogEntry payload or playerName field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13723,7 +13723,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves the activity-log query as nil-returning, so no runtime InitiativeActivityLogEntry payload or taskID field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13758,7 +13758,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves the activity-log query as nil-returning, so no runtime InitiativeActivityLogEntry payload or taskName field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13817,7 +13817,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetInitiativeActivityLogInfo nil-returning, so no runtime InitiativeActivityLogInfo payload or isLoaded field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13852,7 +13852,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetInitiativeActivityLogInfo nil-returning, so no runtime InitiativeActivityLogInfo payload or neighborhoodGUID field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13887,7 +13887,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetInitiativeActivityLogInfo nil-returning, so no runtime InitiativeActivityLogInfo payload or nextUpdateTime field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13922,7 +13922,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetInitiativeActivityLogInfo nil-returning, so no runtime taskActivity array or entry payloads are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -13981,7 +13981,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestones or milestoneOrderIndex field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14016,7 +14016,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestones or requiredContributionAmount field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14051,7 +14051,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or rewards field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14110,7 +14110,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or decorID field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14145,7 +14145,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or decorQuantity field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14180,7 +14180,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or description field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14215,7 +14215,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or favor field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14250,7 +14250,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or money field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14285,7 +14285,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or rewardQuestID field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14320,7 +14320,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestone rewards or title field are produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14963,7 +14963,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback returns nil instead of a modeled group-validity boolean.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -14998,7 +14998,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback returns nil instead of a modeled active-neighborhood-view boolean.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15057,7 +15057,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime currentCycleID field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15092,7 +15092,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime currentProgress field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15127,7 +15127,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime description field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15162,7 +15162,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime duration field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15197,7 +15197,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime initiativeID field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15232,7 +15232,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime isLoaded field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15267,7 +15267,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime milestones field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15302,7 +15302,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime neighborhoodGUID field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15337,7 +15337,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime playerTotalContribution field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15372,7 +15372,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime progressRequired field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15407,7 +15407,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime tasks field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15442,7 +15442,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback leaves GetNeighborhoodInitiativeInfo nil-returning, so no runtime title field is produced.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15477,7 +15477,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback returns nil instead of a modeled access boolean.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15512,7 +15512,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback returns nil instead of a modeled required-level boolean.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15582,7 +15582,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback is a no-op without request timing, completion, or payload publication.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15617,7 +15617,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback is a no-op without request timing, completion, or initiative-info publication.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15652,7 +15652,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback is a no-op and does not change active-neighborhood context.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15687,7 +15687,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback is a no-op and does not change viewing-neighborhood context.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -15722,7 +15722,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback does not provide a modeled ping-enabled boolean or state transitions.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -16770,7 +16770,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback returns nil instead of deriving a boolean from modeled restriction state.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -17647,7 +17647,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback is a no-op and does not establish event timing, delivery, or repeated-call behavior.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -17682,7 +17682,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback is a no-op and does not open, select, or scroll the Settings panel.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -18205,7 +18205,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback returns no duration object and does not model charge timing or lifetime.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -18240,7 +18240,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback returns no duration object and does not model cooldown timing or lifetime.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -18275,7 +18275,7 @@
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
           "summary": "Generic fallback returns no duration object and does not model loss-of-control timing or lifetime.",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd"
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f"
         }
       ],
       "tests": [],
@@ -92486,7 +92486,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/env_init/runtime_surface_bootstrap.lua",
-          "source_hash": "1bd331dc52c840e02797a8ca7d01de4fb1d3071b6d61a0efb442ee0852a520fd",
+          "source_hash": "37ba38e470cfcc4fb64e97d88d0b04379d91214b9acdc33fb38109a9aa18354f",
           "summary": "Runtime bootstrap has no NPC-as-player classification implementation."
         },
         {
