@@ -72,8 +72,11 @@ impl WowLuaEnv {
     }
 
     pub(crate) fn install_initial_screen_size_globals(&self) {
-        let state = self.state.borrow();
-        install_screen_size_globals(self, state.screen_width, state.screen_height);
+        let (screen_width, screen_height) = {
+            let state = self.state.borrow();
+            (state.screen_width, state.screen_height)
+        };
+        install_screen_size_globals(self, screen_width, screen_height);
     }
 
     /// Update screen dimensions in SimState and resize UIParent/WorldFrame to match.
