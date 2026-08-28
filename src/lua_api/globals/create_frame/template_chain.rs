@@ -38,13 +38,8 @@ pub(crate) fn apply_runtime_template_chain(
     inherits: Option<&str>,
     fire_on_load: bool,
 ) -> LuaResult<()> {
-    apply_runtime_template_chain_impl(
-        state,
-        frame_id,
-        inherits,
-        fire_on_load,
-        RuntimeTemplateOverrides::None,
-    )
+    let overrides = RuntimeTemplateOverrides::None;
+    apply_runtime_template_chain_impl(state, frame_id, inherits, fire_on_load, overrides)
 }
 
 pub(crate) fn replay_runtime_template_parent_links(
@@ -71,13 +66,8 @@ pub(crate) fn apply_runtime_template_chain_with_frame_overrides(
     fire_on_load: bool,
     frame: &crate::xml::FrameXml,
 ) -> LuaResult<()> {
-    apply_runtime_template_chain_impl(
-        state,
-        frame_id,
-        inherits,
-        fire_on_load,
-        RuntimeTemplateOverrides::Frame(frame),
-    )
+    let overrides = RuntimeTemplateOverrides::Frame(frame);
+    apply_runtime_template_chain_impl(state, frame_id, inherits, fire_on_load, overrides)
 }
 
 pub(super) fn apply_runtime_template_chain_with_initializer(

@@ -148,13 +148,7 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
         Val::Num(n) => Some(n as i32),
         _ => None,
     };
-    let template_initializer = if borrow_state(state)?.suppress_runtime_on_load_depth > 0
-        && matches!(arg6, Val::Function(_))
-    {
-        arg6
-    } else {
-        Val::Nil
-    };
+    let template_initializer = parse_template_initializer(state, arg6)?;
     let widget_type = resolve_runtime_widget_type(&frame_type)?;
     Ok(CreateFrameArgs {
         frame_type,
@@ -166,6 +160,16 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
         id,
         template_initializer,
     })
+}
+
+fn parse_template_initializer(state: &LuaState, value: Val) -> LuaResult<Val> {
+    let is_xml_frame_creation = borrow_state(state)?.suppress_runtime_on_load_depth > 0;
+    let initializer = if is_xml_frame_creation && matches!(value, Val::Function(_)) {
+        value
+    } else {
+        Val::Nil
+    };
+    Ok(initializer)
 }
 
 fn resolve_runtime_widget_type(frame_type: &str) -> LuaResult<WidgetType> {
