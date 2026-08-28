@@ -29,28 +29,6 @@ where
     Ok(())
 }
 
-fn update_flipbook_animation_and_target<F>(state: &mut LuaState, update: F) -> LuaResult<()>
-where
-    F: FnOnce(&mut crate::lua_api::animation::AnimState),
-{
-    let animation_frame_id = frame_id_from_stack(state, 1)?;
-    let mut sim = borrow_state_mut(state)?;
-    let Some((group_id, animation_index)) =
-        sim.anim_frame_to_anim.get(&animation_frame_id).copied()
-    else {
-        return Ok(());
-    };
-    let Some(group) = sim.animation_groups.get_mut(&group_id) else {
-        return Ok(());
-    };
-    let Some(animation) = group.animations.get_mut(animation_index) else {
-        return Ok(());
-    };
-    update(animation);
-    super::runtime::apply_group_flipbook_state(&mut sim, group_id);
-    Ok(())
-}
-
 pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn animation_set_duration(
     state: &mut LuaState,
 ) -> LuaResult<u32> {
@@ -134,7 +112,7 @@ pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn animation_set
     state: &mut LuaState,
 ) -> LuaResult<u32> {
     let rows = animation_numeric_arg(state, 2) as u32;
-    update_flipbook_animation_and_target(state, |animation| animation.flipbook_rows = rows)?;
+    with_animation_state_mut(state, |a| a.flipbook_rows = rows)?;
     Ok(0)
 }
 
@@ -148,9 +126,7 @@ pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn animation_set
     state: &mut LuaState,
 ) -> LuaResult<u32> {
     let columns = animation_numeric_arg(state, 2) as u32;
-    update_flipbook_animation_and_target(state, |animation| {
-        animation.flipbook_columns = columns;
-    })?;
+    with_animation_state_mut(state, |a| a.flipbook_columns = columns)?;
     Ok(0)
 }
 
@@ -164,7 +140,7 @@ pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn animation_set
     state: &mut LuaState,
 ) -> LuaResult<u32> {
     let frames = animation_numeric_arg(state, 2) as u32;
-    update_flipbook_animation_and_target(state, |animation| animation.flipbook_frames = frames)?;
+    with_animation_state_mut(state, |a| a.flipbook_frames = frames)?;
     Ok(0)
 }
 
