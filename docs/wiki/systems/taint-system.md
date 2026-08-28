@@ -39,6 +39,8 @@ Two environments share the same Lua state:
 - **genv** (`_G`): addon code; `Blizzard_EnvironmentCleanup` nils secure APIs here
 - **secureenv**: shallow copy of `_G` at startup with no `__index = _G` fallback; retains secure APIs after cleanup; addons with `UseSecureEnvironment: 1` in TOC run here via `setfenv`
 
+The shallow copy preserves table references that existed at initialization: `tests/secureenv_isolation.rs::shared_table_mutation_propagates_both_ways` dynamically finds a table present in both environments and verifies a secure-side mutation through the shared reference is visible from `_G`. Primitive values and later `_G` bindings remain separate; later global tables are not visible to secureenv without explicit export.
+
 Retail probe result, 2026-06-20: wrapping `_G.CooldownFrame_Set` and `_G.CooldownFrame_Clear` printed for normal CooldownViewer callers but did not print from `Blizzard_PrivateAurasUI` during a Mythic+ private-aura display. PrivateAurasUI is `UseSecureEnvironment: 1`, so its cooldown code did not reach the live `_G` override. That falsifies the simulator's previous `secureenv` metatable fallback model.
 
 Blizzard source also matches this: outbound bridge files explicitly capture `local secureEnv = GetCurrentEnvironment()`, call `SwapToGlobalEnvironment()`, then assign bridge tables back into `secureEnv` (for example `secureEnv.WowTokenOutbound = WowTokenOutbound`). In the current retail contract, inbound Wow Token callbacks and `RedeemFailed` publish to `_G`, while `WowTokenOutbound` is stored only in `__secureenv`; these are explicit source-level exports, not generic mirroring.

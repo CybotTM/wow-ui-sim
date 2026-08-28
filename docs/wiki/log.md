@@ -1,3 +1,7 @@
+## [2026-08-28] audit | Align runtime object contract documentation
+
+Audited commit `41205e19c`. Updated the FunctionContainer audit claims to match `tests/userdata_proxy.rs`: userdata type, method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys are covered; tostring formatting and broader identity, callback, timer, lifecycle, and metadata semantics remain unproven. Updated secureenv documentation for dynamically proven shallow table-reference sharing, and clarified that `debug.getfenv(frame)[1]` is a live per-instance field view via `tests/widget_misc_methods.rs::test_frame_debug_env_exposes_live_newindex_fields`.
+
 ## [2026-08-27] audit | Default-suite repair slices
 
 Audited commits `5dfbd222c`, `2a876dc25`, `8adadc959`, `d301bd023`, and `af662c223`. No spec or changelog update was warranted: the QuestAsync TOC resolver, Mists-only test gate, duplicate fallback removal, and corrected fixture expectation are test/maintenance changes. Updated [[playerspells-runtime-load]], [[on-update-dirty]], and the index because the SpellBook helper now requires an observable-frame check before falling back, and the settled solo leave-instance path does not query instance/LFG state.
@@ -1273,7 +1277,7 @@ Classified five duration/factory/StatusBar rows as best-effort behavioral from c
 
 ## [2026-08-07] investigation | Bound 12.0.0 FunctionContainer classification
 
-Classified `changed:C_FunctionContainers.CreateCallback` and four `LuaFunctionContainer` rows as best-effort behavioral from checked-in source-register/proxy evidence and the five named `userdata_proxy` tests. Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. The register now totals **21 best-effort and 3389 untriaged**.
+Classified `changed:C_FunctionContainers.CreateCallback` and four `LuaFunctionContainer` rows as best-effort behavioral from checked-in source-register/proxy evidence and the named `userdata_proxy` tests. Tested userdata type, method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys are covered; exact retail callback validation, metatable/equality identity, tostring formatting, timer integration, lifecycle/GC, and API metadata fidelity remain unproven. The register now totals **21 best-effort and 3389 untriaged**.
 
 ## [2026-08-07] investigation | Bound 12.0.0 classifications
 

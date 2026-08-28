@@ -36,7 +36,7 @@ When Lua assigns `frame.Key = value`:
 - child frame ref → stored in `children_keys` (Rust) and on the frame table
 - any other value → stored on the frame table
 
-`debug.getfenv(frame)[1]` is a compatibility view onto the frame table. It must not consume raw numeric key `1` on the frame itself, because addons such as oUF use frames as array-like containers (`element[1]`, `table.insert(element, button)`). A previous implementation stored the hidden field table at raw `frame[1]`, causing ElvUI/oUF aura updates to treat the field table as an aura button and fail at `button:SetSize`.
+`debug.getfenv(frame)[1]` is a live compatibility view onto the frame's per-instance field table. It must not consume raw numeric key `1` on the frame itself, because addons such as oUF use frames as array-like containers (`element[1]`, `table.insert(element, button)`). A previous implementation stored the hidden field table at raw `frame[1]`, causing ElvUI/oUF aura updates to treat the field table as an aura button and fail at `button:SetSize`.
 
 ## Mixin Application
 
