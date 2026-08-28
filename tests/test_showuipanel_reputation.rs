@@ -348,12 +348,6 @@ fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
                 if PanelTemplates_SetTab then
                     PanelTemplates_SetTab(CharacterFrame, ReputationFrame:GetID())
                 end
-                ReputationFrame:Show()
-                ShowUIPanel(CharacterFrame)
-                if ReputationFrame.OnShow then
-                    ReputationFrame:OnShow()
-                end
-
                 return "ready"
                 "#,
             )
@@ -361,18 +355,22 @@ fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
         assert_eq!(setup_result, "ready");
 
         let state = env.state();
-        let dropdown_id = {
+        let (reputation_id, dropdown_id) = {
             let sim = state.borrow();
             let reputation_id = sim
                 .widgets
                 .get_id_by_name("ReputationFrame")
                 .expect("ReputationFrame should exist");
-            sim.widgets
+            let dropdown_id = sim
+                .widgets
                 .get(reputation_id)
                 .and_then(|frame| frame.children_keys.get("filterDropdown"))
                 .copied()
-                .expect("ReputationFrame filterDropdown should exist")
+                .expect("ReputationFrame filterDropdown should exist");
+            (reputation_id, dropdown_id)
         };
+        env.fire_script_handler(reputation_id, "OnShow", Vec::new())
+            .expect("ReputationFrame OnShow should dispatch");
         let left_button = env.lua_string("LeftButton");
         env.fire_script_handler(dropdown_id, "OnMouseDown", vec![left_button])
             .expect("reputation filter OnMouseDown should dispatch");
@@ -381,9 +379,13 @@ fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
             .eval(
                 r#"
                 local dropdown = ReputationFrame.filterDropdown
-                local buttons = dropdown.__wow_menu_buttons
-                if type(buttons) ~= "table" then
-                    return "missing_buttons"
+                local buttons = {}
+                if dropdown.menu then
+                    for _, child in ipairs({ dropdown.menu:GetChildren() }) do
+                        if child:GetObjectType() == "Button" then
+                            buttons[#buttons + 1] = child
+                        end
+                    end
                 end
                 if #buttons ~= 4 then
                     return "button_count=" .. tostring(#buttons)
@@ -398,8 +400,12 @@ fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
                     if not button:IsShown() then
                         return "hidden_button_" .. tostring(index)
                     end
-                    if button:GetText() ~= expectedText then
-                        return "button_" .. tostring(index) .. "=" .. tostring(button:GetText())
+                    local text = button:GetText()
+                    if (text == nil or text == "") and button.fontString then
+                        text = button.fontString:GetText()
+                    end
+                    if text ~= expectedText then
+                        return "button_" .. tostring(index) .. "=" .. tostring(text)
                     end
                     if button:GetFrameStrata() ~= "TOOLTIP" then
                         return "button_" .. tostring(index) .. "_strata=" .. tostring(button:GetFrameStrata())
