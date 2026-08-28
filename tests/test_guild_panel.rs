@@ -492,7 +492,7 @@ fn guild_dropdown_materialized_buttons_have_labels() {
 }
 
 #[test]
-fn communities_list_dropdown_frame_values_are_not_empty() {
+fn communities_list_dropdown_materializes_subscribed_club_rows() {
     test_timeout! {
         let env = setup_env();
         let result: String = env.eval(r#"
@@ -502,25 +502,12 @@ fn communities_list_dropdown_frame_values_are_not_empty() {
             end
 
             dropdown:SetupMenu()
-            local labels = GuildDropdownTestLabels(dropdown)
-            if #labels == 0 then
-                local clubCount = 0
-                local clubs = C_Club.GetSubscribedClubs()
-                if type(clubs) == "table" then
-                    clubCount = #clubs
-                end
-                return "empty_frames:clubs=" .. tostring(clubCount)
-            end
-
-            local closedText = dropdown.Text and dropdown.Text:GetText() or dropdown:GetText()
-            if closedText == nil or closedText == "" then
-                return "empty_closed_text:frames=" .. table.concat(labels, ",")
-            end
-            return "ok:" .. closedText .. ":" .. table.concat(labels, ",")
+            return table.concat(GuildDropdownTestLabels(dropdown), ",")
         "#).unwrap();
-        assert!(
-            result.starts_with("ok:"),
-            "CommunitiesFrame.CommunitiesListDropdown frame values must not be empty: {result}"
+        assert_eq!(
+            result,
+            "Heroes of Azeroth",
+            "communities list dropdown should materialize the subscribed guild row: {result}"
         );
     }
 }
