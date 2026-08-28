@@ -45,21 +45,40 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
     common::drain_string_table(env, "__test_errors")
 }
 
-/// Fire a single event, collecting handler errors via the Lua error handler.
-fn fire(env: &WowLuaEnv, event: &str, args: &[rilua::Val]) -> Vec<String> {
-    env.fire_event_with_args(event, args).ok();
+fn collect_handler_warnings(env: &WowLuaEnv, phase: &str) -> Vec<String> {
     drain_test_errors(env)
+        .into_iter()
+        .map(|warning| format!("[{phase}] {warning}"))
+        .collect()
 }
 
 fn collect_addon_load_warnings(env: &WowLuaEnv, name: &str, toc_path: &Path) -> Vec<String> {
-    match load_addon(&env.loader_env(), toc_path) {
-        Ok(result) => result
-            .warnings
-            .into_iter()
-            .map(|warning| format!("[load {name}] {warning}"))
-            .collect(),
-        Err(error) => vec![format!("[load {name}] FAILED: {error}")],
+    let result = load_addon(&env.loader_env(), toc_path);
+    let load_handler_warnings = collect_handler_warnings(env, &format!("load {name} handler"));
+
+    let result = match result {
+        Ok(result) => result,
+        Err(error) => {
+            let mut warnings = vec![format!("[load {name}] FAILED: {error}")];
+            warnings.extend(load_handler_warnings);
+            return warnings;
+        }
+    };
+
+    let mut warnings = result
+        .warnings
+        .into_iter()
+        .map(|warning| format!("[load {name}] {warning}"))
+        .collect::<Vec<_>>();
+    warnings.extend(load_handler_warnings);
+    if let Err(error) = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(name)]) {
+        warnings.push(format!("[ADDON_LOADED {name}] FAILED: {error}"));
     }
+    warnings.extend(collect_handler_warnings(
+        env,
+        &format!("ADDON_LOADED {name}"),
+    ));
+    warnings
 }
 
 /// Load all Blizzard addons and fire startup events, collecting all warnings.
@@ -68,59 +87,26 @@ fn load_and_startup() -> Vec<String> {
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Game);
 
+    install_test_error_handler(&env);
+
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
     let mut warnings = Vec::new();
-
-    // Load addons
     for (name, toc_path) in &addons {
         warnings.extend(collect_addon_load_warnings(&env, name, toc_path));
     }
 
-    // Apply workarounds (same as main.rs run_post_load_scripts)
     env.apply_post_load_workarounds();
+    warnings.extend(collect_handler_warnings(&env, "post-load workarounds"));
 
-    // Install error handler before firing events
-    install_test_error_handler(&env);
+    wow_ui_sim::startup::fire_startup_events_headless(&env);
+    warnings.extend(collect_handler_warnings(&env, "startup events"));
 
-    // Fire startup events (same sequence as main.rs)
-    fire_startup_events(&env, &mut warnings);
-
-    // Keep only the most recent 500 warnings
-    if warnings.len() > 500 {
-        warnings.drain(..warnings.len() - 500);
+    if let Err(error) = env.fire_on_update(0.016) {
+        warnings.push(format!("[OnUpdate] FAILED: {error}"));
     }
-
+    warnings.extend(collect_handler_warnings(&env, "OnUpdate"));
     warnings
-}
-
-fn fire_startup_events(env: &WowLuaEnv, warnings: &mut Vec<String>) {
-    warnings.extend(fire(env, "ADDON_LOADED", &[env.lua_string("WoWUISim")]));
-    for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
-        warnings.extend(fire(env, event, &[]));
-    }
-
-    env.fire_edit_mode_layouts_updated().ok();
-    warnings.extend(drain_test_errors(env));
-
-    common::call_global_if_present(env, "RequestTimePlayed");
-    warnings.extend(fire(
-        env,
-        "PLAYER_ENTERING_WORLD",
-        &[rilua::Val::Bool(true), rilua::Val::Bool(false)],
-    ));
-    for event in [
-        "UPDATE_BINDINGS",
-        "DISPLAY_SIZE_CHANGED",
-        "UI_SCALE_CHANGED",
-        "PLAYER_LEAVING_WORLD",
-    ] {
-        warnings.extend(fire(env, event, &[]));
-    }
-
-    // Fire one OnUpdate tick to catch handler errors
-    env.fire_on_update(0.016).ok();
-    warnings.extend(drain_test_errors(env));
 }
 
 /// Known warning count from unimplemented APIs. Update this when adding stubs.
