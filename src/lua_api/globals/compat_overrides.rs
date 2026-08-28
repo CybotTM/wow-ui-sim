@@ -277,6 +277,11 @@ fn install_nil_symbol_logger(lua: &mut rilua::Lua) -> LuaResult<()> {
         "__wow_record_nil_symbol_access",
         record_nil_symbol_access,
     )?;
+    LuaApiMut::register_function(
+        lua,
+        "__wow_record_public_global_publication",
+        record_public_global_publication_callback,
+    )?;
     Ok(())
 }
 
@@ -288,16 +293,14 @@ fn record_nil_symbol_access(state: &mut LuaState) -> LuaResult<u32> {
         Val::Num(value) if value.is_finite() => Some(value as i32),
         _ => None,
     };
-    let addon_name = {
-        let sim = borrow_state_mut(state)?;
-        sim.loading_addon_index
-            .or(sim.executing_addon_index)
-            .and_then(|index| sim.addons.get(index as usize))
-            .map(|addon| addon.folder_name.clone())
-    };
-    borrow_state_mut(state)?
-        .nil_symbol_accesses
+    let mut sim = borrow_state_mut(state)?;
+    let addon_index = sim.loading_addon_index.or(sim.executing_addon_index);
+    let addon_name = addon_index
+        .and_then(|index| sim.addons.get(index as usize))
+        .map(|addon| addon.folder_name.clone());
+    sim.nil_symbol_accesses
         .push(crate::lua_api::state::NilSymbolAccess {
+            addon_index,
             addon_name,
             container,
             key,
@@ -305,6 +308,25 @@ fn record_nil_symbol_access(state: &mut LuaState) -> LuaResult<u32> {
             line,
         });
     Ok(0)
+}
+
+fn record_public_global_publication_callback(state: &mut LuaState) -> LuaResult<u32> {
+    let name = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    record_public_global_publication(state, &name)?;
+    Ok(0)
+}
+
+pub(crate) fn record_public_global_publication(state: &mut LuaState, name: &str) -> LuaResult<()> {
+    if name.is_empty() || name.starts_with("C_") {
+        return Ok(());
+    }
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(addon_index) = sim.loading_addon_index {
+        sim.global_publications
+            .insert((addon_index, name.to_string()));
+    }
+    Ok(())
 }
 
 fn sim_print(state: &mut LuaState) -> LuaResult<u32> {

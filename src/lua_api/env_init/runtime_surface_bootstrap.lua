@@ -1542,24 +1542,35 @@ __global_mt.__index = function(t, key)
   __wow_log_nil_symbol_access("_G", key)
   return nil
 end
+local function __wow_record_public_global_assignment(t, key, value)
+  if t ~= _G or type(key) ~= "string" or value == nil or key:sub(1, 2) == "C_" then
+    return
+  end
+  local record = rawget(_G, "__wow_record_public_global_publication")
+  if type(record) == "function" then
+    record(key)
+  end
+end
+
 __global_mt.__newindex = function(t, key, value)
   value = __wow_prepare_global_assignment(key, value)
   local taint = debug and debug.getstacktaint and debug.getstacktaint()
   if __prev_newindex ~= nil then
     if type(__prev_newindex) == "function" then
       __prev_newindex(t, key, value)
-      return
+    else
+      __prev_newindex[key] = value
+      if taint and type(__sim_mark_slot_taint) == "function" then
+        __sim_mark_slot_taint(__prev_newindex, key, taint)
+      end
     end
-    __prev_newindex[key] = value
+  else
+    rawset(t, key, value)
     if taint and type(__sim_mark_slot_taint) == "function" then
-      __sim_mark_slot_taint(__prev_newindex, key, taint)
+      __sim_mark_slot_taint(t, key, taint)
     end
-    return
   end
-  rawset(t, key, value)
-  if taint and type(__sim_mark_slot_taint) == "function" then
-    __sim_mark_slot_taint(t, key, taint)
-  end
+  __wow_record_public_global_assignment(t, key, value)
 end
 setmetatable(_G, __global_mt)
 __wow_seed_namespace_names()

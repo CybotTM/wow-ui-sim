@@ -58,6 +58,10 @@ impl EnvironmentPass {
 }
 
 impl LoadingAddonGuard {
+    fn addon_index(&self) -> u16 {
+        self.addon_idx
+    }
+
     pub(crate) fn commit_loaded(&self) {
         if !self.entered {
             return;
@@ -78,6 +82,9 @@ impl Drop for LoadingAddonGuard {
         }
 
         let mut state = self.state.borrow_mut();
+        state
+            .global_publications
+            .retain(|(addon_index, _)| *addon_index != self.addon_idx);
         let position = state
             .loading_addon_stack
             .iter()
@@ -155,7 +162,13 @@ pub fn load_addon_internal(
     maybe_replay_blizzard_lua_in_secure_env(env, toc, folder_name, &ctx, &mut result);
     maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
-    append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
+    append_nil_symbol_access_warnings(
+        env,
+        loading_guard.addon_index(),
+        &addon_name,
+        nil_symbol_access_start,
+        &mut result,
+    );
     loading_guard.commit_loaded();
     Ok(result)
 }

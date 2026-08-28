@@ -27,6 +27,88 @@ local _ = C_Container.MissingMethod
     dir
 }
 
+fn create_test_addon_with_late_symbol_publication() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    let addon_dir = dir.path();
+
+    let toc_path = addon_dir.join("TestLatePublication.toc");
+    let mut toc = std::fs::File::create(&toc_path).unwrap();
+    writeln!(toc, "## Title: TestLatePublication").unwrap();
+    writeln!(toc, "Early.lua").unwrap();
+    writeln!(toc, "Published.xml").unwrap();
+    writeln!(toc, "Late.lua").unwrap();
+
+    let mut early = std::fs::File::create(addon_dir.join("Early.lua")).unwrap();
+    writeln!(
+        early,
+        r#"local _ = PublishedByLua
+local _ = PublishedByXml
+local _ = StillMissingGlobal
+local _ = C_Container.StillMissingMethod
+"#
+    )
+    .unwrap();
+
+    let mut published = std::fs::File::create(addon_dir.join("Published.xml")).unwrap();
+    writeln!(
+        published,
+        r#"<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Frame name="PublishedByXml"/>
+</Ui>"#
+    )
+    .unwrap();
+
+    let mut late = std::fs::File::create(addon_dir.join("Late.lua")).unwrap();
+    writeln!(late, "PublishedByLua = true").unwrap();
+
+    dir
+}
+
+fn create_test_addon_with_cleared_publication() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    let addon_dir = dir.path();
+
+    let mut toc = std::fs::File::create(addon_dir.join("TestClearedPublication.toc")).unwrap();
+    writeln!(toc, "## Title: TestClearedPublication").unwrap();
+    writeln!(toc, "TestClearedPublication.lua").unwrap();
+
+    let mut lua = std::fs::File::create(addon_dir.join("TestClearedPublication.lua")).unwrap();
+    writeln!(lua, "local _ = PublishedThenCleared").unwrap();
+    writeln!(lua, "PublishedThenCleared = true").unwrap();
+    writeln!(lua, "PublishedThenCleared = nil").unwrap();
+
+    dir
+}
+
+fn create_nested_publication_addons() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    let outer_dir = dir.path().join("OuterConsumer");
+    let nested_dir = dir.path().join("NestedPublisher");
+    std::fs::create_dir_all(&outer_dir).unwrap();
+    std::fs::create_dir_all(&nested_dir).unwrap();
+
+    let mut outer_toc = std::fs::File::create(outer_dir.join("OuterConsumer.toc")).unwrap();
+    writeln!(outer_toc, "## Title: OuterConsumer").unwrap();
+    writeln!(outer_toc, "OuterConsumer.lua").unwrap();
+    let mut outer_lua = std::fs::File::create(outer_dir.join("OuterConsumer.lua")).unwrap();
+    writeln!(
+        outer_lua,
+        r#"local _ = NestedPublishedGlobal
+local loaded, reason = C_AddOns.LoadAddOn("NestedPublisher")
+assert(loaded, tostring(reason))
+"#
+    )
+    .unwrap();
+
+    let mut nested_toc = std::fs::File::create(nested_dir.join("NestedPublisher.toc")).unwrap();
+    writeln!(nested_toc, "## Title: NestedPublisher").unwrap();
+    writeln!(nested_toc, "NestedPublisher.lua").unwrap();
+    let mut nested_lua = std::fs::File::create(nested_dir.join("NestedPublisher.lua")).unwrap();
+    writeln!(nested_lua, "NestedPublishedGlobal = true").unwrap();
+
+    dir
+}
+
 #[test]
 fn load_addon_reports_missing_global_and_namespace_symbol_accesses() {
     let env = WowLuaEnv::new().unwrap();
@@ -57,6 +139,89 @@ fn load_addon_reports_missing_global_and_namespace_symbol_accesses() {
                 .to_string()
         ),
         "expected missing C_* method gap warning, got {:?}",
+        result.warnings
+    );
+}
+
+#[test]
+fn load_addon_omits_regular_globals_published_before_addon_completion() {
+    let env = WowLuaEnv::new().unwrap();
+    let dir = create_test_addon_with_late_symbol_publication();
+    let toc_path = dir.path().join("TestLatePublication.toc");
+
+    let result = load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
+
+    assert!(
+        !result
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("PublishedByLua")),
+        "late Lua publication should resolve its early nil access: {:?}",
+        result.warnings
+    );
+    assert!(
+        !result
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("PublishedByXml")),
+        "named XML frame publication should resolve its early nil access: {:?}",
+        result.warnings
+    );
+    assert!(
+        result.warnings.contains(
+            &"TestLatePublication needs global StillMissingGlobal (accessed at Early.lua:3)"
+                .to_string()
+        ),
+        "regular global still nil at addon completion must remain warned: {:?}",
+        result.warnings
+    );
+    assert!(
+        result.warnings.contains(
+            &"TestLatePublication needs C_Container.StillMissingMethod (accessed at Early.lua:4)"
+                .to_string()
+        ),
+        "C_* method gaps must remain warned after fallback publication: {:?}",
+        result.warnings
+    );
+}
+
+#[test]
+fn publication_guard_cleared_global_remains_warned() {
+    let env = WowLuaEnv::new().unwrap();
+    let dir = create_test_addon_with_cleared_publication();
+    let toc_path = dir.path().join("TestClearedPublication.toc");
+
+    let result = load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
+
+    assert!(
+        result.warnings.contains(
+            &"TestClearedPublication needs global PublishedThenCleared (accessed at TestClearedPublication.lua:1)"
+                .to_string()
+        ),
+        "global cleared before addon completion must remain warned: {:?}",
+        result.warnings
+    );
+}
+
+#[test]
+fn publication_guard_nested_addon_does_not_resolve_outer_warning() {
+    let env = WowLuaEnv::new().unwrap();
+    let dir = create_nested_publication_addons();
+    env.state().borrow_mut().addon_base_paths = vec![dir.path().to_path_buf()];
+    let toc_path = dir.path().join("OuterConsumer/OuterConsumer.toc");
+
+    let result = load_addon(&env.loader_env(), &toc_path).expect("outer addon load should succeed");
+    let nested_global: bool = env
+        .eval("return NestedPublishedGlobal == true")
+        .expect("nested publication should be readable");
+
+    assert!(nested_global, "nested addon should publish its global");
+    assert!(
+        result.warnings.contains(
+            &"OuterConsumer needs global NestedPublishedGlobal (accessed at OuterConsumer.lua:1)"
+                .to_string()
+        ),
+        "nested addon publication must not resolve the outer addon's warning: {:?}",
         result.warnings
     );
 }

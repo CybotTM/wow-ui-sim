@@ -1,18 +1,33 @@
 use crate::loader::LoadResult;
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::state::NilSymbolAccess;
+use rilua::Val;
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 pub(super) fn append_nil_symbol_access_warnings(
     env: &LoaderEnv<'_>,
+    addon_index: u16,
     addon_name: &str,
     start_index: usize,
     result: &mut LoadResult,
 ) {
-    let grouped_accesses = {
+    let (accesses, published_names) = {
         let state = env.state().borrow();
-        summarize_nil_symbol_accesses(&state.nil_symbol_accesses[start_index..])
+        let accesses = state.nil_symbol_accesses[start_index..].to_vec();
+        let published_names = state
+            .global_publications
+            .iter()
+            .filter(|(owner_index, _)| *owner_index == addon_index)
+            .map(|(_, name)| name.clone())
+            .collect::<Vec<_>>();
+        (accesses, published_names)
     };
+    let resolved_names = published_names
+        .into_iter()
+        .filter(|name| raw_public_global_is_non_nil(env, name))
+        .collect::<HashSet<_>>();
+    let grouped_accesses = summarize_nil_symbol_accesses(&accesses, addon_index, &resolved_names);
     result.warnings.extend(
         grouped_accesses
             .into_iter()
@@ -20,9 +35,16 @@ pub(super) fn append_nil_symbol_access_warnings(
     );
 }
 
-fn summarize_nil_symbol_accesses(accesses: &[NilSymbolAccess]) -> Vec<MissingSymbolReport> {
+fn summarize_nil_symbol_accesses(
+    accesses: &[NilSymbolAccess],
+    addon_index: u16,
+    resolved_names: &HashSet<String>,
+) -> Vec<MissingSymbolReport> {
     let mut reports = std::collections::BTreeMap::new();
     for access in accesses {
+        if access.addon_index != Some(addon_index) || is_resolved_global(access, resolved_names) {
+            continue;
+        }
         let need = classify_nil_symbol_access(access);
         let location = format_nil_symbol_location(access);
         reports.entry(need).or_insert(location);
@@ -32,6 +54,26 @@ fn summarize_nil_symbol_accesses(accesses: &[NilSymbolAccess]) -> Vec<MissingSym
         .into_iter()
         .map(|(need, location)| MissingSymbolReport { need, location })
         .collect()
+}
+
+fn is_resolved_global(access: &NilSymbolAccess, resolved_names: &HashSet<String>) -> bool {
+    access.container == "_G"
+        && !access.key.starts_with("C_")
+        && resolved_names.contains(&access.key)
+}
+
+fn raw_public_global_is_non_nil(env: &LoaderEnv<'_>, name: &str) -> bool {
+    env.with_state(|state| {
+        let key = state.gc.intern_string(name.as_bytes());
+        let value = state
+            .gc
+            .tables
+            .get(state.global)
+            .map(|globals| globals.get_str(key, &state.gc.string_arena))
+            .unwrap_or(Val::Nil);
+        Ok::<bool, std::convert::Infallible>(!matches!(value, Val::Nil))
+    })
+    .unwrap_or(false)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]

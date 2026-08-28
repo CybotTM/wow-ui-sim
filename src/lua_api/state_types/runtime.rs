@@ -202,6 +202,8 @@ pub struct LuaErrorRecord {
 /// A missing symbol access captured through `_G` or `C_*` namespace `__index` hooks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct NilSymbolAccess {
+    /// Stable addon index inferred from the loading/executing context.
+    pub addon_index: Option<u16>,
     /// Addon name inferred from the loading/executing context.
     pub addon_name: Option<String>,
     /// Container table where the miss happened (`_G` or `C_*` namespace name).

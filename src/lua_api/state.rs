@@ -164,6 +164,7 @@ macro_rules! build_empty_sim_state {
             lua_error_records: $collections.lua_error_records,
             lua_error_counts: $collections.lua_error_counts,
             nil_symbol_accesses: $collections.nil_symbol_accesses,
+            global_publications: HashSet::new(),
             global_show_hide_depth: 0,
             anim_sync_times: $collections.anim_sync_times,
             player: PlayerState::seeded(),
