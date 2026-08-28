@@ -80,6 +80,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIPanels_Game",
         "Blizzard_UIPanels_Game_Mainline.toc",
     ),
+    ("Blizzard_TokenUI", "Blizzard_TokenUI.toc"),
 ];
 
 fn setup_env() -> WowLuaEnv {

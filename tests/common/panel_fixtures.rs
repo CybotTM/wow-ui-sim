@@ -51,6 +51,7 @@ pub const PANEL_ADDONS: &[&str] = &[
     "Blizzard_ItemButton",
     "Blizzard_QuickKeybind",
     "Blizzard_UIPanels_Game",
+    "Blizzard_TokenUI",
     "Blizzard_Minimap",
 ];
 
