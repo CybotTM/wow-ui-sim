@@ -81,6 +81,8 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIPanels_Game",
         "Blizzard_UIPanels_Game_Mainline.toc",
     ),
+    ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
+    ("Blizzard_UnitFrame", "Blizzard_UnitFrame_Mainline.toc"),
     ("Blizzard_TokenUI", "Blizzard_TokenUI.toc"),
 ];
 
