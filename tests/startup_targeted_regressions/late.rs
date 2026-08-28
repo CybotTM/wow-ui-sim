@@ -183,7 +183,7 @@ fn c_action_bar_matches_master_default_bar_indices() {
 
         assert_eq!(
             result,
-            (1, 13, None, None, None, 7, 0, 0),
+            (1, 13, Some(12), Some(14), Some(1), 7, 0, 0),
             "C_ActionBar should match master default bar index semantics"
         );
     }

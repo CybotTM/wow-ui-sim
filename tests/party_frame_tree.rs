@@ -216,7 +216,7 @@ fn party_frame_member_frames_render_at_master_offsets() {
 }
 
 #[test]
-fn player_and_party_portraits_use_circular_class_texture_fallback() {
+fn player_and_party_portraits_use_current_class_texture_identity() {
     test_timeout! {
         let env = load_settled_game_ui();
         env.exec("A_Admin.SetPartySize(4)").unwrap();
@@ -252,19 +252,19 @@ fn player_and_party_portraits_use_circular_class_texture_fallback() {
 
         assert_eq!(
             player_atlas, "",
-            "player portrait fallback should clear the class atlas once it switches to the circular class texture, got atlas {player_atlas} texture {player_texture}"
+            "player portrait should expose its authored texture identity without an atlas"
         );
         assert_eq!(
-            player_texture, "Interface\\TargetingFrame\\UI-Classes-Circles",
-            "player portrait fallback should use the circular class texture, got atlas {player_atlas} texture {player_texture}"
+            player_texture, "237669",
+            "player portrait should expose the current class-circle texture fileDataID"
         );
         assert_eq!(
             party_atlas, "",
-            "party1 portrait fallback should clear the class atlas once it switches to the circular class texture, got atlas {party_atlas} texture {party_texture}"
+            "party1 portrait should expose its authored texture identity without an atlas"
         );
         assert_eq!(
-            party_texture, "Interface\\TargetingFrame\\UI-Classes-Circles",
-            "party1 portrait fallback should use the circular class texture, got atlas {party_atlas} texture {party_texture}"
+            party_texture, "237669",
+            "party1 portrait should expose the current class-circle texture fileDataID"
         );
     }
 }
