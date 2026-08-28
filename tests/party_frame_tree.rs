@@ -578,13 +578,13 @@ fn party_frame_member_frame1_uses_semantic_child_names() {
             "MemberFrame1.PowerBarAlt must be present, got:\n{dump}",
         );
         for expected in [
-            ".background [Texture] (0x0) visible LOW:4",
-            ".fill [Texture] (0x0) visible LOW:4",
-            ".frame [Texture] (0x0) visible LOW:4",
-            ".spark [Texture] (0x0) visible LOW:4",
-            ".BG [Texture] (16x64) visible LOW:5",
-            ".BGL [Texture] (32x64) visible LOW:5",
-            ".BGR [Texture] (32x64) visible LOW:5",
+            ".background [Texture] (0x0) hidden LOW:4",
+            ".fill [Texture] (0x0) hidden LOW:4",
+            ".frame [Texture] (0x0) hidden LOW:4",
+            ".spark [Texture] (0x0) hidden LOW:4",
+            ".BG [Texture] (16x64) hidden LOW:5",
+            ".BGL [Texture] (32x64) hidden LOW:5",
+            ".BGR [Texture] (32x64) hidden LOW:5",
         ] {
             assert!(
                 dump.contains(expected),
