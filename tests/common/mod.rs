@@ -7,7 +7,7 @@ mod event_helpers;
 pub mod game_menu_fixture;
 pub mod panel_fixtures;
 #[cfg(target_os = "linux")]
-mod prefork_process;
+pub(crate) mod prefork_process;
 #[cfg(target_os = "linux")]
 mod timeout_reexec;
 

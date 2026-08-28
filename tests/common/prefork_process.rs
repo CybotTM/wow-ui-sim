@@ -7,12 +7,12 @@ const SETUP_READY: u8 = 0;
 const SETUP_FAILED: u8 = 1;
 const SETUP_RELEASE: u8 = 2;
 
-pub(super) struct Pipe {
-    pub(super) read_fd: OwnedFd,
-    pub(super) write_fd: OwnedFd,
+pub(crate) struct Pipe {
+    pub(crate) read_fd: OwnedFd,
+    pub(crate) write_fd: OwnedFd,
 }
 
-pub(super) fn create_pipe() -> Result<Pipe, String> {
+pub(crate) fn create_pipe() -> Result<Pipe, String> {
     let mut fds = [0; 2];
     let result = unsafe { libc::pipe2(fds.as_mut_ptr(), libc::O_CLOEXEC) };
     if result == -1 {
@@ -24,7 +24,7 @@ pub(super) fn create_pipe() -> Result<Pipe, String> {
     })
 }
 
-pub(super) fn create_setup_socket() -> Result<(OwnedFd, OwnedFd), String> {
+pub(crate) fn create_setup_socket() -> Result<(OwnedFd, OwnedFd), String> {
     let mut fds = [0; 2];
     let socket_type = libc::SOCK_STREAM | libc::SOCK_CLOEXEC;
     let result = unsafe { libc::socketpair(libc::AF_UNIX, socket_type, 0, fds.as_mut_ptr()) };
@@ -39,7 +39,7 @@ pub(super) fn create_setup_socket() -> Result<(OwnedFd, OwnedFd), String> {
     }))
 }
 
-pub(super) fn prepare_capture_pipe(pipe: Option<Pipe>) -> Result<Option<OwnedFd>, String> {
+pub(crate) fn prepare_capture_pipe(pipe: Option<Pipe>) -> Result<Option<OwnedFd>, String> {
     let Some(pipe) = pipe else {
         return Ok(None);
     };
@@ -48,7 +48,7 @@ pub(super) fn prepare_capture_pipe(pipe: Option<Pipe>) -> Result<Option<OwnedFd>
     Ok(Some(pipe.read_fd))
 }
 
-pub(super) fn establish_child_process_group(setup_fd: RawFd) -> Result<(), String> {
+pub(crate) fn establish_child_process_group(setup_fd: RawFd) -> Result<(), String> {
     let result = unsafe { libc::setpgid(0, 0) };
     if result == -1 {
         let error = io::Error::last_os_error();
@@ -65,7 +65,7 @@ pub(super) fn establish_child_process_group(setup_fd: RawFd) -> Result<(), Strin
     Ok(())
 }
 
-pub(super) fn verify_and_release_child(
+pub(crate) fn verify_and_release_child(
     pid: libc::pid_t,
     setup_fd: OwnedFd,
 ) -> Result<(), String> {
@@ -78,7 +78,7 @@ pub(super) fn verify_and_release_child(
     )
 }
 
-pub(super) fn configure_command_process_group(command: &mut Command) {
+pub(crate) fn configure_command_process_group(command: &mut Command) {
     unsafe {
         command.pre_exec(|| {
             if libc::setpgid(0, 0) == -1 {
@@ -89,7 +89,7 @@ pub(super) fn configure_command_process_group(command: &mut Command) {
     }
 }
 
-pub(super) fn signal_process_group(pid: libc::pid_t, signal: i32) -> Result<(), String> {
+pub(crate) fn signal_process_group(pid: libc::pid_t, signal: i32) -> Result<(), String> {
     let result = unsafe { libc::kill(-pid, signal) };
     if result == 0 {
         return Ok(());
@@ -101,19 +101,19 @@ pub(super) fn signal_process_group(pid: libc::pid_t, signal: i32) -> Result<(), 
     Err(format!("signal process group {pid} failed: {error}"))
 }
 
-pub(super) fn kill_process_group_and_child(pid: libc::pid_t) -> Result<(), String> {
+pub(crate) fn kill_process_group_and_child(pid: libc::pid_t) -> Result<(), String> {
     let group_result = signal_process_group(pid, libc::SIGKILL);
     let child_result = signal_process(pid, libc::SIGKILL);
     combine_results(group_result, child_result)
 }
 
-pub(super) fn terminate_and_reap_child(pid: libc::pid_t) -> Result<(), String> {
+pub(crate) fn terminate_and_reap_child(pid: libc::pid_t) -> Result<(), String> {
     let kill_result = kill_process_group_and_child(pid);
     let reap_result = reap_child(pid);
     combine_results(kill_result, reap_result)
 }
 
-pub(super) fn reap_child(pid: libc::pid_t) -> Result<(), String> {
+pub(crate) fn reap_child(pid: libc::pid_t) -> Result<(), String> {
     loop {
         let mut status = 0;
         let result = unsafe { libc::waitpid(pid, &mut status, 0) };
