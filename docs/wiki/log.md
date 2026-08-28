@@ -1,3 +1,7 @@
+## [2026-08-28] audit | Document same-addon nil-symbol publication reconciliation
+
+Audited commits `473031857` and `e2545a3d1`. Updated [[addon-loading]] and the top-level addon-loading pipeline documentation to record strict nil-symbol diagnostics with reconciliation limited to regular public globals explicitly published later by the same stable addon index through ordinary Lua assignment or named XML frame creation. Nested `C_AddOns.LoadAddOn` publications do not resolve the outer warning, cleared globals and all `C_*` gaps remain warned, and publication-ledger cleanup follows `LoadingAddonGuard`. Updated the existing index summary; no spec change was warranted.
+
 ## [2026-08-28] audit | Document runtime-template lifecycle ordering
 
 Audited commits `0f0c3e40d` through `5189a14ef`. Updated [[xml-template-system]] and [[dropdown-intrinsic-script-chain]] plus the top-level XML template architecture doc. Documentation now records that inline `<Scripts>...</Scripts>` parsing preserves following siblings, XML `<KeyValues>` are initialized before deferred template-child `OnLoad`, intrinsic default scripts use precall dispatch ahead of ordinary style handlers, and animation-group mixins are applied before XML method-script binding and `OnLoad`. Corrected the dropdown regression reference to use real script dispatch rather than `GetScript()`'s normal-binding view. No spec or new index entry was warranted; existing page coverage and cross-links remain sufficient.

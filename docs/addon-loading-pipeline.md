@@ -295,6 +295,12 @@ pub enum LoadError {
 
 **Non-fatal warnings** returned in `LoadResult.warnings`. **Fatal errors** return `Err(LoadError)`.
 
+### Nil-Symbol Diagnostic Reconciliation
+
+Implementation: `src/loader/addon/nil_symbol_reports.rs`, `src/lua_api/globals/compat_overrides.rs`, and `src/lua_api/globals/create_frame/helpers_shared.rs`.
+
+Nil-symbol diagnostics remain strict: unresolved regular globals and every `C_*` namespace or method gap remain warnings. A regular public global read as nil earlier in an addon is reconciled only when that same addon explicitly publishes the global later through ordinary Lua assignment or a named XML frame, and the global remains non-nil when addon loading completes. Publication ownership uses the stable addon index; a nested `C_AddOns.LoadAddOn` publication belongs to the nested addon and does not resolve the outer addon's warning. Globals later cleared remain warned. Publication-ledger entries are cleaned up with the `LoadingAddonGuard` transaction lifecycle.
+
 **Path resolution fallback** (helpers.rs:52-79): Tries case-sensitive relative to XML, case-insensitive relative to XML, case-sensitive relative to addon root, case-insensitive relative to addon root.
 
 ---

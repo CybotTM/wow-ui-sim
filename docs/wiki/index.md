@@ -281,7 +281,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, model-family compatibility surface, texture fileDataID/path identity, C_* namespaces, timers, animation system |
 | [[event-system]] | EventQueue, 36+ script handler types, dispatch flow, OnUpdate tick, startup event sequence, XML script setup |
 | [[xml-template-system]] | XML parsing (30+ element types), template registry, inheritance chain resolution, XML-to-widget Lua code generation, same-object engine-root reuse, inline scripts/events |
-| [[addon-loading]] | TOC parsing, discovered Blizzard load order, inline `[Bootstrap]` semantics, per-file Lua/XML loading, single SimState-owned RAII load transactions, explicit secure replay allowlist, SavedVariables, startup sequence |
+| [[addon-loading]] | TOC parsing, discovered Blizzard load order, inline `[Bootstrap]` semantics, per-file Lua/XML loading, strict nil-symbol diagnostics with same-addon publication reconciliation, stable addon-index ownership, single SimState-owned RAII load transactions, explicit secure replay allowlist, SavedVariables, startup sequence |
 | [[server-snapshot-action-bars]] | Imports action-bar spell slots captured by the ServerSnapshot addon from real WoW SavedVariables before Blizzard action-bar UI loads |
 | [[client-profiles]] | Six client profiles selected by mutually-exclusive cargo features, plus cumulative retail API epoch features; profile-aware loader, per-profile manifests, compat bootstraps, vendor pinning, CI matrix |
 | [[patch-api-audit-manifest]] | Checked-in per-item patch audit SSOT, structural/completion validation, lifecycle assertions, four falsifier families, and generated compact checklists |

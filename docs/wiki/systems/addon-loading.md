@@ -116,6 +116,12 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 
 `LoadError` wraps Io, Toc, Xml, Lua variants. Non-fatal issues accumulate in `LoadResult.warnings`. Path resolution tries four strategies (case-sensitive/insensitive × relative-to-xml/addon-root) before failing.
 
+### Nil-Symbol Diagnostic Reconciliation
+
+Implementation: [nil-symbol reports](../../../src/loader/addon/nil_symbol_reports.rs), [publication callbacks](../../../src/lua_api/globals/compat_overrides.rs), and [named-frame publication](../../../src/lua_api/globals/create_frame/helpers_shared.rs).
+
+Nil-symbol diagnostics remain strict: unresolved regular globals and every `C_*` namespace or method gap remain warnings. A regular public global read as nil earlier in an addon is reconciled only when that same addon explicitly publishes it later through ordinary Lua assignment or a named XML frame, and the global remains non-nil when addon loading completes. Publication ownership uses the stable addon index; a nested `C_AddOns.LoadAddOn` publication belongs to the nested addon and does not resolve the outer addon's warning. Globals later cleared remain warned. Publication-ledger entries are cleaned up with the `LoadingAddonGuard` transaction lifecycle.
+
 ## Sources
 
 - [addon-loading-pipeline.md](../../addon-loading-pipeline.md) — TOC parsing, load flow, XML handlers, SavedVariables, load order
