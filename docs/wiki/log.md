@@ -1,3 +1,7 @@
+## [2026-08-28] audit | Document runtime-template lifecycle ordering
+
+Audited commits `0f0c3e40d` through `5189a14ef`. Updated [[xml-template-system]] and [[dropdown-intrinsic-script-chain]] plus the top-level XML template architecture doc. Documentation now records that inline `<Scripts>...</Scripts>` parsing preserves following siblings, XML `<KeyValues>` are initialized before deferred template-child `OnLoad`, intrinsic default scripts use precall dispatch ahead of ordinary style handlers, and animation-group mixins are applied before XML method-script binding and `OnLoad`. Corrected the dropdown regression reference to use real script dispatch rather than `GetScript()`'s normal-binding view. No spec or new index entry was warranted; existing page coverage and cross-links remain sufficient.
+
 ## [2026-08-28] audit | Align runtime object contract documentation
 
 Audited commit `41205e19c`. Updated the FunctionContainer audit claims to match `tests/userdata_proxy.rs`: userdata type, method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys are covered; tostring formatting and broader identity, callback, timer, lifecycle, and metadata semantics remain unproven. Updated secureenv documentation for dynamically proven shallow table-reference sharing, and clarified that `debug.getfenv(frame)[1]` is a live per-instance field view via `tests/widget_misc_methods.rs::test_frame_debug_env_exposes_live_newindex_fields`.
