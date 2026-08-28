@@ -3176,3 +3176,7 @@ Updated `investigations/partyframe-tree.md`, its index summary, and focused cove
 ## [2026-08-28] fix | Handle nested timeout re-exec guards
 
 Audited commit `14bfc8eb0`. Updated [[prefork-test-harness]] and the prefork spec to document that nested `with_timeout` calls execute in the guarded child with one handshake and no second re-exec boundary, and that multi-shard same-process tests use one outer timeout around the complete sequence with inner shard bodies unwrapped. The existing index summary and related timeout documentation remain accurate; no index change was needed.
+
+## [2026-08-28] correction | Audit current PartyFrame portrait texture identity
+
+Audited commit `640aa7fbb` against current retail portrait evidence. Updated [[partyframe-tree]], [[partyframe-portrait-composition]], and their index summaries: player and party portraits expose `GetAtlas() == nil` and numeric `GetTexture() == 237669`; `GetTextureFilePath()` resolves the authored `Interface\\TargetingFrame\\UI-Classes-Circles` path. Removed the stale legacy fallback claim; no code, test, PLAN.md, vendor, cache, or protected-file changes were made.

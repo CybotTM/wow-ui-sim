@@ -26,6 +26,12 @@ PartyFrame                         [Frame]  (120x244) visible LOW:1
 
 Texture and FontString regions do not expose the Frame-only `GetFrameStrata()` or `GetFrameLevel()` client APIs. Their raw strata and level values in simulator dumps are diagnostic widget fields, not the client ordering contract. Effective region ordering follows the owning `MemberFrame1` frame and each region's draw layer.
 
+## Portrait Texture Contract
+
+The current retail runtime does not expose the class-circle portrait as an atlas. After the settled PartyFrame update, both the player and first party portrait report `GetAtlas() == nil`, `GetTexture() == 237669`, and `GetTextureFilePath() == Interface\\TargetingFrame\\UI-Classes-Circles`. The numeric fileDataID is the `GetTexture()` contract; the authored path is recovered through `GetTextureFilePath()`.
+
+The retail source used by the simulator is `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_UnitFrame/Mainline/UnitFrame.lua`. Its class-atlas branch calls `SetAtlas()` only when `UnitFrame_ShouldReplacePortrait(self)` is true. The default player and party path uses `SetPortraitTexture`, which leaves the class-circle texture as a fileDataID-backed texture.
+
 ## Startup Hang Root Cause
 
 The original investigation found several independent blockers while restoring the tree:
@@ -41,7 +47,7 @@ The original investigation found several independent blockers while restoring th
 - Member frame vertical checks compare absolute stride because Lua geometry uses Y-up coordinates while dump coordinates are top-down. The four members retain the retail 63-pixel stride.
 - The dump excludes the orphaned builtin ghost frame and exposes one visible `PartyFrame` owned by `Blizzard_UnitFrame`.
 - Runtime lowercase aliases such as `self.portrait` and `self.name` remain in `children_keys` without replacing canonical XML `Portrait` and `Name` parent keys.
-- Member children retain semantic names, class-portrait fallback, and font size; `PowerBarAlt` and its `BG`/`BGL`/`BGR` descendants remain present and hidden in the settled tree.
+- Member children retain semantic names and font size; player and party portraits retain the current numeric class-circle texture identity (`237669`) with no atlas, while `PowerBarAlt` and its `BG`/`BGL`/`BGR` descendants remain present and hidden in the settled tree.
 
 ## Verification
 
@@ -52,13 +58,14 @@ Focused coverage in `tests/party_frame_tree.rs` proves:
 - current retail Selection frame levels 1000/1001/1002
 - semantic child names and one visible PartyFrame root
 - member region `GetDrawLayer()` values and sublevels
-- member hover tooltip, portrait fallback, and name font
+- member hover tooltip, current portrait texture identity, and name font
 
 ## Sources
 
 - [party_frame_tree.rs](../../../tests/party_frame_tree.rs) — current behavioral and dump-tree coverage
 - [group_queries.rs](../../../src/lua_api/globals/group_queries.rs) — state-backed party query surface
 - [event system](../../event-system.md) — event dispatch context used by party updates
+- Current retail runtime source: `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_UnitFrame/Mainline/UnitFrame.lua`
 
 ## See Also
 
