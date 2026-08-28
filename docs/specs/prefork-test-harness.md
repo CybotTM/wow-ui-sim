@@ -25,6 +25,14 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Capture child stdout and stderr by default, suppress successful captured output, and print captured output for failures.
 - [x] Inherit child stdout and stderr when `--nocapture` is selected.
 
+### Linux ordinary libtest timeout isolation
+
+- [x] Keep Linux `test_timeout!`/`with_timeout` separate from the prefork runner while re-executing the exact named libtest test in an isolated child process.
+- [x] Convert ordinary assertion panics in the child into a normal libtest failure in the parent, so later sibling tests continue instead of the integration process aborting.
+- [x] On a real timeout, terminate the child process group/tree, reap the child, and return a test failure; the normal `test_timeout!` limit remains 120 seconds, while timeout-reexec conformance fixtures use a 1-second limit only to prove cleanup.
+- [x] Forward visible-output flags (`--nocapture`, `--no-capture`, and `--show-output`) to the exact child test while preserving captured output for failure reporting.
+- [x] Share process-group and process-tree cleanup helpers with the prefork runner without sharing its parent preload, fork scheduling, or immutable-state contract.
+
 ### Normal retail full-UI preload
 
 - [x] Enter process-local parent-bypass bytecode-cache mode before building one parent-owned 1024x768 `ScreenKind::Game` `WowLuaEnv` from the synced default-retail Blizzard UI cache.

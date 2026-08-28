@@ -3157,6 +3157,10 @@ Documented commit `ff01991aa`: direct `call_function_state`/`call_function_state
 
 Updated [`updating-blizzard-ui-to-a-new-patch`](../../updating-blizzard-ui-to-a-new-patch.md), [`casc-loading`](../specs/casc-loading.md), and [[casc-asset-cache]] for commit `2f88b2cab`. Ordinary community rows remain normalized lowercase; `data/listfile-overrides.csv` authoritatively replaces source display paths for normalized path and FDID resolution while preserving slash-normalized canonical casing. Generated rows sort by normalized path. Existing `index.md` catalog text remains accurate; no index change was needed.
 
+## [2026-08-28] audit | Document timeout re-exec and current PartyFrame contract
+
+Audited commit `e5947420e` and current PartyFrame commits `d86832096`/`87701437d`. Updated the prefork spec and system page to distinguish Linux ordinary `test_timeout!`/`with_timeout` exact-test re-exec from the prefork runner, including sibling-preserving assertion failures, process-tree timeout cleanup, visible-output forwarding, and the unchanged 120-second normal limit (1 second only in conformance). Clarified the PartyFrame investigation's hidden `PowerBarAlt` descendants after `87701437d`; its index summary remains accurate, so no index change was needed.
+
 ## [2026-08-27] update | Correct transparent-wrapper frame-level contract
 
 Updated `investigations/transparent-wrapper-render-order.md` after current retail XML and bucket ordering showed the old opaque level-100 border regression was invalid. Documented that only regionless wrappers hoist descendants, wrappers with owned regions retain frame-level boundaries, and higher raw frame levels render after lower levels.

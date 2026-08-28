@@ -41,7 +41,7 @@ The original investigation found several independent blockers while restoring th
 - Member frame vertical checks compare absolute stride because Lua geometry uses Y-up coordinates while dump coordinates are top-down. The four members retain the retail 63-pixel stride.
 - The dump excludes the orphaned builtin ghost frame and exposes one visible `PartyFrame` owned by `Blizzard_UnitFrame`.
 - Runtime lowercase aliases such as `self.portrait` and `self.name` remain in `children_keys` without replacing canonical XML `Portrait` and `Name` parent keys.
-- Member children retain semantic names, class-portrait fallback, font size, and PowerBarAlt descendants.
+- Member children retain semantic names, class-portrait fallback, and font size; `PowerBarAlt` and its `BG`/`BGL`/`BGR` descendants remain present and hidden in the settled tree.
 
 ## Verification
 

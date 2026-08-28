@@ -14,7 +14,9 @@ Each child catches panic payloads into a status channel and terminates with `_ex
 
 The Lua bytecode cache has three process-local modes. Production starts writable. The dedicated prefork parent enters `ParentBypass` before constructing `WowLuaEnv`, so cache lookups return misses without reading `pack.bin`, source compilation continues, and stores are skipped as non-failures. When caching is enabled, the parent seals the cache as empty and initialized after startup while recording whether the pack exists; disabled caching remains a successful no-op. Forked children then transition that inherited state to read-only, so they cannot reload the pack or mutate invalid/oversized removal, torn-pack truncation, standalone legacy migration, legacy-key promotion, append, replacement/compaction, temporary-file creation, rename, or cleanup paths.
 
-Timeout handling remains separate: it signals the whole child process group with `SIGTERM`, waits the configured grace period, escalates to `SIGKILL`, and reaps the direct child. Worker selection honors `--test-threads` before `RUST_TEST_THREADS`, with both capped by the hard maximum.
+Prefork timeout handling remains separate: it signals the whole child process group with `SIGTERM`, waits the configured grace period, escalates to `SIGKILL`, and reaps the direct child. Worker selection honors `--test-threads` before `RUST_TEST_THREADS`, with both capped by the hard maximum.
+
+Ordinary Linux libtest cases wrapped by `test_timeout!`/`with_timeout` use a separate exact-test re-exec path, not the prefork runner. The parent launches the current test executable with the named test, `--exact`, `--include-ignored`, and `--test-threads=1`; a child panic or other non-success exit becomes a normal libtest failure in the parent, so sibling tests continue. A real timeout keeps the existing 120-second limit for normal tests, terminates the child process group/tree, reaps it, and reports a test failure; the conformance fixture alone uses `with_timeout(1, ...)` to prove timeout cleanup. `--nocapture`, `--no-capture`, and `--show-output` are forwarded to the exact child, while captured output is replayed for failures. This path shares `configure_command_process_group`, `signal_process_group`, and `kill_process_group_and_child` from `tests/common/prefork_process.rs`, but does not share prefork preload, fork scheduling, or immutable parent state.
 
 `tests/prefork_full_ui.rs` runs runner conformance in a fresh subprocess before expensive setup during ordinary execution; successful conformance output stays hidden, while failure output is printed. Driver and process-tree fixture modes bypass that orchestration, and `--list` bypasses both conformance and preload.
 
@@ -60,7 +62,9 @@ Sampled process-tree RSS rose from 1,196,596 KiB to 1,523,432 KiB. This metric d
 
 - [Prefork test harness spec](../../specs/prefork-test-harness.md) — behavioral contract and current gaps
 - [Conformance target](../../../tests/prefork_full_ui.rs) — behavioral proof and fixture processes
-- [Reusable runner](../../../tests/common/prefork.rs) — current implementation
+- [Reusable runner](../../../tests/common/prefork.rs) — current prefork implementation
+- [Linux timeout re-exec](../../../tests/common/timeout_reexec.rs) — exact named libtest replay, output forwarding, and bounded process-tree cleanup
+- [Timeout re-exec conformance](../../../tests/timeout_reexec.rs) — panic/timeout aggregation, sibling continuation, visible output, and descendant cleanup proofs
 - [Build registry](../../../build.rs) — `syn`/`quote` marker parsing and stable case generation
 - [Behavioral-messaging cases](../../../tests/blizzard_behavioral_messaging_loads.rs) — two marker-defined cases with remaining libtest tests
 - [Nested registry fixture](../../../tests/prefork_full_ui_nested/fixture.rs) — nested path and inherited-startup proof
