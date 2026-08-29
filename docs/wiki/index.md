@@ -1,3 +1,7 @@
+## [2026-08-29] audit | Document state-backed C_GuildInfo management methods
+
+Audited commit `d64bbb8b3`. Updated [[lua-api]] and the maintained Lua API reference to record state-backed `C_GuildInfo.Invite`, `Uninvite`, `Promote`, and `Leave`, while preserving explicit unsupported status for `Demote`, `Disband`, `SetLeader`, and `RemoveFromGuild`. No new page or spec was warranted.
+
 ## [2026-08-29] audit | Document CVar-backed spell queue window
 
 Audited commit `8e8f23e05`. Updated [[lua-api]] and the maintained Lua API reference: `C_Spell.GetSpellQueueWindow()` now reads the mutable `SpellQueueWindow` CVar, returns a numeric value when parseable, returns `nil` for unavailable/non-numeric values, and preserves identity for the two deprecated spell globals that alias it. No spec or separate page was warranted.

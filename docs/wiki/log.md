@@ -1257,6 +1257,10 @@ Classified exactly 115 added `C_TransmogOutfitInfo` API, structure, and structur
 
 # Wiki Log
 
+## [2026-08-29] audit | Document state-backed C_GuildInfo management methods
+
+Audited commit `d64bbb8b3`. Updated [[lua-api]] and the maintained Lua API reference to record that `C_GuildInfo.Invite`, `Uninvite`, `Promote`, and `Leave` share the existing state-backed guild handlers and deprecated-global identity. Explicitly documented that `Demote`, `Disband`, `SetLeader`, and `RemoveFromGuild` remain unsupported because their distinct semantics are not modeled. No spec or new wiki page was warranted; protected `src/c_api/c_string_util.rs` was not touched.
+
 ## [2026-08-08] investigation | Bound 12.0.0 C_Transmog slice
 
 Classified exactly 11 non-removed `C_Transmog` structure/API rows as `evidence-required`/`unsafe` using checked-in source-register evidence and the current `src/lua_api/globals/missing_surface/transmog.rs` partial surface; tests remain empty with null commit, approval, and scope exception. The source records only names and the `GetSlotVisualInfo` signature transition, while no direct slot-visual/pending/apply state model or behavioral tests establish authoritative retail 12.0.0 semantics. The 21 removed C_Transmog rows remain untriaged because removal direction alone does not establish replacement behavior; no unrelated collection/outfit tests were used and no approval can close these rows. Totals are now **77 best-effort, 372 evidence-required, 1 exception-requested, and 2960 untriaged**.

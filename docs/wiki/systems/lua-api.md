@@ -77,6 +77,8 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, `IsEquippableItem`, and `IsItemInRange` are state-backed; other listed item methods remain mixed implemented/stubbed), C_Container (`GetBagSlotFlag`, `SetBagSlotFlag`, `GetBackpackAutosortDisabled`, and `GetBackpackSellJunkDisabled` share state-backed bag-slot flags), C_Spell (`GetSpellQueueWindow()` reads the current `SpellQueueWindow` CVar and returns its numeric value when parseable), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_ChromieTime (retail/PTR empty-state queries and no-op actions), C_StringUtil (`EscapeDecimalNonPrintables` preserves valid UTF-8 and replaces ASCII control bytes except tab/newline/carriage return, plus invalid UTF-8 bytes, with decimal escapes), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
 
+**Guild management** — `C_GuildInfo.Invite(name)`, `Uninvite(name)`, `Promote(name)`, and `Leave()` share the state-backed handlers used by the deprecated `GuildInvite`, `GuildUninvite`, `GuildPromote`, and `GuildLeave` globals. They update the simulated guild roster/identity and emit the existing roster event behavior. Other `C_GuildInfo` management methods, including `Demote`, `Disband`, `SetLeader`, and `RemoveFromGuild`, remain unsupported because their distinct rank, leadership, disband, or GUID-backed semantics are not modeled.
+
 ### `C_PlayerChoice` (PTR 12.1)
 
 `C_PlayerChoice` is a state-backed deterministic compatibility model. `GetCurrentPlayerChoiceInfo()` returns nil with the default empty state or a documented `PlayerChoiceInfo` table with nested options, buttons, and currency/item/reputation rewards when `SimState.player_choice.current` is seeded. `GetNumRerolls()`, `GetRemainingTime()`, and `IsWaitingForPlayerChoiceResponse()` expose local query state. `SendPlayerChoiceResponse()`, `RequestRerollPlayerChoice()`, and `OnUIClosed()` record local mutator intent. This does not model retail timing, server validation, reroll economics, or live service values.
@@ -103,6 +105,9 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 - [item_button_helper_defaults.rs](../../../src/lua_api/workarounds/temporary/item_button_helper_defaults.rs) — item-button texture fileDataID proof
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - [c_container.rs](../../../src/c_api/item_spell/c_container.rs) — state-backed bag-slot flags and backpack queries
+- [guild_info.rs](../../../src/lua_api/globals/guild_info.rs) — C_GuildInfo namespace registration and state-backed management methods
+- [guild_verbs.rs](../../../src/lua_api/globals/guild_verbs.rs) — shared guild management handlers
+- [blizzard_deprecated_guild_script_loads.rs](../../../tests/blizzard_deprecated_guild_script_loads.rs) — deprecated-global/C_GuildInfo identity and behavior proof
 - [voice_chat.rs](../../../src/lua_api/globals/missing_surface/voice_chat.rs) — state-backed active voice-channel queries
 - [c_voice_chat_probes.rs](../../../tests/c_voice_chat_probes.rs) — active voice-channel type behavior proofs
 - [loader_env.rs](../../../src/lua_api/loader_env.rs) — secure versus public dynamic loader execution

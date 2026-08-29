@@ -288,6 +288,7 @@ anim:SetFromAlpha() / SetToAlpha() / SetDuration()
 | C_Map | `c_map_api.rs` | GetMapInfo (stub) |
 | C_Item | `c_item.rs` | GetItemInfo, GetItemCooldown; state-backed IsConsumableItem, IsEquippableItem, IsItemInRange |
 | C_Container | `item_spell/c_container.rs` | GetContainerItemID/Link/Info, GetBagSlotFlag/SetBagSlotFlag, and backpack flag queries backed by shared bag-slot state |
+| C_GuildInfo | `guild_info.rs` / `guild_verbs.rs` | Invite, Uninvite, Promote, and Leave share state-backed guild management handlers with deprecated globals |
 | C_Spell | `c_spell.rs` | GetSpellQueueWindow reads the current SpellQueueWindow CVar |
 | C_VoiceChat | `missing_surface/voice_chat.rs` | GetActiveChannelType reads the active channel's ChatChannelType or returns nil |
 | C_System | `c_system_api.rs` | GetLocale -> "enUS" |
