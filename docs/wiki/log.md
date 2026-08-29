@@ -1,3 +1,7 @@
+## [2026-08-29] audit | Document modeled C_Item queries
+
+Audited commit `d38588beec834a2adb5ca1ea3f2f57a03469ff85`. Updated [[lua-api]] and the maintained Lua API reference to record that `C_Item.IsConsumableItem`, `C_Item.IsEquippableItem`, and `C_Item.IsItemInRange` are state-backed and share the existing legacy-global semantics. No new page, spec, changelog, or stub-inventory update was warranted; the protected C StringUtil file was not touched.
+
 ## [2026-08-29] system | Promote default retail to API epoch 12.1
 
 Audited commit `3a652e1b2`. Updated [[client-profiles]], [[patch-api-audit-manifest]], and the index: `client-retail` now selects cumulative `retail-12-1-0` / interface `120100`; `client-ptr` remains a separate PTR profile/cache at the same API epoch; historical `profile-retail` epoch selection remains available. Preserved the existing client-profile spec because it already records this contract. No code, Cargo, generated, vendor, cache, PLAN, or protected-file changes.

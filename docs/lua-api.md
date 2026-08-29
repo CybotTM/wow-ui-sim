@@ -286,7 +286,7 @@ anim:SetFromAlpha() / SetToAlpha() / SetDuration()
 |-----------|------|---------------|
 | C_Timer | `timer_api.rs` | After, NewTimer, NewTicker |
 | C_Map | `c_map_api.rs` | GetMapInfo (stub) |
-| C_Item | `c_item_api.rs` | GetItemInfo, GetItemCooldown (stubs) |
+| C_Item | `c_item.rs` | GetItemInfo, GetItemCooldown; state-backed IsConsumableItem, IsEquippableItem, IsItemInRange |
 | C_System | `c_system_api.rs` | GetLocale -> "enUS" |
 | C_EditMode | `c_editmode_api.rs` | GetLayouts |
 | C_CatalogShop | `c_catalog_shop.rs` | GetVCProductInfos -> fresh empty table |

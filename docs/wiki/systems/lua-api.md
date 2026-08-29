@@ -75,7 +75,7 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 ## C_* Namespaces
 
-C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_ChromieTime (retail/PTR empty-state queries and no-op actions), C_StringUtil (`EscapeDecimalNonPrintables` preserves valid UTF-8 and replaces ASCII control bytes except tab/newline/carriage return, plus invalid UTF-8 bytes, with decimal escapes), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
+C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, `IsEquippableItem`, and `IsItemInRange` are state-backed; other listed item methods remain mixed implemented/stubbed), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_ChromieTime (retail/PTR empty-state queries and no-op actions), C_StringUtil (`EscapeDecimalNonPrintables` preserves valid UTF-8 and replaces ASCII control bytes except tab/newline/carriage return, plus invalid UTF-8 bytes, with decimal escapes), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
 
 ### `C_PlayerChoice` (PTR 12.1)
 
