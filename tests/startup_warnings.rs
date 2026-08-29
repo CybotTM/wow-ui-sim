@@ -3,12 +3,13 @@
 use crate::common;
 
 use std::collections::{HashMap, HashSet};
-use std::path::PathBuf;
-use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons};
+use std::path::{Path, PathBuf};
+use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
+#[path = "startup_warnings/diagnostics.rs"]
 mod diagnostics;
 
 use diagnostics::{
