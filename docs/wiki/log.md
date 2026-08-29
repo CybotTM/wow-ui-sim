@@ -6,6 +6,10 @@ Audited commit `72f3ec342`. Updated [[patch-12-1-api-audit]] and [[lua-api]] wit
 
 Updated [[playerspells-runtime-load]] from live artifact `/tmp/CharacterPlayerSpellsProbe-live-2026-08-28.lua` (SHA-256 `40dcf028acd5605d675810abbfc9eb8aa63147425ed5f8bb8b3b54b78c997595`). WoW 12.1.0 build 69497/interface 120100 shows successful direct `ShowUIPanel` and real `ToggleCharacter`/`ToggleSpellBookFrame` paths replacing CharacterFrame with PlayerSpells; CharacterFrame expands 338→540 when opened and returns to 338 when replaced. Recorded PlayerSpells panel attributes and marked empty `UIParent:GetUIPanel` slot captures inconclusive because the API belongs to private `FramePositionDelegate`. Documented that production behavior stayed unchanged and commit `38bc75892` uses dependency-aware `C_AddOns.LoadAddOn` in the fixture. Existing index entry remained sufficient; no code, test, spec, or manifest changes.
 
+## [2026-08-28] audit | Preserve top-level runtime addon warnings
+
+Audited commit `f6052114e74354276359d0f12da0c53cf4a5efe2`. Updated [[addon-loading]] and its index summary: finalized warnings from top-level `C_AddOns.LoadAddOn` calls now remain in SimState until the startup/test collector drains them exactly once, while nested warnings retain owner attribution and forward transitively to the immediate parent result. Added source/test references; no new page or spec was warranted.
+
 ## [2026-08-28] audit | Document nested warning propagation and recorder encapsulation
 
 Audited commits `88cf327a7` and `8a6b5f61a`. Updated [[addon-loading]] and the top-level addon-loading pipeline documentation: nested runtime-addon warnings are finalized under the nested addon and forwarded exactly once to the immediate parent `LoadResult` (transitively for nested-nested loads, without raw-access reprocessing), while the global-publication recorder is captured in a bootstrap-local upvalue and removed from `_G` so addon Lua cannot forge publication events. Updated the existing index summary and added the runtime loader source link; no spec or new wiki page was warranted.
