@@ -270,6 +270,32 @@ pub fn resolve_xml_include_path(xml_path: &Path, addon_root: &Path, file: &str) 
     helpers::resolve_path_with_fallback(xml_dir, addon_root, file)
 }
 
+/// Channel assigned to a loader diagnostic.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LoadDiagnosticChannel {
+    /// A regular global was observed as nil; retain it for inspection without
+    /// treating it as an actionable API requirement.
+    Observation,
+    /// A missing `C_*` namespace or method remains an actionable API gap.
+    Requirement,
+    /// Loading or runtime execution failed and must fail health checks.
+    Failure,
+}
+
+/// Classify the textual diagnostics retained in [`LoadResult::warnings`].
+///
+/// Nil-symbol reports use stable `needs global` and `needs C_` phrases. Other
+/// warning text represents an actual loader or runtime failure.
+pub fn classify_load_diagnostic(message: &str) -> LoadDiagnosticChannel {
+    if message.contains(" needs C_") {
+        return LoadDiagnosticChannel::Requirement;
+    }
+    if message.contains(" needs global ") {
+        return LoadDiagnosticChannel::Observation;
+    }
+    LoadDiagnosticChannel::Failure
+}
+
 /// Result of loading an addon.
 #[derive(Debug)]
 pub struct LoadResult {

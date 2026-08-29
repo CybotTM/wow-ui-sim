@@ -1,7 +1,23 @@
 use std::io::Write;
 
-use wow_ui_sim::loader::load_addon;
+use wow_ui_sim::loader::{LoadDiagnosticChannel, classify_load_diagnostic, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+
+#[test]
+fn load_diagnostics_keep_observations_requirements_and_failures_distinct() {
+    assert_eq!(
+        classify_load_diagnostic("Addon needs global OptionalFrame"),
+        LoadDiagnosticChannel::Observation
+    );
+    assert_eq!(
+        classify_load_diagnostic("Addon needs C_Container.MissingMethod"),
+        LoadDiagnosticChannel::Requirement
+    );
+    assert_eq!(
+        classify_load_diagnostic("Addon.lua: load failed"),
+        LoadDiagnosticChannel::Failure
+    );
+}
 
 fn create_test_addon_with_missing_symbol_accesses() -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();

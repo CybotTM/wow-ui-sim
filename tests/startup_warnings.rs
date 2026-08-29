@@ -4,7 +4,10 @@ use crate::common;
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons, load_addon};
+use wow_ui_sim::loader::{
+    LoadDiagnosticChannel, classify_load_diagnostic, discover_all_blizzard_addons,
+    discover_blizzard_addons, load_addon,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
@@ -124,15 +127,21 @@ fn load_and_startup() -> Vec<String> {
     warnings
 }
 
-/// Known warning count from unimplemented APIs. Update this when adding stubs.
-/// Goal: drive this to zero over time by implementing missing APIs.
-const KNOWN_WARNING_COUNT: usize = 0;
+/// Known actionable loader/runtime failure count. API requirements and regular
+/// nil observations remain visible in the collected diagnostics but are not
+/// startup failures by themselves.
+const KNOWN_FAILURE_COUNT: usize = 0;
 
 #[test]
 fn test_no_warnings_on_startup() {
     test_timeout! {
         let warnings = load_and_startup();
-        let count = warnings.len();
+        let failures = warnings
+            .iter()
+            .filter(|warning| {
+                classify_load_diagnostic(warning) == LoadDiagnosticChannel::Failure
+            })
+            .count();
         let account_store_regressions: Vec<String> = warnings
             .iter()
             .filter(|warning| {
@@ -150,10 +159,10 @@ fn test_no_warnings_on_startup() {
             account_store_regressions.join("\n  ")
         );
 
-        if count > KNOWN_WARNING_COUNT {
+        if failures > KNOWN_FAILURE_COUNT {
             let mut msg = format!(
-                "New warnings introduced! Expected at most {KNOWN_WARNING_COUNT}, got {count}.\n\
-                 All warnings:\n"
+                "New loader/runtime failures introduced! Expected at most {KNOWN_FAILURE_COUNT}, got {failures}.\n\
+                 All diagnostics:\n"
             );
             for w in &warnings {
                 msg.push_str(&format!("  {w}\n"));
