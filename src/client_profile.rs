@@ -293,11 +293,11 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "client-retail", not(feature = "retail-12-1-0")))]
+    #[cfg(feature = "client-retail")]
     fn retail_client_points_at_current_retail_api_epoch() {
         assert_eq!(ACTIVE, ClientProfile::Retail);
-        assert_eq!(ACTIVE_INTERFACE_VERSION, 120007);
-        assert!(cfg!(feature = "retail-12-0-7"));
+        assert_eq!(ACTIVE_INTERFACE_VERSION, 120100);
+        assert!(cfg!(feature = "retail-12-1-0"));
     }
 
     #[test]
@@ -342,7 +342,7 @@ mod tests {
     #[test]
     #[cfg(feature = "client-retail")]
     fn retail_interface_matches_current_live_build() {
-        assert_eq!(ClientProfile::Retail.interface_version(), 120007);
+        assert_eq!(ClientProfile::Retail.interface_version(), 120100);
     }
 
     #[test]
