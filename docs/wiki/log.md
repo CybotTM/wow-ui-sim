@@ -1,3 +1,7 @@
+## [2026-08-28] audit | Document live retail 12.1 GlobalStrings slice
+
+Audited commit `72f3ec342`. Updated [[patch-12-1-api-audit]] and [[lua-api]] with live enUS retail `12.1.0.69497` / interface `120100` evidence captured 2026-08-28: 32 exact string globals are registered only under `profile-retail` + `retail-12-1-0`, and 12 warning candidates proven raw `nil` remain unregistered. Added source/test references and the rationale against placeholder publication; private probe evidence remains outside the repository. Updated the existing index summary; no new page or spec was warranted. Protected `src/c_api/c_string_util.rs` was not touched.
+
 ## [2026-08-28] investigation | Record live PlayerSpells panel replacement contract
 
 Updated [[playerspells-runtime-load]] from live artifact `/tmp/CharacterPlayerSpellsProbe-live-2026-08-28.lua` (SHA-256 `40dcf028acd5605d675810abbfc9eb8aa63147425ed5f8bb8b3b54b78c997595`). WoW 12.1.0 build 69497/interface 120100 shows successful direct `ShowUIPanel` and real `ToggleCharacter`/`ToggleSpellBookFrame` paths replacing CharacterFrame with PlayerSpells; CharacterFrame expands 338→540 when opened and returns to 338 when replaced. Recorded PlayerSpells panel attributes and marked empty `UIParent:GetUIPanel` slot captures inconclusive because the API belongs to private `FramePositionDelegate`. Documented that production behavior stayed unchanged and commit `38bc75892` uses dependency-aware `C_AddOns.LoadAddOn` in the fixture. Existing index entry remained sufficient; no code, test, spec, or manifest changes.

@@ -61,6 +61,8 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 **Font system** — `CreateFont()`, standard fonts (GameFontNormal, ChatFontNormal, SystemFont_Small, etc.) stored as Lua tables with canonical `__fontPath`, `__fontHeight`, and `__fontFlags` keys. FontString snapshots prefer those canonical fields and retain legacy aliases (`__font`, `__height`, `__outline`) only as fallback, so XML `inherits="GameFontNormalLarge"` preserves the inherited size and flags.
 
+**Versioned UI strings** — `register_all_ui_strings()` combines generated global strings with static compatibility data. The live enUS retail 12.1 slice registers exactly 32 probe-proven scalar strings only under `profile-retail` + `retail-12-1-0`; 12 probe-proven nil globals remain absent rather than receiving placeholders or aliases.
+
 **Object pools** — `CreateFramePool`, `CreateFrameFactory` (multi-template), `CreateObjectPool` (generic acquire/release).
 
 **Utilities** — `wipe()`, `tinsert/tremove()`, `CopyTable()`, `MergeTable()`, `Mixin()`, `CreateFromMixins()`, `getglobal/setglobal()`, `loadstring()`, `strsplit()`. Both `string.split(...)` and string `:split(...)` accept Blizzard's delimiter-receiver form, including empty and equal-length punctuation inputs, while retaining ordinary input-first behavior.
@@ -99,6 +101,9 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [loader_env.rs](../../../src/lua_api/loader_env.rs) — secure versus public dynamic loader execution
 - [auth_challenge_frame_parent.rs](../../../src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs) — addon-specific AuthChallenge public export bridge
 - [enums.rs](../../../src/lua_api/env_init/enums.rs) — enum-table reseeding that preserves existing Blizzard extensions
+- [strings/mod.rs](../../../src/lua_api/globals/strings/mod.rs) — generated and versioned UI-string registration
+- [more_strings.rs](../../../src/lua_api/globals/strings/string_data/more_strings.rs) — live retail 12.1 string data table
+- [register.rs](../../../src/lua_api/globals/register.rs) — exact live GlobalStrings contract test
 - [timerunning.rs](../../../src/lua_api/globals/real/timerunning.rs) — state-backed legacy Timerunning globals
 - [bank_storage_verbs.rs](../../../src/lua_api/globals/bank_storage_verbs.rs) — retail guild-tabard lookup registration
 - [c_string_util_decimal.rs](../../../src/c_api/c_string_util_decimal.rs) — decimal escaping for control and invalid UTF-8 bytes

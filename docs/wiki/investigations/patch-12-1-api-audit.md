@@ -29,6 +29,11 @@ The 12.1 compatibility work is currently captured by these commits:
 - `fdcdd4c62` — modeled Battle.net appear-offline intent on `SimState.bnet_appear_offline` and moved the title-friend unit invite probe out of Lua inert defaults.
 - `1701c1c4e` — modeled Discord OAuth/link/settings/server/channel probes against local `SimState.discord` state and removed the final 12.1 Lua inert defaults.
 - `d91e8a342` — modeled housing blueprint availability probes as local `SimState.housing` result codes.
+- `72f3ec342` — registered the live enUS retail 12.1 GlobalStrings slice after direct client probing.
+
+### Live enUS GlobalStrings slice
+
+The authoritative probe targeted retail `12.1.0.69497` / interface `120100`, locale `enUS`, on 2026-08-28. Of 49 candidates, 32 warning candidates were present as exact strings and 12 warning candidates were raw `nil`. `live_retail_12_1_global_strings_match_probe` asserts every scalar value and preserves the 12 nil results. The implementation registers only the 32 proven strings under `profile-retail` + `retail-12-1-0`; it does not claim other locales or retail epochs. The preserved nil set is `BLOCK_REDUCED`, `CONFIRM_TALENT_WIPE`, `EDIT_MODE_OVERRIDE_LAYOUTS`, `EDIT_MODE_OVERRIDE_LAYOUT_MAP`, `LOCALE_koKR`, `LOCALE_ruRU`, `LOCALE_zhCN`, `LOCALE_zhTW`, `NEWBIE_TOOLTIP_COMMUNITIESTAB`, `OK`, `SLASH_TEXTTOSPEECH_HELP_GUILD_ANNOUNCE`, and `WOWHACK_ACCOUNT_STORE_TITLE`. These remain unregistered because absence is the observed client contract: synthesizing placeholders or aliases would change Blizzard branch behavior and hide strict missing-global diagnostics. Private build-stamped probe evidence remains outside the repository.
 
 Key implementation locations:
 
@@ -57,6 +62,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | Area | Current state |
 |------|---------------|
 | Global added APIs | Present under `retail-12-1-0` as Rust-backed APIs or compatibility bridges. `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` now contains no active Lua inert defaults. Rough source scan has no missing global-added names. `LoadAddOnWithErrorHandling` is explicitly modeled as the tested canonical wrapper over `UIParentLoadAddOn`. |
+| Live enUS GlobalStrings | **Implemented slice:** 32 exact scalar strings from retail 12.1 probe; 12 separately probed warning candidates remain raw nil. Registration is limited to `profile-retail` + `retail-12-1-0`; no cross-locale or cross-epoch claim. |
 | Removed APIs | Hidden for addon-facing checks after startup by `src/ptr/strict_removals.lua`; not moved earlier because current Blizzard UI still needs some load-time compatibility. |
 | Events/CVars/Enums | Added event/CVar/enum names are gated by the 12.1 retail epoch where implemented. |
 | Widget methods | Compatible 12.1 widget methods are implemented/tested: forbidden-aspect queries, texture radial-progress-bar methods, roleset/on-update mode methods, statusbar render mode, minimap icon scale, VectorGraphics/SVG stubs. |
@@ -107,7 +113,11 @@ The probes are evidence collectors only. Their presence does not resolve, reclas
 - `data/patch-api/sources/12.1-behaviors.json` — normalized broader behavior boundaries and candidate disposition.
 - [[patch-12-1-behavior-inventory]] — itemized broader behavior machine state and candidate classification.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — regression coverage for safe bridges and strict removals.
+- `src/lua_api/globals/strings/mod.rs` — version-gated registration of the live GlobalStrings slice.
+- `src/lua_api/globals/strings/string_data/more_strings.rs` — exact 32-string enUS retail 12.1 data table.
+- `src/lua_api/globals/register.rs` — `live_retail_12_1_global_strings_match_probe` exact-value and nil-preservation test.
 - `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` — now-empty version-gated hook; safe 12.1 social/housing bridges moved to Rust-backed simulator state.
+- `docs/local/private/probes/GlobalStringProbe-12.1.0.69497-2026-08-28.lua` (gitignored) — private build-stamped live probe capture, SHA-256 `cbb17f19adde1855627aee3e19934000584f200f1ec6bb32a4d7cb6b817b7881`; retained outside version control.
 - `src/ptr/compat_bootstrap.lua` — 12.1 compatibility globals, including `LoadAddOnWithErrorHandling`.
 - `src/ptr/strict_removals.lua` — post-startup hiding of removed 12.1 symbols.
 - [UnitAuraSecretProbe](../../addons/UnitAuraSecretProbe/README.md) — addon-tainted AuraData and `UNIT_AURA` capture procedure and limitations.
