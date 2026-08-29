@@ -222,10 +222,8 @@ fn blizzard_frame_xml_util_publishes_core_item_and_aura_namespaces(env: &WowLuaE
 }
 
 #[cfg(feature = "retail-12-1-0")]
-#[test]
-fn blizzard_frame_xml_util_restores_patch_12_1_difficulty_color_delegates() {
-    let env = load_full_game_ui();
-
+prefork_full_ui_case! {
+fn blizzard_frame_xml_util_restores_patch_12_1_difficulty_color_delegates(env: &WowLuaEnv) {
     let result: String = env
         .eval(
             r#"
@@ -261,6 +259,7 @@ fn blizzard_frame_xml_util_restores_patch_12_1_difficulty_color_delegates() {
         .expect("12.1 DifficultyUtil delegates should survive full Game UI startup");
 
     assert_eq!(result, "ok");
+}
 }
 
 #[cfg(not(feature = "retail-12-1-0"))]
