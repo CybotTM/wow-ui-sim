@@ -1,3 +1,7 @@
+## [2026-08-29] audit | Document retail/PTR Recruit-A-Friend surface distinction
+
+Audited commit `928243411`: retail 12.1 retains `C_RecruitAFriend.IsEnabled`, while PTR hides it after startup through `src/ptr/strict_removals.lua`, despite both profiles selecting API epoch 12.1. Updated [[client-profiles]], [[patch-12-1-api-audit]], the client-profile spec, and [StrictRemovalTimingProbe](../addons/StrictRemovalTimingProbe/README.md) so epoch-gated API guidance preserves this evidence-backed channel exception. No code, generated, vendor, cache, `PLAN.md`, or protected-file changes.
+
 ## [2026-08-29] audit | Document modeled C_Item queries
 
 Audited commit `d38588beec834a2adb5ca1ea3f2f57a03469ff85`. Updated [[lua-api]] and the maintained Lua API reference to record that `C_Item.IsConsumableItem`, `C_Item.IsEquippableItem`, and `C_Item.IsItemInRange` are state-backed and share the existing legacy-global semantics. No new page, spec, changelog, or stub-inventory update was warranted; the protected C StringUtil file was not touched.

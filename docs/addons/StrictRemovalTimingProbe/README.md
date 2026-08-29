@@ -1,7 +1,8 @@
 # StrictRemovalTimingProbe
 
 Captures addon-visible timing for the pinned 12.1 strict-removal surface on
-interface `120100`.
+interface `120100`. Interpret channel-specific results separately: retail 12.1
+retains `C_RecruitAFriend.IsEnabled`, while PTR hides it after startup.
 
 ## Files and load order
 

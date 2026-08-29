@@ -38,7 +38,7 @@ The authoritative probe targeted retail `12.1.0.69497` / interface `120100`, loc
 Key implementation locations:
 
 - `Cargo.toml`, `src/client_profile.rs` — `retail-12-1-0` epoch feature and interface-version mapping.
-- `src/ptr/compat_bootstrap.rs`, `src/ptr/strict_removals.lua` — 12.1 compatibility bootstrap and post-startup strict removals.
+- `src/ptr/compat_bootstrap.rs`, `src/ptr/strict_removals.lua` — 12.1 compatibility bootstrap and profile-specific post-startup strict removals; PTR hides `C_RecruitAFriend.IsEnabled`, which retail retains.
 - `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` — temporary inert defaults for additive 12.1 APIs without a backing simulator model.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — safe bridge and strict removal regression coverage.
 - `src/loader/tests/wow_api_globals/frames_and_attributes.rs`, `src/loader/tests/xml_basics_extra.rs`, `src/loader/tests/runtime_templates.rs`, `src/loader/tests/runtime_template_misc.rs` — 12.1 widget/XML/private-partition behavior coverage.
@@ -63,7 +63,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 |------|---------------|
 | Global added APIs | Present under `retail-12-1-0` as Rust-backed APIs or compatibility bridges. `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` now contains no active Lua inert defaults. Rough source scan has no missing global-added names. `LoadAddOnWithErrorHandling` is explicitly modeled as the tested canonical wrapper over `UIParentLoadAddOn`. |
 | Live enUS GlobalStrings | **Implemented slice:** 32 exact scalar strings from retail 12.1 probe; 12 separately probed warning candidates remain raw nil. Registration is limited to `profile-retail` + `retail-12-1-0`; no cross-locale or cross-epoch claim. |
-| Removed APIs | Hidden for addon-facing checks after startup by `src/ptr/strict_removals.lua`; not moved earlier because current Blizzard UI still needs some load-time compatibility. |
+| Removed APIs | Profile-specific removed APIs are hidden for addon-facing checks after startup by `src/ptr/strict_removals.lua`; for example, PTR hides `C_RecruitAFriend.IsEnabled` while retail 12.1 retains it. Removals are not moved earlier because current Blizzard UI still needs some load-time compatibility. |
 | Events/CVars/Enums | Added event/CVar/enum names are gated by the 12.1 retail epoch where implemented. |
 | Widget methods | Compatible 12.1 widget methods are implemented/tested: forbidden-aspect queries, texture radial-progress-bar methods, roleset/on-update mode methods, statusbar render mode, minimap icon scale, VectorGraphics/SVG stubs. |
 | Private/forbidden XML partition mechanics | Compatible XML/private table behavior is implemented/tested for `useForbiddenObjectTable`, private KeyValues, partition-aware mixins, and secure delegates. |
