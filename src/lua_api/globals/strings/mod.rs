@@ -126,8 +126,11 @@ const FLOAT_DEFS: &[&[crate::lua_api::globals::strings::string_data::FloatDef]] 
     string_data::MOVEMENT_FLOAT_CONSTANTS,
 ];
 
-const STRING_DEFS: &[&[crate::lua_api::globals::strings::string_data::StringDef]] =
-    &[string_data::FONT_COLOR_CODE_STRINGS];
+const STRING_DEFS: &[&[crate::lua_api::globals::strings::string_data::StringDef]] = &[
+    string_data::FONT_COLOR_CODE_STRINGS,
+    #[cfg(all(feature = "profile-retail", feature = "retail-12-1-0"))]
+    string_data::RETAIL_12_1_GLOBAL_STRINGS,
+];
 
 fn should_register_int_constant(name: &str, epoch: RetailApiEpoch) -> bool {
     !(epoch == RetailApiEpoch::Retail12_0_0 && name == "LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT")
