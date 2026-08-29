@@ -144,11 +144,10 @@ fn blizzard_deprecated_spell_script_installs_four_direct_aliases(env: &WowLuaEnv
         "Deprecated_SpellScript.lua lines 9-12 publish 4 direct global aliases (no closure \
          wrapping — plain right-hand-side reads of C_Spell.<Method>): \
          TargetSpellReplacesBonusTree (temporary target-spell metadata default, returns false); \
-         GetMaxSpellStartRecoveryOffset → C_Spell.GetSpellQueueWindow (UNSTUBBED — resolves \
-         via `__wow_namespace_mt.__index` to no-op); GetSpellQueueWindow → \
-         C_Spell.GetSpellQueueWindow (same UNSTUBBED method, both globals share the same \
-         no-op closure); GetSchoolString (registered at c_spell.rs:79, returns localized \
-         school name string)"
+         GetMaxSpellStartRecoveryOffset → C_Spell.GetSpellQueueWindow; GetSpellQueueWindow → \
+         C_Spell.GetSpellQueueWindow (both globals share the same registered CVar-backed \
+         function); GetSchoolString (registered at c_spell.rs, returns localized school \
+         name string)"
     );
 }
 }
@@ -158,19 +157,27 @@ fn blizzard_deprecated_spell_script_direct_aliases_are_identity_equal_to_c_spell
 
     let aliases_match: bool = env
         .eval(
-            "return TargetSpellReplacesBonusTree == C_Spell.TargetSpellReplacesBonusTree \
-                and GetMaxSpellStartRecoveryOffset == C_Spell.GetSpellQueueWindow \
-                and GetSpellQueueWindow == C_Spell.GetSpellQueueWindow \
-                and GetSchoolString == C_Spell.GetSchoolString",
+            r#"
+            local originalValue = GetCVar("SpellQueueWindow")
+            local defaultValue = C_Spell.GetSpellQueueWindow()
+            SetCVar("SpellQueueWindow", "250")
+            local updatedValue = C_Spell.GetSpellQueueWindow()
+            SetCVar("SpellQueueWindow", originalValue)
+
+            return TargetSpellReplacesBonusTree == C_Spell.TargetSpellReplacesBonusTree
+                and GetMaxSpellStartRecoveryOffset == C_Spell.GetSpellQueueWindow
+                and GetSpellQueueWindow == C_Spell.GetSpellQueueWindow
+                and GetSchoolString == C_Spell.GetSchoolString
+                and type(defaultValue) == "number"
+                and defaultValue == 400
+                and updatedValue == 250
+            "#,
         )
-        .expect("identity-equality query for 4 direct aliases should succeed");
+        .expect("identity and CVar-backed queue-window query should succeed");
     assert!(
         aliases_match,
-        "Each direct global must be IDENTITY-EQUAL to its backing C_Spell method. The shim \
-         performs plain table-read assignment so both sides reference the SAME function \
-         value. Note that GetMaxSpellStartRecoveryOffset and GetSpellQueueWindow are aliases \
-         to the SAME GetSpellQueueWindow no-op closure — both globals point at the single \
-         cached `function() return nil end` materialized by `__wow_namespace_mt.__index`"
+        "Direct globals must be identity-equal to their backing C_Spell methods, and \
+         C_Spell.GetSpellQueueWindow must return the current numeric SpellQueueWindow CVar"
     );
 }
 }
@@ -184,11 +191,9 @@ fn blizzard_deprecated_spell_script_get_spell_queue_window_aliases_share_the_sam
     assert!(
         same_closure,
         "GetMaxSpellStartRecoveryOffset and GetSpellQueueWindow must reference the EXACT \
-         SAME function value — both are aliased to C_Spell.GetSpellQueueWindow on lines 10 \
-         and 11. The first read of C_Spell.GetSpellQueueWindow triggers \
-         `__wow_namespace_mt.__index` to materialize a no-op closure and rawset it on \
-         C_Spell. The second read returns the SAME closure. Both globals end up as \
-         identity-equal references to that single closure value"
+         SAME function value — both are aliased to the registered \
+         C_Spell.GetSpellQueueWindow function on lines 10 and 11. Both globals therefore \
+         reference the same CVar-backed closure"
     );
 }
 }
