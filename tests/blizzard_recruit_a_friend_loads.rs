@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 
-use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
+use wow_ui_sim::loader::{
+    discover_blizzard_addon_closure_for_screen, discover_blizzard_addons_for_screen, load_addon,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::fire_startup_events_for_screen;
@@ -270,6 +272,44 @@ fn blizzard_recruit_a_friend_appears_in_eager_game_discovery() {
          so the eager-discovery filter at src/loader/mod.rs:527 MUST keep it in the \
          Game-screen inventory — every loader-filter gate (load_on_demand=false / \
          ptr_only=false / game_type_restricted=false / allows_screen(Game)=true) admits it"
+    );
+}
+
+#[test]
+fn blizzard_recruit_a_friend_loads_with_retail_is_enabled_surface() {
+    let ui = blizzard_ui_dir();
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_mode(ScreenKind::Game);
+    env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
+
+    let mut recruit_a_friend_warnings = None;
+    for (name, toc_path) in discover_blizzard_addon_closure_for_screen(
+        &ui,
+        ScreenKind::Game,
+        &["Blizzard_RecruitAFriend"],
+    ) {
+        let result = load_addon(&env.loader_env(), &toc_path)
+            .unwrap_or_else(|error| panic!("{name} should load: {error}"));
+        if name == "Blizzard_RecruitAFriend" {
+            recruit_a_friend_warnings = Some(result.warnings);
+        }
+    }
+
+    let (is_function, enabled): (bool, bool) = env
+        .eval(
+            "return type(C_RecruitAFriend.IsEnabled) == 'function', \
+             C_RecruitAFriend.IsEnabled()",
+        )
+        .expect("retail Recruit-A-Friend enabled probe should be callable");
+    assert!(is_function, "retail 12.1 must expose C_RecruitAFriend.IsEnabled");
+    assert!(!enabled, "Recruit-A-Friend is modeled disabled by default");
+
+    let warnings = recruit_a_friend_warnings.expect("Recruit-A-Friend addon should load");
+    assert!(
+        !warnings
+            .iter()
+            .any(|warning| warning.contains("C_RecruitAFriend.IsEnabled")),
+        "real Blizzard_RecruitAFriend load must resolve IsEnabled: {warnings:?}"
     );
 }
 
