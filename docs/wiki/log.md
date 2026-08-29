@@ -1,6 +1,10 @@
+## [2026-08-29] audit | Correct typed diagnostic forwarding summary
+
+Audited the documentation added for commits `01026c8b6` and `3ecbc33fc`. Corrected the index and log summaries to distinguish nested diagnostic forwarding from top-level runtime diagnostic retention/draining, and linked the typed diagnostic record definitions in `src/lua_api/state_types/runtime.rs`. No API claims or unsupported behavior changed.
+
 ## [2026-08-29] system | Separate typed addon-load diagnostics
 
-Updated [[addon-loading]] and its index summary for the typed diagnostic contract: actual loader/XML/Lua/runtime failures remain in `LoadResult.warnings`; regular nil-symbol accesses and missing `C_*` contracts retain addon/source/line/environment attribution in dedicated channels; runtime and nested loads forward all three channels exactly once. Startup health now gates only genuine failures while strict unsupported requirements remain inspectable. No unsupported API semantics or runtime-bootstrap hashes changed.
+Updated [[addon-loading]] and its index summary for the typed diagnostic contract: actual loader/XML/Lua/runtime failures remain in `LoadResult.warnings`; regular nil-symbol accesses and missing `C_*` contracts retain addon/source/line/environment attribution in dedicated channels; nested runtime loads forward all three channels exactly once to their parent, while top-level runtime diagnostics remain in SimState until drained once. Startup health now gates only genuine failures while strict unsupported requirements remain inspectable. No unsupported API semantics or runtime-bootstrap hashes changed.
 
 ## [2026-08-29] audit | Document active voice channel type query
 

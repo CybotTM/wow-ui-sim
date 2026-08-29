@@ -137,6 +137,7 @@ Nested runtime-addon loads finalize failures, nil observations, and missing requ
 - [toc/mod.rs](../../../src/toc/mod.rs) — TOC metadata, normal file list, `[Bootstrap]` parsing, path resolution
 - [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution, inline `[Bootstrap]` entries, load transactions, warning finalization, and the secure replay allowlist
 - [c_addons_runtime.rs](../../../src/c_api/c_addons_runtime.rs) — runtime addon loading, typed top-level diagnostic retention, and exactly-once nested forwarding
+- [runtime.rs](../../../src/lua_api/state_types/runtime.rs) — typed diagnostic records and public/secure attribution fields
 - [runtime surface bootstrap](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `_G.__index` diagnostic gate, strict `C_*` namespace fallback, and raw namespace restoration
 - [secure environment](../../../src/lua_api/globals/security/secure_env.rs) — separate secure environment and secure publication recording
 - [precompiled lifecycle helpers](../../../src/loader/precompiled.rs) — raw `_G.self` receiver snapshot/restore
