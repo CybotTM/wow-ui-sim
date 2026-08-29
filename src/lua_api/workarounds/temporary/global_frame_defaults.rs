@@ -4,14 +4,18 @@
 //! the generic runtime bootstrap so their workaround status stays explicit.
 
 const GLOBAL_FRAME_DEFAULTS_LUA: &str = r#"
-local function ensure_named_frame(frameType, name)
+local function ensure_named_frame(frameType, name, hidden)
     if rawget(_G, name) ~= nil then
         return rawget(_G, name)
     end
     if type(CreateFrame) ~= "function" then
         return nil
     end
-    return CreateFrame(frameType or "Frame", name, UIParent)
+    local frame = CreateFrame(frameType or "Frame", name, UIParent)
+    if hidden and type(frame.Hide) == "function" then
+        frame:Hide()
+    end
+    return frame
 end
 
 local function ensure_child_frame(parent, key)
@@ -46,7 +50,7 @@ ensure_named_frame("Frame", "LootFrame")
 ensure_named_frame("Frame", "RaidWarningFrame")
 ensure_named_frame("Frame", "GossipFrame")
 ensure_named_frame("Frame", "FriendsFrame")
-ensure_named_frame("Frame", "HelpFrame")
+ensure_named_frame("Frame", "HelpFrame", true)
 
 local buffFrame = ensure_named_frame("Frame", "BuffFrame")
 local auraContainer = ensure_child_frame(buffFrame, "AuraContainer")

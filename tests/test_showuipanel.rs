@@ -716,12 +716,28 @@ fn registered_ui_panel_closes_with_escape_stack() {
 fn escape_key_closes_character_frame_before_game_menu() {
     test_timeout! {
         let env = setup_env();
-        let shown: bool = env.eval(r#"
+        let panel_state: String = env.eval(r#"
+            if HelpFrame:IsShown() then
+                return "help_frame_placeholder_shown"
+            end
+
             CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
             ToggleCharacter("PaperDollFrame", true)
-            return CharacterFrame:IsShown()
+            if not CharacterFrame:IsShown() then
+                return "not_shown"
+            end
+            local left_panel = GetUIPanel("left")
+            if left_panel ~= CharacterFrame then
+                return "wrong_left_panel:" .. tostring(left_panel and left_panel:GetName())
+                    .. ":manual=" .. tostring(CharacterFrame.editModeManuallyShown)
+            end
+            return "ok"
         "#).unwrap();
-        assert!(shown, "CharacterFrame should be shown before Escape");
+        assert_eq!(
+            panel_state,
+            "ok",
+            "CharacterFrame should enter the active left panel slot without a visible HelpFrame placeholder preempting Escape: {panel_state}"
+        );
 
         env.send_key_press("ESCAPE", None).unwrap();
 
