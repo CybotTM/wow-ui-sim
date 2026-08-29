@@ -79,7 +79,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -120,7 +120,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -161,7 +161,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -1961,7 +1961,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current C_ActionBar.GetActionCharges publishes chargeModRate in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         }
       ],
       "tests": [],
@@ -1990,7 +1990,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current C_ActionBar.GetActionCharges publishes cooldownDuration in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         }
       ],
       "tests": [],
@@ -2019,7 +2019,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current C_ActionBar.GetActionCharges publishes cooldownStartTime in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         }
       ],
       "tests": [],
@@ -2048,7 +2048,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current C_ActionBar.GetActionCharges publishes currentCharges in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         }
       ],
       "tests": [],
@@ -2077,7 +2077,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current C_ActionBar.GetActionCharges publishes maxCharges in a static placeholder table without modeled slot charge state, cooldown progression, or dynamic charge semantics.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         }
       ],
       "tests": [],
@@ -2130,7 +2130,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current C_ActionBar.GetActionCooldown publishes duration in a partial table; start/duration are fixture-backed while enabled/mod-rate semantics remain constant and the complete typed contract is unproven.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         }
       ],
       "tests": [],
@@ -2159,7 +2159,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current C_ActionBar.GetActionCooldown publishes isEnabled in a partial table; start/duration are fixture-backed while enabled/mod-rate semantics remain constant and the complete typed contract is unproven.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         }
       ],
       "tests": [],
@@ -2188,7 +2188,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current C_ActionBar.GetActionCooldown publishes modRate in a partial table; start/duration are fixture-backed while enabled/mod-rate semantics remain constant and the complete typed contract is unproven.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         }
       ],
       "tests": [],
@@ -2217,7 +2217,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current C_ActionBar.GetActionCooldown publishes startTime in a partial table; start/duration are fixture-backed while enabled/mod-rate semantics remain constant and the complete typed contract is unproven.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         }
       ],
       "tests": [],
@@ -2245,7 +2245,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current action-bar implementation and registration do not publish this method (absent)."
         },
         {
@@ -2280,7 +2280,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "GetActionBarPage/SetActionBarPage store the current page in SimState; the page transition path fires ACTIONBAR_PAGE_CHANGED only for real changes."
         },
         {
@@ -2323,7 +2323,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns a fresh default LuaDurationObject without reading the action slot (default duration behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -2358,7 +2358,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns a partial zero/default ActionBarChargeInfo-shaped table: current/max charges and cooldown fields are zero, with modRate 1. No focused direct test is present in this evidence slice."
         },
         {
@@ -2393,7 +2393,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns a partial ActionBarCooldownInfo-shaped table: spell-slot cooldown start/duration are modeled, while isEnabled=true and modRate=1 are constant defaults. No focused direct test is present in this evidence slice."
         },
         {
@@ -2428,7 +2428,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns a fresh default LuaDurationObject without reading the action slot (default duration behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -2463,7 +2463,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant nil for every input (no-op/absent-value behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -2498,7 +2498,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant startTime=0 and duration=0 for every input (default/no-op behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -2533,7 +2533,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns a fresh default LuaDurationObject without reading the action slot (default duration behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -2568,7 +2568,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant nil for every input (no-op/absent-value behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -2603,7 +2603,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "GetActionTexture resolves a modeled action-bar spell slot through SPELL_DB and returns the mapped texture path when the slot has a known spell."
         },
         {
@@ -2646,7 +2646,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant 0 for every input (default behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -2681,7 +2681,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "GetBonusBarIndex reads the simulator bonus-bar index state; the focused evidence covers the seeded state-backed value."
         },
         {
@@ -2693,7 +2693,7 @@
         {
           "kind": "test",
           "reference": "tests/c_action_bar_state_globals.rs",
-          "source_hash": "1304fb2ba24ecd52ee76f29d4b86d97699ffc1968db11dd0f8e1fd7b16fac6a0",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
           "summary": "Focused state-global test checks the state-backed bonus-bar flag/index round-trip."
         }
       ],
@@ -2724,7 +2724,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current C_ActionBar implementation publishes this query through action_bar_api.rs; the value is constant or derived compatibility behavior and is not covered by a focused direct test."
         },
         {
@@ -2759,7 +2759,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current C_ActionBar implementation publishes this query through action_bar_api.rs; the value is constant or derived compatibility behavior and is not covered by a focused direct test."
         },
         {
@@ -2794,7 +2794,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current C_ActionBar implementation publishes this query through action_bar_api.rs; the value is constant or derived compatibility behavior and is not covered by a focused direct test."
         },
         {
@@ -2829,7 +2829,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "GetOverrideBarIndex exposes the simulator override-bar index; focused evidence covers only the inactive default number."
         },
         {
@@ -2841,7 +2841,7 @@
         {
           "kind": "test",
           "reference": "tests/c_action_bar_state_globals.rs",
-          "source_hash": "1304fb2ba24ecd52ee76f29d4b86d97699ffc1968db11dd0f8e1fd7b16fac6a0",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
           "summary": "Focused state-global test checks the default inactive override bar index alongside the other special-bar indexes."
         }
       ],
@@ -2872,7 +2872,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "GetOverrideBarSkin reads the optional simulator override-bar skin used by the skinned override transition."
         },
         {
@@ -2915,7 +2915,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "GetProfessionQualityInfo reads the simulator action_profession_quality state and returns a table with inventoryQuality, iconInventory, and iconQualityContainer, or nil for missing/malformed input."
         },
         {
@@ -2972,7 +2972,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "GetTempShapeshiftBarIndex reads the simulator temp-shapeshift index state; the focused evidence covers state/default behavior only."
         },
         {
@@ -2984,7 +2984,7 @@
         {
           "kind": "test",
           "reference": "tests/c_action_bar_state_globals.rs",
-          "source_hash": "1304fb2ba24ecd52ee76f29d4b86d97699ffc1968db11dd0f8e1fd7b16fac6a0",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
           "summary": "Focused state-global tests check the default inactive temp-shapeshift index and the state-backed active flag/index round-trip."
         }
       ],
@@ -3016,7 +3016,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "GetVehicleBarIndex reads the simulator vehicle-bar index state; the focused evidence covers state/default behavior only."
         },
         {
@@ -3028,7 +3028,7 @@
         {
           "kind": "test",
           "reference": "tests/c_action_bar_state_globals.rs",
-          "source_hash": "1304fb2ba24ecd52ee76f29d4b86d97699ffc1968db11dd0f8e1fd7b16fac6a0",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
           "summary": "Focused state-global tests check vehicle bar-index round-trip from state and inactive default indexes for vehicle, override, and temp shapeshift bars."
         }
       ],
@@ -3060,7 +3060,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "HasAction reports modeled action-slot presence from state.action_bars or state.action_outfits."
         },
         {
@@ -3103,7 +3103,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "HasBonusActionBar reads the simulator bonus-bar state used by the state-backed bonus-bar transition."
         },
         {
@@ -3115,7 +3115,7 @@
         {
           "kind": "test",
           "reference": "tests/c_action_bar_state_globals.rs",
-          "source_hash": "1304fb2ba24ecd52ee76f29d4b86d97699ffc1968db11dd0f8e1fd7b16fac6a0",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
           "summary": "Focused state-global test checks HasBonusActionBar and the state-backed bonus-bar index."
         }
       ],
@@ -3146,7 +3146,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "HasExtraActionBar reads whether the simulator extra-action slot has a granted spell and drives the tested show/icon event path."
         },
         {
@@ -3189,7 +3189,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "HasOverrideActionBar reads the simulator override-bar state used by the skinned override transition."
         },
         {
@@ -3232,7 +3232,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current action-bar implementation and registration do not publish this method (absent)."
         },
         {
@@ -3267,7 +3267,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "HasTempShapeshiftActionBar reads the simulator temp-shapeshift state used by the state-backed transition."
         },
         {
@@ -3279,7 +3279,7 @@
         {
           "kind": "test",
           "reference": "tests/c_action_bar_state_globals.rs",
-          "source_hash": "1304fb2ba24ecd52ee76f29d4b86d97699ffc1968db11dd0f8e1fd7b16fac6a0",
+          "source_hash": "c6bc90a28c00a7d06a776d1adde100bd1beefc309eb388cd71d0dc4e8bd66244",
           "summary": "Focused state-global test checks HasTempShapeshiftActionBar and the state-backed temp-shapeshift index."
         }
       ],
@@ -3310,7 +3310,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "HasVehicleActionBar reads the simulator vehicle-bar state used by the skinned vehicle transition."
         },
         {
@@ -3353,7 +3353,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current action-bar implementation and registration do not publish this method (absent)."
         },
         {
@@ -3388,7 +3388,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -3423,7 +3423,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -3458,7 +3458,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -3493,7 +3493,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation provides a partial casting/action-slot model: it compares the active casting spell to the slot action and otherwise returns false. No focused direct test is present in this evidence slice."
         },
         {
@@ -3528,7 +3528,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -3563,7 +3563,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "IsEquippedGearOutfitAction reads the modeled equipped_gear_outfit_action_slots set used by the action-button outfit-lock overlay path."
         },
         {
@@ -3606,7 +3606,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -3641,7 +3641,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "IsPossessBarVisible reads the simulator possess-bar visibility state used by the tested UPDATE_POSSESS_BAR show/hide path."
         },
         {
@@ -3684,7 +3684,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation returns constant false for every input (default predicate behavior). No focused direct test is present in this evidence slice."
         },
         {
@@ -3719,7 +3719,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation provides a partial action-slot presence model: it reports whether a spell/outfit slot exists and always returns isLackingResources=false. No focused direct test is present in this evidence slice."
         },
         {
@@ -3754,7 +3754,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current implementation partially records button/action identity for simulator refresh dispatch but ignores the cooldown-frame argument; cooldown and lifecycle semantics are unproven. No focused direct test is present in this evidence slice."
         },
         {
@@ -3789,7 +3789,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "GetActionBarPage/SetActionBarPage store the current page in SimState; the page transition path fires ACTIONBAR_PAGE_CHANGED only for real changes."
         },
         {
@@ -3832,7 +3832,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9",
           "summary": "Current action-bar implementation and registration do not publish this method (absent)."
         },
         {
@@ -5339,7 +5339,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5368,7 +5368,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5397,7 +5397,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5426,7 +5426,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5455,7 +5455,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5484,7 +5484,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5513,7 +5513,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5542,7 +5542,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5571,7 +5571,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5600,7 +5600,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5629,7 +5629,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -5658,7 +5658,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_CombatAudioAlert or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -6546,7 +6546,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies CreateColorCurve returns a table exposing Evaluate.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -6583,7 +6583,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies CreateCurve returns a table exposing AddPoint and Evaluate.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -6767,7 +6767,7 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         }
       ],
@@ -6828,19 +6828,19 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
         }
       ],
@@ -6879,7 +6879,7 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
         }
       ],
@@ -6940,19 +6940,19 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
         }
       ],
@@ -7126,7 +7126,7 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         }
       ],
@@ -7163,7 +7163,7 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         }
       ],
@@ -7200,13 +7200,13 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
         }
       ],
@@ -7281,13 +7281,13 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
         }
       ],
@@ -7460,7 +7460,7 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         }
       ],
@@ -7706,7 +7706,7 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         }
       ],
@@ -7743,13 +7743,13 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
         },
         {
@@ -7794,19 +7794,19 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
         }
       ],
@@ -7845,13 +7845,13 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
         }
       ],
@@ -7889,19 +7889,19 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused current-session test checks Current lookup, seeded session identity, source lookup, matching source total, and positive duration."
         },
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused empty-meter test checks empty known meter sessions/sources, zero session totals including maxAmount, table shapes, missing lookups, and optional creature-ID lookup."
         }
       ],
@@ -7940,7 +7940,7 @@
         {
           "kind": "test",
           "reference": "tests/system_api_seeded.rs",
-          "source_hash": "146bc36243fc0c9ec545214679b428af35fc4c3f59e11463c5f39644101f49fc",
+          "source_hash": "406f6b95e40cf338ac74cb40a78f5a1e0d306c2fd549f4d7235df33e7bd09469",
           "summary": "Focused seeded-session test checks one available session and sessionID 1, availability, seeded session/source totals, source identity, and spell lookup."
         }
       ],
@@ -8207,7 +8207,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy coverage verifies the factory result is a table exposing duration methods.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -12383,7 +12383,7 @@
           "kind": "source",
           "reference": "src/c_api/item_spell/c_item.rs",
           "summary": "Current explicit C_Item surface omits IsItemBindToAccount; the related IsBound and IsBoundToAccountUntilEquip registrations both reuse a constant-false placeholder rather than item binding metadata.",
-          "source_hash": "a02c37fb187ea1a88e9f1d31798d89ee416d213620c56dc3c3302f3213eb173b"
+          "source_hash": "94fb0015a1a8976112d95e23a1f18ee7dcb98df586b416a4c5389e90cc65e89a"
         },
         {
           "kind": "source",
@@ -16798,7 +16798,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -16827,7 +16827,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -16856,7 +16856,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -16885,7 +16885,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -16914,7 +16914,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -16943,7 +16943,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -16972,7 +16972,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17001,7 +17001,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17030,7 +17030,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17059,7 +17059,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17088,7 +17088,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17117,7 +17117,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17146,7 +17146,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17175,7 +17175,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17204,7 +17204,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17233,7 +17233,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17262,7 +17262,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17291,7 +17291,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17320,7 +17320,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17349,7 +17349,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17378,7 +17378,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17407,7 +17407,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17436,7 +17436,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Examined current registration surface; it does not register/model C_Secrets or this method. This is not an exhaustive lexical/runtime absence claim."
         }
       ],
@@ -17746,7 +17746,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 duration method; duration-object lifecycle and semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -17775,7 +17775,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 duration method; duration-object lifecycle and semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -17804,7 +17804,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 display-count method; spell metadata/display semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -17833,7 +17833,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 duration method; duration-object lifecycle and semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -17862,7 +17862,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 metadata method; spell metadata semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -17891,7 +17891,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 metadata method; spell metadata semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -17920,7 +17920,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -17949,7 +17949,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -17978,7 +17978,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -18007,7 +18007,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` contains a same-name `IsSelfBuff` registration/implementation based on `implicit_target`, but no matching 12.0.0 publication/behavioral contract is proven.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -18036,7 +18036,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -18065,7 +18065,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Clean current `src/c_api/c_spell.rs` registers no matching 12.0.0 boolean method; boolean semantics are not modeled or focused-tested.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -25019,7 +25019,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -28491,7 +28491,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28532,7 +28532,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28597,7 +28597,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28638,7 +28638,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28679,7 +28679,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28720,7 +28720,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28761,7 +28761,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28802,7 +28802,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28843,7 +28843,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28884,7 +28884,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28925,7 +28925,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -28966,7 +28966,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -29007,7 +29007,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -29048,7 +29048,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -29089,7 +29089,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -29130,7 +29130,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -29171,7 +29171,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -29236,7 +29236,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -29277,7 +29277,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "summary": "Current related profession-quality API returns a distinct reduced payload and does not construct the audited crafting structures.",
-          "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da"
+          "source_hash": "fba614386d82b894faa5e38b370f14e9ddd3751a8300eabba9025c59e3126dc9"
         },
         {
           "kind": "source",
@@ -29324,7 +29324,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover table/method shape, round-trip storage, per-instance isolation, read-only keys, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -29371,7 +29371,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -84552,7 +84552,7 @@
           "kind": "test",
           "reference": "tests/tooltip_text.rs",
           "summary": "Focused tooltip tests verify left-line FontString type, first/second line text, and nil for out-of-range or zero indexes.",
-          "source_hash": "8b8aeb6a83fa59053292d91d42d451e06a962310c15875af63e0a83ff3a23ef0"
+          "source_hash": "67de0e9d5245ea5462dd241d9ad8349add0667db9286f4dcf7a4ec04093601c8"
         }
       ],
       "tests": [
@@ -84591,7 +84591,7 @@
           "kind": "test",
           "reference": "tests/tooltip_text.rs",
           "summary": "Focused tooltip tests verify right-line text for a double line and nil/empty text for a left-only line.",
-          "source_hash": "8b8aeb6a83fa59053292d91d42d451e06a962310c15875af63e0a83ff3a23ef0"
+          "source_hash": "67de0e9d5245ea5462dd241d9ad8349add0667db9286f4dcf7a4ec04093601c8"
         }
       ],
       "tests": [
@@ -86480,7 +86480,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies CreateColorCurve returns a table exposing Evaluate.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -86575,7 +86575,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies color Copy returns a table.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -86843,7 +86843,7 @@
         {
           "kind": "source",
           "reference": "tests/userdata_proxy.rs",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
           "summary": "Related curve proxy tests cover table shape, point insertion, evaluation, and copy behavior, not exact LuaColorCurvePoint typed fields or payload semantics."
         }
       ],
@@ -86937,19 +86937,19 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies CreateCurve returns a table exposing AddPoint and Evaluate.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies per-instance field storage.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies the LuaCurveObject tostring prefix.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -86988,7 +86988,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies scalar AddPoint insertion and linear interpolation.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -87054,7 +87054,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies Copy returns a table with the copied point count.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -87091,7 +87091,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies scalar AddPoint insertion and linear interpolation.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -87157,7 +87157,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy test verifies Copy returns a table with the copied point count.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -87426,7 +87426,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy coverage verifies table/method shape, default-zero behavior, per-instance fields, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -87901,7 +87901,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy coverage verifies IsZero on a newly created duration object.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -88083,7 +88083,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -88124,7 +88124,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -88165,7 +88165,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -88206,7 +88206,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -88378,7 +88378,7 @@
         {
           "kind": "source",
           "reference": "tests/userdata_proxy.rs",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
           "summary": "Related AbbreviateConfig proxy tests cover table shape and generic round-trip storage, not exact NumberAbbrevData typed fields or payload semantics."
         }
       ],
@@ -88558,7 +88558,7 @@
         {
           "kind": "source",
           "reference": "tests/userdata_proxy.rs",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
           "summary": "Related AbbreviateConfig proxy tests cover generic table shape and storage, not exact NumberAbbrevOptions typed fields or payload semantics."
         }
       ],
@@ -88781,7 +88781,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
           "summary": "Current implementation does not provide authoritative focused proof for PrivateAuraIconInfo.borderScale; the field is absent, nil-only, or generic/placeholder-backed.",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c"
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af"
         }
       ],
       "tests": [],
@@ -89997,7 +89997,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Current implementation does not provide authoritative focused proof for SpellCooldownInfo.isOnGCD; the field is absent, nil-only, or generic/placeholder-backed.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -90026,7 +90026,7 @@
           "kind": "source",
           "reference": "src/c_api/c_spell.rs",
           "summary": "Current implementation does not provide authoritative focused proof for SpellCooldownInfo.timeUntilEndOfStartRecovery; the field is absent, nil-only, or generic/placeholder-backed.",
-          "source_hash": "db6887c6a415ef2324a1f8edd5a00665e655545f82c64010aa54ac61f7bd09d5"
+          "source_hash": "16051196e8fb95ee8db4e5c68f3db9388a45a626e89b9174406ff0db23500f40"
         }
       ],
       "tests": [],
@@ -91235,7 +91235,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -91288,7 +91288,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -91335,7 +91335,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused heal_prediction_set_get_roundtrip test reads the initial mode, sets mode 3, and reads the stored mode back.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -91552,7 +91552,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -91605,7 +91605,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -91658,7 +91658,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -91740,7 +91740,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -91967,7 +91967,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -92020,7 +92020,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -92073,7 +92073,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -92204,7 +92204,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -92257,7 +92257,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover heal-prediction table/method shape, setter/getter round-trip, maximum-health reads, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         },
         {
           "kind": "test",
@@ -92380,7 +92380,7 @@
           "kind": "test",
           "reference": "tests/startup_api_widgets.rs",
           "summary": "Focused behavioral test `unit_is_human_player_matches_simulated_player_tokens` proves the bounded behavior described above.",
-          "source_hash": "8cedf10f23fff472599526b6ca82d625740d2549d19dbe12f668cde0299cb631"
+          "source_hash": "427a42008ebd5bb2281d0fc396cd79378ac5e8dfaa2a450485b359f466563d8c"
         }
       ],
       "tests": [
@@ -98560,7 +98560,7 @@
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
           "summary": "Focused userdata-proxy tests verify AbbreviateConfig table/method shape, data round-trip, per-instance fields, read-only keys, and tostring prefix."
         }
       ],
@@ -98630,7 +98630,7 @@
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
           "summary": "Focused userdata-proxy tests verify LuaColorCurveObject table/Evaluate shape and that copying a populated color curve returns a table."
         }
       ],
@@ -98668,7 +98668,7 @@
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
           "summary": "Focused userdata-proxy tests verify LuaCurveObject table/method shape, scalar interpolation, copy shape/count, per-instance fields, and tostring prefix."
         }
       ],
@@ -98738,7 +98738,7 @@
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
           "summary": "Focused userdata-proxy tests verify LuaDurationObject table/method shape, default-zero state, per-instance fields, and tostring prefix."
         },
         {
@@ -98785,7 +98785,7 @@
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685",
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3",
           "summary": "Focused userdata-proxy tests verify UnitHealPredictionCalculator table/method shape, damage-absorb clamp-mode round-trip, maximum-health calculation, and tostring prefix."
         },
         {
@@ -100182,7 +100182,7 @@
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
           "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
-          "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
+          "source_hash": "a128a0fb5884584fa136f1f3f67ddec89aac2b017b3e2d3168c317d81bf9abf3"
         }
       ],
       "tests": [
@@ -100251,7 +100251,7 @@
         {
           "kind": "source",
           "reference": "src/c_api/item_spell/c_item.rs",
-          "source_hash": "a02c37fb187ea1a88e9f1d31798d89ee416d213620c56dc3c3302f3213eb173b",
+          "source_hash": "94fb0015a1a8976112d95e23a1f18ee7dcb98df586b416a4c5389e90cc65e89a",
           "summary": "Current C_Item runtime surface."
         },
         {
@@ -100298,7 +100298,7 @@
         {
           "kind": "source",
           "reference": "src/c_api/item_spell/c_item.rs",
-          "source_hash": "a02c37fb187ea1a88e9f1d31798d89ee416d213620c56dc3c3302f3213eb173b",
+          "source_hash": "94fb0015a1a8976112d95e23a1f18ee7dcb98df586b416a4c5389e90cc65e89a",
           "summary": "Current C_Item.GetItemInfo implementation returns the legacy 17-value shape."
         },
         {
@@ -101649,7 +101649,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -101678,7 +101678,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -101707,7 +101707,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -101736,7 +101736,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -101765,7 +101765,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -101794,7 +101794,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -101823,7 +101823,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -101852,7 +101852,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -101881,7 +101881,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/private_aura_state.rs",
-          "source_hash": "03b413196f536a74a69a286b11dac2bf4e22e19e4c7cd97d7a36c9c0e138384c",
+          "source_hash": "6188c1b8c23457f02f81644bd1f7ad69879a13657d9fb5539855b006671471af",
           "summary": "Current temporary private-aura state is permissive and partial: AnchorPrivateAura and SetPrivateRaidBossMessageCallback are absent, and secure enforcement, callback/anchor lifecycle, payloads, and private visibility are not modeled authoritatively."
         }
       ],
@@ -101910,7 +101910,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/voice_chat.rs",
-          "source_hash": "2241ee71f462d7b316fdf0faca065a3e858b208d44f44bddf429a55d7816d7ec",
+          "source_hash": "647465ce3350e0d06a2ebf34706a17815b375334b7d729d35836b809ae68ec65",
           "summary": "Current C_VoiceChat surface has no modeled speech queue, overlap, rate, volume, or voice state."
         },
         {
@@ -101998,7 +101998,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Current global registration has no ClearRaidMarker publication."
         },
         {
@@ -108651,7 +108651,7 @@
           "kind": "test",
           "reference": "tests/startup_api_stubs.rs",
           "summary": "Focused startup proof calls GetRaidTargetIndex with player and asserts nil without an assigned marker.",
-          "source_hash": "623001be5237b4f308683c7a8f29e75388ddfa776be8b0dec81bfd018eefe668"
+          "source_hash": "49094e5eb6a2fe75e4efdb237298df2ba0163407bd7f9608bb6666e28501f6b9"
         },
         {
           "kind": "source",
@@ -109514,7 +109514,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Current global registration has no PlaceRaidMarker publication."
         },
         {
@@ -109555,7 +109555,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/register.rs",
-          "source_hash": "2766a9c355dfe5ff907e405f4344f52f5f917c958ce329069db66685007b69e4",
+          "source_hash": "1caf1e74df6a3bb0760c9a28863993af77a5d42559fb52f31aa6ed2fa9a63f61",
           "summary": "Current global registration has no RemoveRaidTargets publication."
         },
         {
@@ -110949,7 +110949,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/voice_chat.rs",
-          "source_hash": "2241ee71f462d7b316fdf0faca065a3e858b208d44f44bddf429a55d7816d7ec",
+          "source_hash": "647465ce3350e0d06a2ebf34706a17815b375334b7d729d35836b809ae68ec65",
           "summary": "Voice-chat surface has no TTS playback queue or producer-backed event payload construction."
         },
         {
@@ -111002,7 +111002,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/globals/missing_surface/voice_chat.rs",
-          "source_hash": "2241ee71f462d7b316fdf0faca065a3e858b208d44f44bddf429a55d7816d7ec",
+          "source_hash": "647465ce3350e0d06a2ebf34706a17815b375334b7d729d35836b809ae68ec65",
           "summary": "Voice-chat surface has no TTS playback queue or producer-backed event payload construction."
         },
         {
@@ -125005,7 +125005,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/strings/mod.rs",
           "summary": "Retail 12.0.0 filters LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT after shared compatibility constants are loaded, while excluded profiles retain shared definitions.",
-          "source_hash": "41164200881a17d1dd28d5cf4f37962a011da689d516ec7bd53919a3c5ef2e01"
+          "source_hash": "4b108858b248778a449c0292685b041a6891eb4ded29340708abbab7d0165c05"
         },
         {
           "kind": "test",
@@ -132134,7 +132134,7 @@
         {
           "kind": "source",
           "reference": "Cargo.lock",
-          "source_hash": "2fa4c07b3423a1d5110d2d4887cd70b4842665d7b08ea90d370f57c5cd019f01",
+          "source_hash": "af21e4904d76e815ece0b20f1c0b745e3ea808bcf0e159e406a0c6e8a9ae8898",
           "summary": "The simulator locks rilua commit 8dedc9fedb0160c7834d1e207af7f9996f2540b5 as its Lua runtime dependency."
         },
         {
@@ -132181,7 +132181,7 @@
         {
           "kind": "source",
           "reference": "Cargo.lock",
-          "source_hash": "2fa4c07b3423a1d5110d2d4887cd70b4842665d7b08ea90d370f57c5cd019f01",
+          "source_hash": "af21e4904d76e815ece0b20f1c0b745e3ea808bcf0e159e406a0c6e8a9ae8898",
           "summary": "The simulator locks rilua commit 8dedc9fedb0160c7834d1e207af7f9996f2540b5 as its Lua runtime dependency."
         },
         {
