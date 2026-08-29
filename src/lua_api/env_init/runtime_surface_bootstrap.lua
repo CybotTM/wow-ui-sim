@@ -408,7 +408,7 @@ local function __wow_store_frame()
   return nil
 end
 
-C_StoreSecure = __wow_merge_namespace(C_StoreSecure, {})
+C_StoreSecure = __wow_merge_namespace(rawget(_G, "C_StoreSecure"), {})
 C_StoreSecure.IsAvailable = function()
   return __wow_store_state.available == true
 end

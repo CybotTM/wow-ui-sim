@@ -299,6 +299,31 @@ fn test_frame_literal_mixins_block_applies_mixins() {
 }
 
 #[test]
+#[cfg(feature = "client-retail")]
+fn test_blizzard_help_plate_method_bindings_do_not_report_self_as_global() {
+    let env = WowLuaEnv::new().expect("HelpPlate environment should initialize");
+    let toc_path = blizzard_ui_dir().join("Blizzard_HelpPlate/Blizzard_HelpPlate.toc");
+
+    let result = load_addon(&env.loader_env(), &toc_path).expect("HelpPlate should load");
+
+    assert!(
+        !result
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("needs global self")),
+        "XML method self parameter must not be classified as a global: {:?}",
+        result.warnings
+    );
+    let global_self_type: String = env
+        .eval("return type(rawget(_G, 'self'))")
+        .expect("global self state should be readable");
+    assert_eq!(
+        global_self_type, "nil",
+        "lifecycle dispatch must restore global self"
+    );
+}
+
+#[test]
 fn test_xml_method_script_binds_after_inherited_template_overrides() {
     let t = load_test_xml(
         "xml-method-binding-after-template-overrides",

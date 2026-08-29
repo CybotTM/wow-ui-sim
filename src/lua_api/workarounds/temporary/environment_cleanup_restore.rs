@@ -54,6 +54,29 @@ mod tests {
     }
 
     #[test]
+    fn post_cleanup_restore_does_not_report_its_own_store_namespace_lookup() {
+        let env = WowLuaEnv::new().expect("Lua environment should initialize");
+        env.exec("C_StoreSecure = nil")
+            .expect("store namespace should clear");
+        env.state().borrow_mut().nil_symbol_accesses.clear();
+
+        env.restore_post_cleanup_globals();
+
+        let store_accesses = env
+            .state()
+            .borrow()
+            .nil_symbol_accesses
+            .iter()
+            .filter(|access| access.key == "C_StoreSecure")
+            .cloned()
+            .collect::<Vec<_>>();
+        assert!(
+            store_accesses.is_empty(),
+            "runtime bootstrap must not attribute its own namespace restoration as a client lookup: {store_accesses:?}"
+        );
+    }
+
+    #[test]
     fn post_cleanup_restore_preserves_existing_deprecation_constants() {
         let env = WowLuaEnv::new().expect("Lua environment should initialize");
         let expected_store_buy: String = env
