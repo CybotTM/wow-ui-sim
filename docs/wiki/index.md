@@ -1,3 +1,7 @@
+## [2026-08-29] audit | Document CVar-backed spell queue window
+
+Audited commit `8e8f23e05`. Updated [[lua-api]] and the maintained Lua API reference: `C_Spell.GetSpellQueueWindow()` now reads the mutable `SpellQueueWindow` CVar, returns a numeric value when parseable, returns `nil` for unavailable/non-numeric values, and preserves identity for the two deprecated spell globals that alias it. No spec or separate page was warranted.
+
 ## [2026-08-29] system | Promote default retail to API epoch 12.1
 
 Updated [[client-profiles]] and the patch-audit spec for commit `3a652e1b2`: `client-retail` now selects cumulative `retail-12-1-0` / interface `120100`, while `client-ptr` remains a separate profile/cache at the same epoch. Historical `profile-retail` epoch selection remains available; no cache or vendor-source policy changed.
