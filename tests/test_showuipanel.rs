@@ -297,7 +297,7 @@ fn show_ui_panel_positions_character_frame_at_expected_rect() {
                 if bottom ~= 228 then
                     return "bottom=" .. tostring(bottom)
                 end
-                if width ~= 338 then
+                if width ~= 540 then
                     return "width=" .. tostring(width)
                 end
                 if height ~= 424 then
@@ -359,7 +359,7 @@ fn show_ui_panel_locks_character_frame_layout() {
 
                 if not approx(f.l, 16) then return "frame_left=" .. tostring(f.l) end
                 if not approx(f.b, 228) then return "frame_bottom=" .. tostring(f.b) end
-                if not approx(f.w, 338, 0.1) then return "frame_width=" .. tostring(f.w) end
+                if not approx(f.w, 540, 0.1) then return "frame_width=" .. tostring(f.w) end
                 if not approx(f.h, 424, 0.1) then return "frame_height=" .. tostring(f.h) end
 
                 local closeRect, closeErr = rect("CharacterFrameCloseButton", CharacterFrameCloseButton)
@@ -410,18 +410,18 @@ fn show_ui_panel_locks_character_frame_layout() {
                     return "paperdoll_rect_drift"
                 end
 
-                -- Character frame starts collapsed in default panel mode; lock that state too.
+                -- PaperDollFrame expands CharacterFrame and shows the right-side stats pane.
                 if not CharacterFrameInsetRight then
                     return "inset_right_missing"
                 end
-                if CharacterFrameInsetRight:IsShown() then
-                    return "inset_right_unexpectedly_shown"
+                if not CharacterFrameInsetRight:IsShown() then
+                    return "inset_right_hidden"
                 end
                 if not CharacterStatsPane then
                     return "stats_pane_missing"
                 end
-                if CharacterStatsPane:IsShown() then
-                    return "stats_pane_unexpectedly_shown"
+                if not CharacterStatsPane:IsShown() then
+                    return "stats_pane_hidden"
                 end
 
                 local function expect_slot(name, expected_left, expected_bottom)
@@ -459,7 +459,7 @@ fn show_ui_panel_locks_character_frame_layout() {
                     if not ok then return e end
                 end
 
-                -- Right column slots.
+                -- Right-column slots stay anchored to the expanded frame's right edge.
                 local right_x = f.r - 47
                 local right_rows = {
                     {"CharacterHandsSlot", 553},
