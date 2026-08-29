@@ -218,6 +218,43 @@ fn test_c_container_get_container_item_cooldown_aliases_item_cooldown() {
 }
 
 #[test]
+fn test_c_container_backpack_disabled_flags_share_bag_slot_state() {
+    let env = env();
+    let states: (bool, bool, bool, bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local autosortInitially = C_Container.GetBackpackAutosortDisabled()
+            local sellJunkInitially = C_Container.GetBackpackSellJunkDisabled()
+
+            C_Container.SetBagSlotFlag(0, 1, true)
+            local autosortAfterSet = C_Container.GetBackpackAutosortDisabled()
+            local sellJunkAfterAutosortSet = C_Container.GetBackpackSellJunkDisabled()
+
+            C_Container.SetBagSlotFlag(0, 64, true)
+            local autosortAfterBothSet = C_Container.GetBackpackAutosortDisabled()
+            local sellJunkAfterSet = C_Container.GetBackpackSellJunkDisabled()
+
+            C_Container.SetBagSlotFlag(0, 1, false)
+            C_Container.SetBagSlotFlag(0, 64, false)
+            return autosortInitially,
+                   sellJunkInitially,
+                   autosortAfterSet,
+                   sellJunkAfterAutosortSet,
+                   autosortAfterBothSet,
+                   sellJunkAfterSet,
+                   C_Container.GetBackpackAutosortDisabled(),
+                   C_Container.GetBackpackSellJunkDisabled()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        states,
+        (false, false, true, false, true, true, false, false)
+    );
+}
+
+#[test]
 fn test_c_container_default_shims_have_safe_shapes() {
     let env = env();
     let (purchase_is_nil, quest_ok, filtered, battle_pay, actions_ok): (
