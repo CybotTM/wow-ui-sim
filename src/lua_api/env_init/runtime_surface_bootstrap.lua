@@ -1539,7 +1539,9 @@ __global_mt.__index = function(t, key)
     rawset(t, key, value)
     return value
   end
-  __wow_log_nil_symbol_access("_G", key)
+  if debug.isglobalindex() then
+    __wow_log_nil_symbol_access("_G", key)
+  end
   return nil
 end
 local __wow_record_public_global_publication = rawget(_G, "__wow_record_public_global_publication")

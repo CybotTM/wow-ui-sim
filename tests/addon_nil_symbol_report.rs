@@ -20,6 +20,12 @@ fn create_test_addon_with_missing_symbol_accesses() -> tempfile::TempDir {
 local _ = C_MissingNamespace
 local _ = C_Container.MissingMethod
 local _ = C_Container.MissingMethod
+local _ = _G.OptionalMissingGlobal
+local _ = _G["OptionalMissingGlobal"]
+local _ = _G.DynamicThenDirectMissingGlobal
+local _ = DynamicThenDirectMissingGlobal
+local _ = _G.C_ExplicitMissingNamespace
+local _ = _G.C_Container.ExplicitMissingMethod
 "#
     )
     .unwrap();
@@ -206,6 +212,38 @@ fn load_addon_reports_missing_global_and_namespace_symbol_accesses() {
                 .to_string()
         ),
         "expected missing C_* method gap warning, got {:?}",
+        result.warnings
+    );
+    assert!(
+        result.warnings.contains(
+            &"TestNilSymbols needs C_ExplicitMissingNamespace (accessed at TestNilSymbols.lua:9)"
+                .to_string()
+        ),
+        "explicit _G C_* namespace probes must remain strict diagnostics: {:?}",
+        result.warnings
+    );
+    assert!(
+        result.warnings.contains(
+            &"TestNilSymbols needs C_Container.ExplicitMissingMethod (accessed at TestNilSymbols.lua:10)"
+                .to_string()
+        ),
+        "explicit _G C_* member probes must remain strict diagnostics: {:?}",
+        result.warnings
+    );
+    assert!(
+        !result
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("OptionalMissingGlobal")),
+        "explicit _G table probes are not statically named global requirements: {:?}",
+        result.warnings
+    );
+    assert!(
+        result.warnings.contains(
+            &"TestNilSymbols needs global DynamicThenDirectMissingGlobal (accessed at TestNilSymbols.lua:8)"
+                .to_string()
+        ),
+        "a prior explicit _G probe must not hide a later direct-global requirement: {:?}",
         result.warnings
     );
 }
