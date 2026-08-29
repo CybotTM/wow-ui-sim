@@ -70,6 +70,57 @@ local _ = C_Container.StillMissingMethod
     dir
 }
 
+fn create_test_secure_addon_with_late_symbol_publication() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    let addon_dir = dir.path();
+
+    let mut toc = std::fs::File::create(addon_dir.join("TestSecureLatePublication.toc")).unwrap();
+    writeln!(toc, "## Title: TestSecureLatePublication").unwrap();
+    writeln!(toc, "## UseSecureEnvironment: 1").unwrap();
+    writeln!(toc, "PublicMiss.lua [LoadIntoEnvironment global]").unwrap();
+    writeln!(toc, "Frames.xml").unwrap();
+    writeln!(toc, "Late.lua").unwrap();
+
+    std::fs::write(
+        addon_dir.join("PublicMiss.lua"),
+        "local _ = SecurePublicationMustNotResolvePublic\n",
+    )
+    .unwrap();
+    std::fs::write(
+        addon_dir.join("Frames.xml"),
+        r#"<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Frame name="LateSecureFunctionTemplate" virtual="true">
+        <Scripts>
+            <OnShow function="LaterSecureFunction"/>
+        </Scripts>
+    </Frame>
+    <Frame name="EarlySecureFunctionFrame" inherits="LateSecureFunctionTemplate"/>
+    <Frame name="MissingSecureFunctionFrame">
+        <Scripts>
+            <OnShow function="StillMissingSecureFunction"/>
+        </Scripts>
+    </Frame>
+</Ui>"#,
+    )
+    .unwrap();
+    std::fs::write(
+        addon_dir.join("Late.lua"),
+        r#"function LaterSecureFunction(self)
+    self.lateSecureHandlerRan = true
+end
+function SecurePublicationMustNotResolvePublic()
+end
+local frame = CreateFrame("Frame", "LateSecureFunctionFrame", nil, "LateSecureFunctionTemplate")
+frame:Hide()
+frame:Show()
+SecureLateHandlerExecuted = frame.lateSecureHandlerRan == true
+"#,
+    )
+    .unwrap();
+
+    dir
+}
+
 fn create_test_addon_with_cleared_publication() -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
     let addon_dir = dir.path();
@@ -287,6 +338,62 @@ fn load_addon_omits_regular_globals_published_before_addon_completion() {
         ),
         "C_* method gaps must remain warned after fallback publication: {:?}",
         result.warnings
+    );
+}
+
+#[test]
+fn secure_publication_resolves_only_secure_same_addon_accesses() {
+    let env = WowLuaEnv::new().unwrap();
+    let dir = create_test_secure_addon_with_late_symbol_publication();
+    let toc_path = dir.path().join("TestSecureLatePublication.toc");
+
+    let result = load_addon(&env.loader_env(), &toc_path).expect("secure addon load should succeed");
+
+    let (public_type, secure_type, handler_executed): (String, String, bool) = env
+        .eval(
+            r#"
+            return type(rawget(_G, "LaterSecureFunction")),
+                   type(rawget(__secureenv, "LaterSecureFunction")),
+                   rawget(__secureenv, "SecureLateHandlerExecuted") == true
+            "#,
+        )
+        .expect("secure publication state should be queryable");
+    assert_eq!(public_type, "nil", "secure publication must not leak into _G");
+    assert_eq!(secure_type, "function");
+    assert!(handler_executed, "late secure XML function handler should execute");
+
+    assert!(
+        !result
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("LaterSecureFunction")),
+        "late secure publication should resolve its secure-origin nil access: {:?}",
+        result.warnings
+    );
+    assert!(
+        result
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("StillMissingSecureFunction")),
+        "a genuinely missing secure function must remain diagnostic: {:?}",
+        result.warnings
+    );
+    assert!(
+        result.warnings.contains(
+            &"TestSecureLatePublication needs global SecurePublicationMustNotResolvePublic (accessed at PublicMiss.lua:1)"
+                .to_string()
+        ),
+        "a secure publication must not resolve a public-origin miss: {:?}",
+        result.warnings
+    );
+    let state = env.state().borrow();
+    assert!(
+        state.global_publications.is_empty(),
+        "completed addon loads must clear public publication records"
+    );
+    assert!(
+        state.secure_global_publications.is_empty(),
+        "completed addon loads must clear secure publication records"
     );
 }
 

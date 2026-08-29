@@ -199,6 +199,14 @@ pub struct LuaErrorRecord {
     pub addon_name: Option<String>,
 }
 
+/// Global environment where a missing symbol access originated.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum NilSymbolEnvironment {
+    #[default]
+    Public,
+    Secure,
+}
+
 /// A missing symbol access captured through `_G` or `C_*` namespace `__index` hooks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct NilSymbolAccess {
@@ -206,7 +214,9 @@ pub struct NilSymbolAccess {
     pub addon_index: Option<u16>,
     /// Addon name inferred from the loading/executing context.
     pub addon_name: Option<String>,
-    /// Container table where the miss happened (`_G` or `C_*` namespace name).
+    /// Logical global environment selected by the loading file.
+    pub environment: NilSymbolEnvironment,
+    /// Container table where the miss happened (`_G`, `__secureenv`, or a `C_*` namespace).
     pub container: String,
     /// Missing key that resolved to nil.
     pub key: String,

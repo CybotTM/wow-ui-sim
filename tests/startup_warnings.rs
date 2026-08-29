@@ -479,6 +479,27 @@ fn test_secure_env_annotated_files_load_cleanly() {
             noisy_secure.join("\n")
         );
 
+        let resolved_secure_publications = warnings
+            .iter()
+            .filter(|warning| {
+                [
+                    "StoreButton_OnShow",
+                    "StoreGoldButton_OnShow",
+                    "StoreEditBoxWithAutoCompleteTemplate_OnTextChanged",
+                    "VASCharacterSelection_ClearStoreTooltip",
+                    "WoWTokenButton_OnShow",
+                ]
+                .iter()
+                .any(|name| warning.contains(name))
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        assert!(
+            resolved_secure_publications.is_empty(),
+            "secure same-addon functions published by addon completion must not remain missing:\n{}",
+            resolved_secure_publications.join("\n")
+        );
+
         // Downstream surfaces exposed by secure files.
         let (restricted_scope_ty, secure_filters_delegate_ty): (String, String) = env
             .eval(

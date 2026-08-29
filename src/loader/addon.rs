@@ -18,7 +18,7 @@ use super::error::LoadError;
 use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
 use super::{LoadResult, LoadTiming};
-use nil_symbol_reports::append_nil_symbol_access_warnings;
+use nil_symbol_reports::{append_nil_symbol_access_warnings, enter_nil_symbol_environment};
 
 /// Context for loading addon files (name, private table, and addon root for path resolution).
 pub struct AddonContext<'a> {
@@ -84,6 +84,9 @@ impl Drop for LoadingAddonGuard {
         let mut state = self.state.borrow_mut();
         state
             .global_publications
+            .retain(|(addon_index, _)| *addon_index != self.addon_idx);
+        state
+            .secure_global_publications
             .retain(|(addon_index, _)| *addon_index != self.addon_idx);
         state.pending_nested_addon_warnings.remove(&self.addon_idx);
         let position = state
@@ -511,6 +514,7 @@ fn load_addon_file(
     file: &std::path::Path,
     pass: EnvironmentPass,
 ) {
+    let _nil_symbol_environment_guard = enter_nil_symbol_environment(env, ctx.use_secure_env);
     if !file.is_file() {
         result.warnings.push(format!(
             "{}: IO error: No such file or directory (os error 2)",

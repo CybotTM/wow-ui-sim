@@ -282,6 +282,11 @@ fn install_nil_symbol_logger(lua: &mut rilua::Lua) -> LuaResult<()> {
         "__wow_record_public_global_publication",
         record_public_global_publication_callback,
     )?;
+    LuaApiMut::register_function(
+        lua,
+        "__wow_record_secure_global_publication",
+        record_secure_global_publication_callback,
+    )?;
     Ok(())
 }
 
@@ -295,6 +300,13 @@ fn record_nil_symbol_access(state: &mut LuaState) -> LuaResult<u32> {
     };
     let mut sim = borrow_state_mut(state)?;
     let addon_index = sim.loading_addon_index.or(sim.executing_addon_index);
+    let environment = sim.loading_nil_symbol_environment.unwrap_or_else(|| {
+        if container == "__secureenv" {
+            crate::lua_api::state::NilSymbolEnvironment::Secure
+        } else {
+            crate::lua_api::state::NilSymbolEnvironment::Public
+        }
+    });
     let addon_name = addon_index
         .and_then(|index| sim.addons.get(index as usize))
         .map(|addon| addon.folder_name.clone());
@@ -302,6 +314,7 @@ fn record_nil_symbol_access(state: &mut LuaState) -> LuaResult<u32> {
         .push(crate::lua_api::state::NilSymbolAccess {
             addon_index,
             addon_name,
+            environment,
             container,
             key,
             source,
@@ -316,16 +329,46 @@ fn record_public_global_publication_callback(state: &mut LuaState) -> LuaResult<
     Ok(0)
 }
 
+fn record_secure_global_publication_callback(state: &mut LuaState) -> LuaResult<u32> {
+    let name = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    record_secure_global_publication(state, &name)?;
+    Ok(0)
+}
+
 pub(crate) fn record_public_global_publication(state: &mut LuaState, name: &str) -> LuaResult<()> {
+    record_global_publication(
+        state,
+        name,
+        crate::lua_api::state::NilSymbolEnvironment::Public,
+    )
+}
+
+pub(crate) fn record_secure_global_publication(state: &mut LuaState, name: &str) -> LuaResult<()> {
+    record_global_publication(
+        state,
+        name,
+        crate::lua_api::state::NilSymbolEnvironment::Secure,
+    )
+}
+
+fn record_global_publication(
+    state: &mut LuaState,
+    name: &str,
+    environment: crate::lua_api::state::NilSymbolEnvironment,
+) -> LuaResult<()> {
     if name.is_empty() || name.starts_with("C_") {
         return Ok(());
     }
 
     let mut sim = borrow_state_mut(state)?;
-    if let Some(addon_index) = sim.loading_addon_index {
-        sim.global_publications
-            .insert((addon_index, name.to_string()));
-    }
+    let Some(addon_index) = sim.loading_addon_index else {
+        return Ok(());
+    };
+    let publications = match environment {
+        crate::lua_api::state::NilSymbolEnvironment::Public => &mut sim.global_publications,
+        crate::lua_api::state::NilSymbolEnvironment::Secure => &mut sim.secure_global_publications,
+    };
+    publications.insert((addon_index, name.to_string()));
     Ok(())
 }
 
