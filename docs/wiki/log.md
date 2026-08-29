@@ -1,3 +1,7 @@
+## [2026-08-29] system | Promote default retail to API epoch 12.1
+
+Audited commit `3a652e1b2`. Updated [[client-profiles]], [[patch-api-audit-manifest]], and the index: `client-retail` now selects cumulative `retail-12-1-0` / interface `120100`; `client-ptr` remains a separate PTR profile/cache at the same API epoch; historical `profile-retail` epoch selection remains available. Preserved the existing client-profile spec because it already records this contract. No code, Cargo, generated, vendor, cache, PLAN, or protected-file changes.
+
 ## [2026-08-29] audit | Document syntactic-global versus explicit-_G nil diagnostics
 
 Audited wow-ui-sim commit `d149b2c8d` and rilua commits `1a7c9de` / `3630419`. Updated [[addon-loading]], [[lua-api]], and the addon-loading pipeline docs: direct syntactic global loads remain startup diagnostics; missing regular globals read through `_G.name` or `_G[name]` are optional probes excluded from nil-symbol records and the dedup cache; all `C_*` namespace/member gaps remain strict. Recorded that rilua scopes lookup provenance to VM execution state and exposes read-only `debug.isglobalindex()`, restoring state across nested lookups, errors, and coroutine swaps. No new page or spec was warranted; no code, generated, vendor, cache, `PLAN.md`, Cargo.lock, or protected file changes were made.

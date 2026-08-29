@@ -1,3 +1,7 @@
+## [2026-08-29] system | Promote default retail to API epoch 12.1
+
+Updated [[client-profiles]] and the patch-audit spec for commit `3a652e1b2`: `client-retail` now selects cumulative `retail-12-1-0` / interface `120100`, while `client-ptr` remains a separate profile/cache at the same epoch. Historical `profile-retail` epoch selection remains available; no cache or vendor-source policy changed.
+
 ## [2026-08-28] audit | Document live retail 12.1 GlobalStrings slice
 
 Audited commit `72f3ec342`. Updated [[patch-12-1-api-audit]] and [[lua-api]] with the authoritative enUS retail `12.1.0.69497` / interface `120100` probe result: 32 exact string globals implemented only for `profile-retail` + `retail-12-1-0`, while 12 candidates proven raw `nil` remain absent. The focused `live_retail_12_1_global_strings_match_probe` test preserves both exact values and nil behavior; private build-stamped evidence remains local. No new page or spec was warranted.
@@ -287,7 +291,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[xml-template-system]] | XML parsing (30+ element types), template registry, inheritance chain resolution, XML-to-widget Lua code generation, same-object engine-root reuse, inline scripts/events |
 | [[addon-loading]] | TOC parsing, discovered Blizzard load order, inline `[Bootstrap]` semantics, direct-global versus explicit-`_G` nil-symbol diagnostics, strict `C_*` gaps, same-addon publication reconciliation, top-level warning retention and exactly-once nested runtime-warning forwarding, VM-scoped lookup provenance, startup warning draining, hidden publication-recorder boundary, stable addon-index ownership, single SimState-owned RAII load transactions, explicit secure replay allowlist, SavedVariables, startup sequence |
 | [[server-snapshot-action-bars]] | Imports action-bar spell slots captured by the ServerSnapshot addon from real WoW SavedVariables before Blizzard action-bar UI loads |
-| [[client-profiles]] | Six client profiles selected by mutually-exclusive cargo features, plus cumulative retail API epoch features; profile-aware loader, per-profile manifests, compat bootstraps, vendor pinning, CI matrix |
+| [[client-profiles]] | Six client profiles selected by mutually-exclusive cargo features; current retail and PTR both select cumulative API epoch 12.1 while retaining separate caches, with historical retail epochs, profile-aware loader, manifests, compat bootstraps, vendor pinning, and CI matrix |
 | [[patch-api-audit-manifest]] | Checked-in per-item patch audit SSOT, structural/completion validation, lifecycle assertions, four falsifier families, and generated compact checklists |
 | [[prefork-test-harness]] | Linux-only custom test runner with lazy full-UI preload, immutable parent state, 1,951 listed cases (1,941 migrated full-environment plus 10 manual/nested), finalized zero-eligible audit, child-side explicit/LoadOnDemand setup, bounded workers, structured failures, capture control, and process-tree timeouts |
 | [[texture-atlas]] | TextureManager (BLP/PNG/WebP), ~50K-entry compiled atlas database, five RGBA GPU tiers plus optional BC1/BC3 atlases, persistent live/shared-headless atlas contexts, nine-slice kit detection, UV remapping |
