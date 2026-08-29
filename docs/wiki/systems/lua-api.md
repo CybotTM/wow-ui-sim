@@ -81,6 +81,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 
 `C_PlayerChoice` is a state-backed deterministic compatibility model. `GetCurrentPlayerChoiceInfo()` returns nil with the default empty state or a documented `PlayerChoiceInfo` table with nested options, buttons, and currency/item/reputation rewards when `SimState.player_choice.current` is seeded. `GetNumRerolls()`, `GetRemainingTime()`, and `IsWaitingForPlayerChoiceResponse()` expose local query state. `SendPlayerChoiceResponse()`, `RequestRerollPlayerChoice()`, and `OnUIClosed()` record local mutator intent. This does not model retail timing, server validation, reroll economics, or live service values.
 
+**Active voice channel type** — `C_VoiceChat.GetActiveChannelType()` reads `SimState.voice_chat.active_channel_id`, finds the matching channel, and returns its numeric `ChatChannelType`. It returns one `nil` result when no channel is active or the active ID is stale; it does not synthesize a channel type. This documents only the state-backed query, not broader voice-service authentication, push-to-talk, or transcription behavior.
+
 **Spell queue window** — `C_Spell.GetSpellQueueWindow()` reads the simulator's current `SpellQueueWindow` CVar, so `SetCVar("SpellQueueWindow", value)` changes the returned numeric value. An unavailable or non-numeric CVar value returns `nil`; the deprecated `GetMaxSpellStartRecoveryOffset` and `GetSpellQueueWindow` globals reference the same C API function object.
 
 **Spell descriptions** — `C_Spell.GetSpellDescription()` and `C_TooltipInfo.GetSpellByID()` both route through `src/spell_description_resolver.rs` before text reaches Lua or tooltip lines. The resolver expands Blizzard DB2-style tokens such as `$s1`, `$<damage>`, `$<dmg>`, `$<shield>`, `${...}` arithmetic, `$STR`, `$INT`, `$AP`, `$MHP`, and simple conditional control tokens against `SimState` player stats and the simulator's spell-effect model. AP-scaled Paladin/Demon Hunter formulas are grounded in the local SimulationCraft dump (`~/Repos/simc/SpellDataDump/allspells.txt`): Avenger's Shield uses `1.55 * AP`, Crusader Strike `1.4 * AP`, Shield of the Righteous `0.95 * AP`, Eye Beam `$<dmg>` uses `10 * 0.4026 * AP`, and Shield of Vengeance `$<shield>` uses `30% max health * (1 + versatility damage)`. This keeps spellbook/tooltips from showing raw `$...` placeholders and prevents tooltip-only one-off replacements from drifting away from the C API surface.
@@ -101,6 +103,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 - [item_button_helper_defaults.rs](../../../src/lua_api/workarounds/temporary/item_button_helper_defaults.rs) — item-button texture fileDataID proof
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - [c_container.rs](../../../src/c_api/item_spell/c_container.rs) — state-backed bag-slot flags and backpack queries
+- [voice_chat.rs](../../../src/lua_api/globals/missing_surface/voice_chat.rs) — state-backed active voice-channel queries
+- [c_voice_chat_probes.rs](../../../tests/c_voice_chat_probes.rs) — active voice-channel type behavior proofs
 - [loader_env.rs](../../../src/lua_api/loader_env.rs) — secure versus public dynamic loader execution
 - rilua commits `1a7c9de` and `3630419` — VM-scoped syntactic-global lookup provenance and `debug.isglobalindex()`
 - [auth_challenge_frame_parent.rs](../../../src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs) — addon-specific AuthChallenge public export bridge

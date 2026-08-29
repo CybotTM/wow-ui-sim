@@ -289,6 +289,7 @@ anim:SetFromAlpha() / SetToAlpha() / SetDuration()
 | C_Item | `c_item.rs` | GetItemInfo, GetItemCooldown; state-backed IsConsumableItem, IsEquippableItem, IsItemInRange |
 | C_Container | `item_spell/c_container.rs` | GetContainerItemID/Link/Info, GetBagSlotFlag/SetBagSlotFlag, and backpack flag queries backed by shared bag-slot state |
 | C_Spell | `c_spell.rs` | GetSpellQueueWindow reads the current SpellQueueWindow CVar |
+| C_VoiceChat | `missing_surface/voice_chat.rs` | GetActiveChannelType reads the active channel's ChatChannelType or returns nil |
 | C_System | `c_system_api.rs` | GetLocale -> "enUS" |
 | C_EditMode | `c_editmode_api.rs` | GetLayouts |
 | C_CatalogShop | `c_catalog_shop.rs` | GetVCProductInfos -> fresh empty table |
