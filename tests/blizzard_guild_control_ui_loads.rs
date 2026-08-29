@@ -365,5 +365,23 @@ fn blizzard_guild_control_ui_publishes_guild_control_ui_global_frame(env: &WowLu
          named non-virtual frame materializes as a runtime frame published under its declared \
          name"
     );
+
+    let checkbox_text_publication: (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            return
+                _G.GuildControlUIRankSettingsFrameCheckbox2Text ~= nil,
+                _G.GuildControlUIRankSettingsFrameCheckbox21Text ~= nil,
+                _G.GuildControlUIRankSettingsFrameCheckbox1Text == nil,
+                _G.GuildControlUIRankSettingsFrameCheckbox3Text == nil
+            "#,
+        )
+        .expect("GuildControl checkbox publication query should succeed");
+    assert_eq!(
+        checkbox_text_publication,
+        (true, true, true, true),
+        "XML declares checkbox text children 2 and 21, while dynamically probed IDs 1 and 3 \
+         remain absent"
+    );
 }
 }
