@@ -36,6 +36,8 @@ Creates Lua with full stdlib, initializes SimState with UIParent/WorldFrame via 
 - `exec_with_varargs()` -- Addon loading with (addonName, addonTable) varargs
 - `eval()` -- Return computed values
 
+Loader execution keeps public `_G` and secure `__secureenv` distinct. Same-addon nil-symbol reconciliation records non-`C_*` publications separately for each environment, including secure Lua assignments and Rust-created secure frame exports; a publication only resolves a nil lookup from the same environment. Precompiled OnLoad/OnShow dispatch uses raw `_G.self` snapshot/restore so its temporary receiver does not become a client global observation. Post-cleanup namespace restoration likewise reads raw `_G.C_StoreSecure` before merging simulator state, avoiding attribution of bootstrap lookups to Blizzard code.
+
 ### Timer System (lines 382-506)
 
 - `schedule_timer()` -- Optional interval/iterations, returns unique timer ID

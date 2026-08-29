@@ -1257,7 +1257,9 @@ Classified exactly 115 added `C_TransmogOutfitInfo` API, structure, and structur
 
 # Wiki Log
 
-## [2026-08-29] audit | Document state-backed C_GuildInfo management methods
+## [2026-08-29] audit | Document secure nil-symbol publication and synthetic attribution fixes
+
+Audited commits `2da0dc1de` and `584b84c9e`. Updated [[addon-loading]] and [[lua-api]] plus the maintained addon-loading/Lua API references: same-addon nil-symbol reconciliation now records and resolves public and secure publications separately by stable addon index; secure assignments and secure frame exports cannot resolve public misses; precompiled lifecycle dispatch uses raw `_G.self` snapshot/restore; and post-cleanup `C_StoreSecure` restoration reads raw `_G` state to avoid attributing simulator bootstrap lookups to Blizzard code. No new page or spec was warranted; `docs/wiki/index.md` required no catalog change.\n\n## [2026-08-29] audit | Document state-backed C_GuildInfo management methods
 
 Audited commit `d64bbb8b3`. Updated [[lua-api]] and the maintained Lua API reference to record that `C_GuildInfo.Invite`, `Uninvite`, `Promote`, and `Leave` share the existing state-backed guild handlers and deprecated-global identity. Explicitly documented that `Demote`, `Disband`, `SetLeader`, and `RemoveFromGuild` remain unsupported because their distinct semantics are not modeled. No spec or new wiki page was warranted; protected `src/c_api/c_string_util.rs` was not touched.
 
