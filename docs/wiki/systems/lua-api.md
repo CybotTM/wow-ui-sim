@@ -67,7 +67,7 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 **Utilities** — `wipe()`, `tinsert/tremove()`, `CopyTable()`, `MergeTable()`, `Mixin()`, `CreateFromMixins()`, `getglobal/setglobal()`, `loadstring()`, `strsplit()`. Both `string.split(...)` and string `:split(...)` accept Blizzard's delimiter-receiver form, including empty and equal-length punctuation inputs, while retaining ordinary input-first behavior.
 
-**Security** — `issecure()`, `securecall()`, `securecallfunction()`, `securecallmethod()`, `forceinsecure()`, `hooksecurefunc()` (from Elune or fallback stubs). With no modeled click-binding profile, `C_ClickBindings.GetBindingType()` returns `Enum.ClickBindingType.None` and `ExecuteBinding()` is inert, allowing secure-button `type` attributes to dispatch normally.
+**Security** — `issecure()`, `securecall()`, `securecallfunction()`, `securecallmethod()`, `forceinsecure()`, `hooksecurefunc()` (from Elune or fallback stubs). The read-only `debug.isglobalindex()` query reports whether the active `_G.__index` invocation came from a syntactic global load; its VM-scoped provenance excludes explicit `_G` table reads and restores across nesting, errors, and coroutine swaps. With no modeled click-binding profile, `C_ClickBindings.GetBindingType()` returns `Enum.ClickBindingType.None` and `ExecuteBinding()` is inert, allowing secure-button `type` attributes to dispatch normally.
 
 **Modeled legacy globals** — `ClearTarget()` clears the current target and returns `true` iff a target existed; it returns `false` when no target was set and preserves the `PLAYER_TARGET_CHANGED` event. `IsTimerunningEnabled()` and `GetRemainingTimerunningSeasonSeconds()` read the simulator's Timerunning season state; the countdown is zero when no season is active. `GetGuildTabardFiles()` is registered on retail as well as classic profiles and returns the modeled guild-tabard file tuple used by Blizzard's guild-bank UI. The temporary `Kiosk` namespace defaults `IsEnabled()` and `IsCompetitiveModeEnabled()` to `false` and `GetKioskLoginInfo()` to three `nil` values while preserving existing members.
 
@@ -99,6 +99,7 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (GetItemInfo stub), C
 - [item_button_helper_defaults.rs](../../../src/lua_api/workarounds/temporary/item_button_helper_defaults.rs) — item-button texture fileDataID proof
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - [loader_env.rs](../../../src/lua_api/loader_env.rs) — secure versus public dynamic loader execution
+- rilua commits `1a7c9de` and `3630419` — VM-scoped syntactic-global lookup provenance and `debug.isglobalindex()`
 - [auth_challenge_frame_parent.rs](../../../src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs) — addon-specific AuthChallenge public export bridge
 - [enums.rs](../../../src/lua_api/env_init/enums.rs) — enum-table reseeding that preserves existing Blizzard extensions
 - [strings/mod.rs](../../../src/lua_api/globals/strings/mod.rs) — generated and versioned UI-string registration

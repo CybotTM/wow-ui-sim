@@ -244,7 +244,7 @@ handle:IsCancelled()
 
 **Global:** `getglobal()`, `setglobal()`, `loadstring()`, `GetCurrentEnvironment()`
 
-**Security:** `issecure()`, `issecurevariable()`, `securecall()`, `securecallfunction()`, `forceinsecure()`, `hooksecurefunc()`, `SecureCmdOptionParse()`
+**Security:** `issecure()`, `issecurevariable()`, `securecall()`, `securecallfunction()`, `forceinsecure()`, `hooksecurefunc()`, `SecureCmdOptionParse()`. The read-only `debug.isglobalindex()` query exposes VM-scoped `_G.__index` provenance for syntactic global loads; explicit `_G.name`/`_G[name]` reads remain ordinary table probes.
 
 **Mixin:** `Mixin(target, ...)`, `CreateFromMixins(...)`
 

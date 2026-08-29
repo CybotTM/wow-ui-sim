@@ -1,3 +1,7 @@
+## [2026-08-29] audit | Document syntactic-global versus explicit-_G nil diagnostics
+
+Audited wow-ui-sim commit `d149b2c8d` and rilua commits `1a7c9de` / `3630419`. Updated [[addon-loading]], [[lua-api]], and the addon-loading pipeline docs: direct syntactic global loads remain startup diagnostics; missing regular globals read through `_G.name` or `_G[name]` are optional probes excluded from nil-symbol records and the dedup cache; all `C_*` namespace/member gaps remain strict. Recorded that rilua scopes lookup provenance to VM execution state and exposes read-only `debug.isglobalindex()`, restoring state across nested lookups, errors, and coroutine swaps. No new page or spec was warranted; no code, generated, vendor, cache, `PLAN.md`, Cargo.lock, or protected file changes were made.
+
 ## [2026-08-28] audit | Document live retail 12.1 GlobalStrings slice
 
 Audited commit `72f3ec342`. Updated [[patch-12-1-api-audit]] and [[lua-api]] with live enUS retail `12.1.0.69497` / interface `120100` evidence captured 2026-08-28: 32 exact string globals are registered only under `profile-retail` + `retail-12-1-0`, and 12 warning candidates proven raw `nil` remain unregistered. Added source/test references and the rationale against placeholder publication; private probe evidence remains outside the repository. Updated the existing index summary; no new page or spec was warranted. Protected `src/c_api/c_string_util.rs` was not touched.
