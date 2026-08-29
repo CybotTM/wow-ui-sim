@@ -61,6 +61,11 @@ impl WowLuaEnv {
         &self.state
     }
 
+    /// Drain finalized warnings from top-level runtime addon loads.
+    pub fn drain_runtime_addon_warnings(&self) -> Vec<String> {
+        std::mem::take(&mut self.state.borrow_mut().runtime_addon_warnings)
+    }
+
     /// Set the font system for text measurement from Lua API methods.
     pub fn set_font_system(&self, font_system: Rc<RefCell<WowFontSystem>>) {
         let mut rilua = self.rilua_mut();

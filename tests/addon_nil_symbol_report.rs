@@ -80,6 +80,61 @@ fn create_test_addon_with_cleared_publication() -> tempfile::TempDir {
     dir
 }
 
+fn write_runtime_event_warning_addon(
+    root: &std::path::Path,
+    addon_name: &str,
+    lua_source: &str,
+) {
+    let addon_dir = root.join(addon_name);
+    std::fs::create_dir_all(&addon_dir).unwrap();
+    std::fs::write(
+        addon_dir.join(format!("{addon_name}.toc")),
+        format!("## Title: {addon_name}\n{addon_name}.lua\n"),
+    )
+    .unwrap();
+    std::fs::write(addon_dir.join(format!("{addon_name}.lua")), lua_source).unwrap();
+}
+
+fn write_runtime_event_warning_addon_fixture() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    write_runtime_event_warning_addon(
+        dir.path(),
+        "OuterEventLoader",
+        r#"local frame = CreateFrame("Frame")
+frame:RegisterEvent("ADDON_LOADED")
+frame:SetScript("OnEvent", function(_, _, addonName)
+    if addonName == "OuterEventLoader" then
+        local loaded, reason = C_AddOns.LoadAddOn("RuntimeParent")
+        assert(loaded, tostring(reason))
+    end
+end)
+"#,
+    );
+    write_runtime_event_warning_addon(
+        dir.path(),
+        "RuntimeParent",
+        r#"local _ = RuntimeParentMissingGlobal
+local _ = C_Container.RuntimeParentMissingMethod
+local frame = CreateFrame("Frame")
+frame:RegisterEvent("ADDON_LOADED")
+frame:SetScript("OnEvent", function(_, _, addonName)
+    if addonName == "RuntimeParent" then
+        local loaded, reason = C_AddOns.LoadAddOn("RuntimeChild")
+        assert(loaded, tostring(reason))
+    end
+end)
+"#,
+    );
+    write_runtime_event_warning_addon(
+        dir.path(),
+        "RuntimeChild",
+        r#"local _ = RuntimeChildMissingGlobal
+local _ = C_Container.RuntimeChildMissingMethod
+"#,
+    );
+    dir
+}
+
 fn create_nested_publication_addons() -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
     let outer_dir = dir.path().join("OuterConsumer");
@@ -212,6 +267,51 @@ fn publication_guard_cleared_global_remains_warned() {
         ),
         "global cleared before addon completion must remain warned: {:?}",
         result.warnings
+    );
+}
+
+#[test]
+fn runtime_addon_event_warnings_are_finalized_once_with_their_owners() {
+    let env = WowLuaEnv::new().unwrap();
+    let dir = write_runtime_event_warning_addon_fixture();
+    env.state().borrow_mut().addon_base_paths = vec![dir.path().to_path_buf()];
+    let toc_path = dir.path().join("OuterEventLoader/OuterEventLoader.toc");
+
+    let result = load_addon(&env.loader_env(), &toc_path).expect("outer addon load should succeed");
+    assert!(
+        result.warnings.is_empty(),
+        "runtime warnings must not appear before the outer ADDON_LOADED event: {:?}",
+        result.warnings
+    );
+
+    env.fire_event_with_args("ADDON_LOADED", &[env.lua_string("OuterEventLoader")])
+        .expect("outer ADDON_LOADED event should load the runtime addon chain");
+
+    let warnings = env.drain_runtime_addon_warnings();
+    let expected = [
+        "RuntimeParent needs global RuntimeParentMissingGlobal (accessed at RuntimeParent.lua:1)",
+        "RuntimeParent needs C_Container.RuntimeParentMissingMethod (accessed at RuntimeParent.lua:2)",
+        "RuntimeChild needs global RuntimeChildMissingGlobal (accessed at RuntimeChild.lua:1)",
+        "RuntimeChild needs C_Container.RuntimeChildMissingMethod (accessed at RuntimeChild.lua:2)",
+    ];
+    for expected_warning in expected {
+        assert_eq!(
+            warnings
+                .iter()
+                .filter(|warning| warning.as_str() == expected_warning)
+                .count(),
+            1,
+            "finalized runtime warning should retain its owner and appear exactly once: {expected_warning}; got {warnings:?}"
+        );
+    }
+    assert_eq!(
+        warnings.len(),
+        expected.len(),
+        "runtime warning drain should contain only the four expected warnings: {warnings:?}"
+    );
+    assert!(
+        env.drain_runtime_addon_warnings().is_empty(),
+        "runtime warning drain should consume finalized warnings"
     );
 }
 

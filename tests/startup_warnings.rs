@@ -50,16 +50,23 @@ fn fire(env: &WowLuaEnv, event: &str, args: &[rilua::Val]) -> Vec<String> {
     drain_test_errors(env)
 }
 
-fn collect_handler_warnings(env: &WowLuaEnv, phase: &str) -> Vec<String> {
-    drain_test_errors(env)
+fn collect_handler_and_runtime_warnings(env: &WowLuaEnv, phase: &str) -> Vec<String> {
+    let mut warnings = drain_test_errors(env)
         .into_iter()
         .map(|warning| format!("[{phase}] {warning}"))
-        .collect()
+        .collect::<Vec<_>>();
+    warnings.extend(
+        env.drain_runtime_addon_warnings()
+            .into_iter()
+            .map(|warning| format!("[{phase}] {warning}")),
+    );
+    warnings
 }
 
 fn collect_addon_load_warnings(env: &WowLuaEnv, name: &str, toc_path: &Path) -> Vec<String> {
     let result = load_addon(&env.loader_env(), toc_path);
-    let load_handler_warnings = collect_handler_warnings(env, &format!("load {name} handler"));
+    let load_handler_warnings =
+        collect_handler_and_runtime_warnings(env, &format!("load {name} handler"));
 
     let result = match result {
         Ok(result) => result,
@@ -79,7 +86,7 @@ fn collect_addon_load_warnings(env: &WowLuaEnv, name: &str, toc_path: &Path) -> 
     if let Err(error) = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(name)]) {
         warnings.push(format!("[ADDON_LOADED {name}] FAILED: {error}"));
     }
-    warnings.extend(collect_handler_warnings(
+    warnings.extend(collect_handler_and_runtime_warnings(
         env,
         &format!("ADDON_LOADED {name}"),
     ));
@@ -102,15 +109,18 @@ fn load_and_startup() -> Vec<String> {
     }
 
     env.apply_post_load_workarounds();
-    warnings.extend(collect_handler_warnings(&env, "post-load workarounds"));
+    warnings.extend(collect_handler_and_runtime_warnings(
+        &env,
+        "post-load workarounds",
+    ));
 
     wow_ui_sim::startup::fire_startup_events_headless(&env);
-    warnings.extend(collect_handler_warnings(&env, "startup events"));
+    warnings.extend(collect_handler_and_runtime_warnings(&env, "startup events"));
 
     if let Err(error) = env.fire_on_update(0.016) {
         warnings.push(format!("[OnUpdate] FAILED: {error}"));
     }
-    warnings.extend(collect_handler_warnings(&env, "OnUpdate"));
+    warnings.extend(collect_handler_and_runtime_warnings(&env, "OnUpdate"));
     warnings
 }
 

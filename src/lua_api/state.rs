@@ -166,6 +166,7 @@ macro_rules! build_empty_sim_state {
             nil_symbol_accesses: $collections.nil_symbol_accesses,
             global_publications: HashSet::new(),
             pending_nested_addon_warnings: HashMap::new(),
+            runtime_addon_warnings: Vec::new(),
             global_show_hide_depth: 0,
             anim_sync_times: $collections.anim_sync_times,
             player: PlayerState::seeded(),

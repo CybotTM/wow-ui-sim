@@ -58,7 +58,7 @@ impl EnvironmentPass {
 }
 
 impl LoadingAddonGuard {
-    fn addon_index(&self) -> u16 {
+    pub(crate) fn addon_index(&self) -> u16 {
         self.addon_idx
     }
 
@@ -176,7 +176,7 @@ pub fn load_addon_internal(
     Ok(result)
 }
 
-fn append_pending_nested_addon_warnings(
+pub(crate) fn append_pending_nested_addon_warnings(
     env: &LoaderEnv<'_>,
     addon_index: u16,
     result: &mut LoadResult,
