@@ -18,7 +18,7 @@ use super::error::LoadError;
 use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
 use super::{LoadResult, LoadTiming};
-use nil_symbol_reports::{append_nil_symbol_access_warnings, enter_nil_symbol_environment};
+use nil_symbol_reports::{append_nil_symbol_diagnostics, enter_nil_symbol_environment};
 
 /// Context for loading addon files (name, private table, and addon root for path resolution).
 pub struct AddonContext<'a> {
@@ -88,7 +88,9 @@ impl Drop for LoadingAddonGuard {
         state
             .secure_global_publications
             .retain(|(addon_index, _)| *addon_index != self.addon_idx);
-        state.pending_nested_addon_warnings.remove(&self.addon_idx);
+        state
+            .pending_nested_addon_diagnostics
+            .remove(&self.addon_idx);
         let position = state
             .loading_addon_stack
             .iter()
@@ -137,6 +139,8 @@ pub fn load_addon_internal(
         xml_files: 0,
         timing: LoadTiming::default(),
         warnings: Vec::new(),
+        nil_symbol_observations: Vec::new(),
+        missing_requirements: Vec::new(),
     };
     let already_loaded = env
         .state()
@@ -167,19 +171,19 @@ pub fn load_addon_internal(
     maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
     let addon_index = loading_guard.addon_index();
-    append_nil_symbol_access_warnings(
+    append_nil_symbol_diagnostics(
         env,
         addon_index,
         &addon_name,
         nil_symbol_access_start,
         &mut result,
     );
-    append_pending_nested_addon_warnings(env, addon_index, &mut result);
+    append_pending_nested_addon_diagnostics(env, addon_index, &mut result);
     loading_guard.commit_loaded();
     Ok(result)
 }
 
-pub(crate) fn append_pending_nested_addon_warnings(
+pub(crate) fn append_pending_nested_addon_diagnostics(
     env: &LoaderEnv<'_>,
     addon_index: u16,
     result: &mut LoadResult,
@@ -187,10 +191,10 @@ pub(crate) fn append_pending_nested_addon_warnings(
     let pending = env
         .state()
         .borrow_mut()
-        .pending_nested_addon_warnings
+        .pending_nested_addon_diagnostics
         .remove(&addon_index);
     if let Some(pending) = pending {
-        result.warnings.extend(pending);
+        result.extend_diagnostics(pending);
     }
 }
 

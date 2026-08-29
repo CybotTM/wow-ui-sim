@@ -2,7 +2,7 @@ use super::env::WowLuaAppData;
 use super::env::WowLuaEnv;
 use super::env::next_timer_id;
 use super::env_init::{record_addon_time, update_threshold_counters};
-use super::state::{AddonInfo, AppFrameMetrics, PendingTimer, SimState};
+use super::state::{AddonInfo, AppFrameMetrics, LoadDiagnostics, PendingTimer, SimState};
 use super::timer_processing::{reschedule_timer, timer_should_wait};
 use crate::Result;
 use crate::font::WowFontSystem;
@@ -61,9 +61,9 @@ impl WowLuaEnv {
         &self.state
     }
 
-    /// Drain finalized warnings from top-level runtime addon loads.
-    pub fn drain_runtime_addon_warnings(&self) -> Vec<String> {
-        std::mem::take(&mut self.state.borrow_mut().runtime_addon_warnings)
+    /// Drain finalized failures and nil-symbol diagnostics from runtime addon loads.
+    pub fn drain_runtime_addon_diagnostics(&self) -> LoadDiagnostics {
+        std::mem::take(&mut self.state.borrow_mut().runtime_addon_diagnostics)
     }
 
     /// Set the font system for text measurement from Lua API methods.

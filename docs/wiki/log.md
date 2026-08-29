@@ -1,3 +1,7 @@
+## [2026-08-29] system | Separate typed addon-load diagnostics
+
+Updated [[addon-loading]] and its index summary for the typed diagnostic contract: actual loader/XML/Lua/runtime failures remain in `LoadResult.warnings`; regular nil-symbol accesses and missing `C_*` contracts retain addon/source/line/environment attribution in dedicated channels; runtime and nested loads forward all three channels exactly once. Startup health now gates only genuine failures while strict unsupported requirements remain inspectable. No unsupported API semantics or runtime-bootstrap hashes changed.
+
 ## [2026-08-29] audit | Document active voice channel type query
 
 Audited commit `068ee317e27d6c850d331aaf422d98384e13b2bc`. Updated [[lua-api]] and the maintained Lua API reference: `C_VoiceChat.GetActiveChannelType()` returns the seeded active channel's numeric `ChatChannelType`, or one `nil` result for no/stale active channel IDs. Added source and focused test references. No new page, spec, index entry, code, generated, vendor, cache, `PLAN.md`, or protected-file change was warranted.

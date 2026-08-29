@@ -24,6 +24,10 @@ mod xml_lifecycle;
 mod xml_texture;
 
 use crate::lua_api::LoaderEnv;
+pub use crate::lua_api::state::{
+    LoadDiagnosticAttribution, LoadDiagnostics, MissingRequirement, MissingRequirementKind,
+    NilSymbolEnvironment, NilSymbolObservation, NilSymbolObservationKind,
+};
 use crate::saved_variables::SavedVariablesManager;
 use crate::screen::ScreenKind;
 use crate::toc::TocFile;
@@ -32,7 +36,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 
-pub(crate) use addon::{append_pending_nested_addon_warnings, begin_addon_load};
+pub(crate) use addon::{append_pending_nested_addon_diagnostics, begin_addon_load};
 pub use addon_order::sort_addons_by_dependencies;
 use addon_order::{topological_sort_addons, topological_sort_addons_with_extra_dependencies};
 pub use error::LoadError;
@@ -281,8 +285,30 @@ pub struct LoadResult {
     pub xml_files: usize,
     /// Time breakdown
     pub timing: LoadTiming,
-    /// Errors encountered (non-fatal)
+    /// Actual loader, XML, Lua, or runtime failures encountered during loading.
     pub warnings: Vec<String>,
+    /// Regular-global nil accesses retained as non-fatal diagnostics.
+    pub nil_symbol_observations: Vec<NilSymbolObservation>,
+    /// Missing `C_*` namespaces and members retained as strict API requirements.
+    pub missing_requirements: Vec<MissingRequirement>,
+}
+
+impl LoadResult {
+    pub fn diagnostics(&self) -> LoadDiagnostics {
+        LoadDiagnostics {
+            warnings: self.warnings.clone(),
+            nil_symbol_observations: self.nil_symbol_observations.clone(),
+            missing_requirements: self.missing_requirements.clone(),
+        }
+    }
+
+    pub(crate) fn extend_diagnostics(&mut self, diagnostics: LoadDiagnostics) {
+        self.warnings.extend(diagnostics.warnings);
+        self.nil_symbol_observations
+            .extend(diagnostics.nil_symbol_observations);
+        self.missing_requirements
+            .extend(diagnostics.missing_requirements);
+    }
 }
 
 /// Timing breakdown for addon loading.
@@ -423,23 +449,35 @@ fn load_addon_path(
     if let Ok(Some(result)) =
         crate::mists::character_frame_preload::ensure_before_addon(env, &toc, toc_path)
     {
-        for warning in &result.warnings {
-            trace_load_addon(
-                LoadAddonTraceOrigin::Toc,
-                format!("warning {}: {warning}", result.name),
-            );
-        }
+        trace_load_result_diagnostics(LoadAddonTraceOrigin::Toc, &result.name, &result);
     }
     trace_load_addon(LoadAddonTraceOrigin::Toc, format!("files {addon_name}"));
     let result = addon::load_addon_internal(env, &toc, saved_vars_mgr)?;
-    for warning in &result.warnings {
-        trace_load_addon(
-            LoadAddonTraceOrigin::Toc,
-            format!("warning {addon_name}: {warning}"),
-        );
-    }
+    trace_load_result_diagnostics(LoadAddonTraceOrigin::Toc, addon_name, &result);
     trace_load_addon(LoadAddonTraceOrigin::Toc, format!("loaded {addon_name}"));
     Ok(result)
+}
+
+pub(crate) fn trace_load_result_diagnostics(
+    origin: LoadAddonTraceOrigin,
+    addon_name: &str,
+    result: &LoadResult,
+) {
+    for warning in &result.warnings {
+        trace_load_addon(origin, format!("warning {addon_name}: {warning}"));
+    }
+    for observation in &result.nil_symbol_observations {
+        trace_load_addon(
+            origin,
+            format!("nil observation {addon_name}: {observation}"),
+        );
+    }
+    for requirement in &result.missing_requirements {
+        trace_load_addon(
+            origin,
+            format!("missing requirement {addon_name}: {requirement}"),
+        );
+    }
 }
 
 /// Load an addon from a parsed TOC.

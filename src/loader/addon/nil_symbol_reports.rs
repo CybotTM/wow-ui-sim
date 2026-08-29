@@ -1,14 +1,15 @@
-use crate::loader::LoadResult;
+use crate::loader::{
+    LoadDiagnosticAttribution, LoadResult, MissingRequirement, MissingRequirementKind,
+    NilSymbolObservation, NilSymbolObservationKind,
+};
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::registry_get;
-use crate::lua_api::state::{NilSymbolAccess, NilSymbolEnvironment};
+use crate::lua_api::state::{NilSymbolAccess, NilSymbolEnvironment, SimState};
 use rilua::Val;
 use std::cell::RefCell;
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use std::path::PathBuf;
 use std::rc::Rc;
-
-use crate::lua_api::state::SimState;
 
 pub(super) struct LoadingNilSymbolEnvironmentGuard {
     state: Rc<RefCell<SimState>>,
@@ -38,7 +39,7 @@ pub(super) fn enter_nil_symbol_environment(
     LoadingNilSymbolEnvironmentGuard { state, previous }
 }
 
-pub(super) fn append_nil_symbol_access_warnings(
+pub(super) fn append_nil_symbol_diagnostics(
     env: &LoaderEnv<'_>,
     addon_index: u16,
     addon_name: &str,
@@ -56,12 +57,9 @@ pub(super) fn append_nil_symbol_access_warnings(
         public: resolve_non_nil_names(env, public_names, raw_public_global_is_non_nil),
         secure: resolve_non_nil_names(env, secure_names, raw_secure_global_is_non_nil),
     };
-    let grouped_accesses = summarize_nil_symbol_accesses(&accesses, addon_index, &resolved_names);
-    result.warnings.extend(
-        grouped_accesses
-            .into_iter()
-            .map(|report| format_missing_symbol_report(addon_name, &report)),
-    );
+    let diagnostics =
+        summarize_nil_symbol_accesses(&accesses, addon_index, addon_name, &resolved_names);
+    result.extend_diagnostics(diagnostics);
 }
 
 fn publications_for_addon(publications: &HashSet<(u16, String)>, addon_index: u16) -> Vec<String> {
@@ -91,22 +89,43 @@ struct ResolvedGlobals {
 fn summarize_nil_symbol_accesses(
     accesses: &[NilSymbolAccess],
     addon_index: u16,
+    addon_name: &str,
     resolved_names: &ResolvedGlobals,
-) -> Vec<MissingSymbolReport> {
-    let mut reports = std::collections::BTreeMap::new();
+) -> crate::loader::LoadDiagnostics {
+    let mut observations = BTreeMap::new();
+    let mut requirements = BTreeMap::new();
+
     for access in accesses {
         if access.addon_index != Some(addon_index) || is_resolved_global(access, resolved_names) {
             continue;
         }
-        let need = classify_nil_symbol_access(access);
-        let location = format_nil_symbol_location(access);
-        reports.entry(need).or_insert(location);
+
+        let attribution = diagnostic_attribution(addon_name, access);
+        match classify_nil_symbol_access(access) {
+            ClassifiedNilSymbol::Observation(kind) => {
+                observations
+                    .entry((access.environment, kind))
+                    .or_insert(attribution);
+            }
+            ClassifiedNilSymbol::Requirement(kind) => {
+                requirements
+                    .entry((access.environment, kind))
+                    .or_insert(attribution);
+            }
+        }
     }
 
-    reports
-        .into_iter()
-        .map(|(need, location)| MissingSymbolReport { need, location })
-        .collect()
+    crate::loader::LoadDiagnostics {
+        warnings: Vec::new(),
+        nil_symbol_observations: observations
+            .into_iter()
+            .map(|((_, kind), attribution)| NilSymbolObservation { kind, attribution })
+            .collect(),
+        missing_requirements: requirements
+            .into_iter()
+            .map(|((_, kind), attribution)| MissingRequirement { kind, attribution })
+            .collect(),
+    }
 }
 
 fn is_resolved_global(access: &NilSymbolAccess, resolved_names: &ResolvedGlobals) -> bool {
@@ -151,59 +170,43 @@ fn raw_secure_global_is_non_nil(env: &LoaderEnv<'_>, name: &str) -> bool {
     .unwrap_or(false)
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-enum MissingSymbolNeed {
-    Global(String),
-    CNamespace(String),
-    CMethod { namespace: String, method: String },
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum ClassifiedNilSymbol {
+    Observation(NilSymbolObservationKind),
+    Requirement(MissingRequirementKind),
 }
 
-fn classify_nil_symbol_access(access: &NilSymbolAccess) -> MissingSymbolNeed {
+fn classify_nil_symbol_access(access: &NilSymbolAccess) -> ClassifiedNilSymbol {
     if matches!(access.container.as_str(), "_G" | "__secureenv") {
-        return classify_global_nil_access(&access.key);
+        if access.key.starts_with("C_") {
+            return ClassifiedNilSymbol::Requirement(MissingRequirementKind::CNamespace {
+                namespace: access.key.clone(),
+            });
+        }
+        return ClassifiedNilSymbol::Observation(NilSymbolObservationKind::Global {
+            name: access.key.clone(),
+        });
     }
 
     if access.container.starts_with("C_") {
-        return MissingSymbolNeed::CMethod {
+        return ClassifiedNilSymbol::Requirement(MissingRequirementKind::CMethod {
             namespace: access.container.clone(),
             method: access.key.clone(),
-        };
+        });
     }
 
-    MissingSymbolNeed::Global(format!("{}.{}", access.container, access.key))
+    ClassifiedNilSymbol::Observation(NilSymbolObservationKind::Global {
+        name: format!("{}.{}", access.container, access.key),
+    })
 }
 
-fn classify_global_nil_access(key: &str) -> MissingSymbolNeed {
-    if key.starts_with("C_") {
-        return MissingSymbolNeed::CNamespace(key.to_string());
+fn diagnostic_attribution(addon_name: &str, access: &NilSymbolAccess) -> LoadDiagnosticAttribution {
+    LoadDiagnosticAttribution {
+        addon_name: addon_name.to_string(),
+        environment: access.environment,
+        source: access.source.as_deref().map(summarize_chunk_source),
+        line: access.line,
     }
-
-    MissingSymbolNeed::Global(key.to_string())
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-struct MissingSymbolReport {
-    need: MissingSymbolNeed,
-    location: Option<String>,
-}
-
-fn format_missing_symbol_report(addon_name: &str, report: &MissingSymbolReport) -> String {
-    let need = match &report.need {
-        MissingSymbolNeed::Global(name) => format!("global {name}"),
-        MissingSymbolNeed::CNamespace(namespace) => namespace.clone(),
-        MissingSymbolNeed::CMethod { namespace, method } => format!("{namespace}.{method}"),
-    };
-
-    match &report.location {
-        Some(location) => format!("{addon_name} needs {need} (accessed at {location})"),
-        None => format!("{addon_name} needs {need}"),
-    }
-}
-
-fn format_nil_symbol_location(access: &NilSymbolAccess) -> Option<String> {
-    let source = access.source.as_deref()?;
-    let line = access.line?;
-    Some(format!("{}:{line}", summarize_chunk_source(source)))
 }
 
 fn summarize_chunk_source(source: &str) -> String {

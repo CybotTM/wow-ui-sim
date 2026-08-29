@@ -63,37 +63,36 @@ fn load_runtime_addon_with_dependencies(
     crate::lua_api::workarounds::apply_for_runtime_addon_load(loader_env, addon_name);
     loading_guard.commit_loaded();
     fire_addon_loaded(state, loader_env, addon_name);
-    crate::loader::append_pending_nested_addon_warnings(
+    crate::loader::append_pending_nested_addon_diagnostics(
         loader_env,
         loading_guard.addon_index(),
         &mut result,
     );
-    for warning in &result.warnings {
-        crate::loader::trace_load_addon(origin, format!("warning {addon_name}: {warning}"));
-    }
-    route_finalized_runtime_addon_warnings(loader_env, &result.warnings);
+    crate::loader::trace_load_result_diagnostics(origin, addon_name, &result);
+    route_finalized_runtime_addon_diagnostics(loader_env, result.diagnostics());
     loader_env.state().borrow_mut().invalidate_strata_buckets();
     crate::loader::trace_load_addon(origin, format!("event {addon_name}"));
     crate::loader::trace_load_addon(origin, format!("loaded {addon_name}"));
     Ok(())
 }
 
-fn route_finalized_runtime_addon_warnings(loader_env: &LoaderEnv<'_>, warnings: &[String]) {
-    if warnings.is_empty() {
+fn route_finalized_runtime_addon_diagnostics(
+    loader_env: &LoaderEnv<'_>,
+    diagnostics: crate::loader::LoadDiagnostics,
+) {
+    if diagnostics.is_empty() {
         return;
     }
 
     let mut state = loader_env.state().borrow_mut();
     if let Some(parent_addon_index) = state.loading_addon_stack.iter().rev().nth(1).copied() {
         state
-            .pending_nested_addon_warnings
+            .pending_nested_addon_diagnostics
             .entry(parent_addon_index)
             .or_default()
-            .extend(warnings.iter().cloned());
+            .extend(diagnostics);
     } else {
-        state
-            .runtime_addon_warnings
-            .extend(warnings.iter().cloned());
+        state.runtime_addon_diagnostics.extend(diagnostics);
     }
 }
 
@@ -107,9 +106,7 @@ fn apply_mists_runtime_preload(
     if let Some(result) =
         crate::mists::character_frame_preload::ensure_before_addon(loader_env, toc, toc_path)?
     {
-        for warning in &result.warnings {
-            crate::loader::trace_load_addon(origin, format!("warning {}: {warning}", result.name));
-        }
+        crate::loader::trace_load_result_diagnostics(origin, &result.name, &result);
     }
     Ok(())
 }

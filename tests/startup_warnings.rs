@@ -3,11 +3,17 @@
 use crate::common;
 
 use std::collections::{HashMap, HashSet};
-use std::path::{Path, PathBuf};
-use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons, load_addon};
+use std::path::PathBuf;
+use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
+
+mod diagnostics;
+
+use diagnostics::{
+    StartupDiagnostics, collect_addon_load_diagnostics, collect_handler_and_runtime_diagnostics,
+};
 
 const STARTUP_WARNING_GAME_FOUNDATIONS: &[&str] = &[
     "Blizzard_SharedXMLBase",
@@ -50,51 +56,8 @@ fn fire(env: &WowLuaEnv, event: &str, args: &[rilua::Val]) -> Vec<String> {
     drain_test_errors(env)
 }
 
-fn collect_handler_and_runtime_warnings(env: &WowLuaEnv, phase: &str) -> Vec<String> {
-    let mut warnings = drain_test_errors(env)
-        .into_iter()
-        .map(|warning| format!("[{phase}] {warning}"))
-        .collect::<Vec<_>>();
-    warnings.extend(
-        env.drain_runtime_addon_warnings()
-            .into_iter()
-            .map(|warning| format!("[{phase}] {warning}")),
-    );
-    warnings
-}
-
-fn collect_addon_load_warnings(env: &WowLuaEnv, name: &str, toc_path: &Path) -> Vec<String> {
-    let result = load_addon(&env.loader_env(), toc_path);
-    let load_handler_warnings =
-        collect_handler_and_runtime_warnings(env, &format!("load {name} handler"));
-
-    let result = match result {
-        Ok(result) => result,
-        Err(error) => {
-            let mut warnings = vec![format!("[load {name}] FAILED: {error}")];
-            warnings.extend(load_handler_warnings);
-            return warnings;
-        }
-    };
-
-    let mut warnings = result
-        .warnings
-        .into_iter()
-        .map(|warning| format!("[load {name}] {warning}"))
-        .collect::<Vec<_>>();
-    warnings.extend(load_handler_warnings);
-    if let Err(error) = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(name)]) {
-        warnings.push(format!("[ADDON_LOADED {name}] FAILED: {error}"));
-    }
-    warnings.extend(collect_handler_and_runtime_warnings(
-        env,
-        &format!("ADDON_LOADED {name}"),
-    ));
-    warnings
-}
-
-/// Load all Blizzard addons and fire startup events, collecting all warnings.
-fn load_and_startup() -> Vec<String> {
+/// Load all Blizzard addons and fire startup events, collecting failures and diagnostics.
+fn load_and_startup() -> StartupDiagnostics {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Game);
@@ -103,37 +66,38 @@ fn load_and_startup() -> Vec<String> {
 
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
-    let mut warnings = Vec::new();
+    let mut diagnostics = StartupDiagnostics::default();
     for (name, toc_path) in &addons {
-        warnings.extend(collect_addon_load_warnings(&env, name, toc_path));
+        diagnostics.extend(collect_addon_load_diagnostics(&env, name, toc_path));
     }
 
     env.apply_post_load_workarounds();
-    warnings.extend(collect_handler_and_runtime_warnings(
+    diagnostics.extend(collect_handler_and_runtime_diagnostics(
         &env,
         "post-load workarounds",
     ));
 
     wow_ui_sim::startup::fire_startup_events_headless(&env);
-    warnings.extend(collect_handler_and_runtime_warnings(&env, "startup events"));
+    diagnostics.extend(collect_handler_and_runtime_diagnostics(
+        &env,
+        "startup events",
+    ));
 
     if let Err(error) = env.fire_on_update(0.016) {
-        warnings.push(format!("[OnUpdate] FAILED: {error}"));
+        diagnostics
+            .warnings
+            .push(format!("[OnUpdate] FAILED: {error}"));
     }
-    warnings.extend(collect_handler_and_runtime_warnings(&env, "OnUpdate"));
-    warnings
+    diagnostics.extend(collect_handler_and_runtime_diagnostics(&env, "OnUpdate"));
+    diagnostics
 }
-
-/// Known warning count from unimplemented APIs. Update this when adding stubs.
-/// Goal: drive this to zero over time by implementing missing APIs.
-const KNOWN_WARNING_COUNT: usize = 0;
 
 #[test]
 fn test_no_warnings_on_startup() {
     test_timeout! {
-        let warnings = load_and_startup();
-        let count = warnings.len();
-        let account_store_regressions: Vec<String> = warnings
+        let diagnostics = load_and_startup();
+        let account_store_regressions: Vec<String> = diagnostics
+            .warnings
             .iter()
             .filter(|warning| {
                 (warning.contains("attempt to index global 'AccountStoreFrame'")
@@ -149,17 +113,31 @@ fn test_no_warnings_on_startup() {
              Matching warnings:\n  {}",
             account_store_regressions.join("\n  ")
         );
-
-        if count > KNOWN_WARNING_COUNT {
-            let mut msg = format!(
-                "New warnings introduced! Expected at most {KNOWN_WARNING_COUNT}, got {count}.\n\
-                 All warnings:\n"
-            );
-            for w in &warnings {
-                msg.push_str(&format!("  {w}\n"));
-            }
-            panic!("{msg}");
-        }
+        assert!(
+            diagnostics
+                .nil_symbol_observations
+                .iter()
+                .all(|observation| !observation.attribution.addon_name.is_empty()),
+            "nil observations must retain addon attribution: {:?}",
+            diagnostics.nil_symbol_observations
+        );
+        assert!(
+            diagnostics
+                .missing_requirements
+                .iter()
+                .all(|requirement| !requirement.attribution.addon_name.is_empty()),
+            "missing requirements must retain addon attribution: {:?}",
+            diagnostics.missing_requirements
+        );
+        assert!(
+            diagnostics.warnings.is_empty(),
+            "Startup produced loader/runtime failures:\n  {}\n\
+             Nil observations retained: {}\n\
+             Missing requirements retained: {}",
+            diagnostics.warnings.join("\n  "),
+            diagnostics.nil_symbol_observations.len(),
+            diagnostics.missing_requirements.len()
+        );
     }
 }
 

@@ -307,12 +307,14 @@ fn test_blizzard_help_plate_method_bindings_do_not_report_self_as_global() {
     let result = load_addon(&env.loader_env(), &toc_path).expect("HelpPlate should load");
 
     assert!(
-        !result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("needs global self")),
+        !result.nil_symbol_observations.iter().any(|observation| {
+            matches!(
+                &observation.kind,
+                crate::loader::NilSymbolObservationKind::Global { name } if name == "self"
+            )
+        }),
         "XML method self parameter must not be classified as a global: {:?}",
-        result.warnings
+        result.nil_symbol_observations
     );
     let global_self_type: String = env
         .eval("return type(rawget(_G, 'self'))")

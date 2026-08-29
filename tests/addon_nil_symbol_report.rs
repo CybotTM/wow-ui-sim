@@ -1,7 +1,51 @@
 use std::io::Write;
 
-use wow_ui_sim::loader::load_addon;
+use wow_ui_sim::loader::{
+    LoadResult, MissingRequirement, MissingRequirementKind, NilSymbolEnvironment,
+    NilSymbolObservation, NilSymbolObservationKind, load_addon,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn find_global_observation<'a>(
+    result: &'a LoadResult,
+    name: &str,
+) -> Option<&'a NilSymbolObservation> {
+    result.nil_symbol_observations.iter().find(|observation| {
+        matches!(
+            &observation.kind,
+            NilSymbolObservationKind::Global { name: observed } if observed == name
+        )
+    })
+}
+
+fn find_namespace_requirement<'a>(
+    result: &'a LoadResult,
+    namespace: &str,
+) -> Option<&'a MissingRequirement> {
+    result.missing_requirements.iter().find(|requirement| {
+        matches!(
+            &requirement.kind,
+            MissingRequirementKind::CNamespace { namespace: required }
+                if required == namespace
+        )
+    })
+}
+
+fn find_method_requirement<'a>(
+    result: &'a LoadResult,
+    namespace: &str,
+    method: &str,
+) -> Option<&'a MissingRequirement> {
+    result.missing_requirements.iter().find(|requirement| {
+        matches!(
+            &requirement.kind,
+            MissingRequirementKind::CMethod {
+                namespace: required_namespace,
+                method: required_method,
+            } if required_namespace == namespace && required_method == method
+        )
+    })
+}
 
 fn create_test_addon_with_missing_symbol_accesses() -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
@@ -137,6 +181,24 @@ fn create_test_addon_with_cleared_publication() -> tempfile::TempDir {
     dir
 }
 
+fn create_test_addon_with_lua_failure() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    let addon_dir = dir.path();
+
+    std::fs::write(
+        addon_dir.join("TestLuaFailure.toc"),
+        "## Title: TestLuaFailure\nTestLuaFailure.lua\n",
+    )
+    .unwrap();
+    std::fs::write(
+        addon_dir.join("TestLuaFailure.lua"),
+        "error('typed diagnostic failure probe')\n",
+    )
+    .unwrap();
+
+    dir
+}
+
 fn write_runtime_event_warning_addon(
     root: &std::path::Path,
     addon_name: &str,
@@ -234,7 +296,7 @@ NestedPublishedGlobal = true
 }
 
 #[test]
-fn load_addon_reports_missing_global_and_namespace_symbol_accesses() {
+fn load_addon_separates_nil_observations_requirements_and_failures() {
     let env = WowLuaEnv::new().unwrap();
     let dir = create_test_addon_with_missing_symbol_accesses();
     let toc_path = dir.path().join("TestNilSymbols.toc");
@@ -242,102 +304,114 @@ fn load_addon_reports_missing_global_and_namespace_symbol_accesses() {
     let result = load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
 
     assert!(
-        result.warnings.contains(
-            &"TestNilSymbols needs global MissingGlobalSymbol (accessed at TestNilSymbols.lua:1)"
-                .to_string()
-        ),
-        "expected missing global gap warning, got {:?}",
+        result.warnings.is_empty(),
+        "nil-symbol diagnostics must not become loader failures: {:?}",
         result.warnings
     );
-    assert!(
-        result.warnings.contains(
-            &"TestNilSymbols needs C_MissingNamespace (accessed at TestNilSymbols.lua:2)"
-                .to_string()
-        ),
-        "expected missing C_* namespace gap warning, got {:?}",
-        result.warnings
+
+    let missing_global = find_global_observation(&result, "MissingGlobalSymbol")
+        .expect("direct missing global must remain observable");
+    assert_eq!(missing_global.attribution.addon_name, "TestNilSymbols");
+    assert_eq!(
+        missing_global.attribution.source.as_deref(),
+        Some("TestNilSymbols.lua")
     );
-    assert!(
-        result.warnings.contains(
-            &"TestNilSymbols needs C_Container.MissingMethod (accessed at TestNilSymbols.lua:3)"
-                .to_string()
-        ),
-        "expected missing C_* method gap warning, got {:?}",
-        result.warnings
+    assert_eq!(missing_global.attribution.line, Some(1));
+    assert_eq!(
+        missing_global.attribution.environment,
+        NilSymbolEnvironment::Public
     );
-    assert!(
-        result.warnings.contains(
-            &"TestNilSymbols needs C_ExplicitMissingNamespace (accessed at TestNilSymbols.lua:9)"
-                .to_string()
-        ),
-        "explicit _G C_* namespace probes must remain strict diagnostics: {:?}",
-        result.warnings
-    );
-    assert!(
-        result.warnings.contains(
-            &"TestNilSymbols needs C_Container.ExplicitMissingMethod (accessed at TestNilSymbols.lua:10)"
-                .to_string()
-        ),
-        "explicit _G C_* member probes must remain strict diagnostics: {:?}",
-        result.warnings
-    );
-    assert!(
-        !result
-            .warnings
+
+    let namespace = find_namespace_requirement(&result, "C_MissingNamespace")
+        .expect("missing C namespace must remain a strict requirement");
+    assert_eq!(namespace.attribution.addon_name, "TestNilSymbols");
+    assert_eq!(namespace.attribution.line, Some(2));
+
+    let method = find_method_requirement(&result, "C_Container", "MissingMethod")
+        .expect("missing C method must remain a strict requirement");
+    assert_eq!(method.attribution.line, Some(3));
+    assert_eq!(
+        result
+            .missing_requirements
             .iter()
-            .any(|warning| warning.contains("OptionalMissingGlobal")),
-        "explicit _G table probes are not statically named global requirements: {:?}",
-        result.warnings
+            .filter(|requirement| {
+                matches!(
+                    &requirement.kind,
+                    MissingRequirementKind::CMethod { namespace, method }
+                        if namespace == "C_Container" && method == "MissingMethod"
+                )
+            })
+            .count(),
+        1,
+        "repeated C method accesses must deduplicate"
+    );
+
+    assert!(
+        find_namespace_requirement(&result, "C_ExplicitMissingNamespace").is_some(),
+        "explicit _G C namespace access remains a strict requirement"
     );
     assert!(
-        result.warnings.contains(
-            &"TestNilSymbols needs global DynamicThenDirectMissingGlobal (accessed at TestNilSymbols.lua:8)"
-                .to_string()
-        ),
-        "a prior explicit _G probe must not hide a later direct-global requirement: {:?}",
-        result.warnings
+        find_method_requirement(&result, "C_Container", "ExplicitMissingMethod").is_some(),
+        "explicit _G C member access remains a strict requirement"
+    );
+    assert!(
+        find_global_observation(&result, "OptionalMissingGlobal").is_none(),
+        "explicit optional regular _G probes must remain non-observations"
+    );
+    assert!(
+        find_global_observation(&result, "DynamicThenDirectMissingGlobal").is_some(),
+        "a prior optional _G probe must not hide a later direct-global observation"
     );
 }
 
 #[test]
-fn load_addon_omits_regular_globals_published_before_addon_completion() {
+fn lua_load_failure_remains_fatal_warning() {
+    let env = WowLuaEnv::new().unwrap();
+    let dir = create_test_addon_with_lua_failure();
+    let toc_path = dir.path().join("TestLuaFailure.toc");
+
+    let result = load_addon(&env.loader_env(), &toc_path).expect("loader should report file failure");
+
+    assert!(
+        result
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("typed diagnostic failure probe")),
+        "genuine Lua load failure must remain in warnings: {:?}",
+        result.warnings
+    );
+    assert!(result.nil_symbol_observations.is_empty());
+    assert!(result.missing_requirements.is_empty());
+}
+
+#[test]
+fn load_addon_reconciles_public_globals_published_before_completion() {
     let env = WowLuaEnv::new().unwrap();
     let dir = create_test_addon_with_late_symbol_publication();
     let toc_path = dir.path().join("TestLatePublication.toc");
 
     let result = load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
 
+    assert!(result.warnings.is_empty());
     assert!(
-        !result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("PublishedByLua")),
+        find_global_observation(&result, "PublishedByLua").is_none(),
         "late Lua publication should resolve its early nil access: {:?}",
-        result.warnings
+        result.nil_symbol_observations
     );
     assert!(
-        !result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("PublishedByXml")),
+        find_global_observation(&result, "PublishedByXml").is_none(),
         "named XML frame publication should resolve its early nil access: {:?}",
-        result.warnings
+        result.nil_symbol_observations
     );
     assert!(
-        result.warnings.contains(
-            &"TestLatePublication needs global StillMissingGlobal (accessed at Early.lua:3)"
-                .to_string()
-        ),
-        "regular global still nil at addon completion must remain warned: {:?}",
-        result.warnings
+        find_global_observation(&result, "StillMissingGlobal").is_some(),
+        "regular global still nil at addon completion must remain observable: {:?}",
+        result.nil_symbol_observations
     );
     assert!(
-        result.warnings.contains(
-            &"TestLatePublication needs C_Container.StillMissingMethod (accessed at Early.lua:4)"
-                .to_string()
-        ),
-        "C_* method gaps must remain warned after fallback publication: {:?}",
-        result.warnings
+        find_method_requirement(&result, "C_Container", "StillMissingMethod").is_some(),
+        "C method gap must remain a requirement after regular publication: {:?}",
+        result.missing_requirements
     );
 }
 
@@ -362,29 +436,24 @@ fn secure_publication_resolves_only_secure_same_addon_accesses() {
     assert_eq!(secure_type, "function");
     assert!(handler_executed, "late secure XML function handler should execute");
 
+    assert!(result.warnings.is_empty());
     assert!(
-        !result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("LaterSecureFunction")),
+        find_global_observation(&result, "LaterSecureFunction").is_none(),
         "late secure publication should resolve its secure-origin nil access: {:?}",
-        result.warnings
+        result.nil_symbol_observations
     );
-    assert!(
-        result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("StillMissingSecureFunction")),
-        "a genuinely missing secure function must remain diagnostic: {:?}",
-        result.warnings
+    let missing_secure = find_global_observation(&result, "StillMissingSecureFunction")
+        .expect("a genuinely missing secure function must remain observable");
+    assert_eq!(
+        missing_secure.attribution.environment,
+        NilSymbolEnvironment::Secure
     );
-    assert!(
-        result.warnings.contains(
-            &"TestSecureLatePublication needs global SecurePublicationMustNotResolvePublic (accessed at PublicMiss.lua:1)"
-                .to_string()
-        ),
-        "a secure publication must not resolve a public-origin miss: {:?}",
-        result.warnings
+    let unresolved_public =
+        find_global_observation(&result, "SecurePublicationMustNotResolvePublic")
+            .expect("secure publication must not resolve a public-origin miss");
+    assert_eq!(
+        unresolved_public.attribution.environment,
+        NilSymbolEnvironment::Public
     );
     let state = env.state().borrow();
     assert!(
@@ -405,13 +474,11 @@ fn publication_guard_cleared_global_remains_warned() {
 
     let result = load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
 
+    assert!(result.warnings.is_empty());
     assert!(
-        result.warnings.contains(
-            &"TestClearedPublication needs global PublishedThenCleared (accessed at TestClearedPublication.lua:1)"
-                .to_string()
-        ),
-        "global cleared before addon completion must remain warned: {:?}",
-        result.warnings
+        find_global_observation(&result, "PublishedThenCleared").is_some(),
+        "global cleared before addon completion must remain observable: {:?}",
+        result.nil_symbol_observations
     );
 }
 
@@ -432,31 +499,58 @@ fn runtime_addon_event_warnings_are_finalized_once_with_their_owners() {
     env.fire_event_with_args("ADDON_LOADED", &[env.lua_string("OuterEventLoader")])
         .expect("outer ADDON_LOADED event should load the runtime addon chain");
 
-    let warnings = env.drain_runtime_addon_warnings();
-    let expected = [
-        "RuntimeParent needs global RuntimeParentMissingGlobal (accessed at RuntimeParent.lua:1)",
-        "RuntimeParent needs C_Container.RuntimeParentMissingMethod (accessed at RuntimeParent.lua:2)",
-        "RuntimeChild needs global RuntimeChildMissingGlobal (accessed at RuntimeChild.lua:1)",
-        "RuntimeChild needs C_Container.RuntimeChildMissingMethod (accessed at RuntimeChild.lua:2)",
-    ];
-    for expected_warning in expected {
+    let diagnostics = env.drain_runtime_addon_diagnostics();
+    assert!(
+        diagnostics.warnings.is_empty(),
+        "nil-symbol diagnostics must not become runtime failures: {:?}",
+        diagnostics.warnings
+    );
+    for (addon_name, symbol) in [
+        ("RuntimeParent", "RuntimeParentMissingGlobal"),
+        ("RuntimeChild", "RuntimeChildMissingGlobal"),
+    ] {
         assert_eq!(
-            warnings
+            diagnostics
+                .nil_symbol_observations
                 .iter()
-                .filter(|warning| warning.as_str() == expected_warning)
+                .filter(|observation| {
+                    observation.attribution.addon_name == addon_name
+                        && matches!(
+                            &observation.kind,
+                            NilSymbolObservationKind::Global { name } if name == symbol
+                        )
+                })
                 .count(),
             1,
-            "finalized runtime warning should retain its owner and appear exactly once: {expected_warning}; got {warnings:?}"
+            "runtime observation must retain owner and deduplicate: {diagnostics:?}"
         );
     }
-    assert_eq!(
-        warnings.len(),
-        expected.len(),
-        "runtime warning drain should contain only the four expected warnings: {warnings:?}"
-    );
+    for (addon_name, method) in [
+        ("RuntimeParent", "RuntimeParentMissingMethod"),
+        ("RuntimeChild", "RuntimeChildMissingMethod"),
+    ] {
+        assert_eq!(
+            diagnostics
+                .missing_requirements
+                .iter()
+                .filter(|requirement| {
+                    requirement.attribution.addon_name == addon_name
+                        && matches!(
+                            &requirement.kind,
+                            MissingRequirementKind::CMethod { namespace, method: required }
+                                if namespace == "C_Container" && required == method
+                        )
+                })
+                .count(),
+            1,
+            "runtime requirement must retain owner and deduplicate: {diagnostics:?}"
+        );
+    }
+    assert_eq!(diagnostics.nil_symbol_observations.len(), 2);
+    assert_eq!(diagnostics.missing_requirements.len(), 2);
     assert!(
-        env.drain_runtime_addon_warnings().is_empty(),
-        "runtime warning drain should consume finalized warnings"
+        env.drain_runtime_addon_diagnostics().is_empty(),
+        "runtime diagnostic drain should consume all channels"
     );
 }
 
@@ -473,32 +567,30 @@ fn publication_guard_nested_addon_does_not_resolve_outer_warning() {
         .expect("nested publication should be readable");
 
     assert!(nested_global, "nested addon should publish its global");
-    let nested_method_warning =
-        "NestedPublisher needs C_Container.NestedMissingMethod (accessed at NestedPublisher.lua:1)";
+    assert!(result.warnings.is_empty());
     assert_eq!(
         result
-            .warnings
+            .missing_requirements
             .iter()
-            .filter(|warning| warning.as_str() == nested_method_warning)
+            .filter(|requirement| {
+                requirement.attribution.addon_name == "NestedPublisher"
+                    && matches!(
+                        &requirement.kind,
+                        MissingRequirementKind::CMethod { namespace, method }
+                            if namespace == "C_Container" && method == "NestedMissingMethod"
+                    )
+            })
             .count(),
         1,
-        "nested addon warning should propagate exactly once: {:?}",
-        result.warnings
+        "nested addon requirement should propagate exactly once: {:?}",
+        result.missing_requirements
     );
     assert!(
-        !result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("NestedResolvedGlobal")),
+        find_global_observation(&result, "NestedResolvedGlobal").is_none(),
         "nested addon's resolved global should stay reconciled: {:?}",
-        result.warnings
+        result.nil_symbol_observations
     );
-    assert!(
-        result.warnings.contains(
-            &"OuterConsumer needs global NestedPublishedGlobal (accessed at OuterConsumer.lua:1)"
-                .to_string()
-        ),
-        "nested addon publication must not resolve the outer addon's warning: {:?}",
-        result.warnings
-    );
+    let outer_observation = find_global_observation(&result, "NestedPublishedGlobal")
+        .expect("nested publication must not resolve the outer addon's observation");
+    assert_eq!(outer_observation.attribution.addon_name, "OuterConsumer");
 }
