@@ -2846,7 +2846,7 @@
         }
       ],
       "tests": [
-        "tests/c_action_bar_state_globals.rs::special_bar_indexes_are_nil_when_inactive"
+        "tests/c_action_bar_state_globals.rs::special_bar_indexes_return_default_numbers_when_inactive"
       ],
       "assertions": [],
       "commit": "bdf741cf4",
@@ -2989,7 +2989,7 @@
         }
       ],
       "tests": [
-        "tests/c_action_bar_state_globals.rs::special_bar_indexes_are_nil_when_inactive",
+        "tests/c_action_bar_state_globals.rs::special_bar_indexes_return_default_numbers_when_inactive",
         "tests/c_action_bar_state_globals.rs::temp_shapeshift_bar_index_reads_state"
       ],
       "assertions": [],
@@ -3034,7 +3034,7 @@
       ],
       "tests": [
         "tests/c_action_bar_state_globals.rs::vehicle_bar_index_reads_state",
-        "tests/c_action_bar_state_globals.rs::special_bar_indexes_are_nil_when_inactive"
+        "tests/c_action_bar_state_globals.rs::special_bar_indexes_return_default_numbers_when_inactive"
       ],
       "assertions": [],
       "commit": "0859e07be",
@@ -88087,10 +88087,11 @@
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys"
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
@@ -88127,10 +88128,11 @@
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys"
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
@@ -88167,10 +88169,11 @@
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys"
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
@@ -88207,10 +88210,11 @@
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys"
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
@@ -100182,10 +100186,11 @@
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys"
+        "tests/userdata_proxy.rs::function_container_readonly_keys",
+        "tests/userdata_proxy.rs::function_container_tostring"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
