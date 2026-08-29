@@ -75,7 +75,7 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 ## C_* Namespaces
 
-C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, `IsEquippableItem`, and `IsItemInRange` are state-backed; other listed item methods remain mixed implemented/stubbed), C_Spell (`GetSpellQueueWindow()` reads the current `SpellQueueWindow` CVar and returns its numeric value when parseable), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_ChromieTime (retail/PTR empty-state queries and no-op actions), C_StringUtil (`EscapeDecimalNonPrintables` preserves valid UTF-8 and replaces ASCII control bytes except tab/newline/carriage return, plus invalid UTF-8 bytes, with decimal escapes), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
+C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, `IsEquippableItem`, and `IsItemInRange` are state-backed; other listed item methods remain mixed implemented/stubbed), C_Container (`GetBagSlotFlag`, `SetBagSlotFlag`, `GetBackpackAutosortDisabled`, and `GetBackpackSellJunkDisabled` share state-backed bag-slot flags), C_Spell (`GetSpellQueueWindow()` reads the current `SpellQueueWindow` CVar and returns its numeric value when parseable), C_System (GetLocale → "enUS"), C_EditMode (GetLayouts), C_CatalogShop (`GetVCProductInfos()` returns a fresh empty table), C_ChromieTime (retail/PTR empty-state queries and no-op actions), C_StringUtil (`EscapeDecimalNonPrintables` preserves valid UTF-8 and replaces ASCII control bytes except tab/newline/carriage return, plus invalid UTF-8 bytes, with decimal escapes), C_Quest, C_AchievementInfo, C_ClassTalents, C_Guild, C_LFGList, C_Mail, C_ActionBar — most return nil/false/0 stubs.
 
 ### `C_PlayerChoice` (PTR 12.1)
 
@@ -100,6 +100,7 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 - [container_portrait_texture.rs](../../../src/lua_api/workarounds/temporary/container_portrait_texture.rs) — retail texture fileDataID proof
 - [item_button_helper_defaults.rs](../../../src/lua_api/workarounds/temporary/item_button_helper_defaults.rs) — item-button texture fileDataID proof
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
+- [c_container.rs](../../../src/c_api/item_spell/c_container.rs) — state-backed bag-slot flags and backpack queries
 - [loader_env.rs](../../../src/lua_api/loader_env.rs) — secure versus public dynamic loader execution
 - rilua commits `1a7c9de` and `3630419` — VM-scoped syntactic-global lookup provenance and `debug.isglobalindex()`
 - [auth_challenge_frame_parent.rs](../../../src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs) — addon-specific AuthChallenge public export bridge

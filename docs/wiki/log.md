@@ -6,6 +6,10 @@ Audited commit `928243411`: retail 12.1 retains `C_RecruitAFriend.IsEnabled`, wh
 
 Audited commit `d38588beec834a2adb5ca1ea3f2f57a03469ff85`. Updated [[lua-api]] and the maintained Lua API reference to record that `C_Item.IsConsumableItem`, `C_Item.IsEquippableItem`, and `C_Item.IsItemInRange` are state-backed and share the existing legacy-global semantics. No new page, spec, changelog, or stub-inventory update was warranted; the protected C StringUtil file was not touched.
 
+## [2026-08-29] audit | Document backpack bag flag queries
+
+Audited commit `c17b32062`. Updated the maintained C_* capability references to mark `C_Container.GetBagSlotFlag`, `SetBagSlotFlag`, `GetBackpackAutosortDisabled`, and `GetBackpackSellJunkDisabled` as state-backed shared bag-slot queries, and added the C_Container surface to the Lua API references. No spec or new wiki page was warranted; protected `src/c_api/c_string_util.rs` was not touched.
+
 ## [2026-08-29] audit | Document CVar-backed spell queue window
 
 Audited commit `8e8f23e05`. Updated [[lua-api]] and the maintained Lua API reference: `C_Spell.GetSpellQueueWindow()` reads the mutable `SpellQueueWindow` CVar, returns a numeric value when parseable, returns `nil` for unavailable/non-numeric values, and preserves identity for the two deprecated spell globals that alias it. No spec or separate page was warranted; protected `src/c_api/c_string_util.rs` was not touched.
