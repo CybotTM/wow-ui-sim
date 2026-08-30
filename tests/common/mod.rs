@@ -10,10 +10,10 @@ pub mod panel_fixtures;
 pub(crate) mod prefork_process;
 #[cfg(target_os = "linux")]
 mod timeout_reexec;
+mod workload_gate;
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::sync::{Mutex, MutexGuard, OnceLock};
 use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -21,7 +21,12 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 /// Default 120s — enough for full Blizzard UI load + test logic.
 #[cfg(target_os = "linux")]
 pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
-    timeout_reexec::run(secs, f);
+    timeout_reexec::run(secs, workload_gate::Mode::Shared, f);
+}
+
+#[cfg(target_os = "linux")]
+pub fn with_performance_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
+    timeout_reexec::run(secs, workload_gate::Mode::Exclusive, f);
 }
 
 #[cfg(not(target_os = "linux"))]
@@ -42,34 +47,40 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
     }
 }
 
-/// Serialize perf-sensitive integration tests so their thresholds measure one
-/// startup/load scenario at a time instead of competing with sibling tests.
+#[cfg(not(target_os = "linux"))]
+pub fn with_performance_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
+    with_timeout(secs, f);
+}
+
+/// Run an ordinary expensive workload alongside other shared workloads.
+pub fn with_shared_workload<T>(f: impl FnOnce() -> T) -> T {
+    workload_gate::with_lock(workload_gate::Mode::Shared, f)
+}
+
+/// Run a performance workload without competing test processes.
+pub fn with_exclusive_workload<T>(f: impl FnOnce() -> T) -> T {
+    workload_gate::with_lock(workload_gate::Mode::Exclusive, f)
+}
+
+/// Existing full-UI call sites are ordinary shared workloads.
 pub fn with_perf_lock<T>(f: impl FnOnce() -> T) -> T {
-    let _guard = lock_perf_tests();
-    f()
+    with_shared_workload(f)
 }
 
-fn lock_perf_tests() -> MutexGuard<'static, ()> {
-    static PERF_TEST_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
-    let perf_lock = PERF_TEST_LOCK.get_or_init(|| Mutex::new(()));
-    match perf_lock.lock() {
-        Ok(guard) => guard,
-        // Coverage shards intentionally probe failing paths; a prior panic
-        // must not cascade into unrelated later shards in the same process.
-        Err(poisoned) => poisoned.into_inner(),
-    }
-}
-
-/// Keep a `WowLuaEnv` alive under the global perf lock for the lifetime of a test.
+/// Keep a `WowLuaEnv` under the shared workload gate for the lifetime of a test.
 pub struct LockedEnv {
-    _guard: MutexGuard<'static, ()>,
+    _permit: workload_gate::Permit,
     env: WowLuaEnv,
 }
 
 pub fn lock_env(build: impl FnOnce() -> WowLuaEnv) -> LockedEnv {
-    let guard = lock_perf_tests();
+    let permit = workload_gate::acquire(workload_gate::Mode::Shared)
+        .unwrap_or_else(|error| panic!("acquire shared workload gate: {error}"));
     let env = build();
-    LockedEnv { _guard: guard, env }
+    LockedEnv {
+        _permit: permit,
+        env,
+    }
 }
 
 impl Deref for LockedEnv {
@@ -106,6 +117,14 @@ macro_rules! prefork_full_ui_case {
 macro_rules! test_timeout {
     ($($body:tt)*) => {
         $crate::common::with_timeout(120, move || { $($body)* })
+    };
+}
+
+/// Run a performance test under the existing 120-second child timeout.
+#[macro_export]
+macro_rules! perf_test_timeout {
+    ($($body:tt)*) => {
+        $crate::common::with_performance_timeout(120, move || { $($body)* })
     };
 }
 
@@ -244,6 +263,7 @@ type EnvBuilder = fn() -> WowLuaEnv;
 // part of the shared test API while remaining unused in one specific target.
 const _: () = {
     let _ = with_timeout::<TimeoutBody> as fn(u64, TimeoutBody);
+    let _ = with_performance_timeout::<TimeoutBody> as fn(u64, TimeoutBody);
     let _ = with_perf_lock::<()> as fn(PerfBody);
     let _ = std::mem::size_of::<LockedEnv>();
     let _ = lock_env as fn(EnvBuilder) -> LockedEnv;

@@ -1,13 +1,14 @@
 use super::prefork_process::{
     configure_command_process_group, kill_process_group_and_child, signal_process_group,
 };
+use super::workload_gate::{self, Mode};
 use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, ExitStatus, Stdio};
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Once;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
@@ -19,14 +20,14 @@ const TERMINATION_GRACE: Duration = Duration::from_millis(100);
 static HANDSHAKE_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 static CHILD_HANDSHAKE: Once = Once::new();
 
-pub(super) fn run<F: FnOnce() + Send + 'static>(secs: u64, closure: F) {
+pub(super) fn run<F: FnOnce() + Send + 'static>(secs: u64, mode: Mode, closure: F) {
     let test_name = current_test_name();
     if let Some(guarded_test) = env::var_os(CHILD_TEST_ENV) {
         run_guarded_child(&test_name, guarded_test, closure);
         return;
     }
 
-    run_parent(&test_name, secs, closure);
+    workload_gate::with_lock(mode, || run_parent(&test_name, secs, closure));
 }
 
 fn current_test_name() -> String {
@@ -36,11 +37,7 @@ fn current_test_name() -> String {
         .to_string()
 }
 
-fn run_guarded_child<F: FnOnce()>(
-    test_name: &str,
-    guarded_test: std::ffi::OsString,
-    closure: F,
-) {
+fn run_guarded_child<F: FnOnce()>(test_name: &str, guarded_test: std::ffi::OsString, closure: F) {
     assert_eq!(
         guarded_test.to_string_lossy(),
         test_name,

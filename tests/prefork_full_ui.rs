@@ -7,6 +7,8 @@ mod prefork;
 mod prefork_full_ui_preload;
 #[path = "test_keybindings_panels_detail.rs"]
 mod test_keybindings_panels_detail;
+#[path = "common/workload_gate.rs"]
+mod workload_gate;
 
 include!(concat!(env!("OUT_DIR"), "/integration_tests.rs"));
 
@@ -230,9 +232,11 @@ fn main() -> ExitCode {
         ..Config::default()
     };
     let full_ui_cases = full_ui_cases();
-    prefork::run_with_setup(&full_ui_cases, config, || {
-        run_conformance_subprocess()?;
-        prefork_full_ui_preload::preload_full_game_ui()
+    workload_gate::with_lock(workload_gate::Mode::Shared, || {
+        prefork::run_with_setup(&full_ui_cases, config, || {
+            run_conformance_subprocess()?;
+            prefork_full_ui_preload::preload_full_game_ui()
+        })
     })
 }
 
