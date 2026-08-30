@@ -1,28 +1,30 @@
 # Test Runtime Optimization Boundaries
 
-Commit `cfa2e2e6d7ab8ab7f75d9ff34bd22b69122376f3` narrowed `Blizzard_SharedMapDataProviders` tests from a full Blizzard game load to an exact dependency-closure fixture. The measured bottleneck is repeated `WowLuaEnv` and addon setup, not timeout polling, process launch, prefork scheduling, or libtest target topology. Exact closure fixtures are safe for ordinary addon surface/load tests when full-game ordering is not the behavior under test; mutable environments must remain isolated per test.
+Commit `e1f9b210b1790258a6f865cc3df0e85f6364e8e0` verified the `Blizzard_SharedMapDataProviders` exact dependency-closure fixture. The measured bottleneck is repeated `WowLuaEnv` and addon setup, not timeout polling, process launch, prefork scheduling, or libtest target topology. Exact closure fixtures are safe for ordinary addon surface/load tests when full-game ordering is not the behavior under test; mutable environments must remain isolated per test.
 
 ## Content
 
 ### Baseline and scope
 
-Before `cfa2e2e6d`, the 18-test `blizzard_shared_map_data_providers_loads` module ran its own full game-screen Blizzard load for the relevant tests. The controlled sequential baseline was:
+The 18-test `blizzard_shared_map_data_providers_loads` module previously ran a full game-screen Blizzard load. Controlled measurements compare that baseline with the verified closure fixture at `e1f9b210b1790258a6f865cc3df0e85f6364e8e0`:
 
-- parent revision: `6ca841f38d64b606511ba9abe67cc10ca502a979`
-- command: integration binary filtered to `blizzard_shared_map_data_providers_loads::`, `--nocapture`, `--test-threads=1`
-- result: 18 passed in 20.10 seconds; 20.14 seconds elapsed
-- resource sample: maximum RSS 1,246,460 KiB; 19.06 user seconds and 0.90 system seconds
-- artifact: `/tmp/pi-shared-map-baseline-sequential.result.json`
+| Run | Baseline | Fixed closure | Change |
+|---|---|---|---|
+| Parallel | 18/18; 6.01s libtest, 6.083s wall, 34.03s user, 4.60s system, 6,412,848 KiB RSS | 18/18; 0.83s libtest, 0.85s wall, 3.25s user, 0.36s system, 1,067,108 KiB RSS | wall −86.03%; RSS −83.36% |
+| Sequential | 18/18; 20.10s libtest, 20.140s wall, 19.06s user, 0.90s system, 1,246,460 KiB RSS | 18/18; 2.96s libtest, 2.97s wall, 2.78s user, 0.17s system, 535,624 KiB RSS | wall −85.25%; RSS −57.03% |
 
-Post-change runtime numbers remain pending. The available post-commit inspection records the source diff and clean inspection, but does not provide verifier timing evidence.
+The fixed runs retain the same fresh-environment and direct-root-load test boundary; only the dependency closure is narrowed.
 
-### Safe optimization: exact dependency closure
+### Root cause and verified fix
 
-`cfa2e2e6d` replaces the module's full-game loader with
-`build_blizzard_addon_closure_env(&ui_dir, &["Blizzard_SharedMapDataProviders"], &[])` and uses the shared helpers in `tests/common/blizzard_addon_harness.rs`:
+The bare root closure was invalid: only 16/18 tests passed. Top-level Lua relied on normal eager ambient order, although the target TOC declares no dependencies. The closure therefore lacked SharedXML color helpers and `CVarMapCanvasDataProviderMixin::Init`; the downstream failure surfaced as a nil `DelveEntrancePinMixin`.
+
+`e1f9b210b1790258a6f865cc3df0e85f6364e8e0` supplies ordered `BlizzardAddonOverride` implicit dependencies: `Blizzard_SharedXML`, then `Blizzard_MapCanvas`. The module still uses `build_blizzard_addon_closure_env` with a fresh game-screen environment and direct `Blizzard_SharedMapDataProviders` root load, followed by its existing post-load workaround step. It does not load panel/full UI state and does not share mutable environments.
+
+The shared helpers in `tests/common/blizzard_addon_harness.rs` remain the fixture boundary:
 
 - `new_blizzard_addon_env` creates a fresh game-screen environment;
-- `build_blizzard_addon_closure_env` discovers and loads the root's transitive TOC dependencies in order;
+- `build_blizzard_addon_closure_env` discovers and loads the root's transitive TOC dependencies plus explicit implicit roots in order;
 - `load_blizzard_addon_closure_into_env` applies the same closure to an existing fresh environment.
 
 This is the correct fixture for addon API, TOC, registration, and load-state assertions that do not require the complete game startup sequence. It preserves dependency order without paying for unrelated Blizzard addons. It is not a replacement for full-startup tests: `Blizzard_SharedMapDataProviders` remains ineligible for the finalized prefork parent because its fixture loads before post-load workarounds and omits startup events.
@@ -43,15 +45,17 @@ Never share a mutable `WowLuaEnv` across tests. Tests mutate Lua globals, frame 
 
 ## Sources
 
-- [narrowed SharedMapDataProviders test](../../../tests/blizzard_shared_map_data_providers_loads.rs) — commit `cfa2e2e6d` closure fixture and retained assertions
+- [SharedMapDataProviders test](../../../tests/blizzard_shared_map_data_providers_loads.rs) — commit `e1f9b210b1790258a6f865cc3df0e85f6364e8e0`, implicit dependency override, and retained assertions
 - [Blizzard addon closure harness](../../../tests/common/blizzard_addon_harness.rs) — fresh environments and dependency-ordered closure loading
+- [Blizzard addon override type](../../../src/loader/mod.rs) — ordered implicit dependency contract
 - [timeout re-exec implementation](../../../tests/common/timeout_reexec.rs) — exact child launch, polling, output drains, handshake, and cleanup
 - [timeout re-exec tests](../../../tests/timeout_reexec.rs) — panic, timeout, sibling, descendant, and nested-guard proofs
 - [prefork runner](../../../tests/common/prefork.rs) — bounded workers and isolated child execution
 - [generated integration harness](../../../build.rs) — top-level module discovery and target generation
 - [Blizzard UI test lanes](../reference/blizzard-ui-test-lanes.md) — unit versus addon-bootstrap test intent
 - [Prefork test harness](../systems/prefork-test-harness.md) — full-UI preload contract and eligibility boundary
-- `/tmp/pi-shared-map-baseline-sequential.result.json` — controlled pre-change baseline
+- `/tmp/pi-shared-map-baseline-sequential.result.json` — ephemeral controlled sequential baseline
+- `/tmp/pi-shared-map-fixed-*` — ephemeral fixed parallel/sequential measurements; repository claims remain understandable without these artifacts
 
 ## See Also
 
