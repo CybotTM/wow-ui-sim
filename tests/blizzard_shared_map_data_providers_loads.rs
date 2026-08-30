@@ -4,12 +4,19 @@ use crate::common::blizzard_addon_harness::{
     build_blizzard_addon_closure_env, load_blizzard_addon_closure_into_env,
     new_blizzard_addon_env,
 };
-use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file};
+use wow_ui_sim::loader::{
+    BlizzardAddonOverride, discover_blizzard_addons_for_screen, find_toc_file,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 const ROOT_ADDON: &str = "Blizzard_SharedMapDataProviders";
+const IMPLICIT_DEPENDENCIES: &[&str] = &["Blizzard_SharedXML", "Blizzard_MapCanvas"];
+const ADDON_OVERRIDES: &[BlizzardAddonOverride<'static>] = &[BlizzardAddonOverride {
+    addon: ROOT_ADDON,
+    extra_roots: IMPLICIT_DEPENDENCIES,
+}];
 
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
@@ -104,7 +111,8 @@ const SHARED_PIN_MIXINS: &[&str] = &[
 ];
 
 fn load_map_data_providers_closure() -> WowLuaEnv {
-    let (env, _) = build_blizzard_addon_closure_env(&blizzard_ui_dir(), &[ROOT_ADDON], &[]);
+    let (env, _) =
+        build_blizzard_addon_closure_env(&blizzard_ui_dir(), &[ROOT_ADDON], ADDON_OVERRIDES);
     env.apply_post_load_workarounds();
     env
 }
@@ -376,7 +384,7 @@ fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
          LoadOnDemand=1 keeps the addon out of the eager pool"
     );
 
-    load_blizzard_addon_closure_into_env(&env, &ui, &[ROOT_ADDON], &[]);
+    load_blizzard_addon_closure_into_env(&env, &ui, &[ROOT_ADDON], ADDON_OVERRIDES);
 
     let after: bool = env
         .eval("return C_AddOns.IsAddOnLoaded('Blizzard_SharedMapDataProviders')")
