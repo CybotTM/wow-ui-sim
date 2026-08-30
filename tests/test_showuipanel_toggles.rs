@@ -468,6 +468,10 @@ fn open_trade_skill_opens_blacksmithing_panel() {
 fn toggle_guild_frame_opens_and_closes_communities_panel() {
     test_timeout! {
         let env = setup_env();
+        let (loaded, reason): (bool, Option<String>) = env
+            .eval(r#"return C_AddOns.LoadAddOn("Blizzard_Communities")"#)
+            .expect("Blizzard_Communities load should return");
+        assert!(loaded, "Blizzard_Communities should load: {reason:?}");
 
         let result: String = env.eval(r#"
             if not ToggleGuildFrame then
