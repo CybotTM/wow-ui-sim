@@ -147,6 +147,9 @@ do
     if settingsPanel == nil and type(CreateFrame) == "function" then
         settingsPanel = CreateFrame("Frame", "SettingsPanel", UIParent)
     end
+    if rawget(Settings, "__wow_settings_surface_panel") == settingsPanel then
+        return
+    end
     if type(settingsPanel) == "table" then
         local container = ensure_settings_frame(settingsPanel, "Container", "Frame")
         local settingsList = ensure_settings_frame(container, "SettingsList", "Frame")
@@ -337,6 +340,8 @@ do
             return category
         end
     end
+
+    rawset(Settings, "__wow_settings_surface_panel", settingsPanel)
 end
 
 if rawget(_G, "InterfaceOptions_AddCategory") == nil then
@@ -356,6 +361,10 @@ end
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(SETTINGS_SURFACE_DEFAULTS_LUA)?;
     Ok(())
+}
+
+pub(crate) fn patch(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(SETTINGS_SURFACE_DEFAULTS_LUA);
 }
 
 #[cfg(test)]
@@ -464,6 +473,47 @@ mod tests {
                 "Probe".to_string()
             )
         );
+    }
+
+    #[test]
+    fn reconciles_replacement_settings_panel_idempotently() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            local interfaceCategory = {
+                id = 1,
+                GetID = function(self) return self.id end,
+                GetName = function() return "Interface" end,
+            }
+            Settings = {
+                INTERFACE_CATEGORY_ID = 1,
+                AUDIO_CATEGORY_ID = 2,
+                GetCategory = function(id)
+                    if id == 1 then
+                        return interfaceCategory
+                    end
+                end,
+                OpenToCategory = function() end,
+            }
+            SettingsPanel = CreateFrame("Frame", "ReplacementSettingsPanel", UIParent)
+            SettingsPanel:Hide()
+            "#,
+        )
+        .expect("fixture should replace the Settings panel and namespace");
+
+        crate::lua_api::workarounds::apply(&env);
+        crate::lua_api::workarounds::apply(&env);
+
+        let result: (bool, i32) = env
+            .eval(
+                r#"
+                Settings.OpenToCategory(Settings.INTERFACE_CATEGORY_ID)
+                return SettingsPanel:IsShown(), SettingsPanel:GetCurrentCategory():GetID()
+                "#,
+            )
+            .expect("replacement Settings panel probe should run");
+
+        assert_eq!(result, (true, 1));
     }
 
     #[test]

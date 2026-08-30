@@ -17641,7 +17641,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/settings_surface_defaults.rs",
           "summary": "Current settings defaults model partial Settings categories and panel helpers, but no C_SettingsUtil notification method or SETTINGS_LOADED dispatch.",
-          "source_hash": "db2d636b9e9276e3ddbc35cbfeacc82ee331245923b5b57922237a9cae540b12"
+          "source_hash": "d2ca33e6c160d06b49e9108eeac9bde5cc5fb16a135327dce1c8de394d111c93"
         },
         {
           "kind": "source",
@@ -17676,7 +17676,7 @@
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/settings_surface_defaults.rs",
           "summary": "Current settings defaults model Settings.OpenToCategory and panel visibility only, not the C_SettingsUtil API or scroll-target behavior.",
-          "source_hash": "db2d636b9e9276e3ddbc35cbfeacc82ee331245923b5b57922237a9cae540b12"
+          "source_hash": "d2ca33e6c160d06b49e9108eeac9bde5cc5fb16a135327dce1c8de394d111c93"
         },
         {
           "kind": "source",
