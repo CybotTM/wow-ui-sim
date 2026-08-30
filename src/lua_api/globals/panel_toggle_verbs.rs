@@ -312,6 +312,7 @@ fn toggle_encounter_journal(state: &mut LuaState) -> LuaResult<u32> {
 define_toggle!(toggle_quest_log, "QuestLog", "QuestLogFrame");
 define_toggle!(toggle_world_map, "WorldMap", "WorldMapFrame");
 define_toggle!(toggle_friends_frame, "Friends", "FriendsFrame");
+#[cfg(not(feature = "client-retail"))]
 define_toggle!(toggle_guild_frame, "Guild", "GuildFrame");
 define_toggle!(toggle_help_frame, "Help", "HelpFrame");
 fn toggle_social_panel(state: &mut LuaState) -> LuaResult<u32> {
@@ -346,6 +347,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ToggleQuestLog", toggle_quest_log)?;
     LuaApiMut::register_function(lua, "ToggleWorldMap", toggle_world_map)?;
     LuaApiMut::register_function(lua, "ToggleFriendsFrame", toggle_friends_frame)?;
+    #[cfg(not(feature = "client-retail"))]
     LuaApiMut::register_function(lua, "ToggleGuildFrame", toggle_guild_frame)?;
     LuaApiMut::register_function(lua, "ToggleHelpFrame", toggle_help_frame)?;
     LuaApiMut::register_function(lua, "ToggleSocialPanel", toggle_social_panel)?;
