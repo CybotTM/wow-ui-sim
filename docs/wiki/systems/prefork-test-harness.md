@@ -73,4 +73,5 @@ Sampled process-tree RSS rose from 1,196,596 KiB to 1,523,432 KiB. This metric d
 
 - [[blizzard-ui-test-lanes]] — existing Blizzard UI test organization
 - [[development-phases]] — broader test and performance work
+- [[test-runtime-optimization]] — measured test-runner alternatives and the exact dependency-closure fixture boundary
 - [[bytecode-cache-growth]] — cache size limits and persistence boundaries

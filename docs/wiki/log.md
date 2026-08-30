@@ -1,3 +1,7 @@
+## [2026-08-30] investigation | Measure test-runtime setup cost and narrow addon closures
+
+Audited commit `cfa2e2e6d7ab8ab7f75d9ff34bd22b69122376f3`. Added [[test-runtime-optimization]]: the controlled pre-change `blizzard_shared_map_data_providers_loads` baseline was 18 tests in 20.14 seconds elapsed with 1,246,460 KiB maximum RSS; post-change timing remains pending because available inspection evidence contains no verifier measurement. Timeout re-exec polling/launch, prefork worker tuning, libtest wrappers, and grouped or split targets were rejected as optimization targets because setup dominates or compile duplication does not remove repeated full-UI initialization. Recorded exact dependency-closure fixtures as the safe path for ordinary addon surface/load tests, with a fresh mutable `WowLuaEnv` per test. Updated [[prefork-test-harness]] cross-links; no spec change was warranted.
+
 ## [2026-08-29] audit | Correct typed diagnostic forwarding summary
 
 Audited the documentation added for commits `01026c8b6` and `3ecbc33fc`. Corrected the index and log summaries to distinguish nested diagnostic forwarding from top-level runtime diagnostic retention/draining, and linked the typed diagnostic record definitions in `src/lua_api/state_types/runtime.rs`. No API claims or unsupported behavior changed.
