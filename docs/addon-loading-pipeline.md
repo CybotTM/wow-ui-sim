@@ -337,6 +337,6 @@ Accessors: `size()`, `anchors()`, `scripts()`, `layers()`, `all_frame_elements()
 1. **Startup** (`main.rs`): Apply resource limits, create `WowLuaEnv`, set addon base paths, configure SavedVariables
 2. **Blizzard Addons**: Load in hardcoded dependency order
 3. **Third-Party Addons**: Scan `./Interface/AddOns`, load alphabetically
-4. **Post-Load Scripts**: Execute global initialization
+4. **Post-Load Scripts**: Execute global initialization and reconcile replacement `_G.SettingsPanel`/`Settings` surfaces before category registration/opening
 5. **Startup Events**: Fire `ADDON_LOADED`, hide runtime-hidden frames
 6. **GUI/Dump/Screenshot**: Launch interactive UI, dump frame tree, or render screenshot

@@ -1,3 +1,7 @@
+## [2026-08-30] audit | Document idempotent SettingsPanel reconciliation
+
+Audited commit `5715008bb`. Updated [[lua-api]] and [[addon-loading]] plus the maintained API and loader docs: post-load workarounds reconcile replacement `_G.SettingsPanel`/`Settings` surfaces before category registration/opening and remain idempotent for the same panel identity. `C_SettingsUtil` APIs remain explicitly unsupported. No new page, spec, or changelog was warranted.
+
 ## [2026-08-30] audit | Document retail Guild toggle ownership
 
 Audited commit `427ae6cca58327b02d95d73dc23732778269bbfa`. Updated [[lua-api]], the maintained Lua API reference, and the keybinding system docs: retail leaves `ToggleGuildFrame()` to `Blizzard_Communities`, while non-retail retains the simulator fallback. No new page, spec, or changelog was warranted.

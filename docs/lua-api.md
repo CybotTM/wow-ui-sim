@@ -347,14 +347,15 @@ Enum.DrawLayer = { BACKGROUND=1, BORDER=2, ARTWORK=3, OVERLAY=4, HIGHLIGHT=5 }
 
 ## Workarounds
 
-**File:** `src/lua_api/workarounds.rs`
+**File:** `src/lua_api/workarounds/mod.rs`
 
 Applied after addon loading via `env.apply_post_load_workarounds()`:
 
-1. **UpdateMicroButtons** -- Stub out micro button updates
-2. **Map Canvas Scroll** -- Initialize targetScale/currentScale on WorldMapFrame.ScrollContainer
-3. **Status Bar Animations** -- Provide LevelUpMaxAlphaAnimation stub
-4. **Character Frame Subframes** -- Create missing subframes from CHARACTERFRAME_SUBFRAMES list
+1. **Settings surface** -- Reconcile a replacement `_G.SettingsPanel`/`Settings` pair before category registration and opening; repeated application is idempotent for the same panel
+2. **UpdateMicroButtons** -- Stub out micro button updates
+3. **Map Canvas Scroll** -- Initialize targetScale/currentScale on WorldMapFrame.ScrollContainer
+4. **Status Bar Animations** -- Provide LevelUpMaxAlphaAnimation stub
+5. **Character Frame Subframes** -- Create missing subframes from CHARACTERFRAME_SUBFRAMES list
 
 ---
 
@@ -400,4 +401,5 @@ Applied after addon loading via `env.apply_post_load_workarounds()`:
 | `globals/mixin_api.rs` | UI mixin tables |
 | `globals/c_stubs_api.rs` | C_* namespace stubs |
 | `animation/` | Animation types, ticking |
-| `workarounds.rs` | Post-load workarounds |
+| `workarounds/mod.rs` | Post-load workaround ordering |
+| `workarounds/temporary/settings_surface_defaults.rs` | Replacement SettingsPanel/Settings reconciliation |

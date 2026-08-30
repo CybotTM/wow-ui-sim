@@ -73,6 +73,8 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 **Guild panel toggle ownership** — `ToggleGuildFrame()` remains a simulator fallback on non-retail profiles. Retail leaves the global unpublished by the simulator so `Blizzard_Communities` supplies the canonical implementation after loading; a bare retail environment therefore has no `ToggleGuildFrame`, while reduced fixtures must load that addon before invoking it.
 
+**Settings panel surface** — The post-load workaround in `settings_surface_defaults.rs` reconciles the canonical `_G.SettingsPanel`/`Settings` pair when Blizzard replaces either surface, preserving existing members while supplying the panel/category helpers needed by later registration and opening. Reapplying post-load workarounds is idempotent for the same panel identity. This remains a partial compatibility surface; `C_SettingsUtil.NotifySettingsLoaded` and `C_SettingsUtil.OpenSettingsPanel` are still unsupported.
+
 **Focused compatibility boundaries** — `EJ_SetLootFilter()` accepts integer Lua values and numeric strings locally; nil, invalid, and non-integral inputs become zero without changing global argument coercion. Chat startup assigns `DEFAULT_CHAT_FRAME` whenever `ChatFrame1` exists, while `ChatFrame1.editBox` remains conditional on `ChatFrame1EditBox`. Temporary chat-window state also backs `SetChatWindowName()` and `SetChatWindowDocked()` round-trips through `GetChatWindowInfo()`; these fields remain in the compatibility table until saved chat-layout state is modeled.
 
 ## C_* Namespaces
@@ -107,6 +109,7 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 - [spell_description_resolver.rs](../../../src/spell_description_resolver.rs) — shared spell-description token resolver
 - [container_portrait_texture.rs](../../../src/lua_api/workarounds/temporary/container_portrait_texture.rs) — retail texture fileDataID proof
 - [item_button_helper_defaults.rs](../../../src/lua_api/workarounds/temporary/item_button_helper_defaults.rs) — item-button texture fileDataID proof
+- [settings_surface_defaults.rs](../../../src/lua_api/workarounds/temporary/settings_surface_defaults.rs) — post-load replacement SettingsPanel/Settings reconciliation and idempotence proof
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - [c_container.rs](../../../src/c_api/item_spell/c_container.rs) — state-backed bag-slot flags and backpack queries
 - [guild_info.rs](../../../src/lua_api/globals/guild_info.rs) — C_GuildInfo namespace registration and state-backed management methods

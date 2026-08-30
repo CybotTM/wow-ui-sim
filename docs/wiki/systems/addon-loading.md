@@ -108,7 +108,7 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 1. Create `WowLuaEnv`, set paths, configure SavedVariables, import account `bindings-cache.wtf`, and import `ServerSnapshotDB` action bars/keybindings when present
 2. Load Blizzard startup addons in dependency order (full load for non-LoD addons only; no bootstrap-only LoD pass)
 3. Load third-party startup addons alphabetically/dependency-sorted, overlaying `ServerSnapshotDB` addon states when present (same full-load vs bootstrap-only split)
-4. Apply post-load workarounds (UpdateMicroButtons stub, WorldMapFrame scroll init, etc.)
+4. Apply post-load workarounds, including idempotent reconciliation of replacement `_G.SettingsPanel`/`Settings` surfaces before later category registration/opening (plus UpdateMicroButtons and WorldMapFrame scroll initialization)
 5. Fire startup events: `ADDON_LOADED("WoWUISim")`, `VARIABLES_LOADED`, `PLAYER_LOGIN`, `PLAYER_ENTERING_WORLD(true, false)`, `UPDATE_BINDINGS`, `DISPLAY_SIZE_CHANGED`, `UI_SCALE_CHANGED`
 6. Launch GUI, dump frame tree, or render screenshot
 
@@ -142,6 +142,7 @@ Nested runtime-addon loads finalize failures, nil observations, and missing requ
 - [secure environment](../../../src/lua_api/globals/security/secure_env.rs) — separate secure environment and secure publication recording
 - [precompiled lifecycle helpers](../../../src/loader/precompiled.rs) — raw `_G.self` receiver snapshot/restore
 - [environment cleanup restore](../../../src/lua_api/workarounds/temporary/environment_cleanup_restore.rs) — post-cleanup namespace restoration regression proof
+- [settings surface defaults](../../../src/lua_api/workarounds/temporary/settings_surface_defaults.rs) — post-load replacement SettingsPanel/Settings reconciliation
 - [startup warning tests](../../../tests/startup_warnings.rs) and [nil-symbol tests](../../../tests/addon_nil_symbol_report.rs) — zero-failure startup health, typed runtime diagnostic draining, attribution/deduplication, and direct-global versus explicit-`_G` behavior
 - rilua commits `1a7c9de` and `3630419` — VM-scoped lookup-origin tracking and the read-only `debug.isglobalindex()` query
 - [blizzard-ui-files](../../../data/blizzard-ui-files) — committed per-profile Blizzard UI cache manifests, including bootstrap files needed by each active profile cache

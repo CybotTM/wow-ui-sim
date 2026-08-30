@@ -6,6 +6,10 @@ Audited commits `f6b1077b8e1740c9efabd44ebda061fab1b5f0f6` and `6141fb0bdbcac4de
 
 Audited commit `0caee6eb94d672bbadb37bc9bfbea4b84be59c18`. Updated [[frame-data-flow]] and the maintained frame data-flow reference: `EditModeSystemMixin` now seeds seven callable native `Base` aliases during mixin application, before prepended lifecycle handlers run; missing native methods propagate as template-application errors. Updated the index summary; no new page, spec, or changelog was warranted. Protected `src/c_api/c_string_util.rs` and concurrent worktree changes were untouched.
 
+## [2026-08-30] audit | Document idempotent SettingsPanel reconciliation
+
+Audited commit `5715008bb`. Updated [[lua-api]] and [[addon-loading]] plus the maintained API and loader docs: post-load workarounds reconcile replacement `_G.SettingsPanel`/`Settings` surfaces before category registration/opening and remain idempotent for the same panel identity. `C_SettingsUtil` APIs remain explicitly unsupported. No new page, spec, or changelog was warranted; protected `src/c_api/c_string_util.rs`, code/tests, manifest, vendor/cache, and active agent paths were untouched.
+
 ## [2026-08-30] audit | Document retail Guild toggle ownership
 
 Audited commit `427ae6cca58327b02d95d73dc23732778269bbfa`. Updated [[lua-api]], the maintained Lua API reference, and `keybinding-system.md`: retail does not register a simulator `ToggleGuildFrame()` fallback, so `Blizzard_Communities` supplies the canonical implementation after load; non-retail keeps the fallback. Added source and focused-test references. No new page, spec, or changelog was warranted; protected `src/c_api/c_string_util.rs` and concurrent worktree changes were untouched.
