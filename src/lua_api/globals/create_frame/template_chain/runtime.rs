@@ -412,8 +412,8 @@ fn apply_child_template_properties(
         state,
         child_id,
         frame.combined_mixin().as_deref(),
-    );
-    super::apply_block_mixins(state, child_id, frame.mixins());
+    )?;
+    super::apply_block_mixins(state, child_id, frame.mixins())?;
     super::apply_template_key_values(state, child_id, frame.all_key_values());
     if let Some(scripts) = frame.scripts() {
         super::apply_template_scripts(state, child_id, scripts)?;

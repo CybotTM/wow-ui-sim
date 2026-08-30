@@ -231,9 +231,9 @@ fn apply_chain_entries(
     for entry in chain {
         runtime::ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
         apply_template_partition_marker(state, frame_id, &entry.frame);
-        apply_frame_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
+        apply_frame_mixins(state, frame_id, entry.frame.combined_mixin().as_deref())?;
         let previous_local_source = install_template_local_source(state, entry.local_source);
-        apply_block_mixins(state, frame_id, entry.frame.mixins());
+        apply_block_mixins(state, frame_id, entry.frame.mixins())?;
         apply_template_key_values(state, frame_id, entry.frame.all_key_values());
         restore_template_local_source(state, previous_local_source);
         let entry_is_intrinsic = entry.frame.intrinsic == Some(true);
@@ -347,8 +347,10 @@ pub(super) fn apply_block_mixins(
     state: &mut LuaState,
     frame_id: u64,
     mixins: Option<&crate::xml::MixinsXml>,
-) {
-    let Some(mixins) = mixins else { return };
+) -> LuaResult<()> {
+    let Some(mixins) = mixins else {
+        return Ok(());
+    };
     for mixin in &mixins.entries {
         apply_frame_mixin_with_partitions(
             state,
@@ -358,8 +360,9 @@ pub(super) fn apply_block_mixins(
             mixin.target_partition.as_deref(),
             mixin.inbound_partition.as_deref(),
             mixin.secure_delegates.unwrap_or(false),
-        );
+        )?;
     }
+    Ok(())
 }
 
 fn apply_template_key_values<'a>(
