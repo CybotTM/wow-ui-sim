@@ -2,11 +2,13 @@ use crate::loader::LoadError;
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::globals::inventory_slot::REGISTERED_GET_INVENTORY_SLOT_INFO_KEY;
 use crate::lua_api::methods::{
-    borrow_lua, borrow_state, create_string, registry_get, state_handle, table_get_static,
-    table_set_static,
+    borrow_lua, borrow_state, create_string, create_table, registry_get, registry_set,
+    state_handle, table_get_static, table_set_static,
 };
 use rilua::{Val, vm::state::LuaState};
 use std::{collections::HashSet, io};
+
+const TRANSMOG_SCOPE_ENV_REGISTRY_KEY: &str = "__transmog_inventory_slot_scope_env";
 
 pub(super) fn load_runtime_addon(state: &mut LuaState, addon_name: &str) -> Result<(), LoadError> {
     let loader_env = LoaderEnv::from_parts_active(
@@ -144,14 +146,45 @@ fn with_registered_inventory_slot_info<T>(
     state: &mut LuaState,
     load: impl FnOnce(&mut LuaState) -> Result<T, LoadError>,
 ) -> Result<T, LoadError> {
+    let sim_state = state_handle(state).map_err(|error| LoadError::Lua(error.to_string()))?;
     let global = Val::Table(state.global);
-    let previous = table_get_static(state, global, "GetInventorySlotInfo");
+    let previous_global = table_get_static(state, global, "GetInventorySlotInfo");
     let registered = registry_get(state, REGISTERED_GET_INVENTORY_SLOT_INFO_KEY);
+    let scope_env = create_inventory_slot_scope_env(state, registered);
+    registry_set(state, TRANSMOG_SCOPE_ENV_REGISTRY_KEY, scope_env);
+
+    let previous_scope_env = {
+        let mut sim = sim_state.borrow_mut();
+        sim.loading_scoped_script_env.replace(scope_env)
+    };
     table_set_static(state, global, "GetInventorySlotInfo", registered);
 
     let result = load(state);
-    table_set_static(state, global, "GetInventorySlotInfo", previous);
+
+    table_set_static(state, global, "GetInventorySlotInfo", previous_global);
+    sim_state.borrow_mut().loading_scoped_script_env = previous_scope_env;
+    registry_set(state, TRANSMOG_SCOPE_ENV_REGISTRY_KEY, Val::Nil);
     result
+}
+
+fn create_inventory_slot_scope_env(state: &mut LuaState, registered: Val) -> Val {
+    let scope_env = create_table(state);
+    let metatable = create_table(state);
+    let global = Val::Table(state.global);
+    table_set_static(state, scope_env, "GetInventorySlotInfo", registered);
+    table_set_static(state, metatable, "__index", global);
+    table_set_static(state, metatable, "__newindex", global);
+
+    let (Val::Table(scope_ref), Val::Table(metatable_ref)) = (scope_env, metatable) else {
+        unreachable!("created scope environment and metatable must be tables");
+    };
+    state
+        .gc
+        .tables
+        .get_mut(scope_ref)
+        .expect("created scope environment must remain live")
+        .set_metatable(Some(metatable_ref));
+    scope_env
 }
 
 fn load_runtime_addon_files_unscoped(
@@ -287,6 +320,15 @@ mod tests {
             let values = call_function_state(state, active, &[slot_name])
                 .expect("registered inventory slot function should remain callable");
             assert_eq!(values, Val::Num(1.0));
+            let probe = LuaApiMut::load_bytes(
+                state,
+                b"return GetInventorySlotInfo('HeadSlot')",
+                "transmog-scope-probe",
+            )
+            .expect("scope probe should compile");
+            let probed = call_function_state(state, Val::Function(probe.gc_ref()), &[])
+                .expect("bare global should resolve inside scope");
+            assert_eq!(probed, Val::Num(1.0));
             Err(LoadError::Lua("expected load failure".to_string()))
         });
 
