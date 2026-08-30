@@ -1,3 +1,7 @@
+## [2026-08-30] audit | Document EditMode base-alias initialization
+
+Audited commit `0caee6eb94d672bbadb37bc9bfbea4b84be59c18`. Updated [[frame-data-flow]] and the maintained frame data-flow reference: `EditModeSystemMixin` now seeds seven callable native `Base` aliases during mixin application, before prepended lifecycle handlers run; missing native methods propagate as template-application errors. Updated the index summary; no new page, spec, or changelog was warranted. Protected `src/c_api/c_string_util.rs` and concurrent worktree changes were untouched.
+
 ## [2026-08-30] audit | Document retail Guild toggle ownership
 
 Audited commit `427ae6cca58327b02d95d73dc23732778269bbfa`. Updated [[lua-api]], the maintained Lua API reference, and `keybinding-system.md`: retail does not register a simulator `ToggleGuildFrame()` fallback, so `Blizzard_Communities` supplies the canonical implementation after load; non-retail keeps the fallback. Added source and focused-test references. No new page, spec, or changelog was warranted; protected `src/c_api/c_string_util.rs` and concurrent worktree changes were untouched.
