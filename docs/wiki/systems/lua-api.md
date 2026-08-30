@@ -71,6 +71,8 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 **Modeled legacy globals** — `ClearTarget()` clears the current target and returns `true` iff a target existed; it returns `false` when no target was set and preserves the `PLAYER_TARGET_CHANGED` event. `IsTimerunningEnabled()` and `GetRemainingTimerunningSeasonSeconds()` read the simulator's Timerunning season state; the countdown is zero when no season is active. `GetGuildTabardFiles()` is registered on retail as well as classic profiles and returns the modeled guild-tabard file tuple used by Blizzard's guild-bank UI. The temporary `Kiosk` namespace defaults `IsEnabled()` and `IsCompetitiveModeEnabled()` to `false` and `GetKioskLoginInfo()` to three `nil` values while preserving existing members.
 
+**Guild panel toggle ownership** — `ToggleGuildFrame()` remains a simulator fallback on non-retail profiles. Retail leaves the global unpublished by the simulator so `Blizzard_Communities` supplies the canonical implementation after loading; a bare retail environment therefore has no `ToggleGuildFrame`, while reduced fixtures must load that addon before invoking it.
+
 **Focused compatibility boundaries** — `EJ_SetLootFilter()` accepts integer Lua values and numeric strings locally; nil, invalid, and non-integral inputs become zero without changing global argument coercion. Chat startup assigns `DEFAULT_CHAT_FRAME` whenever `ChatFrame1` exists, while `ChatFrame1.editBox` remains conditional on `ChatFrame1EditBox`. Temporary chat-window state also backs `SetChatWindowName()` and `SetChatWindowDocked()` round-trips through `GetChatWindowInfo()`; these fields remain in the compatibility table until saved chat-layout state is modeled.
 
 ## C_* Namespaces
@@ -137,7 +139,10 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 - [render_layers.rs](../../../src/lua_api/frame/methods/misc/render_layers.rs) — `SetWindow`/`GetWindow` owner attachment
 - [kiosk_namespace_defaults.rs](../../../src/lua_api/workarounds/temporary/kiosk_namespace_defaults.rs) — inert Kiosk defaults
 - [targeting_verbs.rs](../../../src/lua_api/globals/targeting_verbs.rs) — state-backed targeting globals, including `ClearTarget()`'s boolean result
+- [panel_toggle_verbs.rs](../../../src/lua_api/globals/panel_toggle_verbs.rs) — profile-scoped panel toggles, including retail `ToggleGuildFrame()` ownership
+- [panel_toggle_verbs.rs tests](../../../tests/panel_toggle_verbs.rs) — bare-environment retail/non-retail registration proof
 - [targeting_verbs.rs](../../../tests/targeting_verbs.rs) — targeting global behavior proofs
+- [test_showuipanel_toggles.rs](../../../tests/test_showuipanel_toggles.rs) — retail `Blizzard_Communities` load and guild-panel toggle proof
 - `/home/osso/Repos/simc/SpellDataDump/allspells.txt` — coefficient and variable formulas used for AP/health-scaled spell text
 
 ## See Also

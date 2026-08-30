@@ -198,6 +198,11 @@ patch_string_format
 
 `ClearTarget()` clears the current target and returns `true` iff a target existed; it returns `false` when no target was set and preserves the `PLAYER_TARGET_CHANGED` event.
 
+### Profile-scoped guild panel toggle
+**File:** `src/lua_api/globals/panel_toggle_verbs.rs`
+
+`ToggleGuildFrame()` is profile-scoped: non-retail profiles retain the simulator fallback, while retail does not register one and relies on the canonical Blizzard implementation supplied by `Blizzard_Communities` after that addon loads. A bare retail `WowLuaEnv` therefore reports `type(ToggleGuildFrame) == "nil"`; reduced fixtures must load `Blizzard_Communities` before invoking the toggle.
+
 ### CreateFrame
 **File:** `src/lua_api/globals/create_frame.rs`
 
