@@ -81,6 +81,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 
 **Guild management** — `C_GuildInfo.Invite(name)`, `Uninvite(name)`, `Promote(name)`, and `Leave()` share the state-backed handlers used by the deprecated `GuildInvite`, `GuildUninvite`, `GuildPromote`, and `GuildLeave` globals. They update the simulated guild roster/identity and emit the existing roster event behavior. Other `C_GuildInfo` management methods, including `Demote`, `Disband`, `SetLeader`, and `RemoveFromGuild`, remain unsupported because their distinct rank, leadership, disband, or GUID-backed semantics are not modeled.
 
+**Profession specialization boundary** — The temporary `C_ProfSpecs` fixture reports `SkillLineHasSpecialization(164) == true` for the modeled Blacksmithing skill line and `false` for unrelated skill line 165. It does not claim authoritative profession specialization-tree behavior: `GetChildrenForPath()` and the backing path/tree state remain unmodeled, so the full Professions specialization-panel integration test is explicitly ignored rather than supplied with guessed node data.
+
 ### `C_PlayerChoice` (PTR 12.1)
 
 `C_PlayerChoice` is a state-backed deterministic compatibility model. `GetCurrentPlayerChoiceInfo()` returns nil with the default empty state or a documented `PlayerChoiceInfo` table with nested options, buttons, and currency/item/reputation rewards when `SimState.player_choice.current` is seeded. `GetNumRerolls()`, `GetRemainingTime()`, and `IsWaitingForPlayerChoiceResponse()` expose local query state. `SendPlayerChoiceResponse()`, `RequestRerollPlayerChoice()`, and `OnUIClosed()` record local mutator intent. This does not model retail timing, server validation, reroll economics, or live service values.
@@ -108,6 +110,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - [c_container.rs](../../../src/c_api/item_spell/c_container.rs) — state-backed bag-slot flags and backpack queries
 - [guild_info.rs](../../../src/lua_api/globals/guild_info.rs) — C_GuildInfo namespace registration and state-backed management methods
+- [profession_specs_defaults.rs](../../../src/lua_api/workarounds/temporary/profession_specs_defaults.rs) — temporary seeded profession-specialization fixture and supported skill-line boundary
+- [test_showuipanel_lod.rs](../../../tests/test_showuipanel_lod.rs) — explicit unsupported Professions path/tree integration boundary
 - [guild_verbs.rs](../../../src/lua_api/globals/guild_verbs.rs) — shared guild management handlers
 - [blizzard_deprecated_guild_script_loads.rs](../../../tests/blizzard_deprecated_guild_script_loads.rs) — deprecated-global/C_GuildInfo identity and behavior proof
 - [voice_chat.rs](../../../src/lua_api/globals/missing_surface/voice_chat.rs) — state-backed active voice-channel queries

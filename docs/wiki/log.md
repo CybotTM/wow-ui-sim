@@ -1,3 +1,7 @@
+## [2026-08-30] audit | Document bounded profession specialization fixture
+
+Audited commits `f6b1077b8e1740c9efabd44ebda061fab1b5f0f6` and `6141fb0bdbcac4de70d8f85a66905334a1e12523`. Updated [[lua-api]] and the maintained Lua API reference: the temporary `C_ProfSpecs` fixture reports specialization only for modeled Blacksmithing skill line 164, unrelated 165 remains false, and authoritative path/tree semantics remain unsupported because `GetChildrenForPath()` and backing state are unmodeled. The full Professions specialization-panel test remains explicitly ignored; no spec, changelog, or new investigation page was warranted. Protected `src/c_api/c_string_util.rs` and concurrent code changes were untouched.
+
 ## [2026-08-30] audit | Document EditMode base-alias initialization
 
 Audited commit `0caee6eb94d672bbadb37bc9bfbea4b84be59c18`. Updated [[frame-data-flow]] and the maintained frame data-flow reference: `EditModeSystemMixin` now seeds seven callable native `Base` aliases during mixin application, before prepended lifecycle handlers run; missing native methods propagate as template-application errors. Updated the index summary; no new page, spec, or changelog was warranted. Protected `src/c_api/c_string_util.rs` and concurrent worktree changes were untouched.
