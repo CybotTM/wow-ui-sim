@@ -14,9 +14,13 @@
 //! BackSlot→Rear, Bag*Slot→Bag, ReagentBag0Slot→Bag, AmmoSlot→Ammo) cause
 //! "Not found" warnings for visible slots in the paperdoll UI.
 
+use crate::lua_api::methods::{registry_set, table_get_static};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+
+pub(crate) const REGISTERED_GET_INVENTORY_SLOT_INFO_KEY: &str =
+    "__registered_get_inventory_slot_info";
 
 const EMPTY_PROFESSION_SLOT_ICON: i32 = 130766;
 
@@ -108,6 +112,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         "GetInventorySlotInfo",
         get_inventory_slot_info,
     )?;
+    let registered = table_get_static(state, Val::Table(state.global), "GetInventorySlotInfo");
+    registry_set(state, REGISTERED_GET_INVENTORY_SLOT_INFO_KEY, registered);
     Ok(())
 }
 

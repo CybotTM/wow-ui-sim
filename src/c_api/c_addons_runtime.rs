@@ -1,7 +1,11 @@
 use crate::loader::LoadError;
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::methods::{borrow_lua, borrow_state, create_string, state_handle};
-use rilua::vm::state::LuaState;
+use crate::lua_api::globals::inventory_slot::REGISTERED_GET_INVENTORY_SLOT_INFO_KEY;
+use crate::lua_api::methods::{
+    borrow_lua, borrow_state, create_string, registry_get, state_handle, table_get_static,
+    table_set_static,
+};
+use rilua::{Val, vm::state::LuaState};
 use std::{collections::HashSet, io};
 
 pub(super) fn load_runtime_addon(state: &mut LuaState, addon_name: &str) -> Result<(), LoadError> {
@@ -59,7 +63,7 @@ fn load_runtime_addon_with_dependencies(
     }
 
     crate::loader::trace_load_addon(origin, format!("files {addon_name}"));
-    let mut result = load_runtime_addon_files(state, loader_env, &toc)?;
+    let mut result = load_runtime_addon_files(state, loader_env, addon_name, &toc)?;
     crate::lua_api::workarounds::apply_for_runtime_addon_load(loader_env, addon_name);
     loading_guard.commit_loaded();
     fire_addon_loaded(state, loader_env, addon_name);
@@ -122,6 +126,35 @@ fn apply_mists_runtime_preload(
 }
 
 fn load_runtime_addon_files(
+    state: &mut LuaState,
+    loader_env: &LoaderEnv<'_>,
+    addon_name: &str,
+    toc: &crate::toc::TocFile,
+) -> Result<crate::loader::LoadResult, LoadError> {
+    if addon_name == "Blizzard_TransmogShared" {
+        return with_registered_inventory_slot_info(state, |state| {
+            load_runtime_addon_files_unscoped(state, loader_env, toc)
+        });
+    }
+
+    load_runtime_addon_files_unscoped(state, loader_env, toc)
+}
+
+fn with_registered_inventory_slot_info<T>(
+    state: &mut LuaState,
+    load: impl FnOnce(&mut LuaState) -> Result<T, LoadError>,
+) -> Result<T, LoadError> {
+    let global = Val::Table(state.global);
+    let previous = table_get_static(state, global, "GetInventorySlotInfo");
+    let registered = registry_get(state, REGISTERED_GET_INVENTORY_SLOT_INFO_KEY);
+    table_set_static(state, global, "GetInventorySlotInfo", registered);
+
+    let result = load(state);
+    table_set_static(state, global, "GetInventorySlotInfo", previous);
+    result
+}
+
+fn load_runtime_addon_files_unscoped(
     state: &mut LuaState,
     loader_env: &LoaderEnv<'_>,
     toc: &crate::toc::TocFile,
@@ -225,4 +258,42 @@ fn fire_addon_loaded(state: &mut LuaState, loader_env: &LoaderEnv<'_>, addon_nam
     let addon_name_val = create_string(state, addon_name);
     let _ = loader_env.fire_event_with_args("ADDON_LOADED", &[addon_name_val]);
     state.top = saved_top;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::with_registered_inventory_slot_info;
+    use crate::loader::LoadError;
+    use crate::lua_api::WowLuaEnv;
+    use crate::lua_api::methods::{call_function_state, create_string, table_get_static};
+    use rilua::{LuaApiMut, Val};
+
+    #[test]
+    fn runtime_scope_restores_prior_inventory_slot_global_after_error() {
+        let env = WowLuaEnv::new().expect("environment should initialize");
+        env.apply_post_event_workarounds();
+        env.exec("GetInventorySlotInfo = function() return 'prior' end")
+            .expect("prior global should install");
+
+        let mut lua = env.rilua_mut();
+        let state = lua.state_mut();
+        let global = Val::Table(state.global);
+        let previous = table_get_static(state, global, "GetInventorySlotInfo");
+
+        let result: Result<(), LoadError> = with_registered_inventory_slot_info(state, |state| {
+            let active = table_get_static(state, Val::Table(state.global), "GetInventorySlotInfo");
+            assert!(matches!(active, Val::Function(_)));
+            let slot_name = create_string(state, "HeadSlot");
+            let values = call_function_state(state, active, &[slot_name])
+                .expect("registered inventory slot function should remain callable");
+            assert_eq!(values, Val::Num(1.0));
+            Err(LoadError::Lua("expected load failure".to_string()))
+        });
+
+        assert!(result.is_err());
+        assert_eq!(
+            table_get_static(state, global, "GetInventorySlotInfo"),
+            previous
+        );
+    }
 }
