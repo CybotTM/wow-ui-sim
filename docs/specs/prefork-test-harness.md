@@ -11,7 +11,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Borrow immutable state created by the parent in each selected child without leaking child mutations back to the parent or sibling cases.
 - [x] Support one optional `fn()` child setup hook, defaulting to a no-op, after child process-group establishment and before the registered case body under the same panic capture.
 - [x] Run one child process for every selected case.
-- [x] Bound concurrent children with explicit default and hard-maximum worker counts.
+- [x] Bound concurrent children with two default workers and an explicit hard-maximum worker count.
 - [x] Honor both `--test-threads` forms and `RUST_TEST_THREADS`, with the command-line value taking precedence.
 - [x] Run all runner conformance cases in a fresh subprocess before the normal full-UI preload during ordinary target execution; hide successful conformance output and print it on failure.
 - [x] Parse selection before setup so `--list` and zero-match execution run neither conformance nor preload; zero matches report a successful zero-test result, while selected-case setup failure exits explicitly.
@@ -28,6 +28,8 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 ### Linux ordinary libtest timeout isolation
 
 - [x] Keep Linux `test_timeout!`/`with_timeout` separate from the prefork runner while re-executing the exact named libtest test in an isolated child process.
+- [x] Coordinate Linux test workloads with a process-local poison-recovering `RwLock` plus a cross-process `flock`: ordinary timeout, prefork, and full-UI workloads use shared access, while performance measurements use exclusive access.
+- [x] Acquire the workload permit before launching a timeout child and before measured timing starts, so contention is outside the 120-second child budget and performance measurements.
 - [x] Convert ordinary assertion panics in the child into a normal libtest failure in the parent, so later sibling tests continue instead of the integration process aborting.
 - [x] On a real timeout, terminate the child process group/tree, reap the child, and return a test failure; the normal `test_timeout!` limit remains 120 seconds, while timeout-reexec conformance fixtures use a 1-second limit only to prove cleanup.
 - [x] Forward visible-output flags (`--nocapture`, `--no-capture`, and `--show-output`) to the exact child test while preserving captured output for failure reporting.
@@ -46,11 +48,11 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Define migrated cases with the explicit `prefork_full_ui_case!` marker; `build.rs` parses marker items with `syn`, renders the registry with `quote`, and assigns stable `<module>::<function>` names. Patch-manifest test references accept these generated marker cases alongside ordinary `#[test]` functions.
 - [x] Include the generated integration module tree in the prefork target so mixed modules compile once while unmarked tests remain under libtest.
 - [x] Prove nested-module discovery and inherited startup state with `prefork_full_ui_nested::fixture::preloaded_parent_has_normal_game_startup`.
-- [x] Register the generated default-retail full-UI registry with stable `<module>::<function>` names and retain 10 manual/nested prefork cases.
+- [x] Register the generated default-retail full-UI registry with stable `<module>::<function>` names and retain 9 manual/nested prefork cases.
 
 ### Final coverage and eligibility
 
-- [x] List 1,951 cases in the dedicated default-retail prefork target: 1,941 migrated full-environment cases and 10 manual/nested prefork cases.
+- [x] List exactly 1,951 cases in the dedicated default-retail prefork target: 1,942 marker-generated full-environment cases and 9 manual/nested prefork cases.
 - [x] Audit all 304 remaining ordinary startup-like tests and confirm zero eligible cases remain for the finalized shared parent preload.
 - [x] Classify exclusions exactly: 15 alternate-screen; 9 non-equivalent lifecycle; 113 partial custom; 13 partial domain; 3 partial template; 55 partial thread-sensitive; 1 post-drop global state; 75 pre-start custom; 7 profile-specific; 12 render custom; and 1 version-specific.
 - [x] Preserve exclusion rationale: the finalized parent is incompatible with the 75 pre-start and 9 lifecycle cases, while the remaining partial/custom, alternate-screen, render-sensitive, and thread-sensitive cases are not normal-retail startup; the five migrated timeout-wrapped cases now run as prefork children with the same 120-second timeout and process-tree cleanup.
@@ -72,6 +74,7 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - [x] Reduce serial wall time from 23.49 seconds to 10.12 seconds (56.9%).
 - [x] Reduce `/usr/bin/time` process maximum RSS from 1,190,600 KiB to 788,236 KiB (33.8%) and sampled process-tree PSS from 1,189,511 KiB to 1,040,276 KiB (12.5%).
 - [x] Record sampled process-tree RSS separately: it rises from 1,196,596 KiB to 1,523,432 KiB because RSS counts shared copy-on-write pages in both parent and child, while PSS apportions them.
+- [x] Prove workload-gate shared-reader overlap, exclusive exclusion, same-process exclusive serialization, release after error/panic/process exit, and acquisition before timeout measurement.
 
 ### Failure handling
 
@@ -94,6 +97,8 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 - `tests/common/prefork.rs` — reusable eager and lazy-state test-only runner APIs and execution behavior.
 - `tests/common/prefork_full_ui_preload.rs` — target-only normal retail game-screen preload and migrated-case helpers.
 - `tests/prefork_full_ui.rs` — custom target entry point, real-case registry, fixture cases, and behavioral conformance checks.
+- `tests/common/workload_gate.rs` — Linux shared/exclusive process-local and cross-process workload coordination.
+- `tests/workload_gate.rs` — workload-gate overlap, exclusion, cleanup, and timeout-boundary proofs.
 - `tests/test_keybindings_panels_detail.rs` — nine manually registered immutable-environment case bodies.
 - `tests/blizzard_behavioral_messaging_loads.rs` — two marker-defined immutable-environment case bodies; its lightweight tests remain under libtest.
 - `tests/prefork_full_ui_nested/fixture.rs` — nested-module registry and preloaded-startup behavior fixture.

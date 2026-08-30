@@ -6,6 +6,10 @@ Audited commits `f6b1077b8e1740c9efabd44ebda061fab1b5f0f6` and `6141fb0bdbcac4de
 
 Audited commit `0caee6eb94d672bbadb37bc9bfbea4b84be59c18`. Updated [[frame-data-flow]] and the maintained frame data-flow reference: `EditModeSystemMixin` now seeds seven callable native `Base` aliases during mixin application, before prepended lifecycle handlers run; missing native methods propagate as template-application errors. Updated the index summary; no new page, spec, or changelog was warranted. Protected `src/c_api/c_string_util.rs` and concurrent worktree changes were untouched.
 
+## [2026-08-30] audit | Document Linux workload gating for prefork and performance tests
+
+Audited commits `39f4e1a39`, `82b2b927a`, and `5354fad5a`. Updated [[prefork-test-harness]] and the prefork spec/system docs: Linux test workloads use a poison-recovering process-local `RwLock` plus cross-process `flock`; ordinary timeout, prefork, and full-UI workloads acquire shared access, while performance measurements acquire exclusive access before timeout children and measured timing. The prefork target remains exactly 1,951 retail cases (1,942 marker-generated and 9 manual/nested), with two default workers and zero eligible remaining. Added workload-gate implementation/conformance references. No changelog or new page was warranted; protected, code, test, manifest, vendor, cache, and `PLAN.md` paths were untouched.
+
 ## [2026-08-30] audit | Document idempotent SettingsPanel reconciliation
 
 Audited commit `5715008bb`. Updated [[lua-api]] and [[addon-loading]] plus the maintained API and loader docs: post-load workarounds reconcile replacement `_G.SettingsPanel`/`Settings` surfaces before category registration/opening and remain idempotent for the same panel identity. `C_SettingsUtil` APIs remain explicitly unsupported. No new page, spec, or changelog was warranted; protected `src/c_api/c_string_util.rs`, code/tests, manifest, vendor/cache, and active agent paths were untouched.
