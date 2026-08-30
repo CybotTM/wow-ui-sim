@@ -43,6 +43,39 @@ fn shared_readers_overlap_and_exclusive_excludes() {
 }
 
 #[test]
+fn same_process_exclusive_waits_for_existing_exclusive() {
+    let temp = TempDir::new().expect("create same-process workload tempdir");
+    let lock_path = temp.path().join("gate.lock");
+    let first = crate::common::workload_gate::acquire_at(
+        &lock_path,
+        crate::common::workload_gate::Mode::Exclusive,
+    )
+    .expect("acquire first exclusive workload permit");
+    let (acquired_tx, acquired_rx) = std::sync::mpsc::channel();
+    let second_lock_path = lock_path.clone();
+    let second = thread::spawn(move || {
+        let _permit = crate::common::workload_gate::acquire_at(
+            &second_lock_path,
+            crate::common::workload_gate::Mode::Exclusive,
+        )
+        .expect("acquire second exclusive workload permit");
+        acquired_tx
+            .send(())
+            .expect("report second exclusive acquisition");
+    });
+
+    assert!(
+        acquired_rx.recv_timeout(EXCLUSION_PROBE).is_err(),
+        "second same-process writer acquired while the first writer was active"
+    );
+    drop(first);
+    acquired_rx
+        .recv_timeout(MARKER_WAIT)
+        .expect("second same-process writer should acquire after release");
+    second.join().expect("join second same-process writer");
+}
+
+#[test]
 fn gate_releases_after_error_panic_and_process_exit() {
     let temp = TempDir::new().expect("create release-check workload tempdir");
     let lock_path = temp.path().join("gate.lock");
@@ -57,7 +90,7 @@ fn gate_releases_after_error_panic_and_process_exit() {
     let panic = std::panic::catch_unwind(|| {
         crate::common::workload_gate::with_lock_at(
             &lock_path,
-            crate::common::workload_gate::Mode::Shared,
+            crate::common::workload_gate::Mode::Exclusive,
             || panic!("deliberate workload panic"),
         );
     });
