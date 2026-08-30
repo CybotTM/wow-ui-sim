@@ -2830,7 +2830,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
-          "summary": "GetOverrideBarIndex exposes the simulator override-bar index; focused evidence covers only the inactive default number."
+          "summary": "GetOverrideBarIndex exposes the simulator override-bar index; focused evidence covers only inactive nil behavior."
         },
         {
           "kind": "source",
@@ -2842,17 +2842,17 @@
           "kind": "test",
           "reference": "tests/c_action_bar_state_globals.rs",
           "source_hash": "1304fb2ba24ecd52ee76f29d4b86d97699ffc1968db11dd0f8e1fd7b16fac6a0",
-          "summary": "Focused state-global test checks the default inactive override bar index alongside the other special-bar indexes."
+          "summary": "Focused state-global test checks that the inactive override and other special-bar indexes are nil."
         }
       ],
       "tests": [
-        "tests/c_action_bar_state_globals.rs::special_bar_indexes_return_default_numbers_when_inactive"
+        "tests/c_action_bar_state_globals.rs::special_bar_indexes_are_nil_when_inactive"
       ],
       "assertions": [],
       "commit": "bdf741cf4",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to the inactive default override index 14. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
+      "notes": "Best-effort behavioral evidence is limited to the inactive nil override index. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.GetOverrideBarSkin",
@@ -2973,7 +2973,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
-          "summary": "GetTempShapeshiftBarIndex reads the simulator temp-shapeshift index state; the focused evidence covers state/default behavior only."
+          "summary": "GetTempShapeshiftBarIndex reads the simulator temp-shapeshift index state; focused evidence covers active state and inactive nil behavior only."
         },
         {
           "kind": "source",
@@ -2985,18 +2985,18 @@
           "kind": "test",
           "reference": "tests/c_action_bar_state_globals.rs",
           "source_hash": "1304fb2ba24ecd52ee76f29d4b86d97699ffc1968db11dd0f8e1fd7b16fac6a0",
-          "summary": "Focused state-global tests check the default inactive temp-shapeshift index and the state-backed active flag/index round-trip."
+          "summary": "Focused state-global tests check inactive nil behavior and the state-backed active flag/index round-trip."
         }
       ],
       "tests": [
-        "tests/c_action_bar_state_globals.rs::special_bar_indexes_return_default_numbers_when_inactive",
+        "tests/c_action_bar_state_globals.rs::special_bar_indexes_are_nil_when_inactive",
         "tests/c_action_bar_state_globals.rs::temp_shapeshift_bar_index_reads_state"
       ],
       "assertions": [],
       "commit": "06bf6616a",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to inactive default index 1 and the state-backed active index value 9. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
+      "notes": "Best-effort behavioral evidence is limited to inactive nil behavior and the state-backed active index value 9. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.GetVehicleBarIndex",
@@ -3017,7 +3017,7 @@
           "kind": "source",
           "reference": "src/lua_api/globals/action_bar_api.rs",
           "source_hash": "53dc5c554c9b9535a9337a65f10d27ba36c3900aef7950286fb74e2109cfd4da",
-          "summary": "GetVehicleBarIndex reads the simulator vehicle-bar index state; the focused evidence covers state/default behavior only."
+          "summary": "GetVehicleBarIndex reads the simulator vehicle-bar index state; focused evidence covers active state and inactive nil behavior only."
         },
         {
           "kind": "source",
@@ -3029,18 +3029,18 @@
           "kind": "test",
           "reference": "tests/c_action_bar_state_globals.rs",
           "source_hash": "1304fb2ba24ecd52ee76f29d4b86d97699ffc1968db11dd0f8e1fd7b16fac6a0",
-          "summary": "Focused state-global tests check vehicle bar-index round-trip from state and inactive default indexes for vehicle, override, and temp shapeshift bars."
+          "summary": "Focused state-global tests check vehicle bar-index round-trip from state and inactive nil behavior for vehicle, override, and temp shapeshift bars."
         }
       ],
       "tests": [
         "tests/c_action_bar_state_globals.rs::vehicle_bar_index_reads_state",
-        "tests/c_action_bar_state_globals.rs::special_bar_indexes_return_default_numbers_when_inactive"
+        "tests/c_action_bar_state_globals.rs::special_bar_indexes_are_nil_when_inactive"
       ],
       "assertions": [],
       "commit": "0859e07be",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Best-effort behavioral evidence is limited to the state-backed vehicle index value 7 and inactive default index 12. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
+      "notes": "Best-effort behavioral evidence is limited to the state-backed vehicle index value 7 and inactive nil behavior. Exact retail paging, vehicle/override/bonus precedence, skins, secure state, and lifecycle semantics remain unproven."
     },
     {
       "id": "added:C_ActionBar.HasAction",
@@ -88076,28 +88076,27 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
-          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, and timer-handle binding.",
           "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
         },
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "summary": "Focused userdata_proxy tests cover userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys.",
           "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys",
-        "tests/userdata_proxy.rs::function_container_tostring"
+        "tests/userdata_proxy.rs::function_container_readonly_keys"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
+      "notes": "Tested userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "added:LuaFunctionContainer.Cancel",
@@ -88117,28 +88116,27 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
-          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, and timer-handle binding.",
           "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
         },
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "summary": "Focused userdata_proxy tests cover userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys.",
           "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys",
-        "tests/userdata_proxy.rs::function_container_tostring"
+        "tests/userdata_proxy.rs::function_container_readonly_keys"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
+      "notes": "Tested userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "added:LuaFunctionContainer.Invoke",
@@ -88158,28 +88156,27 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
-          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, and timer-handle binding.",
           "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
         },
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "summary": "Focused userdata_proxy tests cover userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys.",
           "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys",
-        "tests/userdata_proxy.rs::function_container_tostring"
+        "tests/userdata_proxy.rs::function_container_readonly_keys"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
+      "notes": "Tested userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "added:LuaFunctionContainer.IsCancelled",
@@ -88199,28 +88196,27 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
-          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, and timer-handle binding.",
           "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
         },
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "summary": "Focused userdata_proxy tests cover userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys.",
           "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys",
-        "tests/userdata_proxy.rs::function_container_tostring"
+        "tests/userdata_proxy.rs::function_container_readonly_keys"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
+      "notes": "Tested userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "added:Model.SetUseGBuffer",
@@ -100175,28 +100171,27 @@
         {
           "kind": "source",
           "reference": "src/lua_api/workarounds/temporary/proxy_object_factories.rs",
-          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, tostring, and timer-handle binding.",
+          "summary": "Current temporary proxy factory implements userdata-backed FunctionContainer construction, method dispatch, cancellation/invoke behavior, per-instance fields, read-only keys, and timer-handle binding.",
           "source_hash": "5113052689298c0660c42aabc779005f74826a3ce9a88cd9184e6ec07f8fe0dd"
         },
         {
           "kind": "test",
           "reference": "tests/userdata_proxy.rs",
-          "summary": "Focused userdata_proxy tests cover method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring.",
+          "summary": "Focused userdata_proxy tests cover userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys.",
           "source_hash": "ee6f713451785c8e22254429205031f83fb81c108b8acec6cdb69cbf9879d685"
         }
       ],
       "tests": [
-        "tests/userdata_proxy.rs::function_container_is_table_with_methods",
+        "tests/userdata_proxy.rs::function_container_is_userdata_with_methods",
         "tests/userdata_proxy.rs::function_container_cancel_and_invoke",
         "tests/userdata_proxy.rs::function_container_per_instance_fields",
-        "tests/userdata_proxy.rs::function_container_readonly_keys",
-        "tests/userdata_proxy.rs::function_container_tostring"
+        "tests/userdata_proxy.rs::function_container_readonly_keys"
       ],
       "assertions": [],
       "commit": "3d767dbd2",
       "approval_id": null,
       "scope_exception": null,
-      "notes": "Tested method exposure, cancellation/invoke suppression, per-instance fields, read-only keys, and tostring are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
+      "notes": "Tested userdata method exposure, cancellation/invoke suppression, per-instance fields, and read-only keys are covered; exact retail callback validation, metatable/equality identity beyond tests, timer integration, lifecycle/GC, and API metadata fidelity remain unproven."
     },
     {
       "id": "changed:C_Housing.RequestHouseFinderNeighborhoodData",
