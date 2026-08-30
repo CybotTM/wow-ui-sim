@@ -7,6 +7,7 @@ use std::time::{Duration, Instant};
 use tempfile::TempDir;
 
 const FIXTURE_MODE_ENV: &str = "WOW_SIM_WORKLOAD_GATE_FIXTURE";
+const LOCK_PATH_ENV: &str = "WOW_SIM_WORKLOAD_GATE_LOCK";
 const READY_PATH_ENV: &str = "WOW_SIM_WORKLOAD_GATE_READY";
 const RELEASE_PATH_ENV: &str = "WOW_SIM_WORKLOAD_GATE_RELEASE";
 const TIMEOUT_REEXEC_TEST_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_TEST";
@@ -43,16 +44,25 @@ fn shared_readers_overlap_and_exclusive_excludes() {
 
 #[test]
 fn gate_releases_after_error_panic_and_process_exit() {
-    let result: Result<(), &str> =
-        crate::common::with_shared_workload(|| Err("deliberate workload failure"));
+    let temp = TempDir::new().expect("create release-check workload tempdir");
+    let lock_path = temp.path().join("gate.lock");
+    let result: Result<(), &str> = crate::common::workload_gate::with_lock_at(
+        &lock_path,
+        crate::common::workload_gate::Mode::Shared,
+        || Err("deliberate workload failure"),
+    );
     assert_eq!(result, Err("deliberate workload failure"));
-    assert_exclusive_can_acquire("after-error");
+    assert_exclusive_can_acquire(temp.path(), "after-error");
 
     let panic = std::panic::catch_unwind(|| {
-        crate::common::with_shared_workload(|| panic!("deliberate workload panic"));
+        crate::common::workload_gate::with_lock_at(
+            &lock_path,
+            crate::common::workload_gate::Mode::Shared,
+            || panic!("deliberate workload panic"),
+        );
     });
     assert!(panic.is_err(), "workload fixture must panic");
-    assert_exclusive_can_acquire("after-panic");
+    assert_exclusive_can_acquire(temp.path(), "after-panic");
 
     let temp = TempDir::new().expect("create process-exit workload tempdir");
     let mut exiting_writer = spawn_holder(temp.path(), "exiting-writer", "exclusive-exit");
@@ -67,17 +77,18 @@ fn gate_releases_after_error_panic_and_process_exit() {
 
 #[test]
 fn exclusive_wait_happens_before_timeout_starts() {
+    let temp = TempDir::new().expect("create timeout-boundary workload tempdir");
+    let lock_path = temp.path().join("gate.lock");
     if std::env::var_os(TIMEOUT_REEXEC_TEST_ENV).is_some() {
-        crate::common::with_performance_timeout(1, || {});
+        crate::common::with_performance_timeout_at(1, &lock_path, || {});
         return;
     }
 
-    let temp = TempDir::new().expect("create timeout-boundary workload tempdir");
     let mut reader = spawn_holder(temp.path(), "timeout-reader", "shared-auto-release");
     wait_until_ready(temp.path(), "timeout-reader");
 
     let started = Instant::now();
-    crate::common::with_performance_timeout(1, || {});
+    crate::common::with_performance_timeout_at(1, &lock_path, || {});
     let elapsed = started.elapsed();
 
     wait_for_success(&mut reader, "timeout-boundary reader");
@@ -92,33 +103,53 @@ fn process_fixture() {
     let Some(mode) = std::env::var_os(FIXTURE_MODE_ENV) else {
         return;
     };
+    let lock_path = fixture_path(LOCK_PATH_ENV);
     let ready_path = fixture_path(READY_PATH_ENV);
     let release_path = fixture_path(RELEASE_PATH_ENV);
 
     match mode.to_string_lossy().as_ref() {
-        "shared" => {
-            crate::common::with_shared_workload(|| hold_until_released(&ready_path, &release_path))
-        }
-        "exclusive" => crate::common::with_exclusive_workload(|| {
-            hold_until_released(&ready_path, &release_path)
-        }),
-        "shared-auto-release" => crate::common::with_shared_workload(|| {
-            std::fs::write(&ready_path, "ready").expect("write auto-release ready marker");
-            thread::sleep(Duration::from_millis(1_300));
-        }),
-        "exclusive-exit" => crate::common::with_exclusive_workload(|| {
-            std::fs::write(&ready_path, "ready").expect("write process-exit ready marker");
-            unsafe { libc::_exit(0) }
-        }),
+        "shared" => with_fixture_lock(
+            &lock_path,
+            crate::common::workload_gate::Mode::Shared,
+            || hold_until_released(&ready_path, &release_path),
+        ),
+        "exclusive" => with_fixture_lock(
+            &lock_path,
+            crate::common::workload_gate::Mode::Exclusive,
+            || hold_until_released(&ready_path, &release_path),
+        ),
+        "shared-auto-release" => with_fixture_lock(
+            &lock_path,
+            crate::common::workload_gate::Mode::Shared,
+            || {
+                std::fs::write(&ready_path, "ready").expect("write auto-release ready marker");
+                thread::sleep(Duration::from_millis(1_300));
+            },
+        ),
+        "exclusive-exit" => with_fixture_lock(
+            &lock_path,
+            crate::common::workload_gate::Mode::Exclusive,
+            || {
+                std::fs::write(&ready_path, "ready").expect("write process-exit ready marker");
+                unsafe { libc::_exit(0) }
+            },
+        ),
         unknown => panic!("unknown workload fixture mode: {unknown}"),
     }
 }
 
-fn assert_exclusive_can_acquire(name: &str) {
-    let temp = TempDir::new().expect("create release-check workload tempdir");
-    let mut writer = spawn_holder(temp.path(), name, "exclusive");
-    wait_until_ready(temp.path(), name);
-    release_holder(temp.path(), name);
+fn with_fixture_lock<T>(
+    path: &Path,
+    mode: crate::common::workload_gate::Mode,
+    body: impl FnOnce() -> T,
+) -> T {
+    crate::common::workload_gate::with_lock_at(path, mode, body)
+}
+
+fn assert_exclusive_can_acquire(directory: &Path, name: &str) {
+    let mut writer = spawn_holder(directory, name, "exclusive");
+    wait_until_ready(directory, name);
+    release_holder(directory, name);
     wait_for_success(&mut writer, name);
 }
 
@@ -135,6 +166,7 @@ fn spawn_holder(directory: &Path, name: &str, mode: &str) -> Child {
             "--nocapture",
         ])
         .env(FIXTURE_MODE_ENV, mode)
+        .env(LOCK_PATH_ENV, directory.join("gate.lock"))
         .env(READY_PATH_ENV, ready_path)
         .env(RELEASE_PATH_ENV, release_path);
     command.spawn().expect("spawn workload gate fixture")

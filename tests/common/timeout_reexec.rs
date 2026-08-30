@@ -21,13 +21,30 @@ static HANDSHAKE_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 static CHILD_HANDSHAKE: Once = Once::new();
 
 pub(super) fn run<F: FnOnce() + Send + 'static>(secs: u64, mode: Mode, closure: F) {
+    run_with_gate(secs, mode, None, closure);
+}
+
+pub(super) fn run_at<F: FnOnce() + Send + 'static>(secs: u64, path: &Path, mode: Mode, closure: F) {
+    run_with_gate(secs, mode, Some(path), closure);
+}
+
+fn run_with_gate<F: FnOnce() + Send + 'static>(
+    secs: u64,
+    mode: Mode,
+    path: Option<&Path>,
+    closure: F,
+) {
     let test_name = current_test_name();
     if let Some(guarded_test) = env::var_os(CHILD_TEST_ENV) {
         run_guarded_child(&test_name, guarded_test, closure);
         return;
     }
 
-    workload_gate::with_lock(mode, || run_parent(&test_name, secs, closure));
+    let run_parent = || run_parent(&test_name, secs, closure);
+    match path {
+        Some(path) => workload_gate::with_lock_at(path, mode, run_parent),
+        None => workload_gate::with_lock(mode, run_parent),
+    }
 }
 
 fn current_test_name() -> String {

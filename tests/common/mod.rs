@@ -10,7 +10,7 @@ pub mod panel_fixtures;
 pub(crate) mod prefork_process;
 #[cfg(target_os = "linux")]
 mod timeout_reexec;
-mod workload_gate;
+pub(crate) mod workload_gate;
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -27,6 +27,15 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
 #[cfg(target_os = "linux")]
 pub fn with_performance_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
     timeout_reexec::run(secs, workload_gate::Mode::Exclusive, f);
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn with_performance_timeout_at<F: FnOnce() + Send + 'static>(
+    secs: u64,
+    path: &Path,
+    f: F,
+) {
+    timeout_reexec::run_at(secs, path, workload_gate::Mode::Exclusive, f);
 }
 
 #[cfg(not(target_os = "linux"))]
