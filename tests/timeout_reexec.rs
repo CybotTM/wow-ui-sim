@@ -1,6 +1,6 @@
 #![cfg(target_os = "linux")]
 
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::os::fd::AsRawFd;
 use std::path::{Path, PathBuf};
@@ -13,7 +13,11 @@ const FIXTURE_MODE_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_FIXTURE";
 const SIBLING_MARKER_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_SIBLING_MARKER";
 const DESCENDANT_PID_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_DESCENDANT_PID";
 const CONCURRENCY_STATE_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_CONCURRENCY_STATE";
+const EXACT_SELECTED_MARKER_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_EXACT_SELECTED_MARKER";
+const EXACT_FORBIDDEN_MARKER_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_EXACT_FORBIDDEN_MARKER";
+const PERMIT_RELEASE_DIR_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_PERMIT_RELEASE_DIR";
 const PROCESS_DEATH_WAIT: Duration = Duration::from_secs(2);
+const FIXTURE_MARKER_WAIT: Duration = Duration::from_secs(4);
 const CONCURRENCY_HOLD: Duration = Duration::from_millis(600);
 const EXPECTED_TIMEOUT_CHILD_LIMIT: u32 = 2;
 
@@ -136,6 +140,60 @@ fn timeout_children_are_limited_to_two_concurrent_processes() {
     );
 }
 
+#[test]
+fn timeout_child_runs_only_exact_selected_test() {
+    let temp = TempDir::new().expect("create exact-selection fixture tempdir");
+    let selected_marker = temp.path().join("selected");
+    let forbidden_marker = temp.path().join("forbidden");
+    let output = run_exact_selection_fixture(&selected_marker, &forbidden_marker);
+    let stdout = stdout(&output);
+    let stderr = stderr(&output);
+
+    assert!(
+        output.status.success(),
+        "exact-selection fixture failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_eq!(
+        std::fs::read_to_string(&selected_marker).expect("read selected marker"),
+        "selected\n",
+        "selected timeout closure must execute exactly once"
+    );
+    assert!(
+        !forbidden_marker.exists(),
+        "suffix-named test was selected unexpectedly"
+    );
+    assert!(
+        stdout.contains("test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured;"),
+        "exact fixture did not report one selected test\nstdout:\n{stdout}"
+    );
+}
+
+#[test]
+fn timed_out_child_releases_permit_for_waiting_sibling() {
+    let temp = TempDir::new().expect("create permit-release fixture tempdir");
+    let output = run_permit_release_fixture(temp.path());
+    let stdout = stdout(&output);
+    let stderr = stderr(&output);
+
+    assert!(!output.status.success(), "permit-release fixture must time out once");
+    assert!(
+        temp.path().join("waiting-complete").exists(),
+        "waiting timeout sibling did not run\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        stdout.contains("test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured;"),
+        "permit-release fixture reported unexpected results\nstdout:\n{stdout}"
+    );
+    assert!(
+        stderr.contains("timed out after 1s"),
+        "permit-release timeout reason was not forwarded\nstderr:\n{stderr}"
+    );
+    assert_final_failure_list(
+        &stdout,
+        "timeout_reexec::fixtures::permit_release_case::a_times_out_holding_permit",
+    );
+}
+
 fn run_fixture(
     filter: &str,
     mode: &str,
@@ -164,6 +222,34 @@ fn run_concurrency_fixture(state_path: &Path) -> Output {
         .env(CONCURRENCY_STATE_ENV, state_path)
         .output()
         .expect("run timeout concurrency fixture")
+}
+
+fn run_exact_selection_fixture(selected_marker: &Path, forbidden_marker: &Path) -> Output {
+    Command::new(std::env::current_exe().expect("resolve integration test binary"))
+        .args([
+            "timeout_reexec::fixtures::exact_selection_case::selected_target",
+            "--exact",
+            "--test-threads=1",
+            "--nocapture",
+        ])
+        .env(FIXTURE_MODE_ENV, "exact-selection")
+        .env(EXACT_SELECTED_MARKER_ENV, selected_marker)
+        .env(EXACT_FORBIDDEN_MARKER_ENV, forbidden_marker)
+        .output()
+        .expect("run timeout exact-selection fixture")
+}
+
+fn run_permit_release_fixture(release_dir: &Path) -> Output {
+    Command::new(std::env::current_exe().expect("resolve integration test binary"))
+        .args([
+            "timeout_reexec::fixtures::permit_release_case::",
+            "--test-threads=3",
+            "--nocapture",
+        ])
+        .env(FIXTURE_MODE_ENV, "permit-release")
+        .env(PERMIT_RELEASE_DIR_ENV, release_dir)
+        .output()
+        .expect("run timeout permit-release fixture")
 }
 
 fn assert_final_failure_list(stdout: &str, expected_failure: &str) {
@@ -242,32 +328,47 @@ fn parse_concurrency_state(state: &str) -> (u32, u32) {
 }
 
 fn update_concurrency_state(path: &Path, delta: i32) {
-    let mut file = OpenOptions::new()
+    let mut file = open_locked_concurrency_state(path);
+    let current = read_locked_concurrency_state(&mut file);
+    let updated = apply_concurrency_delta(current, delta);
+    write_locked_concurrency_state(&mut file, updated);
+}
+
+fn open_locked_concurrency_state(path: &Path) -> File {
+    let file = OpenOptions::new()
         .read(true)
         .write(true)
         .open(path)
         .expect("open timeout concurrency state");
     lock_exclusively(&file);
+    file
+}
 
+fn read_locked_concurrency_state(file: &mut File) -> (u32, u32) {
     let mut state = String::new();
     file.read_to_string(&mut state)
         .expect("read locked timeout concurrency state");
-    let (active, peak) = parse_concurrency_state(&state);
+    parse_concurrency_state(&state)
+}
+
+fn apply_concurrency_delta((active, peak): (u32, u32), delta: i32) -> (u32, u32) {
     let next_active = if delta >= 0 {
         active.checked_add(delta as u32)
     } else {
         active.checked_sub(delta.unsigned_abs())
     }
     .expect("timeout concurrency active count overflow");
-    let next_peak = peak.max(next_active);
+    (next_active, peak.max(next_active))
+}
 
+fn write_locked_concurrency_state(file: &mut File, (active, peak): (u32, u32)) {
     file.seek(SeekFrom::Start(0))
         .expect("rewind timeout concurrency state");
     file.set_len(0).expect("truncate timeout concurrency state");
-    writeln!(file, "{next_active} {next_peak}").expect("write timeout concurrency state");
+    writeln!(file, "{active} {peak}").expect("write timeout concurrency state");
 }
 
-fn lock_exclusively(file: &std::fs::File) {
+fn lock_exclusively(file: &File) {
     loop {
         let result = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX) };
         if result == 0 {
@@ -403,12 +504,66 @@ mod fixtures {
         }
     }
 
+    pub(super) mod exact_selection_case {
+        use super::*;
+
+        #[test]
+        fn selected_target() {
+            if fixture_mode() == Some("exact-selection") {
+                crate::common::with_timeout(1, record_exact_selection);
+            }
+        }
+
+        #[test]
+        fn selected_target_suffix() {
+            if fixture_mode() == Some("exact-selection") {
+                let marker = marker_from_env(EXACT_FORBIDDEN_MARKER_ENV);
+                std::fs::write(marker, "forbidden\n").expect("write forbidden exact marker");
+            }
+        }
+    }
+
+    pub(super) mod permit_release_case {
+        use super::*;
+
+        #[test]
+        fn a_times_out_holding_permit() {
+            if fixture_mode() == Some("permit-release") {
+                crate::common::with_timeout(1, || {
+                    write_release_marker("timeout-started");
+                    thread::sleep(Duration::from_secs(30));
+                });
+            }
+        }
+
+        #[test]
+        fn b_holds_other_permit() {
+            if fixture_mode() == Some("permit-release") {
+                crate::common::with_timeout(5, || {
+                    write_release_marker("holder-started");
+                    wait_for_release_marker("waiting-complete");
+                });
+            }
+        }
+
+        #[test]
+        fn c_waits_for_released_permit() {
+            if fixture_mode() == Some("permit-release") {
+                wait_for_release_marker("timeout-started");
+                wait_for_release_marker("holder-started");
+                crate::common::with_timeout(1, || write_release_marker("waiting-complete"));
+            }
+        }
+    }
+
     fn fixture_mode() -> Option<&'static str> {
         match std::env::var(FIXTURE_MODE_ENV).as_deref() {
             Ok("panic") => Some("panic"),
             Ok("timeout") => Some("timeout"),
             Ok("nested") => Some("nested"),
             Ok("concurrency") => Some("concurrency"),
+            Ok("exact-selection") => Some("exact-selection"),
+            Ok("permit-release") => Some("permit-release"),
             _ => None,
         }
     }
@@ -421,6 +576,40 @@ mod fixtures {
         update_concurrency_state(&state_path, 1);
         thread::sleep(CONCURRENCY_HOLD);
         update_concurrency_state(&state_path, -1);
+    }
+
+    fn record_exact_selection() {
+        let marker = marker_from_env(EXACT_SELECTED_MARKER_ENV);
+        let mut marker = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(marker)
+            .expect("open selected exact marker");
+        writeln!(marker, "selected").expect("write selected exact marker");
+    }
+
+    fn write_release_marker(name: &str) {
+        std::fs::write(release_marker(name), "complete\n").expect("write permit-release marker");
+    }
+
+    fn wait_for_release_marker(name: &str) {
+        let marker = release_marker(name);
+        let deadline = Instant::now() + FIXTURE_MARKER_WAIT;
+        while Instant::now() < deadline {
+            if marker.exists() {
+                return;
+            }
+            thread::sleep(Duration::from_millis(10));
+        }
+        panic!("permit-release marker did not appear: {}", marker.display());
+    }
+
+    fn release_marker(name: &str) -> PathBuf {
+        marker_from_env(PERMIT_RELEASE_DIR_ENV).join(name)
+    }
+
+    fn marker_from_env(name: &str) -> PathBuf {
+        PathBuf::from(std::env::var_os(name).unwrap_or_else(|| panic!("{name} environment")))
     }
 
     fn record_sibling_completion() {

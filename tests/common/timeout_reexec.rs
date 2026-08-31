@@ -90,107 +90,168 @@ where
     F: FnOnce() + Send + 'static,
 {
     drop(closure);
-    let _timeout_permit = TimeoutChildPermit::acquire(
-        workload_path.unwrap_or_else(|| env::temp_dir().join("wow-ui-sim-test-workloads.lock")),
-    );
+    let slot_prefix = workload_path.unwrap_or_else(default_timeout_workload_path);
+    let _timeout_permit = TimeoutChildPermit::acquire(slot_prefix);
+    let execution = execute_timeout_child(test_name, secs);
+    report_timeout_child(test_name, secs, execution);
+}
+
+fn default_timeout_workload_path() -> PathBuf {
+    env::temp_dir().join("wow-ui-sim-test-workloads.lock")
+}
+
+struct ChildExecution {
+    completion: Result<Completion, String>,
+    stdout: Vec<u8>,
+    stderr: Vec<u8>,
+    handshake_result: Result<(), String>,
+    replay_success: bool,
+}
+
+fn execute_timeout_child(test_name: &str, secs: u64) -> ChildExecution {
     let handshake = Handshake::new();
     let replay_success = parent_requests_visible_output();
     let mut child = spawn_exact_test(test_name, handshake.path(), replay_success)
         .unwrap_or_else(|error| panic!("spawn timeout child for `{test_name}`: {error}"));
     let pid = child.id() as libc::pid_t;
-    let stdout = spawn_drain(
-        child
-            .stdout
-            .take()
-            .expect("timeout child stdout must be piped"),
-    );
-    let stderr = spawn_drain(
-        child
-            .stderr
-            .take()
-            .expect("timeout child stderr must be piped"),
-    );
+    let (stdout_drain, stderr_drain) = spawn_child_drains(&mut child);
+    let timeout = Duration::from_secs(secs);
+    let completion = collect_timeout_child(&mut child, pid, timeout);
+    let stdout = join_drain(stdout_drain, "stdout");
+    let stderr = join_drain(stderr_drain, "stderr");
+    let handshake_result = validate_handshake(handshake.path(), test_name);
+    ChildExecution {
+        completion,
+        stdout,
+        stderr,
+        handshake_result,
+        replay_success,
+    }
+}
 
-    let completion = match wait_for_child(&mut child, pid, Duration::from_secs(secs)) {
+fn spawn_child_drains(
+    child: &mut Child,
+) -> (JoinHandle<io::Result<Vec<u8>>>, JoinHandle<io::Result<Vec<u8>>>) {
+    let stdout = child
+        .stdout
+        .take()
+        .expect("timeout child stdout must be piped");
+    let stderr = child
+        .stderr
+        .take()
+        .expect("timeout child stderr must be piped");
+    (spawn_drain(stdout), spawn_drain(stderr))
+}
+
+fn collect_timeout_child(
+    child: &mut Child,
+    pid: libc::pid_t,
+    timeout: Duration,
+) -> Result<Completion, String> {
+    match wait_for_child(child, pid, timeout) {
         Ok(completion) => Ok(completion),
         Err(error) => match terminate_and_reap_child(pid) {
             Ok(()) => Err(error),
             Err(cleanup_error) => Err(format!("{error}; cleanup failed: {cleanup_error}")),
         },
-    };
-    let stdout = join_drain(stdout, "stdout");
-    let stderr = join_drain(stderr, "stderr");
-    let handshake_result = validate_handshake(handshake.path(), test_name);
-
-    match completion {
-        Ok(Completion::Exited(status)) if status.success() && handshake_result.is_ok() => {
-            if replay_success {
-                replay_output(&stdout, &stderr);
-            }
-        }
-        Ok(Completion::Exited(status)) => {
-            replay_output(&stdout, &stderr);
-            let handshake_detail = handshake_result
-                .err()
-                .map(|error| format!("; {error}"))
-                .unwrap_or_default();
-            panic!(
-                "timeout child for `{test_name}` failed ({}){handshake_detail}",
-                describe_status(status)
-            );
-        }
-        Ok(Completion::TimedOut) => {
-            replay_output(&stdout, &stderr);
-            let handshake_detail = handshake_result
-                .err()
-                .map(|error| format!("; {error}"))
-                .unwrap_or_default();
-            panic!("test `{test_name}` timed out after {secs}s{handshake_detail}");
-        }
-        Err(error) => {
-            replay_output(&stdout, &stderr);
-            panic!("timeout child for `{test_name}` could not be collected: {error}");
-        }
     }
 }
 
+fn report_timeout_child(test_name: &str, secs: u64, execution: ChildExecution) {
+    let failure = timeout_child_failure(
+        test_name,
+        secs,
+        execution.completion,
+        &execution.handshake_result,
+    );
+    if let Some(message) = failure {
+        replay_output(&execution.stdout, &execution.stderr);
+        panic!("{message}");
+    }
+    if execution.replay_success {
+        replay_output(&execution.stdout, &execution.stderr);
+    }
+}
+
+fn timeout_child_failure(
+    test_name: &str,
+    secs: u64,
+    completion: Result<Completion, String>,
+    handshake_result: &Result<(), String>,
+) -> Option<String> {
+    let handshake_detail = format_handshake_detail(handshake_result);
+    match completion {
+        Ok(Completion::Exited(status)) if status.success() && handshake_result.is_ok() => None,
+        Ok(Completion::Exited(status)) => Some(format!(
+            "timeout child for `{test_name}` failed ({}){handshake_detail}",
+            describe_status(status)
+        )),
+        Ok(Completion::TimedOut) => {
+            Some(format!("test `{test_name}` timed out after {secs}s{handshake_detail}"))
+        }
+        Err(error) => Some(format!(
+            "timeout child for `{test_name}` could not be collected: {error}"
+        )),
+    }
+}
+
+fn format_handshake_detail(handshake_result: &Result<(), String>) -> String {
+    handshake_result
+        .as_ref()
+        .err()
+        .map(|error| format!("; {error}"))
+        .unwrap_or_default()
+}
+
 struct TimeoutChildPermit {
-    #[cfg(target_os = "linux")]
     _file: File,
 }
 
 impl TimeoutChildPermit {
     fn acquire(workload_path: PathBuf) -> Self {
-        #[cfg(target_os = "linux")]
-        {
-            let prefix = workload_path.to_string_lossy();
-            loop {
-                for slot in 0..TIMEOUT_CHILD_SLOTS {
-                    let path = format!("{prefix}.timeout-slot-{slot}");
-                    let file = OpenOptions::new()
-                        .read(true)
-                        .write(true)
-                        .create(true)
-                        .open(&path)
-                        .unwrap_or_else(|error| panic!("open timeout child slot `{path}`: {error}"));
-                    let result = unsafe {
-                        libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB)
-                    };
-                    if result == 0 {
-                        return Self { _file: file };
-                    }
-                    let error = io::Error::last_os_error();
-                    if error.kind() != io::ErrorKind::WouldBlock {
-                        panic!("acquire timeout child slot `{path}`: {error}");
-                    }
-                }
-                thread::sleep(TIMEOUT_SLOT_POLL_INTERVAL);
+        acquire_timeout_child_permit(workload_path)
+    }
+}
+
+fn acquire_timeout_child_permit(workload_path: PathBuf) -> TimeoutChildPermit {
+    let prefix = workload_path.to_string_lossy();
+    loop {
+        for slot in 0..TIMEOUT_CHILD_SLOTS {
+            let path = format!("{prefix}.timeout-slot-{slot}");
+            let file = open_and_try_lock_timeout_slot(&path)
+                .unwrap_or_else(|error| panic!("acquire timeout child slot `{path}`: {error}"));
+            if let Some(file) = file {
+                return TimeoutChildPermit { _file: file };
             }
         }
-        #[cfg(not(target_os = "linux"))]
-        {
-            let _ = workload_path;
-            Self {}
+        thread::sleep(TIMEOUT_SLOT_POLL_INTERVAL);
+    }
+}
+
+fn open_and_try_lock_timeout_slot(path: &str) -> io::Result<Option<File>> {
+    let file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open(path)?;
+    if try_lock_timeout_slot(&file)? {
+        Ok(Some(file))
+    } else {
+        Ok(None)
+    }
+}
+
+fn try_lock_timeout_slot(file: &File) -> io::Result<bool> {
+    loop {
+        let result = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) };
+        if result == 0 {
+            return Ok(true);
+        }
+        let error = io::Error::last_os_error();
+        match error.kind() {
+            io::ErrorKind::Interrupted => continue,
+            io::ErrorKind::WouldBlock => return Ok(false),
+            _ => return Err(error),
         }
     }
 }
