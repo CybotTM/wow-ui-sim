@@ -1,3 +1,7 @@
+## [2026-08-31] investigation | Store model widget state lazily
+
+Updated [[widget-system]] and added [[widget-registry-storage]] for commit `2542135be` (2026-08-30): nine model-family state groups now live behind one lazy boxed payload, preserving Lua/API defaults and round trips while reducing the settled 45,002-frame registry estimate from 239,185,088 to 213,058,036 bytes. The existing 230,000,000-byte budget remains unchanged; 3D rendering remains out of scope.
+
 ## [2026-08-30] investigation | Separate top-level show ordering from explicit Raise
 
 Updated [[world-map-voice-chat-alerts]] and [[rendering-pipeline]] for commit `dfd997a05`: top-level frames now receive internal monotonic show order, and each per-strata bucket groups all IDs under the nearest active top-level ancestor across intermediate strata. Regular order and explicit same-level `Raise()` semantics remain unchanged; grouped panel segments render contiguously in show order. Focused state-render proof passes 8/8 and the live-like world-map/chat overlap regression passes 1/1.
@@ -309,7 +313,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 |------|---------|
 | [[layout-system]] | AnchorPoint enum (9 positions), single vs multi-anchor resolution, coordinate system (top-left screen / bottom-left Lua), SetPoint API, cycle detection |
 | [[rendering-pipeline]] | QuadBatch (60-byte QuadVertex), five-tier RGBA GPU atlas plus glyph/BC1/BC3 bindings, WGSL shaders, mask resolution, stable-atlas headless batch comparisons, strata/level sorting, monotonic top-level show segments, alpha propagation, hit testing |
-| [[widget-system]] | Frame struct (~140 fields), WidgetType enum (18 types), WidgetRegistry, default children, button text rendering, three-slice pattern, model-family 3D no-op boundary |
+| [[widget-system]] | Frame struct (~140 fields), WidgetType enum (18 types), WidgetRegistry storage accounting, lazy boxed model-family state, default children, button text rendering, three-slice pattern, and 3D no-op boundary |
 | [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, model-family compatibility surface, texture fileDataID/path identity, C_* namespaces including the bounded C_ProfSpecs specialization fixture, timers, animation system |
 | [[event-system]] | EventQueue, 36+ script handler types, dispatch flow, OnUpdate tick, startup event sequence, XML script setup |
 | [[xml-template-system]] | XML parsing (30+ element types), template registry, inheritance chain resolution, XML-to-widget Lua code generation, same-object engine-root reuse, inline scripts/events |
@@ -370,6 +374,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[adventure-guide-simplehtml-markup]] | Encounter Journal overview text uses SimpleHTML; HTML stripping now also removes WoW color/link escapes and converts `|n` line breaks |
 | [[appearances-wardrobe-api]] | Collections Journal Appearances opens, but browsing/filtering/search/favorites need stateful `C_TransmogCollection` source, visual, filter, and search backing instead of fixed stubs |
 | [[transmog-inventory-slot-scope]] | Retail 12.1 keeps removed `GetInventorySlotInfo` nil publicly while `Blizzard_TransmogShared` uses a retained target-scoped loader environment |
+| [[widget-registry-storage]] | Lazy boxed model-family state removes per-frame storage waste while preserving defaults, round trips, and complete heap accounting; settled 45,002-frame estimate falls below the unchanged 230MB budget |
 | [[backpack-background-texture]] | Reported missing tan/brown body on Backpack — investigation showed sim renders exactly what `FlatPanelBackgroundTemplate` authors (solid `PANEL_BACKGROUND_COLOR`); retail texture comes from outside the Gethe public source (addon overlay or unmirrored patch path), no sim-side fix |
 | [[talent-performance]] | Lazy `_G` lookup (431ms→263ms), rect-dirty stale cache causing infinite OnUpdate loop, shallow `issecretvalue` for pool releases (2159ms→2.6ms) |
 | [[character-select-performance]] | Lazy atlas crop stalls (fixed), first-resize relayout deduplication (partial) |

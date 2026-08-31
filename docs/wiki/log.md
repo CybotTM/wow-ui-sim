@@ -1,3 +1,7 @@
+## [2026-08-31] investigation | Document lazy model widget state
+
+Audited commit `2542135be111f53211ac66e39a19591abadde0d6` (2026-08-30). Updated [[widget-system]] and added [[widget-registry-storage]]: nine model-family state groups now use one lazy `Option<Box<ModelWidgetState>>`; absent payloads preserve defaults, mutations allocate on demand, and storage accounting includes boxed strings/vectors without double counting. The settled 45,002-frame estimate fell from 239,185,088 to 213,058,036 bytes under the unchanged 230,000,000-byte budget. Model rendering remains intentionally unsupported. No spec or changelog update was warranted; protected, code, test, manifest, vendor/cache, and `PLAN.md` paths were untouched.
+
 ## [2026-08-30] audit | Update maintained rendering-order documentation
 
 Audited commits `dfd997a05` and `178c83bf0`. Updated [[rendering-pipeline]] plus the maintained `rendering-pipeline.md` and `hit-testing.md`: active `toplevel="true"` frames use a separate monotonic show-order sequence; emitted IDs group under the nearest active top-level ancestor across intermediate strata and remain contiguous; explicit `Raise()`/`Lower()` retain same-raw-level semantics. No rendering spec exists under `docs/specs/`, so no spec change was warranted. Protected, code, manifest, vendor/cache, and `PLAN.md` paths were untouched.
