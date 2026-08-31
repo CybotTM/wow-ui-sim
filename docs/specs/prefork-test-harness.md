@@ -27,9 +27,9 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 ### Linux ordinary libtest timeout isolation
 
-- [x] Keep Linux `test_timeout!`/`with_timeout` separate from the prefork runner while re-executing the exact named libtest test in an isolated child process.
-- [x] Coordinate Linux test workloads with a process-local poison-recovering `RwLock` plus a cross-process `flock`: ordinary timeout, prefork, and full-UI workloads use shared access, while performance measurements use exclusive access.
-- [x] Acquire the workload permit before launching a timeout child and before measured timing starts, so contention is outside the 120-second child budget and performance measurements.
+- [x] Keep Linux `test_timeout!`/`with_timeout` separate from the prefork runner while re-executing exactly one named libtest test in an isolated child with `--exact --include-ignored --test-threads=1`.
+- [x] Coordinate Linux test workloads with a process-local poison-recovering `RwLock` plus a cross-process `flock`: ordinary timeout, prefork, and full-UI workloads use shared access, while performance measurements use exclusive access; ordinary timeout re-executions additionally use a separate two-slot cross-process `flock` permit limiting concurrent full `integration-*` children globally.
+- [x] Acquire the workload permit and timeout-child slot before spawning; start the 120-second child budget only after spawn, and hold the slot through process-tree cleanup, output draining, handshake validation, and failure aggregation.
 - [x] Convert ordinary assertion panics in the child into a normal libtest failure in the parent, so later sibling tests continue instead of the integration process aborting.
 - [x] On a real timeout, terminate the child process group/tree, reap the child, and return a test failure; the normal `test_timeout!` limit remains 120 seconds, while timeout-reexec conformance fixtures use a 1-second limit only to prove cleanup.
 - [x] Forward visible-output flags (`--nocapture`, `--no-capture`, and `--show-output`) to the exact child test while preserving captured output for failure reporting.

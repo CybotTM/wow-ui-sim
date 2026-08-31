@@ -1,3 +1,7 @@
+## [2026-08-31] system | Document bounded Linux timeout re-execution
+
+Updated [[prefork-test-harness]] and the prefork spec/system docs for ordinary Linux timeout re-execution: exact one-test children use a separate two-slot cross-process `flock` permit, acquired before spawn and held through timeout cleanup, output draining, handshake validation, and failure aggregation. Queueing remains outside the post-spawn 120-second budget; default Cargo parallelism and prefork accounting are unchanged. Updated timeout optimization evidence to remove a brittle focused-test count. No final acceptance or manifest refresh was claimed.
+
 ## [2026-08-31] audit | Document retail 12.1 housing Settings strings
 
 Audited commit `cc02aa287`. Updated [[patch-12-1-api-audit]], [[lua-api]], and the maintained Lua API reference with the 13 exact enUS housing Settings labels/tooltips pinned from retail `12.1.0.69497`; the versioned table now contains 45 strings. Recorded the root cause: missing values let the canonical Interface registrant assign category ID 7, then abort before registration. No spec, changelog, or new page was warranted; housing service/state semantics remain unsupported.
