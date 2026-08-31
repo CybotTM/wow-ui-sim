@@ -1,3 +1,7 @@
+## [2026-08-30] audit | Update maintained rendering-order documentation
+
+Audited commits `dfd997a05` and `178c83bf0`. Updated [[rendering-pipeline]] plus the maintained `rendering-pipeline.md` and `hit-testing.md`: active `toplevel="true"` frames use a separate monotonic show-order sequence; emitted IDs group under the nearest active top-level ancestor across intermediate strata and remain contiguous; explicit `Raise()`/`Lower()` retain same-raw-level semantics. No rendering spec exists under `docs/specs/`, so no spec change was warranted. Protected, code, manifest, vendor/cache, and `PLAN.md` paths were untouched.
+
 ## [2026-08-30] investigation | Separate top-level show ordering from explicit Raise
 
 Updated [[world-map-voice-chat-alerts]] for commit `dfd997a05`. The prior `UIParent`/`WorldFrame` boundary repair remained necessary but no longer sufficient after explicit `Raise()`/`Lower()` was correctly constrained to same raw levels: `set_frame_visible()` still reused that path for `toplevel=true`, leaving the low-level `WorldMapFrame` root and split cross-strata descendants around `ChatFrameChannelButton`. Added monotonic active top-level show order in `SimState`, nearest-active-ancestor grouping across intermediate strata, contiguous per-strata groups after regular content, deterministic nested ownership, and full regroup on top-level show. Focused proof is 8/8 state-render tests plus the exact live-like overlap regression 1/1. No spec or new page was needed; protected, vendor/cache, manifest, and `PLAN.md` paths were untouched.

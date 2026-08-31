@@ -288,12 +288,32 @@ The simulator ignores the `BLIZZARD` input token; it does not participate as a d
 BACKGROUND < BORDER < ARTWORK < OVERLAY < HIGHLIGHT
 ```
 
-### Sorting Logic (render.rs:398-415)
+### Sorting Logic (`src/lua_api/state_render.rs`)
 
-1. Primary: frame strata
-2. Secondary: frame level (within strata)
-3. Tertiary: draw layer for regions (frames render before regions)
-4. Tie-breaker: widget ID
+The simulator builds one bucket per frame strata. Ordinary frames and regions retain
+raw frame-level ordering; `raise_order` is only a tie-breaker between siblings with
+the same raw frame level, and `Raise()`/`Lower()` cannot move a frame across a
+higher- or lower-level sibling.
+
+`toplevel="true"` uses a separate monotonic active show-order sequence. Showing a
+top-level frame assigns the next sequence value; hiding removes it, and showing it
+again assigns a newer value. This is intentionally separate from `raise_order`.
+After normal per-strata emission, IDs belonging to an active top-level frame are
+grouped by their nearest active top-level ancestor while walking through any
+intermediate strata. Each group is emitted contiguously in show order, with its
+owning frame anchored first. Thus a panel and its cross-strata descendants cannot
+be split around an independently rooted frame merely because their raw levels differ.
+Top-level visibility changes rebuild the affected bucket grouping; ordinary shows
+may use the incremental repair path. `UIParent` and `WorldFrame` remain strata-root
+boundaries.
+
+Within ordinary content, the effective order remains:
+
+1. Frame strata
+2. Raw frame level
+3. `raise_order` for same-raw-level ties
+4. Draw layer for regions (frames render before regions)
+5. Widget ID
 
 ---
 
@@ -352,7 +372,7 @@ App::hit_test(pos) -> frame_id
 build_quad_batch_for_registry()
     | [Traverse frame tree]
 collect_ancestor_visible_ids() -> HashMap<id, alpha>
-collect_sorted_frames() -> sorted by strata/level/draw-layer
+SimState::get_strata_buckets() -> per-strata frame/region order
     | [Emit quads per type]
 emit_frame_quads() -> match widget_type { ... }
     | [Collect texture requests]

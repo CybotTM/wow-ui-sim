@@ -1,6 +1,6 @@
 ## [2026-08-30] investigation | Separate top-level show ordering from explicit Raise
 
-Updated [[world-map-voice-chat-alerts]] for commit `dfd997a05`: top-level frames now receive internal monotonic show order, and each per-strata bucket groups all IDs under the nearest active top-level ancestor across intermediate strata. Regular order and explicit same-level `Raise()` semantics remain unchanged; grouped panel segments render contiguously in show order. Focused state-render proof passes 8/8 and the live-like world-map/chat overlap regression passes 1/1.
+Updated [[world-map-voice-chat-alerts]] and [[rendering-pipeline]] for commit `dfd997a05`: top-level frames now receive internal monotonic show order, and each per-strata bucket groups all IDs under the nearest active top-level ancestor across intermediate strata. Regular order and explicit same-level `Raise()` semantics remain unchanged; grouped panel segments render contiguously in show order. Focused state-render proof passes 8/8 and the live-like world-map/chat overlap regression passes 1/1.
 
 ## [2026-08-30] investigation | Document Blizzard_TransmogShared inventory-slot scope
 
@@ -308,7 +308,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | Page | Summary |
 |------|---------|
 | [[layout-system]] | AnchorPoint enum (9 positions), single vs multi-anchor resolution, coordinate system (top-left screen / bottom-left Lua), SetPoint API, cycle detection |
-| [[rendering-pipeline]] | QuadBatch (60-byte QuadVertex), five-tier RGBA GPU atlas plus glyph/BC1/BC3 bindings, WGSL shaders, mask resolution, stable-atlas headless batch comparisons, strata/level sorting, alpha propagation, hit testing |
+| [[rendering-pipeline]] | QuadBatch (60-byte QuadVertex), five-tier RGBA GPU atlas plus glyph/BC1/BC3 bindings, WGSL shaders, mask resolution, stable-atlas headless batch comparisons, strata/level sorting, monotonic top-level show segments, alpha propagation, hit testing |
 | [[widget-system]] | Frame struct (~140 fields), WidgetType enum (18 types), WidgetRegistry, default children, button text rendering, three-slice pattern, model-family 3D no-op boundary |
 | [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, model-family compatibility surface, texture fileDataID/path identity, C_* namespaces including the bounded C_ProfSpecs specialization fixture, timers, animation system |
 | [[event-system]] | EventQueue, 36+ script handler types, dispatch flow, OnUpdate tick, startup event sequence, XML script setup |

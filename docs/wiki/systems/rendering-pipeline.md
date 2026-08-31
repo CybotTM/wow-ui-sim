@@ -45,10 +45,24 @@ All RGBA tiers back a 4096×4096 texture. Glyph, BC1, and BC3 atlases are separa
 
 ## Strata and Draw Layer Sorting
 
-Sort key (primary → tie-breaker): frame strata → frame level → region vs non-region (non-regions first) → draw layer → widget ID.
+`SimState::build_strata_buckets()` builds one bucket per frame strata. Ordinary
+content is ordered by raw `frame_level`; `raise_order` is only a tie-breaker for
+siblings at the same raw level. Explicit `Raise()` and `Lower()` therefore do not
+cross raw frame levels. Regions remain grouped with their owning frame and then
+use draw-layer order (`BACKGROUND < BORDER < ARTWORK < OVERLAY < HIGHLIGHT`)
+within that frame's render group.
 
-Strata order: `WORLD < BACKGROUND < LOW < MEDIUM < HIGH < DIALOG < FULLSCREEN < FULLSCREEN_DIALOG < TOOLTIP`.  
-Draw layer order: `BACKGROUND < BORDER < ARTWORK < OVERLAY < HIGHLIGHT`.
+Top-level panels use a separate monotonic active show-order sequence. Showing a
+`toplevel="true"` frame assigns the next sequence value; hiding removes its active
+entry, and showing it again assigns a newer value. After ordinary per-strata
+emission, every ID under an active top-level frame is assigned to its nearest
+active top-level ancestor, even when intermediate parents use other strata. Each
+owner's IDs are then emitted as one contiguous segment in show order, with the
+owner first. Top-level visibility changes invalidate the bucket for a full regroup;
+ordinary child shows can use incremental repair. `UIParent` and `WorldFrame` are
+strata-root boundaries.
+
+Strata order: `WORLD < BACKGROUND < LOW < MEDIUM < HIGH < DIALOG < FULLSCREEN < FULLSCREEN_DIALOG < TOOLTIP`.
 
 ## Alpha Propagation
 
@@ -74,6 +88,9 @@ The headless path is implemented in `src/render/headless.rs` and uses the same W
 ## Sources
 
 - [rendering-pipeline.md](../../rendering-pipeline.md) — QuadBatch, shaders, atlas, hit testing, alpha, text
+- [state_render.rs](../../../src/lua_api/state_render.rs) — per-strata buckets, active top-level show order, nearest-owner grouping, and visibility invalidation
+- [state_render_tests.rs](../../../src/lua_api/state_render_tests.rs) — cross-strata top-level grouping, repeated show ordering, and same-level Raise/Lower boundaries
+- [world_map_voice_button_order.rs](../../../tests/world_map_voice_button_order.rs) — live-like top-level overlap regression
 
 ## See Also
 
