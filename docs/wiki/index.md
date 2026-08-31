@@ -1,3 +1,7 @@
+## [2026-08-30] investigation | Separate top-level show ordering from explicit Raise
+
+Updated [[world-map-voice-chat-alerts]] for commit `dfd997a05`: top-level frames now receive internal monotonic show order, and each per-strata bucket groups all IDs under the nearest active top-level ancestor across intermediate strata. Regular order and explicit same-level `Raise()` semantics remain unchanged; grouped panel segments render contiguously in show order. Focused state-render proof passes 8/8 and the live-like world-map/chat overlap regression passes 1/1.
+
 ## [2026-08-30] investigation | Document Blizzard_TransmogShared inventory-slot scope
 
 Audited commits `4f2d4b779` and `e831f1d98`. Added [[transmog-inventory-slot-scope]] and updated [[lua-api]]/[[addon-loading]] references: retail 12.1 keeps `GetInventorySlotInfo` nil publicly while `Blizzard_TransmogShared` uses a retained target-scoped loader environment, restoring prior global and environment state after success or `LoadError`. No spec or changelog update was needed.
