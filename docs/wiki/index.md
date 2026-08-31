@@ -1,3 +1,7 @@
+## [2026-08-30] investigation | Document Blizzard_TransmogShared inventory-slot scope
+
+Audited commits `4f2d4b779` and `e831f1d98`. Added [[transmog-inventory-slot-scope]] and updated [[lua-api]]/[[addon-loading]] references: retail 12.1 keeps `GetInventorySlotInfo` nil publicly while `Blizzard_TransmogShared` uses a retained target-scoped loader environment, restoring prior global and environment state after success or `LoadError`. No spec or changelog update was needed.
+
 ## [2026-08-30] audit | Document idempotent SettingsPanel reconciliation
 
 Audited commit `5715008bb`. Updated [[lua-api]] and [[addon-loading]] plus the maintained API and loader docs: post-load workarounds reconcile replacement `_G.SettingsPanel`/`Settings` surfaces before category registration/opening and remain idempotent for the same panel identity. `C_SettingsUtil` APIs remain explicitly unsupported. No new page, spec, or changelog was warranted.
@@ -361,6 +365,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[adventure-guide-boss-icons]] | Encounter Journal creature icon fileDataID `0` must be returned as nil so Blizzard boss buttons use their default icon instead of clearing the texture |
 | [[adventure-guide-simplehtml-markup]] | Encounter Journal overview text uses SimpleHTML; HTML stripping now also removes WoW color/link escapes and converts `|n` line breaks |
 | [[appearances-wardrobe-api]] | Collections Journal Appearances opens, but browsing/filtering/search/favorites need stateful `C_TransmogCollection` source, visual, filter, and search backing instead of fixed stubs |
+| [[transmog-inventory-slot-scope]] | Retail 12.1 keeps removed `GetInventorySlotInfo` nil publicly while `Blizzard_TransmogShared` uses a retained target-scoped loader environment |
 | [[backpack-background-texture]] | Reported missing tan/brown body on Backpack — investigation showed sim renders exactly what `FlatPanelBackgroundTemplate` authors (solid `PANEL_BACKGROUND_COLOR`); retail texture comes from outside the Gethe public source (addon overlay or unmirrored patch path), no sim-side fix |
 | [[talent-performance]] | Lazy `_G` lookup (431ms→263ms), rect-dirty stale cache causing infinite OnUpdate loop, shallow `issecretvalue` for pool releases (2159ms→2.6ms) |
 | [[character-select-performance]] | Lazy atlas crop stalls (fixed), first-resize relayout deduplication (partial) |

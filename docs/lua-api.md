@@ -38,6 +38,8 @@ Creates Lua with full stdlib, initializes SimState with UIParent/WorldFrame via 
 
 Loader execution keeps public `_G` and secure `__secureenv` distinct. Same-addon nil-symbol reconciliation records non-`C_*` publications separately for each environment, including secure Lua assignments and Rust-created secure frame exports; a publication only resolves a nil lookup from the same environment. Precompiled OnLoad/OnShow dispatch uses raw `_G.self` snapshot/restore so its temporary receiver does not become a client global observation. Post-cleanup namespace restoration likewise reads raw `_G.C_StoreSecure` before merging simulator state, avoiding attribution of bootstrap lookups to Blizzard code.
 
+Retail 12.1 has one narrower runtime-load exception: `Blizzard_TransmogShared` receives the internally registered `GetInventorySlotInfo` only through a target-scoped loading environment. The public global remains nil before and after `C_AddOns.LoadAddOn("Blizzard_TransmogShared")`; compiled TransmogUtil closures retain the scoped environment, and the loader restores the previous global and environment after success or `LoadError` (`src/c_api/c_addons_runtime.rs`).
+
 ### Timer System (lines 382-506)
 
 - `schedule_timer()` -- Optional interval/iterations, returns unique timer ID
@@ -352,7 +354,8 @@ Enum.DrawLayer = { BACKGROUND=1, BORDER=2, ARTWORK=3, OVERLAY=4, HIGHLIGHT=5 }
 Applied after addon loading via `env.apply_post_load_workarounds()`:
 
 1. **Settings surface** -- Reconcile a replacement `_G.SettingsPanel`/`Settings` pair before category registration and opening; repeated application is idempotent for the same panel
-2. **UpdateMicroButtons** -- Stub out micro button updates
+2. **TransmogShared load scope** -- Keep retail `GetInventorySlotInfo` nil publicly while exposing the registered lookup only to `Blizzard_TransmogShared` loader closures, then restore the prior scope
+3. **UpdateMicroButtons** -- Stub out micro button updates
 3. **Map Canvas Scroll** -- Initialize targetScale/currentScale on WorldMapFrame.ScrollContainer
 4. **Status Bar Animations** -- Provide LevelUpMaxAlphaAnimation stub
 5. **Character Frame Subframes** -- Create missing subframes from CHARACTERFRAME_SUBFRAMES list

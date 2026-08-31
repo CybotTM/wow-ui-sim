@@ -73,6 +73,10 @@ pub struct LoadTiming {
 }
 ```
 
+### Scoped runtime compatibility
+
+Retail 12.1 removes public `GetInventorySlotInfo`, but the on-demand `Blizzard_TransmogShared` TOC still calls it. `C_AddOns.LoadAddOn("Blizzard_TransmogShared")` temporarily exposes the internally registered function through a target-scoped loader environment, whose other lookups forward to the normal global table. Compiled vendor closures retain that environment for later `TransmogUtil` calls. The loader restores the previous public global and loading environment after success or `LoadError`; it does not republish the removed global for general addon code.
+
 ### Addon Context & Internal Loading
 **File:** `src/loader/addon.rs:16-124`
 

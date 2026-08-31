@@ -10,6 +10,10 @@ Audited commit `0caee6eb94d672bbadb37bc9bfbea4b84be59c18`. Updated [[frame-data-
 
 Audited commits `39f4e1a39`, `82b2b927a`, and `5354fad5a`. Updated [[prefork-test-harness]] and the prefork spec/system docs: Linux test workloads use a poison-recovering process-local `RwLock` plus cross-process `flock`; ordinary timeout, prefork, and full-UI workloads acquire shared access, while performance measurements acquire exclusive access before timeout children and measured timing. The prefork target remains exactly 1,951 retail cases (1,942 marker-generated and 9 manual/nested), with two default workers and zero eligible remaining. Added workload-gate implementation/conformance references. No changelog or new page was warranted; protected, code, test, manifest, vendor, cache, and `PLAN.md` paths were untouched.
 
+## [2026-08-30] investigation | Document Blizzard_TransmogShared inventory-slot scope
+
+Audited commits `4f2d4b779` and `e831f1d98`. Added [[transmog-inventory-slot-scope]], updated [[lua-api]] and [[addon-loading]], and linked the maintained API/loader references: retail 12.1 keeps `GetInventorySlotInfo` nil publicly while `Blizzard_TransmogShared` receives the registered lookup through a retained target-scoped environment, with prior global/environment restoration after success or `LoadError`. No spec or changelog update was needed; protected, code, test, manifest, vendor, cache, and `PLAN.md` paths were untouched.
+
 ## [2026-08-30] audit | Document idempotent SettingsPanel reconciliation
 
 Audited commit `5715008bb`. Updated [[lua-api]] and [[addon-loading]] plus the maintained API and loader docs: post-load workarounds reconcile replacement `_G.SettingsPanel`/`Settings` surfaces before category registration/opening and remain idempotent for the same panel identity. `C_SettingsUtil` APIs remain explicitly unsupported. No new page, spec, or changelog was warranted; protected `src/c_api/c_string_util.rs`, code/tests, manifest, vendor/cache, and active agent paths were untouched.

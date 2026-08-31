@@ -57,6 +57,8 @@ During startup, addon discovery includes non-LoadOnDemand addons only. LoadOnDem
 
 `load_addon_internal()` checks the `SimState` addon record before executing files. If the same addon is already marked loaded, the call returns an empty `LoadResult` without re-running Lua/XML files or post-load patches. This preserves mutable registries created by earlier files, including `StaticPopupDialogs`, and prevents repeated dependency encounters from replacing state. The separate loading transaction still handles in-progress re-entry: an addon is not marked loaded until its files and post-load work complete.
 
+Retail 12.1 `Blizzard_TransmogShared` is an addon-specific loading exception. Its runtime `C_AddOns.LoadAddOn` path temporarily gives vendor closures a target-scoped `GetInventorySlotInfo` environment even though the public global was removed. The compiled closures retain that scope for later `TransmogUtil` calls; completion and `LoadError` restore the previous global and scoped environment. See [[transmog-inventory-slot-scope]].
+
 ## Secure Replay Allowlist
 
 The secure Lua environment is separate from `_G`; it has no generic `_G` fallback. After normal loading, the loader explicitly replays only selected Blizzard library addons into `__secureenv` through `is_secure_replay_library_addon()` (`src/loader/addon.rs`). The current allowlist includes `Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_CombatLogBase`, `Blizzard_CatalogShopSharedTemplates`, `Blizzard_CatalogShopSharedUtil`, `Blizzard_AsyncRequest`, and `Blizzard_GameTooltip`.
@@ -136,7 +138,7 @@ Nested runtime-addon loads finalize failures, nil observations, and missing requ
 - [addon_loading.rs](../../../src/bin/wow_sim/addon_loading.rs) — Blizzard eager load, third-party addon discovery, metadata pre-registration, enable-state application, and load loop
 - [toc/mod.rs](../../../src/toc/mod.rs) — TOC metadata, normal file list, `[Bootstrap]` parsing, path resolution
 - [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution, inline `[Bootstrap]` entries, load transactions, warning finalization, and the secure replay allowlist
-- [c_addons_runtime.rs](../../../src/c_api/c_addons_runtime.rs) — runtime addon loading, typed top-level diagnostic retention, and exactly-once nested forwarding
+- [c_addons_runtime.rs](../../../src/c_api/c_addons_runtime.rs) — runtime addon loading, typed top-level diagnostic retention, exactly-once nested forwarding, and the scoped `Blizzard_TransmogShared` compatibility window
 - [runtime.rs](../../../src/lua_api/state_types/runtime.rs) — typed diagnostic records and public/secure attribution fields
 - [runtime surface bootstrap](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `_G.__index` diagnostic gate, strict `C_*` namespace fallback, and raw namespace restoration
 - [secure environment](../../../src/lua_api/globals/security/secure_env.rs) — separate secure environment and secure publication recording

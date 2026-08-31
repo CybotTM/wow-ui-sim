@@ -20,6 +20,8 @@ Enum initialization seeds known `Enum.*` values into existing child tables rathe
 
 `LoaderEnv::exec()` runs dynamic loader code in the currently loading addon's environment, including secure-environment and loading-scoped fenv state. `LoaderEnv::exec_public()` deliberately skips that loading fenv state while preserving the addon's secure file execution. Use it only for an addon-specific bridge that must publish a narrow compatibility surface to `_G`; it is not a generic secure-to-public mirroring mechanism. Secure Lua assignments and Rust secure frame exports are tracked in a secure-only publication ledger, so same-addon nil-symbol reconciliation checks the environment in which the name was read. The AuthChallenge workaround uses this boundary to restore five exported callbacks publicly while the `Blizzard_AuthChallengeUI` addon remains secure (`src/lua_api/loader_env.rs`, `src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs`).
 
+Retail 12.1's `Blizzard_TransmogShared` load is a narrower addon-specific scope: the internally registered `GetInventorySlotInfo` is available to that addon's compiled closures through `loading_scoped_script_env`, while public `_G.GetInventorySlotInfo` stays nil before and after the load. The runtime loader restores both the prior global and prior scoped environment on completion or `LoadError`; see [[transmog-inventory-slot-scope]].
+
 ## FrameHandle Userdata (`src/lua_api/frame/handle.rs`)
 
 ```rust
@@ -120,6 +122,9 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 - [voice_chat.rs](../../../src/lua_api/globals/missing_surface/voice_chat.rs) — state-backed active voice-channel queries
 - [c_voice_chat_probes.rs](../../../tests/c_voice_chat_probes.rs) — active voice-channel type behavior proofs
 - [loader_env.rs](../../../src/lua_api/loader_env.rs) — secure versus public dynamic loader execution
+- [c_addons_runtime.rs](../../../src/c_api/c_addons_runtime.rs) — scoped `Blizzard_TransmogShared` loading and environment restoration
+- [inventory_slot.rs](../../../src/lua_api/globals/inventory_slot.rs) — retained internal inventory-slot registration
+- [blizzard_transmog_shared_loads.rs](../../../tests/blizzard_transmog_shared_loads.rs) — retail public-nil and TransmogUtil regression proof
 - [secure_env.rs](../../../src/lua_api/globals/security/secure_env.rs) — isolated secure globals and secure publication tracking
 - [precompiled.rs](../../../src/loader/precompiled.rs) — raw `_G.self` lifecycle receiver handling
 - [environment_cleanup_restore.rs](../../../src/lua_api/workarounds/temporary/environment_cleanup_restore.rs) — raw `C_StoreSecure` restoration proof
