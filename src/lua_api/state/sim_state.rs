@@ -31,6 +31,8 @@ pub struct SimState {
     pub on_update_frames: HashSet<u64>,
     pub visible_on_update_cache: Option<Vec<u64>>,
     pub strata_buckets: Option<Vec<Vec<u64>>>,
+    pub(crate) active_toplevel_show_orders: HashMap<u64, u64>,
+    pub(crate) next_toplevel_show_order: u64,
     pub pending_hit_grid_changes: Vec<(u64, bool)>,
     pub pending_texture_preloads: BTreeSet<String>,
     pub animation_groups: HashMap<u64, AnimGroupState>,

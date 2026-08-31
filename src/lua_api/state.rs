@@ -45,6 +45,8 @@ macro_rules! build_empty_sim_state {
             on_update_frames: $collections.on_update_frames,
             visible_on_update_cache: $runtime.visible_on_update_cache,
             strata_buckets: $runtime.strata_buckets,
+            active_toplevel_show_orders: HashMap::new(),
+            next_toplevel_show_order: 0,
             pending_hit_grid_changes: $collections.pending_hit_grid_changes,
             pending_texture_preloads: $collections.pending_texture_preloads,
             animation_groups: $collections.animation_groups,
