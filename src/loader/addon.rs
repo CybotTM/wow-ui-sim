@@ -206,7 +206,7 @@ impl TransmogInventorySlotScope {
                 "GetInventorySlotInfo",
                 self.previous_global,
             );
-            Ok(())
+            Ok::<(), LoadError>(())
         })?;
         env.state().borrow_mut().loading_scoped_script_env = self.previous_scoped_env;
         Ok(())

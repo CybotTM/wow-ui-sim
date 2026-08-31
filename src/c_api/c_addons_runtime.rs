@@ -1,7 +1,7 @@
 use crate::loader::LoadError;
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::{borrow_lua, borrow_state, create_string, state_handle};
-use rilua::{Val, vm::state::LuaState};
+use rilua::vm::state::LuaState;
 use std::{collections::HashSet, io};
 
 pub(super) fn load_runtime_addon(state: &mut LuaState, addon_name: &str) -> Result<(), LoadError> {
