@@ -1,3 +1,7 @@
+## [2026-08-31] audit | Document retail 12.1 housing Settings strings
+
+Audited commit `cc02aa287`. Updated [[patch-12-1-api-audit]], [[lua-api]], and the maintained Lua API reference: 13 exact enUS housing Settings labels/tooltips from retail `12.1.0.69497` bring the versioned table to 45 strings and allow the canonical Interface registrant to finish instead of aborting after assigning category ID 7. No spec, changelog, or new investigation page was warranted; housing service/state semantics and `C_SettingsUtil` remain unsupported.
+
 ## [2026-08-31] investigation | Store model widget state lazily
 
 Updated [[widget-system]] and added [[widget-registry-storage]] for commit `2542135be` (2026-08-30): nine model-family state groups now live behind one lazy boxed payload, preserving Lua/API defaults and round trips while reducing the settled 45,002-frame registry estimate from 239,185,088 to 213,058,036 bytes. The existing 230,000,000-byte budget remains unchanged; 3D rendering remains out of scope.

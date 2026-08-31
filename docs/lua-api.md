@@ -38,6 +38,10 @@ Creates Lua with full stdlib, initializes SimState with UIParent/WorldFrame via 
 
 Loader execution keeps public `_G` and secure `__secureenv` distinct. Same-addon nil-symbol reconciliation records non-`C_*` publications separately for each environment, including secure Lua assignments and Rust-created secure frame exports; a publication only resolves a nil lookup from the same environment. Precompiled OnLoad/OnShow dispatch uses raw `_G.self` snapshot/restore so its temporary receiver does not become a client global observation. Post-cleanup namespace restoration likewise reads raw `_G.C_StoreSecure` before merging simulator state, avoiding attribution of bootstrap lookups to Blizzard code.
 
+### Versioned UI strings
+
+The enUS retail 12.1 compatibility slice publishes 45 exact global strings under `profile-retail` + `retail-12-1-0`. Commit `cc02aa287` adds 13 housing Settings labels/tooltips pinned from build `12.1.0.69497`; missing values had caused the canonical Interface Settings registrant to allocate category ID 7 and abort before registration. This is exact string publication only: housing service/state semantics remain unmodeled, and the separately probed nil globals stay absent.
+
 Retail 12.1 has one narrower runtime-load exception: `Blizzard_TransmogShared` receives the internally registered `GetInventorySlotInfo` only through a target-scoped loading environment. The public global remains nil before and after `C_AddOns.LoadAddOn("Blizzard_TransmogShared")`; compiled TransmogUtil closures retain the scoped environment, and the loader restores the previous global and environment after success or `LoadError` (`src/c_api/c_addons_runtime.rs`).
 
 ### Timer System (lines 382-506)

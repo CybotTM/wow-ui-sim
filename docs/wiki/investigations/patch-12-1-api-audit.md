@@ -30,10 +30,11 @@ The 12.1 compatibility work is currently captured by these commits:
 - `1701c1c4e` — modeled Discord OAuth/link/settings/server/channel probes against local `SimState.discord` state and removed the final 12.1 Lua inert defaults.
 - `d91e8a342` — modeled housing blueprint availability probes as local `SimState.housing` result codes.
 - `72f3ec342` — registered the live enUS retail 12.1 GlobalStrings slice after direct client probing.
+- `cc02aa287` — pinned 13 additional exact enUS housing Settings strings from retail `12.1.0.69497`; missing values had caused the canonical Interface registrant to assign category ID 7 and abort before registration.
 
 ### Live enUS GlobalStrings slice
 
-The authoritative probe targeted retail `12.1.0.69497` / interface `120100`, locale `enUS`, on 2026-08-28. Of 49 candidates, 32 warning candidates were present as exact strings and 12 warning candidates were raw `nil`. `live_retail_12_1_global_strings_match_probe` asserts every scalar value and preserves the 12 nil results. The implementation registers only the 32 proven strings under `profile-retail` + `retail-12-1-0`; it does not claim other locales or retail epochs. The preserved nil set is `BLOCK_REDUCED`, `CONFIRM_TALENT_WIPE`, `EDIT_MODE_OVERRIDE_LAYOUTS`, `EDIT_MODE_OVERRIDE_LAYOUT_MAP`, `LOCALE_koKR`, `LOCALE_ruRU`, `LOCALE_zhCN`, `LOCALE_zhTW`, `NEWBIE_TOOLTIP_COMMUNITIESTAB`, `OK`, `SLASH_TEXTTOSPEECH_HELP_GUILD_ANNOUNCE`, and `WOWHACK_ACCOUNT_STORE_TITLE`. These remain unregistered because absence is the observed client contract: synthesizing placeholders or aliases would change Blizzard branch behavior and hide strict missing-global diagnostics. Private build-stamped probe evidence remains outside the repository.
+The authoritative probe targeted retail `12.1.0.69497` / interface `120100`, locale `enUS`, on 2026-08-28. Its 49 candidates included 32 exact strings and 12 raw-`nil` results, all preserved by the existing probe contract. Commit `cc02aa287` adds 13 exact housing Settings labels/tooltips from the pinned enUS GlobalStrings export for the same build, bringing the versioned retail 12.1 table to 45 strings. `Blizzard_SettingsDefinitions_Frame/Mainline/InterfaceOverrides.lua` consumes these values; before the fix, the canonical `Interface.lua` registrant assigned `Settings.INTERFACE_CATEGORY_ID` to newly allocated category ID 7, then aborted on the missing housing string before registering that category, leaving the Settings panel on its prior category (ID 6). `live_retail_12_1_global_strings_match_probe` preserves the original exact/nil observations, while `retail_12_1_housing_settings_global_strings_match_pinned_export` pins the 13 additions. Registration remains limited to `profile-retail` + `retail-12-1-0`; no other locales, epochs, or housing service/state semantics are claimed. The preserved nil set is `BLOCK_REDUCED`, `CONFIRM_TALENT_WIPE`, `EDIT_MODE_OVERRIDE_LAYOUTS`, `EDIT_MODE_OVERRIDE_LAYOUT_MAP`, `LOCALE_koKR`, `LOCALE_ruRU`, `LOCALE_zhCN`, `LOCALE_zhTW`, `NEWBIE_TOOLTIP_COMMUNITIESTAB`, `OK`, `SLASH_TEXTTOSPEECH_HELP_GUILD_ANNOUNCE`, and `WOWHACK_ACCOUNT_STORE_TITLE`. Private build-stamped probe evidence remains outside the repository.
 
 Key implementation locations:
 
@@ -62,7 +63,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | Area | Current state |
 |------|---------------|
 | Global added APIs | Present under `retail-12-1-0` as Rust-backed APIs or compatibility bridges. `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` now contains no active Lua inert defaults. Rough source scan has no missing global-added names. `LoadAddOnWithErrorHandling` is explicitly modeled as the tested canonical wrapper over `UIParentLoadAddOn`. |
-| Live enUS GlobalStrings | **Implemented slice:** 32 exact scalar strings from retail 12.1 probe; 12 separately probed warning candidates remain raw nil. Registration is limited to `profile-retail` + `retail-12-1-0`; no cross-locale or cross-epoch claim. |
+| Live enUS GlobalStrings | **Implemented slice:** 45 exact scalar strings under retail 12.1, consisting of the original probe-backed values plus 13 housing Settings labels/tooltips from `cc02aa287`; the 12 separately probed nil candidates remain raw nil. Registration is limited to `profile-retail` + `retail-12-1-0`; no cross-locale, cross-epoch, or housing service/state claim. |
 | Removed APIs | Profile-specific removed APIs are hidden for addon-facing checks after startup by `src/ptr/strict_removals.lua`; for example, PTR hides `C_RecruitAFriend.IsEnabled` while retail 12.1 retains it. Removals are not moved earlier because current Blizzard UI still needs some load-time compatibility. |
 | Events/CVars/Enums | Added event/CVar/enum names are gated by the 12.1 retail epoch where implemented. |
 | Widget methods | Compatible 12.1 widget methods are implemented/tested: forbidden-aspect queries, texture radial-progress-bar methods, roleset/on-update mode methods, statusbar render mode, minimap icon scale, VectorGraphics/SVG stubs. |
@@ -114,8 +115,9 @@ The probes are evidence collectors only. Their presence does not resolve, reclas
 - [[patch-12-1-behavior-inventory]] — itemized broader behavior machine state and candidate classification.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — regression coverage for safe bridges and strict removals.
 - `src/lua_api/globals/strings/mod.rs` — version-gated registration of the live GlobalStrings slice.
-- `src/lua_api/globals/strings/string_data/more_strings.rs` — exact 32-string enUS retail 12.1 data table.
-- `src/lua_api/globals/register.rs` — `live_retail_12_1_global_strings_match_probe` exact-value and nil-preservation test.
+- `src/lua_api/globals/strings/string_data/more_strings.rs` — exact 45-string enUS retail 12.1 data table, including the 13 housing Settings values pinned by `cc02aa287`.
+- `src/lua_api/globals/register.rs` — `live_retail_12_1_global_strings_match_probe` exact-value/nil-preservation test.
+- `tests/blizzard_settings_definitions_frame_loads.rs` — `retail_12_1_housing_settings_global_strings_match_pinned_export` exact-value test.
 - `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` — now-empty version-gated hook; safe 12.1 social/housing bridges moved to Rust-backed simulator state.
 - `docs/local/private/probes/GlobalStringProbe-12.1.0.69497-2026-08-28.lua` (gitignored) — private build-stamped live probe capture, SHA-256 `cbb17f19adde1855627aee3e19934000584f200f1ec6bb32a4d7cb6b817b7881`; retained outside version control.
 - `src/ptr/compat_bootstrap.lua` — 12.1 compatibility globals, including `LoadAddOnWithErrorHandling`.
