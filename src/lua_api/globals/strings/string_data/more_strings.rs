@@ -16,6 +16,43 @@ pub const RETAIL_12_1_GLOBAL_STRINGS: &[StringDef] = &[
         "Detach",
     ),
     ("HOUSING_FIXTURE_ATTACHED_DECOR_CONFIRMATION_STORE", "Store"),
+    ("HOUSING_SETTINGS_LABEL", "Housing"),
+    (
+        "DECOR_LIGHT_RADIUS_INDICATOR_ENABLED",
+        "Light Radius Indicators",
+    ),
+    (
+        "OPTION_TOOLTIP_DECOR_LIGHT_RADIUS_INDICATOR_ENABLED",
+        "Enables Light Radius Indicators to show when placing Decor",
+    ),
+    ("DECOR_LIGHT_RADIUS_INDICATOR_TYPE_ALWAYS", "Always"),
+    (
+        "OPTION_TOOLTIP_DECOR_LIGHT_RADIUS_INDICATOR_TYPE_ALWAYS",
+        "The Indicator is always visible while moving a light.",
+    ),
+    ("DECOR_LIGHT_RADIUS_INDICATOR_TYPE_OVERLAP", "Overlap"),
+    (
+        "OPTION_TOOLTIP_DECOR_LIGHT_RADIUS_INDICATOR_TYPE_OVERLAP",
+        "When two lights are overlapping the indicator will appear.",
+    ),
+    ("DECOR_LIGHT_RADIUS_INDICATOR_TYPE_NEVER", "Never"),
+    (
+        "OPTION_TOOLTIP_DECOR_LIGHT_RADIUS_INDICATOR_TYPE_NEVER",
+        "No indicator will show.",
+    ),
+    (
+        "SELECTED_DECOR_LIGHT_RADIUS_INDICATOR_TYPE",
+        "Selected Decor",
+    ),
+    (
+        "OPTION_TOOLTIP_SELECTED_DECOR_LIGHT_RADIUS_INDICATOR_TYPE",
+        "Controls how the Light Radius Indicator is displayed on selected Decor while decorating.",
+    ),
+    ("OTHER_DECOR_LIGHT_RADIUS_INDICATOR_TYPE", "Other Decor"),
+    (
+        "OPTION_TOOLTIP_OTHER_DECOR_LIGHT_RADIUS_INDICATOR_TYPE",
+        "Controls how the Light Radius Indicator is displayed on non-selected Decor while decorating.",
+    ),
     (
         "HUD_EDIT_MODE_PERSONAL_RESOURCE_DISPLAY_DISABLED_TOOLTIP",
         "Displays health, power, and class resources. The Personal Resource Display is currently disabled. Enable it in: Combat>Personal Resource Display",
