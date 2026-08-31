@@ -1,6 +1,8 @@
 #![cfg(target_os = "linux")]
 
-use std::io::Write;
+use std::fs::OpenOptions;
+use std::io::{Read, Seek, SeekFrom, Write};
+use std::os::fd::AsRawFd;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::thread;
@@ -10,7 +12,10 @@ use tempfile::TempDir;
 const FIXTURE_MODE_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_FIXTURE";
 const SIBLING_MARKER_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_SIBLING_MARKER";
 const DESCENDANT_PID_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_DESCENDANT_PID";
+const CONCURRENCY_STATE_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_CONCURRENCY_STATE";
 const PROCESS_DEATH_WAIT: Duration = Duration::from_secs(2);
+const CONCURRENCY_HOLD: Duration = Duration::from_millis(600);
+const EXPECTED_TIMEOUT_CHILD_LIMIT: u32 = 2;
 
 #[test]
 fn panic_failure_is_aggregated_and_later_sibling_runs() {
@@ -109,6 +114,28 @@ fn nested_guards_execute_each_closure_once() {
     );
 }
 
+#[test]
+fn timeout_children_are_limited_to_two_concurrent_processes() {
+    let temp = TempDir::new().expect("create concurrency fixture tempdir");
+    let state_path = temp.path().join("concurrency-state");
+    std::fs::write(&state_path, "0 0\n").expect("initialize concurrency state");
+
+    let output = run_concurrency_fixture(&state_path);
+    let stdout = stdout(&output);
+    let stderr = stderr(&output);
+    assert!(
+        output.status.success(),
+        "concurrency fixture failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+
+    let (active, peak) = read_concurrency_state(&state_path);
+    assert_eq!(active, 0, "all timeout children must release their slots");
+    assert_eq!(
+        peak, EXPECTED_TIMEOUT_CHILD_LIMIT,
+        "timeout child peak exceeded the intended bound"
+    );
+}
+
 fn run_fixture(
     filter: &str,
     mode: &str,
@@ -124,6 +151,19 @@ fn run_fixture(
         command.env(DESCENDANT_PID_ENV, path);
     }
     command.output().expect("run timeout re-exec fixture")
+}
+
+fn run_concurrency_fixture(state_path: &Path) -> Output {
+    Command::new(std::env::current_exe().expect("resolve integration test binary"))
+        .args([
+            "timeout_reexec::fixtures::concurrency_case::",
+            "--test-threads=6",
+            "--nocapture",
+        ])
+        .env(FIXTURE_MODE_ENV, "concurrency")
+        .env(CONCURRENCY_STATE_ENV, state_path)
+        .output()
+        .expect("run timeout concurrency fixture")
 }
 
 fn assert_final_failure_list(stdout: &str, expected_failure: &str) {
@@ -177,6 +217,66 @@ fn process_exists(pid: libc::pid_t) -> bool {
 fn kill_process(pid: libc::pid_t) {
     unsafe {
         libc::kill(pid, libc::SIGKILL);
+    }
+}
+
+fn read_concurrency_state(path: &Path) -> (u32, u32) {
+    let state = std::fs::read_to_string(path).expect("read timeout concurrency state");
+    parse_concurrency_state(&state)
+}
+
+fn parse_concurrency_state(state: &str) -> (u32, u32) {
+    let mut values = state.split_whitespace();
+    let active = values
+        .next()
+        .expect("concurrency state active count")
+        .parse()
+        .expect("parse concurrency active count");
+    let peak = values
+        .next()
+        .expect("concurrency state peak count")
+        .parse()
+        .expect("parse concurrency peak count");
+    assert!(values.next().is_none(), "unexpected concurrency state data");
+    (active, peak)
+}
+
+fn update_concurrency_state(path: &Path, delta: i32) {
+    let mut file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(path)
+        .expect("open timeout concurrency state");
+    lock_exclusively(&file);
+
+    let mut state = String::new();
+    file.read_to_string(&mut state)
+        .expect("read locked timeout concurrency state");
+    let (active, peak) = parse_concurrency_state(&state);
+    let next_active = if delta >= 0 {
+        active.checked_add(delta as u32)
+    } else {
+        active.checked_sub(delta.unsigned_abs())
+    }
+    .expect("timeout concurrency active count overflow");
+    let next_peak = peak.max(next_active);
+
+    file.seek(SeekFrom::Start(0))
+        .expect("rewind timeout concurrency state");
+    file.set_len(0).expect("truncate timeout concurrency state");
+    writeln!(file, "{next_active} {next_peak}").expect("write timeout concurrency state");
+}
+
+fn lock_exclusively(file: &std::fs::File) {
+    loop {
+        let result = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX) };
+        if result == 0 {
+            return;
+        }
+        let error = std::io::Error::last_os_error();
+        if error.kind() != std::io::ErrorKind::Interrupted {
+            panic!("lock timeout concurrency state: {error}");
+        }
     }
 }
 
@@ -257,13 +357,70 @@ mod fixtures {
         }
     }
 
+    pub(super) mod concurrency_case {
+        use super::*;
+
+        #[test]
+        fn a_records_concurrency() {
+            if fixture_mode() == Some("concurrency") {
+                crate::common::with_timeout(1, record_concurrency_window);
+            }
+        }
+
+        #[test]
+        fn b_records_concurrency() {
+            if fixture_mode() == Some("concurrency") {
+                crate::common::with_timeout(1, record_concurrency_window);
+            }
+        }
+
+        #[test]
+        fn c_records_concurrency() {
+            if fixture_mode() == Some("concurrency") {
+                crate::common::with_timeout(1, record_concurrency_window);
+            }
+        }
+
+        #[test]
+        fn d_records_concurrency() {
+            if fixture_mode() == Some("concurrency") {
+                crate::common::with_timeout(1, record_concurrency_window);
+            }
+        }
+
+        #[test]
+        fn e_records_concurrency() {
+            if fixture_mode() == Some("concurrency") {
+                crate::common::with_timeout(1, record_concurrency_window);
+            }
+        }
+
+        #[test]
+        fn f_records_concurrency() {
+            if fixture_mode() == Some("concurrency") {
+                crate::common::with_timeout(1, record_concurrency_window);
+            }
+        }
+    }
+
     fn fixture_mode() -> Option<&'static str> {
         match std::env::var(FIXTURE_MODE_ENV).as_deref() {
             Ok("panic") => Some("panic"),
             Ok("timeout") => Some("timeout"),
             Ok("nested") => Some("nested"),
+            Ok("concurrency") => Some("concurrency"),
             _ => None,
         }
+    }
+
+    fn record_concurrency_window() {
+        let state_path = PathBuf::from(
+            std::env::var_os(CONCURRENCY_STATE_ENV)
+                .expect("timeout concurrency state environment"),
+        );
+        update_concurrency_state(&state_path, 1);
+        thread::sleep(CONCURRENCY_HOLD);
+        update_concurrency_state(&state_path, -1);
     }
 
     fn record_sibling_completion() {
