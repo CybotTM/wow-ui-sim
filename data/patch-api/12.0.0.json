@@ -88236,7 +88236,7 @@
         {
           "kind": "source",
           "reference": "src/lua_api/frame/methods/widgets/model.rs",
-          "source_hash": "b142c7f337a400ddb4e40e301a313ecb4d30a610e9391efd2c6d28935928b19f",
+          "source_hash": "47919ac25ed20ea1d212df245c617bd10e7d7e6a4eb4511cde2bd528100af5e3",
           "summary": "Current model widget surface is a stub-only 3D compatibility surface; no faithful G-buffer/model rendering behavior is implemented."
         },
         {
