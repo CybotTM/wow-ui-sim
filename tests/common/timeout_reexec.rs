@@ -3,8 +3,10 @@ use super::prefork_process::{
 };
 use super::workload_gate::{self, Mode};
 use std::env;
-use std::fs::{self, OpenOptions};
+use std::fs::{self, File, OpenOptions};
 use std::io::{self, Read, Write};
+#[cfg(target_os = "linux")]
+use std::os::fd::AsRawFd;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, ExitStatus, Stdio};
 use std::sync::Once;
@@ -16,6 +18,8 @@ const CHILD_TEST_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_TEST";
 const HANDSHAKE_PATH_ENV: &str = "WOW_SIM_TIMEOUT_REEXEC_HANDSHAKE";
 const CHILD_POLL_INTERVAL: Duration = Duration::from_millis(10);
 const TERMINATION_GRACE: Duration = Duration::from_millis(100);
+const TIMEOUT_CHILD_SLOTS: usize = 2;
+const TIMEOUT_SLOT_POLL_INTERVAL: Duration = Duration::from_millis(10);
 
 static HANDSHAKE_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 static CHILD_HANDSHAKE: Once = Once::new();
@@ -40,7 +44,7 @@ fn run_with_gate<F: FnOnce() + Send + 'static>(
         return;
     }
 
-    let run_parent = || run_parent(&test_name, secs, closure);
+    let run_parent = || run_parent(&test_name, secs, path.map(Path::to_path_buf), closure);
     match path {
         Some(path) => workload_gate::with_lock_at(path, mode, run_parent),
         None => workload_gate::with_lock(mode, run_parent),
@@ -80,11 +84,14 @@ fn record_handshake(test_name: &str) {
         .expect("write timeout child handshake");
 }
 
-fn run_parent<F>(test_name: &str, secs: u64, closure: F)
+fn run_parent<F>(test_name: &str, secs: u64, workload_path: Option<PathBuf>, closure: F)
 where
     F: FnOnce() + Send + 'static,
 {
     drop(closure);
+    let _timeout_permit = TimeoutChildPermit::acquire(
+        workload_path.unwrap_or_else(|| env::temp_dir().join("wow-ui-sim-test-workloads.lock")),
+    );
     let handshake = Handshake::new();
     let replay_success = parent_requests_visible_output();
     let mut child = spawn_exact_test(test_name, handshake.path(), replay_success)
@@ -136,6 +143,47 @@ where
         Err(error) => {
             replay_output(&stdout, &stderr);
             panic!("timeout child for `{test_name}` could not be collected: {error}");
+        }
+    }
+}
+
+struct TimeoutChildPermit {
+    #[cfg(target_os = "linux")]
+    _file: File,
+}
+
+impl TimeoutChildPermit {
+    fn acquire(workload_path: PathBuf) -> Self {
+        #[cfg(target_os = "linux")]
+        {
+            let prefix = workload_path.to_string_lossy();
+            loop {
+                for slot in 0..TIMEOUT_CHILD_SLOTS {
+                    let path = format!("{prefix}.timeout-slot-{slot}");
+                    let file = OpenOptions::new()
+                        .read(true)
+                        .write(true)
+                        .create(true)
+                        .open(&path)
+                        .unwrap_or_else(|error| panic!("open timeout child slot `{path}`: {error}"));
+                    let result = unsafe {
+                        libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB)
+                    };
+                    if result == 0 {
+                        return Self { _file: file };
+                    }
+                    let error = io::Error::last_os_error();
+                    if error.kind() != io::ErrorKind::WouldBlock {
+                        panic!("acquire timeout child slot `{path}`: {error}");
+                    }
+                }
+                thread::sleep(TIMEOUT_SLOT_POLL_INTERVAL);
+            }
+        }
+        #[cfg(not(target_os = "linux"))]
+        {
+            let _ = workload_path;
+            Self {}
         }
     }
 }
