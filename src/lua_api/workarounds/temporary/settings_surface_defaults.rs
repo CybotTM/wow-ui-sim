@@ -325,14 +325,18 @@ do
         ensure_layout(interfaceCategory)
 
         function Settings.OpenToCategory(categoryID)
-            local category = Settings.GetCategory(categoryID)
-            if category == nil then
-                category = get_fallback_category(categoryID)
+            local panel = rawget(_G, "SettingsPanel") or settingsPanel
+            if type(panel.OpenToCategory) == "function" then
+                local openedSuccessfully, opened = pcall(panel.OpenToCategory, panel, categoryID)
+                if openedSuccessfully and opened then
+                    return panel:GetCurrentCategory()
+                end
             end
+
+            local category = get_fallback_category(categoryID)
             if category == nil then
                 return nil
             end
-            local panel = rawget(_G, "SettingsPanel") or settingsPanel
             rawset(panel, "_currentCategory", category)
             if type(panel.SetShown) == "function" then
                 pcall(panel.SetShown, panel, true)
