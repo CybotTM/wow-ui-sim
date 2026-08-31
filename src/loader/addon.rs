@@ -3,10 +3,13 @@
 mod nil_symbol_reports;
 
 use crate::lua_api::LoaderEnv;
+use crate::lua_api::globals::inventory_slot::REGISTERED_GET_INVENTORY_SLOT_INFO_KEY;
+use crate::lua_api::methods::{create_table, registry_get, table_get_static, table_set_static};
 use crate::lua_api::state::SimState;
 use crate::saved_variables::SavedVariablesManager;
 use crate::toc::TocFile;
 use rilua::Val;
+use rilua::vm::state::LuaState;
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
@@ -158,6 +161,9 @@ pub fn load_addon_internal(
     let ctx = build_addon_context(env, toc, folder_name)?;
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
     let addon_name = result.name.clone();
+    let transmog_scope = (folder_name == "Blizzard_TransmogShared")
+        .then(|| enter_transmog_inventory_slot_scope(env))
+        .transpose()?;
 
     load_addon_files(
         env,
@@ -168,6 +174,9 @@ pub fn load_addon_internal(
         &mut result,
     );
     maybe_replay_blizzard_lua_in_secure_env(env, toc, folder_name, &ctx, &mut result);
+    if let Some(scope) = transmog_scope {
+        scope.restore(env)?;
+    }
     maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
     let addon_index = loading_guard.addon_index();
@@ -181,6 +190,71 @@ pub fn load_addon_internal(
     append_pending_nested_addon_diagnostics(env, addon_index, &mut result);
     loading_guard.commit_loaded();
     Ok(result)
+}
+
+struct TransmogInventorySlotScope {
+    previous_global: Val,
+    previous_scoped_env: Option<Val>,
+}
+
+impl TransmogInventorySlotScope {
+    fn restore(self, env: &LoaderEnv<'_>) -> Result<(), LoadError> {
+        env.with_state(|state| {
+            table_set_static(
+                state,
+                Val::Table(state.global),
+                "GetInventorySlotInfo",
+                self.previous_global,
+            );
+            Ok(())
+        })?;
+        env.state().borrow_mut().loading_scoped_script_env = self.previous_scoped_env;
+        Ok(())
+    }
+}
+
+fn enter_transmog_inventory_slot_scope(
+    env: &LoaderEnv<'_>,
+) -> Result<TransmogInventorySlotScope, LoadError> {
+    let (previous_global, scope_env) = env.with_state(create_transmog_inventory_slot_scope)?;
+    let previous_scoped_env = env
+        .state()
+        .borrow_mut()
+        .loading_scoped_script_env
+        .replace(scope_env);
+    Ok(TransmogInventorySlotScope {
+        previous_global,
+        previous_scoped_env,
+    })
+}
+
+fn create_transmog_inventory_slot_scope(state: &mut LuaState) -> Result<(Val, Val), LoadError> {
+    let global = Val::Table(state.global);
+    let previous_global = table_get_static(state, global, "GetInventorySlotInfo");
+    let registered = registry_get(state, REGISTERED_GET_INVENTORY_SLOT_INFO_KEY);
+    let scope_env = create_inventory_slot_scope_env(state, registered);
+    table_set_static(state, global, "GetInventorySlotInfo", registered);
+    Ok((previous_global, scope_env))
+}
+
+fn create_inventory_slot_scope_env(state: &mut LuaState, registered: Val) -> Val {
+    let scope_env = create_table(state);
+    let metatable = create_table(state);
+    let global = Val::Table(state.global);
+    table_set_static(state, scope_env, "GetInventorySlotInfo", registered);
+    table_set_static(state, metatable, "__index", global);
+    table_set_static(state, metatable, "__newindex", global);
+
+    let (Val::Table(scope_ref), Val::Table(metatable_ref)) = (scope_env, metatable) else {
+        unreachable!("created scope environment and metatable must be tables");
+    };
+    state
+        .gc
+        .tables
+        .get_mut(scope_ref)
+        .expect("created scope environment must remain live")
+        .set_metatable(Some(metatable_ref));
+    scope_env
 }
 
 pub(crate) fn append_pending_nested_addon_diagnostics(

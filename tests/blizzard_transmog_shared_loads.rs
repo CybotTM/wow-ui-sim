@@ -344,6 +344,32 @@ fn runtime_load_scopes_removed_inventory_slot_global() {
 }
 
 #[test]
+fn direct_load_scopes_removed_inventory_slot_global() {
+    let env = fresh_game_env();
+    env.apply_post_event_workarounds();
+    load_addon(&env.loader_env(), &transmog_shared_toc())
+        .expect("Blizzard_TransmogShared must load via Rust loader");
+
+    let result: String = env
+        .eval(
+            r#"
+            if GetInventorySlotInfo ~= nil then
+                return "public_after_load"
+            end
+
+            local location = TransmogUtil.GetTransmogLocation("HEADSLOT", Enum.TransmogType.Appearance, false)
+            if not location then
+                return "missing_head_location"
+            end
+            return "ok"
+            "#,
+        )
+        .expect("direct TransmogShared scope probe should run");
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn explicit_load_publishes_transmog_util_table() {
     let env = fresh_game_env();
     load_addon(&env.loader_env(), &transmog_shared_toc())
