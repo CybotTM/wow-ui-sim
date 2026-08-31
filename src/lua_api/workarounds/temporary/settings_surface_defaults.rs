@@ -325,6 +325,9 @@ do
         function Settings.OpenToCategory(categoryID)
             local category = Settings.GetCategory(categoryID)
             if category == nil then
+                category = categories[tonumber(categoryID)]
+            end
+            if category == nil then
                 return nil
             end
             local panel = rawget(_G, "SettingsPanel") or settingsPanel
@@ -480,18 +483,11 @@ mod tests {
         let env = WowLuaEnv::new().expect("lua env should initialize");
         env.exec(
             r#"
-            local interfaceCategory = {
-                id = 1,
-                GetID = function(self) return self.id end,
-                GetName = function() return "Interface" end,
-            }
             Settings = {
                 INTERFACE_CATEGORY_ID = 1,
                 AUDIO_CATEGORY_ID = 2,
-                GetCategory = function(id)
-                    if id == 1 then
-                        return interfaceCategory
-                    end
+                GetCategory = function()
+                    return nil
                 end,
                 OpenToCategory = function() end,
             }
@@ -501,8 +497,8 @@ mod tests {
         )
         .expect("fixture should replace the Settings panel and namespace");
 
-        crate::lua_api::workarounds::apply(&env);
-        crate::lua_api::workarounds::apply(&env);
+        env.apply_post_load_workarounds();
+        env.apply_post_load_workarounds();
 
         let result: (bool, i32) = env
             .eval(
