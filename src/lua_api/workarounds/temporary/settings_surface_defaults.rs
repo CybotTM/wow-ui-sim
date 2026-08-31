@@ -197,19 +197,21 @@ do
     rawset(Settings, "INTERFACE_CATEGORY_ID", interfaceCategory:GetID())
     rawset(Settings, "AUDIO_CATEGORY_ID", audioCategory:GetID())
 
-    if rawget(Settings, "GetCategory") == nil then
-        function Settings.GetCategory(id)
-            id = tonumber(id)
-            if categories[id] == nil then
-                if id == rawget(Settings, "INTERFACE_CATEGORY_ID") then
-                    return ensure_category(id, "Interface")
-                end
-                if id == rawget(Settings, "AUDIO_CATEGORY_ID") then
-                    return ensure_category(id, "Audio")
-                end
+    local function get_fallback_category(id)
+        id = tonumber(id)
+        if categories[id] == nil then
+            if id == rawget(Settings, "INTERFACE_CATEGORY_ID") then
+                return ensure_category(id, "Interface")
             end
-            return categories[id]
+            if id == rawget(Settings, "AUDIO_CATEGORY_ID") then
+                return ensure_category(id, "Audio")
+            end
         end
+        return categories[id]
+    end
+
+    if rawget(Settings, "GetCategory") == nil then
+        Settings.GetCategory = get_fallback_category
     end
 
     if type(settingsPanel) == "table" then
@@ -325,7 +327,7 @@ do
         function Settings.OpenToCategory(categoryID)
             local category = Settings.GetCategory(categoryID)
             if category == nil then
-                category = categories[tonumber(categoryID)]
+                category = get_fallback_category(categoryID)
             end
             if category == nil then
                 return nil
@@ -503,13 +505,15 @@ mod tests {
         let result: (bool, i32) = env
             .eval(
                 r#"
+                Settings.INTERFACE_CATEGORY_ID = 7
                 Settings.OpenToCategory(Settings.INTERFACE_CATEGORY_ID)
-                return SettingsPanel:IsShown(), SettingsPanel:GetCurrentCategory():GetID()
+                local category = SettingsPanel:GetCurrentCategory()
+                return SettingsPanel:IsShown(), category and category:GetID() or 0
                 "#,
             )
             .expect("replacement Settings panel probe should run");
 
-        assert_eq!(result, (true, 1));
+        assert_eq!(result, (true, 7));
     }
 
     #[test]
