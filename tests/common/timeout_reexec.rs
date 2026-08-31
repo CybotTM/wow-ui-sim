@@ -1,5 +1,6 @@
 use super::prefork_process::{
     configure_command_process_group, kill_process_group_and_child, signal_process_group,
+    terminate_and_reap_child,
 };
 use super::workload_gate::{self, Mode};
 use std::env;
@@ -110,7 +111,13 @@ where
             .expect("timeout child stderr must be piped"),
     );
 
-    let completion = wait_for_child(&mut child, pid, Duration::from_secs(secs));
+    let completion = match wait_for_child(&mut child, pid, Duration::from_secs(secs)) {
+        Ok(completion) => Ok(completion),
+        Err(error) => match terminate_and_reap_child(pid) {
+            Ok(()) => Err(error),
+            Err(cleanup_error) => Err(format!("{error}; cleanup failed: {cleanup_error}")),
+        },
+    };
     let stdout = join_drain(stdout, "stdout");
     let stderr = join_drain(stderr, "stderr");
     let handshake_result = validate_handshake(handshake.path(), test_name);
