@@ -82,6 +82,7 @@ const PATCH_12_1_REGISTERABLE_EVENTS: &[&str] = &[
     "DISCORD_LINK_UPDATE",
     "DISCORD_SERVER_LIST_UPDATE",
     "DISCORD_STATUS_UPDATE",
+    "EXTERNAL_EVENT_LAUNCH_URL_FAILED",
     "GROUP_BUFF_VISUAL_ALERTS_CHANGED",
     "GUILD_RANKS_UPDATE_ACTIVE_PLAYER",
     "HIDDEN_GROUP_BUFFS_CHANGED",
@@ -178,6 +179,7 @@ mod patch_12_1_tests {
         assert!(is_registerable_event(
             "BATTLE_NET_FRIEND_TAG_ENABLED_STATUS_UPDATED"
         ));
+        assert!(is_registerable_event("EXTERNAL_EVENT_LAUNCH_URL_FAILED"));
         assert!(is_registerable_event("GROUP_BUFF_VISUAL_ALERTS_CHANGED"));
         assert!(is_registerable_event("HOUSING_BLUEPRINT_IMPORT_STARTED"));
         assert!(is_registerable_event("UNIT_PING_PIN_ADDED"));
