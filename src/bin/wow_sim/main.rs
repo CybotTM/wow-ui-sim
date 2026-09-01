@@ -107,6 +107,12 @@ enum Commands {
         /// written losslessly.
         #[arg(long, default_value_t = 90.0, value_name = "1-100")]
         quality: f32,
+        /// UIParent scale, applied before the canvas size so the UI lays out
+        /// for it the way the client does on a uiScale change. The client
+        /// renders 1 UI unit as height/768 * uiScale pixels; 1440p at
+        /// uiScale 0.9 is 1.6875.
+        #[arg(long, default_value_t = 1.0)]
+        ui_scale: f32,
     },
 
     /// Show unique Lua errors as JSON (suppresses other output)
@@ -633,6 +639,23 @@ mod tests {
         let args = Args::try_parse_from(["wow-sim", "--character-select"])
             .expect("legacy character-select flag should parse");
         assert_eq!(args.effective_screen(), ScreenKind::CharacterSelect);
+    }
+
+    #[cfg(feature = "gui")]
+    #[test]
+    fn screenshot_ui_scale_parses_and_defaults_to_one() {
+        let args = Args::try_parse_from(["wow-sim", "screenshot", "--ui-scale", "1.6875"])
+            .expect("screenshot --ui-scale should parse");
+        let Some(Commands::Screenshot { ui_scale, .. }) = args.command else {
+            panic!("expected the screenshot subcommand");
+        };
+        assert_eq!(ui_scale, 1.6875);
+
+        let args = Args::try_parse_from(["wow-sim", "screenshot"]).expect("screenshot should parse");
+        let Some(Commands::Screenshot { ui_scale, .. }) = args.command else {
+            panic!("expected the screenshot subcommand");
+        };
+        assert_eq!(ui_scale, 1.0);
     }
 
     #[test]
