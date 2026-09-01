@@ -26,21 +26,32 @@ Fix:
 - `python3 tools/gen_limited_listfile.py --source <community-listfile.csv>` — 145251 to 145721 rows, from the wowdev community listfile release `202608301946`.
 - `wow-cli casc sync-blizzard-ui` then completes for the first time: 403 files extracted, 0 missing, exit 0.
 
-Separately, three edit-mode enum gaps that only became reachable once the aborts cleared are filled from `EditModeManagerConstantsDocumentation.lua`: `EditModeLossOfControlSetting` was absent; `EditModeSystem` was missing `RaidWarning` and `LossOfControl`, which also numbered `TotemActionBar` 24 instead of 25; `DamageMeterVisibility` was missing `InGroup`. Those are simulator-owned enum tables, not addon content, so the manifest fix does not cover them.
+Separately, thirteen enum gaps that only became reachable once the aborts cleared are filled from `Blizzard_APIDocumentationGenerated`. Those are simulator-owned enum tables, not addon content, so the manifest fix does not cover them.
+
+Three are edit-mode enums: `EditModeLossOfControlSetting` was absent; `EditModeSystem` was missing `RaidWarning` and `LossOfControl`, which also numbered `TotemActionBar` 24 instead of 25; `DamageMeterVisibility` was missing `InGroup`.
+
+Ten more surfaced as execution reached further: `SecondsFormatterRounding`, `CooldownViewerSound` (94 values), `RecentAlliesFriendTag`, `BattleNetFriendLevel` (starts at 1), `BattleNetFriendTag`, `RaidDispelOverlayType`, `SocialSystemType`, `SocialUIPresenceType`, `SocialUIBlockType` and `VisualAlertType` (starts at 1). Three of those cascade: `SocialUIUtil.lua` aborted first on `SocialUIPresenceType` and then on `SocialUIBlockType`, which is why `SocialUIScrollableElementExtentPreviewerMixin` read as nil at three call sites in Blizzard_FriendsFrame and Blizzard_SocialUI even though Blizzard ships it in that same file.
 
 Measured on `client-ptr` with `--no-addons --no-saved-vars`:
 
 | | before | after |
 | --- | --- | --- |
 | addon directories in the cache | 310 | 348 |
-| startup Lua errors | 659 | 312 |
-| distinct error messages | 56 | 27 |
+| `sync-blizzard-ui` | 20 files missing, exit 1 | 403 extracted, 0 missing, exit 0 |
+| startup Lua errors | 659 | 237 |
+| distinct error messages | 56 | 12 |
 | `EditModeManagerFrameMixin` methods | 4 | 138 |
 | `ChatFrame1Background` alpha / vertex | 1.0 / 1,1,1 | 0.25 / 0,0,0 |
+| `BottomManagedFrameContainer` | absent | anchored, `513,45 573x0` |
+| `RightManagedFrameContainer` | absent | anchored, `1595,92 0x847` |
+| edit-mode `registeredSystemFrames` | 0 | 47 |
+| `PlayerFrame` anchor points | 0 | 1 |
 
-What this does NOT fix: `UIParentRightManagedFrameContainer` and `UIParentBottomManagedFrameContainer` still report 0 anchor points and a 0x0 rect, and `PlayerFrame`, `TargetFrame` and `BuffFrame` still have no `SetPoint` at all. Those frames carry no `<Anchors>` in XML by design — the client positions them C-side through the managed-frame and edit-mode systems — so the remaining gap is that the simulator does not model that positioning. Loading `Blizzard_ManagedFrameSystem` supplies the mixin but not the container placement.
+Two leads worth recording as refuted, because both cost time:
 
-A false lead worth recording: the `ptr` profile's Blizzard UI cache was suspected of holding stale 12.0.7 source. It was not. A forced re-extraction from a live 12.1.0.69497 CASC install produced 3388 files that were byte-identical to the existing cache.
+The `ptr` profile's Blizzard UI cache was suspected of holding stale 12.0.7 source, since the profile is named for a PTR while 12.1.0 has shipped live. It does not. A forced re-extraction against a live `12.1.0.69497` install produced 3388 files byte-identical to the existing cache. Note that `sync-blizzard-ui` treats an existing file as a cache hit and does not re-extract it, so a plain re-run cannot show this either way — the directory has to be moved aside first.
+
+Pointing the simulator at the real `_retail_/WTF` via `WOW_SIM_WTF_PATH` looks like an improvement and is not. It does import the character's Edit Mode layout, but that layout arrives with **0 systems** and replaces the simulator's preset layout, which has 52. Measured: with the override `PlayerFrame` and `BuffFrame` have 0 anchor points and do not render at all; without it they have 1 each and appear where the client puts them. The simulator's `Ptr` profile also looks for WTF only under `_ptr_/WTF` (`src/paths.rs`, guarded by `ptr_wtf_candidates_use_ptr_install_flavor_only`), so on a live-only install it finds nothing by default — which is the better outcome here.
 
 ## Sources
 
