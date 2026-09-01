@@ -30,6 +30,14 @@ pub fn with_performance_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
 }
 
 #[cfg(target_os = "linux")]
+pub(crate) const TIMEOUT_FIXTURE_CAPACITY_ENV: &str = "WOW_SIM_TIMEOUT_FIXTURE_CAPACITY";
+
+#[cfg(target_os = "linux")]
+pub(crate) fn with_timeout_fixture_capacity<T>(body: impl FnOnce() -> T) -> T {
+    workload_gate::with_lock(workload_gate::Mode::Exclusive, body)
+}
+
+#[cfg(target_os = "linux")]
 pub(crate) fn with_performance_timeout_at<F: FnOnce() + Send + 'static>(
     secs: u64,
     path: &Path,

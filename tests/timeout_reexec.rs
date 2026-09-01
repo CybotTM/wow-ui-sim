@@ -120,6 +120,27 @@ fn nested_guards_execute_each_closure_once() {
 
 #[test]
 fn timeout_children_are_limited_to_two_concurrent_processes() {
+    assert_concurrency_fixture();
+}
+
+#[test]
+fn timeout_fixtures_can_run_concurrently() {
+    std::thread::scope(|scope| {
+        let launchers = [
+            scope.spawn(assert_concurrency_fixture),
+            scope.spawn(assert_permit_release_fixture),
+            scope.spawn(assert_concurrency_fixture),
+            scope.spawn(assert_permit_release_fixture),
+            scope.spawn(assert_concurrency_fixture),
+            scope.spawn(assert_permit_release_fixture),
+        ];
+        for launcher in launchers {
+            launcher.join().expect("timeout fixture launcher thread");
+        }
+    });
+}
+
+fn assert_concurrency_fixture() {
     let temp = TempDir::new().expect("create concurrency fixture tempdir");
     let state_path = temp.path().join("concurrency-state");
     std::fs::write(&state_path, "0 0\n").expect("initialize concurrency state");
@@ -170,6 +191,10 @@ fn timeout_child_runs_only_exact_selected_test() {
 
 #[test]
 fn timed_out_child_releases_permit_for_waiting_sibling() {
+    assert_permit_release_fixture();
+}
+
+fn assert_permit_release_fixture() {
     let temp = TempDir::new().expect("create permit-release fixture tempdir");
     let output = run_permit_release_fixture(temp.path());
     let stdout = stdout(&output);
@@ -208,24 +233,25 @@ fn run_fixture(
     if let Some(path) = descendant_pid_path {
         command.env(DESCENDANT_PID_ENV, path);
     }
-    command.output().expect("run timeout re-exec fixture")
+    run_capacity_fixture(command)
 }
 
 fn run_concurrency_fixture(state_path: &Path) -> Output {
-    Command::new(std::env::current_exe().expect("resolve integration test binary"))
+    let mut command = Command::new(std::env::current_exe().expect("resolve integration test binary"));
+    command
         .args([
             "timeout_reexec::fixtures::concurrency_case::",
             "--test-threads=6",
             "--nocapture",
         ])
         .env(FIXTURE_MODE_ENV, "concurrency")
-        .env(CONCURRENCY_STATE_ENV, state_path)
-        .output()
-        .expect("run timeout concurrency fixture")
+        .env(CONCURRENCY_STATE_ENV, state_path);
+    run_capacity_fixture(command)
 }
 
 fn run_exact_selection_fixture(selected_marker: &Path, forbidden_marker: &Path) -> Output {
-    Command::new(std::env::current_exe().expect("resolve integration test binary"))
+    let mut command = Command::new(std::env::current_exe().expect("resolve integration test binary"));
+    command
         .args([
             "timeout_reexec::fixtures::exact_selection_case::selected_target",
             "--exact",
@@ -234,22 +260,30 @@ fn run_exact_selection_fixture(selected_marker: &Path, forbidden_marker: &Path) 
         ])
         .env(FIXTURE_MODE_ENV, "exact-selection")
         .env(EXACT_SELECTED_MARKER_ENV, selected_marker)
-        .env(EXACT_FORBIDDEN_MARKER_ENV, forbidden_marker)
-        .output()
-        .expect("run timeout exact-selection fixture")
+        .env(EXACT_FORBIDDEN_MARKER_ENV, forbidden_marker);
+    run_capacity_fixture(command)
 }
 
 fn run_permit_release_fixture(release_dir: &Path) -> Output {
-    Command::new(std::env::current_exe().expect("resolve integration test binary"))
+    let mut command = Command::new(std::env::current_exe().expect("resolve integration test binary"));
+    command
         .args([
             "timeout_reexec::fixtures::permit_release_case::",
             "--test-threads=3",
             "--nocapture",
         ])
         .env(FIXTURE_MODE_ENV, "permit-release")
-        .env(PERMIT_RELEASE_DIR_ENV, release_dir)
-        .output()
-        .expect("run timeout permit-release fixture")
+        .env(PERMIT_RELEASE_DIR_ENV, release_dir);
+    run_capacity_fixture(command)
+}
+
+fn run_capacity_fixture(mut command: Command) -> Output {
+    crate::common::with_timeout_fixture_capacity(|| {
+        command
+            .env(crate::common::TIMEOUT_FIXTURE_CAPACITY_ENV, "1")
+            .output()
+            .expect("run timeout re-exec fixture")
+    })
 }
 
 fn assert_final_failure_list(stdout: &str, expected_failure: &str) {

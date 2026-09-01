@@ -3,6 +3,7 @@ use super::prefork_process::{
     terminate_and_reap_child,
 };
 use super::workload_gate::{self, Mode};
+use super::TIMEOUT_FIXTURE_CAPACITY_ENV;
 use std::env;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Read, Write};
@@ -46,6 +47,10 @@ fn run_with_gate<F: FnOnce() + Send + 'static>(
     }
 
     let run_parent = || run_parent(&test_name, secs, path.map(Path::to_path_buf), closure);
+    if env::var_os(TIMEOUT_FIXTURE_CAPACITY_ENV).is_some() {
+        run_parent();
+        return;
+    }
     match path {
         Some(path) => workload_gate::with_lock_at(path, mode, run_parent),
         None => workload_gate::with_lock(mode, run_parent),
