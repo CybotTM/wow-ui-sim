@@ -937,3 +937,8 @@ pub const SOCIAL_UI_PRESENCE_TYPE: SeqEnumDef = (
 
 pub const SOCIAL_UI_BLOCK_TYPE: SeqEnumDef =
     ("SocialUIBlockType", &["None", "Ignore", "BattleNetInviteBlock"]);
+
+pub const SCRIPT_OBJECT_ACCESS_RESTRICTION: EnumDef = (
+    "ScriptObjectAccessRestriction",
+    &[("DenyTaintedAccessWhenAurasAreSecret", 1)],
+);

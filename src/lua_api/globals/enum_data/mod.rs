@@ -236,4 +236,5 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     // Starts at 1, so it cannot be a SeqEnumDef
     BATTLE_NET_FRIEND_LEVEL,
     VISUAL_ALERT_TYPE,
+    SCRIPT_OBJECT_ACCESS_RESTRICTION,
 ];
