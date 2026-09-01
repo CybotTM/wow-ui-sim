@@ -233,7 +233,7 @@ fn run_fixture(
     if let Some(path) = descendant_pid_path {
         command.env(DESCENDANT_PID_ENV, path);
     }
-    spawn_capacity_reserved_fixture(command)
+    command.output().expect("run timeout re-exec fixture")
 }
 
 fn run_concurrency_fixture(state_path: &Path) -> Output {
@@ -261,7 +261,7 @@ fn run_exact_selection_fixture(selected_marker: &Path, forbidden_marker: &Path) 
         .env(FIXTURE_MODE_ENV, "exact-selection")
         .env(EXACT_SELECTED_MARKER_ENV, selected_marker)
         .env(EXACT_FORBIDDEN_MARKER_ENV, forbidden_marker);
-    spawn_capacity_reserved_fixture(command)
+    command.output().expect("run timeout exact-selection fixture")
 }
 
 fn run_permit_release_fixture(release_dir: &Path) -> Output {
