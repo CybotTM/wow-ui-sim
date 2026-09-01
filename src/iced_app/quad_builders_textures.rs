@@ -499,6 +499,37 @@ fn apply_desaturate_flag(batch: &mut QuadBatch, vert_before: usize) {
 
 const DEFAULT_MINIMAP_MASK_TEXTURE: &str = r"Interface\HUD\UIMinimapMask";
 
+/// Where the opaque disc sits inside `UIMinimapMask` (256x256, BLP2
+/// uncompressed BGRA, alpha uniformly 255 so coverage is RGB). Measured by
+/// decoding the asset: pixels with max(r,g,b) > 127 span x 27..229 and
+/// y 20..229, i.e. a 203x210 disc that is not centred on the canvas.
+///
+/// The client applies this mask C-side and nothing in Blizzard Lua or XML sizes
+/// it. Stretching the whole canvas over the 198x198 Minimap frame shrinks the
+/// disc to ~79% of the frame and leaves a ring of empty space inside the
+/// compass border; a 203px disc on a 198px frame is plainly authored to cover
+/// the frame edge to edge. So the mask rectangle is the frame expanded such
+/// that the disc maps onto it, which the fractions below express.
+const MINIMAP_MASK_CANVAS: f32 = 256.0;
+const MINIMAP_MASK_DISC_LEFT: f32 = 27.0;
+const MINIMAP_MASK_DISC_TOP: f32 = 20.0;
+const MINIMAP_MASK_DISC_WIDTH: f32 = 203.0;
+const MINIMAP_MASK_DISC_HEIGHT: f32 = 210.0;
+
+/// Screen rectangle to stretch the built-in minimap mask over so that its
+/// opaque disc covers `bounds`.
+fn default_minimap_mask_rect(bounds: Rectangle) -> Rectangle {
+    let sx = bounds.width / MINIMAP_MASK_DISC_WIDTH;
+    let sy = bounds.height / MINIMAP_MASK_DISC_HEIGHT;
+    Rectangle::new(
+        iced::Point::new(
+            bounds.x - MINIMAP_MASK_DISC_LEFT * sx,
+            bounds.y - MINIMAP_MASK_DISC_TOP * sy,
+        ),
+        iced::Size::new(MINIMAP_MASK_CANVAS * sx, MINIMAP_MASK_CANVAS * sy),
+    )
+}
+
 /// Build quads for a Minimap widget - map texture clipped by the active minimap mask.
 pub(crate) fn build_minimap_quads(
     batch: &mut QuadBatch,
@@ -513,11 +544,19 @@ pub(crate) fn build_minimap_quads(
         [1.0, 1.0, 1.0, alpha],
         BlendMode::Alpha,
     );
-    let mask_texture = f
-        .minimap_mask_texture
-        .as_deref()
-        .unwrap_or(DEFAULT_MINIMAP_MASK_TEXTURE);
-    crate::iced_app::masking::apply_mask_path(batch, vert_before, bounds, mask_texture);
+    match f.minimap_mask_texture.as_deref() {
+        // An addon-supplied mask is a MaskTexture stretched over the frame,
+        // which is what the plain path does.
+        Some(mask_texture) => {
+            crate::iced_app::masking::apply_mask_path(batch, vert_before, bounds, mask_texture)
+        }
+        None => crate::iced_app::masking::apply_mask_path_with_rect(
+            batch,
+            vert_before,
+            default_minimap_mask_rect(bounds),
+            DEFAULT_MINIMAP_MASK_TEXTURE,
+        ),
+    }
 }
 
 #[cfg(test)]
@@ -574,6 +613,30 @@ mod tests {
                 .iter()
                 .all(|vertex| vertex.mask_tex_index == -2)
         );
+    }
+
+    /// The built-in mask's opaque disc occupies x 27..229 / y 20..229 of its
+    /// 256px canvas. Stretching the canvas over the frame would give the quad
+    /// mask UVs 0..1 and shrink the visible disc to ~79% of the frame; the disc
+    /// must map onto the frame instead, so the quad's UVs are the disc's
+    /// sub-range of the canvas.
+    #[test]
+    fn default_minimap_mask_disc_covers_the_frame() {
+        let mut batch = QuadBatch::new();
+        let frame = Frame::new(WidgetType::Minimap, Some("Minimap".to_string()), None);
+        let bounds = Rectangle::new(Point::new(10.0, 20.0), Size::new(198.0, 198.0));
+
+        build_minimap_quads(&mut batch, bounds, &frame, 1.0);
+
+        let us: Vec<f32> = batch.vertices.iter().map(|v| v.mask_tex_coords[0]).collect();
+        let vs: Vec<f32> = batch.vertices.iter().map(|v| v.mask_tex_coords[1]).collect();
+        let (umin, umax) = (us.iter().cloned().fold(1.0, f32::min), us.iter().cloned().fold(0.0, f32::max));
+        let (vmin, vmax) = (vs.iter().cloned().fold(1.0, f32::min), vs.iter().cloned().fold(0.0, f32::max));
+        let close = |a: f32, b: f32| (a - b).abs() < 0.005;
+        assert!(close(umin, 27.0 / 256.0) && close(umax, 230.0 / 256.0),
+            "mask U range {umin}..{umax} should be the disc's 27..230 of 256");
+        assert!(close(vmin, 20.0 / 256.0) && close(vmax, 230.0 / 256.0),
+            "mask V range {vmin}..{vmax} should be the disc's 20..230 of 256");
     }
 
     #[test]
