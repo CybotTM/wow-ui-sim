@@ -16388,3 +16388,7 @@ end
 if not Enum.SocialUIBlockTypeMeta then
   Enum.SocialUIBlockTypeMeta = { MaxValue = 2, MinValue = 0, NumValues = 3 }
 end
+
+if not Enum.ScriptObjectAccessRestrictionMeta then
+  Enum.ScriptObjectAccessRestrictionMeta = { MaxValue = 1, MinValue = 1, NumValues = 1 }
+end
