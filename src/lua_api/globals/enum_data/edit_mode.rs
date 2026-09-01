@@ -38,8 +38,18 @@ pub const EDIT_MODE_SYSTEM: SeqEnumDef = (
         "PersonalResourceDisplay",
         "EncounterEvents",
         "DamageMeter",
+        #[cfg(feature = "retail-12-1-0")]
+        "RaidWarning",
         "TotemActionBar",
+        #[cfg(feature = "retail-12-1-0")]
+        "LossOfControl",
     ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const EDIT_MODE_SYSTEM_META: EnumDef = (
+    "EditModeSystemMeta",
+    &[("MinValue", 0), ("MaxValue", 26), ("NumValues", 27)],
 );
 
 pub const EDIT_MODE_CHAT_FRAME_SETTING: SeqEnumDef = (
@@ -93,13 +103,33 @@ pub const EDIT_MODE_ACCOUNT_SETTING: SeqEnumDef = (
         "ShowEncounterEvents",
         "ShowDamageMeter",
         "ShowExternalDefensives",
+        #[cfg(feature = "retail-12-1-0")]
+        "ShowRaidWarning",
         "ShowTotemActionBar",
+        #[cfg(feature = "retail-12-1-0")]
+        "ShowLossOfControl",
     ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const EDIT_MODE_ACCOUNT_SETTING_META: EnumDef = (
+    "EditModeAccountSettingMeta",
+    &[("MinValue", 0), ("MaxValue", 35), ("NumValues", 36)],
 );
 
 pub const EDIT_MODE_LAYOUT_TYPE: SeqEnumDef = (
     "EditModeLayoutType",
     &["Preset", "Account", "Character", "Override"],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const EDIT_MODE_LOSS_OF_CONTROL_SETTING: SeqEnumDef =
+    ("EditModeLossOfControlSetting", &["Size"]);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const EDIT_MODE_LOSS_OF_CONTROL_SETTING_META: EnumDef = (
+    "EditModeLossOfControlSettingMeta",
+    &[("MinValue", 0), ("MaxValue", 0), ("NumValues", 1)],
 );
 
 pub const EDIT_MODE_UNIT_FRAME_SETTING: SeqEnumDef = (

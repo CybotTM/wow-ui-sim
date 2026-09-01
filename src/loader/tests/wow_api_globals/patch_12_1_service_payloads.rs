@@ -41,6 +41,45 @@ fn test_patch_12_1_lfg_lair_category_constant() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_edit_mode_loss_of_control_enums() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local system = Enum.EditModeSystem
+            if system.RaidWarning ~= 24 or system.TotemActionBar ~= 25 or system.LossOfControl ~= 26 then
+                return "system"
+            end
+            local systemMeta = Enum.EditModeSystemMeta
+            if systemMeta.MinValue ~= 0 or systemMeta.MaxValue ~= 26 or systemMeta.NumValues ~= 27 then
+                return "system-meta"
+            end
+
+            local account = Enum.EditModeAccountSetting
+            if account.ShowRaidWarning ~= 33 or account.ShowTotemActionBar ~= 34 or account.ShowLossOfControl ~= 35 then
+                return "account"
+            end
+            local accountMeta = Enum.EditModeAccountSettingMeta
+            if accountMeta.MinValue ~= 0 or accountMeta.MaxValue ~= 35 or accountMeta.NumValues ~= 36 then
+                return "account-meta"
+            end
+
+            local lossOfControl = Enum.EditModeLossOfControlSetting
+            local lossOfControlMeta = Enum.EditModeLossOfControlSettingMeta
+            if type(lossOfControl) ~= "table" or lossOfControl.Size ~= 0 then return "loss-of-control" end
+            if lossOfControlMeta.MinValue ~= 0 or lossOfControlMeta.MaxValue ~= 0 or lossOfControlMeta.NumValues ~= 1 then
+                return "loss-of-control-meta"
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_pet_and_lfg_payloads() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

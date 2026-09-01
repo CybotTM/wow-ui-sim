@@ -74,6 +74,8 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     EDIT_MODE_CHAT_FRAME_SETTING,
     EDIT_MODE_ACCOUNT_SETTING,
     EDIT_MODE_LAYOUT_TYPE,
+    #[cfg(feature = "retail-12-1-0")]
+    EDIT_MODE_LOSS_OF_CONTROL_SETTING,
     EDIT_MODE_UNIT_FRAME_SETTING,
     EDIT_MODE_CAST_BAR_SETTING,
     EDIT_MODE_MINIMAP_SETTING,
@@ -168,6 +170,12 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     BATTLE_NET_FRIEND_LEVEL,
     #[cfg(feature = "retail-12-1-0")]
     BATTLE_NET_FRIEND_LEVEL_META,
+    #[cfg(feature = "retail-12-1-0")]
+    EDIT_MODE_ACCOUNT_SETTING_META,
+    #[cfg(feature = "retail-12-1-0")]
+    EDIT_MODE_LOSS_OF_CONTROL_SETTING_META,
+    #[cfg(feature = "retail-12-1-0")]
+    EDIT_MODE_SYSTEM_META,
     LFG_ROLE,
     UNIT_SEX,
     UI_WIDGET_TEXT_SIZE_TYPE,
