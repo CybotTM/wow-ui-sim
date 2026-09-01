@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document raid dispel overlay enum
+
+Audited commit `4d90beffd`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: generated `Enum.RaidDispelOverlayType` (`Disabled=0`, `UseDebuffColor=1`, `UseBlack=2`) plus metadata satisfies the current `CompactUnitFrameOptions` lookup. The later `CompactUnitFrameUtil` `pairs(nil)` was downstream of that aborted options load; overlay rendering remains unmodeled. No spec, changelog, or new page was warranted.
+
 ## [2026-09-01] audit | Document ChatFrame combat-audio command names
 
 Audited commit `abcfb395b`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: `SLASH_CAA_WHEN_TARGET_DIES` and `SLASH_CAA_PLAY_SOUND` bring the retail 12.1 compatibility table from 68 to 70 strings. Current `TextToSpeechCommands.lua` passes both to `AddCommand`, which applies `string.lower` during preload; their values were not captured by the existing 49-candidate live probe. No spec, changelog, or new page was warranted.
