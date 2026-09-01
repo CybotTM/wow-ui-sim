@@ -41,6 +41,7 @@ The 12.1 compatibility work is currently captured by these commits:
 - `6eae179ff` — added generated `Enum.CustomAuraButtonDispelTypeTextureStyle` (`0..4`) and metadata required by `Blizzard_Deprecated/Deprecated_12_1_0.lua` to construct `AuraButtonBorderStyle` aliases when deprecation fallbacks load.
 - `fc833ab34` — added retail-12.1 `EXTERNAL_EVENT_LAUNCH_URL_FAILED` to the strict registerable-event table, allowing the current `Blizzard_GameMenu` registration; no external URL API or event-producer behavior is modeled.
 - `e3806caba` — publishes generated retail-12.1 `Enum.HousingResult` values `0..111` with metadata (`MinValue=0`, `MaxValue=111`, `NumValues=112`) before the stale missing-enums fallback, letting current `Blizzard_HousingTemplates` build `HousingResultToErrorText`; housing operations and result strings remain unmodeled, and the pre-12.1 contract is unchanged.
+- `db678a399` — publishes current wowt-global-dataset retail-12.1 `Enum.HouseSettingFlags` bitmask values `0..16384` (16 values) and metadata (`MinValue=0`, `MaxValue=16384`, `NumValues=16`) before that fallback. Current `Blizzard_HousingData` uses `BlueprintExportNeighbors`, `BlueprintExportGuild`, `BlueprintExportFriends`, and `BlueprintExportParty` in `HousingAccessTypeStrings`; housing access/export behavior and strings remain unmodeled, and the pre-12.1 contract is unchanged.
 
 ### Live enUS GlobalStrings slice
 

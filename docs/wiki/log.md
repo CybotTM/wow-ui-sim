@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document retail 12.1 HouseSettingFlags enum
+
+Audited commit `db678a399`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: current wowt-global-dataset `Enum.HouseSettingFlags` now publishes all 16 bitmask values through `BlueprintExportParty=16384` with metadata under `retail-12-1-0` before the stale fallback. Current `Blizzard_HousingData` uses the four non-`Anyone` blueprint-export flags in `HousingAccessTypeStrings`; housing access/export behavior and strings remain unmodeled, and the pre-12.1 contract is unchanged. No spec, changelog, index, or new page was warranted; no code, vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.
+
 ## [2026-09-01] audit | Document retail 12.1 HousingResult enum
 
 Audited commit `e3806caba`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: generated `Enum.HousingResult` now publishes all 112 values (`0..111`) with metadata under `retail-12-1-0` before the stale missing-enums fallback, allowing current `Blizzard_HousingTemplates` to build `HousingResultToErrorText`. Housing operations and result strings remain unmodeled; the pre-12.1 contract is unchanged. No spec, changelog, index, or new page was warranted; no code, vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.
