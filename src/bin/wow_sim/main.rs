@@ -103,6 +103,10 @@ enum Commands {
         crop: Option<String>,
         #[arg(long, value_name = "FILTER")]
         dump_tree: Option<Option<String>>,
+        /// WebP quality, 1-100. Ignored when --output ends in .png, which is
+        /// written losslessly.
+        #[arg(long, default_value_t = 90.0, value_name = "1-100")]
+        quality: f32,
     },
 
     /// Show unique Lua errors as JSON (suppresses other output)
