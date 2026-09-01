@@ -42,7 +42,7 @@ fn load_full_game_ui() -> WowLuaEnv {
 }
 
 #[test]
-fn blizzard_friends_frame_toc_declares_timerunning_dep_and_allow_load_both() {
+fn blizzard_friends_frame_toc_declares_required_social_dependencies_and_allow_load_both() {
     let toc = TocFile::from_file(&friends_frame_toc()).expect("Blizzard_FriendsFrame TOC parse");
 
     assert!(
@@ -72,10 +72,12 @@ fn blizzard_friends_frame_toc_declares_timerunning_dep_and_allow_load_both() {
     let deps = toc.dependencies();
     assert_eq!(
         deps,
-        vec!["Blizzard_TimerunningUtil".to_string()],
-        "`## Dependencies: Blizzard_TimerunningUtil` declares the only required \
-         dependency — the timerunning helpers are needed because the friends list shows \
-         a clock icon next to characters playing the timerunning seasonal mode. Got: \
+        vec![
+            "Blizzard_TimerunningUtil".to_string(),
+            "Blizzard_AddFriend".to_string(),
+        ],
+        "Blizzard_FriendsFrame requires Blizzard_TimerunningUtil and Blizzard_AddFriend. \
+         The latter now owns the BattleNet invite UI extracted from FriendsFrame. Got: \
          {:?}",
         deps
     );
@@ -84,11 +86,10 @@ fn blizzard_friends_frame_toc_declares_timerunning_dep_and_allow_load_both() {
         .expect("Blizzard_FriendsFrame TOC should read");
     assert!(
         toc_text.contains(
-            "## OptionalDeps: Blizzard_GlueStubs, Blizzard_ActionBar, Blizzard_RecentAllies"
+            "## OptionalDeps: Blizzard_GlueStubs, Blizzard_ActionBar, Blizzard_SocialUIShared, Blizzard_RecentAllies, Blizzard_UnitPopupShared, Blizzard_UnitPopup"
         ),
-        "Blizzard_FriendsFrame declares three optional deps: Blizzard_GlueStubs (for \
-         glue-screen friend list on Login/CharacterSelect), Blizzard_ActionBar (for the \
-         `/who` action button), Blizzard_RecentAllies (the embedded RecentAllies tab)"
+        "Blizzard_FriendsFrame declares the current optional social UI dependencies, including \
+         Blizzard_SocialUIShared and both UnitPopup addons."
     );
     assert!(
         toc_text.contains("## AllowLoad: both"),
@@ -186,25 +187,22 @@ fn blizzard_friends_frame_is_addon_loaded_returns_true_after_full_game_ui_load(e
 }
 
 prefork_full_ui_case! {
-fn blizzard_friends_frame_publishes_four_top_level_frames(env: &WowLuaEnv) {
+fn blizzard_friends_frame_publishes_three_top_level_frames(env: &WowLuaEnv) {
 
-    let frames: (bool, bool, bool, bool) = env
+    let frames: (bool, bool, bool) = env
         .eval(
             "return type(FriendsFrame) == 'table', \
                     type(AddFriendFrame) == 'table', \
-                    type(FriendsFriendsFrame) == 'table', \
-                    type(BattleTagInviteFrame) == 'table'",
+                    type(FriendsFriendsFrame) == 'table'",
         )
         .expect("Top-level frame probe should succeed");
     assert_eq!(
         frames,
-        (true, true, true, true),
-        "FriendsFrame.xml declares four UIParent-parented frames as named globals: \
-         FriendsFrame (toplevel ButtonFrameTemplate, hidden — the main social panel), \
-         AddFriendFrame (DIALOG strata, ResizeLayoutFrame inheriting AddFriendFrameMixin), \
-         FriendsFriendsFrame (DIALOG strata, FriendsFriendsFrameMixin — mutual-friends \
-         lookup popup), BattleTagInviteFrame (DIALOG strata — BattleTag invite consent \
-         dialog)"
+        (true, true, true),
+        "Current FriendsFrame XML declares FriendsFrame (the main social panel), \
+         AddFriendFrame (the dialog-strata add-friend panel), and FriendsFriendsFrame \
+         (the mutual-friends popup). BattleNet invite UI now belongs to Blizzard_AddFriend, \
+         not Blizzard_FriendsFrame."
     );
 }
 }
@@ -462,7 +460,7 @@ fn blizzard_friends_frame_publishes_friend_tab_enum(env: &WowLuaEnv) {
 }
 
 prefork_full_ui_case! {
-fn blizzard_friends_frame_publishes_squelch_and_friends_friends_enums(env: &WowLuaEnv) {
+fn blizzard_friends_frame_publishes_squelch_types(env: &WowLuaEnv) {
 
     let squelch: (i64, i64) = env
         .eval(
@@ -473,24 +471,9 @@ fn blizzard_friends_frame_publishes_squelch_and_friends_friends_enums(env: &WowL
     assert_eq!(
         squelch,
         (1, 2),
-        "FriendsFrame.lua lines 27-28 declare the two-state squelch enum used by the \
-         ignore/block-invite UI: SQUELCH_TYPE_IGNORE=1 (full chat suppression), \
-         SQUELCH_TYPE_BLOCK_INVITE=2 (just blocks party/raid invites)"
-    );
-
-    let friends_friends: (i64, i64, i64) = env
-        .eval(
-            "return FRIENDS_FRIENDS_POTENTIAL, \
-                    FRIENDS_FRIENDS_MUTUAL, \
-                    FRIENDS_FRIENDS_ALL",
-        )
-        .expect("FRIENDS_FRIENDS_* probe should succeed");
-    assert_eq!(
-        friends_friends,
-        (1, 2, 3),
-        "FriendsFrame.lua lines 29-31 declare the FriendsFriendsFrame radio-filter \
-         enum: POTENTIAL=1 (suggested), MUTUAL=2 (both follow each other), ALL=3 \
-         (everyone the selected friend follows)"
+        "FriendsFrame.lua declares the two-state squelch enum used by the ignore/block-invite UI. \
+         FriendsFriendsViewType is deliberately local to FriendsFriendsFrame.lua and is not a \
+         public runtime global."
     );
 }
 }

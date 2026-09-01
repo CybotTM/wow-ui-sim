@@ -122,7 +122,7 @@ fn blizzard_housing_controls_toc_is_retail_only_and_omits_allow_load() {
 }
 
 #[test]
-fn blizzard_housing_controls_toc_lists_five_files() {
+fn blizzard_housing_controls_toc_lists_bootstrap_and_four_runtime_files() {
     let toc =
         TocFile::from_file(&housing_controls_toc()).expect("HousingControls TOC should parse");
     let files: Vec<String> = toc
@@ -133,34 +133,18 @@ fn blizzard_housing_controls_toc_lists_five_files() {
     assert_eq!(
         files,
         vec![
-            "Blizzard_HousingControlsUtil.lua".to_string(),
+            "Blizzard_HousingControls_Bootstrap.lua".to_string(),
             "Blizzard_HousingControlButton.lua".to_string(),
             "Blizzard_HousingControlButton.xml".to_string(),
             "Blizzard_HousingControls.lua".to_string(),
             "Blizzard_HousingControls.xml".to_string(),
         ],
-        "Blizzard_HousingControls TOC body lists exactly 5 source files in this exact order: \
-         Blizzard_HousingControlsUtil.lua (publishes the HousingControlsUtil module table with \
-         the single CanActivateHousingControls(availabilityResult) helper that maps \
-         Enum.HousingResult.Success to true and otherwise looks up the error text from \
-         HousingResultToErrorText — must load FIRST because the ControlButton mixins reference \
-         HousingControlsUtil.CanActivateHousingControls), Blizzard_HousingControlButton.lua \
-         (publishes BaseHousingControlButtonMixin + the 5 button-specific mixins — \
-         HouseEditorButtonMixin, HouseExitButtonMixin, HouseInfoButtonMixin, \
-         HouseInspectorButtonMixin, HouseSettingsButtonMixin — must load BEFORE the matching \
-         XML templates can reference them via `mixin=`), Blizzard_HousingControlButton.xml \
-         (publishes 8 virtual Button templates — the 3 base/intermediate templates \
-         BaseHousingControlButtonTemplate / HousingControlActionButtonTemplate / \
-         HousingControlModeButtonTemplate plus the 5 specific implementations \
-         HouseEditorButtonTemplate / HouseSettingsButtonTemplate / HousingExitButtonTemplate / \
-         HouseInfoButtonTemplate / HouseInspectorButtonTemplate), Blizzard_HousingControls.lua \
-         (publishes HousingControlsMixin + VisitorControlFrameMixin + the 2 local event tables \
-         HousingControlsEvents (4 events — HOUSE_PLOT_ENTERED, HOUSE_PLOT_EXITED, \
-         HOUSE_EDITOR_AVAILABILITY_CHANGED, CURRENT_HOUSE_INFO_RECIEVED) and \
-         HousingControlsShownEvents (3 events — HOUSE_EDITOR_MODE_CHANGED, UPDATE_BINDINGS, \
-         HOUSE_INFO_UPDATED)), Blizzard_HousingControls.xml (publishes the named non-virtual \
-         HousingControlsFrame inheriting HousingControlsMixin + the named non-virtual \
-         HousingVisitorControlsFrame placeholder)"
+        "Blizzard_HousingControls TOC body lists exactly 5 source files in this exact order. \
+         The first file is Blizzard_HousingControls_Bootstrap.lua, annotated inline with \
+         `[Bootstrap]`; it publishes HousingControls_LoadUI(), which delegates to \
+         LoadAddOnWithErrorHandling(AddonName). The annotation does not reorder this TOC. \
+         The remaining files define the control-button mixins and templates, then the \
+         HousingControls frame and XML."
     );
 }
 
@@ -175,26 +159,17 @@ fn blizzard_housing_controls_directory_holds_six_entries() {
     assert_eq!(
         entries.len(),
         6,
-        "Blizzard_HousingControls directory ships exactly 6 entries: 5 source files referenced \
-         by the TOC + 1 TOC file. No flavor subdirectory and no Localization.lua — the \
-         strings (HOUSING_CONTROLS_EDITOR_UNAVAILABLE / HOUSING_CONTROLS_EDITOR_UNAVAILABLE_FMT \
-         / HOUSING_CONTROLS_EDITOR_BUTTON_ENTER / HOUSING_CONTROLS_EDITOR_BUTTON_ENTER_FMT / \
-         HOUSING_CONTROLS_EDITOR_BUTTON_EXIT / HOUSING_CONTROLS_EDITOR_BUTTON_EXIT_FMT / \
-         HOUSING_CONTROLS_SETTINGS_TOOLTIP / HOUSING_CONTROLS_SETTINGS_UNAVAILABLE / \
-         HOUSING_CONTROLS_SETTINGS_UNAVAILABLE_FMT / HOUSING_CONTROLS_EXIT_BUTTON / \
-         HOUSING_CONTROLS_INSPECT_TOOLTIP / HOUSING_CONTROLS_INSPECT_UNAVAILABLE_EDITOR_ACTIVE \
-         / HOUSING_DASHBOARD_HOUSEINFO_TOOLTIP / HOUSING_DASHBOARD_OWNERS_HOUSE) are pulled \
-         from the global locale table maintained by the housing dependency chain. Got: \
-         {entries:?}"
+        "Blizzard_HousingControls directory ships exactly 6 entries: the 5 TOC files and \
+         the bare TOC. No flavor subdirectory or Localization.lua. Got: {entries:?}"
     );
     assert!(
         entries.contains(&"Blizzard_HousingControls.toc".to_string()),
         "Blizzard_HousingControls directory must contain the bare TOC file"
     );
     assert!(
-        entries.contains(&"Blizzard_HousingControlsUtil.lua".to_string()),
-        "Blizzard_HousingControls directory must contain the Util tail file (10 lines, the \
-         CanActivateHousingControls helper that ControlButton mixins consume)"
+        entries.contains(&"Blizzard_HousingControls_Bootstrap.lua".to_string()),
+        "Blizzard_HousingControls directory must contain the Bootstrap file that publishes \
+         HousingControls_LoadUI"
     );
 }
 
@@ -295,22 +270,29 @@ fn blizzard_housing_controls_publishes_housing_controls_frame_global(env: &WowLu
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_controls_publishes_housing_visitor_controls_frame_placeholder_global(env: &WowLuaEnv) {
+fn blizzard_housing_controls_visitor_frame_matches_current_parent_key_contract(env: &WowLuaEnv) {
     load_housing_controls(env);
 
-    let exists: bool = env
+    let contract: (bool, bool, bool, bool, bool, bool, bool, bool) = env
         .eval(
-            "local f = _G['HousingVisitorControlsFrame']; return type(f) == 'table' and type(f.GetName) == 'function'",
+            "local f = HousingControlsFrame and HousingControlsFrame.VisitorControlFrame; \
+             local buttons = f and f.ButtonContainer; \
+             return type(f) == 'table', \
+                    f and f.OwnerNameText ~= nil, \
+                    f and f.Divider ~= nil, \
+                    type(buttons) == 'table', \
+                    buttons and buttons.VisitorInspectorButton ~= nil, \
+                    buttons and buttons.BlueprintsButton ~= nil, \
+                    buttons and buttons.VisitorHouseInfoButton ~= nil, \
+                    buttons and buttons.VisitorExitButton ~= nil",
         )
-        .expect("HousingVisitorControlsFrame global lookup should succeed");
-    assert!(
-        exists,
-        "After LoD load, `HousingVisitorControlsFrame` should publish as a global frame \
-         instance — Blizzard_HousingControls.xml lines 100-102 declare `<Frame \
-         name=\"HousingVisitorControlsFrame\">` with empty body. This is a placeholder \
-         non-virtual Frame at file scope reserved for future visitor-control wiring; current \
-         visitor controls live as a parentKey child of HousingControlsFrame \
-         (HousingControlsFrame.VisitorControlFrame, mixin=VisitorControlFrameMixin)"
+        .expect("VisitorControlFrame parentKey contract probe should succeed");
+    assert_eq!(
+        contract,
+        (true, true, true, true, true, true, true, true),
+        "Current HousingControlsFrame.VisitorControlFrame owns OwnerNameText, Divider, and \
+         ButtonContainer. Its four action parent keys are VisitorInspectorButton, \
+         BlueprintsButton, VisitorHouseInfoButton, and VisitorExitButton."
     );
 }
 }
@@ -367,19 +349,16 @@ fn blizzard_housing_controls_mixin_publishes_eight_methods(env: &WowLuaEnv) {
 }
 
 prefork_full_ui_case! {
-fn blizzard_visitor_control_frame_mixin_publishes_one_method(env: &WowLuaEnv) {
+fn blizzard_housing_visitor_controls_layout_mixin_publishes_owner_info_method(env: &WowLuaEnv) {
     load_housing_controls(env);
 
     let exists: bool = env
-        .eval("return type(VisitorControlFrameMixin['UpdateOwnerInfomation']) == 'function'")
-        .expect("VisitorControlFrameMixin method existence query should succeed");
+        .eval("return type(HousingVisitorControlsLayoutMixin['UpdateOwnerInfomation']) == 'function'")
+        .expect("HousingVisitorControlsLayoutMixin method existence query should succeed");
     assert!(
         exists,
-        "VisitorControlFrameMixin must expose `:UpdateOwnerInfomation()` (note Blizzard's \
-         typo — `Infomation`, not `Information` — preserved verbatim from the source) — calls \
-         C_Housing.GetCurrentHouseInfo() and either clears OwnerNameText (when no info) or \
-         formats it via `string.format(HOUSING_DASHBOARD_OWNERS_HOUSE, houseInfo.ownerName)`. \
-         Stores ownerName on self for downstream use"
+        "HousingVisitorControlsLayoutMixin must expose `:UpdateOwnerInfomation()` (Blizzard's \
+         `Infomation` spelling) to populate OwnerNameText from C_Housing.GetCurrentHouseInfo()."
     );
 }
 }
@@ -501,7 +480,7 @@ fn blizzard_housing_controls_owner_control_frame_publishes_five_buttons(env: &Wo
         "HouseEditorButton",
         "SettingsButton",
         "ExitButton",
-        "HouseInfoButton",
+        "BlueprintsButton",
         "InspectorButton",
     ] {
         let exists: bool = env
@@ -516,57 +495,11 @@ fn blizzard_housing_controls_owner_control_frame_publishes_five_buttons(env: &Wo
              can address them without touching `_G`: HouseEditorButton (68x68 \
              HouseEditorButtonTemplate centered with -12 y-offset), SettingsButton \
              (HouseSettingsButtonTemplate left of editor with 10,3 offset), ExitButton \
-             (HousingExitButtonTemplate left of settings), HouseInfoButton \
-             (HouseInfoButtonTemplate right of editor with -10,3 offset), InspectorButton \
-             (HouseInspectorButtonTemplate right of HouseInfoButton). All 5 inherit \
-             BaseHousingControlButtonTemplate's `parentArray=\"Buttons\"`, so they collect \
-             into HousingControlsFrame.OwnerControlFrame.Buttons for the UpdateButtons loop"
-        );
-    }
-}
-}
-
-prefork_full_ui_case! {
-fn blizzard_housing_controls_visitor_control_frame_publishes_three_buttons(env: &WowLuaEnv) {
-    load_housing_controls(env);
-
-    let visitor_frame_exists: bool = env
-        .eval(
-            "local f = HousingControlsFrame.VisitorControlFrame; return type(f) == 'table' and type(f.GetName) == 'function'",
-        )
-        .expect("VisitorControlFrame parentKey lookup should succeed");
-    assert!(
-        visitor_frame_exists,
-        "HousingControlsFrame.VisitorControlFrame must publish via parentKey — \
-         Blizzard_HousingControls.xml line 52 declares `<Frame parentKey=\"VisitorControlFrame\" \
-         mixin=\"VisitorControlFrameMixin\" setAllPoints=\"true\" hidden=\"true\">` as the \
-         container for the 3 visitor-mode buttons + the OwnerNameText FontString + Divider \
-         texture (atlas=`controls-frame-guest`)"
-    );
-
-    for parent_key in [
-        "VisitorHouseInfoButton",
-        "VisitorExitButton",
-        "VisitorInspectorButton",
-        "OwnerNameText",
-        "Divider",
-    ] {
-        let exists: bool = env
-            .eval(&format!(
-                "return type(HousingControlsFrame.VisitorControlFrame['{parent_key}']) ~= 'nil'"
-            ))
-            .expect("VisitorControlFrame parentKey child lookup should succeed");
-        assert!(
-            exists,
-            "HousingControlsFrame.VisitorControlFrame.{parent_key} must publish via parentKey — \
-             the XML wires the visitor-mode children: OwnerNameText (GameFontNormalHuge \
-             FontString anchored TOP, color=HOUSING_CONTROL_PANEL_TITLE), Divider \
-             (controls-frame-guest atlas anchored 8 below OwnerNameText), \
-             VisitorHouseInfoButton (HouseInfoButtonTemplate anchored TOP of Divider with \
-             0,-5), VisitorExitButton (HousingExitButtonTemplate left-of VisitorHouseInfoButton), \
-             VisitorInspectorButton (HouseInspectorButtonTemplate right-of \
-             VisitorHouseInfoButton). The 3 buttons collect into the VisitorControlFrame's \
-             Buttons parentArray for the UpdateButtons loop when the visitor frame is active"
+             (HousingExitButtonTemplate left of settings), BlueprintsButton \
+             (HousingBlueprintActionButtonTemplate right of editor with -10,3 offset), \
+             InspectorButton (HouseInspectorButtonTemplate right of BlueprintsButton). All 5 \
+             inherit BaseHousingControlButtonTemplate's `parentArray=\"Buttons\"`, so they \
+             collect into HousingControlsFrame.OwnerControlFrame.Buttons for the UpdateButtons loop"
         );
     }
 }

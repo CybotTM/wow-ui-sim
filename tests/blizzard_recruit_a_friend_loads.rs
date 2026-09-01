@@ -17,11 +17,13 @@ fn raf_toc() -> PathBuf {
     blizzard_ui_dir().join("Blizzard_RecruitAFriend/Blizzard_RecruitAFriend.toc")
 }
 
-const DEPENDENCIES: &[&str] = &[
+const OPTIONAL_DEPENDENCIES: &[&str] = &[
     "Blizzard_BNet",
     "Blizzard_FriendsFrame",
     "Blizzard_FrameXMLUtil",
+    "Blizzard_SocialUIShared",
     "Blizzard_TransmogShared",
+    "Blizzard_UnitPopup",
 ];
 
 const MIXIN_TABLES: &[&str] = &[
@@ -98,7 +100,7 @@ fn load_full_game_ui() -> WowLuaEnv {
 }
 
 #[test]
-fn blizzard_recruit_a_friend_toc_pins_eager_game_only_with_four_dependencies() {
+fn blizzard_recruit_a_friend_toc_pins_eager_game_only_with_optional_social_dependencies() {
     let toc = TocFile::from_file(&raf_toc()).expect("Blizzard_RecruitAFriend TOC parse");
 
     assert!(
@@ -134,29 +136,19 @@ fn blizzard_recruit_a_friend_toc_pins_eager_game_only_with_four_dependencies() {
          per-character SavedVars"
     );
 
-    let deps = toc.dependencies();
-    assert_eq!(
-        deps,
-        DEPENDENCIES
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<_>>(),
-        "Blizzard_RecruitAFriend declares 4 hard `## Dependencies` in this order: \
-         Blizzard_BNet (BattleNet account-link API consumed by the BNGetFriendInfo / \
-         BNGetGameAccountInfo lookups for recruit rows), Blizzard_FriendsFrame (the \
-         RecruitAFriendFrame parents to FriendsFrame at xml:466 with parent=\"FriendsFrame\" \
-         and is enrolled in FRIENDSFRAME_SUBFRAMES — must exist before this addon \
-         loads or the parent attribute resolves to nil), Blizzard_FrameXMLUtil \
-         (publishes ResizeLayoutMixin / StaticPopupSpecial_Hide / various format \
-         helpers), Blizzard_TransmogShared (publishes ItemTransmogInfoMixin / \
-         transmog-appearance accessors used by the cosmetic-reward button tooltip path). \
-         Got: {:?}",
-        deps
-    );
     assert!(
-        toc.optional_deps().is_empty(),
-        "Blizzard_RecruitAFriend declares no `## OptionalDeps` — the 4 hard deps cover \
-         every cross-addon surface it needs"
+        toc.dependencies().is_empty(),
+        "Blizzard_RecruitAFriend has no hard `## Dependencies`; it participates in eager \
+         game-screen discovery and its social integrations are optional."
+    );
+    assert_eq!(
+        toc.optional_deps(),
+        OPTIONAL_DEPENDENCIES
+            .iter()
+            .map(|dependency| dependency.to_string())
+            .collect::<Vec<_>>(),
+        "Blizzard_RecruitAFriend declares the current six `## OptionalDeps`, including the \
+         newer Blizzard_SocialUIShared and Blizzard_UnitPopup integrations."
     );
 
     let toc_text = std::fs::read_to_string(raf_toc()).expect("RAF TOC reads");
@@ -210,7 +202,7 @@ fn blizzard_recruit_a_friend_toc_carries_rare_suppress_local_table_ref_directive
 }
 
 #[test]
-fn blizzard_recruit_a_friend_toc_lists_only_the_xml_with_lua_pulled_via_script_directive() {
+fn blizzard_recruit_a_friend_toc_lists_frame_and_social_view_sources() {
     let toc = TocFile::from_file(&raf_toc()).expect("RAF TOC parse");
     let listed: Vec<String> = toc
         .files
@@ -219,13 +211,13 @@ fn blizzard_recruit_a_friend_toc_lists_only_the_xml_with_lua_pulled_via_script_d
         .collect();
     assert_eq!(
         listed,
-        vec!["RecruitAFriendFrame.xml".to_string()],
-        "Blizzard_RecruitAFriend lists ONLY the XML in the TOC body — the .lua \
-         companion is pulled via `<Script file=\"RecruitAFriendFrame.lua\"/>` at \
-         xml:3. This is the modern XML-driven Lua-loading form, same shape as \
-         Blizzard_RaidUI / Blizzard_QuickJoin / Blizzard_QuickKeybind, and distinct \
-         from the older both-files-in-TOC form used by Blizzard_RecentAllies / \
-         Blizzard_RaidFrame. Got: {:?}",
+        vec![
+            "RecruitAFriendFrame.xml".to_string(),
+            "RecruitAFriendSocialView.lua".to_string(),
+            "RecruitAFriendSocialView.xml".to_string(),
+        ],
+        "Blizzard_RecruitAFriend lists the core frame XML plus the current Social View Lua/XML \
+         pair. RecruitAFriendFrame.lua remains pulled by its XML `<Script>` directive. Got: {:?}",
         listed
     );
 
@@ -301,7 +293,10 @@ fn blizzard_recruit_a_friend_loads_with_retail_is_enabled_surface() {
              C_RecruitAFriend.IsEnabled()",
         )
         .expect("retail Recruit-A-Friend enabled probe should be callable");
-    assert!(is_function, "retail 12.1 must expose C_RecruitAFriend.IsEnabled");
+    assert!(
+        is_function,
+        "retail 12.1 must expose C_RecruitAFriend.IsEnabled"
+    );
     assert!(!enabled, "Recruit-A-Friend is modeled disabled by default");
 
     let warnings = recruit_a_friend_warnings.expect("Recruit-A-Friend addon should load");
@@ -449,37 +444,31 @@ fn blizzard_recruit_a_friend_frame_is_in_friends_frame_subframes_table(env: &Wow
          FriendsFrame.lua line 63 declares the array of frame-name strings that \
          FriendsFrame_ShowSubFrame iterates to mutually exclude. \
          RecruitAFriendFrame is named in that list (entry 5 in the standard 6-entry \
-         array) so the social-panel tab strip can show/hide it via name lookup. The \
-         dep direction is encoded in the TOC: RAF declares Blizzard_FriendsFrame as a \
-         hard dep, ensuring FRIENDSFRAME_SUBFRAMES exists by the time RAF's XML parses"
+         array) so the social-panel tab strip can show/hide it via name lookup. RAF now \
+         lists Blizzard_FriendsFrame as an optional social integration; eager game-screen \
+         discovery loads FriendsFrame before RAF's XML parses."
     );
 }
 }
 
 prefork_full_ui_case! {
-fn blizzard_recruit_a_friend_frame_mixin_publishes_callback_event_enum(env: &WowLuaEnv) {
+fn blizzard_recruit_a_friend_frame_mixin_publishes_current_callback_event_enum(env: &WowLuaEnv) {
 
-    let events: (bool, bool, bool, bool) = env
+    let events: (bool, bool, bool, bool, bool) = env
         .eval(
-            "return type(RecruitAFriendFrameMixin.Event) == 'table' and \
+            "return type(RecruitAFriendFrameMixin.Event) == 'table', \
                     RecruitAFriendFrameMixin.Event.NewRewardTabSelected ~= nil, \
-                    RecruitAFriendFrameMixin.Event.SelectedRAFVersionChanged ~= nil, \
                     RecruitAFriendFrameMixin.Event.RewardsListOpened ~= nil, \
-                    RecruitAFriendFrameMixin.Event.RewardsListClosed ~= nil",
+                    RecruitAFriendFrameMixin.Event.RewardsListClosed ~= nil, \
+                    RecruitAFriendFrameMixin.Event.SelectedRAFVersionChanged == nil",
         )
         .expect("Callback event enum probe should succeed");
     assert_eq!(
         events,
-        (true, true, true, true),
-        "RecruitAFriendFrameMixin = CreateFromMixins(CallbackRegistryMixin) and \
-         GenerateCallbackEvents at lua:16-22 publishes 4 dynamic events on the mixin: \
-         NewRewardTabSelected (driven when the user clicks a different reward tier \
-         tab — reward grid rebuilds), SelectedRAFVersionChanged (driven when the user \
-         switches between current and legacy RAF program versions in the version \
-         dropdown), RewardsListOpened / RewardsListClosed (lifecycle hooks for the \
-         RecruitAFriendRewardsFrame popup — used to drive the YellowGlow pulse \
-         animation on the claim button). The .Event table is auto-populated by \
-         GenerateCallbackEvents — distinct from the static enums in older addons"
+        (true, true, true, true, true),
+        "Current RecruitAFriendFrameMixin GenerateCallbackEvents publishes only \
+         NewRewardTabSelected, RewardsListOpened, and RewardsListClosed. \
+         SelectedRAFVersionChanged is absent from the retail 12.1.0.69497 source."
     );
 }
 }
