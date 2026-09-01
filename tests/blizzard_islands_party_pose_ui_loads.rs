@@ -25,7 +25,8 @@ fn party_pose_toc() -> PathBuf {
 }
 
 fn ui_widgets_toc() -> PathBuf {
-    blizzard_ui_dir().join("Blizzard_UIWidgets/Blizzard_UIWidgets_Mainline.toc")
+    find_toc_file(&blizzard_ui_dir().join("Blizzard_UIWidgets"))
+        .expect("Blizzard_UIWidgets TOC should resolve")
 }
 
 const MIXIN_METHODS: &[&str] = &[

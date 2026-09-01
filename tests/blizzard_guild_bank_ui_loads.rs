@@ -19,7 +19,7 @@ fn guild_bank_dir() -> PathBuf {
 }
 
 fn guild_bank_toc() -> PathBuf {
-    guild_bank_dir().join("Blizzard_GuildBankUI.toc")
+    find_toc_file(&guild_bank_dir()).expect("Blizzard_GuildBankUI TOC should resolve")
 }
 
 fn load_guild_bank_ui(env: &WowLuaEnv) {
@@ -57,15 +57,12 @@ fn load_full_game_ui_with_guild_bank_lod() -> WowLuaEnv {
 }
 
 #[test]
-fn blizzard_guild_bank_ui_find_toc_resolves_bare_variant() {
-    let resolved =
-        find_toc_file(&guild_bank_dir()).expect("Blizzard_GuildBankUI TOC should resolve");
+fn blizzard_guild_bank_ui_find_toc_resolves_mainline_variant() {
+    let resolved = guild_bank_toc();
     assert_eq!(
-        resolved,
-        guild_bank_toc(),
-        "Blizzard_GuildBankUI ships exactly one bare TOC (`Blizzard_GuildBankUI.toc`) — no \
-         flavor variants. `find_toc_file` (src/loader/mod.rs:65) falls through to the bare \
-         `.toc` suffix after the flavor-specific lookups miss"
+        resolved.file_name().and_then(|name| name.to_str()),
+        Some("Blizzard_GuildBankUI_Mainline.toc"),
+        "retail resolves the mainline GuildBankUI TOC through find_toc_file"
     );
 }
 

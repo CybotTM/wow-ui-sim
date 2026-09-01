@@ -1,8 +1,7 @@
 #![cfg(feature = "client-retail")]
 use std::path::PathBuf;
 
-use wow_ui_sim::loader::discover_blizzard_addons_for_screen;
-use wow_ui_sim::loader::load_addon;
+use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::fire_startup_events_for_screen;
@@ -15,7 +14,8 @@ fn blizzard_ui_dir() -> PathBuf {
 }
 
 fn commentator_toc() -> PathBuf {
-    blizzard_ui_dir().join("Blizzard_Commentator/Blizzard_Commentator.toc")
+    find_toc_file(&blizzard_ui_dir().join("Blizzard_Commentator"))
+        .expect("Blizzard_Commentator TOC should resolve")
 }
 
 fn load_full_game_ui() -> WowLuaEnv {

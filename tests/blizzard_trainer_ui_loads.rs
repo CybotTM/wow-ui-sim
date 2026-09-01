@@ -16,7 +16,7 @@ fn trainer_dir() -> PathBuf {
 }
 
 fn trainer_toc() -> PathBuf {
-    trainer_dir().join("Blizzard_TrainerUI.toc")
+    find_toc_file(&trainer_dir()).expect("Blizzard_TrainerUI TOC should resolve")
 }
 
 const ALL_FOUR_SCREENS: &[ScreenKind] = &[
@@ -78,14 +78,12 @@ fn load_full_game_ui() -> WowLuaEnv {
 }
 
 #[test]
-fn find_toc_file_resolves_bare_toc() {
-    let resolved = find_toc_file(&trainer_dir()).expect("TrainerUI TOC resolves");
+fn find_toc_file_resolves_mainline_toc() {
+    let resolved = trainer_toc();
     assert_eq!(
-        resolved,
-        trainer_toc(),
-        "Bare TOC — no flavor suffix; classic-era LoD addon resolved \
-         via the bare-TOC path in find_toc_file at \
-         src/loader/mod.rs:65-95"
+        resolved.file_name().and_then(|name| name.to_str()),
+        Some("Blizzard_TrainerUI_Mainline.toc"),
+        "retail resolves the mainline TrainerUI TOC through find_toc_file"
     );
 }
 

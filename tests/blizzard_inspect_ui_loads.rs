@@ -17,16 +17,19 @@ fn inspect_ui_dir() -> PathBuf {
 }
 
 fn inspect_ui_toc() -> PathBuf {
-    inspect_ui_dir().join("Blizzard_InspectUI.toc")
+    find_toc_file(&inspect_ui_dir()).expect("Blizzard_InspectUI TOC should resolve")
 }
 
 const TOC_FILES: &[&str] = &[
-    "Blizzard_InspectUI.xml",
-    "InspectPaperDollFrame.lua",
-    "InspectPaperDollFrame.xml",
-    "InspectPVPFrame.xml",
-    "InspectGuildFrame.xml",
-    "Localization.lua",
+    "Mainline/Blizzard_InspectUI_Bootstrap.lua",
+    "Mainline/Blizzard_InspectUI.xml",
+    "Mainline/InspectPaperDollFrame.lua",
+    "Mainline/InspectPaperDollFrame.xml",
+    "Mainline/InspectPVPFrame.lua",
+    "Mainline/InspectPVPFrame.xml",
+    "Mainline/InspectGuildFrame.lua",
+    "Mainline/InspectGuildFrame.xml",
+    "Mainline/Localization.lua",
 ];
 
 const SUBFRAME_NAMES: &[&str] = &[
@@ -104,13 +107,12 @@ fn load_inspect_ui(env: &WowLuaEnv) {
 }
 
 #[test]
-fn blizzard_inspect_ui_find_toc_resolves_bare_variant() {
-    let resolved = find_toc_file(&inspect_ui_dir()).expect("Blizzard_InspectUI TOC should resolve");
+fn blizzard_inspect_ui_find_toc_resolves_mainline_variant() {
+    let resolved = inspect_ui_toc();
     assert_eq!(
-        resolved,
-        inspect_ui_toc(),
-        "Blizzard_InspectUI ships exactly one bare TOC — LoadOnDemand inspect-target paperdoll \
-         module resolves via `find_toc_file` fallthrough"
+        resolved.file_name().and_then(|name| name.to_str()),
+        Some("Blizzard_InspectUI_Mainline.toc"),
+        "retail resolves the mainline InspectUI TOC through find_toc_file"
     );
 }
 
@@ -173,7 +175,7 @@ fn blizzard_inspect_ui_toc_omits_default_state_and_allow_load_keys() {
 }
 
 #[test]
-fn blizzard_inspect_ui_toc_lists_six_files_in_expected_order() {
+fn blizzard_inspect_ui_toc_lists_current_files_in_expected_order() {
     let toc = TocFile::from_file(&inspect_ui_toc()).expect("Blizzard_InspectUI TOC should parse");
     assert_eq!(
         toc.files
@@ -181,14 +183,7 @@ fn blizzard_inspect_ui_toc_lists_six_files_in_expected_order() {
             .map(|p| p.to_string_lossy().into_owned())
             .collect::<Vec<_>>(),
         TOC_FILES.iter().map(|s| s.to_string()).collect::<Vec<_>>(),
-        "TOC body must list exactly these 6 files in this exact order. Note: \
-         Blizzard_InspectUI.lua is NOT in the TOC body — it loads via the \
-         `<Script file=\"Blizzard_InspectUI.lua\"/>` directive at \
-         Blizzard_InspectUI.xml:3 (XML-driven script loading, the older single-file Blizzard \
-         pattern). Same applies to InspectPVPFrame.lua and InspectGuildFrame.lua — both pulled \
-         in by their respective XML files' Script directives. Only InspectPaperDollFrame.lua is \
-         listed in the TOC body directly because its parent XML file declares dependent \
-         templates that must publish before the lua's mixin definitions reference them"
+        "current retail TOC must list its bootstrap and Mainline files in declared order"
     );
 }
 
