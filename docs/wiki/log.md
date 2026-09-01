@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document FrameXMLUtil secure replay
+
+Audited commit `93761fdb4`. Updated [[addon-loading]] and the maintained addon-loading pipeline: secure `Blizzard_AuraContainer` needs `AuraUtil.DefaultAuraCompare` and `AuraUtil.UnitFrameDebuffComparator`, so `Blizzard_FrameXMLUtil` is explicitly replayed into `__secureenv`. Public-only loading left secureenv stale, aborting TargetFrame aura initialization before `FocusFrame` creation. Focused coverage: `loader::tests::lua_loading::blizzard_frame_xml_util_replays_aura_comparators_into_secure_environment`. No new page, index update, spec, cache, manifest, vendor/Blizzard, `PLAN.md`, or protected-file change was warranted.
+
 ## [2026-09-01] audit | Document partition-aware XML handlers and RestrictedAuraAPI
 
 Audited commits `391cd75ea` and `d994939bf`. Updated [[xml-template-system]], [[lua-api]], the maintained Lua API reference, and [[patch-12-1-api-audit]]: `__wow_bind_xml_method` resolves public then forbidden methods for private XML frames, while forbidden receivers forward public `FrameHandle` methods; this applies to precompiled intrinsic `OnLoad` and ordinary XML handlers. Retail 12.1 `GetBuildOption("RestrictedAuraAPI")` returns `true`; unknown options return `nil`, selecting the forbidden aura template path. No new page, index update, spec, cache, manifest, vendor/Blizzard, `PLAN.md`, or protected-file change was warranted.

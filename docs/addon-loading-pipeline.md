@@ -265,6 +265,10 @@ A non-Blizzard cache directory is not an eager root: it loads only when a retain
 
 Foundational SharedXML addons are promoted to `LoadFirst` so templates exist before other Blizzard addons instantiate frames. Third-party addons load after this Blizzard startup pass.
 
+### Secure-library replay
+
+`__secureenv` is separate from public `_G`, so selected Blizzard libraries are re-executed there after normal loading instead of generically mirroring globals. The allowlist includes `Blizzard_FrameXMLUtil`: secure `Blizzard_AuraContainer` needs its `AuraUtil.DefaultAuraCompare` and `AuraUtil.UnitFrameDebuffComparator`. Before commit `93761fdb4`, public-only `AuraUtil` left secureenv stale, aborted TargetFrame aura initialization, and prevented subsequent `FocusFrame` creation. Focused coverage: `loader::tests::lua_loading::blizzard_frame_xml_util_replays_aura_comparators_into_secure_environment`.
+
 ---
 
 ## Error Handling
