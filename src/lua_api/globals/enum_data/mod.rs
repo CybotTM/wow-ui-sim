@@ -224,6 +224,10 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     HOUSE_SETTING_FLAGS_META,
     #[cfg(feature = "retail-12-1-0")]
     HOUSING_BLUEPRINT_TYPE_META,
+    #[cfg(feature = "retail-12-1-0")]
+    HOUSING_BLUEPRINT_UNMET_REQUIREMENT_FLAGS,
+    #[cfg(feature = "retail-12-1-0")]
+    HOUSING_BLUEPRINT_UNMET_REQUIREMENT_FLAGS_META,
     LFG_ROLE,
     UNIT_SEX,
     UI_WIDGET_TEXT_SIZE_TYPE,

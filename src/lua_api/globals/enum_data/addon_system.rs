@@ -691,6 +691,27 @@ pub const HOUSING_BLUEPRINT_TYPE_META: EnumDef = (
     &[("MinValue", 0), ("MaxValue", 4), ("NumValues", 5)],
 );
 
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_BLUEPRINT_UNMET_REQUIREMENT_FLAGS: EnumDef = (
+    "HousingBlueprintUnmetRequirementFlags",
+    &[
+        ("InsufficientBudget", 1),
+        ("MissingRoom", 2),
+        ("MissingFixture", 4),
+        ("MissingDecor", 8),
+        ("MissingDye", 16),
+        ("MismatchedExteriorFaction", 32),
+        ("HouseTypeLocked", 64),
+        ("HouseSizeLocked", 128),
+    ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_BLUEPRINT_UNMET_REQUIREMENT_FLAGS_META: EnumDef = (
+    "HousingBlueprintUnmetRequirementFlagsMeta",
+    &[("MinValue", 1), ("MaxValue", 128), ("NumValues", 8)],
+);
+
 pub const HOUSE_OWNER_ERROR: EnumDef = (
     "HouseOwnerError",
     &[("Faction", 0), ("Guild", 1), ("GenericPermission", 2)],

@@ -342,6 +342,47 @@ fn test_patch_12_1_housing_blueprint_type_values() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_housing_blueprint_unmet_requirement_flags_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local namespace = Enum.HousingBlueprintUnmetRequirementFlags
+                local metadata = Enum.HousingBlueprintUnmetRequirementFlagsMeta
+                if type(namespace) ~= "table" or type(metadata) ~= "table" then
+                    return "tables"
+                end
+                local expected = {
+                    InsufficientBudget = 1,
+                    MissingRoom = 2,
+                    MissingFixture = 4,
+                    MissingDecor = 8,
+                    MissingDye = 16,
+                    MismatchedExteriorFaction = 32,
+                    HouseTypeLocked = 64,
+                    HouseSizeLocked = 128,
+                }
+                for name, value in pairs(expected) do
+                    if namespace[name] ~= value then
+                        return name .. ":value=" .. tostring(namespace[name])
+                    end
+                end
+                if namespace.None ~= nil or table.count(namespace) ~= 8 then return "count" end
+                if metadata.MinValue ~= 1 or metadata.MaxValue ~= 128 or metadata.NumValues ~= 8 then
+                    return "metadata"
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "HousingBlueprintUnmetRequirementFlags did not match the 12.1 source register"
+    );
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_house_setting_flags_values() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
