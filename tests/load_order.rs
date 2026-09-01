@@ -163,6 +163,13 @@ fn test_startup_publishers_load_before_consumers() {
             );
         }
 
+        for publisher in ["Blizzard_MacroUI", "Blizzard_TrainerUI"] {
+            assert!(
+                names.contains(&publisher),
+                "standalone startup publisher {publisher} should be discovered"
+            );
+        }
+
         assert!(
             !names.contains(&"Deprecated_PaperDoll"),
             "unrelated load-on-demand addons must remain excluded"

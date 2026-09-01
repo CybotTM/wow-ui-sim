@@ -253,22 +253,25 @@ fn blizzard_macro_ui_directory_holds_eight_entries_one_toc_four_lua_three_xml() 
 }
 
 #[test]
-fn blizzard_macro_ui_excluded_from_every_screen_auto_discovery() {
+fn blizzard_macro_ui_is_game_startup_publisher_only() {
+    let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
+    assert!(
+        game_addons
+            .iter()
+            .any(|(name, _)| name == "Blizzard_MacroUI"),
+        "Blizzard_MacroUI remains `## LoadOnDemand: 1` but is selected on Game so its \
+         bootstrap publishes MacroFrame_LoadUI before Blizzard_ClickBindingUI OnLoad"
+    );
+
     for screen in [
-        ScreenKind::Game,
         ScreenKind::Login,
         ScreenKind::CharacterSelect,
         ScreenKind::CharacterCreate,
     ] {
         let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), screen);
-        let found = addons.iter().any(|(name, _)| name == "Blizzard_MacroUI");
         assert!(
-            !found,
-            "Blizzard_MacroUI must be filtered out of auto-discovery on every ScreenKind. \
-             The `## LoadOnDemand: 1` declaration routes it into the lod_pool rather than \
-             the eager `addons` set in discover_blizzard_addons_for_screen — only an \
-             explicit ShowUIPanel(MacroFrame) / UIParentLoadAddOn(\"Blizzard_MacroUI\") \
-             pulls it in. (Screen tested: {screen:?})"
+            !addons.iter().any(|(name, _)| name == "Blizzard_MacroUI"),
+            "Blizzard_MacroUI must remain absent from non-game discovery ({screen:?})"
         );
     }
 }

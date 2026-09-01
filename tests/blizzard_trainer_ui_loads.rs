@@ -212,15 +212,25 @@ fn body_resolves_to_xml_and_localization_lua() {
 }
 
 #[test]
-fn absent_from_every_screen_eager_discovery() {
-    for screen in ALL_FOUR_SCREENS {
-        let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), *screen);
-        let found = addons.iter().any(|(name, _)| name == "Blizzard_TrainerUI");
+fn trainer_ui_is_game_startup_publisher_only() {
+    let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
+    assert!(
+        game_addons
+            .iter()
+            .any(|(name, _)| name == "Blizzard_TrainerUI"),
+        "Blizzard_TrainerUI remains `## LoadOnDemand: 1` but is selected on Game so its \
+         bootstrap publishes ClassTrainerFrame_LoadUI before startup interaction registration"
+    );
+
+    for screen in [
+        ScreenKind::Login,
+        ScreenKind::CharacterSelect,
+        ScreenKind::CharacterCreate,
+    ] {
+        let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), screen);
         assert!(
-            !found,
-            "Blizzard_TrainerUI must be absent from {screen:?} eager \
-             discovery — `## LoadOnDemand: 1` excludes LoD addons from \
-             the eager sweep"
+            !addons.iter().any(|(name, _)| name == "Blizzard_TrainerUI"),
+            "Blizzard_TrainerUI must remain absent from non-game discovery ({screen:?})"
         );
     }
 }

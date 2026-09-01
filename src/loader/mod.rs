@@ -166,6 +166,8 @@ fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
             "Blizzard_RaidUI".to_string(),
             vec!["Blizzard_RaidFrame".to_string()],
         ),
+        ("Blizzard_MacroUI".to_string(), vec![]),
+        ("Blizzard_TrainerUI".to_string(), vec![]),
     ])
 }
 
