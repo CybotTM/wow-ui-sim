@@ -344,6 +344,26 @@ pub fn type_fn(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// GetBuildOption(name) — return the value of a named client build option.
+pub fn get_build_option(state: &mut LuaState) -> LuaResult<u32> {
+    let is_restricted_aura_api = matches!(
+        stack_val(state, 1),
+        Val::Str(name)
+            if state
+                .gc
+                .string_arena
+                .get(name)
+                .is_some_and(|name| name.data() == b"RestrictedAuraAPI")
+    ) && cfg!(feature = "retail-12-1-0");
+
+    state.push(if is_restricted_aura_api {
+        Val::Bool(true)
+    } else {
+        Val::Nil
+    });
+    Ok(1)
+}
+
 /// IsPublicTestClient() — always false in the simulator.
 pub fn is_public_test_client(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
@@ -662,6 +682,7 @@ fn register_utility_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
 
 fn register_system_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "type", type_fn)?;
+    LuaApiMut::register_function(lua, "GetBuildOption", get_build_option)?;
     LuaApiMut::register_function(lua, "IsPublicTestClient", is_public_test_client)?;
     LuaApiMut::register_function(lua, "IsBetaBuild", is_beta_build)?;
     LuaApiMut::register_function(lua, "IsPublicBuild", is_public_build)?;
