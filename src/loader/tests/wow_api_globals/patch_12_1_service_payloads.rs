@@ -54,6 +54,50 @@ fn test_patch_12_1_battle_net_friend_tag_enum() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_social_ui_shared_preload_globals() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local presence = Enum.SocialUIPresenceType
+            local meta = Enum.SocialUIPresenceTypeMeta
+            if type(presence) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if presence.Unknown ~= 0 or presence.Online ~= 1 or presence.Offline ~= 2 then return "presence-1" end
+            if presence.Away ~= 3 or presence.Busy ~= 4 or presence.AppearOffline ~= 5 then return "presence-2" end
+            if meta.MinValue ~= 0 or meta.MaxValue ~= 5 or meta.NumValues ~= 6 then return "metadata" end
+
+            local labelNames = {
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_PROFESSIONS",
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_PVP",
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_RAIDING",
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_DUNGEONS",
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_DELVE",
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_QUESTING",
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_ROLEPLAYING",
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_DPS",
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_HEALER",
+                "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_TANK",
+                "SOCIAL_UI_PRESENCE_TYPE_LABEL_UNKNOWN",
+                "SOCIAL_UI_PRESENCE_TYPE_LABEL_ONLINE",
+                "SOCIAL_UI_PRESENCE_TYPE_LABEL_OFFLINE",
+                "SOCIAL_UI_PRESENCE_TYPE_LABEL_AWAY",
+                "SOCIAL_UI_PRESENCE_TYPE_LABEL_BUSY",
+                "SOCIAL_UI_PRESENCE_TYPE_LABEL_APPEAR_OFFLINE",
+            }
+            for index, name in ipairs(labelNames) do
+                local label = _G[name]
+                if type(label) ~= "string" or label == "" then return "label-" .. index end
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_lfg_lair_category_constant() {
     let env = WowLuaEnv::new().unwrap();
     let category: i32 = env.eval("return LE_LFG_CATEGORY_LAIR").unwrap();

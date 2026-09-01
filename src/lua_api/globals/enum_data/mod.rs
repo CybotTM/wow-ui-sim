@@ -175,6 +175,10 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     #[cfg(feature = "retail-12-1-0")]
     BATTLE_NET_FRIEND_TAG_META,
     #[cfg(feature = "retail-12-1-0")]
+    SOCIAL_UI_PRESENCE_TYPE,
+    #[cfg(feature = "retail-12-1-0")]
+    SOCIAL_UI_PRESENCE_TYPE_META,
+    #[cfg(feature = "retail-12-1-0")]
     EDIT_MODE_ACCOUNT_SETTING_META,
     #[cfg(feature = "retail-12-1-0")]
     EDIT_MODE_LOSS_OF_CONTROL_SETTING_META,

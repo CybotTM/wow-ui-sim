@@ -4,6 +4,31 @@ use super::{IntDef, StringDef};
 
 pub const RETAIL_12_1_GLOBAL_STRINGS: &[StringDef] = &[
     (
+        "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_PROFESSIONS",
+        "Professions",
+    ),
+    ("SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_PVP", "PvP"),
+    ("SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_RAIDING", "Raiding"),
+    ("SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_DUNGEONS", "Dungeons"),
+    ("SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_DELVE", "Delves"),
+    ("SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_QUESTING", "Questing"),
+    (
+        "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_ROLEPLAYING",
+        "Roleplaying",
+    ),
+    ("SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_DPS", "Damage"),
+    ("SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_HEALER", "Healer"),
+    ("SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_TANK", "Tank"),
+    ("SOCIAL_UI_PRESENCE_TYPE_LABEL_UNKNOWN", "Unknown"),
+    ("SOCIAL_UI_PRESENCE_TYPE_LABEL_ONLINE", "Online"),
+    ("SOCIAL_UI_PRESENCE_TYPE_LABEL_OFFLINE", "Offline"),
+    ("SOCIAL_UI_PRESENCE_TYPE_LABEL_AWAY", "Away"),
+    ("SOCIAL_UI_PRESENCE_TYPE_LABEL_BUSY", "Busy"),
+    (
+        "SOCIAL_UI_PRESENCE_TYPE_LABEL_APPEAR_OFFLINE",
+        "Appear Offline",
+    ),
+    (
         "BLIZZARD_STORE_VAS_ERROR_BOOST_THROTTLE",
         "Maximum number of character boosts reached for the day. Please try again tomorrow.",
     ),

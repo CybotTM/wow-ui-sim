@@ -224,6 +224,25 @@ pub const BATTLE_NET_FRIEND_TAG_META: EnumDef = (
     &[("MinValue", 0), ("MaxValue", 9), ("NumValues", 10)],
 );
 
+#[cfg(feature = "retail-12-1-0")]
+pub const SOCIAL_UI_PRESENCE_TYPE: EnumDef = (
+    "SocialUIPresenceType",
+    &[
+        ("Unknown", 0),
+        ("Online", 1),
+        ("Offline", 2),
+        ("Away", 3),
+        ("Busy", 4),
+        ("AppearOffline", 5),
+    ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const SOCIAL_UI_PRESENCE_TYPE_META: EnumDef = (
+    "SocialUIPresenceTypeMeta",
+    &[("MinValue", 0), ("MaxValue", 5), ("NumValues", 6)],
+);
+
 pub const GUILD_ERROR_TYPE: SeqEnumDef = (
     "GuildErrorType",
     &[
