@@ -624,9 +624,22 @@ fn apply_rgba_mask_entry(
     use_uv_inset: bool,
 ) {
     let tex_idx = entry.tex_index();
+    // The coverage encoding was guessed from the mask's file name before its
+    // pixels existed. Now that the entry is resolved, decide it from the
+    // data: a mask whose alpha is uniformly opaque carries coverage in RGB,
+    // anything else carries it in alpha. Both branches are needed - WoW ships
+    // both encodings - and the flag has to be cleared as well as set, or the
+    // name-based guess wins where it was wrong. See
+    // docs/wiki/investigations/mask-coverage-encoding.md.
+    let alpha_coverage = !entry.alpha_uniformly_opaque;
     for vertex in vertices.iter_mut() {
         if vertex.mask_tex_index == -2 {
             vertex.mask_tex_index = tex_idx;
+            if alpha_coverage {
+                vertex.flags |= crate::render::shader::FLAG_MASK_ALPHA_COVERAGE;
+            } else {
+                vertex.flags &= !crate::render::shader::FLAG_MASK_ALPHA_COVERAGE;
+            }
             vertex.mask_tex_coords[0] = remap_entry_uv(
                 vertex.mask_tex_coords[0],
                 UvRemap::entry_axis(entry.uv_x, entry.uv_width, entry.original_width, entry.tier)
