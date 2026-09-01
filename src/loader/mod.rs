@@ -244,6 +244,30 @@ fn toc_stem_matches_folder(stem: &str, folder_name: &str) -> bool {
     rest.is_empty() || rest.starts_with('_') || rest.starts_with('-')
 }
 
+/// Addons whose bare `<addon>.toc` supersedes the flavor-suffixed variant.
+///
+/// The 12.x TOC format annotates entries inline with `[AllowLoadGameType ...]`
+/// so one file can serve every flavor, which makes the per-flavor TOCs beside
+/// it legacy. `Blizzard_FrameXML.toc` carries 88 such annotations and lists 105
+/// files against `Blizzard_FrameXML_Mainline.toc`'s 86; taking the flavor
+/// variant drops the Lua for PVPHonorSystem, PVPUITemplates, EquipmentFlyout,
+/// GhostFrame and SharedPetBattleTemplates, whose XML siblings carry no
+/// `<Script file=...>` include to pull them back in. Six startup errors trace to
+/// that. The five entries the flavor TOC has and the bare one lacks
+/// (ColorPickerFrame, RaidWarning, SplashFrame, UIErrorsFrame) moved into
+/// addons of their own, so nothing is lost by preferring the bare file.
+///
+/// Deliberately not generalised: of the sixteen addons shipping both variants,
+/// most have a *fuller* flavor TOC — `Blizzard_UIParent.toc` lists one file
+/// against its variant's six — so a blanket flip would lose far more than it
+/// fixes.
+fn prefers_bare_toc(addon_name: &str) -> bool {
+    matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
+    ) && addon_name == "Blizzard_FrameXML"
+}
+
 fn profile_specific_fallback_toc(addon_name: &str) -> Option<String> {
     match crate::client_profile::ACTIVE {
         crate::client_profile::ClientProfile::Mists if addon_name == "Blizzard_GameMenu" => {
@@ -272,10 +296,17 @@ pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
             return Some(toc_path);
         }
     }
-    let toc_variants = [
-        format!("{}{}.toc", addon_name, active_profile_toc_suffix()),
-        format!("{}.toc", addon_name),
-    ];
+    let toc_variants = if prefers_bare_toc(addon_name) {
+        [
+            format!("{}.toc", addon_name),
+            format!("{}{}.toc", addon_name, active_profile_toc_suffix()),
+        ]
+    } else {
+        [
+            format!("{}{}.toc", addon_name, active_profile_toc_suffix()),
+            format!("{}.toc", addon_name),
+        ]
+    };
     for variant in &toc_variants {
         let toc_path = addon_dir.join(variant);
         if toc_path.exists() {
