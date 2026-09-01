@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document retail 12.1 SocialSystemType enum
+
+Audited commit `51b9243c5`. Updated [[patch-12-1-api-audit]]: generated retail `12.1.0.69497` `Enum.SocialSystemType` now publishes `Friends=0`, `QuickJoin=1`, `RaidList=2`, `RecruitAFriend=3`, and `RecentAllies=4`, with `MinValue=0`, `MaxValue=4`, and `NumValues=5` under the retail 12.1 epoch. Current `Blizzard_SocialUI` OnLoad reads all five for tab definitions; Social service behavior remains unmodeled. No new page, index update, spec, manifest, `PLAN.md`, vendor/cache/Blizzard, or protected-file change was warranted.
+
 ## [2026-09-01] audit | Document PetBattle species/model-scene preload boundary
 
 Audited commits `eae094261` and `b08bd4cf7`. Updated [[patch-12-1-api-audit]]: current retail `12.1.0.69497` `PetBattleFrame_OnLoad` first passed a missing `C_PetBattles.GetPetSpeciesID` result into `C_PetJournal.GetPetModelSceneInfoBySpeciesID`; after the state-backed API was added, stale default IDs `1`/`2` still had no seeded Pet Journal records, so lookup returned no values and `TransitionToModelSceneID` received `nil`. Default battle-pet IDs now align with Journal seeds `39`/`87`; unknown owner/index remains `nil`. No new page, index update, spec, manifest, `PLAN.md`, vendor/cache/Blizzard, or protected-file change was warranted.
