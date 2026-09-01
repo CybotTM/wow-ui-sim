@@ -13,12 +13,12 @@
 //!        ordering of FrameXML, the LoadWith inline-pull of UIParentPanelManager.
 //!     2. PANEL LOADING — the ShowUIPanel / HideUIPanel / GetUIPanel / SetUIPanelAttribute /
 //!        UpdateUIPanelPositions globals, the UIPanelWindows registry, and
-//!        UIParentLoadAddOn (the on-demand panel-trigger).
+//!        RegisterUIPanel (the current panel-registration entry point).
 //!     3. GLOBAL FRAME CREATION CONTRACTS — UIParent / WorldFrame as pre-created
 //!        engine frames whose Lua handles must resolve before any addon's file-
 //!        scope `parent="UIParent"` reference; the named global frames
 //!        (UIErrorsFrame, AlertFrame, SplashFrame) parented to UIParent at load
-//!        time; the UIParentManagedFrameTemplate inheritance contract for
+//!        time; the ManagedFrameSystem template inheritance contract for
 //!        downstream-addon managed-frame containers.
 //!
 //! Layered structure (top = base, bottom = consumer):
@@ -244,10 +244,8 @@ fn ui_parent_panel_manager_pulls_alongside_ui_parent_via_load_with() {
          the panel manager loads INLINE in the same load-pass rather than waiting for the \
          dep-graph sweep to reach it. This is structurally redundant with the explicit \
          Dependencies edge for the simulator's eager-discovery path (both names are non-LoD, \
-         so both are pulled either way), but it matters for the load-on-demand contract: if \
-         a future addon dynamically loads UIParent via UIParentLoadAddOn, the panel manager \
-         comes along automatically without that addon needing to know it exists. Got: \
-         {load_with:?}"
+         so both are pulled either way), while still preserving the current source's inline \
+         load-with relationship. Got: {load_with:?}"
     );
 
     for other in &[
@@ -524,7 +522,7 @@ prefork_full_ui_case! {
             ("SetUIPanelAttribute", "function"),
             ("UpdateUIPanelPositions", "function"),
             ("UIPanelWindows", "table"),
-            ("UIParentLoadAddOn", "function"),
+            ("RegisterUIPanel", "function"),
         ];
 
         for (global, expected_kind) in panel_manager_globals {
@@ -538,10 +536,9 @@ prefork_full_ui_case! {
                  Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua at lines 828, 853, \
                  881, 115; UpdateUIPanelPositions in UpdateUIPanelPositions.lua; UIPanelWindows is \
                  a literal table populated by UIPanelWindows.lua's `UIPanelWindows_Initialize()`; \
-                 UIParentLoadAddOn is the on-demand panel trigger declared in \
-                 Blizzard_UIParent/Mainline/UIParent.lua. Downstream addons rely on every one of \
-                 these being live at file scope; if any is nil, the entire panel-show flow is \
-                 dead"
+                 RegisterUIPanel is the current registration entry point. Downstream addons rely on \
+                 every one of these being live at file scope; if any is nil, the entire panel-show \
+                 flow is dead"
             );
         }
 
@@ -604,16 +601,24 @@ prefork_full_ui_case! {
 
         let lane_templates = [
             (
-                "UIParentManagedFrameTemplate",
-                "Blizzard_UIParent/Mainline/UIParent.xml",
+                "ManagedFrameTemplate",
+                "Blizzard_ManagedFrameSystem/Shared/ManagedFrameSystem.xml",
             ),
             (
-                "UIParentBottomManagedFrameTemplate",
-                "Blizzard_UIParent/Mainline/UIParent.xml",
+                "BottomManagedFrameTemplate",
+                "Blizzard_ManagedFrameSystem/Shared/ManagedFrameSystem.xml",
             ),
             (
-                "UIParentRightManagedFrameTemplate",
-                "Blizzard_UIParent/Mainline/UIParent.xml",
+                "RightManagedFrameTemplate",
+                "Blizzard_ManagedFrameSystem/Shared/ManagedFrameSystem.xml",
+            ),
+            (
+                "ManagedFrameContainerBaseTemplate",
+                "Blizzard_ManagedFrameSystem/Shared/ManagedFrameSystem.xml",
+            ),
+            (
+                "ManagedFrameContainer",
+                "Blizzard_ManagedFrameSystem/Mainline/ManagedFrameSystem.xml",
             ),
             (
                 "AlertFrameTemplate",
@@ -625,11 +630,10 @@ prefork_full_ui_case! {
             assert!(
                 wow_ui_sim::xml::get_template(template).is_some(),
                 "Lane template `{template}` (defined in {source}) must register in \
-                 `wow_ui_sim::xml::get_template`. UIParent*ManagedFrameTemplate is the inheritance \
-                 point for downstream addon frames that opt into the bottom/right-strip auto-layout \
-                 system (ObjectiveTrackerFrame, CompactArenaFrames, etc.); AlertFrameTemplate is \
-                 the base for FrameXML/Mainline/AlertFrameSystems.xml's per-system alert variants. \
-                 If this regresses, downstream addons fail to instantiate their managed frames"
+                 `wow_ui_sim::xml::get_template`. ManagedFrameSystem owns the current bottom/right \
+                 auto-layout inheritance for downstream frames; AlertFrameTemplate remains the base \
+                 for FrameXML/Mainline/AlertFrameSystems.xml's per-system alert variants. If this \
+                 regresses, downstream addons fail to instantiate their managed frames"
             );
         }
     }

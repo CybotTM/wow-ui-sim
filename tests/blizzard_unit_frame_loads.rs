@@ -64,7 +64,7 @@ const FAMILY_PLACEHOLDER_BODY_FILE: &str = "[Family]\\CompactUnitFrameOptions.lu
 const FAMILY_PLACEHOLDER_RESOLVED_RELATIVE: &str = "Mainline/CompactUnitFrameOptions.lua";
 
 const REPRESENTATIVE_FRAME_MIXINS: &[&str] = &[
-    "PlayerFrameBottomManagedFramesContainerMixin",
+    "PlayerBottomManagedFrameContainerMixin",
     "TargetFrameMixin",
     "TargetFrameStatusBarMixin",
     "TargetFrameHealthBarMixin",
@@ -162,6 +162,8 @@ const REPRESENTATIVE_VIRTUAL_TEMPLATES: &[&str] = &[
     "MyHealPredictionBarTemplate",
     "OtherHealPredictionBarTemplate",
     "PaladinPowerBarFrameTemplate",
+    "PlayerBottomManagedFrameTemplate",
+    "PlayerManagedContainerTemplate",
 ];
 
 const REPRESENTATIVE_NON_VIRTUAL_FRAMES: &[&str] = &[
@@ -190,7 +192,7 @@ const REPRESENTATIVE_NON_VIRTUAL_FRAMES: &[&str] = &[
     "DruidComboPointBarFrame",
     "WarlockPowerFrame",
     "PlayerPowerBarAlt",
-    "PlayerFrameBottomManagedFramesContainer",
+    "PlayerBottomManagedFrameContainer",
     "PartyMemberBuffTooltip",
     "PlayerBuffTimerManager",
 ];
@@ -281,10 +283,9 @@ fn toc_is_eager_with_seven_dependencies() {
         "TOC must declare exactly these 7 hard deps. \
          Blizzard_SettingsDefinitions_Frame is read by EditModeManager \
          when registering the unit-frame system definitions; \
-         Blizzard_UIParent supplies UIParent + the managed-frame \
-         layout templates (UIParentBottomManagedFrameTemplate consumed \
-         by EncounterBar + PlayerFrameBottomManagedFrameTemplate \
-         consumed by PetFrame); Blizzard_BuffFrame must publish \
+         Blizzard_UIParent supplies UIParent while the current managed-frame system provides \
+         PlayerBottomManagedFrameTemplate (consumed by PetFrame and resource bars) and \
+         PlayerManagedContainerTemplate; Blizzard_BuffFrame must publish \
          AuraFrame mixins before CompactUnitFrame pools subscribe; \
          Blizzard_UIPanels_Game is the panel registry consumed by \
          Show/HideUIPanel calls in the focus-frame teardown path; \
@@ -466,16 +467,13 @@ fn full_game_load_publishes_frame_mixins(env: &WowLuaEnv) {
             kind, "table",
             "{mixin} must be a global table after load. The frame \
              mixins front the toplevel unit frames: PlayerFrame chassis \
-             (with bottom-managed-container hosting AlternatePowerBar / \
-             PetFrame), TargetFrame + FocusFrame (both share \
-             TargetFrameTemplate but FocusFrame is clamped-to-screen), \
-             PetFrame (parent=PlayerFrame, mixes \
-             PlayerFrameBottomManagedFrameTemplate + \
-             SecureUnitButtonTemplate), Boss[1-5]TargetFrame array \
-             container, EncounterBar (parent=UIParent owning the \
-             scenario power-bar widgets — the parent of \
-             UIWidgetPowerBarContainerFrame from Blizzard_UIWidgets), \
-             RuneFrame for DK runes"
+             (with PlayerBottomManagedFrameContainer hosting AlternatePowerBar / PetFrame), \
+             TargetFrame + FocusFrame (both share TargetFrameTemplate but FocusFrame is \
+             clamped-to-screen), PetFrame (parent=PlayerFrame, mixes \
+             PlayerBottomManagedFrameTemplate + SecureUnitButtonTemplate), Boss[1-5]TargetFrame \
+             array container, EncounterBar (parent=UIParent owning the scenario power-bar \
+             widgets — the parent of UIWidgetPowerBarContainerFrame from \
+             Blizzard_UIWidgets), RuneFrame for DK runes"
         );
     }
 }
@@ -592,23 +590,18 @@ fn full_game_load_publishes_named_top_level_frames(env: &WowLuaEnv) {
             "Named top-level frame `{name}` must exist as a global \
              after Blizzard_UnitFrame loads (got type={frame_kind}). \
              Unit-frame instances span: PlayerFrame chassis (with \
-             children PlayerFrameBottomManagedFramesContainer hosting \
-             PlayerPowerBarAlt + PetFrame); TargetFrame + FocusFrame \
-             (both inherit TargetFrameTemplate, both EditMode-managed); \
-             PetCastingBarFrame parent=UIParent (StatusBar widget for \
-             the pet's spellcast); BossTargetFrameContainer + \
-             Boss[1-5]TargetFrame for raid-encounter boss bars; \
-             EncounterBar (frameStrata=MEDIUM frameLevel=70 \
-             VerticalLayoutFrame, owns scenario power-bar widgets — \
-             the parent referenced by Blizzard_UIWidgets's \
-             UIWidgetPowerBarContainerFrame); RuneFrame for DK runes; \
-             TotemFrame for Shaman; the per-spec resource bars \
-             (PaladinPowerBarFrame, MonkHarmonyBarFrame, \
-             RogueComboPointBarFrame, DruidComboPointBarFrame, \
-             EssencePlayerFrame for Evoker, InsanityBarFrame for \
-             Shadow Priest, MageArcaneChargesFrame, WarlockPowerFrame); \
-             PartyFrame anchor; PartyMemberBuffTooltip; \
-             PlayerBuffTimerManager"
+             PlayerBottomManagedFrameContainer hosting PlayerPowerBarAlt + PetFrame); \
+             TargetFrame + FocusFrame (both inherit TargetFrameTemplate, both \
+             EditMode-managed); PetCastingBarFrame parent=UIParent (StatusBar widget for \
+             the pet's spellcast); BossTargetFrameContainer + Boss[1-5]TargetFrame for \
+             raid-encounter boss bars; EncounterBar (frameStrata=MEDIUM frameLevel=70 \
+             VerticalLayoutFrame, owns scenario power-bar widgets — the parent referenced \
+             by Blizzard_UIWidgets's UIWidgetPowerBarContainerFrame); RuneFrame for DK \
+             runes; TotemFrame for Shaman; the per-spec resource bars \
+             (PaladinPowerBarFrame, MonkHarmonyBarFrame, RogueComboPointBarFrame, \
+             DruidComboPointBarFrame, EssencePlayerFrame for Evoker, InsanityBarFrame for \
+             Shadow Priest, MageArcaneChargesFrame, WarlockPowerFrame); PartyFrame anchor; \
+             PartyMemberBuffTooltip; PlayerBuffTimerManager"
         );
     }
 }

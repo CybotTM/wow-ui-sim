@@ -51,9 +51,9 @@ fn blizzard_frame_xml_base_mainline_toc_is_eager_with_two_deps_and_allow_load_ga
         "Blizzard_FrameXMLBase has no `## LoadOnDemand` line — this is the base library \
          tier that publishes Constants.lua (INVSLOT_*, NUM_BAG_SLOTS, CLASS_SORT_ORDER, \
          QuestDifficultyColors, ...), AnimatedStatusBarMixin, GradualAnimatedStatusBarMixin, \
-         IconDataProviderMixin, PowerDependencyLineMixin, FrameLocks (SmartShow/SmartHide \
-         hooks), FlowContainer_*, and PlayerMovementFrameFader. Every downstream Blizzard \
-         addon depends on these so they MUST be eagerly loaded at startup"
+         IconDataProviderMixin, PowerDependencyLineMixin, FlowContainer_*, and \
+         PlayerMovementFrameFader. Every downstream Blizzard addon depends on these so they \
+         MUST be eagerly loaded at startup"
     );
     assert!(
         !toc.is_secure_env(),
@@ -167,7 +167,6 @@ fn blizzard_frame_xml_base_loads_via_full_game_ui_without_errors(env: &WowLuaEnv
                 || message.contains("GradualAnimatedStatusBar")
                 || message.contains("IconDataProvider")
                 || message.contains("PowerDependencyLine")
-                || message.contains("FrameLocks")
                 || message.contains("FlowContainer")
                 || message.contains("PlayerMovementFrameFader")
         })
@@ -420,45 +419,21 @@ fn blizzard_frame_xml_base_publishes_quest_difficulty_color_table(env: &WowLuaEn
 }
 
 prefork_full_ui_case! {
-fn blizzard_frame_xml_base_publishes_frame_lock_globals(env: &WowLuaEnv) {
-
-    let frame_lock_api: (bool, bool, bool, bool, bool, bool, bool) = env
+fn blizzard_frame_xml_base_does_not_publish_removed_frame_lock_globals(env: &WowLuaEnv) {
+    let removed_globals: (bool, bool, bool, bool, bool, bool, bool, bool, bool) = env
         .eval(
-            "return type(SmartShow) == 'function', \
-                    type(SmartHide) == 'function', \
-                    type(IsFrameSmartShown) == 'function', \
-                    type(IsFrameLockActive) == 'function', \
-                    type(AddFrameLock) == 'function', \
-                    type(RemoveFrameLock) == 'function', \
-                    type(SetFrameLock) == 'function'",
+            "return SmartShow == nil, SmartHide == nil, IsFrameSmartShown == nil, \
+                    IsFrameLockActive == nil, AddFrameLock == nil, RemoveFrameLock == nil, \
+                    SetFrameLock == nil, FRAMELOCK_STATES == nil, \
+                    FRAMELOCK_STATE_PRIORITIES == nil",
         )
-        .expect("FrameLocks API probe should succeed");
+        .expect("removed FrameLocks global probe should succeed");
     assert_eq!(
-        frame_lock_api,
-        (true, true, true, true, true, true, true),
-        "Mainline/FrameLocks.lua publishes seven public functions: SmartShow / SmartHide \
-         (the frame method overrides set up by initiateFrame), IsFrameSmartShown / \
-         IsFrameLockActive (state queries), AddFrameLock / RemoveFrameLock / SetFrameLock \
-         (lock toggle helpers). These hide-most pet-battles / spectating / commentator \
-         display modes drive the canonical Blizzard `FRAMELOCK_STATES` system"
-    );
-
-    let frame_lock_state: (bool, bool, bool, bool) = env
-        .eval(
-            "return type(FRAMELOCK_STATES) == 'table', \
-                    type(FRAMELOCK_STATE_PRIORITIES) == 'table', \
-                    type(FRAMELOCK_STATES.PETBATTLES) == 'table', \
-                    type(FRAMELOCK_STATES.SPECTATING) == 'table'",
-        )
-        .expect("FRAMELOCK_STATES probe should succeed");
-    assert_eq!(
-        frame_lock_state,
-        (true, true, true, true),
-        "FrameLocks.lua:80-102 publishes FRAMELOCK_STATES with three keys \
-         (COMMENTATOR_SPECTATING_MODE, PETBATTLES, SPECTATING) and \
-         FRAMELOCK_STATE_PRIORITIES (the ordered priority list). Each entry maps frame \
-         names (PlayerFrame, TargetFrame, MainActionBar, ...) to 'hidden' / 'shown' \
-         desired states"
+        removed_globals,
+        (true, true, true, true, true, true, true, true, true),
+        "Retail 12.1 no longer loads the legacy FrameLocks module through \
+         Blizzard_FrameXMLBase, so none of its former public globals may be required by \
+         the current-source contract"
     );
 }
 }

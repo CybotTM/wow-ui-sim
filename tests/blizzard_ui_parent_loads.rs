@@ -32,8 +32,8 @@ const TOC_DEPENDENCIES: &[&str] = &[
 ];
 
 const MIXINS: &[&str] = &[
-    "UIParentManagedFrameMixin",
-    "UIParentManagedFrameContainerMixin",
+    "ManagedFrameMixin",
+    "ManagedFrameContainerMixin",
 ];
 
 const MODULE_LOAD_TABLES: &[&str] = &[
@@ -60,7 +60,6 @@ const FREE_FUNCTIONS: &[&str] = &[
     "UIParent_Shared_OnLoad",
     "UIParent_Shared_OnEvent",
     "UIParent_UpdateTopFramePositions",
-    "UIParentLoadAddOn",
     "WorldFrame_OnLoad",
     "WorldFrame_OnUpdate",
     "UpdateUIElementsForClientScene",
@@ -76,17 +75,18 @@ const FREE_FUNCTIONS: &[&str] = &[
 
 const VIRTUAL_TEMPLATES: &[&str] = &[
     "ChatBubbleTemplate",
-    "UIParentManagedFrameTemplate",
-    "UIParentBottomManagedFrameTemplate",
-    "UIParentRightManagedFrameTemplate",
-    "UIParentManagedFrameContainer",
+    "ManagedFrameTemplate",
+    "BottomManagedFrameTemplate",
+    "RightManagedFrameTemplate",
+    "ManagedFrameContainerBaseTemplate",
+    "ManagedFrameContainer",
 ];
 
 const NAMED_NON_VIRTUAL_FRAMES: &[&str] = &[
     "UIParent",
     "WorldFrame",
-    "UIParentBottomManagedFrameContainer",
-    "UIParentRightManagedFrameContainer",
+    "BottomManagedFrameContainer",
+    "RightManagedFrameContainer",
 ];
 
 fn fresh_game_env() -> WowLuaEnv {
@@ -363,13 +363,9 @@ fn full_game_load_publishes_mixins(env: &WowLuaEnv) {
             .unwrap_or_else(|err| panic!("{mixin} probe failed: {err}"));
         assert_eq!(
             kind, "table",
-            "{mixin} must be a global table after load. Both mixins live \
-             in Shared/UIParent.lua: UIParentManagedFrameMixin gives \
-             OnShow/OnHide hooks that route into the parent container's \
-             UpdateFrame; UIParentManagedFrameContainerMixin maintains \
-             the managedFrames list with AddManagedFrame / \
-             RemoveManagedFrame / UpdateManagedFrames / \
-             AnimIn/AnimOutManagedFrames / UpdateManagedFramesAlphaState"
+            "{mixin} must be a global table after load. ManagedFrameSystem publishes \
+             ManagedFrameMixin for OnShow/OnHide updates and ManagedFrameContainerMixin \
+             for the managedFrames collection and its layout updates"
         );
     }
 }
@@ -431,15 +427,12 @@ fn full_game_load_publishes_free_functions(env: &WowLuaEnv) {
              / OnShow / OnHide are the singleton frame's script handlers \
              wired in UIParent.xml:18-32. The `_Shared_` variants are the \
              cross-flavor handlers in Shared/UIParent.lua invoked at the \
-             top of the Mainline handler. UIParentLoadAddOn drives the \
-             on-demand-addon-load helpers for every per-feature \
-             `*_LoadUI()` shim. WorldFrame_OnLoad / OnUpdate are the \
-             world-render container's tick driver (StaticPopup_UpdateAll, \
-             MirrorTimerContainer:ForceUpdateTimers, the tutorial \
-             polling). UpdateUIElementsForClientScene flips PlayerFrame \
-             / TargetFrame visibility based on Enum.ClientSceneType. The \
-             Toggle* / Open* family are the public API for opening \
-             addon-side panels"
+             top of the Mainline handler. WorldFrame_OnLoad / OnUpdate are the world-render \
+             container's tick driver (StaticPopup_UpdateAll, \
+             MirrorTimerContainer:ForceUpdateTimers, the tutorial polling). \
+             UpdateUIElementsForClientScene flips PlayerFrame / TargetFrame visibility based \
+             on Enum.ClientSceneType. The Toggle* / Open* family are the public API for \
+             opening addon-side panels"
         );
     }
 }
@@ -471,14 +464,11 @@ fn full_game_load_registers_virtual_templates(env: &WowLuaEnv) {
         assert!(
             entry.is_some(),
             "{template} must be a registered virtual template. \
-             ChatBubbleTemplate (ChatBubbleTemplates.xml) is the \
-             nine-slice chat-bubble chassis with ARTWORK-layer FontString \
-             and a tail texture. UIParentManagedFrameTemplate is the \
-             base for all UIParent-managed frames (OnShow/OnHide route \
-             to the mixin); the Bottom and Right variants add KeyValues \
-             for layoutParent/align/hideWhenActionBarIsOverriden. \
-             UIParentManagedFrameContainer is the VerticalLayoutFrame + \
-             container-mixin chassis that owns the actual layout slots"
+             ChatBubbleTemplate (ChatBubbleTemplates.xml) is the nine-slice chat-bubble \
+             chassis with ARTWORK-layer FontString and a tail texture. ManagedFrameTemplate \
+             is the base for managed frames; the Bottom and Right variants add layout \
+             KeyValues. ManagedFrameContainerBaseTemplate and ManagedFrameContainer provide \
+             the layout-container inheritance chain"
         );
     }
 }
@@ -499,10 +489,9 @@ fn full_game_load_publishes_named_non_virtual_frames(env: &WowLuaEnv) {
              wrapping (`addToSecureEnv=\"true\"`). WorldFrame \
              (WorldFrame.xml:21) is the unique world-render container \
              with `clipChildren=\"true\"` and `propagateMouseInput=\"Both\"`. \
-             UIParentBottomManagedFrameContainer / \
-             UIParentRightManagedFrameContainer are concrete instances of \
-             UIParentManagedFrameContainer at frameStrata=\"LOW\" — they \
-             host the layout slots populated by managed-frame consumers"
+             BottomManagedFrameContainer / RightManagedFrameContainer are concrete managed \
+             frame containers at frameStrata=\"LOW\" — they host the layout slots populated by \
+             managed-frame consumers"
         );
     }
 }

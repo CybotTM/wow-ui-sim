@@ -216,8 +216,7 @@ fn blizzard_debug_tools_frame_stack_helper_globals_are_defined(env: &WowLuaEnv) 
                 and type(FrameStackTooltip_OnUpdate) == 'function' \
                 and type(DebugTooltip_OnLoad) == 'function' \
                 and type(DebugIdentifierFrame_OnLoad) == 'function' \
-                and type(CompareFunctionReturns) == 'function' \
-                and type(CanAccessObject) == 'function'",
+                and type(CompareFunctionReturns) == 'function'", 
         )
         .expect("FrameStackTooltip helper-global query should succeed");
     assert!(
@@ -226,9 +225,8 @@ fn blizzard_debug_tools_frame_stack_helper_globals_are_defined(env: &WowLuaEnv) 
          the framestack tooltip: 5 cvar-readers (fstack_enabled / fstack_showhidden / \
          fstack_showhighlight / fstack_showregions / fstack_showanchors), Show/Hide/Toggle, \
          OnFramestackVisibilityUpdated, InspectTable / HandleFrameCommand / ChangeHighlight, \
-         and the OnUpdate ticker. DebugObjectUtil.lua exports CanAccessObject and \
-         Blizzard_DebugTools.lua line 317 publishes CompareFunctionReturns for `func1, func2, \
-         ...` ordered comparison"
+         and the OnUpdate ticker. Blizzard_DebugTools.lua line 317 publishes \
+         CompareFunctionReturns for `func1, func2, ...` ordered comparison"
     );
 }
 }
