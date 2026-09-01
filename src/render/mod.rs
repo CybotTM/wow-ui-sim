@@ -87,6 +87,8 @@ pub use shader::{
     WowUiProgram, load_texture_or_crop,
 };
 #[cfg(feature = "gui")]
+pub use shader::{brightness_boost_divisor, set_brightness_boost_divisor};
+#[cfg(feature = "gui")]
 pub use text::TextRenderer;
 #[cfg(feature = "gui")]
 pub use texture::{

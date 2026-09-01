@@ -13,6 +13,38 @@ use wgpu::util::DeviceExt;
 struct Uniforms {
     /// Projection matrix (orthographic, screen coords to clip space).
     projection: [[f32; 4]; 4],
+    /// x: gamma divisor for the brightness boost the fragment shader applies
+    /// to non-additive pixels (`pow(rgb, 1/x)`). 1.5 is the historical
+    /// on-screen aid that lifts dark UI against the black backdrop; 1.0 is the
+    /// identity, which a capture meant to match the client wants. The other
+    /// three lanes keep the struct 16-byte aligned for the uniform buffer.
+    params: [f32; 4],
+}
+
+/// Gamma divisor the shader uses to lift dark pixels, from
+/// `WOW_SIM_BRIGHTNESS_BOOST`: unset / "1" keeps the historical 1.5, "0" or
+/// "false" disables the lift (divisor 1.0), any other number is used as the
+/// divisor directly.
+fn brightness_boost_divisor() -> f32 {
+    brightness_boost_divisor_from(std::env::var("WOW_SIM_BRIGHTNESS_BOOST").ok().as_deref())
+}
+
+fn brightness_boost_divisor_from(value: Option<&str>) -> f32 {
+    const DEFAULT: f32 = 1.5;
+    let Some(v) = value else {
+        return DEFAULT;
+    };
+    let v = v.trim();
+    if v == "0" || v.eq_ignore_ascii_case("false") || v.eq_ignore_ascii_case("off") {
+        1.0
+    } else if v == "1" || v.eq_ignore_ascii_case("true") || v.eq_ignore_ascii_case("on") {
+        DEFAULT
+    } else {
+        v.parse::<f32>()
+            .ok()
+            .filter(|d| *d > 0.0)
+            .unwrap_or(DEFAULT)
+    }
 }
 
 impl Uniforms {
@@ -25,7 +57,10 @@ impl Uniforms {
             [0.0, 0.0, 1.0, 0.0],
             [-1.0, 1.0, 0.0, 1.0],
         ];
-        Self { projection }
+        Self {
+            projection,
+            params: [brightness_boost_divisor(), 0.0, 0.0, 0.0],
+        }
     }
 }
 
@@ -481,7 +516,7 @@ fn create_uniform_resources(
         label: Some("WoW UI Uniform Bind Group Layout"),
         entries: &[wgpu::BindGroupLayoutEntry {
             binding: 0,
-            visibility: wgpu::ShaderStages::VERTEX,
+            visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
             ty: wgpu::BindingType::Buffer {
                 ty: wgpu::BufferBindingType::Uniform,
                 has_dynamic_offset: false,
@@ -501,4 +536,30 @@ fn create_uniform_resources(
     });
 
     (uniform_buffer, layout, bind_group)
+}
+
+#[cfg(test)]
+mod brightness_boost_tests {
+    use super::brightness_boost_divisor_from;
+
+    #[test]
+    fn unset_keeps_the_historical_lift() {
+        assert_eq!(brightness_boost_divisor_from(None), 1.5);
+        assert_eq!(brightness_boost_divisor_from(Some("1")), 1.5);
+        assert_eq!(brightness_boost_divisor_from(Some("on")), 1.5);
+    }
+
+    #[test]
+    fn zero_false_and_off_disable_the_lift() {
+        assert_eq!(brightness_boost_divisor_from(Some("0")), 1.0);
+        assert_eq!(brightness_boost_divisor_from(Some("false")), 1.0);
+        assert_eq!(brightness_boost_divisor_from(Some(" OFF ")), 1.0);
+    }
+
+    #[test]
+    fn a_positive_number_is_the_divisor_and_garbage_falls_back() {
+        assert_eq!(brightness_boost_divisor_from(Some("2.2")), 2.2);
+        assert_eq!(brightness_boost_divisor_from(Some("-1")), 1.5);
+        assert_eq!(brightness_boost_divisor_from(Some("bright")), 1.5);
+    }
 }

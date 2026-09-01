@@ -10,6 +10,8 @@
 // Uniforms (group 0)
 struct Uniforms {
     projection: mat4x4<f32>,
+    // x = brightness gamma divisor (1.5 lifts dark UI, 1.0 = identity)
+    params: vec4<f32>,
 }
 
 @group(0) @binding(0)
@@ -216,7 +218,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     // destination; boosting them also makes near-transparent atlas edge pixels
     // visible as stripes.
     if blend_mode != BLEND_ADDITIVE {
-        color = vec4f(pow(color.rgb, vec3f(1.0 / 1.5)), color.a);
+        color = vec4f(pow(color.rgb, vec3f(1.0 / uniforms.params.x)), color.a);
     }
 
     // Premultiplied alpha output: pipeline uses src + dst * (1 - src.a).
