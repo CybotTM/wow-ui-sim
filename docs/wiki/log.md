@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Load CombatLog startup publisher
+
+Audited commit `a5ce1b550`. Updated [[addon-loading]], the addon-loading pipeline, and the prefork harness spec: `Blizzard_CombatLog` remains `LoadOnDemand` by TOC metadata but is an explicit `Blizzard_Game` startup dependency, so its full TOC publishes `CombatLog_LoadUI` before `PLAYER_LOGIN`; declared `Blizzard_CombatLogBase` and `Blizzard_CombatLogProcessor` dependencies load first. This does not restore a bootstrap-only pass, load all LoD addons, or reorder TOC files. No new page, index update, manifest, cache content, `PLAN.md`, vendor/Blizzard, or protected-file change was warranted.
+
 ## [2026-09-01] audit | Load startup publishers in dependency order
 
 Audited commits `50943cff0` and `34712c117`. Updated [[addon-loading]], the addon-loading pipeline, and the prefork harness spec: full game discovery adds only the LoD publishers required by current startup consumers. `Blizzard_Game` depends on `Blizzard_TimeManager`, `Blizzard_CooldownBroadcaster`, and `Blizzard_BoostTutorial`; LoD root `Blizzard_RaidUI` depends on `Blizzard_RaidFrame`, so RaidFrame loads first and RaidUI is ready before startup events. LoD keys in the implicit startup-dependency map are selected as roots. `[Bootstrap]` remains an inline TOC annotation, not a global LoD pass or reorder signal; unrelated LoD roots such as `Deprecated_PaperDoll` remain excluded. No new page, index update, manifest, cache content, `PLAN.md`, vendor/Blizzard, or protected-file change was warranted.

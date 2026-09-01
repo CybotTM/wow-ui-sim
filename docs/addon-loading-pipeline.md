@@ -11,7 +11,7 @@ pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
 }
 ```
 
-Prefers Mainline variants for retail WoW compatibility. Game startup selects eligible non-LoD `Blizzard_*` roots, their hard TOC dependency closure, and explicit LoD startup roots. `Blizzard_Game` depends on `Blizzard_TimeManager`, `Blizzard_CooldownBroadcaster`, and `Blizzard_BoostTutorial`; `Blizzard_RaidUI` is selected as an LoD startup root and depends on `Blizzard_RaidFrame`, so RaidFrame loads first. Other LoD addons—including non-Blizzard `Deprecated_PaperDoll`—remain excluded. `[Bootstrap]` remains an inline TOC annotation, not a discovery trigger or file-order override.
+Prefers Mainline variants for retail WoW compatibility. Game startup selects eligible non-LoD `Blizzard_*` roots, their hard TOC dependency closure, and explicit LoD startup roots. `Blizzard_Game` depends on `Blizzard_TimeManager`, `Blizzard_CooldownBroadcaster`, `Blizzard_BoostTutorial`, and `Blizzard_CombatLog`; CombatLog's declared base and processor dependencies load first, publishing `CombatLog_LoadUI` before `PLAYER_LOGIN`. `Blizzard_RaidUI` is selected as an LoD startup root and depends on `Blizzard_RaidFrame`, so RaidFrame loads first. Other LoD addons—including non-Blizzard `Deprecated_PaperDoll`—remain excluded. `[Bootstrap]` remains an inline TOC annotation, not a discovery trigger or file-order override.
 
 ### TOC File Parsing
 **File:** `src/toc.rs:63-120`
@@ -261,7 +261,7 @@ Default storage: `~/.local/share/wow-sim/SavedVariables/`
 
 Blizzard startup discovery is root-and-closure based, then topologically sorted from TOC dependencies plus simulator implicit startup dependencies. Eligible non-LoadOnDemand cache addons whose directory names start with `Blizzard_` are roots, subject to screen/profile exclusions. The candidate pool also retains eligible LoadOnDemand Blizzard TOCs and eligible non-Blizzard TOCs so a selected root can pull its transitive hard `## Dependencies:` closure.
 
-A non-Blizzard cache directory is not an eager root: it loads only when a retained Blizzard root requires it. Current retail `Blizzard_TutorialManager` demonstrates this: its `middleclass` dependency loads before the root. Conversely, unrelated non-Blizzard directories such as `Deprecated_PaperDoll` remain excluded. LoadOnDemand Blizzard addons remain out of the root set unless reached by the closure or named as an implicit startup-dependency key; such LoD keys are selected as startup roots and then ordered by their dependencies. Discovery does not eagerly load every cache directory.
+A non-Blizzard cache directory is not an eager root: it loads only when a retained Blizzard root requires it. Current retail `Blizzard_TutorialManager` demonstrates this: its `middleclass` dependency loads before the root. Conversely, unrelated non-Blizzard directories such as `Deprecated_PaperDoll` remain excluded. LoadOnDemand Blizzard addons remain out of the root set unless reached by the closure or named as an implicit startup-dependency key; such LoD keys are selected as startup roots and load complete TOCs in dependency order. `Blizzard_CombatLog` remains LoadOnDemand in TOC metadata, but `Blizzard_Game` selects it to publish `CombatLog_LoadUI` before `PLAYER_LOGIN`; `Blizzard_CombatLogBase` and `Blizzard_CombatLogProcessor` precede it through declared dependencies. `[Bootstrap]` neither selects every LoD addon nor changes file order.
 
 Foundational SharedXML addons are promoted to `LoadFirst` so templates exist before other Blizzard addons instantiate frames. Third-party addons load after this Blizzard startup pass.
 
@@ -321,7 +321,7 @@ Accessors: `size()`, `anchors()`, `scripts()`, `layers()`, `all_frame_elements()
 ## Complete Load Sequence
 
 1. **Startup** (`main.rs`): Apply resource limits, create `WowLuaEnv`, set addon base paths, configure SavedVariables
-2. **Blizzard Addons**: Discover eligible `Blizzard_*` non-LoD roots, include their transitive hard TOC dependencies from the candidate pool, then load the resulting dependency order
+2. **Blizzard Addons**: Discover eligible `Blizzard_*` non-LoD roots, explicit LoD startup roots, and their transitive hard TOC dependencies from the candidate pool; load every selected TOC in dependency order
 3. **Third-Party Addons**: Scan `./Interface/AddOns`, load alphabetically
 4. **Post-Load Scripts**: Execute global initialization and reconcile replacement `_G.SettingsPanel`/`Settings` surfaces before category registration/opening
 5. **Startup Events**: Fire `ADDON_LOADED`, hide runtime-hidden frames
