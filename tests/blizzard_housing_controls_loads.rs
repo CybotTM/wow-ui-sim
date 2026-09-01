@@ -292,7 +292,7 @@ fn blizzard_housing_controls_visitor_frame_publishes_layout_parent_keys(env: &Wo
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_controls_visitor_button_container_publishes_four_actions(env: &WowLuaEnv) {
+fn blizzard_housing_controls_visitor_control_frame_button_container_publishes_four_actions(env: &WowLuaEnv) {
     load_housing_controls(env);
 
     let actions: (bool, bool, bool, bool) = env
@@ -366,7 +366,7 @@ fn blizzard_housing_controls_mixin_publishes_eight_methods(env: &WowLuaEnv) {
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_visitor_controls_layout_mixin_publishes_owner_info_method(env: &WowLuaEnv) {
+fn blizzard_housing_visitor_control_frame_layout_mixin_publishes_owner_info_method(env: &WowLuaEnv) {
     load_housing_controls(env);
 
     let exists: bool = env
