@@ -6,7 +6,9 @@ use std::rc::Rc;
 use wow_ui_sim::font::WowFontSystem;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
-use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_startup};
+use wow_ui_sim::startup::{
+    apply_delay, apply_ui_scale, run_extra_update_ticks, settle_headless_startup,
+};
 
 pub(super) fn run_gui(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(feature = "casc")]
@@ -72,6 +74,7 @@ pub(super) fn dispatch_screenshot(mut dispatch: CommandDispatch) {
         png,
         dump_tree,
         quality,
+        ui_scale,
     }) = dispatch.command
     else {
         unreachable!("dispatch_screenshot only fires for Commands::Screenshot");
@@ -92,6 +95,7 @@ pub(super) fn dispatch_screenshot(mut dispatch: CommandDispatch) {
             exec_lua_secure: dispatch.exec_lua_secure,
             dump_tree,
             quality,
+            ui_scale,
         },
     );
 }
@@ -256,6 +260,7 @@ pub(super) struct ScreenshotCommand<'a> {
     pub(super) exec_lua_secure: bool,
     pub(super) dump_tree: Option<Option<String>>,
     pub(super) quality: f32,
+    pub(super) ui_scale: f32,
 }
 
 pub(super) fn run_screenshot(
@@ -296,6 +301,7 @@ fn prepare_screenshot_env(
     settle_headless_startup(env);
     env.service_headless_reload(saved_vars)
         .expect("screenshot startup ReloadUI failed");
+    apply_ui_scale(env, command.ui_scale);
     env.set_screen_size(command.width as f32, command.height as f32);
     wow_ui_sim::debug_helpers::debug_show_game_menu(env);
     run_screenshot_exec_lua(env, command);
@@ -486,6 +492,7 @@ mod reload_tests {
             exec_lua_secure: false,
             dump_tree: None,
             quality: 15.0,
+            ui_scale: 1.0,
         };
         prepare_screenshot_env(&mut env, &mut None, &command);
         assert!(
