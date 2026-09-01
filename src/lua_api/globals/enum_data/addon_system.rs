@@ -525,14 +525,30 @@ pub const WARBAND_SCENE_ANIMATION_EVENT: EnumDef = (
 // Housing Enums
 // ============================================================================
 
+#[cfg(feature = "retail-12-1-0")]
 pub const HOUSING_RESULT: SeqEnumDef = (
     "HousingResult",
     &[
         "Success",
+        "AccountBanned",
         "ActionLockedByCombat",
+        "BlueprintCodeInvalid",
+        "BlueprintDyeFailed",
+        "BlueprintGenericExportError",
+        "BlueprintGenericImportError",
+        "BlueprintLocationInvalid",
+        "BlueprintNameInvalid",
+        "BlueprintNotFound",
+        "BlueprintRequirementsUnmet",
+        "BlueprintRoomPlacementRequired",
+        "BlueprintTypeInvalid",
+        "BlueprintTypeLocationInvalid",
+        "BlueprintStorageLimit",
+        "BlueprintVersionInvalid",
         "BoundsFailureChildren",
         "BoundsFailurePlot",
         "BoundsFailureRoom",
+        "BoundToStartingArea",
         "CannotAfford",
         "CharterComplete",
         "CollisionInvalid",
@@ -548,7 +564,6 @@ pub const HOUSING_RESULT: SeqEnumDef = (
         "FixtureHookOccupied",
         "FixtureHouseTypeMismatch",
         "FixtureNotFound",
-        "FixtureNotOwned",
         "FixtureSizeMismatch",
         "FixtureTypeMismatch",
         "GenericFailure",
@@ -568,17 +583,23 @@ pub const HOUSING_RESULT: SeqEnumDef = (
         "IncorrectFaction",
         "InvalidDecorItem",
         "InvalidDistance",
+        "InvalidExteriorDocument",
         "InvalidGuild",
         "InvalidHouse",
         "InvalidInstance",
         "InvalidInteraction",
+        "InvalidInteriorDocument",
+        "InvalidLightOverlap",
         "InvalidMap",
         "InvalidNeighborhoodName",
         "InvalidRoomLayout",
+        "InsufficientRoomBudget",
         "LockedByOtherPlayer",
         "LockOperationFailed",
-        "MaxDecorReached",
+        "MaxPlacedDecorReached",
+        "MaxPetDecorReached",
         "MaxPreviewDecorReached",
+        "MaxStorageDecorReached",
         "MissingCoreFixture",
         "MissingDye",
         "MissingExpansionAccess",
@@ -604,6 +625,7 @@ pub const HOUSING_RESULT: SeqEnumDef = (
         "PlotReservationCooldown",
         "PlotReserved",
         "RoomNotFound",
+        "RoomPlacementOutOfBounds",
         "RoomUpdateFailed",
         "RpcFailure",
         "ServiceNotAvailable",
@@ -620,6 +642,12 @@ pub const HOUSING_RESULT: SeqEnumDef = (
         "UncollectedRoomTheme",
         "UnlockOperationFailed",
     ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_RESULT_META: EnumDef = (
+    "HousingResultMeta",
+    &[("MinValue", 0), ("MaxValue", 111), ("NumValues", 112)],
 );
 
 pub const HOUSE_SETTING_FLAGS: EnumDef = (

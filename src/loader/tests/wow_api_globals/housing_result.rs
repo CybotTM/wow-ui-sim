@@ -1,9 +1,126 @@
-//! Startup publication and values for the 12.0.0 HousingResult enum.
+//! Versioned startup publication and values for the HousingResult enum.
 
 #![cfg(feature = "retail-12-0-0")]
 
 use super::super::*;
 
+#[cfg(feature = "retail-12-1-0")]
+const RETAIL_12_1_HOUSING_RESULT_NAMES: &[&str] = &[
+    "Success",
+    "AccountBanned",
+    "ActionLockedByCombat",
+    "BlueprintCodeInvalid",
+    "BlueprintDyeFailed",
+    "BlueprintGenericExportError",
+    "BlueprintGenericImportError",
+    "BlueprintLocationInvalid",
+    "BlueprintNameInvalid",
+    "BlueprintNotFound",
+    "BlueprintRequirementsUnmet",
+    "BlueprintRoomPlacementRequired",
+    "BlueprintTypeInvalid",
+    "BlueprintTypeLocationInvalid",
+    "BlueprintStorageLimit",
+    "BlueprintVersionInvalid",
+    "BoundsFailureChildren",
+    "BoundsFailurePlot",
+    "BoundsFailureRoom",
+    "BoundToStartingArea",
+    "CannotAfford",
+    "CharterComplete",
+    "CollisionInvalid",
+    "DbError",
+    "DecorCannotBeRedeemed",
+    "DecorItemNotDestroyable",
+    "DecorNotFound",
+    "DecorNotFoundInStorage",
+    "DuplicateCharterSignature",
+    "FilterRejected",
+    "FixtureCantDeleteDoor",
+    "FixtureHookEmpty",
+    "FixtureHookOccupied",
+    "FixtureHouseTypeMismatch",
+    "FixtureNotFound",
+    "FixtureSizeMismatch",
+    "FixtureTypeMismatch",
+    "GenericFailure",
+    "GuildMoreAccountsNeeded",
+    "GuildMoreActivePlayersNeeded",
+    "GuildNotLoaded",
+    "HouseEditLockFailed",
+    "HouseExteriorAlreadyThatSize",
+    "HouseExteriorAlreadyThatType",
+    "HouseExteriorRootNotFound",
+    "HouseExteriorTypeNeighborhoodMismatch",
+    "HouseExteriorTypeNotFound",
+    "HouseExteriorTypeSizeMismatch",
+    "HouseExteriorSizeNotAvailable",
+    "HookNotChildOfFixture",
+    "HouseNotFound",
+    "IncorrectFaction",
+    "InvalidDecorItem",
+    "InvalidDistance",
+    "InvalidExteriorDocument",
+    "InvalidGuild",
+    "InvalidHouse",
+    "InvalidInstance",
+    "InvalidInteraction",
+    "InvalidInteriorDocument",
+    "InvalidLightOverlap",
+    "InvalidMap",
+    "InvalidNeighborhoodName",
+    "InvalidRoomLayout",
+    "InsufficientRoomBudget",
+    "LockedByOtherPlayer",
+    "LockOperationFailed",
+    "MaxPlacedDecorReached",
+    "MaxPetDecorReached",
+    "MaxPreviewDecorReached",
+    "MaxStorageDecorReached",
+    "MissingCoreFixture",
+    "MissingDye",
+    "MissingExpansionAccess",
+    "MissingFactionMap",
+    "MissingPrivateNeighborhoodInvite",
+    "MoreHouseSlotsNeeded",
+    "MoreSignaturesNeeded",
+    "NeighborhoodNotFound",
+    "NoNeighborhoodOwnershipRequests",
+    "NotInDecorEditMode",
+    "NotInFixtureEditMode",
+    "NotInLayoutEditMode",
+    "NotInsideHouse",
+    "NotOnOwnedPlot",
+    "OperationAborted",
+    "OwnerNotInGuild",
+    "PermissionDenied",
+    "PlacementTargetInvalid",
+    "PlayerNotFound",
+    "PlayerNotInInstance",
+    "PlotNotFound",
+    "PlotNotVacant",
+    "PlotReservationCooldown",
+    "PlotReserved",
+    "RoomNotFound",
+    "RoomPlacementOutOfBounds",
+    "RoomUpdateFailed",
+    "RpcFailure",
+    "ServiceNotAvailable",
+    "StaticDataNotFound",
+    "TimeoutLimit",
+    "TimerunningNotAllowed",
+    "TokenRequired",
+    "TooManyRequests",
+    "TransactionFailure",
+    "UncollectedExteriorFixture",
+    "UncollectedHouseType",
+    "UncollectedRoom",
+    "UncollectedRoomMaterial",
+    "UncollectedRoomTheme",
+    "UnlockOperationFailed",
+];
+
+#[cfg(not(feature = "retail-12-1-0"))]
 const HOUSING_RESULT_VALUES: &[(&str, i64)] = &[
     ("BoundsFailureChildren", 2),
     ("BoundsFailurePlot", 3),
@@ -95,6 +212,7 @@ const HOUSING_RESULT_VALUES: &[(&str, i64)] = &[
     ("UnlockOperationFailed", 89),
 ];
 
+#[cfg(not(feature = "retail-12-1-0"))]
 #[test]
 fn test_patch_12_0_0_housing_result_values() {
     let env = WowLuaEnv::new().unwrap();
@@ -141,5 +259,45 @@ fn test_patch_12_0_0_housing_result_values() {
     assert_eq!(
         result, "ok",
         "HousingResult did not match the 12.0.0 source register"
+    );
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn test_patch_12_1_housing_result_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let expected_lua = RETAIL_12_1_HOUSING_RESULT_NAMES
+        .iter()
+        .enumerate()
+        .map(|(value, name)| format!("[{name:?}] = {value}"))
+        .collect::<Vec<_>>()
+        .join(",\n                ");
+    let script = format!(
+        r#"
+            local namespace = Enum.HousingResult
+            local metadata = Enum.HousingResultMeta
+            if type(namespace) ~= "table" or type(metadata) ~= "table" then
+                return "tables"
+            end
+            local expected = {{
+                {expected_lua}
+            }}
+            for name, value in pairs(expected) do
+                if namespace[name] ~= value then
+                    return name .. ":value=" .. tostring(namespace[name])
+                end
+            end
+            if table.count(namespace) ~= 112 then return "count" end
+            if metadata.MinValue ~= 0 or metadata.MaxValue ~= 111 or metadata.NumValues ~= 112 then
+                return "metadata"
+            end
+            return "ok"
+        "#,
+        expected_lua = expected_lua,
+    );
+    let result: String = env.eval(&script).unwrap();
+    assert_eq!(
+        result, "ok",
+        "HousingResult did not match the 12.1 source register"
     );
 }

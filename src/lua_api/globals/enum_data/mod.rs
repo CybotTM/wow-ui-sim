@@ -149,6 +149,8 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     NEIGHBORHOOD_OWNER_TYPE,
     HOUSING_LAYOUT_RESTRICTION,
     HOUSING_EXPERT_SUBMODE_RESTRICTION,
+    #[cfg(feature = "retail-12-1-0")]
+    HOUSING_RESULT,
     SPELL_BOOK_SPELL_BANK,
     SPELL_BOOK_ITEM_TYPE,
     BATTLE_PET_ACTION,
@@ -212,6 +214,8 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     VISUAL_ALERT_TYPE_META,
     #[cfg(feature = "retail-12-1-0")]
     RAID_DISPEL_OVERLAY_TYPE_META,
+    #[cfg(feature = "retail-12-1-0")]
+    HOUSING_RESULT_META,
     LFG_ROLE,
     UNIT_SEX,
     UI_WIDGET_TEXT_SIZE_TYPE,
