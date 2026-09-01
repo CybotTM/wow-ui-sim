@@ -133,6 +133,16 @@ fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
             "Blizzard_ObjectiveTracker".to_string(),
             vec!["Blizzard_POIButton".to_string()],
         ),
+        // Blizzard_SharedXML.toc declares Blizzard_Narration; the legacy
+        // Blizzard_SharedXML_Mainline.toc that the loader prefers does not, so
+        // NarrationSliderMixin is still nil when Blizzard_EditMode builds its
+        // slider and MinimalSlider.lua:237 raises on SetNarrationValueFormatter.
+        // Restoring the edge is narrower than switching that addon to its bare
+        // TOC, which was measured to abort the whole Tutorial subsystem.
+        (
+            "Blizzard_SharedXML".to_string(),
+            vec!["Blizzard_Narration".to_string()],
+        ),
     ])
 }
 
