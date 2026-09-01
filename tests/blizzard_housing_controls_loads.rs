@@ -270,28 +270,45 @@ fn blizzard_housing_controls_publishes_housing_controls_frame_global(env: &WowLu
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_controls_visitor_frame_matches_current_parent_key_contract(env: &WowLuaEnv) {
+fn blizzard_housing_controls_visitor_frame_publishes_layout_parent_keys(env: &WowLuaEnv) {
     load_housing_controls(env);
 
-    let contract: (bool, bool, bool, bool, bool, bool, bool, bool) = env
+    let contract: (bool, bool, bool, bool) = env
         .eval(
             "local f = HousingControlsFrame and HousingControlsFrame.VisitorControlFrame; \
-             local buttons = f and f.ButtonContainer; \
              return type(f) == 'table', \
                     f and f.OwnerNameText ~= nil, \
                     f and f.Divider ~= nil, \
-                    type(buttons) == 'table', \
-                    buttons and buttons.VisitorInspectorButton ~= nil, \
+                    type(f and f.ButtonContainer) == 'table'",
+        )
+        .expect("VisitorControlFrame layout parentKey probe should succeed");
+    assert_eq!(
+        contract,
+        (true, true, true, true),
+        "Current HousingControlsFrame.VisitorControlFrame owns OwnerNameText, Divider, and \
+         ButtonContainer."
+    );
+}
+}
+
+prefork_full_ui_case! {
+fn blizzard_housing_controls_visitor_button_container_publishes_four_actions(env: &WowLuaEnv) {
+    load_housing_controls(env);
+
+    let actions: (bool, bool, bool, bool) = env
+        .eval(
+            "local f = HousingControlsFrame and HousingControlsFrame.VisitorControlFrame; \
+             local buttons = f and f.ButtonContainer; \
+             return buttons and buttons.VisitorInspectorButton ~= nil, \
                     buttons and buttons.BlueprintsButton ~= nil, \
                     buttons and buttons.VisitorHouseInfoButton ~= nil, \
                     buttons and buttons.VisitorExitButton ~= nil",
         )
-        .expect("VisitorControlFrame parentKey contract probe should succeed");
+        .expect("VisitorControlFrame action parentKey probe should succeed");
     assert_eq!(
-        contract,
-        (true, true, true, true, true, true, true, true),
-        "Current HousingControlsFrame.VisitorControlFrame owns OwnerNameText, Divider, and \
-         ButtonContainer. Its four action parent keys are VisitorInspectorButton, \
+        actions,
+        (true, true, true, true),
+        "HousingControlsFrame.VisitorControlFrame.ButtonContainer owns VisitorInspectorButton, \
          BlueprintsButton, VisitorHouseInfoButton, and VisitorExitButton."
     );
 }
