@@ -71,6 +71,7 @@ pub(super) fn dispatch_screenshot(mut dispatch: CommandDispatch) {
         crop,
         png,
         dump_tree,
+        quality,
     }) = dispatch.command
     else {
         unreachable!("dispatch_screenshot only fires for Commands::Screenshot");
@@ -90,6 +91,7 @@ pub(super) fn dispatch_screenshot(mut dispatch: CommandDispatch) {
             exec_lua: dispatch.exec_lua.as_deref(),
             exec_lua_secure: dispatch.exec_lua_secure,
             dump_tree,
+            quality,
         },
     );
 }
@@ -253,6 +255,7 @@ pub(super) struct ScreenshotCommand<'a> {
     pub(super) exec_lua: Option<&'a str>,
     pub(super) exec_lua_secure: bool,
     pub(super) dump_tree: Option<Option<String>>,
+    pub(super) quality: f32,
 }
 
 pub(super) fn run_screenshot(
@@ -276,7 +279,7 @@ pub(super) fn run_screenshot(
 
     let img = render_screenshot_image(env, &batch, &glyph_atlas, command.width, command.height);
     let img = apply_optional_crop(img, command.crop.as_deref());
-    let output = save_screenshot(&img, &command.output, command.png);
+    let output = save_screenshot(&img, &command.output, command.png, command.quality);
     eprintln!(
         "Saved {}x{} screenshot to {}",
         img.width(),
@@ -444,11 +447,14 @@ fn apply_crop(img: image::RgbaImage, crop_str: &str) -> image::RgbaImage {
     img.view(crop_x, crop_y, crop_width, crop_height).to_image()
 }
 
-fn save_screenshot(img: &image::RgbaImage, output: &Path, png: bool) -> PathBuf {
-    wow_ui_sim::screenshot_output::save_screenshot(img, output, png, 15.0).unwrap_or_else(|e| {
-        eprintln!("Failed to save screenshot: {e}");
-        std::process::exit(1);
-    })
+/// Write the rendered frame to `output`, losslessly with `png`, otherwise as
+/// lossy WebP at `quality` (clamped to 1-100).
+fn save_screenshot(img: &image::RgbaImage, output: &Path, png: bool, quality: f32) -> PathBuf {
+    wow_ui_sim::screenshot_output::save_screenshot(img, output, png, quality.clamp(1.0, 100.0))
+        .unwrap_or_else(|e| {
+            eprintln!("Failed to save screenshot: {e}");
+            std::process::exit(1);
+        })
 }
 
 fn create_texture_manager(env: &WowLuaEnv) -> Rc<RefCell<wow_ui_sim::texture::TextureManager>> {
@@ -479,6 +485,7 @@ mod reload_tests {
             exec_lua: Some("reload_sentinel = true; ReloadUI()"),
             exec_lua_secure: false,
             dump_tree: None,
+            quality: 15.0,
         };
         prepare_screenshot_env(&mut env, &mut None, &command);
         assert!(
