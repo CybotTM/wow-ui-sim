@@ -162,6 +162,8 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     PREY_HUNT_PROGRESS_STATE,
     STATUS_BAR_FILL_STYLE,
     RAID_DISPEL_DISPLAY_TYPE,
+    #[cfg(feature = "retail-12-1-0")]
+    RAID_DISPEL_OVERLAY_TYPE,
     NAME_PLATE_STYLE,
     AUTO_COMPLETE_PRIORITY,
 ];
@@ -196,6 +198,8 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     VISUAL_ALERT_TYPE,
     #[cfg(feature = "retail-12-1-0")]
     VISUAL_ALERT_TYPE_META,
+    #[cfg(feature = "retail-12-1-0")]
+    RAID_DISPEL_OVERLAY_TYPE_META,
     LFG_ROLE,
     UNIT_SEX,
     UI_WIDGET_TEXT_SIZE_TYPE,

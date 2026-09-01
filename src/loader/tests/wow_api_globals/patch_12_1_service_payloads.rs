@@ -294,6 +294,27 @@ fn test_patch_12_1_chat_frame_command_names() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_raid_dispel_overlay_type_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local overlay = Enum.RaidDispelOverlayType
+            local meta = Enum.RaidDispelOverlayTypeMeta
+            if type(overlay) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if overlay.Disabled ~= 0 or overlay.UseDebuffColor ~= 1 or overlay.UseBlack ~= 2 then return "values" end
+            if table.count(overlay) ~= 3 then return "extras" end
+            if meta.MinValue ~= 0 or meta.MaxValue ~= 2 or meta.NumValues ~= 3 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_lfg_lair_category_constant() {
     let env = WowLuaEnv::new().unwrap();
     let category: i32 = env.eval("return LE_LFG_CATEGORY_LAIR").unwrap();
