@@ -225,6 +225,18 @@ pub const BATTLE_NET_FRIEND_TAG_META: EnumDef = (
 );
 
 #[cfg(feature = "retail-12-1-0")]
+pub const SOCIAL_UI_BLOCK_TYPE: EnumDef = (
+    "SocialUIBlockType",
+    &[("None", 0), ("Ignore", 1), ("BattleNetInviteBlock", 2)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const SOCIAL_UI_BLOCK_TYPE_META: EnumDef = (
+    "SocialUIBlockTypeMeta",
+    &[("MinValue", 0), ("MaxValue", 2), ("NumValues", 3)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
 pub const SOCIAL_UI_PRESENCE_TYPE: EnumDef = (
     "SocialUIPresenceType",
     &[

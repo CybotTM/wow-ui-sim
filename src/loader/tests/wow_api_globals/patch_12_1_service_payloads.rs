@@ -98,6 +98,26 @@ fn test_patch_12_1_social_ui_shared_preload_globals() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_social_ui_block_type_preload_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local block = Enum.SocialUIBlockType
+            local meta = Enum.SocialUIBlockTypeMeta
+            if type(block) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if block.None ~= 0 or block.Ignore ~= 1 or block.BattleNetInviteBlock ~= 2 then return "values" end
+            if meta.MinValue ~= 0 or meta.MaxValue ~= 2 or meta.NumValues ~= 3 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_lfg_lair_category_constant() {
     let env = WowLuaEnv::new().unwrap();
     let category: i32 = env.eval("return LE_LFG_CATEGORY_LAIR").unwrap();
