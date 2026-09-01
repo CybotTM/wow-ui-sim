@@ -67,6 +67,7 @@ pub(super) fn dispatch_screenshot(dispatch: CommandDispatch) {
         filter,
         crop,
         dump_tree,
+        quality,
     }) = dispatch.command
     else {
         unreachable!("dispatch_screenshot only fires for Commands::Screenshot");
@@ -84,6 +85,7 @@ pub(super) fn dispatch_screenshot(dispatch: CommandDispatch) {
             exec_lua: dispatch.exec_lua.as_deref(),
             exec_lua_secure: dispatch.exec_lua_secure,
             dump_tree,
+            quality,
         },
     );
 }
@@ -246,6 +248,7 @@ pub(super) struct ScreenshotCommand<'a> {
     pub(super) exec_lua: Option<&'a str>,
     pub(super) exec_lua_secure: bool,
     pub(super) dump_tree: Option<Option<String>>,
+    pub(super) quality: f32,
 }
 
 pub(super) fn run_screenshot(
@@ -268,8 +271,7 @@ pub(super) fn run_screenshot(
 
     let img = render_screenshot_image(&batch, &glyph_atlas, command.width, command.height);
     let img = apply_optional_crop(img, command.crop.as_deref());
-    let output = command.output.with_extension("webp");
-    save_screenshot(&img, &output);
+    let output = save_screenshot(&img, &command.output, command.quality);
     eprintln!(
         "Saved {}x{} screenshot to {}",
         img.width(),
@@ -424,14 +426,34 @@ fn apply_crop(img: image::RgbaImage, crop_str: &str) -> image::RgbaImage {
     img.view(crop_x, crop_y, crop_width, crop_height).to_image()
 }
 
-fn save_screenshot(img: &image::RgbaImage, output: &Path) {
+/// Write the rendered frame to `output`.
+///
+/// A `.png` extension is honoured and written losslessly. Anything else is
+/// forced to `.webp` and encoded lossily at `quality`. UI screenshots are
+/// mostly small text and one-pixel borders, which lossy WebP smears first, so
+/// the default is high and PNG is available when the pixels have to be exact.
+fn save_screenshot(img: &image::RgbaImage, output: &Path, quality: f32) -> PathBuf {
+    let wants_png = output
+        .extension()
+        .and_then(|e| e.to_str())
+        .is_some_and(|e| e.eq_ignore_ascii_case("png"));
+
+    if wants_png {
+        if let Err(e) = img.save(output) {
+            eprintln!("Failed to save PNG: {}", e);
+            std::process::exit(1);
+        }
+        return output.to_path_buf();
+    }
+
     let output = output.with_extension("webp");
     let encoder = webp::Encoder::from_rgba(img.as_raw(), img.width(), img.height());
-    let mem = encoder.encode(15.0);
+    let mem = encoder.encode(quality.clamp(1.0, 100.0));
     if let Err(e) = std::fs::write(&output, &*mem) {
         eprintln!("Failed to save WebP: {}", e);
         std::process::exit(1);
     }
+    output
 }
 
 fn create_texture_manager() -> wow_ui_sim::texture::TextureManager {
