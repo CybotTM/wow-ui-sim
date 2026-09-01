@@ -1,4 +1,7 @@
-use super::{manifest_entries, manifest_entry_fdid, manifest_entry_is_allowed_unmapped};
+use super::{
+    CacheProvenance, invalidate_cache_if_provenance_mismatched, manifest_entries,
+    manifest_entry_fdid, manifest_entry_is_allowed_unmapped,
+};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -90,20 +93,102 @@ fn fdid_extraction_uses_cdn_after_local_casc_miss() {
     );
 }
 
-#[test]
-fn complete_marker_writes_profile_provenance() {
-    let root = unique_temp_dir("provenance");
+fn test_provenance(build_key: &str) -> CacheProvenance {
+    CacheProvenance::new(
+        crate::client_profile::ACTIVE.cache_subdir(),
+        "wow",
+        "12.1.0.69497",
+        build_key,
+        "install-key",
+        "manifest-hash",
+    )
+}
 
-    super::write_complete_marker(&root).expect("write complete marker");
+#[test]
+fn mismatched_provenance_removes_stale_profile_cache_before_sync() {
+    let root = unique_temp_dir("mismatched-provenance");
+    let stale_file = root.join("Blizzard_InspectUI/InspectPaperDollFrame.lua");
+    std::fs::create_dir_all(stale_file.parent().expect("stale file parent"))
+        .expect("create stale cache");
+    std::fs::write(&stale_file, "legacy global").expect("write stale cache file");
+    std::fs::write(
+        root.join(super::PROVENANCE_FILE),
+        test_provenance("old-build").contents(),
+    )
+    .expect("write stale provenance");
+
+    let refreshed = invalidate_cache_if_provenance_mismatched(&root, &test_provenance("new-build"))
+        .expect("invalidate stale cache");
+
+    assert!(
+        refreshed,
+        "changed build identity must invalidate the cache"
+    );
+    assert!(
+        !root.exists(),
+        "invalidated cache must remove stale files before re-extraction"
+    );
+}
+
+#[test]
+fn legacy_provenance_removes_stale_profile_cache_before_sync() {
+    let root = unique_temp_dir("legacy-provenance");
+    let stale_file = root.join("Blizzard_TransmogShared/Blizzard_TransmogShared.lua");
+    std::fs::create_dir_all(stale_file.parent().expect("stale file parent"))
+        .expect("create stale cache");
+    std::fs::write(&stale_file, "legacy global").expect("write stale cache file");
+    std::fs::write(
+        root.join(super::PROVENANCE_FILE),
+        "profile=retail\nsource=casc-local-or-cdn\nfallback=none\n",
+    )
+    .expect("write legacy provenance");
+
+    let refreshed = invalidate_cache_if_provenance_mismatched(&root, &test_provenance("build-key"))
+        .expect("invalidate legacy cache");
+
+    assert!(refreshed, "legacy provenance must invalidate the cache");
+    assert!(
+        !root.exists(),
+        "legacy cache must remove stale files before re-extraction"
+    );
+}
+
+#[test]
+fn matching_provenance_preserves_existing_profile_cache() {
+    let root = unique_temp_dir("matching-provenance");
+    let existing_file = root.join("Blizzard_InspectUI/InspectPaperDollFrame.lua");
+    std::fs::create_dir_all(existing_file.parent().expect("existing file parent"))
+        .expect("create cache");
+    std::fs::write(&existing_file, "current source").expect("write cache file");
+    let expected = test_provenance("current-build");
+    std::fs::write(root.join(super::PROVENANCE_FILE), expected.contents())
+        .expect("write matching provenance");
+
+    let refreshed = invalidate_cache_if_provenance_mismatched(&root, &expected)
+        .expect("preserve matching cache");
+
+    assert!(
+        !refreshed,
+        "matching cache identity must remain incremental"
+    );
+    assert_eq!(
+        std::fs::read_to_string(existing_file).expect("read preserved cache file"),
+        "current source"
+    );
+    std::fs::remove_dir_all(root).expect("remove cache root");
+}
+
+#[test]
+fn complete_marker_writes_supplied_provenance_identity() {
+    let root = unique_temp_dir("provenance");
+    let expected = test_provenance("build-key");
+
+    super::write_complete_marker(&root, &expected).expect("write complete marker");
 
     let provenance =
         std::fs::read_to_string(root.join(super::PROVENANCE_FILE)).expect("read provenance");
-    assert!(provenance.contains(&format!(
-        "profile={}",
-        crate::client_profile::ACTIVE.cache_subdir()
-    )));
-    assert!(provenance.contains("source=casc-local-or-cdn"));
-    assert!(provenance.contains("fallback=none"));
+    assert_eq!(provenance, expected.contents());
+    assert!(root.join(super::COMPLETE_MARKER).is_file());
     std::fs::remove_dir_all(root).expect("remove cache root");
 }
 

@@ -80,7 +80,10 @@ does not change output ordering.
 ### 4. Rebuild and validate the sync
 
 The manifests and limited listfile are `include_str!`'d at compile time, so
-rebuild before syncing.
+rebuild before syncing. The rebuilt sync compares its active profile, CASC product,
+active `.build.info` identity, and compiled manifest hash with cache provenance. A
+mismatch automatically removes only that profile's `AddOns` cache before extraction;
+do not delete the cache manually.
 
 ```bash
 cargo build --bin wow-cli
