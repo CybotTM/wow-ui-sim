@@ -1,6 +1,10 @@
+## [2026-09-01] audit | Document ChatFrame combat-audio format strings
+
+Audited commit `43075580b`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: seven retail-12.1-gated English compatibility format strings bring the table from 61 to 68 entries and satisfy unconditional `:format(min, max)` calls in `Blizzard_ChatFrame/Shared/TextToSpeechCommands.lua` preload. Their values were not captured by the existing live probe. No spec, changelog, or new page was warranted.
+
 ## [2026-09-01] audit | Document retail 12.1 Cooldown Viewer sound enum
 
-Audited commit `9555a7649`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: generated `Enum.CooldownViewerSound` publishes all 94 values (`0..93`) with metadata under `retail-12-1-0`, satisfying `Blizzard_ChatFrame/Shared/TextToSpeechCommands.lua` enum reads during preload. Runtime then reached a later missing string global. No Cooldown Viewer sound selection, CVar handling, or audio playback behavior is modeled; no spec, changelog, or new page was warranted.
+Audited commit `9555a7649`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: generated `Enum.CooldownViewerSound` publishes all 94 values (`0..93`) with metadata under `retail-12-1-0`, satisfying `Blizzard_ChatFrame/Shared/TextToSpeechCommands.lua` enum reads during preload. No spec, changelog, or new page was warranted.
 
 ## [2026-09-01] audit | Document retail 12.1 Social UI preload surface
 
