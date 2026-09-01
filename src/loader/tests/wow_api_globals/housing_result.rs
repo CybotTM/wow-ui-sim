@@ -342,6 +342,46 @@ fn test_patch_12_1_housing_blueprint_type_values() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_housing_blueprint_content_type_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local namespace = Enum.HousingBlueprintContentType
+                local metadata = Enum.HousingBlueprintContentTypeMeta
+                if type(namespace) ~= "table" or type(metadata) ~= "table" then
+                    return "tables"
+                end
+                local expected = {
+                    None = 0,
+                    HouseType = 1,
+                    Room = 2,
+                    Decor = 3,
+                    Dye = 4,
+                    Fixture = 5,
+                    Other = 6,
+                }
+                for name, value in pairs(expected) do
+                    if namespace[name] ~= value then
+                        return name .. ":value=" .. tostring(namespace[name])
+                    end
+                end
+                if table.count(namespace) ~= 7 then return "count" end
+                if metadata.MinValue ~= 0 or metadata.MaxValue ~= 6 or metadata.NumValues ~= 7 then
+                    return "metadata"
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "HousingBlueprintContentType did not match the 12.1 source register"
+    );
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_housing_blueprint_unmet_requirement_flags_values() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

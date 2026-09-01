@@ -692,6 +692,26 @@ pub const HOUSING_BLUEPRINT_TYPE_META: EnumDef = (
 );
 
 #[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_BLUEPRINT_CONTENT_TYPE: SeqEnumDef = (
+    "HousingBlueprintContentType",
+    &[
+        "None",
+        "HouseType",
+        "Room",
+        "Decor",
+        "Dye",
+        "Fixture",
+        "Other",
+    ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_BLUEPRINT_CONTENT_TYPE_META: EnumDef = (
+    "HousingBlueprintContentTypeMeta",
+    &[("MinValue", 0), ("MaxValue", 6), ("NumValues", 7)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
 pub const HOUSING_BLUEPRINT_UNMET_REQUIREMENT_FLAGS: EnumDef = (
     "HousingBlueprintUnmetRequirementFlags",
     &[
