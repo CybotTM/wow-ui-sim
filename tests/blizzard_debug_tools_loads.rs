@@ -216,7 +216,7 @@ fn blizzard_debug_tools_frame_stack_helper_globals_are_defined(env: &WowLuaEnv) 
                 and type(FrameStackTooltip_OnUpdate) == 'function' \
                 and type(DebugTooltip_OnLoad) == 'function' \
                 and type(DebugIdentifierFrame_OnLoad) == 'function' \
-                and type(CompareFunctionReturns) == 'function'", 
+                and type(CompareFunctionReturns) == 'function'",
         )
         .expect("FrameStackTooltip helper-global query should succeed");
     assert!(
