@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document PetBattle species/model-scene preload boundary
+
+Audited commits `eae094261` and `b08bd4cf7`. Updated [[patch-12-1-api-audit]]: current retail `12.1.0.69497` `PetBattleFrame_OnLoad` first passed a missing `C_PetBattles.GetPetSpeciesID` result into `C_PetJournal.GetPetModelSceneInfoBySpeciesID`; after the state-backed API was added, stale default IDs `1`/`2` still had no seeded Pet Journal records, so lookup returned no values and `TransitionToModelSceneID` received `nil`. Default battle-pet IDs now align with Journal seeds `39`/`87`; unknown owner/index remains `nil`. No new page, index update, spec, manifest, `PLAN.md`, vendor/cache/Blizzard, or protected-file change was warranted.
+
 ## [2026-09-01] audit | Document temporary pet-battle breed quality
 
 Audited commit `7ecab542f`. Updated [[lua-api]] and the maintained Lua API reference: temporary Lua-owned pet-battle sample state seeds displayed pets with rare breed quality (`3`), while `C_PetBattles.GetBreedQuality(owner, petIndex)` returns that numeric seed or `0` for an absent sample pet, allowing current PetBattleFrame OnLoad rarity rendering. Pet ownership, breeding, capture, combat outcomes, and live battle data remain unmodeled. No spec, index, or new page was warranted; no code, vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.
