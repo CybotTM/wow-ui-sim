@@ -189,6 +189,18 @@ pub const TTS_VOICE_TYPE: SeqEnumDef = ("TtsVoiceType", &["Standard", "Alternate
 // Guild / Social Enums
 // ============================================================================
 
+#[cfg(feature = "retail-12-1-0")]
+pub const BATTLE_NET_FRIEND_LEVEL: EnumDef = (
+    "BattleNetFriendLevel",
+    &[("BattleTag", 1), ("RealID", 2), ("Title", 3)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const BATTLE_NET_FRIEND_LEVEL_META: EnumDef = (
+    "BattleNetFriendLevelMeta",
+    &[("MinValue", 1), ("MaxValue", 3), ("NumValues", 3)],
+);
+
 pub const GUILD_ERROR_TYPE: SeqEnumDef = (
     "GuildErrorType",
     &[

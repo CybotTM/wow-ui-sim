@@ -164,6 +164,10 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
 
 // All explicit value enums (for batch registration)
 pub const EXPLICIT_ENUMS: &[EnumDef] = &[
+    #[cfg(feature = "retail-12-1-0")]
+    BATTLE_NET_FRIEND_LEVEL,
+    #[cfg(feature = "retail-12-1-0")]
+    BATTLE_NET_FRIEND_LEVEL_META,
     LFG_ROLE,
     UNIT_SEX,
     UI_WIDGET_TEXT_SIZE_TYPE,

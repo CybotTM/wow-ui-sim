@@ -12,6 +12,26 @@ use crate::lua_api::state::{
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_battle_net_friend_level_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local level = Enum.BattleNetFriendLevel
+            local meta = Enum.BattleNetFriendLevelMeta
+            if type(level) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if level.BattleTag ~= 1 or level.RealID ~= 2 or level.Title ~= 3 then return "values" end
+            if meta.MinValue ~= 1 or meta.MaxValue ~= 3 or meta.NumValues ~= 3 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_pet_and_lfg_payloads() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
