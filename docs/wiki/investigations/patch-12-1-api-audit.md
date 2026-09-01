@@ -33,6 +33,7 @@ The 12.1 compatibility work is currently captured by these commits:
 - `cc02aa287` — pinned 13 additional exact enUS housing Settings strings from retail `12.1.0.69497`; missing values had caused the canonical Interface registrant to assign category ID 7 and abort before registration.
 - `cfec8576b` — added 16 retail-12.1-gated Social UI compatibility labels plus `Enum.SocialUIPresenceType` and its metadata, keeping `Blizzard_SocialUIShared` tag/presence tables populated during preload.
 - `8f070a410` — added `Enum.SocialUIBlockType` and its metadata.
+- `9555a7649` — added the generated `Enum.CooldownViewerSound` 94-value contract and metadata, satisfying its reads during `Blizzard_ChatFrame` preload; execution then advanced to the later missing `SLASH_CAA_HELP_SAY_COMBAT_START_SOUND` global.
 
 ### Live enUS GlobalStrings slice
 
@@ -67,7 +68,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | Global added APIs | Present under `retail-12-1-0` as Rust-backed APIs or compatibility bridges. `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` now contains no active Lua inert defaults. Rough source scan has no missing global-added names. `LoadAddOnWithErrorHandling` is explicitly modeled as the tested canonical wrapper over `UIParentLoadAddOn`. |
 | Live enUS GlobalStrings | **Implemented table:** 61 strings under retail 12.1: the existing 45 strings plus 16 retail-12.1-gated Social UI compatibility labels from `cfec8576b`. The 16 label values were not captured by the 49-candidate live probe; they keep `Blizzard_SocialUIShared` tag/presence tables populated. The 12 separately probed nil candidates remain raw nil. Registration is limited to `profile-retail` + `retail-12-1-0`; no cross-locale, cross-epoch, housing, or Social UI service/state claim. |
 | Removed APIs | Profile-specific removed APIs are hidden for addon-facing checks after startup by `src/ptr/strict_removals.lua`; for example, PTR hides `C_RecruitAFriend.IsEnabled` while retail 12.1 retains it. Removals are not moved earlier because current Blizzard UI still needs some load-time compatibility. |
-| Events/CVars/Enums | Added event/CVar/enum names are gated by the 12.1 retail epoch where implemented. `cfec8576b` adds `Enum.SocialUIPresenceType` (`0..5`, six values) and metadata; `8f070a410` adds `Enum.SocialUIBlockType` (`0..2`, three values) and metadata. |
+| Events/CVars/Enums | Added event/CVar/enum names are gated by the 12.1 retail epoch where implemented. `cfec8576b` adds `Enum.SocialUIPresenceType` (`0..5`, six values) and metadata; `8f070a410` adds `Enum.SocialUIBlockType` (`0..2`, three values) and metadata; `9555a7649` adds the generated `Enum.CooldownViewerSound` contract (`0..93`, 94 values) and metadata. It satisfies `Blizzard_ChatFrame/Shared/TextToSpeechCommands.lua` enum reads during preload; the run then reaches a later missing string global. Sound selection, CVar handling, and audio playback remain unmodeled. |
 | Widget methods | Compatible 12.1 widget methods are implemented/tested: forbidden-aspect queries, texture radial-progress-bar methods, roleset/on-update mode methods, statusbar render mode, minimap icon scale, VectorGraphics/SVG stubs. |
 | Private/forbidden XML partition mechanics | Compatible XML/private table behavior is implemented/tested for `useForbiddenObjectTable`, private KeyValues, partition-aware mixins, and secure delegates. |
 | `DurationTextBinding` color methods | Implemented as compatibility methods on `C_DurationUtil.CreateDurationTextBinding(...)`: `ClearTextColorCurve`, `GetFormattedTextColor`, `GetTextColorCurve`, `SetTextColorCurve`. |
@@ -117,7 +118,10 @@ The probes are evidence collectors only. Their presence does not resolve, reclas
 - [[patch-12-1-behavior-inventory]] — itemized broader behavior machine state and candidate classification.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — regression coverage for safe bridges and strict removals.
 - `src/lua_api/globals/strings/mod.rs` — version-gated registration of the live GlobalStrings slice.
-- `src/lua_api/globals/strings/string_data/more_strings.rs` — exact 45-string enUS retail 12.1 data table, including the 13 housing Settings values pinned by `cc02aa287`.
+- `src/lua_api/globals/strings/string_data/more_strings.rs` — 61-string retail 12.1 compatibility table: 45 existing strings, including 13 housing Settings values pinned by `cc02aa287`, plus 16 Social UI compatibility labels that are not probe-exact.
+- `src/lua_api/globals/enum_data/addon_system.rs` — retail-12.1-gated Social UI and Cooldown Viewer enum contracts.
+- `/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_APIDocumentationGenerated/CooldownViewerConstantsDocumentation.lua` — authoritative `CooldownViewerSound` values and metadata for build `12.1.0.69497`.
+- `/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_ChatFrame/Shared/TextToSpeechCommands.lua` — current Blizzard preload consumer of `CooldownViewerSound`.
 - `src/lua_api/globals/register.rs` — `live_retail_12_1_global_strings_match_probe` exact-value/nil-preservation test.
 - `tests/blizzard_settings_definitions_frame_loads.rs` — `retail_12_1_housing_settings_global_strings_match_pinned_export` exact-value test.
 - `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` — now-empty version-gated hook; safe 12.1 social/housing bridges moved to Rust-backed simulator state.

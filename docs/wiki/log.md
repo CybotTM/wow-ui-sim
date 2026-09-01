@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document retail 12.1 Cooldown Viewer sound enum
+
+Audited commit `9555a7649`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: retail-12.1-gated generated `Enum.CooldownViewerSound` now publishes all 94 values (`0..93`) with metadata, satisfying `Blizzard_ChatFrame/Shared/TextToSpeechCommands.lua` enum reads during preload. Runtime then reached later missing `SLASH_CAA_HELP_SAY_COMBAT_START_SOUND`. Source: cached `CooldownViewerConstantsDocumentation.lua` for retail `12.1.0.69497`. Cooldown Viewer sound selection, CVar handling, and audio playback remain unmodeled. No spec, changelog, or new page was warranted; no vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.
+
 ## [2026-09-01] audit | Document retail 12.1 Social UI preload surface
 
 Audited commits `cfec8576b` and `8f070a410`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: 16 retail-12.1-gated Social UI compatibility labels bring the table from 45 to 61 strings and keep `Blizzard_SocialUIShared` tag/presence tables populated; their English values were not captured by the existing 49-candidate live probe. Documented `Enum.SocialUIPresenceType`/metadata and `Enum.SocialUIBlockType`/metadata. No spec, changelog, or new page was warranted; Social UI service/state semantics remain unmodeled. No vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.
