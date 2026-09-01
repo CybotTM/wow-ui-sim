@@ -105,6 +105,27 @@ fn test_provenance(build_key: &str) -> CacheProvenance {
 }
 
 #[test]
+#[cfg(feature = "casc")]
+fn build_identity_selects_the_requested_active_product() {
+    let build_info = "\
+Branch!STRING:0|Active!DEC:1|Build Key!HEX:16|Install Key!HEX:16|Version!STRING:0|Product!STRING:0
+us|1|retail-build|retail-install|12.1.0.69497|wow
+us|1|ptr-build|ptr-install|12.1.0.69587|wowt";
+
+    let retail = super::parse_active_build_identity(build_info, "wow")
+        .expect("retail active build identity");
+    let ptr =
+        super::parse_active_build_identity(build_info, "wowt").expect("PTR active build identity");
+
+    assert_eq!(retail.version, "12.1.0.69497");
+    assert_eq!(retail.build_key, "retail-build");
+    assert_eq!(retail.install_key, "retail-install");
+    assert_eq!(ptr.version, "12.1.0.69587");
+    assert_eq!(ptr.build_key, "ptr-build");
+    assert_eq!(ptr.install_key, "ptr-install");
+}
+
+#[test]
 fn mismatched_provenance_removes_stale_profile_cache_before_sync() {
     let root = unique_temp_dir("mismatched-provenance");
     let stale_file = root.join("Blizzard_InspectUI/InspectPaperDollFrame.lua");

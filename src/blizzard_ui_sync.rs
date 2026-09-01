@@ -3,6 +3,8 @@
 mod profile_cache;
 
 use self::profile_cache::{cache_entry_is_usable, required_profile_cache_entries};
+#[cfg(feature = "casc")]
+use cascette_client_storage::BuildInfoFile;
 use sha2::{Digest, Sha256};
 use std::path::{Path, PathBuf};
 #[cfg(feature = "casc")]
@@ -155,18 +157,11 @@ impl CacheProvenance {
     }
 }
 
+#[cfg(feature = "casc")]
 struct BuildIdentity {
     version: String,
     build_key: String,
     install_key: String,
-}
-
-struct BuildInfoColumns {
-    active: usize,
-    build_key: usize,
-    install_key: usize,
-    version: usize,
-    product: usize,
 }
 
 fn expected_cache_provenance() -> crate::Result<CacheProvenance> {
@@ -205,64 +200,33 @@ fn read_active_build_identity(
     parse_active_build_identity(&contents, active_product).map_err(crate::Error::Other)
 }
 
+#[cfg(feature = "casc")]
 fn parse_active_build_identity(
     contents: &str,
     active_product: &str,
 ) -> Result<BuildIdentity, String> {
-    let mut lines = contents.lines();
-    let header = lines
-        .next()
-        .ok_or_else(|| ".build.info is missing its header".to_string())?;
-    let columns = build_info_columns(header)?;
+    let build_info = BuildInfoFile::parse_str(contents)
+        .map_err(|error| format!("parse .build.info: {error}"))?;
+    let active_entry = build_info
+        .entries()
+        .into_iter()
+        .find(|entry| entry.is_active() && entry.product() == Some(active_product))
+        .ok_or_else(|| {
+            format!(".build.info has no active entry for CASC product {active_product}")
+        })?;
 
-    for line in lines {
-        let values: Vec<_> = line.split('|').collect();
-        if build_info_row_matches_active_product(&values, &columns, active_product) {
-            return Ok(BuildIdentity {
-                version: build_info_value(&values, columns.version, "Version")?.to_string(),
-                build_key: build_info_value(&values, columns.build_key, "Build Key")?.to_string(),
-                install_key: build_info_value(&values, columns.install_key, "Install Key")?
-                    .to_string(),
-            });
-        }
-    }
-
-    Err(format!(
-        ".build.info has no active entry for CASC product {active_product}"
-    ))
-}
-
-fn build_info_columns(header: &str) -> Result<BuildInfoColumns, String> {
-    let fields: Vec<_> = header.split('|').collect();
-    Ok(BuildInfoColumns {
-        active: build_info_column_index(&fields, "Active")?,
-        build_key: build_info_column_index(&fields, "Build Key")?,
-        install_key: build_info_column_index(&fields, "Install Key")?,
-        version: build_info_column_index(&fields, "Version")?,
-        product: build_info_column_index(&fields, "Product")?,
+    Ok(BuildIdentity {
+        version: required_build_info_value(active_entry.version(), "Version")?,
+        build_key: required_build_info_value(active_entry.build_key(), "Build Key")?,
+        install_key: required_build_info_value(active_entry.install_key(), "Install Key")?,
     })
 }
 
-fn build_info_row_matches_active_product(
-    values: &[&str],
-    columns: &BuildInfoColumns,
-    active_product: &str,
-) -> bool {
-    values.get(columns.active) == Some(&"1") && values.get(columns.product) == Some(&active_product)
-}
-
-fn build_info_column_index(fields: &[&str], column: &str) -> Result<usize, String> {
-    fields
-        .iter()
-        .position(|field| field.split('!').next() == Some(column))
-        .ok_or_else(|| format!(".build.info is missing {column} column"))
-}
-
-fn build_info_value<'a>(values: &'a [&str], index: usize, column: &str) -> Result<&'a str, String> {
-    values
-        .get(index)
-        .copied()
+#[cfg(feature = "casc")]
+fn required_build_info_value(value: Option<&str>, column: &str) -> Result<String, String> {
+    value
         .filter(|value| !value.is_empty())
+        .map(str::to_string)
         .ok_or_else(|| format!("active .build.info entry is missing {column}"))
 }
 
