@@ -94,25 +94,17 @@ impl WowLuaEnv {
 
     // ── Escape ────────────────────────────────────────────────────────────────
 
-    /// Priority: focused EditBox OnEscapePressed → registered game-menu Escape
-    /// handlers → keybinding dispatch.
+    /// Priority: focused EditBox OnEscapePressed → keybinding dispatch.
     ///
-    /// The client consults the handlers registered through
-    /// `RegisterGameMenuEscHandler` before it runs the ESCAPE binding, so a
-    /// handler that returns true consumes the press. The default ESCAPE binding
-    /// runs Blizzard's `ToggleGameMenu()`, whose retail ordering closes
-    /// Settings, static popups, menus, spell targeting, and the game menu
-    /// itself. Duplicating that close stack here causes drift.
+    /// The default ESCAPE binding runs Blizzard's `ToggleGameMenu()`, whose
+    /// retail ordering closes Settings, static popups, menus, spell targeting,
+    /// and the game menu itself. Duplicating that close stack here causes drift.
     fn dispatch_escape(&self) -> Result<()> {
         let focused = self.state.borrow().focused_frame_id;
         if let Some(fid) = focused {
             if self.fire_handler_returns_truthy(fid, "OnEscapePressed")? {
                 return Ok(());
             }
-        }
-        let consumed = self.call_global("__wow_dispatch_game_menu_esc", &[])?;
-        if matches!(consumed.first(), Some(Val::Bool(true))) {
-            return Ok(());
         }
         let mut lua = self.lua.borrow_mut();
         super::globals::keybindings::dispatch_key_binding(&mut lua, "ESCAPE")?;
