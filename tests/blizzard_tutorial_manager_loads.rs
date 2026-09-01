@@ -25,7 +25,7 @@ const GLUE_SCREENS: &[ScreenKind] = &[
     ScreenKind::CharacterCreate,
 ];
 
-const TOC_DEPENDENCIES: &[&str] = &["Blizzard_Dispatcher", "Blizzard_HelpPlate"];
+const TOC_DEPENDENCIES: &[&str] = &["middleclass", "Blizzard_Dispatcher", "Blizzard_HelpPlate"];
 
 const MODULE_TABLES: &[&str] = &[
     "TutorialManager",
@@ -117,7 +117,7 @@ fn find_toc_file_resolves_bare_toc() {
 }
 
 #[test]
-fn toc_is_eager_with_two_dependencies() {
+fn toc_is_eager_with_three_dependencies() {
     let toc = TocFile::from_file(&tutorial_manager_toc()).expect("TOC parses");
 
     assert!(
@@ -184,6 +184,7 @@ fn toc_raw_bytes_pin_three_directives_and_nine_body_files() {
 
     let expected_lines = [
         "## Title: Blizzard_TutorialManager",
+        "## Dep: middleclass",
         "## Dep: Blizzard_Dispatcher",
         "## Dep: Blizzard_HelpPlate",
         "Blizzard_TutorialQueue.lua",
@@ -224,18 +225,30 @@ fn toc_raw_bytes_pin_three_directives_and_nine_body_files() {
 }
 
 #[test]
-fn appears_in_game_eager_discovery() {
+fn game_discovery_loads_middleclass_before_tutorial_manager_without_unrelated_non_blizzard_roots() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
-    let found = addons
+    let middleclass_index = addons
         .iter()
-        .any(|(name, _)| name == "Blizzard_TutorialManager");
+        .position(|(name, _)| name == "middleclass")
+        .expect("TutorialManager hard dependency `middleclass` must be discovered");
+    let tutorial_manager_index = addons
+        .iter()
+        .position(|(name, _)| name == "Blizzard_TutorialManager")
+        .expect(
+            "Blizzard_TutorialManager must appear in Game eager discovery — non-LoD addon \
+             with no AllowLoad (Game-only)",
+        );
+
     assert!(
-        found,
-        "Blizzard_TutorialManager must appear in Game eager discovery \
-         — non-LoD addon with no AllowLoad (Game-only). Two consumers \
-         declare it as RequiredDep: Blizzard_NewPlayerExperience (LoD, \
-         pulled in for new-player flow) and Blizzard_Tutorials (non-LoD, \
-         mainline-only, the in-game tutorial overlay)"
+        middleclass_index < tutorial_manager_index,
+        "middleclass must load before Blizzard_TutorialManager so Blizzard_TutorialBase.lua \
+         can call class(\"TutorialBase\")"
+    );
+    assert!(
+        !addons
+            .iter()
+            .any(|(name, _)| name == "Deprecated_PaperDoll"),
+        "unrelated non-Blizzard roots must not enter Game discovery"
     );
 }
 
