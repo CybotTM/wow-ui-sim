@@ -166,6 +166,25 @@ fn seconds_formatter_enums_are_available_with_expected_values() {
 }
 
 #[test]
+fn script_object_access_restriction_enum_is_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local restriction = Enum.ScriptObjectAccessRestriction
+            local meta = Enum.ScriptObjectAccessRestrictionMeta
+            if type(restriction) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if restriction.DenyTaintedAccessWhenAurasAreSecret ~= 1 then return "value" end
+            if meta.MinValue ~= 1 or meta.MaxValue ~= 1 or meta.NumValues ~= 1 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn cooldown_layout_enums_are_available_with_expected_values() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

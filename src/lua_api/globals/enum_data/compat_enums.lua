@@ -50,6 +50,20 @@ if not Enum.SecondsFormatterRoundingMeta then
   }
 end
 
+if not Enum.ScriptObjectAccessRestriction then
+  Enum.ScriptObjectAccessRestriction = {
+    DenyTaintedAccessWhenAurasAreSecret = 1,
+  }
+end
+
+if not Enum.ScriptObjectAccessRestrictionMeta then
+  Enum.ScriptObjectAccessRestrictionMeta = {
+    MinValue = 1,
+    MaxValue = 1,
+    NumValues = 1,
+  }
+end
+
 if not Enum.CooldownLayoutStatus then
   Enum.CooldownLayoutStatus = {
     Success = 0,
