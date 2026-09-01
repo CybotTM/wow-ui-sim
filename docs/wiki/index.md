@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document retail 12.1 housing blueprint content-type enum
+
+Audited commit `665f5a31b`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: generated `Enum.HousingBlueprintContentType` publishes seven contiguous values (`None=0` through `Other=6`) plus metadata under `retail-12-1-0`, allowing the final current `Blizzard_HousingData` content label table to load. Housing blueprint operations and strings remain unmodeled. No spec, changelog, or new page was warranted.
+
 ## [2026-09-01] audit | Document retail 12.1 housing blueprint requirement flags
 
 Audited commit `432d357a1`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: generated `Enum.HousingBlueprintUnmetRequirementFlags` publishes eight bitmask values (`InsufficientBudget=1` through `HouseSizeLocked=128`, with no `None`) plus metadata under `retail-12-1-0`, allowing current `Blizzard_HousingData` blueprint-requirement text tables to load. Housing blueprint validation, operations, and strings remain unmodeled. No spec, changelog, or new page was warranted.

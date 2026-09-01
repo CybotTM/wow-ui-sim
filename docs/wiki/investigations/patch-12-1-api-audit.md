@@ -44,6 +44,7 @@ The 12.1 compatibility work is currently captured by these commits:
 - `db678a399` — publishes current wowt-global-dataset retail-12.1 `Enum.HouseSettingFlags` bitmask values `0..16384` (16 values) and metadata (`MinValue=0`, `MaxValue=16384`, `NumValues=16`) before that fallback. Current `Blizzard_HousingData` uses `BlueprintExportNeighbors`, `BlueprintExportGuild`, `BlueprintExportFriends`, and `BlueprintExportParty` in `HousingAccessTypeStrings`; housing access/export behavior and strings remain unmodeled, and the pre-12.1 contract is unchanged.
 - `045c9fa19` — publishes generated retail-12.1 `Enum.HousingBlueprintType` (`None=0` through `Exterior=4`) with metadata (`MinValue=0`, `MaxValue=4`, `NumValues=5`) for current `Blizzard_HousingData` blueprint-type label tables; housing blueprint operations and strings remain unmodeled.
 - `432d357a1` — publishes generated retail-12.1 `Enum.HousingBlueprintUnmetRequirementFlags` (`InsufficientBudget=1` through `HouseSizeLocked=128`, eight members and no `None`) with metadata (`MinValue=1`, `MaxValue=128`, `NumValues=8`) for current `Blizzard_HousingData` blueprint-requirement text table; housing blueprint validation, operations, and strings remain unmodeled.
+- `665f5a31b` — publishes generated retail-12.1 `Enum.HousingBlueprintContentType` (`None=0` through `Other=6`) with metadata (`MinValue=0`, `MaxValue=6`, `NumValues=7`) for the final current `Blizzard_HousingData` content label table; housing blueprint operations and strings remain unmodeled.
 
 ### Live enUS GlobalStrings slice
 
