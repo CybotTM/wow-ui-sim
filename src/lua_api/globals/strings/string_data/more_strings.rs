@@ -29,6 +29,34 @@ pub const RETAIL_12_1_GLOBAL_STRINGS: &[StringDef] = &[
         "Appear Offline",
     ),
     (
+        "SLASH_CAA_HELP_SAY_COMBAT_START_SOUND",
+        "Sound (%d-%d) to say when combat starts.",
+    ),
+    (
+        "SLASH_CAA_HELP_SAY_COMBAT_END_SOUND",
+        "Sound (%d-%d) to say when combat ends.",
+    ),
+    (
+        "SLASH_CAA_HELP_SAY_TARGET_CASTS_INTERRUPT_SOUND",
+        "Sound (%d-%d) to say when interrupting a target cast.",
+    ),
+    (
+        "SLASH_CAA_HELP_SAY_TARGET_CASTS_INTERRUPT_SUCCESS_SOUND",
+        "Sound (%d-%d) to say after interrupting a target cast.",
+    ),
+    (
+        "SLASH_CAA_HELP_WHEN_TARGET_DIES_SOUND",
+        "Sound (%d-%d) to say when a target dies.",
+    ),
+    (
+        "SLASH_CAA_HELP_SAY_IF_TARGETED_SOUND",
+        "Sound (%d-%d) to say when targeted.",
+    ),
+    (
+        "SLASH_CAA_HELP_DEBUFF_SELF_ALERT_SOUND",
+        "Sound (%d-%d) to say for a self debuff alert.",
+    ),
+    (
         "BLIZZARD_STORE_VAS_ERROR_BOOST_THROTTLE",
         "Maximum number of character boosts reached for the day. Please try again tomorrow.",
     ),

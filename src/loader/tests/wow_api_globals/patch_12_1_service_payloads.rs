@@ -238,6 +238,38 @@ fn test_patch_12_1_cooldown_viewer_sound_enum() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_chat_frame_sound_help_strings() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local names = {
+                "SLASH_CAA_HELP_SAY_COMBAT_START_SOUND",
+                "SLASH_CAA_HELP_SAY_COMBAT_END_SOUND",
+                "SLASH_CAA_HELP_SAY_TARGET_CASTS_INTERRUPT_SOUND",
+                "SLASH_CAA_HELP_SAY_TARGET_CASTS_INTERRUPT_SUCCESS_SOUND",
+                "SLASH_CAA_HELP_WHEN_TARGET_DIES_SOUND",
+                "SLASH_CAA_HELP_SAY_IF_TARGETED_SOUND",
+                "SLASH_CAA_HELP_DEBUFF_SELF_ALERT_SOUND",
+            }
+            for index, name in ipairs(names) do
+                local formatString = _G[name]
+                if type(formatString) ~= "string" or formatString == "" then return "missing-" .. index end
+                local formatted = formatString:format(1, 93)
+                if not formatted:find("1", 1, true) or not formatted:find("93", 1, true) then
+                    return "format-" .. index
+                end
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_lfg_lair_category_constant() {
     let env = WowLuaEnv::new().unwrap();
     let category: i32 = env.eval("return LE_LFG_CATEGORY_LAIR").unwrap();
