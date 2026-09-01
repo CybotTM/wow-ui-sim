@@ -20,7 +20,7 @@ Enum initialization seeds known `Enum.*` values into existing child tables rathe
 
 `LoaderEnv::exec()` runs dynamic loader code in the currently loading addon's environment, including secure-environment and loading-scoped fenv state. `LoaderEnv::exec_public()` deliberately skips that loading fenv state while preserving the addon's secure file execution. Use it only for an addon-specific bridge that must publish a narrow compatibility surface to `_G`; it is not a generic secure-to-public mirroring mechanism. Secure Lua assignments and Rust secure frame exports are tracked in a secure-only publication ledger, so same-addon nil-symbol reconciliation checks the environment in which the name was read. The AuthChallenge workaround uses this boundary to restore five exported callbacks publicly while the `Blizzard_AuthChallengeUI` addon remains secure (`src/lua_api/loader_env.rs`, `src/lua_api/workarounds/temporary/auth_challenge_frame_parent.rs`).
 
-Retail 12.1's `Blizzard_TransmogShared` load is a narrower addon-specific scope: the internally registered `GetInventorySlotInfo` is available to that addon's compiled closures through `loading_scoped_script_env`, while public `_G.GetInventorySlotInfo` stays nil before and after the load. The runtime loader restores both the prior global and prior scoped environment on completion or `LoadError`; see [[transmog-inventory-slot-scope]].
+Retail 12.1 removes public `_G.GetInventorySlotInfo`; current `Blizzard_TransmogShared` calls `C_PaperDollInfo.GetInventorySlotInfo` directly. No loader-scoped legacy-global compatibility remains. See [[transmog-inventory-slot-scope]] for the retired stale-source workaround.
 
 ## FrameHandle Userdata (`src/lua_api/frame/handle.rs`)
 

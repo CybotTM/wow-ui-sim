@@ -57,7 +57,7 @@ During startup, addon discovery includes non-LoadOnDemand addons only. LoadOnDem
 
 `load_addon_internal()` checks the `SimState` addon record before executing files. If the same addon is already marked loaded, the call returns an empty `LoadResult` without re-running Lua/XML files or post-load patches. This preserves mutable registries created by earlier files, including `StaticPopupDialogs`, and prevents repeated dependency encounters from replacing state. The separate loading transaction still handles in-progress re-entry: an addon is not marked loaded until its files and post-load work complete.
 
-Retail 12.1 `Blizzard_TransmogShared` is an addon-specific loading exception. Its runtime `C_AddOns.LoadAddOn` path temporarily gives vendor closures a target-scoped `GetInventorySlotInfo` environment even though the public global was removed. The compiled closures retain that scope for later `TransmogUtil` calls; completion and `LoadError` restore the previous global and scoped environment. See [[transmog-inventory-slot-scope]].
+Retail 12.1 removes public `GetInventorySlotInfo`, while current `Blizzard_TransmogShared` uses `C_PaperDollInfo.GetInventorySlotInfo` directly. It has no loader-scoped legacy-global exception. See [[transmog-inventory-slot-scope]] for the retired stale-source workaround.
 
 ## Secure Replay Allowlist
 

@@ -312,7 +312,7 @@ fn dep_directories_exist_on_disk() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
-fn runtime_load_scopes_removed_inventory_slot_global() {
+fn runtime_load_keeps_removed_inventory_slot_global_private() {
     let env = fresh_game_env();
     env.apply_post_event_workarounds();
 
@@ -338,13 +338,13 @@ fn runtime_load_scopes_removed_inventory_slot_global() {
             return "ok"
             "#,
         )
-        .expect("runtime TransmogShared scope probe should run");
+        .expect("runtime TransmogShared compatibility probe should run");
 
     assert_eq!(result, "ok");
 }
 
 #[test]
-fn direct_load_scopes_removed_inventory_slot_global() {
+fn direct_load_keeps_removed_inventory_slot_global_private() {
     let env = fresh_game_env();
     env.apply_post_event_workarounds();
     load_addon(&env.loader_env(), &transmog_shared_toc())
@@ -364,7 +364,7 @@ fn direct_load_scopes_removed_inventory_slot_global() {
             return "ok"
             "#,
         )
-        .expect("direct TransmogShared scope probe should run");
+        .expect("direct TransmogShared compatibility probe should run");
 
     assert_eq!(result, "ok");
 }

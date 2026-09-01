@@ -1,3 +1,7 @@
+## [2026-09-01] investigation | Retire TransmogShared inventory-slot loader scope
+
+Refreshed the retail manifest from Gethe `live` build `12.1.0.69497` and found the prior scope was based on stale 12.0.7 source: current `Blizzard_TransmogShared` calls `C_PaperDollInfo.GetInventorySlotInfo` directly. Removed the target-scoped legacy-global loader mechanism and its stale restoration test while preserving retail public removal and TransmogUtil behavior coverage. Updated [[transmog-inventory-slot-scope]], [[addon-loading]], and [[lua-api]]; cache provenance refresh prevents the stale-source condition from recurring.
+
 ## [2026-09-01] audit | Document timeout fixture capacity reservation
 
 Audited commit `d5e017f31`. Updated [[prefork-test-harness]] and the prefork spec: outer timeout conformance fixture subprocesses reserve the shared workload gate exclusively, while an inherited marker bypasses gate acquisition for descendants. Nested timeout children therefore retain the same global two-slot permit cap without deadlocking against their fixture reservation. No new page, index update, or changelog was warranted; protected `src/c_api/c_string_util.rs`, code, tests, `PLAN.md`, and vendor/cache/Blizzard paths were untouched.
