@@ -56,6 +56,8 @@ pub const RETAIL_12_1_GLOBAL_STRINGS: &[StringDef] = &[
         "SLASH_CAA_HELP_DEBUFF_SELF_ALERT_SOUND",
         "Sound (%d-%d) to say for a self debuff alert.",
     ),
+    ("SLASH_CAA_WHEN_TARGET_DIES", "whentargetdies"),
+    ("SLASH_CAA_PLAY_SOUND", "playsound"),
     (
         "BLIZZARD_STORE_VAS_ERROR_BOOST_THROTTLE",
         "Maximum number of character boosts reached for the day. Please try again tomorrow.",

@@ -270,6 +270,30 @@ fn test_patch_12_1_chat_frame_sound_help_strings() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_chat_frame_command_names() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local names = {
+                "SLASH_CAA_WHEN_TARGET_DIES",
+                "SLASH_CAA_PLAY_SOUND",
+            }
+            for index, name in ipairs(names) do
+                local command = _G[name]
+                if type(command) ~= "string" or command == "" then return "missing-" .. index end
+                if command ~= string.lower(command) then return "uppercase-" .. index end
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_lfg_lair_category_constant() {
     let env = WowLuaEnv::new().unwrap();
     let category: i32 = env.eval("return LE_LFG_CATEGORY_LAIR").unwrap();
