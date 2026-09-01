@@ -35,6 +35,21 @@ if not Enum.SecondsFormatterAbbreviationMeta then
   }
 end
 
+if not Enum.SecondsFormatterRounding then
+  Enum.SecondsFormatterRounding = {
+    RoundUp = 0,
+    Truncate = 1,
+  }
+end
+
+if not Enum.SecondsFormatterRoundingMeta then
+  Enum.SecondsFormatterRoundingMeta = {
+    MinValue = 0,
+    MaxValue = 1,
+    NumValues = 2,
+  }
+end
+
 if not Enum.CooldownLayoutStatus then
   Enum.CooldownLayoutStatus = {
     Success = 0,

@@ -141,6 +141,22 @@ fn seconds_formatter_enums_are_available_with_expected_values() {
                 return "wrong_abbreviation"
             end
 
+            local rounding = Enum.SecondsFormatterRounding
+            if type(rounding) ~= "table" then
+                return "missing_rounding"
+            end
+            if rounding.RoundUp ~= 0 or rounding.Truncate ~= 1 then
+                return "wrong_rounding"
+            end
+
+            local roundingMeta = Enum.SecondsFormatterRoundingMeta
+            if type(roundingMeta) ~= "table" then
+                return "missing_rounding_meta"
+            end
+            if roundingMeta.MinValue ~= 0 or roundingMeta.MaxValue ~= 1 or roundingMeta.NumValues ~= 2 then
+                return "wrong_rounding_meta"
+            end
+
             return "ok"
             "#,
         )
