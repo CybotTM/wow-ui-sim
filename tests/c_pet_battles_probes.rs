@@ -202,6 +202,32 @@ fn get_turn_result_default_zero() {
     assert_eq!(result, 0);
 }
 
+// ── GetBreedQuality ───────────────────────────────────────────────────────────
+
+#[test]
+fn get_breed_quality_returns_numeric_seeded_and_missing_values() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local ally = C_PetBattles.GetBreedQuality(Enum.BattlePetOwner.Ally, 1)
+            local enemy = C_PetBattles.GetBreedQuality(Enum.BattlePetOwner.Enemy, 1)
+            local missing = C_PetBattles.GetBreedQuality(Enum.BattlePetOwner.Ally, 99)
+            if type(ally) ~= "number" or type(enemy) ~= "number" or type(missing) ~= "number" then
+                return "type"
+            end
+            if ally ~= Enum.BattlePetBreedQuality.Rare or enemy ~= Enum.BattlePetBreedQuality.Rare then
+                return "seeded"
+            end
+            if missing ~= 0 then return "missing" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
 // ── GetXP ─────────────────────────────────────────────────────────────────────
 
 #[test]
