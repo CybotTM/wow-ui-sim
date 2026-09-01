@@ -47,7 +47,7 @@ fn run_with_gate<F: FnOnce() + Send + 'static>(
     }
 
     let run_parent = || run_parent(&test_name, secs, path.map(Path::to_path_buf), closure);
-    if env::var_os(TIMEOUT_FIXTURE_CAPACITY_ENV).is_some() {
+    if fixture_capacity_is_reserved() {
         run_parent();
         return;
     }
@@ -55,6 +55,13 @@ fn run_with_gate<F: FnOnce() + Send + 'static>(
         Some(path) => workload_gate::with_lock_at(path, mode, run_parent),
         None => workload_gate::with_lock(mode, run_parent),
     }
+}
+
+fn fixture_capacity_is_reserved() -> bool {
+    matches!(
+        env::var(TIMEOUT_FIXTURE_CAPACITY_ENV).as_deref(),
+        Ok("reserved")
+    )
 }
 
 fn current_test_name() -> String {

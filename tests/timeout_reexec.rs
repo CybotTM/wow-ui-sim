@@ -233,7 +233,7 @@ fn run_fixture(
     if let Some(path) = descendant_pid_path {
         command.env(DESCENDANT_PID_ENV, path);
     }
-    run_capacity_fixture(command)
+    spawn_capacity_reserved_fixture(command)
 }
 
 fn run_concurrency_fixture(state_path: &Path) -> Output {
@@ -246,7 +246,7 @@ fn run_concurrency_fixture(state_path: &Path) -> Output {
         ])
         .env(FIXTURE_MODE_ENV, "concurrency")
         .env(CONCURRENCY_STATE_ENV, state_path);
-    run_capacity_fixture(command)
+    spawn_capacity_reserved_fixture(command)
 }
 
 fn run_exact_selection_fixture(selected_marker: &Path, forbidden_marker: &Path) -> Output {
@@ -261,7 +261,7 @@ fn run_exact_selection_fixture(selected_marker: &Path, forbidden_marker: &Path) 
         .env(FIXTURE_MODE_ENV, "exact-selection")
         .env(EXACT_SELECTED_MARKER_ENV, selected_marker)
         .env(EXACT_FORBIDDEN_MARKER_ENV, forbidden_marker);
-    run_capacity_fixture(command)
+    spawn_capacity_reserved_fixture(command)
 }
 
 fn run_permit_release_fixture(release_dir: &Path) -> Output {
@@ -274,13 +274,13 @@ fn run_permit_release_fixture(release_dir: &Path) -> Output {
         ])
         .env(FIXTURE_MODE_ENV, "permit-release")
         .env(PERMIT_RELEASE_DIR_ENV, release_dir);
-    run_capacity_fixture(command)
+    spawn_capacity_reserved_fixture(command)
 }
 
-fn run_capacity_fixture(mut command: Command) -> Output {
+fn spawn_capacity_reserved_fixture(mut command: Command) -> Output {
     crate::common::with_timeout_fixture_capacity(|| {
         command
-            .env(crate::common::TIMEOUT_FIXTURE_CAPACITY_ENV, "1")
+            .env(crate::common::TIMEOUT_FIXTURE_CAPACITY_ENV, "reserved")
             .output()
             .expect("run timeout re-exec fixture")
     })
