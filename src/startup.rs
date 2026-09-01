@@ -612,24 +612,121 @@ fn force_show_party_member_frames(env: &WowLuaEnv) {
 
 /// Seed buff duration text so it's visible immediately without waiting
 /// for the first OnUpdate tick. OnUpdate handlers maintain it afterwards.
-pub fn seed_buff_durations(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
+///
+/// A permanent aura carries `duration == 0` and `expirationTime == 0`, so
+/// `expirationTime - GetTime()` is negative and the icon renders a countdown
+/// running backwards from zero. Blizzard gates the same computation on
+/// `info.duration > 0 and info.expirationTime > 0` (BuffFrame.lua:812, again at
+/// :1026); that guard is applied here, so an aura with no duration gets no
+/// timer text at all.
+const SEED_BUFF_DURATIONS_LUA: &str = r#"
         if not BuffFrame or not BuffFrame.auraFrames then return end
         for _, b in ipairs(BuffFrame.auraFrames) do
             if b:IsVisible() and b.UpdateDuration then
                 local timeLeft = b.timeLeft
-                if not timeLeft and b.buttonInfo and b.buttonInfo.expirationTime then
-                    timeLeft = b.buttonInfo.expirationTime - GetTime()
-                    if b.buttonInfo.timeMod and b.buttonInfo.timeMod > 0 then
-                        timeLeft = timeLeft / b.buttonInfo.timeMod
+                local info = b.buttonInfo
+                if not timeLeft and info
+                        and info.duration and info.duration > 0
+                        and info.expirationTime and info.expirationTime > 0 then
+                    timeLeft = info.expirationTime - GetTime()
+                    if info.timeMod and info.timeMod > 0 then
+                        timeLeft = timeLeft / info.timeMod
                     end
                 end
-                if timeLeft then
+                if timeLeft and timeLeft > 0 then
                     pcall(b.UpdateDuration, b, timeLeft)
                 end
             end
         end
-    "#,
-    );
+    "#;
+
+pub fn seed_buff_durations(env: &WowLuaEnv) {
+    let _ = env.exec(SEED_BUFF_DURATIONS_LUA);
+}
+
+#[cfg(test)]
+mod seed_buff_duration_tests {
+    use super::*;
+
+    /// A permanent aura reports `duration == 0` and `expirationTime == 0`.
+    /// Subtracting `GetTime()` from that yields a negative number, which the
+    /// icon rendered as a countdown running backwards ("-2 s"). Blizzard gates
+    /// the same computation on both fields being positive.
+    #[test]
+    fn permanent_auras_get_no_duration_text() {
+        let env = WowLuaEnv::new().unwrap();
+        let (timed, permanent, no_info, zero_duration, stale_negative): (
+            String,
+            String,
+            String,
+            String,
+            String,
+        ) = env
+            .eval(&format!(
+                r#"
+                local seen = {{}}
+                local function frame(name, duration, expirationTime, presetTimeLeft)
+                    return {{
+                        name = name,
+                        timeLeft = presetTimeLeft,
+                        buttonInfo = duration and
+                            {{ duration = duration, expirationTime = expirationTime }} or nil,
+                        IsVisible = function() return true end,
+                        UpdateDuration = function(self, timeLeft)
+                            seen[self.name] = timeLeft
+                        end,
+                    }}
+                end
+
+                BuffFrame = {{ auraFrames = {{
+                    frame("timed", 3600, GetTime() + 1800),
+                    frame("permanent", 0, 0),
+                    frame("no_info", nil, nil),
+                    -- Discriminates the duration guard from the timeLeft>0 guard:
+                    -- expiry is in the future, so a positive timeLeft would pass
+                    -- the second check, but Blizzard requires BOTH fields positive.
+                    frame("zero_duration", 0, GetTime() + 600),
+                    -- The frame already carries a stale negative timeLeft, so the
+                    -- duration guard never runs for it. Only the timeLeft>0 check
+                    -- keeps this one from rendering a backwards countdown.
+                    frame("stale_negative", 3600, GetTime() + 1800, -5),
+                }} }}
+
+                {snippet}
+
+                local function report(key)
+                    local v = seen[key]
+                    if v == nil then return "none" end
+                    return v > 0 and "positive" or "NONPOSITIVE"
+                end
+                return report("timed"), report("permanent"), report("no_info"),
+                    report("zero_duration"), report("stale_negative")
+                "#,
+                snippet = SEED_BUFF_DURATIONS_LUA
+            ))
+            .unwrap();
+
+        assert_eq!(
+            timed, "positive",
+            "an aura with a real duration keeps its timer"
+        );
+        assert_eq!(
+            permanent, "none",
+            "a permanent aura must get no timer text; a negative countdown is the defect"
+        );
+        assert_eq!(
+            no_info, "none",
+            "an aura with no buttonInfo must be skipped"
+        );
+        assert_eq!(
+            zero_duration, "none",
+            "duration 0 means permanent even when expirationTime is in the future; \
+             this is the case the duration guard catches and the timeLeft>0 guard does not"
+        );
+        assert_eq!(
+            stale_negative, "none",
+            "a frame carrying a stale negative timeLeft must not render it; \
+             this is the case only the timeLeft>0 guard catches"
+        );
+    }
 }
