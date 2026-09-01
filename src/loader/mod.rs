@@ -153,6 +153,18 @@ fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
             "Blizzard_ObjectiveTracker".to_string(),
             vec!["Blizzard_POIButton".to_string()],
         ),
+        (
+            "Blizzard_Game".to_string(),
+            vec![
+                "Blizzard_TimeManager".to_string(),
+                "Blizzard_CooldownBroadcaster".to_string(),
+                "Blizzard_BoostTutorial".to_string(),
+            ],
+        ),
+        (
+            "Blizzard_RaidFrame".to_string(),
+            vec!["Blizzard_RaidUI".to_string()],
+        ),
     ])
 }
 

@@ -132,6 +132,43 @@ fn test_item_button_loads_before_framexmlutil() {
     }
 }
 
+/// Startup consumers must pull their load-on-demand publisher addons without
+/// promoting unrelated load-on-demand addons into eager discovery.
+#[test]
+fn test_startup_publishers_load_before_consumers() {
+    test_timeout! {
+        let ui = blizzard_ui_dir();
+        let addons = discover_blizzard_addons(&ui);
+        let names: Vec<&str> = addons.iter().map(|(name, _)| name.as_str()).collect();
+
+        for (publisher, consumer) in [
+            ("Blizzard_TimeManager", "Blizzard_Game"),
+            ("Blizzard_CooldownBroadcaster", "Blizzard_Game"),
+            ("Blizzard_BoostTutorial", "Blizzard_Game"),
+            ("Blizzard_RaidUI", "Blizzard_RaidFrame"),
+        ] {
+            let publisher_position = names
+                .iter()
+                .position(|name| *name == publisher)
+                .unwrap_or_else(|| panic!("{publisher} should be discovered"));
+            let consumer_position = names
+                .iter()
+                .position(|name| *name == consumer)
+                .unwrap_or_else(|| panic!("{consumer} should be discovered"));
+
+            assert!(
+                publisher_position < consumer_position,
+                "{publisher} must load before {consumer}"
+            );
+        }
+
+        assert!(
+            !names.contains(&"Deprecated_PaperDoll"),
+            "unrelated load-on-demand addons must remain excluded"
+        );
+    }
+}
+
 /// Snapshot of the full resolved Blizzard addon load order.
 ///
 /// If the topological sort algorithm changes and reorders addons, this test
