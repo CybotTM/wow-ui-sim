@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document Blizzard dependency-root discovery
+
+Audited commit `d62832f08`. Updated [[addon-loading]], the maintained addon-loading pipeline, and the prefork harness spec: eligible non-LoadOnDemand `Blizzard_*` cache addons are startup roots, while the filtered candidate pool contributes only transitive hard TOC dependencies. Current `Blizzard_TutorialManager` therefore loads `middleclass` before itself; unrelated non-Blizzard directories such as `Deprecated_PaperDoll` remain excluded. LoadOnDemand addons are not roots merely because they are present in cache. No new page was warranted; no code, vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.
+
 ## [2026-09-01] audit | Document retail 12.1 housing blueprint content-type enum
 
 Audited commit `665f5a31b`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: generated `Enum.HousingBlueprintContentType` now publishes all seven contiguous values (`None=0` through `Other=6`) with metadata under `retail-12-1-0`, allowing the final current `Blizzard_HousingData` content label table to load. Housing blueprint operations and strings remain unmodeled. No spec, changelog, index, or new page was warranted; no code, vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.

@@ -258,30 +258,12 @@ Default storage: `~/.local/share/wow-sim/SavedVariables/`
 ---
 
 ## Blizzard Addon Loading Order
-**File:** `src/main.rs:229-278`
 
-27 addons in hardcoded dependency order:
+Blizzard startup discovery is root-and-closure based, then topologically sorted from TOC dependencies plus simulator implicit startup dependencies. Eligible non-LoadOnDemand cache addons whose directory names start with `Blizzard_` are roots, subject to screen/profile exclusions. The candidate pool also retains eligible LoadOnDemand Blizzard TOCs and eligible non-Blizzard TOCs so a selected root can pull its transitive hard `## Dependencies:` closure.
 
-```
-Foundation:
-  SharedXMLBase -> Colors -> SharedXML -> SharedXMLGame ->
-  UIPanelTemplates -> FrameXMLBase
+A non-Blizzard cache directory is not an eager root: it loads only when a retained Blizzard root requires it. Current retail `Blizzard_TutorialManager` demonstrates this: its `middleclass` dependency loads before the root. Conversely, unrelated non-Blizzard directories such as `Deprecated_PaperDoll` remain excluded. LoadOnDemand Blizzard addons likewise remain out of the root set unless required by that closure or an implicit startup dependency. Discovery does not eagerly load every cache directory.
 
-Core:
-  LoadLocale -> Fonts_Shared -> HelpPlate -> AccessibilityTemplates ->
-  ObjectAPI -> UIParent -> TextStatusBar -> MoneyFrame -> POIButton ->
-  Flyout -> StoreUI -> MicroMenu -> EditMode -> GarrisonBase ->
-  GameTooltip -> UIParentPanelManager -> Settings_Shared ->
-  SettingsDefinitions_Shared -> SettingsDefinitions_Frame ->
-  FrameXMLUtil -> ItemButton -> QuickKeybind -> FrameXML
-
-UI Panels:
-  UIPanels_Game -> MapCanvasSecureUtil -> MapCanvas ->
-  SharedMapDataProviders -> WorldMap -> ActionBar -> GameMenu ->
-  UIWidgets -> Minimap -> AddOnList -> TimerunningUtil -> Communities
-```
-
-Third-party addons loaded alphabetically after Blizzard addons.
+Foundational SharedXML addons are promoted to `LoadFirst` so templates exist before other Blizzard addons instantiate frames. Third-party addons load after this Blizzard startup pass.
 
 ---
 
@@ -339,7 +321,7 @@ Accessors: `size()`, `anchors()`, `scripts()`, `layers()`, `all_frame_elements()
 ## Complete Load Sequence
 
 1. **Startup** (`main.rs`): Apply resource limits, create `WowLuaEnv`, set addon base paths, configure SavedVariables
-2. **Blizzard Addons**: Load in hardcoded dependency order
+2. **Blizzard Addons**: Discover eligible `Blizzard_*` non-LoD roots, include their transitive hard TOC dependencies from the candidate pool, then load the resulting dependency order
 3. **Third-Party Addons**: Scan `./Interface/AddOns`, load alphabetically
 4. **Post-Load Scripts**: Execute global initialization and reconcile replacement `_G.SettingsPanel`/`Settings` surfaces before category registration/opening
 5. **Startup Events**: Fire `ADDON_LOADED`, hide runtime-hidden frames
