@@ -124,8 +124,8 @@ us|1|0123456789abcdef0123456789abcdef||12.1.0.69497|wow";
 fn build_identity_selects_the_requested_active_product() {
     let build_info = "\
 Branch!STRING:0|Active!DEC:1|Build Key!HEX:16|Install Key!HEX:16|Version!STRING:0|Product!STRING:0
-us|1|retail-build|retail-install|12.1.0.69497|wow
-us|1|ptr-build|ptr-install|12.1.0.69587|wowt";
+us|1|11111111111111111111111111111111|22222222222222222222222222222222|12.1.0.69497|wow
+us|1|33333333333333333333333333333333|44444444444444444444444444444444|12.1.0.69587|wowt";
 
     let retail = super::parse_active_build_identity(build_info, "wow")
         .expect("retail active build identity");
@@ -133,11 +133,11 @@ us|1|ptr-build|ptr-install|12.1.0.69587|wowt";
         super::parse_active_build_identity(build_info, "wowt").expect("PTR active build identity");
 
     assert_eq!(retail.version, "12.1.0.69497");
-    assert_eq!(retail.build_key, "retail-build");
-    assert_eq!(retail.install_key, "retail-install");
+    assert_eq!(retail.build_key, "11111111111111111111111111111111");
+    assert_eq!(retail.install_key, "22222222222222222222222222222222");
     assert_eq!(ptr.version, "12.1.0.69587");
-    assert_eq!(ptr.build_key, "ptr-build");
-    assert_eq!(ptr.install_key, "ptr-install");
+    assert_eq!(ptr.build_key, "33333333333333333333333333333333");
+    assert_eq!(ptr.install_key, "44444444444444444444444444444444");
 }
 
 #[test]
@@ -246,10 +246,10 @@ fn ptr_manifest_includes_ptr_only_aura_container() {
 
 #[test]
 #[cfg(feature = "profile-retail")]
-fn retail_manifest_excludes_ptr_only_aura_container() {
+fn retail_manifest_includes_current_aura_container() {
     let manifest: Vec<_> = manifest_entries().collect();
 
-    assert!(!manifest.contains(&"Blizzard_AuraContainer/Blizzard_AuraContainer.toc"));
+    assert!(manifest.contains(&"Blizzard_AuraContainer/Blizzard_AuraContainer.toc"));
 }
 
 #[test]
