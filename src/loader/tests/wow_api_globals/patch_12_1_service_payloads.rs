@@ -54,6 +54,52 @@ fn test_patch_12_1_battle_net_friend_tag_enum() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_recent_allies_friend_tag_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local tag = Enum.RecentAlliesFriendTag
+            local meta = Enum.RecentAlliesFriendTagMeta
+            if type(tag) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if tag.Professions ~= 0 or tag.PvP ~= 1 or tag.Raiding ~= 2 then return "first" end
+            if tag.Dungeons ~= 3 or tag.Delves ~= 4 or tag.Questing ~= 5 then return "last" end
+            if table.count(tag) ~= 6 or tag.DamagerRole ~= nil then return "distinct" end
+            if meta.MinValue ~= 0 or meta.MaxValue ~= 5 or meta.NumValues ~= 6 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn test_patch_12_1_rolodex_legacy_friend_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local rolodex = Enum.RolodexType
+            local meta = Enum.RolodexTypeMeta
+            if type(rolodex) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if rolodex.PvPKill ~= 20 or rolodex.LegacyFriend ~= 23 then return "values" end
+            for _, value in pairs(rolodex) do
+                if value == 21 or value == 22 then return "gaps" end
+            end
+            if table.count(rolodex) ~= 22 then return "count" end
+            if meta.MinValue ~= 0 or meta.MaxValue ~= 23 or meta.NumValues ~= 22 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_social_ui_shared_preload_globals() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

@@ -292,6 +292,25 @@ pub const COOLDOWN_VIEWER_SOUND_META: EnumDef = (
 
 pub const TTS_VOICE_TYPE: SeqEnumDef = ("TtsVoiceType", &["Standard", "Alternate"]);
 
+#[cfg(feature = "retail-12-1-0")]
+pub const RECENT_ALLIES_FRIEND_TAG: SeqEnumDef = (
+    "RecentAlliesFriendTag",
+    &[
+        "Professions",
+        "PvP",
+        "Raiding",
+        "Dungeons",
+        "Delves",
+        "Questing",
+    ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const RECENT_ALLIES_FRIEND_TAG_META: EnumDef = (
+    "RecentAlliesFriendTagMeta",
+    &[("MinValue", 0), ("MaxValue", 5), ("NumValues", 6)],
+);
+
 // ============================================================================
 // Guild / Social Enums
 // ============================================================================
@@ -446,6 +465,15 @@ pub const ROLODEX_TYPE: SeqEnumDef = (
         "PetBattle",
         "PvPKill",
     ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const ROLODEX_TYPE_LEGACY_FRIEND: EnumDef = ("RolodexType", &[("LegacyFriend", 23)]);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const ROLODEX_TYPE_META: EnumDef = (
+    "RolodexTypeMeta",
+    &[("MinValue", 0), ("MaxValue", 23), ("NumValues", 22)],
 );
 
 pub const INVALID_PLOT_SCREENSHOT_REASON: SeqEnumDef = (

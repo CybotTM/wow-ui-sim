@@ -127,6 +127,8 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     COOLDOWN_VIEWER_CATEGORY,
     #[cfg(feature = "retail-12-1-0")]
     COOLDOWN_VIEWER_SOUND,
+    #[cfg(feature = "retail-12-1-0")]
+    RECENT_ALLIES_FRIEND_TAG,
     TTS_VOICE_TYPE,
     GUILD_ERROR_TYPE,
     ROLODEX_TYPE,
@@ -172,6 +174,12 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
 pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     #[cfg(feature = "retail-12-1-0")]
     COOLDOWN_VIEWER_SOUND_META,
+    #[cfg(feature = "retail-12-1-0")]
+    RECENT_ALLIES_FRIEND_TAG_META,
+    #[cfg(feature = "retail-12-1-0")]
+    ROLODEX_TYPE_LEGACY_FRIEND,
+    #[cfg(feature = "retail-12-1-0")]
+    ROLODEX_TYPE_META,
     #[cfg(feature = "retail-12-1-0")]
     BATTLE_NET_FRIEND_LEVEL,
     #[cfg(feature = "retail-12-1-0")]
