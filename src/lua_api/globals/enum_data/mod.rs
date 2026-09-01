@@ -176,6 +176,10 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     EDIT_MODE_LOSS_OF_CONTROL_SETTING_META,
     #[cfg(feature = "retail-12-1-0")]
     EDIT_MODE_SYSTEM_META,
+    #[cfg(feature = "retail-12-1-0")]
+    VISUAL_ALERT_TYPE,
+    #[cfg(feature = "retail-12-1-0")]
+    VISUAL_ALERT_TYPE_META,
     LFG_ROLE,
     UNIT_SEX,
     UI_WIDGET_TEXT_SIZE_TYPE,

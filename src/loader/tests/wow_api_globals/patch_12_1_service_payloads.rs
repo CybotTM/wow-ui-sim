@@ -80,6 +80,29 @@ fn test_patch_12_1_edit_mode_loss_of_control_enums() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_visual_alert_type_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local alert = Enum.VisualAlertType
+            local meta = Enum.VisualAlertTypeMeta
+            if type(alert) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if alert.MarchingAnts ~= 1 or alert.MarchingAntsCyan ~= 2 or alert.MarchingAntsRed ~= 3 then return "ants-1" end
+            if alert.MarchingAntsGreen ~= 4 or alert.MarchingAntsBlue ~= 5 then return "ants-2" end
+            if alert.Flash ~= 6 or alert.FlashCyan ~= 7 or alert.FlashRed ~= 8 then return "flash-1" end
+            if alert.FlashGreen ~= 9 or alert.FlashBlue ~= 10 then return "flash-2" end
+            if meta.MinValue ~= 1 or meta.MaxValue ~= 10 or meta.NumValues ~= 10 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_pet_and_lfg_payloads() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
