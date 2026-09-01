@@ -650,19 +650,33 @@ pub const HOUSING_RESULT_META: EnumDef = (
     &[("MinValue", 0), ("MaxValue", 111), ("NumValues", 112)],
 );
 
+#[cfg(feature = "retail-12-1-0")]
 pub const HOUSE_SETTING_FLAGS: EnumDef = (
     "HouseSettingFlags",
     &[
+        ("None", 0),
         ("HouseAccessAnyone", 1),
         ("HouseAccessNeighbors", 2),
         ("HouseAccessGuild", 4),
         ("HouseAccessFriends", 8),
         ("HouseAccessParty", 16),
-        ("PlotAccessNeighbors", 32),
-        ("PlotAccessGuild", 64),
-        ("PlotAccessFriends", 128),
-        ("PlotAccessParty", 256),
+        ("PlotAccessAnyone", 32),
+        ("PlotAccessNeighbors", 64),
+        ("PlotAccessGuild", 128),
+        ("PlotAccessFriends", 256),
+        ("PlotAccessParty", 512),
+        ("BlueprintExportAnyone", 1024),
+        ("BlueprintExportNeighbors", 2048),
+        ("BlueprintExportGuild", 4096),
+        ("BlueprintExportFriends", 8192),
+        ("BlueprintExportParty", 16384),
     ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSE_SETTING_FLAGS_META: EnumDef = (
+    "HouseSettingFlagsMeta",
+    &[("MinValue", 0), ("MaxValue", 16384), ("NumValues", 16)],
 );
 
 pub const HOUSE_OWNER_ERROR: EnumDef = (

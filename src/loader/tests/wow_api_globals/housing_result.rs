@@ -1,4 +1,4 @@
-//! Versioned startup publication and values for the HousingResult enum.
+//! Versioned startup publication and values for housing enums.
 
 #![cfg(feature = "retail-12-0-0")]
 
@@ -299,5 +299,54 @@ fn test_patch_12_1_housing_result_values() {
     assert_eq!(
         result, "ok",
         "HousingResult did not match the 12.1 source register"
+    );
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn test_patch_12_1_house_setting_flags_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+                local namespace = Enum.HouseSettingFlags
+                local metadata = Enum.HouseSettingFlagsMeta
+                if type(namespace) ~= "table" or type(metadata) ~= "table" then
+                    return "tables"
+                end
+                local expected = {
+                    None = 0,
+                    HouseAccessAnyone = 1,
+                    HouseAccessNeighbors = 2,
+                    HouseAccessGuild = 4,
+                    HouseAccessFriends = 8,
+                    HouseAccessParty = 16,
+                    PlotAccessAnyone = 32,
+                    PlotAccessNeighbors = 64,
+                    PlotAccessGuild = 128,
+                    PlotAccessFriends = 256,
+                    PlotAccessParty = 512,
+                    BlueprintExportAnyone = 1024,
+                    BlueprintExportNeighbors = 2048,
+                    BlueprintExportGuild = 4096,
+                    BlueprintExportFriends = 8192,
+                    BlueprintExportParty = 16384,
+                }
+                for name, value in pairs(expected) do
+                    if namespace[name] ~= value then
+                        return name .. ":value=" .. tostring(namespace[name])
+                    end
+                end
+                if table.count(namespace) ~= 16 then return "count" end
+                if metadata.MinValue ~= 0 or metadata.MaxValue ~= 16384 or metadata.NumValues ~= 16 then
+                    return "metadata"
+                end
+                return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "HouseSettingFlags did not match the 12.1 source register"
     );
 }
