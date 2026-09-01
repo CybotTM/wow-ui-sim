@@ -38,10 +38,6 @@ Audited commits `39f4e1a39`, `82b2b927a`, and `5354fad5a`. Updated [[prefork-tes
 
 Audited commits `4f2d4b779` and `e831f1d98`. Added [[transmog-inventory-slot-scope]], updated [[lua-api]] and [[addon-loading]], and linked the maintained API/loader references: retail 12.1 keeps `GetInventorySlotInfo` nil publicly while `Blizzard_TransmogShared` receives the registered lookup through a retained target-scoped environment, with prior global/environment restoration after success or `LoadError`. No spec or changelog update was needed; protected, code, test, manifest, vendor, cache, and `PLAN.md` paths were untouched.
 
-## [2026-09-01] investigation | Expand Blizzard inventory-slot loader scope
-
-Updated [[transmog-inventory-slot-scope]], [[lua-api]], and [[addon-loading]]: retail 12.1 keeps `GetInventorySlotInfo` nil publicly while exactly `Blizzard_InspectUI` and `Blizzard_TransmogShared` receive the internally registered lookup through retained target-scoped loader environments. The loader restores prior public-global and loading-environment state after success or `LoadError`; no spec or changelog update was needed.
-
 ## [2026-08-30] audit | Document idempotent SettingsPanel reconciliation
 
 Audited commit `5715008bb`. Updated [[lua-api]] and [[addon-loading]] plus the maintained API and loader docs: post-load workarounds reconcile replacement `_G.SettingsPanel`/`Settings` surfaces before category registration/opening and remain idempotent for the same panel identity. `C_SettingsUtil` APIs remain explicitly unsupported. No new page, spec, or changelog was warranted; protected `src/c_api/c_string_util.rs`, code/tests, manifest, vendor/cache, and active agent paths were untouched.

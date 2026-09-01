@@ -42,7 +42,7 @@ Loader execution keeps public `_G` and secure `__secureenv` distinct. Same-addon
 
 The enUS retail 12.1 compatibility slice publishes 45 exact global strings under `profile-retail` + `retail-12-1-0`. Commit `cc02aa287` adds 13 housing Settings labels/tooltips pinned from build `12.1.0.69497`; missing values had caused the canonical Interface Settings registrant to allocate category ID 7 and abort before registration. This is exact string publication only: housing service/state semantics remain unmodeled, and the separately probed nil globals stay absent.
 
-Retail 12.1 has one narrower runtime-load exception: `Blizzard_InspectUI` and `Blizzard_TransmogShared` receive the internally registered `GetInventorySlotInfo` only through target-scoped loading environments. The public global remains nil before and after either load; compiled TransmogUtil closures retain the scoped environment, and the loader restores the previous global and environment after success or `LoadError` (`src/loader/addon.rs`).
+Retail 12.1 has one narrower runtime-load exception: `Blizzard_TransmogShared` receives the internally registered `GetInventorySlotInfo` only through a target-scoped loading environment. The public global remains nil before and after `C_AddOns.LoadAddOn("Blizzard_TransmogShared")`; compiled TransmogUtil closures retain the scoped environment, and the loader restores the previous global and environment after success or `LoadError` (`src/c_api/c_addons_runtime.rs`).
 
 ### Timer System (lines 382-506)
 
@@ -358,7 +358,7 @@ Enum.DrawLayer = { BACKGROUND=1, BORDER=2, ARTWORK=3, OVERLAY=4, HIGHLIGHT=5 }
 Applied after addon loading via `env.apply_post_load_workarounds()`:
 
 1. **Settings surface** -- Reconcile a replacement `_G.SettingsPanel`/`Settings` pair before category registration and opening; repeated application is idempotent for the same panel
-2. **Inventory-slot load scope** -- Keep retail `GetInventorySlotInfo` nil publicly while exposing the registered lookup only to `Blizzard_InspectUI` and `Blizzard_TransmogShared` loader closures, then restore the prior scope
+2. **TransmogShared load scope** -- Keep retail `GetInventorySlotInfo` nil publicly while exposing the registered lookup only to `Blizzard_TransmogShared` loader closures, then restore the prior scope
 3. **UpdateMicroButtons** -- Stub out micro button updates
 3. **Map Canvas Scroll** -- Initialize targetScale/currentScale on WorldMapFrame.ScrollContainer
 4. **Status Bar Animations** -- Provide LevelUpMaxAlphaAnimation stub

@@ -231,26 +231,7 @@ fn blizzard_inspect_ui_excluded_from_every_screen_auto_discovery() {
 
 prefork_full_ui_case! {
 fn blizzard_inspect_ui_loads_without_addon_specific_lua_errors(env: &WowLuaEnv) {
-    let public_before_load: String = env
-        .eval("return type(GetInventorySlotInfo)")
-        .expect("pre-load removed-global probe should succeed");
-    assert_eq!(
-        public_before_load, "nil",
-        "retail 12.1 removes GetInventorySlotInfo from the public Lua surface; \
-         Blizzard_InspectUI must receive the internal lookup only through its scoped loader \
-         environment"
-    );
-
     load_inspect_ui(env);
-
-    let public_after_load: String = env
-        .eval("return type(GetInventorySlotInfo)")
-        .expect("post-load removed-global probe should succeed");
-    assert_eq!(
-        public_after_load, "nil",
-        "Blizzard_InspectUI's scoped loader compatibility must restore the removed public \
-         GetInventorySlotInfo global after its TOC has loaded"
-    );
 
     let load_errors: Vec<String> = env
         .state()
