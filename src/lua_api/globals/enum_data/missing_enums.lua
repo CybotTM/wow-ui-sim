@@ -4736,9 +4736,9 @@ end
 
 if not Enum.DamageMeterVisibilityMeta then
   Enum.DamageMeterVisibilityMeta = {
-    MaxValue = 2,
+    MaxValue = 3,
     MinValue = 0,
-    NumValues = 3,
+    NumValues = 4,
   }
 end
 
@@ -5036,6 +5036,14 @@ if not Enum.EditModeLayoutTypeMeta then
   }
 end
 
+if not Enum.EditModeLossOfControlSettingMeta then
+  Enum.EditModeLossOfControlSettingMeta = {
+    MaxValue = 0,
+    MinValue = 0,
+    NumValues = 1,
+  }
+end
+
 if not Enum.EditModeMicroMenuSettingMeta then
   Enum.EditModeMicroMenuSettingMeta = {
     MaxValue = 3,
@@ -5118,9 +5126,9 @@ end
 
 if not Enum.EditModeSystemMeta then
   Enum.EditModeSystemMeta = {
-    MaxValue = 23,
+    MaxValue = 26,
     MinValue = 0,
-    NumValues = 24,
+    NumValues = 27,
   }
 end
 
