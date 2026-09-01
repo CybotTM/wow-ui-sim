@@ -48,6 +48,8 @@ The 12.1 compatibility work is currently captured by these commits:
 - `665f5a31b` — publishes generated retail-12.1 `Enum.HousingBlueprintContentType` (`None=0` through `Other=6`) with metadata (`MinValue=0`, `MaxValue=6`, `NumValues=7`) for the final current `Blizzard_HousingData` content label table; housing blueprint operations and strings remain unmodeled.
 - `eae094261` — models `C_PetBattles.GetPetSpeciesID(owner, petIndex)` from `SimState.pet_battles`; valid pets return their numeric species ID while unknown owners or indexes return `nil`. Current `PetBattleFrame_OnLoad` passes this value to `C_PetJournal.GetPetModelSceneInfoBySpeciesID`; the prior absent API returned `nil`, reaching a numeric-only Pet Journal call.
 - `b08bd4cf7` — aligns default battle-pet species IDs with existing Pet Journal seeds: ally `39` and enemy `87`. The initial state-backed IDs (`1`/`2`) still lacked journal records, so model-scene lookup returned no values and `PetModelScene:TransitionToModelSceneID(nil, ...)` failed. The chained regression now requires numeric Pet Journal model-scene IDs for both default battle pets.
+- `391cd75ea` — makes `__wow_bind_xml_method` resolve XML method handlers public-first, then through the forbidden object table for `useForbiddenObjectTable` frames. The forbidden receiver forwards missing public `FrameHandle` methods, so precompiled intrinsic `OnLoad` and ordinary private handlers both retain frame behavior.
+- `d994939bf` — models retail-12.1 `GetBuildOption("RestrictedAuraAPI")` as `true`; unknown names return `nil`. This selects the current forbidden aura template path without adding a generic build-option fallback.
 
 ### Live enUS GlobalStrings slice
 

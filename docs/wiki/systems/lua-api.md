@@ -57,6 +57,8 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 **Core overrides** — `print` appends to `SimState.console_output`; `ipairs` iterates frame children; `getmetatable` returns a fake metatable exposing all frame methods; `string.format` maps `%F` → `%f` for LuaJIT compatibility.
 
+**Build options** — retail 12.1 `GetBuildOption("RestrictedAuraAPI")` returns `true`, selecting current forbidden aura templates; unknown options return `nil`.
+
 **CreateFrame** — Parses type/name/parent/template, registers frame, links parent-child, inherits strata/level, creates widget type defaults, applies templates, returns FrameHandle.
 
 **CreateWindow** — Returns a frame-backed `SimpleWindow` for Blizzard external-tool panels. The second argument initializes topmost state; `SetWindowSize`/`SetMinSize` enforce dimensions, `IsTopmost`/`SetTopmost` expose the modeled flag, and `Close` hides the frame. `SetTitle` and `SetFocus` are callable no-ops; popup-style, position, and focus persistence are not modeled. Owner frames use `SetWindow`/`GetWindow` and ordinary anchoring.

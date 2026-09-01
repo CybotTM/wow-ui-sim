@@ -203,6 +203,11 @@ patch_string_format
 - **getmetatable** -- Returns fake metatable with widget-filtered `__index` methods; direct userdata calls still resolve through the shared `FrameRef` registration path
 - **string.format** -- Converts `%F` -> `%f` (WoW LuaJIT vs standard Lua 5.1)
 
+### Build options
+**File:** `src/lua_api/globals/utility_system_spell/mod.rs`
+
+Retail 12.1 `GetBuildOption("RestrictedAuraAPI")` returns `true`, selecting current forbidden aura templates. Unknown names return `nil`.
+
 ### Modeled targeting global
 **File:** `src/lua_api/globals/targeting_verbs.rs`
 
