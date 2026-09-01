@@ -98,6 +98,28 @@ fn get_ability_info_by_id_unknown_returns_nil() {
     assert!(ability_name.is_none());
 }
 
+// ── GetPetSpeciesID ───────────────────────────────────────────────────────────
+
+#[test]
+fn get_pet_species_id_returns_seeded_ids_and_nil_for_missing_pet() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local ally = C_PetBattles.GetPetSpeciesID(1, 1)
+            local enemy = C_PetBattles.GetPetSpeciesID(2, 1)
+            local missing = C_PetBattles.GetPetSpeciesID(1, 99)
+            if ally ~= 1 then return "ally:" .. tostring(ally) end
+            if enemy ~= 2 then return "enemy:" .. tostring(enemy) end
+            if missing ~= nil then return "missing:" .. tostring(missing) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
 // ── GetPetStats ───────────────────────────────────────────────────────────────
 
 #[test]

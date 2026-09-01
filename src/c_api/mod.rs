@@ -36,6 +36,7 @@ pub mod c_map_exploration_info;
 pub mod c_merchant_frame;
 pub mod c_paper_doll_info;
 pub mod c_party_info;
+pub mod c_pet_battles;
 pub mod c_ping_secure;
 pub mod c_player_choice;
 pub mod c_player_interaction_manager;
