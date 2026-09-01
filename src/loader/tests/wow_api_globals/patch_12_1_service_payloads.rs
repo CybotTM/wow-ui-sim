@@ -134,6 +134,13 @@ fn test_patch_12_1_social_ui_shared_preload_globals() {
             if presence.Away ~= 3 or presence.Busy ~= 4 or presence.AppearOffline ~= 5 then return "presence-2" end
             if meta.MinValue ~= 0 or meta.MaxValue ~= 5 or meta.NumValues ~= 6 then return "metadata" end
 
+            local system = Enum.SocialSystemType
+            local systemMeta = Enum.SocialSystemTypeMeta
+            if type(system) ~= "table" or type(systemMeta) ~= "table" then return "system-tables" end
+            if system.Friends ~= 0 or system.QuickJoin ~= 1 or system.RaidList ~= 2 then return "system-first" end
+            if system.RecruitAFriend ~= 3 or system.RecentAllies ~= 4 then return "system-last" end
+            if systemMeta.MinValue ~= 0 or systemMeta.MaxValue ~= 4 or systemMeta.NumValues ~= 5 then return "system-metadata" end
+
             local labelNames = {
                 "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_PROFESSIONS",
                 "SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_PVP",

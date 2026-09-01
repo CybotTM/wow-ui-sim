@@ -399,6 +399,24 @@ pub const SOCIAL_UI_PRESENCE_TYPE_META: EnumDef = (
     &[("MinValue", 0), ("MaxValue", 5), ("NumValues", 6)],
 );
 
+#[cfg(feature = "retail-12-1-0")]
+pub const SOCIAL_SYSTEM_TYPE: SeqEnumDef = (
+    "SocialSystemType",
+    &[
+        "Friends",
+        "QuickJoin",
+        "RaidList",
+        "RecruitAFriend",
+        "RecentAllies",
+    ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const SOCIAL_SYSTEM_TYPE_META: EnumDef = (
+    "SocialSystemTypeMeta",
+    &[("MinValue", 0), ("MaxValue", 4), ("NumValues", 5)],
+);
+
 pub const GUILD_ERROR_TYPE: SeqEnumDef = (
     "GuildErrorType",
     &[
