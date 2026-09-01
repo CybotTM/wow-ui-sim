@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document Macro/Trainer startup roots and TOC game types
+
+Audited commits `7f68e2f24`, `44d5ab8df`, `b5191265b`, `7b3dba413`, and `3fde8b80e`. Updated [[addon-loading]], the addon-loading pipeline, and the prefork harness spec: `Blizzard_MacroUI` and `Blizzard_TrainerUI` remain LoadOnDemand but are explicit Game-only startup roots, publishing `MacroFrame_LoadUI` and `ClassTrainerFrame_LoadUI` while staying excluded from glue screens. Inline `[AllowLoadGameType]` values now accept comma or whitespace separators, so current `vanilla tbc mainline` annotations retain retail LoadSystem files and nested template mixins. `[Bootstrap]` remains inline-only; no bootstrap pass, all-LoD load, or TOC reordering was introduced. No new page, index update, manifest, cache content, `PLAN.md`, vendor/Blizzard, or protected-file change was warranted.
+
 ## [2026-09-01] audit | Load CombatLog startup publisher
 
 Audited commit `a5ce1b550`. Updated [[addon-loading]], the addon-loading pipeline, and the prefork harness spec: `Blizzard_CombatLog` remains `LoadOnDemand` by TOC metadata but is an explicit `Blizzard_Game` startup dependency, so its full TOC publishes `CombatLog_LoadUI` before `PLAYER_LOGIN`; declared `Blizzard_CombatLogBase` and `Blizzard_CombatLogProcessor` dependencies load first. This does not restore a bootstrap-only pass, load all LoD addons, or reorder TOC files. No new page, index update, manifest, cache content, `PLAN.md`, vendor/Blizzard, or protected-file change was warranted.

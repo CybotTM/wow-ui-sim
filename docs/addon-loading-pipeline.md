@@ -11,7 +11,7 @@ pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
 }
 ```
 
-Prefers Mainline variants for retail WoW compatibility. Game startup selects eligible non-LoD `Blizzard_*` roots, their hard TOC dependency closure, and explicit LoD startup roots. `Blizzard_Game` depends on `Blizzard_TimeManager`, `Blizzard_CooldownBroadcaster`, `Blizzard_BoostTutorial`, and `Blizzard_CombatLog`; CombatLog's declared base and processor dependencies load first, publishing `CombatLog_LoadUI` before `PLAYER_LOGIN`. `Blizzard_RaidUI` is selected as an LoD startup root and depends on `Blizzard_RaidFrame`, so RaidFrame loads first. Other LoD addons—including non-Blizzard `Deprecated_PaperDoll`—remain excluded. `[Bootstrap]` remains an inline TOC annotation, not a discovery trigger or file-order override.
+Prefers Mainline variants for retail WoW compatibility. Game startup selects eligible non-LoD `Blizzard_*` roots, their hard TOC dependency closure, and explicit LoD startup roots. `Blizzard_Game` depends on `Blizzard_TimeManager`, `Blizzard_CooldownBroadcaster`, `Blizzard_BoostTutorial`, and `Blizzard_CombatLog`; CombatLog's declared base and processor dependencies load first, publishing `CombatLog_LoadUI` before `PLAYER_LOGIN`. `Blizzard_MacroUI` and `Blizzard_TrainerUI` are standalone Game-only LoD roots that publish `MacroFrame_LoadUI` and `ClassTrainerFrame_LoadUI`; they remain LoD and excluded from glue screens. `Blizzard_RaidUI` is selected as an LoD startup root and depends on `Blizzard_RaidFrame`, so RaidFrame loads first. Other LoD addons—including non-Blizzard `Deprecated_PaperDoll`—remain excluded. `[Bootstrap]` remains an inline TOC annotation, not a discovery trigger or file-order override.
 
 ### TOC File Parsing
 **File:** `src/toc.rs:63-120`
@@ -37,7 +37,7 @@ pub struct TocFile {
 **File Processing** (lines 69-104):
 - Skips `#` comment lines
 - Strips `[AllowLoadTextLocale]` annotations (only loads enUS)
-- Skips `[AllowLoadGameType]` files unless "mainline" or "standard"
+- Splits `[AllowLoadGameType]` values on commas or whitespace, then keeps files matching the active profile (for example, `vanilla tbc mainline` includes retail `mainline`)
 - Replaces placeholders: `[Family]` -> "Mainline", `[Game]` -> "Standard"
 - Normalizes backslashes, strips inline annotations
 
