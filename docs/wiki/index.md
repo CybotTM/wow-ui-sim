@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document Recent Allies preload enums
+
+Audited commit `ec0e21537`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: `Enum.RecentAlliesFriendTag` (`0..5`) plus metadata and sparse `Enum.RolodexType.LegacyFriend=23` with preserved `21`/`22` gaps and metadata resolve independent `Blizzard_RecentAllies` preload tables. Recent Allies service/search behavior remains unmodeled; no spec, changelog, or new page was warranted.
+
 ## [2026-09-01] audit | Document raid dispel overlay enum
 
 Audited commit `4d90beffd`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: generated `Enum.RaidDispelOverlayType` (`Disabled=0`, `UseDebuffColor=1`, `UseBlack=2`) plus metadata satisfies the current `CompactUnitFrameOptions` lookup. The later `CompactUnitFrameUtil` `pairs(nil)` was downstream of that aborted options load; overlay rendering remains unmodeled. No spec, changelog, or new page was warranted.
