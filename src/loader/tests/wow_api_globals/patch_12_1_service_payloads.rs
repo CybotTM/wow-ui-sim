@@ -32,6 +32,15 @@ fn test_patch_12_1_battle_net_friend_level_enum() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_lfg_lair_category_constant() {
+    let env = WowLuaEnv::new().unwrap();
+    let category: i32 = env.eval("return LE_LFG_CATEGORY_LAIR").unwrap();
+
+    assert_eq!(category, 8);
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_pet_and_lfg_payloads() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

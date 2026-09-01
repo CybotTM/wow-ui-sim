@@ -116,6 +116,8 @@ const INT_DEFS: &[&[crate::lua_api::globals::strings::string_data::IntDef]] = &[
     string_data::COMBAT_LOG_RAID_TARGET_CONSTANTS,
     string_data::TOTEM_SLOT_CONSTANTS,
     string_data::LFG_CATEGORY_CONSTANTS,
+    #[cfg(feature = "retail-12-1-0")]
+    string_data::RETAIL_12_1_LFG_CATEGORY_CONSTANTS,
     string_data::GAME_ERROR_STRINGS,
     string_data::ACTIONBAR_STATE_CONSTANTS,
     string_data::FRAME_TUTORIAL_CONSTANTS,
