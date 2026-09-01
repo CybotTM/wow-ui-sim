@@ -201,6 +201,29 @@ pub const BATTLE_NET_FRIEND_LEVEL_META: EnumDef = (
     &[("MinValue", 1), ("MaxValue", 3), ("NumValues", 3)],
 );
 
+#[cfg(feature = "retail-12-1-0")]
+pub const BATTLE_NET_FRIEND_TAG: EnumDef = (
+    "BattleNetFriendTag",
+    &[
+        ("Professions", 0),
+        ("PvP", 1),
+        ("Raiding", 2),
+        ("Dungeons", 3),
+        ("Delves", 4),
+        ("Questing", 5),
+        ("Roleplaying", 6),
+        ("DamagerRole", 7),
+        ("HealerRole", 8),
+        ("TankRole", 9),
+    ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const BATTLE_NET_FRIEND_TAG_META: EnumDef = (
+    "BattleNetFriendTagMeta",
+    &[("MinValue", 0), ("MaxValue", 9), ("NumValues", 10)],
+);
+
 pub const GUILD_ERROR_TYPE: SeqEnumDef = (
     "GuildErrorType",
     &[

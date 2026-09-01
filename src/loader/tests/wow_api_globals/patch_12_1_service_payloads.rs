@@ -32,6 +32,28 @@ fn test_patch_12_1_battle_net_friend_level_enum() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_battle_net_friend_tag_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local tag = Enum.BattleNetFriendTag
+            local meta = Enum.BattleNetFriendTagMeta
+            if type(tag) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if tag.Professions ~= 0 or tag.PvP ~= 1 or tag.Raiding ~= 2 then return "interests-1" end
+            if tag.Dungeons ~= 3 or tag.Delves ~= 4 or tag.Questing ~= 5 or tag.Roleplaying ~= 6 then return "interests-2" end
+            if tag.DamagerRole ~= 7 or tag.HealerRole ~= 8 or tag.TankRole ~= 9 then return "roles" end
+            if meta.MinValue ~= 0 or meta.MaxValue ~= 9 or meta.NumValues ~= 10 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_lfg_lair_category_constant() {
     let env = WowLuaEnv::new().unwrap();
     let category: i32 = env.eval("return LE_LFG_CATEGORY_LAIR").unwrap();
