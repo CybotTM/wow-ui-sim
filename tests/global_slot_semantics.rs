@@ -61,9 +61,8 @@ fn g_live_shadow_surfaces_new_whitelisted_global_after_freeze() {
         return;
     }
 
-    let test_name = std::thread::current()
-        .name()
-        .expect("global-slot test thread name");
+    let test_thread = std::thread::current();
+    let test_name = test_thread.name().expect("global-slot test thread name");
     let output = Command::new(std::env::current_exe().expect("integration test binary"))
         .args([test_name, "--exact", "--test-threads=1", "--nocapture"])
         .env(FREEZE_GLOBALS_CHILD_ENV, "1")
