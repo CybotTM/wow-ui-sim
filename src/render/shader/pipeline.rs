@@ -25,7 +25,7 @@ struct Uniforms {
 /// `WOW_SIM_BRIGHTNESS_BOOST`: unset / "1" keeps the historical 1.5, "0" or
 /// "false" disables the lift (divisor 1.0), any other number is used as the
 /// divisor directly.
-fn brightness_boost_divisor() -> f32 {
+pub fn brightness_boost_divisor() -> f32 {
     brightness_boost_divisor_from(std::env::var("WOW_SIM_BRIGHTNESS_BOOST").ok().as_deref())
 }
 
