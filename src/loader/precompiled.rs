@@ -13,8 +13,9 @@ const FIRE_ONLOAD_SOURCE: &str = r#"
     if not frame then return end
     local oldSelf = rawget(_G, "self")
     rawset(_G, "self", frame)
-    if type(frame.OnLoad_Intrinsic) == "function" then
-        local ok, err = pcall(frame.OnLoad_Intrinsic, frame)
+    local intrinsic = __wow_bind_xml_method(frame, "OnLoad_Intrinsic")
+    if type(intrinsic) == "function" then
+        local ok, err = pcall(intrinsic, frame)
         if not ok then
             __report("[OnLoad_Intrinsic] " .. tostring(err))
         end
