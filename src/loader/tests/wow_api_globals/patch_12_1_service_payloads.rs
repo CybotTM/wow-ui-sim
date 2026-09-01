@@ -54,6 +54,28 @@ fn test_patch_12_1_battle_net_friend_tag_enum() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_custom_aura_button_dispel_type_texture_style_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local style = Enum.CustomAuraButtonDispelTypeTextureStyle
+            local meta = Enum.CustomAuraButtonDispelTypeTextureStyleMeta
+            if type(style) ~= "table" or type(meta) ~= "table" then return "tables" end
+            if style.Border ~= 0 or style.BorderWithIcon ~= 1 or style.Icon ~= 2 then return "values-1" end
+            if style.PreserveAsset ~= 3 or style.CustomAsset ~= 4 then return "values-2" end
+            if table.count(style) ~= 5 then return "count" end
+            if meta.MinValue ~= 0 or meta.MaxValue ~= 4 or meta.NumValues ~= 5 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_recent_allies_friend_tag_enum() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

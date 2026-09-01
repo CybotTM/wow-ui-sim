@@ -128,6 +128,8 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     #[cfg(feature = "retail-12-1-0")]
     COOLDOWN_VIEWER_SOUND,
     #[cfg(feature = "retail-12-1-0")]
+    CUSTOM_AURA_BUTTON_DISPEL_TYPE_TEXTURE_STYLE,
+    #[cfg(feature = "retail-12-1-0")]
     RECENT_ALLIES_FRIEND_TAG,
     TTS_VOICE_TYPE,
     GUILD_ERROR_TYPE,
@@ -174,6 +176,8 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
 pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     #[cfg(feature = "retail-12-1-0")]
     COOLDOWN_VIEWER_SOUND_META,
+    #[cfg(feature = "retail-12-1-0")]
+    CUSTOM_AURA_BUTTON_DISPEL_TYPE_TEXTURE_STYLE_META,
     #[cfg(feature = "retail-12-1-0")]
     RECENT_ALLIES_FRIEND_TAG_META,
     #[cfg(feature = "retail-12-1-0")]

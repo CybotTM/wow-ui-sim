@@ -293,6 +293,24 @@ pub const COOLDOWN_VIEWER_SOUND_META: EnumDef = (
 pub const TTS_VOICE_TYPE: SeqEnumDef = ("TtsVoiceType", &["Standard", "Alternate"]);
 
 #[cfg(feature = "retail-12-1-0")]
+pub const CUSTOM_AURA_BUTTON_DISPEL_TYPE_TEXTURE_STYLE: SeqEnumDef = (
+    "CustomAuraButtonDispelTypeTextureStyle",
+    &[
+        "Border",
+        "BorderWithIcon",
+        "Icon",
+        "PreserveAsset",
+        "CustomAsset",
+    ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const CUSTOM_AURA_BUTTON_DISPEL_TYPE_TEXTURE_STYLE_META: EnumDef = (
+    "CustomAuraButtonDispelTypeTextureStyleMeta",
+    &[("MinValue", 0), ("MaxValue", 4), ("NumValues", 5)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
 pub const RECENT_ALLIES_FRIEND_TAG: SeqEnumDef = (
     "RecentAlliesFriendTag",
     &[
