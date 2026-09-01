@@ -38,7 +38,9 @@ pub const EDIT_MODE_SYSTEM: SeqEnumDef = (
         "PersonalResourceDisplay",
         "EncounterEvents",
         "DamageMeter",
+        "RaidWarning",
         "TotemActionBar",
+        "LossOfControl",
     ],
 );
 
@@ -209,6 +211,9 @@ pub const EDIT_MODE_DURABILITY_FRAME_SETTING: SeqEnumDef =
     ("EditModeDurabilityFrameSetting", &["Size"]);
 
 pub const EDIT_MODE_TIMER_BARS_SETTING: SeqEnumDef = ("EditModeTimerBarsSetting", &["Size"]);
+
+pub const EDIT_MODE_LOSS_OF_CONTROL_SETTING: SeqEnumDef =
+    ("EditModeLossOfControlSetting", &["Size"]);
 
 pub const EDIT_MODE_VEHICLE_SEAT_INDICATOR_SETTING: SeqEnumDef =
     ("EditModeVehicleSeatIndicatorSetting", &["Size"]);
@@ -399,7 +404,7 @@ pub const DAMAGE_METER_NUMBERS: SeqEnumDef =
     ("DamageMeterNumbers", &["Minimal", "Compact", "Complete"]);
 
 pub const DAMAGE_METER_VISIBILITY: SeqEnumDef =
-    ("DamageMeterVisibility", &["Always", "InCombat", "Hidden"]);
+    ("DamageMeterVisibility", &["Always", "InCombat", "Hidden", "InGroup"]);
 
 pub const DAMAGE_METER_SOURCE_DISPLAY_TYPE: SeqEnumDef =
     ("DamageMeterSourceDisplayType", &["None", "Ally", "Enemy"]);

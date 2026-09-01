@@ -316,3 +316,62 @@ fn test_global_functions_callable() {
         assert_eq!(ty, "function", "{} should be function", f);
     }
 }
+
+/// `RegisterGameMenuEscHandler` and `GameMenuEscPriority` are client-side
+/// globals that 25 Blizzard files call at FILE SCOPE. Without them each of
+/// those files raises there and silently loses every definition below the call
+/// -- see `docs/wiki/investigations/game-menu-esc-handlers.md`. Assert the
+/// registry exists and that dispatch honours priority, not just presence.
+#[test]
+fn test_game_menu_esc_handlers_dispatch_in_priority_order() {
+    let env = WowLuaEnv::new().unwrap();
+    let (register_ty, priority_ty, order, consumed, unconsumed): (
+        String,
+        String,
+        String,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local calls = {}
+            -- Registered low priority first, so a plain registration-order
+            -- dispatch would visit AddOn before FrameworkPre.
+            RegisterGameMenuEscHandler(GameMenuEscPriority.AddOn, function()
+                calls[#calls + 1] = "addon"
+                return false
+            end)
+            RegisterGameMenuEscHandler(GameMenuEscPriority.FrameworkPre, function()
+                calls[#calls + 1] = "pre"
+                return false
+            end)
+            local unconsumed = __wow_dispatch_game_menu_esc()
+
+            -- A handler that returns true consumes the press and stops the walk.
+            RegisterGameMenuEscHandler(GameMenuEscPriority.Framework, function()
+                calls[#calls + 1] = "framework"
+                return true
+            end)
+            calls = {}
+            local consumed = __wow_dispatch_game_menu_esc()
+
+            return type(RegisterGameMenuEscHandler),
+                type(GameMenuEscPriority.Framework),
+                table.concat(calls, ","),
+                consumed,
+                unconsumed
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(register_ty, "function");
+    assert_eq!(priority_ty, "number");
+    // FrameworkPre before Framework before AddOn, and the walk stops at the
+    // first handler that consumes the press.
+    assert_eq!(order, "pre,framework");
+    assert!(consumed, "a handler returning true must consume the press");
+    assert!(
+        !unconsumed,
+        "with every handler returning false the press falls through to the keybinding"
+    );
+}

@@ -1610,3 +1610,7 @@ Added parser and loader support for TOC entries annotated with `[Bootstrap]`, mo
 ## [2026-07-01] correction | `[Bootstrap]` preserves TOC order
 
 Updated `systems/addon-loading.md` after live-client probes showed `[Bootstrap]` is not a separate pass and must not move files out of TOC order. `TocFile` now keeps annotated files in `files` and records a per-file bootstrap flag. Startup loads full TOCs for non-LoD addons and only annotated bootstrap files for LoD addons, preserving addon order; runtime `LoadAddOn` skips already-executed bootstrap files and a self `LoadAddOn(thisAddon)` call from bootstrap remains a benign reentrancy no-op.
+
+## [2026-09-01] investigation | Game menu Esc handlers
+
+Added `investigations/game-menu-esc-handlers.md`. `RegisterGameMenuEscHandler` and `GameMenuEscPriority` are client-side globals with no definition in the Blizzard UI and no `Blizzard_APIDocumentationGenerated` entry; all 25 call sites are at file scope, so each file lost every definition below that line. `EditModeManager.lua` aborted before `RegisterSystemFrame`, which made `EditModeSystemMixin:OnSystemLoad` raise for every `EditModeSystemTemplate` frame — visible as the chat frame rendering an opaque white background because `FloatingChatFrame_Update` never applied the window colour and alpha. The bootstrap now models the registry, `key_dispatch.rs` consults it before the ESCAPE keybinding, and three edit-mode enum gaps found behind the abort are filled from `EditModeManagerConstantsDocumentation.lua`. Startup errors on `client-ptr` drop from 659 to 475.
