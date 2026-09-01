@@ -38,8 +38,8 @@ Measured on `client-ptr` with `--no-addons --no-saved-vars`:
 | --- | --- | --- |
 | addon directories in the cache | 310 | 348 |
 | `sync-blizzard-ui` | 20 files missing, exit 1 | 403 extracted, 0 missing, exit 0 |
-| startup Lua errors | 659 | 30 |
-| distinct error messages | 56 | 5 |
+| startup Lua errors | 659 | 26 |
+| distinct error messages | 56 | 4 |
 | `EditModeManagerFrameMixin` methods | 4 | 138 |
 | `ChatFrame1Background` alpha / vertex | 1.0 / 1,1,1 | 0.25 / 0,0,0 |
 | `BottomManagedFrameContainer` | absent | anchored, `513,45 573x0` |
@@ -66,6 +66,10 @@ Clearing the aborts let execution reach code that had never run, which surfaced 
 **`C_StringUtil` was rebuilt after the workaround layer populated it.** `register_c_string_util` assigned a fresh table over the global, and it runs a second time from `environment_cleanup_restore` — after `C_StringUtil.CreateSecondsFormatter` is installed. `ensure_global_table` keeps the existing namespace. The same replace-don't-merge shape may exist at other `src/c_api/` registration sites; not surveyed.
 
 **The screenshot command encoded at WebP quality 15** and forced the extension, smearing exactly the small text and one-pixel borders a UI capture exists to show. `.png` is honoured losslessly now and WebP takes `--quality`.
+
+**The minimap terrain sat inside a ring of empty space.** The terrain quad is the full 198×198 frame; the mask shrank it. `build_minimap_quads` stretched the built-in `Interface\HUD\UIMinimapMask` over the frame bounds, and decoding that asset (256×256, BLP2 uncompressed BGRA, alpha uniformly 255) shows its opaque disc at x 27..229 / y 20..229 — 203×210, off-centre on the canvas. Stretched over the frame, the disc covers ~79% of it. Nothing in Blizzard Lua or XML declares this mask; the client applies it C-side, and a 203px disc against a 198px frame is authored to cover the frame edge to edge. The mask rectangle is now the frame expanded so the disc maps onto it (`default_minimap_mask_rect`); addon masks set through `SetMaskTexture` keep the stretched behaviour. Measured in the annulus between radius 80 and 118 where the gap sat: dark backdrop pixels 58.9% → 2.9%.
+
+**Two things that looked like defects and are not.** The row of glyph-like shapes under the player frame is the Paladin Holy Power bar at 0/5 (`PaladinPowerBarFrame`, atlas `uf-holypower-runeholder`), rendered pixel-correctly. The yellow halo around objective-tracker quest icons is `POIButton.xml`'s deliberate `Glow` texture with `alphaMode="ADD"`; the residual softness of those icons is the 1.25× upscale of a 22px asset, inherent to any UI scale above 1.0.
 
 ## Rendering a screenshot that looks like the client
 
