@@ -161,8 +161,8 @@ pub fn load_addon_internal(
     let ctx = build_addon_context(env, toc, folder_name)?;
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
     let addon_name = result.name.clone();
-    let transmog_scope = (folder_name == "Blizzard_TransmogShared")
-        .then(|| enter_transmog_inventory_slot_scope(env))
+    let inventory_slot_scope = inventory_slot_compatibility_addon(folder_name)
+        .then(|| enter_inventory_slot_scope(env))
         .transpose()?;
 
     load_addon_files(
@@ -174,7 +174,7 @@ pub fn load_addon_internal(
         &mut result,
     );
     maybe_replay_blizzard_lua_in_secure_env(env, toc, folder_name, &ctx, &mut result);
-    if let Some(scope) = transmog_scope {
+    if let Some(scope) = inventory_slot_scope {
         scope.restore(env)?;
     }
     maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
@@ -192,12 +192,12 @@ pub fn load_addon_internal(
     Ok(result)
 }
 
-struct TransmogInventorySlotScope {
+struct InventorySlotScope {
     previous_global: Val,
     previous_scoped_env: Option<Val>,
 }
 
-impl TransmogInventorySlotScope {
+impl InventorySlotScope {
     fn restore(self, env: &LoaderEnv<'_>) -> Result<(), LoadError> {
         env.with_state(|state| {
             table_set_static(
@@ -213,22 +213,27 @@ impl TransmogInventorySlotScope {
     }
 }
 
-fn enter_transmog_inventory_slot_scope(
-    env: &LoaderEnv<'_>,
-) -> Result<TransmogInventorySlotScope, LoadError> {
-    let (previous_global, scope_env) = env.with_state(create_transmog_inventory_slot_scope)?;
+fn inventory_slot_compatibility_addon(folder_name: &str) -> bool {
+    matches!(
+        folder_name,
+        "Blizzard_InspectUI" | "Blizzard_TransmogShared"
+    )
+}
+
+fn enter_inventory_slot_scope(env: &LoaderEnv<'_>) -> Result<InventorySlotScope, LoadError> {
+    let (previous_global, scope_env) = env.with_state(create_inventory_slot_scope)?;
     let previous_scoped_env = env
         .state()
         .borrow_mut()
         .loading_scoped_script_env
         .replace(scope_env);
-    Ok(TransmogInventorySlotScope {
+    Ok(InventorySlotScope {
         previous_global,
         previous_scoped_env,
     })
 }
 
-fn create_transmog_inventory_slot_scope(state: &mut LuaState) -> Result<(Val, Val), LoadError> {
+fn create_inventory_slot_scope(state: &mut LuaState) -> Result<(Val, Val), LoadError> {
     let global = Val::Table(state.global);
     let previous_global = table_get_static(state, global, "GetInventorySlotInfo");
     let registered = registry_get(state, REGISTERED_GET_INVENTORY_SLOT_INFO_KEY);
