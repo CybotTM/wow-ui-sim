@@ -159,6 +159,7 @@ fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
                 "Blizzard_TimeManager".to_string(),
                 "Blizzard_CooldownBroadcaster".to_string(),
                 "Blizzard_BoostTutorial".to_string(),
+                "Blizzard_CombatLog".to_string(),
             ],
         ),
         (

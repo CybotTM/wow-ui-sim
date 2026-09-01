@@ -38,16 +38,22 @@ fn load_full_game_ui() -> WowLuaEnv {
 }
 
 #[test]
-fn blizzard_combat_log_is_load_on_demand_not_in_discovery() {
+fn blizzard_combat_log_is_load_on_demand_startup_publisher() {
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
+    let combat_log_position = addons
+        .iter()
+        .position(|(name, _)| name == "Blizzard_CombatLog");
+    let game_position = addons.iter().position(|(name, _)| name == "Blizzard_Game");
 
-    let auto_loaded = addons.iter().any(|(name, _)| name == "Blizzard_CombatLog");
     assert!(
-        !auto_loaded,
-        "Blizzard_CombatLog is `## LoadOnDemand: 1` and must NOT appear in Game-screen \
-         auto-discovery (it is loaded explicitly via runtime `LoadAddOn` from \
-         Blizzard_ChatFrameBase when the chat system needs the COMBATLOG ChatFrame2)"
+        combat_log_position.is_some(),
+        "Blizzard_CombatLog remains `## LoadOnDemand: 1` but must be discovered to publish \
+         CombatLog_LoadUI before Blizzard_Game startup events"
+    );
+    assert!(
+        combat_log_position < game_position,
+        "Blizzard_CombatLog must load before Blizzard_Game"
     );
 }
 
