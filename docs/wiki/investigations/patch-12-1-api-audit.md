@@ -38,6 +38,7 @@ The 12.1 compatibility work is currently captured by these commits:
 - `abcfb395b` — added the retail-12.1-gated `SLASH_CAA_WHEN_TARGET_DIES` and `SLASH_CAA_PLAY_SOUND` compatibility command names passed to `AddCommand` and normalized with `string.lower` during ChatFrame preload.
 - `4d90beffd` — added generated `Enum.RaidDispelOverlayType` and metadata required by `CompactUnitFrameOptions`; the subsequent `CompactUnitFrameUtil` `pairs(nil)` was downstream of that aborted options load.
 - `ec0e21537` — added `Enum.RecentAlliesFriendTag` (`0..5`) and its metadata, plus sparse `Enum.RolodexType.LegacyFriend=23` with metadata preserving the `21`/`22` gaps, resolving independent `Blizzard_RecentAllies` preload tables.
+- `6eae179ff` — added generated `Enum.CustomAuraButtonDispelTypeTextureStyle` (`0..4`) and metadata required by `Blizzard_Deprecated/Deprecated_12_1_0.lua` to construct `AuraButtonBorderStyle` aliases when deprecation fallbacks load.
 
 ### Live enUS GlobalStrings slice
 
