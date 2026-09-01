@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document retail 12.1 Social UI preload surface
+
+Audited commits `cfec8576b` and `8f070a410`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: 16 retail-12.1-gated Social UI compatibility labels bring the table from 45 to 61 strings and keep `Blizzard_SocialUIShared` tag/presence tables populated; their English values were not captured by the existing 49-candidate live probe. Documented `Enum.SocialUIPresenceType`/metadata and `Enum.SocialUIBlockType`/metadata. No spec, changelog, or new page was warranted; Social UI service/state semantics remain unmodeled. No vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.
+
 ## [2026-09-01] investigation | Retire TransmogShared inventory-slot loader scope
 
 Refreshed the retail manifest from Gethe `live` build `12.1.0.69497` and found the prior scope was based on stale 12.0.7 source: current `Blizzard_TransmogShared` calls `C_PaperDollInfo.GetInventorySlotInfo` directly. Removed the target-scoped legacy-global loader mechanism and its stale restoration test while preserving retail public removal and TransmogUtil behavior coverage. Updated [[transmog-inventory-slot-scope]], [[addon-loading]], and [[lua-api]]; cache provenance refresh prevents the stale-source condition from recurring.

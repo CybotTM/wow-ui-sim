@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document retail 12.1 Social UI preload surface
+
+Audited commits `cfec8576b` and `8f070a410`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: 16 retail-12.1-gated Social UI compatibility labels bring the table from 45 to 61 strings and keep `Blizzard_SocialUIShared` tag/presence tables populated; their English values were not captured by the existing 49-candidate live probe. Documented `Enum.SocialUIPresenceType`/metadata and `Enum.SocialUIBlockType`/metadata. No spec, changelog, or new page was warranted; Social UI service/state semantics remain unmodeled.
+
 ## [2026-08-31] audit | Document retail 12.1 housing Settings strings
 
 Audited commit `cc02aa287`. Updated [[patch-12-1-api-audit]], [[lua-api]], and the maintained Lua API reference: 13 exact enUS housing Settings labels/tooltips from retail `12.1.0.69497` bring the versioned table to 45 strings and allow the canonical Interface registrant to finish instead of aborting after assigning category ID 7. No spec, changelog, or new investigation page was warranted; housing service/state semantics and `C_SettingsUtil` remain unsupported.
