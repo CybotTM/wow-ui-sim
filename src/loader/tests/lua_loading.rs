@@ -417,6 +417,58 @@ GlobalOnly.lua [AllowLoadEnvironment Global]
 }
 
 #[test]
+fn blizzard_frame_xml_util_replays_aura_comparators_into_secure_environment() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("AuraUtil = { bootstrap = true }").unwrap();
+
+    let temp_root = std::env::temp_dir().join("wow-sim-framexmlutil-secure-replay-test");
+    let addon_dir = temp_root.join("Blizzard_FrameXMLUtil");
+    std::fs::create_dir_all(&addon_dir).unwrap();
+    std::fs::write(
+        addon_dir.join("AuraUtil.lua"),
+        r#"
+        AuraUtil = {}
+        AuraUtil.DefaultAuraCompare = function() return "default" end
+        AuraUtil.UnitFrameDebuffComparator = function() return "debuff" end
+        "#,
+    )
+    .unwrap();
+
+    let toc = crate::toc::TocFile::parse(
+        &addon_dir,
+        r#"
+## Title: Blizzard_FrameXMLUtil
+## AllowLoad: Game
+AuraUtil.lua
+"#,
+    );
+
+    load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+
+    let comparator_types: (String, String, String, String) = env
+        .eval(
+            r#"
+            return type(rawget(_G, "AuraUtil").DefaultAuraCompare),
+                   type(rawget(__secureenv, "AuraUtil").DefaultAuraCompare),
+                   type(rawget(_G, "AuraUtil").UnitFrameDebuffComparator),
+                   type(rawget(__secureenv, "AuraUtil").UnitFrameDebuffComparator)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        comparator_types,
+        (
+            "function".into(),
+            "function".into(),
+            "function".into(),
+            "function".into()
+        )
+    );
+
+    std::fs::remove_dir_all(&temp_root).ok();
+}
+
+#[test]
 fn blizzard_game_tooltip_lua_replays_into_secure_environment() {
     let env = WowLuaEnv::new().unwrap();
     let temp_root = std::env::temp_dir().join("wow-sim-game-tooltip-secure-replay-test");
