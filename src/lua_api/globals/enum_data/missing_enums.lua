@@ -16352,3 +16352,43 @@ if not Enum.ZoneControlStateMeta then
     NumValues = 2,
   }
 end
+
+if not Enum.SecondsFormatterRoundingMeta then
+  Enum.SecondsFormatterRoundingMeta = { MaxValue = 1, MinValue = 0, NumValues = 2 }
+end
+
+if not Enum.CooldownViewerSoundMeta then
+  Enum.CooldownViewerSoundMeta = { MaxValue = 93, MinValue = 0, NumValues = 94 }
+end
+
+if not Enum.RecentAlliesFriendTagMeta then
+  Enum.RecentAlliesFriendTagMeta = { MaxValue = 5, MinValue = 0, NumValues = 6 }
+end
+
+if not Enum.BattleNetFriendLevelMeta then
+  Enum.BattleNetFriendLevelMeta = { MaxValue = 3, MinValue = 1, NumValues = 3 }
+end
+
+if not Enum.BattleNetFriendTagMeta then
+  Enum.BattleNetFriendTagMeta = { MaxValue = 9, MinValue = 0, NumValues = 10 }
+end
+
+if not Enum.RaidDispelOverlayTypeMeta then
+  Enum.RaidDispelOverlayTypeMeta = { MaxValue = 2, MinValue = 0, NumValues = 3 }
+end
+
+if not Enum.SocialSystemTypeMeta then
+  Enum.SocialSystemTypeMeta = { MaxValue = 4, MinValue = 0, NumValues = 5 }
+end
+
+if not Enum.VisualAlertTypeMeta then
+  Enum.VisualAlertTypeMeta = { MaxValue = 10, MinValue = 1, NumValues = 10 }
+end
+
+if not Enum.SocialUIPresenceTypeMeta then
+  Enum.SocialUIPresenceTypeMeta = { MaxValue = 5, MinValue = 0, NumValues = 6 }
+end
+
+if not Enum.SocialUIBlockTypeMeta then
+  Enum.SocialUIBlockTypeMeta = { MaxValue = 2, MinValue = 0, NumValues = 3 }
+end

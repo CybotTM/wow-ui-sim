@@ -162,6 +162,15 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     RAID_DISPEL_DISPLAY_TYPE,
     NAME_PLATE_STYLE,
     AUTO_COMPLETE_PRIORITY,
+    // Social, friend-list, aura-formatting and raid-display enums
+    SECONDS_FORMATTER_ROUNDING,
+    COOLDOWN_VIEWER_SOUND,
+    RECENT_ALLIES_FRIEND_TAG,
+    BATTLE_NET_FRIEND_TAG,
+    RAID_DISPEL_OVERLAY_TYPE,
+    SOCIAL_SYSTEM_TYPE,
+    SOCIAL_UI_PRESENCE_TYPE,
+    SOCIAL_UI_BLOCK_TYPE,
 ];
 
 // All explicit value enums (for batch registration)
@@ -224,4 +233,7 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     CREATION_CLASS_DISABLED_REASON,
     CREATION_RACE_DISABLED_REASON,
     VAS_QUEUE_STATUS,
+    // Starts at 1, so it cannot be a SeqEnumDef
+    BATTLE_NET_FRIEND_LEVEL,
+    VISUAL_ALERT_TYPE,
 ];
