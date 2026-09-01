@@ -125,6 +125,8 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     NAVIGATION_STATE,
     UI_FRAME_TYPE,
     COOLDOWN_VIEWER_CATEGORY,
+    #[cfg(feature = "retail-12-1-0")]
+    COOLDOWN_VIEWER_SOUND,
     TTS_VOICE_TYPE,
     GUILD_ERROR_TYPE,
     ROLODEX_TYPE,
@@ -166,6 +168,8 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
 
 // All explicit value enums (for batch registration)
 pub const EXPLICIT_ENUMS: &[EnumDef] = &[
+    #[cfg(feature = "retail-12-1-0")]
+    COOLDOWN_VIEWER_SOUND_META,
     #[cfg(feature = "retail-12-1-0")]
     BATTLE_NET_FRIEND_LEVEL,
     #[cfg(feature = "retail-12-1-0")]

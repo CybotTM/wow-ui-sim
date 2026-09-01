@@ -118,6 +118,126 @@ fn test_patch_12_1_social_ui_block_type_preload_enum() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_cooldown_viewer_sound_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local sound = Enum.CooldownViewerSound
+            local meta = Enum.CooldownViewerSoundMeta
+            if type(sound) ~= "table" or type(meta) ~= "table" then return "tables" end
+
+            local names = {
+                "TextToSpeech",
+                "AnimalsCat",
+                "AnimalsChicken",
+                "AnimalsCow",
+                "AnimalsGnoll",
+                "AnimalsGoat",
+                "AnimalsLion",
+                "AnimalsPanther",
+                "AnimalsRattlesnake",
+                "AnimalsSheep",
+                "AnimalsWolf",
+                "DevicesBoatHorn",
+                "DevicesAirHorn",
+                "DevicesBikeHorn",
+                "DevicesCashRegister",
+                "DevicesJackpotBell",
+                "DevicesJackpotCoins",
+                "DevicesJackpotFail",
+                "DevicesRotaryPhoneDial",
+                "DevicesRotaryPhoneRing",
+                "DevicesStovePipe",
+                "DevicesTrashcanLid",
+                "ImpactsAnvilStrike",
+                "ImpactsBubbleSmash",
+                "ImpactsLowThud",
+                "ImpactsMetalClanks",
+                "ImpactsMetalRattle",
+                "ImpactsMetalScrape",
+                "ImpactsMetalWarble",
+                "ImpactsPopClick",
+                "ImpactsStrangeClang",
+                "ImpactsSwordScrape",
+                "InstrumentsBellRing",
+                "InstrumentsBellTrill",
+                "InstrumentsBrass",
+                "InstrumentsChimeAscending",
+                "InstrumentsGuitarChug",
+                "InstrumentsGuitarPinch",
+                "InstrumentsPitchPipeDistressed",
+                "InstrumentsPitchPipeNote",
+                "InstrumentsSynthBig",
+                "InstrumentsSynthBuzz",
+                "InstrumentsSynthHigh",
+                "InstrumentsWarhorn",
+                "War2AbstractWhoosh",
+                "War2Choir",
+                "War2Construction",
+                "War2MagicChimes",
+                "War2PigSqueal",
+                "War2Saws",
+                "War2Seal",
+                "War2Slow",
+                "War2Smith",
+                "War2SynthStinger",
+                "War2TrumpetRally",
+                "War2ZippyMagic",
+                "War3Bell",
+                "War3CrunchyBell",
+                "War3DrumSplash",
+                "War3Error",
+                "War3Fanfare",
+                "War3GateOpen",
+                "War3Gold",
+                "War3MagicShimmer",
+                "War3Ringout",
+                "War3Rooster",
+                "War3ShimmerBell",
+                "War3WolfHowl",
+                "ShortBellStrike",
+                "ShortBellTree",
+                "ShortBigPot",
+                "ShortBlades",
+                "ShortCoffeeMug",
+                "ShortCowBell",
+                "ShortFingerSnap",
+                "ShortGuitar",
+                "ShortKalimba",
+                "ShortMetalBladeDrop",
+                "ShortMetalBladeOnRod",
+                "ShortMetalImpact",
+                "ShortMiniWoodXylophone",
+                "ShortPaperCup",
+                "ShortSheetMetal",
+                "ShortStovePipe",
+                "ShortStovePipeBlade",
+                "ShortSwordShing",
+                "ShortSynthBleep",
+                "ShortSynthBlurp",
+                "ShortSynthError",
+                "ShortSynthHigh",
+                "ShortTriangle",
+                "ShortWaterDrop",
+                "ShortWineBottle",
+                "ShortWoodXylophone",
+            }
+            for index, name in ipairs(names) do
+                if sound[name] ~= index - 1 then return "sound-" .. index end
+            end
+            if table.count(sound) ~= #names then return "count" end
+            if meta.MinValue ~= 0 or meta.MaxValue ~= 93 or meta.NumValues ~= 94 then return "metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_lfg_lair_category_constant() {
     let env = WowLuaEnv::new().unwrap();
     let category: i32 = env.eval("return LE_LFG_CATEGORY_LAIR").unwrap();
