@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Load startup publishers in dependency order
+
+Audited commits `50943cff0` and `34712c117`. Updated [[addon-loading]], the addon-loading pipeline, and the prefork harness spec: full game discovery adds only the LoD publishers required by current startup consumers. `Blizzard_Game` depends on `Blizzard_TimeManager`, `Blizzard_CooldownBroadcaster`, and `Blizzard_BoostTutorial`; LoD root `Blizzard_RaidUI` depends on `Blizzard_RaidFrame`, so RaidFrame loads first and RaidUI is ready before startup events. LoD keys in the implicit startup-dependency map are selected as roots. `[Bootstrap]` remains an inline TOC annotation, not a global LoD pass or reorder signal; unrelated LoD roots such as `Deprecated_PaperDoll` remain excluded. No new page, index update, manifest, cache content, `PLAN.md`, vendor/Blizzard, or protected-file change was warranted.
+
 ## [2026-09-01] audit | Require retail CooldownBroadcaster bootstrap cache entry
 
 Audited commit `af410e4b7`. Updated [[addon-loading]] and the Blizzard UI patch-update runbook: current retail `12.1.0.69497` manifest and `Blizzard_CooldownBroadcaster` TOC require `Blizzard_CooldownBroadcaster_Bootstrap.lua`; stale PTR-only filtering skipped it during retail sync, allowing an incomplete completed cache. Retail and PTR now both include and require the entry. No new page, index update, manifest, cache content, spec, `PLAN.md`, vendor/Blizzard, or protected-file change was warranted.
