@@ -101,7 +101,7 @@ fn get_ability_info_by_id_unknown_returns_nil() {
 // ── GetPetSpeciesID ───────────────────────────────────────────────────────────
 
 #[test]
-fn get_pet_species_id_returns_seeded_ids_and_nil_for_missing_pet() {
+fn get_pet_species_id_matches_journal_model_scenes_for_default_battle_pets() {
     let env = env();
     let result: String = env
         .eval(
@@ -109,9 +109,14 @@ fn get_pet_species_id_returns_seeded_ids_and_nil_for_missing_pet() {
             local ally = C_PetBattles.GetPetSpeciesID(1, 1)
             local enemy = C_PetBattles.GetPetSpeciesID(2, 1)
             local missing = C_PetBattles.GetPetSpeciesID(1, 99)
-            if ally ~= 1 then return "ally:" .. tostring(ally) end
-            if enemy ~= 2 then return "enemy:" .. tostring(enemy) end
+            if ally ~= 39 then return "ally:" .. tostring(ally) end
+            if enemy ~= 87 then return "enemy:" .. tostring(enemy) end
             if missing ~= nil then return "missing:" .. tostring(missing) end
+
+            local allyCard, allyLoadout = C_PetJournal.GetPetModelSceneInfoBySpeciesID(ally)
+            local enemyCard, enemyLoadout = C_PetJournal.GetPetModelSceneInfoBySpeciesID(enemy)
+            if type(allyCard) ~= "number" or type(allyLoadout) ~= "number" then return "ally-scenes" end
+            if type(enemyCard) ~= "number" or type(enemyLoadout) ~= "number" then return "enemy-scenes" end
             return "ok"
             "#,
         )
