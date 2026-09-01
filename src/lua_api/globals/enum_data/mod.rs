@@ -151,6 +151,8 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     HOUSING_EXPERT_SUBMODE_RESTRICTION,
     #[cfg(feature = "retail-12-1-0")]
     HOUSING_RESULT,
+    #[cfg(feature = "retail-12-1-0")]
+    HOUSING_BLUEPRINT_TYPE,
     SPELL_BOOK_SPELL_BANK,
     SPELL_BOOK_ITEM_TYPE,
     BATTLE_PET_ACTION,
@@ -220,6 +222,8 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     HOUSE_SETTING_FLAGS,
     #[cfg(feature = "retail-12-1-0")]
     HOUSE_SETTING_FLAGS_META,
+    #[cfg(feature = "retail-12-1-0")]
+    HOUSING_BLUEPRINT_TYPE_META,
     LFG_ROLE,
     UNIT_SEX,
     UI_WIDGET_TEXT_SIZE_TYPE,

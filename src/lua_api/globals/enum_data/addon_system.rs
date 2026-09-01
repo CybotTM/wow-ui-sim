@@ -679,6 +679,18 @@ pub const HOUSE_SETTING_FLAGS_META: EnumDef = (
     &[("MinValue", 0), ("MaxValue", 16384), ("NumValues", 16)],
 );
 
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_BLUEPRINT_TYPE: SeqEnumDef = (
+    "HousingBlueprintType",
+    &["None", "House", "Room", "Interior", "Exterior"],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_BLUEPRINT_TYPE_META: EnumDef = (
+    "HousingBlueprintTypeMeta",
+    &[("MinValue", 0), ("MaxValue", 4), ("NumValues", 5)],
+);
+
 pub const HOUSE_OWNER_ERROR: EnumDef = (
     "HouseOwnerError",
     &[("Faction", 0), ("Guild", 1), ("GenericPermission", 2)],
