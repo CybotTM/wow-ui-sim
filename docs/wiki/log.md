@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document retail 12.1 HousingResult enum
+
+Audited commit `e3806caba`. Updated [[patch-12-1-api-audit]] and [[lua-api]]: generated `Enum.HousingResult` now publishes all 112 values (`0..111`) with metadata under `retail-12-1-0` before the stale missing-enums fallback, allowing current `Blizzard_HousingTemplates` to build `HousingResultToErrorText`. Housing operations and result strings remain unmodeled; the pre-12.1 contract is unchanged. No spec, changelog, index, or new page was warranted; no code, vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.
+
 ## [2026-09-01] audit | Document retail 12.1 external URL failure event registration
 
 Audited commit `fc833ab34`. Updated [[patch-12-1-api-audit]] and event-system docs: retail 12.1's strict registerable-event table now accepts `EXTERNAL_EVENT_LAUNCH_URL_FAILED`, allowing current `Blizzard_GameMenu` registration. No event producer, payload, or `C_ExternalEventURL` behavior is modeled; no spec, changelog, index, or new page was warranted.
