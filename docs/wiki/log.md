@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document timeout fixture capacity reservation
+
+Audited commit `d5e017f31`. Updated [[prefork-test-harness]] and the prefork spec: outer timeout conformance fixture subprocesses reserve the shared workload gate exclusively, while an inherited marker bypasses gate acquisition for descendants. Nested timeout children therefore retain the same global two-slot permit cap without deadlocking against their fixture reservation. No new page, index update, or changelog was warranted; protected `src/c_api/c_string_util.rs`, code, tests, `PLAN.md`, and vendor/cache/Blizzard paths were untouched.
+
 ## [2026-08-31] system | Document bounded Linux timeout re-execution
 
 Updated [[prefork-test-harness]] and the prefork spec/system docs for ordinary Linux timeout re-execution: exact one-test children use a separate two-slot cross-process `flock` permit, acquired before spawn and held through timeout cleanup, output draining, handshake validation, and failure aggregation. Queueing remains outside the post-spawn 120-second budget; default Cargo parallelism and prefork accounting are unchanged. Updated timeout optimization evidence to remove a brittle focused-test count. No final acceptance or manifest refresh was claimed.
