@@ -87,6 +87,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 
 **Profession specialization boundary** — The temporary `C_ProfSpecs` fixture reports `SkillLineHasSpecialization(164) == true` for the modeled Blacksmithing skill line and `false` for unrelated skill line 165. It does not claim authoritative profession specialization-tree behavior: `GetChildrenForPath()` and the backing path/tree state remain unmodeled, so the full Professions specialization-panel integration test is explicitly ignored rather than supplied with guessed node data.
 
+**Pet-battle breed quality boundary** — Temporary Lua-owned `C_PetBattles` sample state seeds the five displayed pets with `Enum.BattlePetBreedQuality.Rare` (`3`). `GetBreedQuality(owner, petIndex)` returns that numeric seed or `0` for an absent pet, letting current `PetBattleFrame` OnLoad render rarity without a nil value. This is not a pet-battle model: ownership, breeding, capture, combat outcomes, and live battle data remain unmodeled.
+
 ### `C_PlayerChoice` (PTR 12.1)
 
 `C_PlayerChoice` is a state-backed deterministic compatibility model. `GetCurrentPlayerChoiceInfo()` returns nil with the default empty state or a documented `PlayerChoiceInfo` table with nested options, buttons, and currency/item/reputation rewards when `SimState.player_choice.current` is seeded. `GetNumRerolls()`, `GetRemainingTime()`, and `IsWaitingForPlayerChoiceResponse()` expose local query state. `SendPlayerChoiceResponse()`, `RequestRerollPlayerChoice()`, and `OnUIClosed()` record local mutator intent. This does not model retail timing, server validation, reroll economics, or live service values.
@@ -116,6 +118,8 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 - [c_container.rs](../../../src/c_api/item_spell/c_container.rs) — state-backed bag-slot flags and backpack queries
 - [guild_info.rs](../../../src/lua_api/globals/guild_info.rs) — C_GuildInfo namespace registration and state-backed management methods
 - [profession_specs_defaults.rs](../../../src/lua_api/workarounds/temporary/profession_specs_defaults.rs) — temporary seeded profession-specialization fixture and supported skill-line boundary
+- [pet_battle_runtime_state.rs](../../../src/lua_api/workarounds/temporary/pet_battle_runtime_state.rs) — temporary seeded pet-battle breed-quality compatibility state
+- [c_pet_battles_probes.rs](../../../tests/c_pet_battles_probes.rs) — seeded and absent-pet GetBreedQuality behavior proof
 - [test_showuipanel_lod.rs](../../../tests/test_showuipanel_lod.rs) — explicit unsupported Professions path/tree integration boundary
 - [guild_verbs.rs](../../../src/lua_api/globals/guild_verbs.rs) — shared guild management handlers
 - [blizzard_deprecated_guild_script_loads.rs](../../../tests/blizzard_deprecated_guild_script_loads.rs) — deprecated-global/C_GuildInfo identity and behavior proof

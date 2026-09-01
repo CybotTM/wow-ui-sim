@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Document temporary pet-battle breed quality
+
+Audited commit `7ecab542f`. Updated [[lua-api]] and the maintained Lua API reference: temporary Lua-owned pet-battle sample state seeds displayed pets with rare breed quality (`3`), while `C_PetBattles.GetBreedQuality(owner, petIndex)` returns that numeric seed or `0` for an absent sample pet, allowing current PetBattleFrame OnLoad rarity rendering. Pet ownership, breeding, capture, combat outcomes, and live battle data remain unmodeled. No spec, index, or new page was warranted; no code, vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.
+
 ## [2026-09-01] audit | Document Blizzard dependency-root discovery
 
 Audited commit `d62832f08`. Updated [[addon-loading]], the maintained addon-loading pipeline, and the prefork harness spec: eligible non-LoadOnDemand `Blizzard_*` cache addons are startup roots, while the filtered candidate pool contributes only transitive hard TOC dependencies. Current `Blizzard_TutorialManager` therefore loads `middleclass` before itself; unrelated non-Blizzard directories such as `Deprecated_PaperDoll` remain excluded. LoadOnDemand addons are not roots merely because they are present in cache. No new page was warranted; no code, vendor, cache, Blizzard, manifest, `PLAN.md`, or protected-file changes.

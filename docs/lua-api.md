@@ -44,6 +44,10 @@ The retail 12.1 compatibility table publishes 70 strings under `profile-retail` 
 
 Retail 12.1 removes public `GetInventorySlotInfo`. Current `Blizzard_TransmogShared` calls `C_PaperDollInfo.GetInventorySlotInfo` directly, so no loader-scoped legacy-global exception remains; see [[transmog-inventory-slot-scope]] for the retired stale-source workaround.
 
+### Temporary pet-battle runtime
+
+`src/lua_api/workarounds/temporary/pet_battle_runtime_state.rs` seeds sample allied and enemy pets for compatibility. `C_PetBattles.GetBreedQuality(owner, petIndex)` returns seeded `Enum.BattlePetBreedQuality.Rare` (`3`) or numeric fallback `0` for an absent pet, allowing current `PetBattleFrame` OnLoad rarity rendering. It does not model pet ownership, breeding, capture, combat outcomes, or live battle data.
+
 ### Timer System (lines 382-506)
 
 - `schedule_timer()` -- Optional interval/iterations, returns unique timer ID
