@@ -171,6 +171,30 @@ fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
         ("Blizzard_AchievementUI".to_string(), vec![]),
         ("Blizzard_Transmog".to_string(), vec![]),
         ("Blizzard_ArdenwealdGardening".to_string(), vec![]),
+        // Blizzard_SharedXML.toc declares Blizzard_Narration; the legacy
+        // Blizzard_SharedXML_Mainline.toc that the loader prefers does not, so
+        // NarrationSliderMixin is still nil when Blizzard_EditMode builds its
+        // slider and MinimalSlider.lua:237 raises on SetNarrationValueFormatter.
+        // Restoring the edge is narrower than switching that addon to its bare
+        // TOC, which was measured to abort the whole Tutorial subsystem.
+        (
+            "Blizzard_SharedXML".to_string(),
+            vec!["Blizzard_Narration".to_string()],
+        ),
+        // The 12.1.0 Blizzard_UIParentPanelManager TOC declares
+        // Blizzard_ManagedFrameSystem and Blizzard_GameMenuEsc only; the
+        // `## LoadWith: Blizzard_UIParent` of earlier builds is gone. Its Lua
+        // still uses UIParent at file scope (UIPanelLayoutFrame.lua:11 parents
+        // a frame to it, UpdateUIPanelPositions.lua:1 sets its
+        // OnAttributeChanged script), and the eager-discovery order pinned by
+        // tests/blizzard_core_frame_lane.rs keeps UIParent first, so the edge
+        // is explicit rather than left to the sort's alphabetical tie-break:
+        // the Narration edge above moves UIParent later and would otherwise
+        // flip the pair.
+        (
+            "Blizzard_UIParentPanelManager".to_string(),
+            vec!["Blizzard_UIParent".to_string()],
+        ),
     ])
 }
 
