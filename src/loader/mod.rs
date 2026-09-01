@@ -162,8 +162,8 @@ fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
             ],
         ),
         (
-            "Blizzard_RaidFrame".to_string(),
-            vec!["Blizzard_RaidUI".to_string()],
+            "Blizzard_RaidUI".to_string(),
+            vec!["Blizzard_RaidFrame".to_string()],
         ),
     ])
 }
@@ -837,6 +837,12 @@ fn pull_required_dependency_addons(
             addons
                 .keys()
                 .flat_map(|name| extra_dependencies.get(name).into_iter().flatten().cloned()),
+        )
+        .chain(
+            extra_dependencies
+                .keys()
+                .filter(|name| lod_pool.contains_key(*name))
+                .cloned(),
         )
         .filter(|dep| lod_pool.contains_key(dep))
         .collect();

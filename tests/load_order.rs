@@ -145,7 +145,7 @@ fn test_startup_publishers_load_before_consumers() {
             ("Blizzard_TimeManager", "Blizzard_Game"),
             ("Blizzard_CooldownBroadcaster", "Blizzard_Game"),
             ("Blizzard_BoostTutorial", "Blizzard_Game"),
-            ("Blizzard_RaidUI", "Blizzard_RaidFrame"),
+            ("Blizzard_RaidFrame", "Blizzard_RaidUI"),
         ] {
             let publisher_position = names
                 .iter()
