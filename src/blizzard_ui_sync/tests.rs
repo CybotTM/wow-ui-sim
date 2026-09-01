@@ -106,6 +106,21 @@ fn test_provenance(build_key: &str) -> CacheProvenance {
 
 #[test]
 #[cfg(feature = "casc")]
+fn build_identity_allows_an_active_product_without_install_key() {
+    let build_info = "\
+Branch!STRING:0|Active!DEC:1|Build Key!HEX:16|Install Key!HEX:16|Version!STRING:0|Product!STRING:0
+us|1|0123456789abcdef0123456789abcdef||12.1.0.69497|wow";
+
+    let identity = super::parse_active_build_identity(build_info, "wow")
+        .expect("active build identity without install key");
+
+    assert_eq!(identity.version, "12.1.0.69497");
+    assert_eq!(identity.build_key, "0123456789abcdef0123456789abcdef");
+    assert!(identity.install_key.is_empty());
+}
+
+#[test]
+#[cfg(feature = "casc")]
 fn build_identity_selects_the_requested_active_product() {
     let build_info = "\
 Branch!STRING:0|Active!DEC:1|Build Key!HEX:16|Install Key!HEX:16|Version!STRING:0|Product!STRING:0

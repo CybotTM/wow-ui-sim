@@ -218,7 +218,7 @@ fn parse_active_build_identity(
     Ok(BuildIdentity {
         version: required_build_info_value(active_entry.version(), "Version")?,
         build_key: required_build_info_value(active_entry.build_key(), "Build Key")?,
-        install_key: required_build_info_value(active_entry.install_key(), "Install Key")?,
+        install_key: active_entry.install_key().unwrap_or_default().to_string(),
     })
 }
 

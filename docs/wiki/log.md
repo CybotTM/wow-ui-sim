@@ -12,7 +12,7 @@ Updated [[prefork-test-harness]] and the prefork spec/system docs for ordinary L
 
 ## [2026-09-01] system | Refresh Blizzard UI profile caches by provenance
 
-Updated [[addon-loading]] for cache provenance schema 1: `wow-cli casc sync-blizzard-ui` compares active profile, CASC product, active `.build.info` version/build/install keys, and compiled manifest hash before retaining an existing profile cache. Mismatches remove only that profile's `AddOns` root before extraction; matching identity retains incremental repair behavior. Patch refreshes no longer require manual cache deletion.
+Updated [[addon-loading]] for cache provenance schema 1: `wow-cli casc sync-blizzard-ui` compares active profile, CASC product, active `.build.info` version/build key, optional install key, and compiled manifest hash before retaining an existing profile cache. Mismatches remove only that profile's `AddOns` root before extraction; matching identity retains incremental repair behavior. Patch refreshes no longer require manual cache deletion.
 
 ## [2026-08-31] audit | Document retail 12.1 housing Settings strings
 
