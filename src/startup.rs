@@ -170,6 +170,20 @@ pub fn fire_gui_startup_on_update_tick(env: &WowLuaEnv) {
     }
 }
 
+/// Scale UIParent before the canvas size is applied. `set_screen_size` fires
+/// DISPLAY_SIZE_CHANGED / UI_SCALE_CHANGED and replays the edit-mode anchor
+/// hooks, which is what re-runs `ManageFramePositions` and sizes the managed
+/// containers for the scaled UIParent. Scaling from `--exec-lua` instead runs
+/// after that pass and leaves the containers laid out for scale 1.
+pub fn apply_ui_scale(env: &WowLuaEnv, ui_scale: f32) {
+    if ui_scale == 1.0 {
+        return;
+    }
+    if let Err(e) = env.exec(&format!("UIParent:SetScale({ui_scale})")) {
+        eprintln!("[ui-scale] error: {e}");
+    }
+}
+
 /// Fire extra OnUpdate ticks so deferred UI can process in headless commands.
 pub fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
     for _ in 0..n {
@@ -544,10 +558,6 @@ fn normalize_headless_frame_positions(env: &WowLuaEnv) {
 
         if CompactPartyFrame then
             CompactPartyFrame:SetSize(98, 234)
-        end
-
-        if ObjectiveTrackerFrame then
-            ObjectiveTrackerFrame:SetHeight(836.5)
         end
 
         if PlayerCastingBarFrame then

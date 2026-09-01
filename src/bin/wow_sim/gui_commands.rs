@@ -5,7 +5,9 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use wow_ui_sim::font::WowFontSystem;
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_startup};
+use wow_ui_sim::startup::{
+    apply_delay, apply_ui_scale, run_extra_update_ticks, settle_headless_startup,
+};
 
 pub(super) fn run_gui(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
     let debug_options = dispatch.debug_options();
@@ -68,6 +70,7 @@ pub(super) fn dispatch_screenshot(dispatch: CommandDispatch) {
         crop,
         dump_tree,
         quality,
+        ui_scale,
     }) = dispatch.command
     else {
         unreachable!("dispatch_screenshot only fires for Commands::Screenshot");
@@ -86,6 +89,7 @@ pub(super) fn dispatch_screenshot(dispatch: CommandDispatch) {
             exec_lua_secure: dispatch.exec_lua_secure,
             dump_tree,
             quality,
+            ui_scale,
         },
     );
 }
@@ -249,6 +253,7 @@ pub(super) struct ScreenshotCommand<'a> {
     pub(super) exec_lua_secure: bool,
     pub(super) dump_tree: Option<Option<String>>,
     pub(super) quality: f32,
+    pub(super) ui_scale: f32,
 }
 
 pub(super) fn run_screenshot(
@@ -282,6 +287,7 @@ pub(super) fn run_screenshot(
 
 fn prepare_screenshot_env(env: &WowLuaEnv, command: &ScreenshotCommand<'_>) {
     settle_headless_startup(env);
+    apply_ui_scale(env, command.ui_scale);
     env.set_screen_size(command.width as f32, command.height as f32);
     wow_ui_sim::debug_helpers::debug_show_game_menu(env);
     run_screenshot_exec_lua(env, command);
