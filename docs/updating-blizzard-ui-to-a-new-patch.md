@@ -114,10 +114,13 @@ For each remaining miss:
 
 ### 6. Update the profile-specific required/hardcoded lists
 
-If a patch renames files referenced by the hardcoded lists in
-`src/blizzard_ui_sync/profile_cache.rs`
-(`RETAIL_REQUIRED_PROFILE_CACHE_ENTRIES`, `MISTS_REQUIRED_PROFILE_CACHE_ENTRIES`,
-`ptr_only_entry`, …), update them to the new paths.
+If a patch renames files referenced by the hardcoded lists or profile filters in
+`src/blizzard_ui_sync/profile_cache.rs`, update them to the new paths and verify
+that every file referenced by an active profile's manifest or TOC is included by
+that profile's sync filter and required-entry set. Do not retain a stale
+profile-only exclusion: retail 12.1's `Blizzard_CooldownBroadcaster_Bootstrap.lua`
+was incorrectly filtered as PTR-only, allowing a completed retail cache without a
+TOC-required file.
 
 ### 7. Re-capture baselines and commit
 

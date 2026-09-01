@@ -1,3 +1,7 @@
+## [2026-09-01] audit | Require retail CooldownBroadcaster bootstrap cache entry
+
+Audited commit `af410e4b7`. Updated [[addon-loading]] and the Blizzard UI patch-update runbook: current retail `12.1.0.69497` manifest and `Blizzard_CooldownBroadcaster` TOC require `Blizzard_CooldownBroadcaster_Bootstrap.lua`; stale PTR-only filtering skipped it during retail sync, allowing an incomplete completed cache. Retail and PTR now both include and require the entry. No new page, index update, manifest, cache content, spec, `PLAN.md`, vendor/Blizzard, or protected-file change was warranted.
+
 ## [2026-09-01] audit | Document retail 12.1 SocialSystemType enum
 
 Audited commit `51b9243c5`. Updated [[patch-12-1-api-audit]]: generated retail `12.1.0.69497` `Enum.SocialSystemType` now publishes `Friends=0`, `QuickJoin=1`, `RaidList=2`, `RecruitAFriend=3`, and `RecentAllies=4`, with `MinValue=0`, `MaxValue=4`, and `NumValues=5` under the retail 12.1 epoch. Current `Blizzard_SocialUI` OnLoad reads all five for tab definitions; Social service behavior remains unmodeled. No new page, index update, spec, manifest, `PLAN.md`, vendor/cache/Blizzard, or protected-file change was warranted.
