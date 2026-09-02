@@ -78,16 +78,31 @@ fn achievement_ui_load_emits_no_lane_specific_lua_errors() {
 }
 
 const CURRENT_TOC_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil", "Blizzard_Plunderstorm"];
+const PANEL_ADDON_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil"];
+const CLOSURE_LOADED_ADDONS: &[&str] = &["Blizzard_Plunderstorm", ROOT];
 
 #[test]
 fn achievement_ui_dependency_closure_includes_current_declared_dependencies() {
-    with_blizzard_addon_smoke_shape(&[ROOT], &[], |_env, loaded| {
-        for required in CURRENT_TOC_DEPENDENCIES.iter().chain(std::iter::once(&ROOT)) {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
+        for required in PANEL_ADDON_DEPENDENCIES {
+            let is_loaded: bool = env
+                .eval(&format!(r#"return C_AddOns.IsAddOnLoaded("{required}")"#))
+                .expect("panel baseline dependency load-state probe must run cleanly");
+
+            assert!(
+                is_loaded,
+                "`{required}` is a declared AchievementUI dependency already loaded by \
+                 PANEL_ADDONS. Validate its runtime loaded state through C_AddOns rather than \
+                 requiring it in this harness's newly-loaded closure result."
+            );
+        }
+
+        for required in CLOSURE_LOADED_ADDONS {
             assert!(
                 loaded.iter().any(|entry| entry == required),
-                "The AchievementUI closure must include `{required}`. Retail 12.1 declares \
-                 Blizzard_FrameXMLUtil and Blizzard_Plunderstorm directly; transitive entries \
-                 are owned by those dependency closures. Got: {loaded:?}"
+                "The AchievementUI closure must newly load `{required}`. Retail 12.1 declares \
+                 Blizzard_Plunderstorm directly, then loads Blizzard_AchievementUI as the root. \
+                 Got: {loaded:?}"
             );
         }
     });
@@ -190,19 +205,32 @@ fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
          contract with the TOC if retail changes it."
     );
 
-    with_blizzard_addon_smoke_shape(&[ROOT], &[], |_env, loaded| {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
         for dep in &declared_deps {
-            assert!(
-                loaded.iter().any(|name| name == dep),
-                "Declared TOC dependency `{dep}` (parsed from \
-                 `{ROOT_TOC_FILE}` via `TocFile::from_file`) MUST appear in the closure-walked \
-                 `loaded` set. The walker calls `toc.dependencies().chain(toc.optional_deps())` \
-                 (src/loader/mod.rs:454) to pull deps transitively. A missing entry here means \
-                 the walker dropped the dep — downstream addons inheriting templates from this \
-                 dep would fail to resolve. Loaded set: {loaded:?}"
-            );
+            if PANEL_ADDON_DEPENDENCIES.contains(&dep.as_str()) {
+                let is_loaded: bool = env
+                    .eval(&format!(r#"return C_AddOns.IsAddOnLoaded("{dep}")"#))
+                    .expect("panel baseline dependency load-state probe must run cleanly");
+
+                assert!(
+                    is_loaded,
+                    "Declared TOC dependency `{dep}` is already loaded by PANEL_ADDONS, so \
+                     C_AddOns.IsAddOnLoaded must report it at runtime."
+                );
+            } else {
+                assert!(
+                    loaded.iter().any(|name| name == dep),
+                    "Declared TOC dependency `{dep}` (parsed from \
+                     `{ROOT_TOC_FILE}` via `TocFile::from_file`) MUST appear in the \
+                     newly-loaded closure set. Got: {loaded:?}"
+                );
+            }
         }
 
+        assert!(
+            loaded.iter().any(|name| name == ROOT),
+            "The newly-loaded closure must include its requested root `{ROOT}`. Got: {loaded:?}"
+        );
     });
 }
 
