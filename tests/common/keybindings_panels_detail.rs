@@ -38,6 +38,7 @@ const BLIZZARD_ADDONS: &[&str] = &[
     "Blizzard_ItemButton",
     "Blizzard_QuickKeybind",
     "Blizzard_FrameXML",
+    "Blizzard_GameMenuEsc",
     "Blizzard_UIPanels_Game",
     "Blizzard_MapCanvasSecureUtil",
     "Blizzard_MapCanvas",
