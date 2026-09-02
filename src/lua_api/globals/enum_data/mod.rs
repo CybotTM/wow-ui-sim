@@ -237,6 +237,10 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     #[cfg(feature = "retail-12-1-0")]
     HOUSE_SETTING_FLAGS_META,
     #[cfg(feature = "retail-12-1-0")]
+    HOUSING_BUDGET_TYPE,
+    #[cfg(feature = "retail-12-1-0")]
+    HOUSING_BUDGET_TYPE_META,
+    #[cfg(feature = "retail-12-1-0")]
     HOUSING_BLUEPRINT_TYPE_META,
     #[cfg(feature = "retail-12-1-0")]
     HOUSING_BLUEPRINT_CONTENT_TYPE_META,
@@ -303,6 +307,10 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     PLAYER_MENTORSHIP_STATUS,
     CHARACTER_CREATE_TYPE,
     VALUE_ADDED_SERVICE_TYPE,
+    #[cfg(feature = "retail-12-1-0")]
+    FORBIDDEN_ASPECT,
+    #[cfg(feature = "retail-12-1-0")]
+    FORBIDDEN_ASPECT_META,
     CREATION_CLASS_DISABLED_REASON,
     CREATION_RACE_DISABLED_REASON,
     VAS_QUEUE_STATUS,

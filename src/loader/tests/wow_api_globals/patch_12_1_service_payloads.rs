@@ -719,7 +719,7 @@ fn test_patch_12_1_spell_cooldown_payload() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
-fn test_patch_12_1_housing_editor_enums() {
+fn test_patch_12_1_housing_and_forbidden_enums() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
         .eval(
@@ -735,6 +735,21 @@ fn test_patch_12_1_housing_editor_enums() {
             if type(player) ~= "table" or type(playerMeta) ~= "table" then return "player-tables" end
             if player.None ~= 0 or player.Owner ~= 1 or player.Visitor ~= 2 then return "player-values" end
             if playerMeta.MinValue ~= 0 or playerMeta.MaxValue ~= 2 or playerMeta.NumValues ~= 3 then return "player-metadata" end
+
+            local budget = Enum.HousingBudgetType
+            local budgetMeta = Enum.HousingBudgetTypeMeta
+            if type(budget) ~= "table" or type(budgetMeta) ~= "table" then return "budget-tables" end
+            if budget.RoomPlacement ~= 0 or budget.DecorPlacement ~= 1 or budget.PetDecor ~= 2 then return "budget-values" end
+            if budgetMeta.MinValue ~= 0 or budgetMeta.MaxValue ~= 2 or budgetMeta.NumValues ~= 3 then return "budget-metadata" end
+
+            local aspect = Enum.ForbiddenAspect
+            local aspectMeta = Enum.ForbiddenAspectMeta
+            if type(aspect) ~= "table" or type(aspectMeta) ~= "table" then return "aspect-tables" end
+            if aspect.SetToDefaults ~= 1 or aspect.ScriptBindings ~= 2 or aspect.UntrustedScriptExecution ~= 4 then return "aspect-first" end
+            if aspect.UntrustedLayoutScriptExecution ~= 8 or aspect.EventRegistrations ~= 16 or aspect.AlwaysPropagateInput ~= 32 then return "aspect-middle-1" end
+            if aspect.ScriptedInput ~= 64 or aspect.QueryFocus ~= 128 or aspect.ChangeAnimationTarget ~= 256 then return "aspect-middle-2" end
+            if aspect.RemoveSecretAspects ~= 512 or aspect.ChangeParent ~= 1024 then return "aspect-last" end
+            if aspectMeta.MinValue ~= 1 or aspectMeta.MaxValue ~= 1024 or aspectMeta.NumValues ~= 11 then return "aspect-metadata" end
             return "ok"
             "#,
         )

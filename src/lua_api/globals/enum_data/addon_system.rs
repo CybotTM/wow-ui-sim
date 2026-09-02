@@ -718,6 +718,18 @@ pub const HOUSE_SETTING_FLAGS_META: EnumDef = (
 );
 
 #[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_BUDGET_TYPE: EnumDef = (
+    "HousingBudgetType",
+    &[("RoomPlacement", 0), ("DecorPlacement", 1), ("PetDecor", 2)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_BUDGET_TYPE_META: EnumDef = (
+    "HousingBudgetTypeMeta",
+    &[("MinValue", 0), ("MaxValue", 2), ("NumValues", 3)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
 pub const HOUSING_BLUEPRINT_TYPE: SeqEnumDef = (
     "HousingBlueprintType",
     &["None", "House", "Room", "Interior", "Exterior"],

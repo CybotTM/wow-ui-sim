@@ -82,6 +82,30 @@ pub const VALUE_ADDED_SERVICE_TYPE: EnumDef = (
     ],
 );
 
+#[cfg(feature = "retail-12-1-0")]
+pub const FORBIDDEN_ASPECT: EnumDef = (
+    "ForbiddenAspect",
+    &[
+        ("SetToDefaults", 1),
+        ("ScriptBindings", 2),
+        ("UntrustedScriptExecution", 4),
+        ("UntrustedLayoutScriptExecution", 8),
+        ("EventRegistrations", 16),
+        ("AlwaysPropagateInput", 32),
+        ("ScriptedInput", 64),
+        ("QueryFocus", 128),
+        ("ChangeAnimationTarget", 256),
+        ("RemoveSecretAspects", 512),
+        ("ChangeParent", 1024),
+    ],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const FORBIDDEN_ASPECT_META: EnumDef = (
+    "ForbiddenAspectMeta",
+    &[("MinValue", 1), ("MaxValue", 1024), ("NumValues", 11)],
+);
+
 pub const CREATION_CLASS_DISABLED_REASON: EnumDef = (
     "CreationClassDisabledReason",
     &[
