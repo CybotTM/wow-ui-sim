@@ -404,10 +404,10 @@ pub(crate) struct FontObjectFields {
 
 pub(crate) fn read_font_object_fields(state: &mut LuaState, font_object: Val) -> FontObjectFields {
     FontObjectFields {
-        font: font_field_string(state, font_object.clone(), "__font", "__fontPath"),
-        font_size: font_field_number(state, font_object.clone(), "__height", "__fontHeight")
+        font: font_field_string(state, font_object.clone(), "__fontPath", "__font"),
+        font_size: font_field_number(state, font_object.clone(), "__fontHeight", "__height")
             .map(|height| height as f32),
-        font_outline: font_field_string(state, font_object.clone(), "__outline", "__fontFlags")
+        font_outline: font_field_string(state, font_object.clone(), "__fontFlags", "__outline")
             .map(|outline| crate::widget::TextOutline::from_wow_str(&outline)),
         justify_h: font_field_string(state, font_object.clone(), "__justifyH", "__justifyH")
             .map(|justify| crate::widget::TextJustify::from_wow_str(&justify)),
