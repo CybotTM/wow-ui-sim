@@ -1,3 +1,7 @@
+## [2026-09-02] port | Rebase the manifest drift branch onto master
+
+Rebased the [[blizzard-ui-manifest-drift]] branch from `634bb762c` onto `bbd591fe4`; the page gains a section on what master had fixed in the meantime (kept master's version), what the keep-both conflict resolutions had cut, the `client-retail` 12.1.0 manifest refresh (master already reports 0 startup Lua errors under retail, 42 distinct under ptr; the branch 0 under both), why `sync-blizzard-ui` under `client-ptr` refuses a live install (CASC product `wowt`), and the one ordering regression the rebase surfaced (`Blizzard_UIParentPanelManager` before `Blizzard_UIParent`), fixed with an explicit startup dependency.
+
 ## [2026-09-02] investigation | Preserve duplicate named region bindings
 
 Documented commit `601cde499`: duplicate sibling Texture/FontString regions with the same parent now keep the first `_G` binding while retaining both objects. Current `Blizzard_GMChatUI.xml` relies on this for its second `GMChatTabBG` texture to anchor to the first; last-writer replacement had produced a self-anchor error and aborted XML before `GMChatStatusFrame`, breaking Behavioral Messaging. Added [[duplicate-named-region-binding]], updated [[global-frame-index]], and recorded the related retail 12.1 Tiered Entrance enum, Transmog startup root, and `HasAccessConstraints` contracts in [[patch-12-1-api-audit]] and [[addon-loading]].

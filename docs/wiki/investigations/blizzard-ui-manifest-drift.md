@@ -143,6 +143,16 @@ The client renders one UI unit as `height / 768 × uiScale` pixels; a 3440×1440
 
 `Blizzard_PTRFeedback` ("Issue Reporter") is marked `## OnlyBetaAndPTR: 1` and the client skips it on live builds. `is_ptr_only()` skips it only when the profile is *not* `client-ptr` — and `client-ptr` is what targets 12.1.0, which has since shipped live (`.build.info` reports `12.1.0.69497`, product `wow`). Whether the profile should still claim `IsTestBuild()` is a question for the profile's semantics, not something to change quietly; hide the frame when capturing.
 
+## Port onto upstream master (2026-09-02)
+
+The branch was rebased from `634bb762c` onto `bbd591fe4`, 1174 commits later. Sixteen files conflicted. Where master had meanwhile fixed the same thing, master's version is kept: `ensure_table_field` (the enum re-initialisation), `Enum.EditModeAccountSetting`, four lib tests, and nine of the ten enums above as Rust tables (`addon_system.rs`, `widget.rs`, `combat_system.rs` — member names and values compared equal to the branch's tables, so nothing was lost). The branch keeps the `*Meta` tables for all ten, which the Rust registration does not emit. Three keep-both resolutions had cut code (`append_pending_nested_addon_diagnostics` lost its closing braces, the SecondsFormatter proxy lost an `end`, `render_headless_primitive_to_image` no longer exists; `HeadlessRenderContext` replaces it) and are folded back into the commits that introduced the lines.
+
+Master also refreshed `data/blizzard-ui-files/retail.txt` for 12.1.0 (`bf6c3e3ea`), so `client-retail` is the profile it verifies 12.1.0 with now. With a retail cache synced from a live `12.1.0.69497` install (348 addon directories, provenance recorded), master already reports **0** startup Lua errors under `client-retail`; under `client-ptr` with the same content it reports 42 distinct messages, 101 occurrences (`SetNarrationValueFormatter`, `RaidWarningFrame_OnLoad`, `FloatingPetBattleTooltip.lua:1`, the pet-battle tooltip family — the legacy-TOC and Narration findings above), and the branch 0 under both. The render differences against master are the ones catalogued above (empty portrait rings, unfilled bars, `-2 s` auras, white chat window, brightness lift in captures): master's Lua count says nothing about them.
+
+`wow-cli casc sync-blizzard-ui` built with `client-ptr` refuses a live install: the profile maps to CASC product `wowt`, which `.build.info` does not carry. The `ptr` cache used for every measurement above was populated by the older sync from the same 12.1.0.69497 install; the 3846 files it shares with the freshly synced retail cache are byte-identical (201 are ptr-manifest-only, `Blizzard_PTRFeedback` among them). Master's provenance check simply cannot re-sync it.
+
+One ordering regression relative to master came out of the rebase: the `Blizzard_SharedXML → Blizzard_Narration` edge moves `Blizzard_UIParent` behind `Blizzard_UIParentPanelManager` in eager discovery, whose 12.1.0 TOC no longer carries `## LoadWith: Blizzard_UIParent`. An explicit edge in `implicit_blizzard_startup_dependencies` keeps UIParent first (`tests/blizzard_core_frame_lane.rs`).
+
 ## Sources
 
 - [gen_blizzard_ui_manifest.py](../../tools/gen_blizzard_ui_manifest.py) — states the manifest contract this drifted from
