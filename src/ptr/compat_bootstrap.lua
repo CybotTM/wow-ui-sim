@@ -51,7 +51,6 @@ __wow_fill_enum("NamePlateStyle", { "Classic" })
 __wow_fill_enum("PingResult", { "FailedSilent" })
 __wow_fill_enum("PingSubjectType", { "ActionReady", "ActionOnCooldown", "ActionUnavailable" })
 __wow_fill_enum("SecretAspect", { "RadialProgress" })
-__wow_fill_enum("TieredEntranceType", { "Lairs" })
 __wow_fill_enum("TooltipDataLineType", { "ItemSpellTriggerOnUse", "ItemSpellTriggerOnEquip", "ItemSpellTriggerOnProc" })
 
 if not Enum.ForbiddenScriptObjectAspect then

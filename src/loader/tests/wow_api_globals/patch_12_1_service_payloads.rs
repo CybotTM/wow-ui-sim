@@ -32,6 +32,25 @@ fn test_patch_12_1_battle_net_friend_level_enum() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_tiered_entrance_type_enum() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local entrance = Enum.TieredEntranceType
+            if type(entrance) ~= "table" then return "table" end
+            if entrance.Invalid ~= 0 or entrance.Delve ~= 1 then return "first" end
+            if entrance.Sites ~= 2 or entrance.WorldTier ~= 3 or entrance.Lairs ~= 4 then return "rest" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_battle_net_friend_tag_enum() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

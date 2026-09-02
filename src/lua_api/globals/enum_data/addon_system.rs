@@ -811,6 +811,18 @@ pub const NEIGHBORHOOD_OWNER_TYPE: SeqEnumDef =
 // Delves Enums
 // ============================================================================
 
+#[cfg(feature = "retail-12-1-0")]
+pub const TIERED_ENTRANCE_TYPE: EnumDef = (
+    "TieredEntranceType",
+    &[
+        ("Invalid", 0),
+        ("Delve", 1),
+        ("Sites", 2),
+        ("WorldTier", 3),
+        ("Lairs", 4),
+    ],
+);
+
 pub const TIERED_ENTRANCE_REWARD_TYPE: EnumDef =
     ("TieredEntranceRewardType", &[("Item", 0), ("Currency", 1)]);
 
