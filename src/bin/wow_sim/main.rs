@@ -230,6 +230,24 @@ fn hires_atlases_wanted(ui_scale: f32, env_override: Option<&str>) -> bool {
     }
 }
 
+/// Whether the command renders to an image file.
+fn is_screenshot_command(command: &Option<Commands>) -> bool {
+    match command {
+        #[cfg(feature = "gui")]
+        Some(Commands::Screenshot { .. }) => true,
+        _ => false,
+    }
+}
+
+/// A capture reproduces atlas texels 1:1 unless `WOW_SIM_BRIGHTNESS_BOOST`
+/// asks for the on-screen lift: the `pow(rgb, 1/1.5)` aid lifts dark values
+/// most, which flattens the dark outlines of small art (the calendar
+/// button's day plate reads blurred with it) and matches no client texel.
+/// The live window keeps the environment's choice.
+fn screenshot_brightness_divisor(is_screenshot: bool, env_override: Option<&str>) -> Option<f32> {
+    (is_screenshot && env_override.is_none()).then_some(1.0)
+}
+
 fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     if let Some(Commands::CacheTexture { ref path, force }) = args.command {
@@ -240,6 +258,10 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     wow_ui_sim::atlas::set_prefer_hires_atlases(hires_atlases_wanted(
         requested_ui_scale(&args.command),
         std::env::var("WOW_SIM_HIRES_ATLASES").ok().as_deref(),
+    ));
+    wow_ui_sim::render::set_brightness_boost_divisor(screenshot_brightness_divisor(
+        is_screenshot_command(&args.command),
+        std::env::var("WOW_SIM_BRIGHTNESS_BOOST").ok().as_deref(),
     ));
     let init = init_and_load(&args, screen)?;
     #[cfg(feature = "gui")]
@@ -669,6 +691,9 @@ mod tests {
     fn hires_atlases_follow_the_ui_scale_unless_overridden() {
         assert!(!hires_atlases_wanted(1.0, None));
         assert!(hires_atlases_wanted(1.6875, None));
+        assert_eq!(screenshot_brightness_divisor(true, None), Some(1.0));
+        assert_eq!(screenshot_brightness_divisor(true, Some("1.5")), None);
+        assert_eq!(screenshot_brightness_divisor(false, None), None);
         assert!(!hires_atlases_wanted(1.6875, Some("0")));
         assert!(hires_atlases_wanted(1.0, Some("1")));
         assert!(hires_atlases_wanted(1.25, Some("garbage")));
