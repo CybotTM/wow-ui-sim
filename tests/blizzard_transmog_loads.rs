@@ -124,9 +124,9 @@ fn toc_is_load_on_demand_with_thirteen_dependencies() {
     assert!(
         toc.is_load_on_demand(),
         "`## LoadOnDemand: 1` — Transmog only loads when the player \
-         visits a transmogrifier NPC. UIParent.lua:475-477 publishes \
-         `Transmog_LoadUI()` which calls \
-         `UIParentLoadAddOn(\"Blizzard_Transmog\")`"
+         visits a transmogrifier NPC. Blizzard_Transmog_Bootstrap.lua \
+         publishes `Transmog_LoadUI()` and registers it with \
+         `RegisterPlayerInteraction`"
     );
 
     let deps = toc.dependencies();
@@ -564,8 +564,8 @@ fn transmog_load_ui_published_at_boot(env: &WowLuaEnv) {
     assert_eq!(
         kind, "function",
         "Transmog_LoadUI must exist at boot — published by \
-         UIParent.lua:475-477 BEFORE Blizzard_Transmog itself loads, \
-         so PlayerInteractionFrameManager's loadFunc reference \
+         Blizzard_Transmog_Bootstrap.lua before the rest of the LoD \
+         addon body loads, so the Transmogrifier interaction's loadFunc \
          resolves at module-init time. Without this boot-time wrapper, \
          the first transmog interaction would race the LoD load"
     );
