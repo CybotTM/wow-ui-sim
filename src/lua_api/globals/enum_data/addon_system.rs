@@ -669,6 +669,26 @@ pub const HOUSING_RESULT_META: EnumDef = (
 );
 
 #[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_PET_BEHAVIOR_TYPE: SeqEnumDef =
+    ("HousingPetBehaviorType", &["Stationary", "Wander"]);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_PET_BEHAVIOR_TYPE_META: EnumDef = (
+    "HousingPetBehaviorTypeMeta",
+    &[("MinValue", 0), ("MaxValue", 1), ("NumValues", 2)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSE_EDITOR_PLAYER_TYPE: SeqEnumDef =
+    ("HouseEditorPlayerType", &["None", "Owner", "Visitor"]);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSE_EDITOR_PLAYER_TYPE_META: EnumDef = (
+    "HouseEditorPlayerTypeMeta",
+    &[("MinValue", 0), ("MaxValue", 2), ("NumValues", 3)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
 pub const HOUSE_SETTING_FLAGS: EnumDef = (
     "HouseSettingFlags",
     &[

@@ -697,3 +697,29 @@ fn test_patch_12_1_spell_cooldown_payload() {
 
     assert_eq!(result, "ok");
 }
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn test_patch_12_1_housing_editor_enums() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local pet = Enum.HousingPetBehaviorType
+            local petMeta = Enum.HousingPetBehaviorTypeMeta
+            if type(pet) ~= "table" or type(petMeta) ~= "table" then return "pet-tables" end
+            if pet.Stationary ~= 0 or pet.Wander ~= 1 then return "pet-values" end
+            if petMeta.MinValue ~= 0 or petMeta.MaxValue ~= 1 or petMeta.NumValues ~= 2 then return "pet-metadata" end
+
+            local player = Enum.HouseEditorPlayerType
+            local playerMeta = Enum.HouseEditorPlayerTypeMeta
+            if type(player) ~= "table" or type(playerMeta) ~= "table" then return "player-tables" end
+            if player.None ~= 0 or player.Owner ~= 1 or player.Visitor ~= 2 then return "player-values" end
+            if playerMeta.MinValue ~= 0 or playerMeta.MaxValue ~= 2 or playerMeta.NumValues ~= 3 then return "player-metadata" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
