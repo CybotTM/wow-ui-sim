@@ -258,8 +258,6 @@ fn allow_load_game_restricts_to_in_world() {
 }
 
 #[test]
-
-#[test]
 fn toc_raw_bytes_pin_directives_and_representative_body_files() {
     let raw = std::fs::read_to_string(ui_widgets_toc()).expect("TOC reads utf-8");
 
