@@ -730,6 +730,18 @@ pub const HOUSING_BUDGET_TYPE_META: EnumDef = (
 );
 
 #[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_HOUSE_SCOPE: EnumDef = (
+    "HousingHouseScope",
+    &[("None", 0), ("Interior", 1), ("Exterior", 2)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
+pub const HOUSING_HOUSE_SCOPE_META: EnumDef = (
+    "HousingHouseScopeMeta",
+    &[("MinValue", 0), ("MaxValue", 2), ("NumValues", 3)],
+);
+
+#[cfg(feature = "retail-12-1-0")]
 pub const HOUSING_BLUEPRINT_TYPE: SeqEnumDef = (
     "HousingBlueprintType",
     &["None", "House", "Room", "Interior", "Exterior"],

@@ -241,6 +241,10 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     #[cfg(feature = "retail-12-1-0")]
     HOUSING_BUDGET_TYPE_META,
     #[cfg(feature = "retail-12-1-0")]
+    HOUSING_HOUSE_SCOPE,
+    #[cfg(feature = "retail-12-1-0")]
+    HOUSING_HOUSE_SCOPE_META,
+    #[cfg(feature = "retail-12-1-0")]
     HOUSING_BLUEPRINT_TYPE_META,
     #[cfg(feature = "retail-12-1-0")]
     HOUSING_BLUEPRINT_CONTENT_TYPE_META,

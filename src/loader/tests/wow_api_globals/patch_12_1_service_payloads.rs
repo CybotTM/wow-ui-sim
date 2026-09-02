@@ -742,6 +742,12 @@ fn test_patch_12_1_housing_and_forbidden_enums() {
             if budget.RoomPlacement ~= 0 or budget.DecorPlacement ~= 1 or budget.PetDecor ~= 2 then return "budget-values" end
             if budgetMeta.MinValue ~= 0 or budgetMeta.MaxValue ~= 2 or budgetMeta.NumValues ~= 3 then return "budget-metadata" end
 
+            local scope = Enum.HousingHouseScope
+            local scopeMeta = Enum.HousingHouseScopeMeta
+            if type(scope) ~= "table" or type(scopeMeta) ~= "table" then return "scope-tables" end
+            if scope.None ~= 0 or scope.Interior ~= 1 or scope.Exterior ~= 2 then return "scope-values" end
+            if scopeMeta.MinValue ~= 0 or scopeMeta.MaxValue ~= 2 or scopeMeta.NumValues ~= 3 then return "scope-metadata" end
+
             local aspect = Enum.ForbiddenAspect
             local aspectMeta = Enum.ForbiddenAspectMeta
             if type(aspect) ~= "table" or type(aspectMeta) ~= "table" then return "aspect-tables" end
