@@ -1094,9 +1094,14 @@ do
     end
 
     if frameIndex.IsInDefaultPosition == nil then
+      -- The client has this method only on edit-mode systems; the two
+      -- Blizzard callers outside the mixin (AlertFrames.lua:416,
+      -- EditModeUtil.lua:22) treat its absence as "in default position".
+      -- Every simulator frame carries it, so a frame without systemInfo
+      -- must answer true or the alert container never advances its anchor.
       function frameIndex:IsInDefaultPosition()
         local info = self.systemInfo
-        return type(info) == "table" and info.isInDefaultPosition == true
+        return type(info) ~= "table" or info.isInDefaultPosition == true
       end
     end
   end
