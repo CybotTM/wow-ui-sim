@@ -78,7 +78,8 @@ fn achievement_ui_load_emits_no_lane_specific_lua_errors() {
 }
 
 const CURRENT_TOC_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil", "Blizzard_Plunderstorm"];
-const PANEL_ADDON_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil", "Blizzard_Plunderstorm"];
+const PANEL_ADDON_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil"];
+const STANDARD_GAME_TYPE_FILTERED_DEPENDENCIES: &[&str] = &["Blizzard_Plunderstorm"];
 const CLOSURE_LOADED_ADDONS: &[&str] = &[ROOT];
 
 #[test]
@@ -101,8 +102,8 @@ fn achievement_ui_dependency_closure_includes_current_declared_dependencies() {
             assert!(
                 loaded.iter().any(|entry| entry == required),
                 "The AchievementUI closure must newly load its requested root `{required}`. \
-                 Its required and optional TOC dependencies are already part of PANEL_ADDONS, so \
-                 their state is verified through C_AddOns above. Got: {loaded:?}"
+                 `Blizzard_FrameXMLUtil` is already in PANEL_ADDONS, while optional \
+                 `Blizzard_Plunderstorm` is excluded by its game-type restriction. Got: {loaded:?}"
             );
         }
     });
@@ -209,13 +210,23 @@ fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
         for dep in &declared_deps {
             let is_loaded: bool = env
                 .eval(&format!(r#"return C_AddOns.IsAddOnLoaded("{dep}")"#))
-                .expect("panel baseline dependency load-state probe must run cleanly");
+                .expect("declared dependency load-state probe must run cleanly");
 
-            assert!(
-                is_loaded,
-                "Declared TOC dependency `{dep}` is already loaded by PANEL_ADDONS, so \
-                 C_AddOns.IsAddOnLoaded must report it at runtime."
-            );
+            if PANEL_ADDON_DEPENDENCIES.contains(&dep.as_str()) {
+                assert!(
+                    is_loaded,
+                    "Declared TOC dependency `{dep}` is already loaded by PANEL_ADDONS, so \
+                     C_AddOns.IsAddOnLoaded must report it at runtime."
+                );
+            } else if STANDARD_GAME_TYPE_FILTERED_DEPENDENCIES.contains(&dep.as_str()) {
+                assert!(
+                    !is_loaded,
+                    "Declared TOC dependency `{dep}` is restricted to the plunderstorm game \
+                     type, so the standard retail panel fixture must not load it."
+                );
+            } else {
+                panic!("unclassified declared AchievementUI dependency `{dep}`");
+            }
         }
 
         assert!(

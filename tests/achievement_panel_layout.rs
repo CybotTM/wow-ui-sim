@@ -159,7 +159,7 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
         AchievementFrameSummaryCategoriesStatusBar,
         "achievement_summary_categories_status_bar",
         335,
-        372,
+        380,
         488,
         21
     )
