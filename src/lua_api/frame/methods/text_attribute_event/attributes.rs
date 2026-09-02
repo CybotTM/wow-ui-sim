@@ -498,6 +498,19 @@ pub(super) fn set_forbidden(state: &mut LuaState) -> LuaResult<u32> {
     }
 }
 
+pub(super) fn has_access_constraints(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let has_access_constraints = sim
+        .widgets
+        .get(id)
+        .map(|frame| frame.forbidden)
+        .unwrap_or(false);
+    drop(sim);
+    state.push(Val::Bool(has_access_constraints));
+    Ok(1)
+}
+
 pub(super) fn is_forbidden(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
