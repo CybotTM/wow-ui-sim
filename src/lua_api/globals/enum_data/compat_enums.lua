@@ -123,14 +123,6 @@ if not Enum.ExpansionLandingPageType then
   }
 end
 
-if not Enum.HousingHouseScope then
-  Enum.HousingHouseScope = {
-    None = 0,
-    Interior = 1,
-    Exterior = 2,
-  }
-end
-
 if not CompactRaidGroupTypeEnum then
   CompactRaidGroupTypeEnum = {
     Party = Enum.EditModeUnitFrameSystemIndices.Party,
