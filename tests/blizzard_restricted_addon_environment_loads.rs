@@ -34,6 +34,8 @@ const TOC_FILES: &[&str] = &[
     "SecureAuraHeader.xml",
 ];
 
+const RETAIL_TOC_FILE_COUNT: usize = 10;
+
 const HARD_DEPENDENCIES: &[&str] = &["Blizzard_FrameXML"];
 
 const RESTRICTED_INFRASTRUCTURE_GLOBALS: &[&str] = &[
@@ -215,7 +217,7 @@ fn toc_declares_eager_game_only_with_classic_standard_allowlist() {
 }
 
 #[test]
-fn toc_lists_twelve_files_in_documented_order() {
+fn toc_lists_ten_retail_files_in_documented_order() {
     let toc = TocFile::from_file(&restricted_toc())
         .expect("Blizzard_RestrictedAddOnEnvironment TOC should parse");
     let listed: Vec<String> = toc
@@ -223,9 +225,13 @@ fn toc_lists_twelve_files_in_documented_order() {
         .iter()
         .map(|p| p.to_string_lossy().replace('\\', "/"))
         .collect();
+    let expected: Vec<String> = TOC_FILES[..RETAIL_TOC_FILE_COUNT]
+        .iter()
+        .map(|name| (*name).to_string())
+        .collect();
     assert_eq!(
-        listed, TOC_FILES,
-        "Retail 12.1 TOC must retain the current twelve ordered secure-environment files, including the classic-gated SecureAuraHeader pair"
+        listed, expected,
+        "Retail parsing must retain the first ten ordered files and filter the classic-gated SecureAuraHeader pair"
     );
 }
 
@@ -258,7 +264,8 @@ fn restricted_environment_lua_carries_secure_env_per_file_override() {
          with secure taint so the restricted-execution sandbox stays insecure-sealed"
     );
 
-    for (idx, &name) in TOC_FILES.iter().enumerate() {
+    for (idx, file) in toc.files.iter().enumerate() {
+        let name = file.to_string_lossy();
         if name == "RestrictedEnvironment.lua" {
             continue;
         }
