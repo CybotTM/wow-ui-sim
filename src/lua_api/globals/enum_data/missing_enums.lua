@@ -4914,9 +4914,9 @@ end
 
 if not Enum.EditModeAccountSettingMeta then
   Enum.EditModeAccountSettingMeta = {
-    MaxValue = 33,
+    MaxValue = 35,
     MinValue = 0,
-    NumValues = 34,
+    NumValues = 36,
   }
 end
 

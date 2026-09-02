@@ -95,7 +95,9 @@ pub const EDIT_MODE_ACCOUNT_SETTING: SeqEnumDef = (
         "ShowEncounterEvents",
         "ShowDamageMeter",
         "ShowExternalDefensives",
+        "ShowRaidWarning",
         "ShowTotemActionBar",
+        "ShowLossOfControl",
     ],
 );
 
