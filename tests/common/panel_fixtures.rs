@@ -39,6 +39,8 @@ pub const PANEL_ADDONS: &[&str] = &[
     "Blizzard_EditMode",
     "Blizzard_GarrisonBase",
     "Blizzard_GameTooltip",
+    "Blizzard_ManagedFrameSystem",
+    "Blizzard_GameMenuEsc",
     "Blizzard_UIParentPanelManager",
     "Blizzard_Settings_Shared",
     "Blizzard_SettingsDefinitions_Shared",
