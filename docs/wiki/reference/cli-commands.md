@@ -135,7 +135,7 @@ Host noise: this machine mixes Zen 5 (CPUs 0-3, 12-15, 5.16 GHz) and Zen 5c (3.2
 | `--no-addons` | Skip third-party addons |
 | `--addons-path DIR` | Exclusive third-party root; repeat for multiple roots |
 | `--no-saved-vars` | Skip WTF SavedVariables (~18% of load time) |
-| `--delay <ms>` | Delay after startup events (dump-tree/screenshot) |
+| `--delay <ms>` | Delay after startup events (dump-tree/screenshot); followed by one OnUpdate tick carrying the slept time and the timers that came due, before `--exec-lua` runs |
 | `--exec-lua "code"` | Execute Lua after startup; prefix with `@` to load file |
 | `--class <NAME|N>` | Set the player class by case-insensitive name or one-based index |
 | `--spec <NAME|N>` | Set the specialization by case-insensitive name or one-based index; uses the current class when `--class` is absent |

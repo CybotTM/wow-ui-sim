@@ -521,7 +521,7 @@ fn show_windows_error_message(message: &str) {
     }
 }
 
-use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_startup};
+use wow_ui_sim::startup::{apply_delay_with_tick, run_extra_update_ticks, settle_headless_startup};
 
 struct CommandDispatch {
     command: Option<Commands>,
@@ -670,6 +670,9 @@ fn run_dump_tree(
     settle_headless_startup(env);
     env.service_headless_reload(saved_vars)
         .expect("dump-tree startup ReloadUI failed");
+    apply_delay_with_tick(env, command.delay);
+    env.service_headless_reload(saved_vars)
+        .expect("dump-tree delay ReloadUI failed");
     if let Some(code) = command.exec_lua {
         let code = exec_lua::wrap_headless_exec_lua(code);
         if let Err(e) = env.exec_maybe_secure(&code, command.exec_lua_secure) {
@@ -681,7 +684,6 @@ fn run_dump_tree(
     run_extra_update_ticks(env, 3);
     env.service_headless_reload(saved_vars)
         .expect("dump-tree timer ReloadUI failed");
-    apply_delay(command.delay);
     update_dump_layout_rects(env);
     print_dump_tree(env, &command);
 }

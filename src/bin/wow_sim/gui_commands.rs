@@ -7,7 +7,7 @@ use wow_ui_sim::font::WowFontSystem;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::startup::{
-    apply_delay, apply_ui_scale, run_extra_update_ticks, settle_headless_startup,
+    apply_delay_with_tick, apply_ui_scale, run_extra_update_ticks, settle_headless_startup,
 };
 
 pub(super) fn run_gui(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
@@ -304,13 +304,15 @@ fn prepare_screenshot_env(
     apply_ui_scale(env, command.ui_scale);
     env.set_screen_size(command.width as f32, command.height as f32);
     wow_ui_sim::debug_helpers::debug_show_game_menu(env);
+    apply_delay_with_tick(env, command.delay);
+    env.service_headless_reload(saved_vars)
+        .expect("screenshot delay ReloadUI failed");
     run_screenshot_exec_lua(env, command);
     env.service_headless_reload(saved_vars)
         .expect("screenshot script ReloadUI failed");
     run_extra_update_ticks(env, 3);
     env.service_headless_reload(saved_vars)
         .expect("screenshot timer ReloadUI failed");
-    apply_delay(command.delay);
 }
 
 fn run_screenshot_exec_lua(env: &WowLuaEnv, command: &ScreenshotCommand<'_>) {
