@@ -105,7 +105,7 @@ use crate::common::blizzard_addon_harness::{
     new_blizzard_addon_env, with_blizzard_addon_smoke_shape,
 };
 use crate::common::load_required_blizzard_addon;
-use crate::common::panel_fixtures::blizzard_ui_dir;
+use crate::common::panel_fixtures::{blizzard_ui_dir, load_panel_addons};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
@@ -117,6 +117,9 @@ fn explicit_account_store_load_preserves_popup_after_static_popup_load() {
     let ui_dir = blizzard_ui_dir();
     let env = new_blizzard_addon_env(&ui_dir);
 
+    // AccountStore declares SharedXML, StaticPopup, and UIParentPanelManager.
+    // The panel fixture supplies the panel manager's required predecessor chain.
+    load_panel_addons(&env);
     load_required_blizzard_addon(&env, &ui_dir, ROOT);
     let popup_registered_before_static_popup_load: bool = env
         .eval(&format!(
