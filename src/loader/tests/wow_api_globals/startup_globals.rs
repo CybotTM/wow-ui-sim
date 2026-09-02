@@ -742,6 +742,7 @@ fn test_patch_12_1_housing_editor_decor_layout_state() {
             local petInfo = C_HousingCustomizeMode.GetSelectedDecorPetInfo()
             local maxIndoor, maxOutdoor = C_HousingDecor.GetBothMaxPlacementBudgets()
             local spentIndoor, spentOutdoor = C_HousingDecor.GetBothSpentPlacementBudgets()
+            if C_HouseEditor.GetActiveHouseEditorMode() ~= Enum.HouseEditorMode.None then return "editor-mode" end
             if C_HouseEditor.GetHouseEditorPlayerType() ~= 7 then return "editor-type" end
             if petInfo.petGUID ~= "pet-1" or petInfo.petName ~= "Biscuit" then return "pet-info" end
             if C_HousingDecor.AnyDecorPlacedInRoom(11) ~= true then return "room-decor" end
