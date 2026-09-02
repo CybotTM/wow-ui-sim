@@ -144,6 +144,11 @@ const ATLAS_INFO_STRUCT: &[&str] = &[
     "    pub bottom_tex_coord: f32,",
     "    pub tiles_horizontally: bool,",
     "    pub tiles_vertically: bool,",
+    "    /// `width`/`height` come from the member's OverrideWidth/Height, i.e.",
+    "    /// they are the logical (display) size already. A `-2x` entry with",
+    "    /// this set must not be halved when it stands in for a missing 1x",
+    "    /// sibling; without it the entry holds the pixel rect of the 2x art.",
+    "    pub size_is_override: bool,",
     "}",
     "",
 ];
@@ -182,7 +187,7 @@ const ATLAS_LOOKUP_STRUCT: &[&str] = &[
     "    pub fn width(&self) -> u32 {",
     "        if let Some((w, _)) = self.logical_size {",
     "            w",
-    "        } else if self.is_2x_fallback {",
+    "        } else if self.is_2x_fallback && !self.info.size_is_override {",
     "            self.info.width / 2",
     "        } else {",
     "            self.info.width",
@@ -192,7 +197,7 @@ const ATLAS_LOOKUP_STRUCT: &[&str] = &[
     "    pub fn height(&self) -> u32 {",
     "        if let Some((_, h)) = self.logical_size {",
     "            h",
-    "        } else if self.is_2x_fallback {",
+    "        } else if self.is_2x_fallback && !self.info.size_is_override {",
     "            self.info.height / 2",
     "        } else {",
     "            self.info.height",
@@ -389,12 +394,24 @@ fn format_atlas_entry(
         member.height
     };
 
+    let size_is_override = member.override_width > 0 || member.override_height > 0;
+
     Some(format!(
         "\"{}\" => AtlasInfo {{ file: r\"{}\", width: {}, height: {}, \
          left_tex_coord: {:.6}, right_tex_coord: {:.6}, \
          top_tex_coord: {:.6}, bottom_tex_coord: {:.6}, \
-         tiles_horizontally: {}, tiles_vertically: {} }},",
-        name_lower, wow_path, display_w, display_h, left, right, top, bottom, tiles_h, tiles_v
+         tiles_horizontally: {}, tiles_vertically: {}, size_is_override: {} }},",
+        name_lower,
+        wow_path,
+        display_w,
+        display_h,
+        left,
+        right,
+        top,
+        bottom,
+        tiles_h,
+        tiles_v,
+        size_is_override
     ))
 }
 

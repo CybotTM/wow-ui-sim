@@ -95,7 +95,7 @@ fn nine_slice_key_candidates(key: &str) -> [String; 2] {
 }
 
 fn logical_nine_slice_piece_size(lookup: &AtlasInfo, from_2x: bool) -> (u32, u32) {
-    if from_2x {
+    if from_2x && !lookup.size_is_override {
         (
             (lookup.width as f32 / 2.0).round() as u32,
             (lookup.height as f32 / 2.0).round() as u32,
@@ -268,6 +268,23 @@ mod tests {
             ns_info.edge_top.height,
             (edge_top.height as f32 / 2.0).round() as u32
         );
+    }
+
+    #[test]
+    fn override_sized_2x_fallback_is_not_halved() {
+        // uimicromenu2x has no 1x sibling; its members carry OverrideWidth /
+        // OverrideHeight, so the DB width (32x41) is the logical size already
+        // and the plate must fill the 32x40 micro button. bagslots2x stores
+        // the pixel rect (96) and halves to the 48-unit bag slot.
+        let plate = get_atlas_info("ui-hud-micromenu-buttonbg-up").expect("micro-menu plate");
+        assert!(plate.is_2x_fallback);
+        assert!(plate.info.size_is_override);
+        assert_eq!((plate.width(), plate.height()), (32, 41));
+
+        let bag = get_atlas_info("bag-main").expect("bag slot");
+        assert!(bag.is_2x_fallback);
+        assert!(!bag.info.size_is_override);
+        assert_eq!((bag.width(), bag.height()), (48, 48));
     }
 
     #[test]
