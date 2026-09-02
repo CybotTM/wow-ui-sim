@@ -163,7 +163,7 @@ fn blizzard_islands_queue_toc_declares_standard_game_type_only() {
 }
 
 #[test]
-fn blizzard_islands_queue_toc_lists_lua_then_xml_in_order() {
+fn blizzard_islands_queue_toc_lists_bootstrap_lua_then_xml_in_order() {
     let toc =
         TocFile::from_file(&islands_queue_toc()).expect("Blizzard_IslandsQueueUI TOC should parse");
     assert_eq!(
@@ -172,28 +172,22 @@ fn blizzard_islands_queue_toc_lists_lua_then_xml_in_order() {
             .map(|p| p.to_string_lossy().into_owned())
             .collect::<Vec<_>>(),
         vec![
+            "Blizzard_IslandsQueueUI_Bootstrap.lua".to_string(),
             "Blizzard_IslandsQueueUI.lua".to_string(),
             "Blizzard_IslandsQueueUI.xml".to_string(),
         ],
-        "TOC body must list lua FIRST then xml — the lua file declares all 4 mixins \
-         (IslandsQueueWeeklyQuestMixin / IslandsQueueWeeklyQuestRewardMixin / \
-         IslandsQueueFrameMixin / IslandsQueueFrameDifficultyMixin) at file scope before any \
-         XML-instantiated frame's `mixin=\"...\"` attribute or `<OnLoad method=\"OnLoad\"/>` \
-         script binding tries to resolve the mixin tables via `_G`. The XML follows so the \
-         IslandsQueueFrame and its template-derived children can be created with the mixins \
-         already present"
+        "TOC body lists its Bootstrap file before the Lua and XML body in current retail order"
     );
 }
 
 #[test]
-fn blizzard_islands_queue_directory_holds_three_entries() {
+fn blizzard_islands_queue_directory_holds_four_entries() {
     let entries = std::fs::read_dir(islands_queue_dir())
         .expect("Blizzard_IslandsQueueUI directory should read")
         .count();
     assert_eq!(
-        entries, 3,
-        "Directory must hold exactly 3 entries (1 TOC + 1 lua + 1 xml; no flavor subdirectory, \
-         no Localization.lua — strings come from the global locale table)"
+        entries, 4,
+        "Directory holds the TOC, Bootstrap, Lua, and XML files"
     );
 }
 

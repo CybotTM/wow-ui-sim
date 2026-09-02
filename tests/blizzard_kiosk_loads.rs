@@ -22,6 +22,7 @@ fn kiosk_toc() -> PathBuf {
 
 const KIOSK_TOC_FILES: &[&str] = &[
     "Housing/Config.lua",
+    "Blizzard_Kiosk_Bootstrap.lua",
     "Kiosk.lua",
     "Kiosk.xml",
     "Housing/Glue.lua",
@@ -183,7 +184,7 @@ fn blizzard_kiosk_toc_declares_allow_load_both_with_no_game_type_restriction() {
 }
 
 #[test]
-fn blizzard_kiosk_toc_lists_seven_files_with_per_file_allow_load_brackets_stripped() {
+fn blizzard_kiosk_toc_lists_eight_files_with_per_file_allow_load_brackets_stripped() {
     let toc = TocFile::from_file(&kiosk_toc()).expect("Blizzard_Kiosk TOC should parse");
     assert_eq!(
         toc.files
@@ -191,13 +192,13 @@ fn blizzard_kiosk_toc_lists_seven_files_with_per_file_allow_load_brackets_stripp
             .map(|p| p.to_string_lossy().into_owned())
             .collect::<Vec<_>>(),
         KIOSK_TOC_FILES,
-        "TOC body must list exactly 7 files in this order — Housing/Config.lua, Kiosk.lua, \
-         Kiosk.xml, Housing/Glue.lua, Housing/Glue.xml, Housing/Game.lua, Housing/Game.xml. \
-         The bracketed `[AllowLoad Glue]` and `[AllowLoad Game]` per-file annotations are \
+        "TOC body must list exactly 8 files in this order — Housing/Config.lua, \
+         Blizzard_Kiosk_Bootstrap.lua, Kiosk.lua, Kiosk.xml, Housing/Glue.lua, \
+         Housing/Glue.xml, Housing/Game.lua, Housing/Game.xml. The bracketed `[AllowLoad Glue]` and `[AllowLoad Game]` per-file annotations are \
          STRIPPED by strip_annotations (src/toc.rs:29-41) but the file paths still land in \
          the files vec. The TOC parser only honors `[AllowLoadGameType ...]` and \
          `[AllowLoadTextLocale ...]` per-file gates (src/toc.rs:138-143); per-file \
-         `[AllowLoad ...]` annotations are NOT filtered, so the simulator loads all 7 files \
+         `[AllowLoad ...]` annotations are NOT filtered, so the simulator loads all 8 files \
          on every screen mode the addon is invoked on. The Glue.lua/.xml + Game.lua/.xml \
          pair both define a frame named `KioskFrame` — the second `KioskFrame` (from Game.xml \
          since it is last in the body) re-creates the first via `register_new_frame` + \

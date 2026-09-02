@@ -64,7 +64,7 @@ fn blizzard_game_menu_picks_mainline_toc_variant() {
 }
 
 #[test]
-fn blizzard_game_menu_mainline_toc_declares_game_tooltip_dep() {
+fn blizzard_game_menu_mainline_toc_declares_current_dependencies() {
     let toc = TocFile::from_file(&game_menu_mainline_toc())
         .expect("Blizzard_GameMenu Mainline TOC parse");
 
@@ -97,11 +97,13 @@ fn blizzard_game_menu_mainline_toc_declares_game_tooltip_dep() {
     let deps = toc.dependencies();
     assert_eq!(
         deps,
-        vec!["Blizzard_GameTooltip".to_string()],
-        "`## Dependencies: Blizzard_GameTooltip` declares the only required dependency \
-         — the menu's button tooltips (e.g. the disabled `MACROS` button explanation, \
-         the kiosk-mode disabled tooltip on `BLIZZARD_STORE`) need GameTooltip to \
-         render. Got: {:?}",
+        vec![
+            "Blizzard_GameTooltip".to_string(),
+            "Blizzard_GameMenuEsc".to_string(),
+            "Blizzard_StaticPopup".to_string(),
+        ],
+        "Blizzard_GameMenu declares its tooltip, Escape-handler, and static-popup \
+         dependencies in current retail order. Got: {:?}",
         deps
     );
 

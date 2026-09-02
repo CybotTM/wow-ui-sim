@@ -14,7 +14,7 @@ fn blizzard_ui_dir() -> PathBuf {
 }
 
 fn frame_xml_toc() -> PathBuf {
-    blizzard_ui_dir().join("Blizzard_FrameXML/Blizzard_FrameXML_Mainline.toc")
+    blizzard_ui_dir().join("Blizzard_FrameXML/Blizzard_FrameXML.toc")
 }
 
 fn load_full_game_ui() -> WowLuaEnv {
@@ -42,8 +42,8 @@ fn load_full_game_ui() -> WowLuaEnv {
 }
 
 #[test]
-fn blizzard_frame_xml_mainline_toc_is_load_first_with_ten_deps_and_allow_load_game() {
-    let toc = TocFile::from_file(&frame_xml_toc()).expect("Blizzard_FrameXML_Mainline TOC parse");
+fn blizzard_frame_xml_toc_is_load_first_with_current_dependencies() {
+    let toc = TocFile::from_file(&frame_xml_toc()).expect("Blizzard_FrameXML TOC parse");
 
     assert!(
         !toc.is_load_on_demand(),
@@ -64,40 +64,38 @@ fn blizzard_frame_xml_mainline_toc_is_load_first_with_ten_deps_and_allow_load_ga
     assert_eq!(
         toc.dependencies(),
         vec![
-            "Blizzard_UIParent".to_string(),
+            "Blizzard_ObjectAPI".to_string(),
+            "Blizzard_FrameXMLBase".to_string(),
+            "Blizzard_UIErrorsFrame".to_string(),
             "Blizzard_UIParentPanelManager".to_string(),
             "Blizzard_SettingsDefinitions_Frame".to_string(),
             "Blizzard_ItemButton".to_string(),
+            "Blizzard_UnitPopup".to_string(),
             "Blizzard_FrameXMLUtil".to_string(),
+            "Blizzard_RaidWarning".to_string(),
             "Blizzard_UIPanelTemplates".to_string(),
             "Blizzard_GameTooltip".to_string(),
             "Blizzard_MoneyFrame".to_string(),
             "Blizzard_Colors".to_string(),
             "Blizzard_TransmogShared".to_string(),
+            "Blizzard_LFGUtil".to_string(),
+            "Blizzard_ManagedFrameSystem".to_string(),
+            "Blizzard_MirrorTimer".to_string(),
         ],
-        "Blizzard_FrameXML declares ten hard dependencies in this exact order: \
-         UIParent (the master UI frame), UIParentPanelManager (panel slot manager), \
-         SettingsDefinitions_Frame (settings registry), ItemButton (button intrinsics), \
-         FrameXMLUtil (utility helpers), UIPanelTemplates (panel chrome templates), \
-         GameTooltip (tooltip primitives), MoneyFrame (currency display), Colors \
-         (color palette), TransmogShared (transmog data plumbing). All ten must \
-         topo-sort before FrameXML so its singletons can reach intrinsic templates / \
-         globals defined in those addons"
+        "Blizzard_FrameXML declares its current 17 dependencies in TOC order"
     );
     assert!(
         !toc.is_game_type_restricted(),
-        "Blizzard_FrameXML declares no `## AllowLoadGameType:` line, so \
-         is_game_type_restricted() returns false — the Mainline TOC variant covers \
-         standard retail (the Mists/Cata variants are separate TOC files)"
+        "Blizzard_FrameXML declares no top-level `## AllowLoadGameType:` restriction"
     );
     assert!(
         toc.saved_variables().is_empty(),
-        "Blizzard_FrameXML_Mainline declares no `## SavedVariables` — FrameXML core \
-         widgets are transient and rebuild on every login"
+        "Blizzard_FrameXML declares no `## SavedVariables` — FrameXML core widgets are \
+         transient and rebuild on every login"
     );
 
     let toc_text = std::fs::read_to_string(frame_xml_toc())
-        .expect("Blizzard_FrameXML_Mainline TOC should read");
+        .expect("Blizzard_FrameXML TOC should read");
     assert!(
         toc_text.contains("## LoadFirst: 1"),
         "Blizzard_FrameXML declares `## LoadFirst: 1` — the loader gives this addon \
@@ -107,35 +105,26 @@ fn blizzard_frame_xml_mainline_toc_is_load_first_with_ten_deps_and_allow_load_ga
          from them"
     );
     assert!(
-        toc_text.contains("## DefaultState: enabled"),
-        "Blizzard_FrameXML declares `## DefaultState: enabled` — disabling FrameXML \
-         would break virtually every Blizzard UI addon, but the metadata is still \
-         declared explicitly for the Addons UI"
-    );
-    assert!(
-        toc_text.contains("## AllowLoad: Game"),
-        "Blizzard_FrameXML declares `## AllowLoad: Game` — the FrameXML core is \
-         in-world only (glue screens have their own minimal frame ecosystem driven \
-         by Blizzard_GlueXML)"
+        !toc_text.contains("## AllowLoad:"),
+        "Blizzard_FrameXML's current bare TOC omits top-level AllowLoad metadata"
     );
 }
 
 #[test]
 fn blizzard_frame_xml_allows_only_game_screen() {
-    let toc = TocFile::from_file(&frame_xml_toc()).expect("Blizzard_FrameXML_Mainline TOC parse");
+    let toc = TocFile::from_file(&frame_xml_toc()).expect("Blizzard_FrameXML TOC parse");
 
     assert!(
         toc.allows_screen(ScreenKind::Game),
-        "`## AllowLoad: Game` must allow the Game screen (src/toc.rs:307)"
+        "Missing `## AllowLoad:` defaults to allowing the Game screen"
     );
     assert!(
         !toc.allows_screen(ScreenKind::Login),
-        "`## AllowLoad: Game` must reject the Login screen — FrameXML is in-world only"
+        "Missing `## AllowLoad:` rejects Login by the loader's Game-only default"
     );
     assert!(
         !toc.allows_screen(ScreenKind::CharacterSelect),
-        "`## AllowLoad: Game` must reject CharacterSelect — glue screens use \
-         Blizzard_GlueXML instead"
+        "Missing `## AllowLoad:` rejects CharacterSelect by the loader's Game-only default"
     );
 }
 
@@ -147,9 +136,8 @@ fn blizzard_frame_xml_auto_loads_on_game_and_skips_login() {
         .any(|(name, _)| name == "Blizzard_FrameXML");
     assert!(
         in_game,
-        "Blizzard_FrameXML has no `## LoadOnDemand` line and `## AllowLoad: Game`, so \
-         it MUST appear in Game-screen auto-discovery — it's the FrameXML core that \
-         every panel depends on"
+        "Blizzard_FrameXML has no `## LoadOnDemand` line and defaults to Game-only, so it \
+         MUST appear in Game-screen auto-discovery"
     );
 
     let login_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Login);
@@ -158,8 +146,8 @@ fn blizzard_frame_xml_auto_loads_on_game_and_skips_login() {
         .any(|(name, _)| name == "Blizzard_FrameXML");
     assert!(
         !in_login,
-        "`## AllowLoad: Game` means Blizzard_FrameXML MUST NOT appear in Login \
-         auto-discovery — the glue addon set excludes the in-world FrameXML core"
+        "The default Game-only AllowLoad behavior excludes Blizzard_FrameXML from Login \
+         auto-discovery"
     );
 }
 

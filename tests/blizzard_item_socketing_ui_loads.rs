@@ -20,7 +20,11 @@ fn item_socketing_toc() -> PathBuf {
     item_socketing_dir().join("Blizzard_ItemSocketingUI.toc")
 }
 
-const ITEM_SOCKETING_FILES: &[&str] = &["Blizzard_ItemSocketingUI.xml", "Localization.lua"];
+const ITEM_SOCKETING_FILES: &[&str] = &[
+    "Blizzard_ItemSocketingUI_Bootstrap.lua",
+    "Blizzard_ItemSocketingUI.xml",
+    "Localization.lua",
+];
 
 const SOCKET_BUTTON_METHODS: &[&str] = &[
     "OnLoad",
@@ -76,7 +80,7 @@ fn blizzard_item_socketing_find_toc_resolves_bare_variant() {
 }
 
 #[test]
-fn blizzard_item_socketing_toc_declares_load_on_demand_with_no_dependencies() {
+fn blizzard_item_socketing_toc_declares_load_on_demand_with_animated_shine_dependency() {
     let toc = TocFile::from_file(&item_socketing_toc())
         .expect("Blizzard_ItemSocketingUI TOC should parse");
     assert!(
@@ -87,14 +91,11 @@ fn blizzard_item_socketing_toc_declares_load_on_demand_with_no_dependencies() {
     );
     assert!(!toc.is_load_first());
     assert!(!toc.is_secure_env());
-    assert!(
-        toc.dependencies().is_empty(),
-        "Blizzard_ItemSocketingUI declares ZERO `## Dependencies:` — the gem-socketing UI relies \
-         only on auto-loaded foundational addons (Blizzard_SharedXML for ButtonFrameTemplate / \
-         AnimatedShineTemplate / GameTooltipTemplate, Blizzard_ScrollingMessageFrame for \
-         ScrollFrameTemplate / EventScrollFrame, Blizzard_TextureUtil for SetupTextureKitOnFrame / \
-         TextureKitConstants, the SetItemButtonTexture global helper from Blizzard_ItemButton). \
-         There is no explicit Dependencies declaration in the TOC"
+    assert_eq!(
+        toc.dependencies(),
+        vec!["Blizzard_AnimatedShine".to_string()],
+        "Blizzard_ItemSocketingUI declares Blizzard_AnimatedShine for its socket animation \
+         templates"
     );
     assert!(
         toc.optional_deps().is_empty(),
@@ -155,14 +156,13 @@ fn blizzard_item_socketing_toc_omits_allow_load_metadata() {
          keeps the on-demand panel out of glue-screen sweeps without an explicit allow"
     );
     assert!(
-        !raw.contains("## Dependencies"),
-        "TOC must NOT declare `## Dependencies:` — the gem-socketing UI depends only on \
-         foundational addons that auto-load before any LoD addon. An explicit dep would be redundant"
+        raw.contains("## Dependencies: Blizzard_AnimatedShine"),
+        "TOC must declare its Blizzard_AnimatedShine dependency"
     );
 }
 
 #[test]
-fn blizzard_item_socketing_toc_lists_xml_and_localization_with_lua_loaded_via_script_directive() {
+fn blizzard_item_socketing_toc_lists_bootstrap_xml_and_localization() {
     let toc = TocFile::from_file(&item_socketing_toc())
         .expect("Blizzard_ItemSocketingUI TOC should parse");
     assert_eq!(
@@ -171,8 +171,7 @@ fn blizzard_item_socketing_toc_lists_xml_and_localization_with_lua_loaded_via_sc
             .map(|p| p.to_string_lossy().into_owned())
             .collect::<Vec<_>>(),
         ITEM_SOCKETING_FILES,
-        "TOC body must list exactly 2 files — Blizzard_ItemSocketingUI.xml then Localization.lua. \
-         The .lua sibling Blizzard_ItemSocketingUI.lua is loaded by the XML's \
+        "TOC body lists Bootstrap, XML, and Localization in current retail order. The .lua sibling Blizzard_ItemSocketingUI.lua is loaded by the XML's \
          `<Script file=\"Blizzard_ItemSocketingUI.lua\"/>` directive at xml line 3 BEFORE any \
          frame element is parsed, so both mixin tables (GenericSocketButtonMixin, \
          GenericItemSocketingFrameMixin) and the 4 free helpers (ItemSocketingFrame_OnLoad, \
@@ -186,16 +185,13 @@ fn blizzard_item_socketing_toc_lists_xml_and_localization_with_lua_loaded_via_sc
 }
 
 #[test]
-fn blizzard_item_socketing_directory_holds_four_entries() {
+fn blizzard_item_socketing_directory_holds_five_entries() {
     let entries = std::fs::read_dir(item_socketing_dir())
         .expect("Blizzard_ItemSocketingUI directory should read")
         .count();
     assert_eq!(
-        entries, 4,
-        "Directory must hold exactly 4 entries (1 TOC + 1 lua + 1 xml + 1 Localization.lua) — no \
-         flavor subdirectory. Localization.lua is a stub kept for the convention of running an \
-         end-of-load locale pass; the actual gem-color labels resolve through the global locale \
-         table (BLUE_GEM / RED_GEM / YELLOW_GEM / META_GEM literals)"
+        entries, 5,
+        "Directory holds the TOC, Bootstrap, Lua, XML, and Localization files"
     );
 }
 

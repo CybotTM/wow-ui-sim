@@ -204,7 +204,7 @@ fn blizzard_group_finder_directory_ships_three_tocs_plus_three_subdirectories() 
 }
 
 #[test]
-fn blizzard_group_finder_tbc_toc_declares_two_deps_and_tbc_game_type() {
+fn blizzard_group_finder_tbc_toc_declares_three_deps_and_tbc_game_type() {
     let toc = TocFile::from_file(&group_finder_tbc_toc()).expect("TBC TOC should parse");
     assert!(
         toc.is_game_type_restricted(),
@@ -229,10 +229,10 @@ fn blizzard_group_finder_tbc_toc_declares_two_deps_and_tbc_game_type() {
         vec![
             "Blizzard_GameTooltip".to_string(),
             "Blizzard_UIPanelTemplates".to_string(),
+            "Blizzard_LFGUtil".to_string(),
         ],
-        "Blizzard_GroupFinder TBC declares exactly two deps — Blizzard_GameTooltip + \
-         Blizzard_UIPanelTemplates. The Mainline-only Blizzard_EditMode dep is dropped \
-         because Classic does not ship the EditMode layout system"
+        "Blizzard_GroupFinder TBC declares GameTooltip, UIPanelTemplates, and LFGUtil; \
+         the Mainline-only Blizzard_EditMode dependency remains absent on TBC"
     );
 }
 

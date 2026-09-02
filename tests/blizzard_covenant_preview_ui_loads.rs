@@ -56,10 +56,11 @@ fn blizzard_covenant_preview_ui_toc_is_load_on_demand() {
         !toc.is_secure_env(),
         "Blizzard_CovenantPreviewUI does not declare UseSecureEnvironment"
     );
-    assert!(
-        toc.dependencies().is_empty(),
-        "Blizzard_CovenantPreviewUI has no `## Dependencies` line — its TOC is just \
-         Title/Author/Version/`## LoadOnDemand: 1` plus Blizzard_CovenantPreviewUI.xml"
+    assert_eq!(
+        toc.dependencies(),
+        vec!["Blizzard_GameMenuEsc".to_string()],
+        "Blizzard_CovenantPreviewUI declares Blizzard_GameMenuEsc so its Escape handler is \
+         available before the preview frame loads"
     );
 }
 

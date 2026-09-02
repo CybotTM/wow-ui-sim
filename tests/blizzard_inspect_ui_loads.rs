@@ -149,28 +149,24 @@ fn blizzard_inspect_ui_toc_declares_lod_with_no_dependencies() {
 }
 
 #[test]
-fn blizzard_inspect_ui_toc_omits_default_state_and_allow_load_keys() {
+fn blizzard_inspect_ui_toc_declares_current_game_mainline_metadata() {
     let toc = TocFile::from_file(&inspect_ui_toc()).expect("Blizzard_InspectUI TOC should parse");
 
     assert!(
         !toc.is_game_type_restricted(),
-        "Blizzard_InspectUI omits `## AllowLoadGameType` — `is_game_type_restricted()` returns \
-         false (src/toc.rs default branch). Inspect functionality is core gameplay across every \
-         flavor"
+        "Blizzard_InspectUI's `## AllowLoadGameType: mainline` is available to the retail \
+         profile"
     );
 
     let raw =
         std::fs::read_to_string(inspect_ui_toc()).expect("Blizzard_InspectUI TOC should read");
     assert!(
-        !raw.contains("## DefaultState:"),
-        "TOC must omit `## DefaultState:` — LoD addons rely on the loader's eager LoadOnDemand \
-         path; explicit DefaultState would conflict with the on-demand contract"
+        raw.contains("## AllowLoad: game"),
+        "TOC declares current game-only AllowLoad metadata"
     );
     assert!(
-        !raw.contains("## AllowLoad:"),
-        "TOC must omit `## AllowLoad:` — LoD addons are only pulled in by the explicit \
-         LoadAddOn / UIParentLoadAddOn call from InspectFrame_Show, never via the screen \
-         auto-discovery sweep, so AllowLoad gating is irrelevant"
+        raw.contains("## AllowLoadGameType: mainline"),
+        "TOC declares current mainline game-type metadata"
     );
 }
 
