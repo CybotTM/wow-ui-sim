@@ -10,9 +10,9 @@ fn blizzard_ui_dir() -> PathBuf {
 
 fn blizzard_toc(addon: &str) -> PathBuf {
     let addon_dir = blizzard_ui_dir().join(addon);
-    find_toc_file(&addon_dir).unwrap_or_else(|error| {
+    find_toc_file(&addon_dir).unwrap_or_else(|| {
         panic!(
-            "current active-profile TOC for `{addon}` must resolve at {}: {error}",
+            "current active-profile TOC for `{addon}` must resolve at {}",
             addon_dir.display()
         )
     })
