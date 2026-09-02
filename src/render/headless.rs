@@ -455,6 +455,61 @@ mod tests {
     use super::{image_from_read_back_buffer, install_glyph_atlas_data, read_back_buffer_layout};
     use crate::render::shader::WowUiPrimitive;
 
+    /// The client magnifies UI art bilinearly; a nearest sampler turns every
+    /// upscaled icon and frame into stair-stepped pixel blocks. A 2x2 checker
+    /// drawn at 16x16 has a smooth ramp through the middle only when the
+    /// sampler interpolates: nearest yields nothing but 0 and 255.
+    #[test]
+    fn atlas_sampler_interpolates_between_texels() {
+        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+        let has_adapter = pollster::block_on(async {
+            instance
+                .request_adapter(&wgpu::RequestAdapterOptions::default())
+                .await
+                .is_ok()
+        });
+        if !has_adapter {
+            eprintln!("Skipping atlas sampler test: no GPU adapter available");
+            return;
+        }
+
+        let path = r"Interface\Test\Checker2x2";
+        let mut batch = crate::render::QuadBatch::default();
+        batch.push_textured_path(
+            iced::Rectangle::new(iced::Point::ORIGIN, iced::Size::new(16.0, 16.0)),
+            path,
+            [1.0, 1.0, 1.0, 1.0],
+            crate::BlendMode::Alpha,
+        );
+        // black / white / white / black
+        let rgba: Vec<u8> = [
+            [0u8, 0, 0, 255],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255],
+            [0, 0, 0, 255],
+        ]
+        .concat();
+        let texture = crate::render::shader::GpuTextureData {
+            path: path.to_string(),
+            width: 2,
+            height: 2,
+            rgba: rgba.into(),
+        };
+        let mut primitive = WowUiPrimitive::new_merged_with_textures(
+            std::sync::Arc::new(batch),
+            vec![texture],
+            Vec::new(),
+        );
+        let image = super::HeadlessRenderContext::new(16, 16).render(&mut primitive);
+
+        let row: Vec<u8> = (0..16).map(|x| image.get_pixel(x, 4).0[0]).collect();
+        let intermediate = row.iter().filter(|&&v| v > 24 && v < 231).count();
+        assert!(
+            intermediate >= 3,
+            "a magnified checker should ramp between its texels with a bilinear sampler; row 4 = {row:?}"
+        );
+    }
+
     #[test]
     fn read_back_buffer_layout_aligns_rows_to_256_bytes() {
         let layout = read_back_buffer_layout(3, 2);
