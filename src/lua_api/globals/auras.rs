@@ -81,6 +81,8 @@ fn install_c_unit_auras_methods(state: &mut LuaState, ns: Val) {
         ns,
         &[
             ("GetAuraSlots", get_aura_slots),
+            ("GetUnitAuraInstanceIDs", get_unit_aura_instance_ids),
+            ("IsAuraFilteredOutByInstanceID", is_aura_filtered_out_by_instance_id),
             ("GetAuraDataBySlot", get_aura_data_by_slot),
             ("GetAuraDataByIndex", get_aura_data_by_index),
             (
@@ -335,6 +337,52 @@ fn get_aura_slots(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Num(aura.aura_instance_id as f64));
     }
     Ok(auras.len() as u32 + 1)
+}
+
+// ── GetUnitAuraInstanceIDs ───────────────────────────────────────────────────
+//
+// `(unit, filter, maxCount, sortRule, sortDirection)` -> table of aura
+// instance IDs (UnitAuraDocumentation.lua). The 12.1 aura containers
+// (`AuraContainerPublicAuraSource:GetAllAuraInstanceIDs`) rebuild their
+// groups from it and iterate the result with ipairs, so a unit with no
+// auras gets an empty table, never nil. The sort arguments are accepted and
+// ignored: the containers re-sort with their own comparator.
+fn get_unit_aura_instance_ids(state: &mut LuaState) -> LuaResult<u32> {
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let filter_str: String = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
+    let max_count = Option::<f64>::from_stack(state, 3)?
+        .filter(|count| *count > 0.0)
+        .map(|count| count as usize)
+        .unwrap_or(usize::MAX);
+    let auras = collect_visible_unit_auras(state, &unit, filter_from_str(&filter_str));
+    let table = create_table(state);
+    if let Val::Table(table_ref) = table {
+        for (index, aura) in auras.iter().take(max_count).enumerate() {
+            table_set_num(
+                state,
+                table_ref,
+                (index + 1) as f64,
+                Val::Num(aura.aura_instance_id as f64),
+            );
+        }
+    }
+    state.push(table);
+    Ok(1)
+}
+
+// ── IsAuraFilteredOutByInstanceID ────────────────────────────────────────────
+//
+// `(unit, auraInstanceID, filter)` -> isFiltered: true when the aura is not
+// in the unit's list for that filter.
+fn is_aura_filtered_out_by_instance_id(state: &mut LuaState) -> LuaResult<u32> {
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let aura_id = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
+    let filter_str: String = Option::<String>::from_stack(state, 3)?.unwrap_or_default();
+    let listed = collect_visible_unit_auras(state, &unit, filter_from_str(&filter_str))
+        .iter()
+        .any(|aura| aura.aura_instance_id == aura_id);
+    state.push(Val::Bool(!listed));
+    Ok(1)
 }
 
 // ── GetAuraDataBySlot ────────────────────────────────────────────────────────

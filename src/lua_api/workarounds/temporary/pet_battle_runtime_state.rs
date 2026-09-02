@@ -51,6 +51,7 @@ local function __wow_pet_battle_seed_sample()
     {
       name = "Arcane Familiar",
       level = 25,
+      speciesID = 39,
       health = 1120,
       maxHealth = 1420,
       power = 18,
@@ -69,6 +70,7 @@ local function __wow_pet_battle_seed_sample()
     {
       name = "Clockwork Hopper",
       level = 24,
+      speciesID = 87,
       health = 910,
       maxHealth = 1180,
       power = 15,
@@ -84,6 +86,7 @@ local function __wow_pet_battle_seed_sample()
     {
       name = "Frost Pup",
       level = 23,
+      speciesID = 68,
       health = 870,
       maxHealth = 1110,
       power = 14,
@@ -101,6 +104,7 @@ local function __wow_pet_battle_seed_sample()
     {
       name = "Stone Lurker",
       level = 24,
+      speciesID = 40,
       health = 980,
       maxHealth = 1320,
       power = 16,
@@ -116,6 +120,7 @@ local function __wow_pet_battle_seed_sample()
     {
       name = "Bog Hopper",
       level = 24,
+      speciesID = 630,
       health = 930,
       maxHealth = 1210,
       power = 13,
@@ -231,6 +236,14 @@ C_PetBattles.GetNumAuras = function(owner, petIndex)
   local pet = __wow_pet_battle_get_pet(owner, petIndex)
   return pet and pet.auras and #pet.auras or 0
 end
+-- Species of a fixture pet, chosen from the default pet journal (state_defaults
+-- pets: 39 Mechanical Squirrel, 87 Phoenix Hatchling, 68 Cat, 40 Bombay Cat,
+-- 630 Clockwork Gnome) so GetPetModelSceneInfoBySpeciesID resolves them;
+-- PetBattleFrame's OnLoad raises on a nil species.
+C_PetBattles.GetPetSpeciesID = function(owner, petIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  return pet and pet.speciesID or nil
+end
 C_PetBattles.GetHealth = function(owner, petIndex)
   local pet = __wow_pet_battle_get_pet(owner, petIndex)
   return pet and pet.health or 0
@@ -272,8 +285,18 @@ C_PetBattles.GetAllStates = function(parserEnv)
   end
   parserEnv.STATE_Stat_Power = 18
 end
+-- The client returns nothing while not queued (QueueStatusFrame lists a
+-- pet-battle entry for any non-nil status) and a status string otherwise.
 C_PetBattles.GetPVPMatchmakingInfo = function()
-  return __wow_pet_battle_state.queueStatus, __wow_pet_battle_state.queueEstimatedTime, __wow_pet_battle_state.queueTime
+  local status = __wow_pet_battle_state.queueStatus
+  local matchmaking = Enum.PetBattleQueueStatus and Enum.PetBattleQueueStatus.Matchmaking or 1
+  local accepted = Enum.PetBattleQueueStatus and Enum.PetBattleQueueStatus.MatchAccepted or 2
+  if status == matchmaking then
+    return "queued", __wow_pet_battle_state.queueEstimatedTime, __wow_pet_battle_state.queueTime
+  elseif status == accepted then
+    return "proposal", __wow_pet_battle_state.queueEstimatedTime, __wow_pet_battle_state.queueTime
+  end
+  return nil
 end
 C_PetBattles.CanAcceptQueuedPVPMatch = function()
   return __wow_pet_battle_state.canAcceptQueuedPVPMatch == true
@@ -357,6 +380,39 @@ mod tests {
             .expect("static pet-battle fallbacks should be callable");
 
         assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn pvp_matchmaking_info_is_nil_until_queued() {
+        // QueueStatusFrame lists a pet-battle entry for ANY non-nil status,
+        // so a numeric "None" showed the LFG eye with a phantom queue.
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let (idle, queued): (String, String) = env
+            .eval(
+                r#"
+                local idle = tostring(C_PetBattles.GetPVPMatchmakingInfo())
+                C_PetBattles.StartPVPMatchmaking()
+                return idle, tostring(C_PetBattles.GetPVPMatchmakingInfo())
+                "#,
+            )
+            .expect("matchmaking probe");
+        assert_eq!(idle, "nil", "not queued: no status at all");
+        assert_eq!(queued, "queued", "queued: the status string the UI compares against");
+    }
+
+    #[test]
+    fn fixture_pets_carry_a_species_the_journal_knows() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let (species, scene_type): (f64, String) = env
+            .eval(
+                r#"
+                local species = C_PetBattles.GetPetSpeciesID(Enum.BattlePetOwner.Ally, 1)
+                return species, type(C_PetJournal.GetPetModelSceneInfoBySpeciesID(species))
+                "#,
+            )
+            .expect("species probe");
+        assert!(species >= 1.0, "the ally's first pet has a species");
+        assert_eq!(scene_type, "number", "the journal knows that species and returns a scene");
     }
 
     #[test]

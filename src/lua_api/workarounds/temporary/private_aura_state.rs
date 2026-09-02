@@ -133,7 +133,12 @@ if rawget(C_UnitAurasPrivate, "SetShowDispelTypeCallback") == nil then
     end
 end
 
-if rawget(C_UnitAuras, "TriggerPrivateAuraShowDispelType") == nil then
+-- 12.1.0 removed C_UnitAuras.TriggerPrivateAuraShowDispelType; the PTR profile's
+-- strict removals record that in __wow_removed_keys, and a stopgap must not
+-- bring a removed API back.
+local removedUnitAuraKeys = rawget(C_UnitAuras, "__wow_removed_keys")
+if rawget(C_UnitAuras, "TriggerPrivateAuraShowDispelType") == nil
+    and not (type(removedUnitAuraKeys) == "table" and removedUnitAuraKeys.TriggerPrivateAuraShowDispelType) then
     function C_UnitAuras.TriggerPrivateAuraShowDispelType(showDispelType)
         local state = PrivateAuraState()
         state.lastShowDispelType = showDispelType
@@ -175,6 +180,20 @@ if rawget(C_UnitAurasPrivate, "GetAllPrivateAuras") == nil then
     function C_UnitAurasPrivate.GetAllPrivateAuras(unitToken)
         local state = PrivateAuraState()
         return CopyPrivateAuraList(state.privateAurasByUnit[tostring(unitToken or "")] or {})
+    end
+end
+
+if rawget(C_UnitAurasPrivate, "GetAllPrivateAuraInstanceIDs") == nil then
+    -- Undocumented (no entry in Blizzard_APIDocumentationGenerated);
+    -- Blizzard_AuraContainerSources.lua:58 iterates the result with ipairs,
+    -- so a unit without private auras gets an empty table.
+    function C_UnitAurasPrivate.GetAllPrivateAuraInstanceIDs(unitToken)
+        local state = PrivateAuraState()
+        local ids = {}
+        for index, aura in ipairs(state.privateAurasByUnit[tostring(unitToken or "")] or {}) do
+            ids[index] = aura.auraInstanceID
+        end
+        return ids
     end
 end
 
@@ -245,7 +264,9 @@ mod tests {
                 if C_UnitAurasPrivate._state.warningTextFrame ~= "warning" then
                     return "bad_warning_frame"
                 end
-                if C_UnitAuras.TriggerPrivateAuraShowDispelType ~= nil then
+                -- rawget: the namespace's __index hands out generated stubs for known
+                -- API names, so a plain read is non-nil even after the 12.1.0 removal.
+                if rawget(C_UnitAuras, "TriggerPrivateAuraShowDispelType") ~= nil then
                     C_UnitAurasPrivate.SetShowDispelTypeCallback(function(value)
                         dispel = value
                     end)

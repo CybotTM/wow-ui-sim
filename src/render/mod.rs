@@ -81,6 +81,7 @@ pub use glyph::{GlyphAtlas, emit_text_quads};
 #[cfg(feature = "gui")]
 pub(crate) use shader::ThreeSlicePathParams;
 #[cfg(feature = "gui")]
+pub use shader::{brightness_boost_divisor, set_brightness_boost_divisor};
 pub use shader::{
     FrameQuadSnapshot, GpuBcTextureData, GpuTextureAtlas, GpuTextureData, NineSliceTextures,
     QuadBatch, QuadVertex, TextureEntry, TextureRequest, WowUiPipeline, WowUiPrimitive,

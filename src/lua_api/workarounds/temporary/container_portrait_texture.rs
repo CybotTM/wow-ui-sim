@@ -137,7 +137,7 @@ mod tests {
             super::apply_bootstrap(&mut lua).expect("portrait helpers should apply");
         }
 
-        let result: (String, f64, f64, f64, f64, String) = env
+        let result: (f64, f64, f64, f64, f64, f64) = env
             .eval(
                 r#"
                 local frame = CreateFrame("Frame")
@@ -158,12 +158,18 @@ mod tests {
             )
             .expect("portrait helpers should run");
 
-        assert_eq!(result.0, "Interface\\TargetingFrame\\UI-Classes-Circles");
+        // GetTexture answers the fileDataID once a path resolves through the
+        // bundled listfile, as the client does for path-set textures.
+        let circles = crate::limited_listfile::lookup_texture_path(r"Interface\TargetingFrame\UI-Classes-Circles")
+            .expect("class circles should be in the bundled listfile");
+        assert_eq!(result.0 as u32, circles);
         assert_eq!(
             (result.1, result.2, result.3, result.4),
             (0.0, 0.25, 0.0, 0.25)
         );
-        assert_eq!(result.5, "Interface\\ICONS\\INV_Misc_QuestionMark");
+        let question_mark = crate::limited_listfile::lookup_texture_path(r"Interface\ICONS\INV_Misc_QuestionMark")
+            .expect("question mark icon should be in the bundled listfile");
+        assert_eq!(result.5 as u32, question_mark);
     }
 
     #[test]
