@@ -99,16 +99,18 @@ fn toc_is_eager_with_shared_xml_base_dependency() {
 }
 
 #[test]
-fn toc_without_allow_load_accepts_every_screen_kind() {
+fn toc_without_allow_load_defaults_to_game_screen_only() {
     let toc = TocFile::from_file(&ui_parent_toc()).expect("TOC parses");
 
-    for screen in [ScreenKind::Game]
-        .into_iter()
-        .chain(GLUE_SCREENS.iter().copied())
-    {
+    assert!(
+        toc.allows_screen(ScreenKind::Game),
+        "A TOC without AllowLoad must load on the game screen"
+    );
+
+    for screen in GLUE_SCREENS {
         assert!(
-            toc.allows_screen(screen),
-            "UIParent's current TOC has no AllowLoad restriction, so TocFile must accept {screen:?}"
+            !toc.allows_screen(screen),
+            "A TOC without AllowLoad must not load on glue screen {screen:?}"
         );
     }
 }
