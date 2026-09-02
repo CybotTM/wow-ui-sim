@@ -24,6 +24,11 @@ pub struct FontXml {
     /// from one of them, so dropping it flattens nearly all UI text.
     #[serde(rename = "Shadow")]
     pub shadow: Option<crate::xml::ShadowXml>,
+    /// `<Color>` child: the text colour every FontString inheriting the font
+    /// starts with. `GameFontNormal` and its small/large siblings carry
+    /// `color="NORMAL_FONT_COLOR"`, the number fonts explicit r/g/b.
+    #[serde(rename = "Color")]
+    pub color: Option<crate::xml::ColorXml>,
 }
 
 /// FontFamily definition - collection of fonts for different alphabets.
