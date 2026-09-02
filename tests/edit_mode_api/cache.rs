@@ -175,6 +175,60 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
 }
 
 #[test]
+fn edit_mode_account_cache_without_layout_rows_yields_no_layouts() {
+    let _env_guard = EnvVarGuard::unset(EDIT_MODE_LAYOUT_ENV);
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let wtf_path = temp.path().join("WTF");
+    let account_path = wtf_path.join("Account/TestAccount");
+    let character_path = account_path.join("Test Realm/Testchar");
+    std::fs::create_dir_all(&character_path).expect("create WTF dirs");
+    // A 12.1 client writes the layout count and the account settings only:
+    // `<layoutCount> <settingCount> <settingCount values>` with no layout rows.
+    std::fs::write(
+        account_path.join("edit-mode-cache-account.txt"),
+        concat!(
+            "2 36 ",
+            "0 100 1 1 0 0 0 0 1 0 0 0 1 1 0 0 1 1 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0",
+            "\0"
+        ),
+    )
+    .expect("write account edit mode cache");
+    std::fs::write(
+        character_path.join("edit-mode-cache-character.txt"),
+        "2 0 0 1 1 1\0",
+    )
+    .expect("write character edit mode cache");
+
+    let env = WowLuaEnv::new().expect("create Lua environment");
+    let mut saved_vars = SavedVariablesManager::with_storage_dir(temp.path().join("local-sv"));
+    saved_vars.set_wtf_config(WtfConfig::new(
+        &wtf_path,
+        "TestAccount",
+        "Test Realm",
+        "Testchar",
+    ));
+    env.loader_env()
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1, None))
+        .expect("load edit mode cache");
+
+    let (layout_count, active, setting_count): (i32, i32, i32) = env
+        .eval(
+            r#"
+            local info = C_EditMode.GetLayouts()
+            return #info.layouts, info.activeLayout, #C_EditMode.GetAccountSettings()
+            "#,
+        )
+        .expect("read imported edit mode cache");
+
+    assert_eq!(
+        layout_count, 0,
+        "a layout count without layout rows must not fabricate empty layouts"
+    );
+    assert_eq!(active, 2);
+    assert_eq!(setting_count, 36);
+}
+
+#[test]
 fn edit_mode_wtf_cache_can_override_active_layout_by_name() {
     let temp = tempfile::tempdir().expect("create temp dir");
     let wtf_path = temp.path().join("WTF");
