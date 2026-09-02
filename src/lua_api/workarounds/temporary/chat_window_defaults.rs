@@ -80,7 +80,16 @@ if GetChatWindowInfo == nil then
     if chat and chat.docked ~= nil then
       docked = chat.docked == true
     end
-    return "Chat " .. tostring(realId), 12, 0, 0, 0, 0.25, shown, false, docked, false
+    -- The client's default chat cache names window 1 GENERAL and window 2
+    -- COMBAT_LOG; any other window has no name and FloatingChatFrame.lua
+    -- formats CHAT_NAME_TEMPLATE ("Chat %d") for it.
+    local name = ""
+    if realId == 1 then
+      name = rawget(_G, "GENERAL") or "General"
+    elseif realId == 2 then
+      name = rawget(_G, "COMBAT_LOG") or "Combat Log"
+    end
+    return name, 12, 0, 0, 0, 0.25, shown, false, docked, false
   end
 end
 
@@ -142,6 +151,21 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
 
     #[test]
+    fn default_chat_windows_carry_the_client_names() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let (general, combat_log, third): (String, String, String) = env
+            .eval(
+                r#"
+                return (GetChatWindowInfo(1)), (GetChatWindowInfo(2)), (GetChatWindowInfo(3))
+                "#,
+            )
+            .expect("chat window info");
+        assert_eq!(general, "General", "window 1 is the General tab, as in the client's default cache");
+        assert_eq!(combat_log, "Combat Log");
+        assert_eq!(third, "", "an unnamed window gets CHAT_NAME_TEMPLATE from Blizzard's code");
+    }
+
+    #[test]
     fn installs_chat_window_defaults() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
@@ -167,7 +191,7 @@ mod tests {
                 if ChatFrameUtil.GetCommunitiesChannelLocalID(nil, nil) ~= nil then return "community_local_id" end
 
                 local name, fontSize, r, g, b, alpha, shown, locked, docked = GetChatWindowInfo(2)
-                if name ~= "Chat 2" or fontSize ~= 12 then return "info_shape" end
+                if name ~= "Combat Log" or fontSize ~= 12 then return "info_shape" end
                 if r ~= 0 or g ~= 0 or b ~= 0 or alpha ~= 0.25 then return "info_color" end
                 if shown ~= false or locked ~= false or docked ~= false then return "hidden_defaults" end
 
