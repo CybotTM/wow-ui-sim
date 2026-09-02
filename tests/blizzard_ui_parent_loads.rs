@@ -109,7 +109,7 @@ fn toc_without_allow_load_defaults_to_game_screen_only() {
 
     for screen in GLUE_SCREENS {
         assert!(
-            !toc.allows_screen(screen),
+            !toc.allows_screen(*screen),
             "A TOC without AllowLoad must not load on glue screen {screen:?}"
         );
     }
