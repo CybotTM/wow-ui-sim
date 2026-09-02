@@ -452,6 +452,7 @@ pub(super) fn is_secure_replay_library_addon(folder_name: &str) -> bool {
             | "Blizzard_CatalogShopSharedTemplates"
             | "Blizzard_AsyncRequest"
             | "Blizzard_GameTooltip"
+            | "Blizzard_CombatLogBase"
     )
 }
 

@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-09-02] update | Blizzard_CombatLogBase replays into secureenv
+
+Updated `systems/taint-system.md`: `Blizzard_CombatLogBase` joined the secure replay library list. PTR startup raised `Blizzard_CombatLogProcessor.lua:337: attempt to index global 'CombatLogUtil'` from `ChatConfigFrame`'s PLAYER_ENTERING_WORLD handler because the secure processor reads `CombatLogUtil`, `COMBATLOG_FILTER_MINE` and `COMBATLOG_DEFAULT_COLORS` from its plain dependency, which had only reached `_G`; the handler aborted before `hasEnteredWorld`. A generalized rule (replay every direct `## Dependencies` of a `UseSecureEnvironment` addon) was implemented first and rejected: secure TOCs declare `Blizzard_FrameXMLBase`, `Blizzard_ObjectAPI`, `Blizzard_SharedXMLGame`, `Blizzard_VisualAlerts` and others as `## Dep`, and re-running those in secureenv re-executed their top-level code — `Constants.lua` and `VisualAlertTemplates.lua` load errors doubled and `PrivateVisualAlertsManager` OnLoad gained a new `attempt to call a nil value`.
+
 ## [2026-07-16] update | FrameStrata before/after observations
 
 Updated FrameStrata documentation from `/tmp/FrameStrataProbe-parent-retail.lua` (retail 12.0.7 build 68453, captured `2026-07-16T01:21:08`). During XML `OnLoad`, the actual parent and direct `PARENT` child both reported `DIALOG`, while the literal sibling reported `LOW`. Under an actual `DIALOG` parent, base `HIGH` reported `HIGH`, derived literal `LOW` reported `LOW`, and derived `PARENT` reported `HIGH`. After the tested parent-strata and reparent operations, every tested non-fixed child and grandchild reported `LOW`, including explicit XML `MEDIUM` fixtures. Documentation avoids claims about the client's internal resolution or propagation mechanism; the capture did not test `BLIZZARD`.
