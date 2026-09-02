@@ -37,6 +37,7 @@ const MINIMAP_TOC_FILES: &[&str] = &[
 const REQUIRED_DEPENDENCIES: &[&str] = &[
     "Blizzard_ActionBar",
     "Blizzard_EditMode",
+    "Blizzard_FrameXMLUtil",
     "Blizzard_GameTooltip",
 ];
 
@@ -150,7 +151,7 @@ fn blizzard_minimap_find_toc_resolves_mainline_variant() {
 }
 
 #[test]
-fn blizzard_minimap_toc_declares_default_state_with_three_required_deps() {
+fn blizzard_minimap_toc_declares_default_state_with_four_required_deps() {
     let toc = TocFile::from_file(&minimap_mainline_toc()).expect("Blizzard_Minimap TOC parses");
     assert!(
         !toc.is_load_on_demand(),
@@ -168,8 +169,9 @@ fn blizzard_minimap_toc_declares_default_state_with_three_required_deps() {
         REQUIRED_DEPENDENCIES.len(),
         "TOC must declare exactly {} `## Dependencies:` entries; got {deps:?}. The minimap \
          depends on Blizzard_ActionBar (XP/reputation bar anchoring), Blizzard_EditMode \
-         (MinimapCluster registers as `EditModeMinimapSystemTemplate`), and \
-         Blizzard_GameTooltip (zone-text + game-time hover tooltips)",
+         (MinimapCluster registers as `EditModeMinimapSystemTemplate`), Blizzard_FrameXMLUtil \
+         (shared GameTime utility helpers), and Blizzard_GameTooltip (zone-text + game-time \
+         hover tooltips)",
         REQUIRED_DEPENDENCIES.len()
     );
     for required in REQUIRED_DEPENDENCIES {
@@ -403,8 +405,6 @@ fn blizzard_minimap_publishes_module_level_constants(env: &WowLuaEnv) {
             and MinimapPulseLock.GarrisonBuilding == 1 \
             and MinimapPulseLock.GarrisonInvasion == 2 \
             and MinimapPulseLock.RunesOfPower == 8 \
-            and GAMETIME_AM == true \
-            and GAMETIME_PM == false \
             and type(ExpansionLandingPageMode) == 'table' \
             and ExpansionLandingPageMode.Garrison == 1";
     let ok: bool = env
@@ -413,9 +413,9 @@ fn blizzard_minimap_publishes_module_level_constants(env: &WowLuaEnv) {
     assert!(
         ok,
         "Module-level constants must publish at `_G` with their declared values. \
-         Minimap.lua / GameTime.lua define canonical timing budgets, tracking categories, \
-         the eight-entry MinimapPulseLock enum, and am/pm flags that consumers read by \
-         name to drive minimap pulse / fade animations and time-of-day display"
+         Minimap.lua defines canonical timing budgets, tracking categories, and the eight-entry \
+         MinimapPulseLock enum that consumers read by name to drive minimap pulse / fade \
+         animations. GameTime.lua no longer exports GAMETIME_AM / GAMETIME_PM globals"
     );
 }
 }

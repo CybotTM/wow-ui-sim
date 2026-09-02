@@ -20,7 +20,12 @@ fn quick_join_toc() -> PathBuf {
     quick_join_dir().join("Blizzard_QuickJoin.toc")
 }
 
-const TOC_FILES: &[&str] = &["QuickJoinToast.xml", "QuickJoin.xml"];
+const TOC_FILES: &[&str] = &[
+    "QuickJoinToast.xml",
+    "QuickJoin.xml",
+    "QuickJoinSocialView.xml",
+    "QuickJoinSocialView.lua",
+];
 
 const REQUIRED_DEPS: &[&str] = &["Blizzard_FriendsFrame"];
 
@@ -30,6 +35,7 @@ const PUBLIC_MIXIN_GLOBALS: &[&str] = &[
     "QuickJoinEntriesMixin",
     "QuickJoinEntryMixin",
     "QuickJoinRoleSelectionMixin",
+    "JoinQueueButtonMixin",
     "QuickJoinToastMixin",
     "QuickJoinToastGroupMixin",
     "QuickJoinToastThrottleMixin",
@@ -52,7 +58,6 @@ const PUBLIC_GLOBAL_HELPERS: &[&str] = &[
     "QuickJoinToast_GetPriority",
     "QuickJoinToast_GetPriorityFromQueue",
     "QuickJoinToast_GetPriorityFromPlayers",
-    "QuickJoin_JoinQueueButtonOnClick",
 ];
 
 const TOAST_ON_LOAD_REGISTERED_EVENTS: &[&str] = &[
@@ -228,7 +233,7 @@ fn blizzard_quick_join_toc_declares_metadata_in_raw_bytes() {
 }
 
 #[test]
-fn blizzard_quick_join_toc_lists_two_xml_files_with_companion_lua_pulled_in() {
+fn blizzard_quick_join_toc_lists_current_toast_frame_and_social_view_files() {
     let toc = TocFile::from_file(&quick_join_toc()).expect("TOC parses");
     let listed: Vec<String> = toc
         .files
@@ -237,28 +242,12 @@ fn blizzard_quick_join_toc_lists_two_xml_files_with_companion_lua_pulled_in() {
         .collect();
     assert_eq!(
         listed, TOC_FILES,
-        "TOC body lists EXACTLY 2 XML files (paths normalized to forward \
-         slashes by src/toc.rs:147) in canonical order: QuickJoinToast.xml \
-         FIRST (publishes the QuickJoinToastTemplate virtual frame template \
-         + the QuickJoinToastButton named non-virtual frame anchored as a \
-         ChatAlertFrame subsystem and pulls in QuickJoinToast.lua via \
-         `<Script file=>` at line 3), QuickJoinToast.lua's 3 mixin globals \
-         (QuickJoinToastMixin / QuickJoinToastGroupMixin / \
-         QuickJoinToastThrottleMixin) plus 3 priority-helper globals; \
-         QuickJoin.xml SECOND (publishes the QuickJoinButtonMemberTemplate \
-         + QuickJoinButtonQueueTemplate FontString templates, the \
-         QuickJoinButtonTemplate virtual button, the QuickJoinFrame parented \
-         to FriendsFrame as the tab content panel, and the \
-         QuickJoinRoleSelectionFrame role-picker dialog parented to UIParent; \
-         pulls in QuickJoin.lua via `<Script file=>` at line 3 declaring the \
-         remaining 5 mixins). Both Lua files are pulled in by their matching \
-         XML files via `<Script file=>` rather than being listed in the TOC \
-         body — this is the canonical XML-driven Lua-loading pattern (same \
-         shape as Blizzard_QuestNavigation and Blizzard_PVPMatch). The 2 XML \
-         files load in toast-then-frame order so the toast button (which \
-         only depends on its own template) materializes before the larger \
-         tab content frame which references the QuickJoinButtonTemplate \
-         from QuickJoin.xml itself"
+        "TOC body lists four entries (paths normalized to forward slashes by src/toc.rs:147) \
+         in canonical order: QuickJoinToast.xml (which loads QuickJoinToast.lua through its \
+         Script entry), QuickJoin.xml (which loads QuickJoin.lua), then the current social-view \
+         pair QuickJoinSocialView.xml and QuickJoinSocialView.lua. The social-view files are \
+         direct TOC entries, not XML Script inclusions, so the load contract is the literal \
+         four-entry ordered list"
     );
 }
 
@@ -435,19 +424,13 @@ fn blizzard_quick_join_publishes_global_helper_functions(env: &WowLuaEnv) {
         assert_eq!(
             kind, "function",
             "_G.{helper} must publish as a function — Blizzard_QuickJoin \
-             ships exactly 4 public helper functions outside the 8 mixin \
-             tables: 3 priority helpers in QuickJoinToast.lua \
-             (QuickJoinToast_GetPriority(group, queues, players) computes \
-             the toast priority from the combined queue + player priority \
-             scores; QuickJoinToast_GetPriorityFromQueue(queue) returns the \
-             per-queue priority used by the toast throttle to decide which \
-             toast to show; QuickJoinToast_GetPriorityFromPlayers(players) \
-             returns the per-player-list priority for friend-group \
-             differentiation), and 1 click handler in QuickJoin.lua \
-             (QuickJoin_JoinQueueButtonOnClick(self) is the OnClick handler \
-             attached to the join-queue button inside each entry — it routes \
-             into C_SocialQueue.JoinQueue with the entry's group and queue \
-             IDs)"
+             ships exactly 3 public helper functions outside the mixin tables: the priority \
+             helpers in QuickJoinToast.lua (QuickJoinToast_GetPriority(group, queues, players) \
+             computes toast priority from combined queue + player scores; \
+             QuickJoinToast_GetPriorityFromQueue(queue) returns per-queue priority; \
+             QuickJoinToast_GetPriorityFromPlayers(players) returns per-player-list priority). \
+             The join button is now implemented by JoinQueueButtonMixin:OnClick, which calls \
+             its parent QuickJoinMixin:JoinQueue()"
         );
     }
 }

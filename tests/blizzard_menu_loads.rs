@@ -123,7 +123,7 @@ const VIRTUAL_TEMPLATES_BASE: &[&str] = &[
     "WowStyle2DropdownTemplate",
     "WowStyle2IconButtonTemplate",
     "WowMenuAutoHideButtonTemplate",
-    "WowMenuDropdownHighlightRadioTemplate",
+    "WowMenuDropdownHighlightButtonTemplate",
 ];
 
 const VIRTUAL_TEMPLATES_RETAIL: &[&str] = &[
@@ -614,7 +614,7 @@ fn blizzard_menu_xml_registers_eight_virtual_templates_for_retail(env: &WowLuaEn
              OnMouseWheel scripts); MenuTemplates.xml declares 4 cross-flavor templates \
              (WowStyle2DropdownTemplate, WowStyle2IconButtonTemplate, \
              WowMenuAutoHideButtonTemplate (propagateMouseInput=Motion), \
-             WowMenuDropdownHighlightRadioTemplate (inherits DarkMenuElementTemplate, \
+             WowMenuDropdownHighlightButtonTemplate (inherits DarkMenuElementTemplate, \
              motionScriptsWhileDisabled=true)); Mainline/MenuTemplates.xml declares 3 \
              retail-only templates (WowStyle1DropdownTemplate, WowStyle1ArrowDropdownTemplate, \
              WowStyle1FilterDropdownTemplate — all DropdownButton-derived intrinsics consuming \
