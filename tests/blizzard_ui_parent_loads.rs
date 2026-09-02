@@ -99,6 +99,31 @@ fn toc_is_eager_with_shared_xml_base_dependency() {
 }
 
 #[test]
+fn toc_without_allow_load_accepts_every_screen_kind() {
+    let toc = TocFile::from_file(&ui_parent_toc()).expect("TOC parses");
+
+    for screen in [ScreenKind::Game]
+        .into_iter()
+        .chain(GLUE_SCREENS.iter().copied())
+    {
+        assert!(
+            toc.allows_screen(screen),
+            "UIParent's current TOC has no AllowLoad restriction, so TocFile must accept {screen:?}"
+        );
+    }
+}
+
+#[test]
+fn toc_body_resolves_to_single_ui_parent_lua_file() {
+    let toc = TocFile::from_file(&ui_parent_toc()).expect("TOC parses");
+    assert_eq!(
+        toc.files,
+        vec![PathBuf::from("UIParent.lua")],
+        "Retail 12.1 UIParent TOC must resolve exactly one body file"
+    );
+}
+
+#[test]
 fn toc_raw_bytes_pin_current_three_line_contract() {
     let raw = std::fs::read_to_string(ui_parent_toc()).expect("TOC reads utf-8");
     assert_eq!(
