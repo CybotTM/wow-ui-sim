@@ -282,7 +282,10 @@ mod tests {
 
     #[test]
     fn retail_interface_matches_current_live_build() {
-        assert_eq!(ClientProfile::Retail.interface_version(), 120007);
+        // The constant is gated on the retail epoch feature; 12.1.0 is the live
+        // build since 2026-08 and is what the `retail-12-1-0` epoch compiles in.
+        let expected = if cfg!(feature = "retail-12-1-0") { 120100 } else { 120007 };
+        assert_eq!(ClientProfile::Retail.interface_version(), expected);
     }
 
     #[test]

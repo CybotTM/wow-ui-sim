@@ -198,7 +198,10 @@ mod tests {
             )
             .expect("item-button helper behavior probe should run");
 
-        assert!(result.0.contains("INV_Misc_QuestionMark"));
+        // GetTexture answers the fileDataID for a path the bundled listfile knows.
+        let question_mark = crate::limited_listfile::lookup_texture_path(r"Interface\Icons\INV_Misc_QuestionMark")
+            .expect("question mark icon should be in the bundled listfile");
+        assert_eq!(result.0, question_mark.to_string());
         assert_eq!(result.1, "7");
         assert_close(result.2, 0.1);
         assert_close(result.3, 0.2);
