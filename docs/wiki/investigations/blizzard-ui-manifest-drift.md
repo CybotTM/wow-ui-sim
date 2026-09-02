@@ -101,7 +101,7 @@ Clearing the aborts let execution reach code that had never run, which surfaced 
 
 ## Second pass: every remaining startup error and the capture, item by item
 
-Three read-only agents (visual diff against the client capture, startup-error triage, tab seams, edit-mode import) delivered findings on 2026-09-02; each was re-verified before it was fixed, and several turned out to have a different mechanism than reported. `lua-errors` on client-ptr went from 25 distinct messages to **0**, `tests/frame_positions.rs` from 15 of 28 cases at the branch base to 28 of 28.
+Five read-only agents (global strings — recorded above —, visual diff against the client capture, startup-error triage, tab seams, edit-mode import) delivered findings on 2026-09-02; each was re-verified before it was fixed, and several turned out to have a different mechanism than reported. `lua-errors` on client-ptr went from 25 distinct messages to **0**, `tests/frame_positions.rs` from 15 of 28 cases at the branch base to 28 of 28.
 
 **The global string table was a client build behind and its generator cut multi-line strings.** Recorded above.
 
@@ -131,7 +131,7 @@ Three read-only agents (visual diff against the client capture, startup-error tr
 
 **Two frame_positions cases were stale for 12.1.0**: `UIParentRightManagedFrameContainer` is an empty shell now (the live container is `RightManagedFrameContainer`) and `PrivateRaidBossEmoteFrameAnchor` moved into `Blizzard_RaidWarning` at 800x80.
 
-**Not defects, verified as such**: the chat tab's colour (additive orange over whatever is behind it), the minimap ring's width (the atlas art is a thin rim), the status tracking bars and party frames (simulated game state), the layout (the player's custom edit-mode layout), addon-only elements in the capture. The chat window is named "General" now, as the client's default cache has it.
+**Not defects, verified as such**: the chat tab's colour (additive orange over whatever is behind it), the minimap ring's width (the atlas art is a thin rim), the status tracking bars and party frames (simulated game state), the layout (the player's custom edit-mode layout), addon-only elements in the capture. The chat tabs read "General" and "Combat Log" now: `FCF_SetWindowName` names an unnamed window itself and stores the name through `SetChatWindowName`, which the stub lacked and whose "Chat <n>" answer had kept that branch from running (naming the windows in the stub instead surfaced the missing function as the last startup error).
 
 ## Rendering a screenshot that looks like the client
 
