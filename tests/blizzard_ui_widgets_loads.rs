@@ -17,7 +17,7 @@ fn ui_widgets_dir() -> PathBuf {
 }
 
 fn ui_widgets_toc() -> PathBuf {
-    ui_widgets_dir().join("Blizzard_UIWidgets_Mainline.toc")
+    ui_widgets_dir().join("Blizzard_UIWidgets.toc")
 }
 
 const GLUE_SCREENS: &[ScreenKind] = &[
@@ -26,7 +26,12 @@ const GLUE_SCREENS: &[ScreenKind] = &[
     ScreenKind::CharacterCreate,
 ];
 
-const TOC_DEPENDENCIES: &[&str] = &["Blizzard_Minimap", "Blizzard_Colors"];
+const TOC_DEPENDENCIES: &[&str] = &[
+    "Blizzard_Minimap",
+    "Blizzard_Colors",
+    "Blizzard_LFGUtil",
+    "Blizzard_ManagedFrameSystem",
+];
 
 const REPRESENTATIVE_BODY_FILES: &[&str] = &[
     "Mainline\\Blizzard_WidgetsUtil.lua",
@@ -198,23 +203,17 @@ fn load_full_game_ui() -> WowLuaEnv {
 }
 
 #[test]
-fn find_toc_file_resolves_mainline_variant() {
+fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&ui_widgets_dir()).expect("UIWidgets TOC resolves");
     assert_eq!(
         resolved,
         ui_widgets_toc(),
-        "find_toc_file at src/loader/mod.rs:65-95 prefers \
-         `<addon>_Mainline.toc`. Blizzard_UIWidgets ships ONLY the \
-         Mainline variant — no bare TOC, no Classic/Mists companion. \
-         Widget templates exposed by C_UIWidgetManager.GetAllWidgetsBySetID \
-         are a Mainline-era addition (Battle for Azeroth onwards) and \
-         the Classic flavors don't render dynamic widgets through this \
-         system"
+        "Blizzard_UIWidgets ships the active retail contract in one bare TOC"
     );
 }
 
 #[test]
-fn toc_is_eager_with_two_dependencies() {
+fn toc_is_eager_with_four_dependencies() {
     let toc = TocFile::from_file(&ui_widgets_toc()).expect("TOC parses");
 
     assert!(
@@ -229,14 +228,7 @@ fn toc_is_eager_with_two_dependencies() {
     let deps = toc.dependencies();
     assert_eq!(
         deps, TOC_DEPENDENCIES,
-        "TOC must declare exactly Blizzard_Minimap and Blizzard_Colors \
-         as hard deps. Blizzard_Minimap is needed because \
-         UIWidgetBelowMinimapContainerFrame anchors itself relative to \
-         the Minimap (the BelowMinimap widget set is the lowest-strata \
-         minimap-adjacent overlay). Blizzard_Colors supplies the named \
-         color globals (HIGHLIGHT_FONT_COLOR, NORMAL_FONT_COLOR, \
-         RED_FONT_COLOR, plus widget-specific colors used by the \
-         StatusBar / TextWithState / ZoneControl mixins). Got: {deps:?}"
+        "TOC must declare the current Minimap, Colors, LFGUtil, and ManagedFrameSystem dependencies. Got: {deps:?}"
     );
 
     assert!(toc.optional_deps().is_empty());
@@ -266,15 +258,6 @@ fn allow_load_game_restricts_to_in_world() {
 }
 
 #[test]
-fn allow_load_game_type_mainline_is_not_restricted() {
-    let toc = TocFile::from_file(&ui_widgets_toc()).expect("TOC parses");
-
-    assert!(
-        !toc.is_game_type_restricted(),
-        "`## AllowLoadGameType: mainline` hits the non-restricting \
-         branch at toc.rs:294-302 (standard|mainline accepted)"
-    );
-}
 
 #[test]
 fn toc_raw_bytes_pin_directives_and_representative_body_files() {
@@ -282,9 +265,8 @@ fn toc_raw_bytes_pin_directives_and_representative_body_files() {
 
     let expected_directives = [
         "## Title: Blizzard_UIWidgets",
-        "## Dependencies: Blizzard_Minimap, Blizzard_Colors",
+        "## Dependencies: Blizzard_Minimap, Blizzard_Colors, Blizzard_LFGUtil, Blizzard_ManagedFrameSystem",
         "## AllowLoad: game",
-        "## AllowLoadGameType: mainline",
     ];
 
     for line in expected_directives {

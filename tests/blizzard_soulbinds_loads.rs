@@ -76,7 +76,7 @@ fn load_full_game_ui() -> WowLuaEnv {
 }
 
 #[test]
-fn toc_declares_load_on_demand_with_blizzard_colors_dep() {
+fn toc_declares_load_on_demand_with_current_dependencies() {
     let toc = TocFile::from_file(&soulbinds_toc()).expect("Soulbinds TOC parses");
 
     assert!(
@@ -92,14 +92,11 @@ fn toc_declares_load_on_demand_with_blizzard_colors_dep() {
 
     assert_eq!(
         toc.dependencies(),
-        vec!["Blizzard_Colors".to_string()],
-        "`## Dependencies: Blizzard_Colors` MUST resolve to \
-         [Blizzard_Colors] via the plural-key path at \
-         src/toc.rs:210-217. Blizzard_Colors publishes the \
-         CONDUIT_POTENCY / CONDUIT_ENDURANCE / CONDUIT_FINESSE color \
-         globals consumed by SoulbindsUtil.GetConduitName / \
-         GetConduitEmblemAtlas at \
-         Blizzard_SoulbindsUtil.lua:84-101"
+        vec![
+            "Blizzard_Colors".to_string(),
+            "Blizzard_GameMenuEsc".to_string(),
+        ],
+        "Current retail Soulbinds depends on Blizzard_Colors and Blizzard_GameMenuEsc"
     );
 }
 
@@ -126,7 +123,7 @@ fn toc_raw_bytes_pin_four_metadata_directives() {
         "## Title: Blizzard Soulbinds",
         "## Author: Blizzard Entertainment",
         "## LoadOnDemand: 1",
-        "## Dependencies: Blizzard_Colors",
+        "## Dependencies: Blizzard_Colors, Blizzard_GameMenuEsc",
     ];
 
     for directive in expected_directives {

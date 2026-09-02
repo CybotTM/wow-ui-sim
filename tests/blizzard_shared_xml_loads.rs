@@ -349,12 +349,9 @@ fn mainline_subdir_holds_retail_only_overrides() {
     assert!(mainline_dir.is_dir());
 
     assert!(
-        mainline_dir.join("ClassColors.lua").is_file(),
-        "Mainline/ClassColors.lua must exist — populates RAID_CLASS_COLORS \
-         with the 13 retail classes (DEATHKNIGHT, DEMONHUNTER, EVOKER, etc.) \
-         + 2 special entries (ADVENTURER, TRAVELER for Plunderstorm). The \
-         Mists variant uses a different ClassColors.lua keyed off a smaller \
-         class set"
+        shared_xml_dir().join("ClassColors.lua").is_file(),
+        "ClassColors.lua lives at the Blizzard_SharedXML root and populates \
+         RAID_CLASS_COLORS for the retail classes plus Plunderstorm entries"
     );
     assert!(
         mainline_dir
