@@ -281,6 +281,14 @@ fn toc_stem_matches_folder(stem: &str, folder_name: &str) -> bool {
 /// (ColorPickerFrame, RaidWarning, SplashFrame, UIErrorsFrame) moved into
 /// addons of their own, so nothing is lost by preferring the bare file.
 ///
+/// `Blizzard_SettingsDefinitions_Frame` is the same shape: its bare TOC lists
+/// `CombatAudioAlertConstants.lua` (which `CombatAudioAlertManager:OnLoad`
+/// reads) and uses `[Family]\` paths, while `_Mainline.toc` predates the split
+/// that moved `AudioAssist` and `Subtitles` into
+/// `Blizzard_SettingsDefinitions_Shared` and still lists them, so with the
+/// flavor TOC `Subtitles.lua` runs twice and registers the `movieSubtitle`
+/// setting twice.
+///
 /// Deliberately not generalised: of the sixteen addons shipping both variants,
 /// most have a *fuller* flavor TOC — `Blizzard_UIParent.toc` lists one file
 /// against its variant's six — so a blanket flip would lose far more than it
@@ -289,7 +297,10 @@ fn prefers_bare_toc(addon_name: &str) -> bool {
     matches!(
         crate::client_profile::ACTIVE,
         crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
-    ) && addon_name == "Blizzard_FrameXML"
+    ) && matches!(
+        addon_name,
+        "Blizzard_FrameXML" | "Blizzard_SettingsDefinitions_Frame"
+    )
 }
 
 fn profile_specific_fallback_toc(addon_name: &str) -> Option<String> {
