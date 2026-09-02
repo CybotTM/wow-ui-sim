@@ -15,19 +15,29 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     {
         let state = lua.state_mut();
         let enum_table = ensure_global_table(state, "Enum");
+        // Ensure semantics: this also runs from `restore_post_cleanup_globals`
+        // after Blizzard_EnvironmentCleanup, in the middle of the addon load
+        // and again after it. Replacing a sub-table there dropped the members
+        // the PTR bootstrap had appended (Enum.CooldownViewerCategory's
+        // GroupBuff..EquipSlotTracked) and the ones Blizzard Lua adds itself
+        // (HiddenActive / HiddenPassive), so three CooldownViewer files
+        // aborted at file scope on a nil table key. An existing table is kept
+        // and only missing members are filled in.
         for &(enum_name, entries) in EXPLICIT_ENUMS.iter() {
-            let enum_values = create_table(state);
+            let enum_values = ensure_enum_table(state, enum_table, enum_name);
             for &(variant_name, value) in entries {
-                table_set(state, enum_values, variant_name, Val::Num(value as f64));
+                if matches!(table_get(state, enum_values, variant_name), Val::Nil) {
+                    table_set(state, enum_values, variant_name, Val::Num(value as f64));
+                }
             }
-            table_set(state, enum_table, enum_name, enum_values);
         }
         for &(enum_name, entries) in SEQUENTIAL_ENUMS.iter() {
-            let enum_values = create_table(state);
+            let enum_values = ensure_enum_table(state, enum_table, enum_name);
             for (index, &variant_name) in entries.iter().enumerate() {
-                table_set(state, enum_values, variant_name, Val::Num(index as f64));
+                if matches!(table_get(state, enum_values, variant_name), Val::Nil) {
+                    table_set(state, enum_values, variant_name, Val::Num(index as f64));
+                }
             }
-            table_set(state, enum_table, enum_name, enum_values);
         }
     }
     lua.exec(MISSING_ENUMS_LUA)?;
@@ -54,6 +64,17 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(CONSTANTS_VALUES_LUA)?;
     lua.exec(COMPAT_CONSTANTS_LUA)?;
     Ok(())
+}
+
+/// `Enum[name]`, created when absent and kept when a table already exists.
+fn ensure_enum_table(state: &mut rilua::vm::state::LuaState, enum_table: Val, name: &str) -> Val {
+    let existing = table_get(state, enum_table, name);
+    if matches!(existing, Val::Table(_)) {
+        return existing;
+    }
+    let created = create_table(state);
+    table_set(state, enum_table, name, created);
+    created
 }
 
 #[cfg(feature = "retail-12-1-0")]
