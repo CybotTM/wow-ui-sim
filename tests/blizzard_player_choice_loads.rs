@@ -42,7 +42,11 @@ const PLAYER_CHOICE_TOC_FILES: &[&str] = &[
     "Blizzard_PlayerChoiceTimer.xml",
 ];
 
-const REQUIRED_DEPS: &[&str] = &["Blizzard_Colors", "Blizzard_UIWidgets"];
+const REQUIRED_DEPS: &[&str] = &[
+    "Blizzard_Colors",
+    "Blizzard_GameMenuEsc",
+    "Blizzard_UIWidgets",
+];
 
 const PUBLIC_MIXINS: &[&str] = &[
     "PlayerChoiceFrameMixin",
@@ -229,9 +233,8 @@ fn blizzard_player_choice_toc_declares_metadata_in_raw_bytes() {
          both lists are part of the addon's hard dependency set"
     );
     assert!(
-        raw.contains("## Dependencies: Blizzard_Colors"),
-        "TOC must declare `## Dependencies: Blizzard_Colors` exactly — single-entry \
-         dep list (no comma)"
+        raw.contains("## Dependencies: Blizzard_Colors, Blizzard_GameMenuEsc"),
+        "TOC must declare Blizzard_Colors and Blizzard_GameMenuEsc in its Dependencies list."
     );
     assert!(
         !raw.contains("## AllowLoad:"),

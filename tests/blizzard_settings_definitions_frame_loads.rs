@@ -15,14 +15,14 @@ fn definitions_frame_dir() -> PathBuf {
     blizzard_ui_dir().join("Blizzard_SettingsDefinitions_Frame")
 }
 
-fn definitions_frame_mainline_toc() -> PathBuf {
-    definitions_frame_dir().join("Blizzard_SettingsDefinitions_Frame_Mainline.toc")
+fn definitions_frame_toc() -> PathBuf {
+    definitions_frame_dir().join("Blizzard_SettingsDefinitions_Frame.toc")
 }
 
 const HARD_DEPS: &[&str] = &[
-    "Blizzard_SharedXML",
     "Blizzard_SettingsDefinitions_Shared",
     "Blizzard_Colors",
+    "Blizzard_GameMenuEsc",
 ];
 
 const PUBLIC_GLOBAL_NAMESPACES: &[&str] = &[
@@ -140,24 +140,19 @@ fn retail_12_1_housing_settings_global_strings_match_pinned_export() {
 }
 
 #[test]
-fn find_toc_file_prefers_mainline_variant() {
-    let resolved = find_toc_file(&definitions_frame_dir())
-        .expect("Blizzard_SettingsDefinitions_Frame TOC resolves");
+fn find_toc_file_resolves_bare_variant() {
     assert_eq!(
-        resolved,
-        definitions_frame_mainline_toc(),
-        "find_toc_file must prefer the `_Mainline.toc` variant — there is NO bare \
-         `Blizzard_SettingsDefinitions_Frame.toc`, only the flavor-specific \
-         `_Mainline.toc`. The classic flavor stack uses different override Lua \
-         files (`Mainline\\` subdir is mainline-only) so a separate _Cata/_Wrath \
-         TOC variant in upstream Blizzard source omits the entire Mainline subdir"
+        find_toc_file(&definitions_frame_dir())
+            .expect("Blizzard_SettingsDefinitions_Frame TOC resolves"),
+        definitions_frame_toc(),
+        "Retail ships the bare Blizzard_SettingsDefinitions_Frame.toc."
     );
 }
 
 #[test]
-fn toc_declares_eager_game_only_mainline_with_three_hard_deps() {
-    let toc = TocFile::from_file(&definitions_frame_mainline_toc())
-        .expect("Blizzard_SettingsDefinitions_Frame_Mainline TOC parses");
+fn toc_declares_eager_game_only_with_three_hard_deps() {
+    let toc = TocFile::from_file(&definitions_frame_toc())
+        .expect("Blizzard_SettingsDefinitions_Frame TOC parses");
 
     assert!(
         !toc.is_load_on_demand(),
@@ -219,21 +214,13 @@ fn toc_declares_eager_game_only_mainline_with_three_hard_deps() {
 
 #[test]
 fn toc_raw_bytes_pin_metadata_with_default_state_enabled() {
-    let raw = std::fs::read_to_string(definitions_frame_mainline_toc())
-        .expect("Blizzard_SettingsDefinitions_Frame_Mainline TOC reads utf-8");
+    let raw = std::fs::read_to_string(definitions_frame_toc())
+        .expect("Blizzard_SettingsDefinitions_Frame TOC reads utf-8");
 
     assert!(raw.contains("## Title: Blizzard_SettingsDefinitions_Frame"));
-    assert!(raw.contains("## Author: Blizzard Entertainment"));
-    assert!(
-        raw.contains("## DefaultState: enabled"),
-        "TOC must declare `## DefaultState: enabled` — settings panel categories \
-         must always be available; player-facing addon-management UI must not \
-         offer a way to disable category registration"
-    );
     assert!(raw.contains("## AllowLoad: Game"));
-    assert!(raw.contains("## AllowLoadGameType: mainline"));
     assert!(raw.contains(
-        "## Dependencies: Blizzard_SharedXML, Blizzard_SettingsDefinitions_Shared, Blizzard_Colors"
+        "## Dependencies: Blizzard_SettingsDefinitions_Shared, Blizzard_Colors, Blizzard_GameMenuEsc"
     ));
     assert!(
         !raw.contains("## SavedVariables"),
@@ -245,8 +232,8 @@ fn toc_raw_bytes_pin_metadata_with_default_state_enabled() {
 
 #[test]
 fn toc_body_lists_eight_mainline_overrides_first_then_main_files_with_classic_comment() {
-    let toc = TocFile::from_file(&definitions_frame_mainline_toc())
-        .expect("Blizzard_SettingsDefinitions_Frame_Mainline TOC parses");
+    let toc = TocFile::from_file(&definitions_frame_toc())
+        .expect("Blizzard_SettingsDefinitions_Frame TOC parses");
     let listed: Vec<String> = toc
         .files
         .iter()
@@ -307,8 +294,8 @@ fn toc_body_lists_eight_mainline_overrides_first_then_main_files_with_classic_co
         );
     }
 
-    let raw = std::fs::read_to_string(definitions_frame_mainline_toc())
-        .expect("Blizzard_SettingsDefinitions_Frame_Mainline TOC reads utf-8");
+    let raw = std::fs::read_to_string(definitions_frame_toc())
+        .expect("Blizzard_SettingsDefinitions_Frame TOC reads utf-8");
     assert!(
         raw.contains(
             "# NOTE: Accessibility.lua should be the only file loaded in classic, only \

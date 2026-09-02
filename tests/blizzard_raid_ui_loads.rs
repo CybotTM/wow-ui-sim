@@ -16,10 +16,14 @@ fn raid_ui_dir() -> PathBuf {
 }
 
 fn raid_ui_toc() -> PathBuf {
-    raid_ui_dir().join("Blizzard_RaidUI.toc")
+    find_toc_file(&raid_ui_dir()).expect("Blizzard_RaidUI active TOC resolves")
 }
 
-const TOC_FILES: &[&str] = &["Blizzard_RaidUI.xml", "Localization.lua"];
+const TOC_FILES: &[&str] = &[
+    "Blizzard_RaidUI_Bootstrap.lua",
+    "Mainline/Blizzard_RaidUI.xml",
+    "Localization.lua",
+];
 
 const TOP_LEVEL_FUNCTIONS: &[&str] = &[
     "RaidClassButton_OnLoad",
@@ -105,34 +109,12 @@ fn load_full_game_ui() -> WowLuaEnv {
 }
 
 #[test]
-fn blizzard_raid_ui_find_toc_resolves_bare_variant() {
-    let resolved = find_toc_file(&raid_ui_dir()).expect("Blizzard_RaidUI TOC resolves");
+fn blizzard_raid_ui_find_toc_resolves_active_mainline_variant() {
     assert_eq!(
-        resolved,
         raid_ui_toc(),
-        "Blizzard_RaidUI ships a SINGLE bare `Blizzard_RaidUI.toc` variant — \
-         NO `_Mainline.toc`, NO Mists / Wrath / Classic flavor variant. The \
-         `find_toc_file` walker at src/loader/mod.rs:65-95 walks \
-         `[_Mainline.toc, .toc]` and falls through to the bare form. \
-         Distinct from sibling Blizzard_RaidFrame which carries a \
-         `_Mainline.toc` suffix; Blizzard_RaidUI is flavor-agnostic at the \
-         TOC level"
+        raid_ui_dir().join("Blizzard_RaidUI_Mainline.toc"),
+        "Retail must select Blizzard_RaidUI_Mainline.toc through find_toc_file."
     );
-
-    for variant_suffix in [
-        "_Mainline.toc",
-        "_Mists.toc",
-        "_Wrath.toc",
-        "_Classic.toc",
-        "_Cata.toc",
-        "_Vanilla.toc",
-    ] {
-        let variant = raid_ui_dir().join(format!("Blizzard_RaidUI{variant_suffix}"));
-        assert!(
-            !variant.exists(),
-            "Blizzard_RaidUI must NOT ship a {variant_suffix} variant"
-        );
-    }
 }
 
 #[test]
@@ -273,7 +255,7 @@ fn blizzard_raid_ui_toc_declares_metadata_in_raw_bytes() {
 }
 
 #[test]
-fn blizzard_raid_ui_toc_lists_two_files_xml_first_then_localization() {
+fn blizzard_raid_ui_toc_lists_bootstrap_xml_then_localization() {
     let toc = TocFile::from_file(&raid_ui_toc()).expect("TOC parses");
     let listed: Vec<String> = toc
         .files

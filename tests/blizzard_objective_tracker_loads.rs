@@ -28,6 +28,7 @@ const REQUIRED_DEPS: &[&str] = &[
     "Blizzard_MawBuffs",
     "Blizzard_TieredEntranceTraits",
     "Blizzard_TransmogShared",
+    "Blizzard_ManagedFrameSystem",
     "Blizzard_UIWidgets",
 ];
 
@@ -136,7 +137,7 @@ fn blizzard_objective_tracker_find_toc_resolves_bare_variant() {
 }
 
 #[test]
-fn blizzard_objective_tracker_toc_declares_eager_game_only_with_four_required_deps() {
+fn blizzard_objective_tracker_toc_declares_eager_game_only_with_five_required_deps() {
     let toc =
         TocFile::from_file(&objective_tracker_toc()).expect("Blizzard_ObjectiveTracker TOC parses");
 

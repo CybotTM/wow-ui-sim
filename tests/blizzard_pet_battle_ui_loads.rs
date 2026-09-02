@@ -33,7 +33,12 @@ const PET_BATTLE_TOC_FILES: &[&str] = &[
     "Shared/Localization.lua",
 ];
 
-const REQUIRED_DEPS: &[&str] = &["Blizzard_Colors", "Blizzard_MicroMenu"];
+const REQUIRED_DEPS: &[&str] = &[
+    "Blizzard_Colors",
+    "Blizzard_MicroMenu",
+    "Blizzard_RaidWarning",
+    "Blizzard_UIModes",
+];
 
 const PUBLIC_MIXINS: &[&str] = &["MicroButtonFrameMixin"];
 
@@ -123,7 +128,7 @@ fn blizzard_pet_battle_ui_find_toc_resolves_bare_variant() {
 }
 
 #[test]
-fn blizzard_pet_battle_ui_toc_declares_eager_dual_flavor_with_two_deps() {
+fn blizzard_pet_battle_ui_toc_declares_eager_dual_flavor_with_four_deps() {
     let toc = TocFile::from_file(&pet_battle_toc()).expect("Blizzard_PetBattleUI TOC parses");
 
     assert!(

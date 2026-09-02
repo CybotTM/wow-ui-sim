@@ -25,7 +25,7 @@ const PING_UI_TOC_FILES: &[&str] = &[
     "Blizzard_PingUI.xml",
 ];
 
-const REQUIRED_DEPS: &[&str] = &["Blizzard_SharedXML"];
+const REQUIRED_DEPS: &[&str] = &["Blizzard_SharedXML", "Blizzard_FrameXMLUtil"];
 
 const SECURE_ENV_MIXINS: &[&str] = &[
     "PingFrameMixin",
