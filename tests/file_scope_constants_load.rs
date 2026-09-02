@@ -83,3 +83,45 @@ fn text_to_speech_commands_loads_past_the_combat_start_sound_block() {
         assert!(multiline, "a string spanning CSV lines reaches Lua whole");
     });
 }
+
+#[test]
+fn housing_data_loads_past_its_enum_keyed_tables() {
+    // Blizzard_HousingData.lua keys tables at file scope by HousingResult
+    // members 12.1.0 added (line 11 BlueprintRoomPlacementRequired, ...), by
+    // the four undocumented HouseSettingFlags.BlueprintExport* (124-127) and
+    // by three enums the simulator did not carry (180-201).
+    // HousingBlueprintContentTypeStrings (line 204) is the file's last table.
+    with_blizzard_addon_closure(&["Blizzard_HousingTemplates"], &[], |env, _| {
+        let (to_string, max_storage, house_size_locked, content_other): (String, f64, f64, f64) = env
+            .eval(
+                r#"
+                return type(HousingBlueprintContentTypeStrings), Enum.HousingResult.MaxStorageDecorReached,
+                    Enum.HousingBlueprintUnmetRequirementFlags.HouseSizeLocked,
+                    Enum.HousingBlueprintContentType.Other
+                "#,
+            )
+            .expect("housing globals should be readable");
+        assert_eq!(to_string, "table", "Blizzard_HousingData.lua ran to its end");
+        assert_eq!(max_storage, 70.0, "PlayerHousingConstantsDocumentation.lua value");
+        assert_eq!(house_size_locked, 128.0, "HousingBlueprintConstantsDocumentation.lua value");
+        assert_eq!(content_other, 6.0);
+    });
+}
+
+#[test]
+fn deprecated_12_1_0_loads_past_the_dispel_type_texture_style_table() {
+    // Deprecated_12_1_0.lua:69-73 builds AuraButtonBorderStyle from
+    // Enum.CustomAuraButtonDispelTypeTextureStyle; line 75 aliases
+    // GetInspectSpecialization below it.
+    with_blizzard_addon_closure(&["Blizzard_Deprecated"], &[], |env, _| {
+        let (color, inspect): (f64, String) = env
+            .eval(
+                r#"
+                return AuraButtonBorderStyle.Color, type(GetInspectSpecialization)
+                "#,
+            )
+            .expect("deprecated globals should be readable");
+        assert_eq!(color, 3.0, "PreserveAsset = 3 in AuraContainerSharedDocumentation.lua");
+        assert_eq!(inspect, "function", "the alias on the file's last line exists");
+    });
+}
