@@ -31,6 +31,9 @@ const ACTION_BAR_ADDONS: &[&str] = &[
     "Blizzard_Flyout",
     "Blizzard_StoreUI",
     "Blizzard_MicroMenu",
+    "Blizzard_ManagedFrameSystem",
+    "Blizzard_GameMenuEsc",
+    "Blizzard_UIParentUtil",
     "Blizzard_EditMode",
     "Blizzard_GarrisonBase",
     "Blizzard_GameTooltip",
@@ -47,6 +50,7 @@ const ACTION_BAR_ADDONS: &[&str] = &[
     "Blizzard_MapCanvas",
     "Blizzard_SharedMapDataProviders",
     "Blizzard_WorldMap",
+    "Blizzard_PingUI",
     "Blizzard_ActionBar",
 ];
 
