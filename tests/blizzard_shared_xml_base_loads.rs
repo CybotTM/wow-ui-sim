@@ -279,17 +279,12 @@ fn xml_files_load_after_their_lua_companions() {
         .position(|p| p == "ColorSwatch.lua")
         .expect("ColorSwatch.lua present");
     assert!(
-        swatch_xml < swatch_lua,
-        "ColorSwatch.xml is INTENTIONALLY loaded BEFORE ColorSwatch.lua — \
-         opposite of the CallbackRegistrant ordering. The XML's \
-         `mixin=\"ColorSwatchMixin\"` is a forward reference: \
-         ColorSwatchMixin gets published by ColorSwatch.lua AFTER the XML \
-         registers the virtual ColorSwatchTemplate. The XML template lives \
-         in the template registry and is materialized later when consumers \
-         use `inherits=\"ColorSwatchTemplate\"`, by which point the .lua \
-         has run. Got xml at {} lua at {}",
-        swatch_xml,
-        swatch_lua
+        swatch_lua < swatch_xml,
+        "ColorSwatch.lua must load before ColorSwatch.xml so the virtual \
+         ColorSwatchTemplate resolves ColorSwatchMixin at XML parse time. \
+         Got lua at {} xml at {}",
+        swatch_lua,
+        swatch_xml
     );
 }
 

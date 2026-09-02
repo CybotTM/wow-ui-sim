@@ -27,7 +27,7 @@ fn load_player_spells(env: &WowLuaEnv) {
 const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
-    ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
+    ("Blizzard_SharedXML", "Blizzard_SharedXML.toc"),
     (
         "Blizzard_SharedXMLGame",
         "Blizzard_SharedXMLGame_Mainline.toc",
