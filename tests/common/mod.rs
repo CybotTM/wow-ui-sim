@@ -198,19 +198,8 @@ pub fn env_with_shared_xml() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     let ui = blizzard_ui_dir();
 
-    let base_toc = ui.join("Blizzard_SharedXMLBase/Blizzard_SharedXMLBase.toc");
-    if base_toc.exists()
-        && let Err(e) = load_addon(&env.loader_env(), &base_toc)
-    {
-        eprintln!("Warning: Failed to load SharedXMLBase: {}", e);
-    }
-
-    let shared_toc = ui.join("Blizzard_SharedXML/Blizzard_SharedXML_Mainline.toc");
-    if shared_toc.exists()
-        && let Err(e) = load_addon(&env.loader_env(), &shared_toc)
-    {
-        eprintln!("Warning: Failed to load SharedXML: {}", e);
-    }
+    load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXMLBase");
+    load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXML");
 
     env
 }
