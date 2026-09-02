@@ -478,6 +478,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[unanchored-frame-render-leak]] | Unanchored frames have no valid WoW rect but were rendered at parent origin; render-list filtering now skips them and their descendants |
 | [[glow-effects]] | Additive blending end-to-end; one gap: SetBorderBlendMode missing |
 | [[global-frame-index]] | Lazy `_G` lookup design; Phase 1 done, Phases 2-3 planned |
+| [[duplicate-named-region-binding]] | Duplicate sibling regions retain the first global name so later same-name XML textures can anchor to the earlier object |
 | [[hybrid-scrollbar-thumb-texture]] | Runtime templates apply Blizzard `<ThumbTexture>` XML to intrinsic slider thumb children instead of creating HybridScrollBar placeholders |
 | [[world-map-frame-level-rebuilds]] | World map pins were forcing no-op `SetFrameLevel()` invalidations; steady-state bucket rebuilds are now gone |
 | [[root-region-render-order]] | Root-level regions in the same draw layer must sort by ascending creation id; the old reverse-id tie breaker made newer root regions draw underneath older ones |
