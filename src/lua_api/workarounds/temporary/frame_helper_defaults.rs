@@ -447,7 +447,8 @@ mod tests {
                 if frame:IsInitialized() then return "fresh_frame_initialized" end
                 frame.layoutInfo = {}
                 if not frame:IsInitialized() then return "layout_frame_uninitialized" end
-                if frame:IsInDefaultPosition() then return "default_position_without_info" end
+                -- no systemInfo: default position (AlertFrames.lua:416 semantics)
+                if not frame:IsInDefaultPosition() then return "default_position_without_info" end
                 frame.systemInfo = { isInDefaultPosition = true }
                 if not frame:IsInDefaultPosition() then return "default_position_missing" end
                 return "ok"
