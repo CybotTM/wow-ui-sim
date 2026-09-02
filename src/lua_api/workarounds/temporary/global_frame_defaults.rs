@@ -45,7 +45,6 @@ ensure_named_frame("Frame", "RolePollPopup")
 ensure_named_frame("Frame", "TimerTracker")
 ensure_named_frame("MessageFrame", "UIErrorsFrame")
 ensure_named_frame("Frame", "SideDressUpFrame")
-ensure_named_frame("Frame", "ContainerFrameCombinedBags")
 ensure_named_frame("Frame", "LootFrame")
 ensure_named_frame("Frame", "RaidWarningFrame")
 ensure_named_frame("Frame", "GossipFrame")
@@ -86,7 +85,6 @@ mod tests {
                     "TimerTracker",
                     "UIErrorsFrame",
                     "SideDressUpFrame",
-                    "ContainerFrameCombinedBags",
                     "LootFrame",
                     "RaidWarningFrame",
                     "GossipFrame",
