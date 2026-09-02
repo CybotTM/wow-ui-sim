@@ -129,12 +129,17 @@ const POSITION_TESTS: &[TestCase] = &[
     ("status_tracking_bar",        "StatusTrackingBarManager",       514.0, 1166.0,  571.0,  34.0, 1.0),
     // Overlay / warning frames
     ("ui_errors_frame",            "UIErrorsFrame",                  544.0,  122.0,  512.0,  60.0, 1.0),
-    ("raid_boss_emote_anchor",     "PrivateRaidBossEmoteFrameAnchor",544.0,  252.0,  512.0,  80.0, 1.0),
+    // 12.1.0 moved the anchor into Blizzard_RaidWarning (RaidWarning.xml:27,
+    // Size 800x80); the 512-wide definition is the legacy FrameXML copy.
+    ("raid_boss_emote_anchor",     "PrivateRaidBossEmoteFrameAnchor",400.0,  182.0,  800.0,  80.0, 1.0),
     ("critical_encounter_warnings","CriticalEncounterWarnings",      500.0,   40.0,  600.0,  48.0, 1.0),
     ("medium_encounter_warnings",  "MediumEncounterWarnings",        525.0,   90.0,  550.0,  36.0, 1.0),
     ("minor_encounter_warnings",   "MinorEncounterWarnings",         550.0,  130.0,  500.0,  36.0, 1.0),
     // Managed containers
-    ("right_managed_container",    "UIParentRightManagedFrameContainer", 1335.0, 260.0, 260.0, 847.0, 1.0),
+    // 12.1.0's UIParent.xml:83 leaves UIParentRightManagedFrameContainer an
+    // empty shell (no size, no anchors); the live container the tracker
+    // anchors to is Blizzard_ManagedFrameSystem's RightManagedFrameContainer.
+    ("right_managed_container",    "RightManagedFrameContainer",         1335.0, 260.0, 260.0, 847.0, 1.0),
     // Casting bar (hidden — no active cast; attached to PlayerFrame via PlayerFrame_AttachCastBar)
     ("casting_bar",                "PlayerCastingBarFrame",              696.0,  594.5,  208.0,  11.0, 1.0),
 ];
