@@ -97,7 +97,7 @@ fn blizzard_gm_chat_ui_toc_declares_no_allow_load_directive() {
 }
 
 #[test]
-fn blizzard_gm_chat_ui_toc_lists_lua_xml_and_localization() {
+fn blizzard_gm_chat_ui_toc_lists_bootstrap_lua_xml_and_localization() {
     let toc = TocFile::from_file(&gm_chat_ui_toc()).expect("Blizzard_GMChatUI TOC should parse");
     let files: Vec<String> = toc
         .files
@@ -107,20 +107,20 @@ fn blizzard_gm_chat_ui_toc_lists_lua_xml_and_localization() {
     assert_eq!(
         files,
         vec![
+            "Blizzard_GMChatUI_Bootstrap.lua".to_string(),
             "Blizzard_GMChatUI.lua".to_string(),
             "Blizzard_GMChatUI.xml".to_string(),
             "Localization.lua".to_string(),
         ],
-        "Blizzard_GMChatUI TOC lists exactly 3 files in this exact order: Blizzard_GMChatUI.lua \
-         (must come first because the XML's `<Scripts><OnLoad function=\"GMChatFrame_OnLoad\"/>` \
-         resolves at XML-parse time and needs the Lua-published functions registered first), \
-         Blizzard_GMChatUI.xml (instantiates GMChatFrame + GMChatStatusFrame), Localization.lua \
-         (currently empty stub kept around for future hotfix-friendly localized strings)"
+        "Blizzard_GMChatUI TOC lists exactly 4 files in source order: the interaction bootstrap, \
+         main Lua helpers required by the XML scripts, XML roots for GMChatFrame and \
+         GMChatStatusFrame, then the localization stub. The Bootstrap annotation does not reorder \
+         normal explicit addon loading"
     );
 }
 
 #[test]
-fn blizzard_gm_chat_ui_directory_ships_three_files_plus_toc() {
+fn blizzard_gm_chat_ui_directory_ships_four_files_plus_toc() {
     let dir = gm_chat_ui_dir();
     let mut entries: Vec<String> = std::fs::read_dir(&dir)
         .expect("Blizzard_GMChatUI directory should exist")
@@ -134,10 +134,11 @@ fn blizzard_gm_chat_ui_directory_ships_three_files_plus_toc() {
             "Blizzard_GMChatUI.lua".to_string(),
             "Blizzard_GMChatUI.toc".to_string(),
             "Blizzard_GMChatUI.xml".to_string(),
+            "Blizzard_GMChatUI_Bootstrap.lua".to_string(),
             "Localization.lua".to_string(),
         ],
-        "Blizzard_GMChatUI directory ships exactly 4 entries (TOC + Lua + XML + Localization) \
-         with no flavor subdirectory or media folder"
+        "Blizzard_GMChatUI directory ships exactly 5 entries (TOC + bootstrap + Lua + XML + \
+         Localization) with no flavor subdirectory or media folder"
     );
 }
 
