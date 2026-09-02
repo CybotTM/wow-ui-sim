@@ -254,8 +254,12 @@ fn player_and_party_portraits_use_circular_class_texture_fallback() {
             player_atlas, "",
             "player portrait fallback should clear the class atlas once it switches to the circular class texture, got atlas {player_atlas} texture {player_texture}"
         );
+        // GetTexture answers the fileDataID, as the client does.
+        let circles = wow_ui_sim::limited_listfile::lookup_texture_path(r"Interface\TargetingFrame\UI-Classes-Circles")
+            .expect("UI-Classes-Circles is in the bundled listfile")
+            .to_string();
         assert_eq!(
-            player_texture, "Interface\\TargetingFrame\\UI-Classes-Circles",
+            player_texture, circles,
             "player portrait fallback should use the circular class texture, got atlas {player_atlas} texture {player_texture}"
         );
         assert_eq!(
@@ -263,7 +267,7 @@ fn player_and_party_portraits_use_circular_class_texture_fallback() {
             "party1 portrait fallback should clear the class atlas once it switches to the circular class texture, got atlas {party_atlas} texture {party_texture}"
         );
         assert_eq!(
-            party_texture, "Interface\\TargetingFrame\\UI-Classes-Circles",
+            party_texture, circles,
             "party1 portrait fallback should use the circular class texture, got atlas {party_atlas} texture {party_texture}"
         );
     }
@@ -515,50 +519,56 @@ fn party_frame_member_frame1_uses_semantic_child_names() {
         );
         let dump = lines.join("\n");
 
+        // EditModeSystemSelectionBaseTemplate carries frameLevel="1000"
+        // (EditModeSystemTemplates.xml:11); the level reads as 3 only while
+        // the edit-mode system templates fail to apply, which they did on
+        // master before Blizzard_GameMenuEsc was synced.
         assert!(
             dump.contains(&format!(
-                ".Selection [Frame] ({PARTY_FRAME_SELECTION_SIZE}) [stored=1x1] hidden LOW:3"
+                ".Selection [Frame] ({PARTY_FRAME_SELECTION_SIZE}) [stored=1x1] hidden LOW:1000"
             )),
-            "PartyFrame.Selection must stay in the LOW:3 band like master, got:\n{dump}",
+            "PartyFrame.Selection must carry its template's frame level 1000, got:\n{dump}",
         );
         assert!(
             dump.contains(&format!(
-                ".MouseOverHighlight [Frame] ({PARTY_FRAME_SELECTION_SIZE}) hidden LOW:4"
+                ".MouseOverHighlight [Frame] ({PARTY_FRAME_SELECTION_SIZE}) hidden LOW:1001"
             )),
-            "PartyFrame.Selection.MouseOverHighlight must stay in the LOW:4 band like master, got:\n{dump}",
+            "PartyFrame.Selection.MouseOverHighlight sits one level above the selection frame, got:\n{dump}",
         );
         assert!(
-            dump.contains(".TopLeftCorner [Texture] (16x16) visible LOW:5"),
-            "PartyFrame.Selection.MouseOverHighlight corners must stay in LOW:5 like master, got:\n{dump}",
+            dump.contains(".TopLeftCorner [Texture] (16x16) hidden LOW:1002"),
+            "PartyFrame.Selection.MouseOverHighlight corners sit one level above the highlight and stay hidden until hovered, got:\n{dump}",
         );
         assert!(
             dump.contains(".MemberFrame1 [Button] (120x53) visible LOW:2"),
             "MemberFrame1 must be present in the dump, got:\n{dump}",
         );
         assert!(
-            dump.contains(".Portrait [Texture] (37x37) visible LOW:3"),
-            "MemberFrame1 portrait must keep the Blizzard parentKey name, got:\n{dump}",
+            dump.contains(".portrait [Texture] (37x37) visible LOW:3"),
+            "MemberFrame1 portrait must keep the Blizzard parentKey name (12.1.0 lowercases it), got:\n{dump}",
         );
         assert!(
-            dump.contains(".Flash [Texture] (114x47) hidden LOW:3"),
-            "MemberFrame1 flash texture must keep the Blizzard parentKey name, got:\n{dump}",
+            dump.contains(".threatIndicator [Texture] (114x47) hidden LOW:3"),
+            "MemberFrame1 threat indicator (the 114x47 overlay master called Flash) must keep the Blizzard parentKey name, got:\n{dump}",
         );
         assert!(
-            dump.contains(".Name [FontString] (57x12) visible LOW:3"),
+            dump.contains(".name [FontString] (57x12) visible MEDIUM:0"),
             "MemberFrame1 name fontstring must keep the Blizzard parentKey name, got:\n{dump}",
         );
         assert!(
             dump.contains(".PowerBarAlt [Frame] (0x0) hidden LOW:3"),
             "MemberFrame1.PowerBarAlt must be present, got:\n{dump}",
         );
+        // Hidden until the alternate power bar is shown: UnitPowerBarAlt's
+        // mixins run now that the edit-mode system templates apply.
         for expected in [
-            ".background [Texture] (0x0) visible LOW:4",
-            ".fill [Texture] (0x0) visible LOW:4",
-            ".frame [Texture] (0x0) visible LOW:4",
-            ".spark [Texture] (0x0) visible LOW:4",
-            ".BG [Texture] (16x64) visible LOW:5",
-            ".BGL [Texture] (32x64) visible LOW:5",
-            ".BGR [Texture] (32x64) visible LOW:5",
+            ".background [Texture] (0x0) hidden LOW:4",
+            ".fill [Texture] (0x0) hidden LOW:4",
+            ".frame [Texture] (0x0) hidden LOW:4",
+            ".spark [Texture] (0x0) hidden LOW:4",
+            ".BG [Texture] (16x64) hidden LOW:5",
+            ".BGL [Texture] (32x64) hidden LOW:5",
+            ".BGR [Texture] (32x64) hidden LOW:5",
         ] {
             assert!(
                 dump.contains(expected),

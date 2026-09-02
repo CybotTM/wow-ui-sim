@@ -107,7 +107,10 @@ const POSITION_TESTS: &[TestCase] = &[
     ("player_frame",               "PlayerFrame",                    268.0,  850.0,  232.0, 100.0, 1.0),
     ("target_frame",               "TargetFrame",                   1100.0,  850.0,  232.0, 100.0, 1.0),
     ("focus_frame",                "FocusFrame",                    1320.0,  835.0, 232.0, 100.0, 1.0),
-    ("paladin_power_bar",          "PaladinPowerBarFrame",           314.0,  945.0,  150.0,  43.0, 1.0),
+    // Managed by PlayerBottomManagedFrameContainer: UIParent.lua:167 skips a
+    // frame that answers false to IsInDefaultPosition, and plain frames (no
+    // systemInfo) answered false before; the client has no method on them.
+    ("paladin_power_bar",          "PaladinPowerBarFrame",           341.5,  922.0,  150.0,  43.0, 1.0),
     ("party_frame",                "PartyFrame",                      22.0,  147.0,  120.0, 244.0, 1.0),
     ("compact_party_frame",        "CompactPartyFrame",               22.0,  147.0,   98.0, 234.0, 1.0),
     // HUD elements
